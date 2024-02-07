@@ -40,7 +40,7 @@ Contributors to this project were funded by
 [ci-link]: https://github.com/stfc/janus-core/actions
 [cov-badge]: https://coveralls.io/repos/github/stfc/janus-core/badge.svg?branch=main
 [cov-link]: https://coveralls.io/github/stfc/janus-core?branch=main
-[docs-badge]: https://github.com/stfc/janus-core/actions/workflows/pages/pages-build-deployment/badge.svg
+[docs-badge]: https://github.com/stfc/janus-core/actions/workflows/docs.yml/badge.svg
 [docs-link]: https://stfc.github.io/janus-core/
 [pypi-badge]: https://badge.fury.io/py/janus-core.svg
 [pypi-link]: https://badge.fury.io/py/janus-core
