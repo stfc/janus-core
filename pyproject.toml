@@ -3,8 +3,10 @@ name = "janus-core"
 version = "0.1.0a0"
 description = "Tools for machine learnt interatomic potentials"
 authors = [
-    "Federica Zanca",
     "Elliott Kasoar",
+    "Federica Zanca",
+    "Patrick Austin",
+    "David Mason",
     "Jacob Wilkins",
     "Alin M. Elena",
 ]
