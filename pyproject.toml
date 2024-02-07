@@ -1,0 +1,71 @@
+[tool.poetry]
+name = "janus-core"
+version = "0.1.0a0"
+description = "Tools for machine learnt interatomic potentials"
+authors = [
+    "Federica Zanca",
+    "Elliott Kasoar",
+    "Jacob Wilkins",
+    "Alin M. Elena",
+]
+license = "LICENSE"
+readme = "README.md"
+packages = [{include = "janus_core"}]
+classifiers = [
+    "Programming Language :: Python",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD 3-Clause License",
+    "Natural Language :: English",
+    "Development Status :: 3 - Alpha",
+]
+repository = "https://github.com/stfc/janus-core/"
+documentation = "https://stfc.github.io/janus-core/"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+ase = "^3.22.1"
+
+[tool.poetry.group.dev.dependencies]
+coverage = {extras = ["toml"], version = "^7.4.1"}
+pgtest = "^1.3.2"
+pytest = "^8.0"
+pytest-cov = "^4.1.0"
+wheel = "^0.42"
+
+[tool.poetry.group.pre-commit]
+optional = true
+[tool.poetry.group.pre-commit.dependencies]
+black = "^24.1.1"
+pre-commit = "^3.6.0"
+pylint = "^2.15.10"
+
+[tool.poetry.group.docs]
+optional = true
+[tool.poetry.group.docs.dependencies]
+furo = "^2024.1.29"
+markupsafe = "<2.1"
+sphinx = "^7.2.6"
+sphinxcontrib-contentui = "^0.2.5"
+sphinxcontrib-details-directive = "^0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.format]
+max-line-length = 125
+
+[tool.pytest.ini_options]
+# Configuration for [pytest](https://docs.pytest.org)
+python_files = "test_*.py"
+
+[tool.coverage.run]
+# Configuration of [coverage.py](https://coverage.readthedocs.io)
+# reporting which lines of your plugin are covered by tests
+source=["janus_core"]
+
+[tool.isort]
+# Configuration of [isort](https://isort.readthedocs.io)
+line_length = 120
+force_sort_within_sections = true
+sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER']
