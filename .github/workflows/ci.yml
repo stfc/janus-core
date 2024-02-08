@@ -32,6 +32,9 @@ jobs:
         PYTEST_ADDOPTS: "--durations=0"
       run: poetry run pytest --cov janus_core --cov-append .
 
+    - name: Report coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
