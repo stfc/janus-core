@@ -34,6 +34,18 @@ jobs:
 
     - name: Report coverage to Coveralls
       uses: coverallsapp/github-action@v2
+      with:
+        parallel: true
+        flag-name: run-${{ matrix.python-version }}
+
+  coverage:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close parallel build
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
 
   docs:
     runs-on: ubuntu-latest
