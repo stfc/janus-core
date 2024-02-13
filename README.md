@@ -3,6 +3,7 @@
 [![Docs status][docs-badge]][docs-link]
 [![PyPI version][pypi-badge]][pypi-link]
 [![License][license-badge]][license-link]
+[![DOI][doi-badge]][doi-link]
 
 # janus-core
 
@@ -46,3 +47,5 @@ Contributors to this project were funded by
 [pypi-link]: https://badge.fury.io/py/janus-core
 [license-badge]: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
 [license-link]: https://opensource.org/licenses/BSD-3-Clause
+[doi-link]: https://zenodo.org/badge/latestdoi/754081470
+[doi-badge]: https://zenodo.org/badge/754081470.svg
