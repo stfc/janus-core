@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "janus-core"
-version = "0.1.0a0"
+version = "0.1.0a1"
 description = "Tools for machine learnt interatomic potentials"
 authors = [
     "Elliott Kasoar",
