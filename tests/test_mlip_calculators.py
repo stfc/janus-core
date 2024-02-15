@@ -8,9 +8,7 @@ from janus_core.mlip_calculators import choose_calculator
 
 
 def test_mace():
-    """
-    Test mace calculator can be configured.
-    """
+    """Test mace calculator can be configured."""
     model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
     calculator = choose_calculator(
         architecture="mace", device="cpu", model_paths=model_path
@@ -38,9 +36,7 @@ def test_mace_mp():
 
 @pytest.mark.extra_mlips
 def test_m3gnet():
-    """
-    Test m3gnet calculator can be configured.
-    """
+    """Test m3gnet calculator can be configured."""
     calculator = choose_calculator(
         architecture="m3gnet",
     )
@@ -49,9 +45,7 @@ def test_m3gnet():
 
 @pytest.mark.extra_mlips
 def test_chgnet():
-    """
-    Test chgnet calculator can be configured.
-    """
+    """Test chgnet calculator can be configured."""
     calculator = choose_calculator(
         architecture="chgnet",
     )
@@ -59,8 +53,6 @@ def test_chgnet():
 
 
 def test_invalid_arch():
-    """
-    Test error raised for invalid architecture.
-    """
+    """Test error raised for invalid architecture."""
     with pytest.raises(ValueError):
         choose_calculator(architecture="invalid")

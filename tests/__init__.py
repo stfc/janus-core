@@ -1,7 +1,4 @@
-""" Tests for janus_core.
-
-Includes example test (test.py).
-"""
+"""Tests for janus_core."""
 
 import os
 

@@ -24,7 +24,7 @@ class SinglePoint:
 
         Attributes
         ----------
-        System : str
+        system : str
             System to simulate.
         architecture : str
             MLIP architecture to use for single point calculations.
@@ -40,17 +40,13 @@ class SinglePoint:
         self.read_system()
         self.get_calculator(**kwargs)
 
-    def read_system(self):
-        """
-        Read system and system name.
-        """
+    def read_system(self) -> None:
+        """Read system and system name."""
         self.sys = read(self.system)
         self.sysname = pathlib.Path(self.system).stem
 
-    def get_calculator(self, **kwargs):
-        """
-        Configure calculator and attach to system.
-        """
+    def get_calculator(self, **kwargs) -> None:
+        """Configure calculator and attach to system."""
         calculator = choose_calculator(
             architecture=self.architecture,
             device=self.device,
@@ -60,8 +56,6 @@ class SinglePoint:
             self.read_system()
         self.sys.calc = calculator
 
-    def get_potential_energy(self):
-        """
-        Calculate potential energy using MLIP.
-        """
+    def get_potential_energy(self) -> float:
+        """Calculate potential energy using MLIP."""
         return self.sys.get_potential_energy()
