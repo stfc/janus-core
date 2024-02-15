@@ -67,6 +67,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pylint.format]
 max-line-length = 125
+max-args = 10
 good-names = ["e"]
 
 [tool.pytest.ini_options]
