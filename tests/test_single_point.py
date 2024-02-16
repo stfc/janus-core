@@ -41,20 +41,20 @@ def test_single_point_forces():
 
 def test_single_point_stress():
     """Test single point stress using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "UiO66.cif")
+    data_path = os.path.join(os.path.dirname(__file__), "data", "NaCl.cif")
     model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
 
     assert single_point.run_single_point(["stress"])["stress"][0] == pytest.approx(
-        -0.00415290516
+        -0.004783275999053424
     )
 
 
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "UiO66.cif")
+    data_path = os.path.join(os.path.dirname(__file__), "data", "NaCl.cif")
     model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
