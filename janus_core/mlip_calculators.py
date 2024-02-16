@@ -38,6 +38,9 @@ def choose_calculator(
     """
     # pylint: disable=import-outside-toplevel
     # pylint: disable=too-many-branches
+    # pylint: disable=import-error
+    # Optional imports handled via `architecture`. We could catch these,
+    # but the error message is clear if imports are missing.
     if architecture == "mace":
         from mace import __version__
         from mace.calculators import MACECalculator
