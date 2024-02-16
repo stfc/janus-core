@@ -23,7 +23,17 @@ pre-commit install  # install pre-commit hooks
 pytest -v  # discover and run all tests
 ```
 
-Manually updating ASE via https://gitlab.com/ase/ase is strongly recommended, as tags are no longer regularly published.
+Manually updating ASE via https://gitlab.com/ase/ase is strongly recommended, as tags are no longer regularly published. For example:
+
+```shell
+pip install git+https://gitlab.com/ase/ase.git@b31569210d739bd12c8ad2b6ec0290108e049eea
+```
+
+To prevent poetry downgrading ASE when installing in future, add the commit to pyproject.toml:
+
+```shell
+poetry add git+https://gitlab.com:ase/ase.git#b31569210d739bd12c8ad2b6ec0290108e049eea
+```
 
 ## License
 
