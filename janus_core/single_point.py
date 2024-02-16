@@ -13,11 +13,13 @@ from janus_core.mlip_calculators import choose_calculator
 class SinglePoint:
     """Perpare and perform single point calculations."""
 
+    #  pylint: disable=dangerous-default-value
     def __init__(
         self,
         system: str,
         architecture: str = "mace_mp",
         device: str = "cpu",
+        read_kwargs: dict = {},
         **kwargs,
     ) -> None:
         """
@@ -32,59 +34,94 @@ class SinglePoint:
             Default is "mace_mp".
         device : str
             Device to run model on. Default is "cpu".
+        read_kwargs : dict
+            kwargs to pass to ase.io.read. Default is {}.
         """
         self.architecture = architecture
         self.device = device
         self.system = system
 
         # Read system and get calculator
-        self.read_system()
+        self.read_system(**read_kwargs)
         self.get_calculator(**kwargs)
 
-    def read_system(self) -> None:
-        """Read system and system name."""
-        self.sys = read(self.system)
+    def read_system(self, **kwargs) -> None:
+        """Read system and system name.
+
+        If the file contains multiple structures, only the last configuration
+        will be read by default.
+        """
+        self.sys = read(self.system, **kwargs)
         self.sysname = pathlib.Path(self.system).stem
 
-    def get_calculator(self, **kwargs) -> None:
-        """Configure calculator and attach to system."""
+    def get_calculator(self, read_kwargs: dict = {}, **kwargs) -> None:
+        """Configure calculator and attach to system.
+
+        Parameters
+        ----------
+        read_kwargs : dict
+            kwargs to pass to ase.io.read. Default is {}.
+        """
         calculator = choose_calculator(
             architecture=self.architecture,
             device=self.device,
             **kwargs,
         )
         if self.sys is None:
-            self.read_system()
-        self.sys.calc = calculator
+            self.read_system(**read_kwargs)
 
-    def _get_potential_energy(self) -> float:
+        if isinstance(self.sys, list):
+            for sys in self.sys:
+                sys.calc = calculator
+        else:
+            self.sys.calc = calculator
+
+    def _get_potential_energy(self) -> float | list[float]:
         """Calculate potential energy using MLIP.
 
         Returns
         -------
-        potential_energy : float
-            Potential energy of system.
+        potential_energy : float | list[float]
+            Potential energy of system(s).
         """
+        if isinstance(self.sys, list):
+            energies = []
+            for sys in self.sys:
+                energies.append(sys.get_potential_energy())
+            return energies
+
         return self.sys.get_potential_energy()
 
-    def _get_forces(self) -> NDArray:
+    def _get_forces(self) -> NDArray | list[NDArray]:
         """Calculate forces using MLIP.
 
         Returns
         -------
-        forces : float
-            Forces of system.
+        forces : NDArray | list[NDArray]
+            Forces of system(s).
         """
+        if isinstance(self.sys, list):
+            forces = []
+            for sys in self.sys:
+                forces.append(sys.get_forces())
+            return forces
+
         return self.sys.get_forces()
 
-    def _get_stress(self) -> NDArray:
+    def _get_stress(self) -> NDArray | list[NDArray]:
         """Calculate stress using MLIP.
 
         Returns
         -------
-        stress : float
-            Stress of system.
+        stress : NDArray | list[NDArray]
+            Stress of system(s).
         """
+        if isinstance(self.sys, list):
+            stress = []
+            for sys in self.sys:
+                stress.append(sys.get_stress())
+            return stress
+
         return self.sys.get_stress()
 
     def run_single_point(self, properties: str | list[str] | None = None) -> dict:

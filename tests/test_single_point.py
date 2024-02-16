@@ -64,3 +64,19 @@ def test_single_point_none():
     for prop in ["energy", "forces", "stress"]:
         assert prop in results
 
+
+def test_single_point_traj():
+    """Test single point stress using MACE calculator."""
+    data_path = os.path.join(os.path.dirname(__file__), "data", "benzene-traj.xyz")
+    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+    single_point = SinglePoint(
+        system=data_path,
+        architecture="mace",
+        model_paths=model_path,
+        read_kwargs={"index": ":"},
+    )
+
+    assert len(single_point.sys) == 2
+    results = single_point.run_single_point("energy")
+    assert results["energy"][0] == pytest.approx(-76.0605725422795)
+    assert results["energy"][1] == pytest.approx(-74.80419118083256)
