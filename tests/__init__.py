@@ -1,5 +1,5 @@
 """Tests for janus_core."""
 
-import os
+from pathlib import Path
 
-TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = Path(__file__).resolve().parent

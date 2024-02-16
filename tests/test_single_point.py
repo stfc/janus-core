@@ -1,6 +1,6 @@
 """Test configuration of MLIP calculators."""
 
-import os
+from pathlib import Path
 
 import pytest
 
@@ -9,7 +9,7 @@ from janus_core.single_point import SinglePoint
 
 def test_potential_energy():
     """Test single point energy using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "benzene.xyz")
+    data_path = Path(Path(__file__).parent, "data", "benzene.xyz")
     single_point = SinglePoint(system=data_path)
 
     assert single_point.run_single_point("energy")["energy"] == -76.0605725422795
@@ -17,8 +17,9 @@ def test_potential_energy():
 
 def test_single_point_kwargs():
     """Test kwargs passed when using MACE calculator for single point energy."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "benzene.xyz")
-    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+
+    data_path = Path(Path(__file__).parent, "data", "benzene.xyz")
+    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -28,8 +29,8 @@ def test_single_point_kwargs():
 
 def test_single_point_forces():
     """Test single point forces using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "benzene.xyz")
-    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+    data_path = Path(Path(__file__).parent, "data", "benzene.xyz")
+    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -41,8 +42,8 @@ def test_single_point_forces():
 
 def test_single_point_stress():
     """Test single point stress using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "NaCl.cif")
-    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+    data_path = Path(Path(__file__).parent, "data", "NaCl.cif")
+    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -54,8 +55,8 @@ def test_single_point_stress():
 
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "NaCl.cif")
-    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+    data_path = Path(Path(__file__).parent, "data", "NaCl.cif")
+    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -67,8 +68,8 @@ def test_single_point_none():
 
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
-    data_path = os.path.join(os.path.dirname(__file__), "data", "benzene-traj.xyz")
-    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+    data_path = Path(Path(__file__).parent, "data", "benzene-traj.xyz")
+    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
     single_point = SinglePoint(
         system=data_path,
         architecture="mace",

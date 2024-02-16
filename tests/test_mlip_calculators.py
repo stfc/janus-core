@@ -1,6 +1,6 @@
 """Test configuration of MLIP calculators."""
 
-import os
+from pathlib import Path
 
 import pytest
 
@@ -9,7 +9,7 @@ from janus_core.mlip_calculators import choose_calculator
 
 def test_mace():
     """Test mace calculator can be configured."""
-    model_path = os.path.join(os.path.dirname(__file__), "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
     calculator = choose_calculator(
         architecture="mace", device="cpu", model_paths=model_path
     )
