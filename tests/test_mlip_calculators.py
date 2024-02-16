@@ -9,7 +9,7 @@ from janus_core.mlip_calculators import choose_calculator
 
 def test_mace():
     """Test mace calculator can be configured."""
-    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
     calculator = choose_calculator(
         architecture="mace", device="cpu", model_paths=model_path
     )

@@ -19,7 +19,7 @@ def test_single_point_kwargs():
     """Test kwargs passed when using MACE calculator for single point energy."""
 
     data_path = Path(Path(__file__).parent, "data", "benzene.xyz")
-    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -30,7 +30,7 @@ def test_single_point_kwargs():
 def test_single_point_forces():
     """Test single point forces using MACE calculator."""
     data_path = Path(Path(__file__).parent, "data", "benzene.xyz")
-    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -43,7 +43,7 @@ def test_single_point_forces():
 def test_single_point_stress():
     """Test single point stress using MACE calculator."""
     data_path = Path(Path(__file__).parent, "data", "NaCl.cif")
-    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -56,7 +56,7 @@ def test_single_point_stress():
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
     data_path = Path(Path(__file__).parent, "data", "NaCl.cif")
-    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=model_path
     )
@@ -69,7 +69,7 @@ def test_single_point_none():
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
     data_path = Path(Path(__file__).parent, "data", "benzene-traj.xyz")
-    model_path = Path(Path(__file__).parent, "models", "MACE_small.model")
+    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
     single_point = SinglePoint(
         system=data_path,
         architecture="mace",
