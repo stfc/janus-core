@@ -23,6 +23,8 @@ pre-commit install  # install pre-commit hooks
 pytest -v  # discover and run all tests
 ```
 
+Manually updating ASE via https://gitlab.com/ase/ase is strongly recommended, as tags are no longer regularly published.
+
 ## License
 
 [BSD 3-Clause License](LICENSE)

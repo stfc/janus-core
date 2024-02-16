@@ -24,7 +24,7 @@ documentation = "https://stfc.github.io/janus-core/"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-ase = { git = "https://gitlab.com/ase/ase.git", rev = "d255dbe1" }
+ase = "^3.22.1"
 mace-torch = "^0.3.4"
 
 [tool.poetry.group.dev.dependencies]
