@@ -5,7 +5,7 @@ from __future__ import annotations
 import pathlib
 
 from ase.io import read
-from numpy.typing import NDArray
+from numpy import ndarray
 
 from janus_core.mlip_calculators import choose_calculator
 
@@ -92,12 +92,12 @@ class SinglePoint:
 
         return self.sys.get_potential_energy()
 
-    def _get_forces(self) -> NDArray | list[NDArray]:
+    def _get_forces(self) -> ndarray | list[ndarray]:
         """Calculate forces using MLIP.
 
         Returns
         -------
-        forces : NDArray | list[NDArray]
+        forces : ndarray | list[ndarray]
             Forces of system(s).
         """
         if isinstance(self.sys, list):
@@ -108,12 +108,12 @@ class SinglePoint:
 
         return self.sys.get_forces()
 
-    def _get_stress(self) -> NDArray | list[NDArray]:
+    def _get_stress(self) -> ndarray | list[ndarray]:
         """Calculate stress using MLIP.
 
         Returns
         -------
-        stress : NDArray | list[NDArray]
+        stress : ndarray | list[ndarray]
             Stress of system(s).
         """
         if isinstance(self.sys, list):
