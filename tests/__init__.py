@@ -1,8 +1,5 @@
-""" Tests for janus_core.
+"""Tests for janus_core."""
 
-Includes example test (test.py).
-"""
+from pathlib import Path
 
-import os
-
-TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = Path(__file__).resolve().parent

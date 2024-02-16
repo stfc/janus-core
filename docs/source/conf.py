@@ -35,6 +35,8 @@ extensions = [
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "ase": ("https://wiki.fysik.dtu.dk/ase", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
