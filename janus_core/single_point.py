@@ -5,6 +5,7 @@ from __future__ import annotations
 import pathlib
 
 from ase.io import read
+from numpy.typing import NDArray
 
 from janus_core.mlip_calculators import choose_calculator
 
@@ -56,6 +57,61 @@ class SinglePoint:
             self.read_system()
         self.sys.calc = calculator
 
-    def get_potential_energy(self) -> float:
-        """Calculate potential energy using MLIP."""
+    def _get_potential_energy(self) -> float:
+        """Calculate potential energy using MLIP.
+
+        Returns
+        -------
+        potential_energy : float
+            Potential energy of system.
+        """
         return self.sys.get_potential_energy()
+
+    def _get_forces(self) -> NDArray:
+        """Calculate forces using MLIP.
+
+        Returns
+        -------
+        forces : float
+            Forces of system.
+        """
+        return self.sys.get_forces()
+
+    def _get_stress(self) -> NDArray:
+        """Calculate stress using MLIP.
+
+        Returns
+        -------
+        stress : float
+            Stress of system.
+        """
+        return self.sys.get_stress()
+
+    def run_single_point(self, properties: str | list[str] | None = None) -> dict:
+        """Run single point calculations.
+
+        Parameters
+        ----------
+        properties : str | List[str] | None
+            Physical properties to calculate. If not specified, "energy",
+            "forces", and "stress" will be returned.
+
+        Returns
+        -------
+        results : dict
+            Dictionary of calculated results.
+        """
+        results = {}
+        if properties is None:
+            properties = []
+        if isinstance(properties, str):
+            properties = [properties]
+
+        if "energy" in properties or len(properties) == 0:
+            results["energy"] = self._get_potential_energy()
+        if "forces" in properties or len(properties) == 0:
+            results["forces"] = self._get_forces()
+        if "stress" in properties or len(properties) == 0:
+            results["stress"] = self._get_stress()
+
+        return results
