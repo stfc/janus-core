@@ -8,7 +8,7 @@ except ImportError:
     from ase.constraints import UnitCellFilter
 import pytest
 
-from janus_core.geo_opt import optimize
+from janus_core.geom_opt import optimize
 from janus_core.single_point import SinglePoint
 
 
