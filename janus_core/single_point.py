@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pathlib
+from typing import Any
 
 from ase.io import read
 from numpy import ndarray
@@ -13,13 +14,12 @@ from janus_core.mlip_calculators import choose_calculator
 class SinglePoint:
     """Perpare and perform single point calculations."""
 
-    #  pylint: disable=dangerous-default-value
     def __init__(
         self,
         system: str,
         architecture: str = "mace_mp",
         device: str = "cpu",
-        read_kwargs: dict = {},
+        read_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -34,16 +34,17 @@ class SinglePoint:
             Default is "mace_mp".
         device : str
             Device to run model on. Default is "cpu".
-        read_kwargs : dict
-            kwargs to pass to ase.io.read. Default is {}.
+        read_kwargs : dict[str, Any] | None
+            kwargs to pass to ase.io.read. Default is None.
         """
         self.architecture = architecture
         self.device = device
         self.system = system
 
         # Read system and get calculator
+        read_kwargs = read_kwargs if read_kwargs else {}
         self.read_system(**read_kwargs)
-        self.get_calculator(**kwargs)
+        self.set_calculator(**kwargs)
 
     def read_system(self, **kwargs) -> None:
         """Read system and system name.
@@ -54,13 +55,15 @@ class SinglePoint:
         self.sys = read(self.system, **kwargs)
         self.sysname = pathlib.Path(self.system).stem
 
-    def get_calculator(self, read_kwargs: dict = {}, **kwargs) -> None:
+    def set_calculator(
+        self, read_kwargs: dict[str, Any] | None = None, **kwargs
+    ) -> None:
         """Configure calculator and attach to system.
 
         Parameters
         ----------
-        read_kwargs : dict
-            kwargs to pass to ase.io.read. Default is {}.
+        read_kwargs : dict[str, Any] | None
+            kwargs to pass to ase.io.read. Default is None.
         """
         calculator = choose_calculator(
             architecture=self.architecture,
@@ -68,6 +71,7 @@ class SinglePoint:
             **kwargs,
         )
         if self.sys is None:
+            read_kwargs = read_kwargs if read_kwargs else {}
             self.read_system(**read_kwargs)
 
         if isinstance(self.sys, list):
@@ -124,7 +128,9 @@ class SinglePoint:
 
         return self.sys.get_stress()
 
-    def run_single_point(self, properties: str | list[str] | None = None) -> dict:
+    def run_single_point(
+        self, properties: str | list[str] | None = None
+    ) -> dict[str, Any]:
         """Run single point calculations.
 
         Parameters
@@ -135,7 +141,7 @@ class SinglePoint:
 
         Returns
         -------
-        results : dict
+        results : Dict[str, Any]
             Dictionary of calculated results.
         """
         results = {}
