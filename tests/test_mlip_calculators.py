@@ -6,31 +6,21 @@ import pytest
 
 from janus_core.mlip_calculators import choose_calculator
 
-
-def test_mace():
-    """Test mace calculator can be configured."""
-    model_path = Path(Path(__file__).parent, "models", "mace_mp_small.model")
-    calculator = choose_calculator(
-        architecture="mace", device="cpu", model_paths=model_path
-    )
-    assert calculator.parameters["version"] is not None
-
-
-def test_mace_off():
-    """Test mace_off calculator can be configured."""
-    calculator = choose_calculator(
-        architecture="mace_off",
-        device="cpu",
-    )
-    assert calculator.parameters["version"] is not None
+test_data = [
+    (
+        "mace",
+        "cpu",
+        {"model_paths": Path(__file__).parent / "models" / "mace_mp_small.model"},
+    ),
+    ("mace_off", "cpu", {}),
+    ("mace_mp", "cpu", {}),
+]
 
 
-def test_mace_mp():
-    """Test mace_mp calculator can be configured."""
-    calculator = choose_calculator(
-        architecture="mace_mp",
-        device="cpu",
-    )
+@pytest.mark.parametrize("architecture, device, kwargs", test_data)
+def test_mace(architecture, device, kwargs):
+    """Test mace calculators can be configured."""
+    calculator = choose_calculator(architecture=architecture, device=device, **kwargs)
     assert calculator.parameters["version"] is not None
 
 
