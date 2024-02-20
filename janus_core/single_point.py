@@ -141,7 +141,7 @@ class SinglePoint:
 
         Returns
         -------
-        results : Dict[str, Any]
+        results : dict[str, Any]
             Dictionary of calculated results.
         """
         results = {}

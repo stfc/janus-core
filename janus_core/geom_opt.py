@@ -1,9 +1,7 @@
 """Geometry optimisation."""
 
-from __future__ import annotations
-
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from ase import Atoms
 from ase.io import write
@@ -19,13 +17,13 @@ from ase.optimize import LBFGS
 def optimize(
     atoms: Atoms,
     fmax: float = 0.1,
-    dyn_kwargs: dict[str, Any] | None = None,
-    filter_func: callable | None = DefaultFilter,
-    filter_kwargs: dict[str, Any] | None = None,
+    dyn_kwargs: Union[dict[str, Any], None] = None,
+    filter_func: Union[callable, None] = DefaultFilter,
+    filter_kwargs: Union[dict[str, Any], None] = None,
     optimizer: callable = LBFGS,
-    opt_kwargs: dict[str, Any] | None = None,
-    save_path: Path | str | None = None,
-    save_kwargs: dict[str, Any] | None = None,
+    opt_kwargs: Union[dict[str, Any], None] = None,
+    save_path: Union[Path, str, None] = None,
+    save_kwargs: Union[dict[str, Any], None] = None,
 ) -> Atoms:
     """Optimize geometry of input structure.
 
@@ -35,19 +33,19 @@ def optimize(
         Atoms object to optimize geometry for.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
-    dyn_kwargs : dict[str, Any] | None
+    dyn_kwargs : Union[dict[str, Any], None]
         kwargs to pass to dyn.run. Default is None.
-    filter_func : callable | None
+    filter_func : Union[callable, None]
         Apply constraints to atoms through ASE filter function. Default is `FrechetCellFilter`.
-    filter_kwargs : dict[str, Any] | None
+    filter_kwargs : Union[dict[str, Any], None]
         kwargs to pass to filter_func. Default is None.
     optimzer : callable
         ASE optimization function. Default is `LBFGS`.
-    opt_kwargs : dict[str, Any] | None
+    opt_kwargs : Union[dict[str, Any], None]
         kwargs to pass to optimzer. Default is None.
-    save_path : Path | str | None
+    save_path : Union[Path, str, None]
         Path to save optimised structure. Default is None.
-    save_kwargs : dict[str, Any] | None
+    save_kwargs : Union[dict[str, Any], None]
         kwargs to pass to ase.io.write. Default is None.
 
     Returns
