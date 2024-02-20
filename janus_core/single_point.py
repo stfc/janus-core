@@ -1,9 +1,7 @@
 """Perpare and perform single point calculations."""
 
-from __future__ import annotations
-
 import pathlib
-from typing import Any
+from typing import Any, Optional, Union
 
 from ase.io import read
 from numpy import ndarray
@@ -19,7 +17,7 @@ class SinglePoint:
         system: str,
         architecture: str = "mace_mp",
         device: str = "cpu",
-        read_kwargs: dict[str, Any] | None = None,
+        read_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -34,7 +32,7 @@ class SinglePoint:
             Default is "mace_mp".
         device : str
             Device to run model on. Default is "cpu".
-        read_kwargs : dict[str, Any] | None
+        read_kwargs : Optional[dict[str, Any]]
             kwargs to pass to ase.io.read. Default is None.
         """
         self.architecture = architecture
@@ -56,13 +54,13 @@ class SinglePoint:
         self.sysname = pathlib.Path(self.system).stem
 
     def set_calculator(
-        self, read_kwargs: dict[str, Any] | None = None, **kwargs
+        self, read_kwargs: Optional[dict[str, Any]] = None, **kwargs
     ) -> None:
         """Configure calculator and attach to system.
 
         Parameters
         ----------
-        read_kwargs : dict[str, Any] | None
+        read_kwargs : Optional[dict[str, Any]]
             kwargs to pass to ase.io.read. Default is None.
         """
         calculator = choose_calculator(
@@ -80,12 +78,12 @@ class SinglePoint:
         else:
             self.sys.calc = calculator
 
-    def _get_potential_energy(self) -> float | list[float]:
+    def _get_potential_energy(self) -> Union[float, list[float]]:
         """Calculate potential energy using MLIP.
 
         Returns
         -------
-        potential_energy : float | list[float]
+        potential_energy : Union[float, list[float]]
             Potential energy of system(s).
         """
         if isinstance(self.sys, list):
@@ -96,12 +94,12 @@ class SinglePoint:
 
         return self.sys.get_potential_energy()
 
-    def _get_forces(self) -> ndarray | list[ndarray]:
+    def _get_forces(self) -> Union[ndarray, list[ndarray]]:
         """Calculate forces using MLIP.
 
         Returns
         -------
-        forces : ndarray | list[ndarray]
+        forces : Union[ndarray, list[ndarray]]
             Forces of system(s).
         """
         if isinstance(self.sys, list):
@@ -112,12 +110,12 @@ class SinglePoint:
 
         return self.sys.get_forces()
 
-    def _get_stress(self) -> ndarray | list[ndarray]:
+    def _get_stress(self) -> Union[ndarray, list[ndarray]]:
         """Calculate stress using MLIP.
 
         Returns
         -------
-        stress : ndarray | list[ndarray]
+        stress : Union[ndarray, list[ndarray]]
             Stress of system(s).
         """
         if isinstance(self.sys, list):
@@ -129,13 +127,13 @@ class SinglePoint:
         return self.sys.get_stress()
 
     def run_single_point(
-        self, properties: str | list[str] | None = None
+        self, properties: Optional[Union[str, list[str]]] = None
     ) -> dict[str, Any]:
         """Run single point calculations.
 
         Parameters
         ----------
-        properties : str | List[str] | None
+        properties : Optional[Union[str, list[str]]]
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
 
