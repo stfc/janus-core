@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from ase import Atoms
+from ase.io import write
 
 try:
     from ase.filters import FrechetCellFilter as DefaultFilter
@@ -22,6 +24,8 @@ def optimize(
     filter_kwargs: dict[str, Any] | None = None,
     optimizer: callable = LBFGS,
     opt_kwargs: dict[str, Any] | None = None,
+    save_path: Path | str | None = None,
+    save_kwargs: dict[str, Any] | None = None,
 ) -> Atoms:
     """Optimize geometry of input structure.
 
@@ -41,6 +45,10 @@ def optimize(
         ASE optimization function. Default is `LBFGS`.
     opt_kwargs : dict[str, Any] | None
         kwargs to pass to optimzer. Default is None.
+    save_path : Path | str | None
+        Path to save optimised structure. Default is None.
+    save_kwargs : dict[str, Any] | None
+        kwargs to pass to ase.io.write. Default is None.
 
     Returns
     -------
@@ -50,6 +58,7 @@ def optimize(
     dyn_kwargs = dyn_kwargs if dyn_kwargs else {}
     filter_kwargs = filter_kwargs if filter_kwargs else {}
     opt_kwargs = opt_kwargs if opt_kwargs else {}
+    save_kwargs = save_kwargs if save_kwargs else {}
 
     if filter_func is not None:
         filtered_atoms = filter_func(atoms, **filter_kwargs)
@@ -58,4 +67,8 @@ def optimize(
         dyn = optimizer(atoms, **opt_kwargs)
 
     dyn.run(fmax=fmax, **dyn_kwargs)
+
+    if save_path is not None:
+        write(save_path, atoms, **save_kwargs)
+
     return atoms

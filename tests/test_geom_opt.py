@@ -6,6 +6,7 @@ try:
     from ase.filters import UnitCellFilter
 except ImportError:
     from ase.constraints import UnitCellFilter
+from ase.io import read
 import pytest
 
 from janus_core.geom_opt import optimize
@@ -65,3 +66,33 @@ def test_optimize(architecture, structure, model_path, expected, kwargs):
 
     assert atoms.get_potential_energy() < init_energy
     assert atoms.get_potential_energy() == pytest.approx(expected)
+
+
+def test_save(tmp_path):
+    """Test saving optimised structure."""
+    data_path = DATA_PATH / "NaCl.cif"
+    single_point = SinglePoint(
+        system=data_path, architecture="mace", model_paths=MODEL_PATH
+    )
+
+    init_energy = single_point.run_single_point("energy")["energy"]
+
+    optimize(
+        single_point.sys,
+        save_path=tmp_path / "NaCl.xyz",
+        save_kwargs={"format": "extxyz"},
+    )
+    opt_struct = read(tmp_path / "NaCl.xyz")
+
+    assert opt_struct.get_potential_energy() < init_energy
+
+
+def test_traj(tmp_path):
+    """Test saving optimisation trajectory output."""
+    data_path = DATA_PATH / "NaCl.cif"
+    single_point = SinglePoint(
+        system=data_path, architecture="mace", model_paths=MODEL_PATH
+    )
+    optimize(single_point.sys, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")})
+    traj = read(tmp_path / "NaCl.traj", index=":")
+    assert len(traj) == 3
