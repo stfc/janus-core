@@ -1,10 +1,10 @@
-"""Geometry optimisation."""
+"""Geometry optimization."""
 
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from ase import Atoms
-from ase.io import write
+from ase.io import read, write
 
 try:
     from ase.filters import FrechetCellFilter as DefaultFilter
@@ -22,8 +22,8 @@ def optimize(
     filter_kwargs: Optional[dict[str, Any]] = None,
     optimizer: callable = LBFGS,
     opt_kwargs: Optional[dict[str, Any]] = None,
-    save_path: Optional[Union[Path, str]] = None,
-    save_kwargs: Optional[dict[str, Any]] = None,
+    struct_kwargs: Optional[dict[str, Any]] = None,
+    traj_kwargs: Optional[dict[str, Any]] = None,
 ) -> Atoms:
     """Optimize geometry of input structure.
 
@@ -36,17 +36,20 @@ def optimize(
     dyn_kwargs : Optional[dict[str, Any]]
         kwargs to pass to dyn.run. Default is None.
     filter_func : Optional[callable]
-        Apply constraints to atoms through ASE filter function. Default is `FrechetCellFilter`.
+        Apply constraints to atoms through ASE filter function.
+        Default is `FrechetCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         kwargs to pass to filter_func. Default is None.
     optimzer : callable
         ASE optimization function. Default is `LBFGS`.
     opt_kwargs : Optional[dict[str, Any]]
         kwargs to pass to optimzer. Default is None.
-    save_path : Optional[Union[Path, str]]
-        Path to save optimised structure. Default is None.
-    save_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to ase.io.write. Default is None.
+    struct_kwargs : Optional[dict[str, Any]]
+        kwargs to pass to ase.io.write to save optimized structure.
+        Must include "filename" keyword. Default is None.
+    traj_kwargs : Optional[dict[str, Any]]
+        kwargs to pass to ase.io.write to save optimization trajectory.
+        Must include "filename" keyword. Default is None.
 
     Returns
     -------
@@ -56,7 +59,19 @@ def optimize(
     dyn_kwargs = dyn_kwargs if dyn_kwargs else {}
     filter_kwargs = filter_kwargs if filter_kwargs else {}
     opt_kwargs = opt_kwargs if opt_kwargs else {}
-    save_kwargs = save_kwargs if save_kwargs else {}
+    struct_kwargs = struct_kwargs if struct_kwargs else {}
+    traj_kwargs = traj_kwargs if traj_kwargs else {}
+
+    if struct_kwargs and "filename" not in struct_kwargs:
+        raise ValueError("'filename' must be included in struct_kwargs")
+
+    if traj_kwargs and "filename" not in traj_kwargs:
+        raise ValueError("'filename' must be included in traj_kwargs")
+
+    if traj_kwargs and "trajectory" not in opt_kwargs:
+        raise ValueError(
+            "'trajectory' must be a key in opt_kwargs to save the trajectory."
+        )
 
     if filter_func is not None:
         filtered_atoms = filter_func(atoms, **filter_kwargs)
@@ -66,7 +81,14 @@ def optimize(
 
     dyn.run(fmax=fmax, **dyn_kwargs)
 
-    if save_path is not None:
-        write(save_path, atoms, **save_kwargs)
+    # Write out optimized structure
+    if struct_kwargs:
+        write(images=atoms, **struct_kwargs)
+
+    # Reformat trajectory file from binary
+    if traj_kwargs:
+        traj = read(opt_kwargs["trajectory"], index=":")
+        write(images=traj, **traj_kwargs)
+        Path(opt_kwargs["trajectory"]).unlink()
 
     return atoms

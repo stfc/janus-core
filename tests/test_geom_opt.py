@@ -1,4 +1,4 @@
-"""Test geometry optimisation."""
+"""Test geometry optimization."""
 
 from pathlib import Path
 
@@ -68,9 +68,10 @@ def test_optimize(architecture, structure, model_path, expected, kwargs):
     assert atoms.get_potential_energy() == pytest.approx(expected)
 
 
-def test_save(tmp_path):
-    """Test saving optimised structure."""
+def test_saving_struct(tmp_path):
+    """Test saving optimized structure."""
     data_path = DATA_PATH / "NaCl.cif"
+    struct_path = tmp_path / "NaCl.xyz"
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=MODEL_PATH
     )
@@ -79,16 +80,15 @@ def test_save(tmp_path):
 
     optimize(
         single_point.sys,
-        save_path=tmp_path / "NaCl.xyz",
-        save_kwargs={"format": "extxyz"},
+        struct_kwargs={"filename": struct_path, "format": "extxyz"},
     )
-    opt_struct = read(tmp_path / "NaCl.xyz")
+    opt_struct = read(struct_path)
 
     assert opt_struct.get_potential_energy() < init_energy
 
 
-def test_traj(tmp_path):
-    """Test saving optimisation trajectory output."""
+def test_saving_traj(tmp_path):
+    """Test saving optimization trajectory output."""
     data_path = DATA_PATH / "NaCl.cif"
     single_point = SinglePoint(
         system=data_path, architecture="mace", model_paths=MODEL_PATH
@@ -96,3 +96,35 @@ def test_traj(tmp_path):
     optimize(single_point.sys, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")})
     traj = read(tmp_path / "NaCl.traj", index=":")
     assert len(traj) == 3
+
+
+def test_traj_reformat(tmp_path):
+    """Test saving optimization trajectory in different format."""
+    data_path = DATA_PATH / "NaCl.cif"
+    traj_path_binary = tmp_path / "NaCl.traj"
+    traj_path_xyz = tmp_path / "NaCl-traj.xyz"
+
+    single_point = SinglePoint(
+        system=data_path, architecture="mace", model_paths=MODEL_PATH
+    )
+
+    optimize(
+        single_point.sys,
+        opt_kwargs={"trajectory": str(traj_path_binary)},
+        traj_kwargs={"filename": traj_path_xyz},
+    )
+    traj = read(tmp_path / "NaCl-traj.xyz", index=":")
+
+    assert len(traj) == 3
+    assert traj_path_binary.is_file() is False
+
+
+def test_missing_traj_kwarg(tmp_path):
+    """Test saving optimization trajectory in different format."""
+    data_path = DATA_PATH / "NaCl.cif"
+    traj_path = tmp_path / "NaCl-traj.xyz"
+    single_point = SinglePoint(
+        system=data_path, architecture="mace", model_paths=MODEL_PATH
+    )
+    with pytest.raises(ValueError):
+        optimize(single_point.sys, traj_kwargs={"filename": traj_path})
