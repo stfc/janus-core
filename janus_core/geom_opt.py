@@ -37,7 +37,7 @@ def optimize(
         kwargs to pass to dyn.run. Default is {}.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
-        Default is `FrechetCellFilter`.
+        Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         kwargs to pass to filter_func. Default is {}.
     optimzer : callable
