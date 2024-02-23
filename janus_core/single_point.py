@@ -33,7 +33,7 @@ class SinglePoint:
         device : str
             Device to run model on. Default is "cpu".
         read_kwargs : Optional[dict[str, Any]]
-            kwargs to pass to ase.io.read. Default is None.
+            kwargs to pass to ase.io.read. Default is {}.
         """
         self.architecture = architecture
         self.device = device
@@ -61,7 +61,7 @@ class SinglePoint:
         Parameters
         ----------
         read_kwargs : Optional[dict[str, Any]]
-            kwargs to pass to ase.io.read. Default is None.
+            kwargs to pass to ase.io.read. Default is {}.
         """
         calculator = choose_calculator(
             architecture=self.architecture,
