@@ -5,8 +5,6 @@ Similar in spirit with matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
-from __future__ import annotations
-
 from typing import Literal
 
 from ase.calculators.calculator import Calculator

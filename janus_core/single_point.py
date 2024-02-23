@@ -1,8 +1,7 @@
 """Perpare and perform single point calculations."""
 
-from __future__ import annotations
-
 import pathlib
+from typing import Any, Optional, Union
 
 from ase.io import read
 from numpy import ndarray
@@ -13,13 +12,12 @@ from janus_core.mlip_calculators import choose_calculator
 class SinglePoint:
     """Perpare and perform single point calculations."""
 
-    #  pylint: disable=dangerous-default-value
     def __init__(
         self,
         system: str,
         architecture: str = "mace_mp",
         device: str = "cpu",
-        read_kwargs: dict = {},
+        read_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -34,7 +32,7 @@ class SinglePoint:
             Default is "mace_mp".
         device : str
             Device to run model on. Default is "cpu".
-        read_kwargs : dict
+        read_kwargs : Optional[dict[str, Any]]
             kwargs to pass to ase.io.read. Default is {}.
         """
         self.architecture = architecture
@@ -42,8 +40,9 @@ class SinglePoint:
         self.system = system
 
         # Read system and get calculator
+        read_kwargs = read_kwargs if read_kwargs else {}
         self.read_system(**read_kwargs)
-        self.get_calculator(**kwargs)
+        self.set_calculator(**kwargs)
 
     def read_system(self, **kwargs) -> None:
         """Read system and system name.
@@ -54,12 +53,14 @@ class SinglePoint:
         self.sys = read(self.system, **kwargs)
         self.sysname = pathlib.Path(self.system).stem
 
-    def get_calculator(self, read_kwargs: dict = {}, **kwargs) -> None:
+    def set_calculator(
+        self, read_kwargs: Optional[dict[str, Any]] = None, **kwargs
+    ) -> None:
         """Configure calculator and attach to system.
 
         Parameters
         ----------
-        read_kwargs : dict
+        read_kwargs : Optional[dict[str, Any]]
             kwargs to pass to ase.io.read. Default is {}.
         """
         calculator = choose_calculator(
@@ -68,6 +69,7 @@ class SinglePoint:
             **kwargs,
         )
         if self.sys is None:
+            read_kwargs = read_kwargs if read_kwargs else {}
             self.read_system(**read_kwargs)
 
         if isinstance(self.sys, list):
@@ -76,12 +78,12 @@ class SinglePoint:
         else:
             self.sys.calc = calculator
 
-    def _get_potential_energy(self) -> float | list[float]:
+    def _get_potential_energy(self) -> Union[float, list[float]]:
         """Calculate potential energy using MLIP.
 
         Returns
         -------
-        potential_energy : float | list[float]
+        potential_energy : Union[float, list[float]]
             Potential energy of system(s).
         """
         if isinstance(self.sys, list):
@@ -92,12 +94,12 @@ class SinglePoint:
 
         return self.sys.get_potential_energy()
 
-    def _get_forces(self) -> ndarray | list[ndarray]:
+    def _get_forces(self) -> Union[ndarray, list[ndarray]]:
         """Calculate forces using MLIP.
 
         Returns
         -------
-        forces : ndarray | list[ndarray]
+        forces : Union[ndarray, list[ndarray]]
             Forces of system(s).
         """
         if isinstance(self.sys, list):
@@ -108,12 +110,12 @@ class SinglePoint:
 
         return self.sys.get_forces()
 
-    def _get_stress(self) -> ndarray | list[ndarray]:
+    def _get_stress(self) -> Union[ndarray, list[ndarray]]:
         """Calculate stress using MLIP.
 
         Returns
         -------
-        stress : ndarray | list[ndarray]
+        stress : Union[ndarray, list[ndarray]]
             Stress of system(s).
         """
         if isinstance(self.sys, list):
@@ -124,18 +126,20 @@ class SinglePoint:
 
         return self.sys.get_stress()
 
-    def run_single_point(self, properties: str | list[str] | None = None) -> dict:
+    def run_single_point(
+        self, properties: Optional[Union[str, list[str]]] = None
+    ) -> dict[str, Any]:
         """Run single point calculations.
 
         Parameters
         ----------
-        properties : str | List[str] | None
+        properties : Optional[Union[str, list[str]]]
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
 
         Returns
         -------
-        results : dict
+        results : dict[str, Any]
             Dictionary of calculated results.
         """
         results = {}
