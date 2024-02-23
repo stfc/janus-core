@@ -1,6 +1,5 @@
 """Geometry optimization."""
 
-from pathlib import Path
 from typing import Any, Optional
 
 from ase import Atoms
@@ -89,6 +88,5 @@ def optimize(
     if traj_kwargs:
         traj = read(opt_kwargs["trajectory"], index=":")
         write(images=traj, **traj_kwargs)
-        Path(opt_kwargs["trajectory"]).unlink()
 
     return atoms

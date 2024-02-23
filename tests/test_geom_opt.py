@@ -116,7 +116,6 @@ def test_traj_reformat(tmp_path):
     traj = read(tmp_path / "NaCl-traj.xyz", index=":")
 
     assert len(traj) == 3
-    assert traj_path_binary.is_file() is False
 
 
 def test_missing_traj_kwarg(tmp_path):
