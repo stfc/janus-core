@@ -6,7 +6,7 @@ from typing import Any, Literal, Optional, Union
 from ase.io import read
 from numpy import ndarray
 
-from janus_core.mlip_calculators import architectures, choose_calculator
+from janus_core.mlip_calculators import architectures, choose_calculator, devices
 
 
 class SinglePoint:
@@ -16,7 +16,7 @@ class SinglePoint:
         self,
         system: str,
         architecture: Literal[architectures] = "mace_mp",
-        device: str = "cpu",
+        device: Literal[devices] = "cpu",
         read_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
@@ -27,10 +27,10 @@ class SinglePoint:
         ----------
         system : str
             System to simulate.
-        architecture : str
+        architecture : Literal[architectures]
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
-        device : str
+        device : Literal[devices]
             Device to run model on. Default is "cpu".
         read_kwargs : Optional[dict[str, Any]]
             kwargs to pass to ase.io.read. Default is {}.

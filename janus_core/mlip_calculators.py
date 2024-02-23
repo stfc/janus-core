@@ -10,10 +10,13 @@ from typing import Literal
 from ase.calculators.calculator import Calculator
 
 architectures = ["mace", "mace_mp", "mace_off", "m3gnet", "chgnet"]
+devices = ["cpu", "cuda", "mps"]
 
 
 def choose_calculator(
-    architecture: Literal[architectures] = "mace", **kwargs
+    architecture: Literal[architectures] = "mace",
+    device: Literal[devices] = "cuda",
+    **kwargs,
 ) -> Calculator:
     """Choose MLIP calculator to configure.
 
@@ -42,15 +45,13 @@ def choose_calculator(
         from mace.calculators import MACECalculator
 
         kwargs.setdefault("default_dtype", "float64")
-        kwargs.setdefault("device", "cuda")
-        calculator = MACECalculator(**kwargs)
+        calculator = MACECalculator(device=device, **kwargs)
 
     elif architecture == "mace_mp":
         from mace import __version__
         from mace.calculators import mace_mp
 
         kwargs.setdefault("default_dtype", "float64")
-        kwargs.setdefault("device", "cuda")
         kwargs.setdefault("model", "small")
         calculator = mace_mp(**kwargs)
 
@@ -59,7 +60,6 @@ def choose_calculator(
         from mace.calculators import mace_off
 
         kwargs.setdefault("default_dtype", "float64")
-        kwargs.setdefault("device", "cuda")
         kwargs.setdefault("model", "small")
         calculator = mace_off(**kwargs)
 
@@ -75,7 +75,7 @@ def choose_calculator(
         from chgnet import __version__
         from chgnet.model.dynamics import CHGNetCalculator
 
-        calculator = CHGNetCalculator(**kwargs)
+        calculator = CHGNetCalculator(use_device=device, **kwargs)
 
     else:
         raise ValueError(

@@ -6,7 +6,7 @@ import pytest
 
 from janus_core.mlip_calculators import choose_calculator
 
-test_data = [
+test_data_mace = [
     (
         "mace",
         "cpu",
@@ -16,8 +16,10 @@ test_data = [
     ("mace_mp", "cpu", {}),
 ]
 
+test_data_extras = [("m3gnet", "cpu"), ("chgnet", "")]
 
-@pytest.mark.parametrize("architecture, device, kwargs", test_data)
+
+@pytest.mark.parametrize("architecture, device, kwargs", test_data_mace)
 def test_mace(architecture, device, kwargs):
     """Test mace calculators can be configured."""
     calculator = choose_calculator(architecture=architecture, device=device, **kwargs)
@@ -25,19 +27,12 @@ def test_mace(architecture, device, kwargs):
 
 
 @pytest.mark.extra_mlips
-def test_m3gnet():
-    """Test m3gnet calculator can be configured."""
+@pytest.mark.parametrize("architecture, device", test_data_extras)
+def test_extra_mlips(architecture, device):
+    """Test m3gnet and chgnet calculators can be configured."""
     calculator = choose_calculator(
-        architecture="m3gnet",
-    )
-    assert calculator.parameters["version"] is not None
-
-
-@pytest.mark.extra_mlips
-def test_chgnet():
-    """Test chgnet calculator can be configured."""
-    calculator = choose_calculator(
-        architecture="chgnet",
+        architecture=architecture,
+        device=device,
     )
     assert calculator.parameters["version"] is not None
 
