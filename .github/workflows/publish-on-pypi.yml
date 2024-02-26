@@ -15,16 +15,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install poetry
-      run: pipx install poetry
-
     - name: Set up Python 3.11
       uses: actions/setup-python@v5
       with:
         python-version: 3.11
 
+    - name: Install poetry
+      run: pipx install poetry
+
     - name: Build project for distribution
-      run: poetry build
+      run: |
+        poetry env use 3.11
+        poetry build
 
     - name: Check Version
       id: check-version
