@@ -1,12 +1,12 @@
 """Perpare and perform single point calculations."""
 
 import pathlib
-from typing import Any, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from ase.io import read
 from numpy import ndarray
 
-from janus_core.mlip_calculators import choose_calculator
+from janus_core.mlip_calculators import architectures, choose_calculator, devices
 
 
 class SinglePoint:
@@ -15,8 +15,8 @@ class SinglePoint:
     def __init__(
         self,
         system: str,
-        architecture: str = "mace_mp",
-        device: str = "cpu",
+        architecture: Literal[architectures] = "mace_mp",
+        device: Literal[devices] = "cpu",
         read_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
@@ -27,10 +27,10 @@ class SinglePoint:
         ----------
         system : str
             System to simulate.
-        architecture : str
+        architecture : Literal[architectures]
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
-        device : str
+        device : Literal[devices]
             Device to run model on. Default is "cpu".
         read_kwargs : Optional[dict[str, Any]]
             kwargs to pass to ase.io.read. Default is {}.
@@ -87,10 +87,7 @@ class SinglePoint:
             Potential energy of system(s).
         """
         if isinstance(self.sys, list):
-            energies = []
-            for sys in self.sys:
-                energies.append(sys.get_potential_energy())
-            return energies
+            return [sys.get_potential_energy() for sys in self.sys]
 
         return self.sys.get_potential_energy()
 
@@ -103,10 +100,7 @@ class SinglePoint:
             Forces of system(s).
         """
         if isinstance(self.sys, list):
-            forces = []
-            for sys in self.sys:
-                forces.append(sys.get_forces())
-            return forces
+            return [sys.get_forces() for sys in self.sys]
 
         return self.sys.get_forces()
 
@@ -119,10 +113,7 @@ class SinglePoint:
             Stress of system(s).
         """
         if isinstance(self.sys, list):
-            stress = []
-            for sys in self.sys:
-                stress.append(sys.get_stress())
-            return stress
+            return [sys.get_stress() for sys in self.sys]
 
         return self.sys.get_stress()
 
