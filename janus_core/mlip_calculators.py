@@ -1,4 +1,5 @@
-"""Configure MLIP calculators.
+"""
+Configure MLIP calculators.
 
 Similar in spirit with matcalc and quacc approaches
 - https://github.com/materialsvirtuallab/matcalc
