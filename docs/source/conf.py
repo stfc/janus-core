@@ -34,14 +34,14 @@ extensions = [
     "sphinxcontrib.contentui",
 ]
 
+numpydoc_validation_checks = {"all", "EX01", "SA01", "ES01"}
+numpydoc_validation_exclude = {r"\.__weakref__$", r"\.__repr__$"}
+
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
 }
-
-numpydoc_validation_checks = {"all", "EX01", "SA01", "ES01"}
-numpydoc_validation_exclude = {r"\.__weakref__$", r"\.__repr__$"}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
