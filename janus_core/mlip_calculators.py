@@ -18,12 +18,22 @@ def choose_calculator(
     device: Literal[devices] = "cuda",
     **kwargs,
 ) -> Calculator:
-    """Choose MLIP calculator to configure.
+    """
+    Choose MLIP calculator to configure.
 
     Parameters
     ----------
     architecture : Literal[architectures], optional
         MLIP architecture. Default is "mace".
+    device : Literal[devices]
+        Device to run calculator on. Default is "cuda".
+    **kwargs
+        Additional keyword arguments passed to the selected calculator.
+
+    Returns
+    -------
+    Calculator
+        Configured MLIP calculator.
 
     Raises
     ------
@@ -31,11 +41,6 @@ def choose_calculator(
         MLIP module not correctly been installed.
     ValueError
         Invalid architecture specified.
-
-    Returns
-    -------
-    calculator : Calculator
-        Configured MLIP calculator.
     """
     # pylint: disable=import-outside-toplevel, too-many-branches, import-error
     # Optional imports handled via `architecture`. We could catch these,
