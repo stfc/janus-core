@@ -1,4 +1,4 @@
-"""Perpare and perform single point calculations."""
+"""Prepare and perform single point calculations."""
 
 import pathlib
 from typing import Any, Literal, Optional, Union
@@ -11,7 +11,7 @@ from janus_core.mlip_calculators import architectures, choose_calculator, device
 
 class SinglePoint:
     """
-    Perpare and perform single point calculations.
+    Prepare and perform single point calculations.
 
     Parameters
     ----------

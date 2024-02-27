@@ -43,7 +43,7 @@ def optimize(
     optimizer : callable
         ASE optimization function. Default is `LBFGS`.
     opt_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to optimzer. Default is {}.
+        Keyword arguments to pass to optimizer. Default is {}.
     struct_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write to save optimized structure.
         Must include "filename" keyword. Default is {}.
