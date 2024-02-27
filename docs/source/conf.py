@@ -26,9 +26,10 @@ import janus_core
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "numpydoc",
     "sphinx.ext.autodoc",
-    "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinxcontrib.contentui",
 ]
@@ -38,6 +39,9 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
 }
+
+numpydoc_validation_checks = {"all", "EX01", "SA01", "ES01"}
+numpydoc_validation_exclude = {r"\.__weakref__$", r"\.__repr__$"}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
