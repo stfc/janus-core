@@ -33,8 +33,6 @@ class SinglePoint:
         MLIP architecture to use for single point calculations.
     system : str
         System to simulate.
-    architecture : Literal[architectures]
-        MLIP architecture to use for single point calculations.
     device : Literal[devices]
         Device to run MLIP model on.
 
