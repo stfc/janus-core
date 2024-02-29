@@ -10,35 +10,32 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 test_data = [
-    (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}),
+    (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
     (
         DATA_PATH / "benzene.xyz",
         -76.06057739257812,
         ["energy"],
         "energy",
         {"default_dtype": "float32"},
+        None,
     ),
-    (
-        DATA_PATH / "benzene.xyz",
-        -0.0360169762840179,
-        ["forces"],
-        "forces",
-        {"idx": [0, 1]},
-    ),
-    (DATA_PATH / "NaCl.cif", -0.004783275999053424, ["stress"], "stress", {"idx": [0]}),
+    (DATA_PATH / "benzene.xyz", -0.0360169762840179, ["forces"], "forces", {}, [0, 1]),
+    (DATA_PATH / "NaCl.cif", -0.004783275999053424, ["stress"], "stress", {}, [0]),
 ]
 
 
-@pytest.mark.parametrize("system, expected, properties, prop_key, kwargs", test_data)
-def test_potential_energy(system, expected, properties, prop_key, kwargs):
+@pytest.mark.parametrize(
+    "system, expected, properties, prop_key, calc_kwargs, idx", test_data
+)
+def test_potential_energy(system, expected, properties, prop_key, calc_kwargs, idx):
     """Test single point energy using MACE calculators."""
+    calc_kwargs["model_paths"] = MODEL_PATH
     single_point = SinglePoint(
-        system=system, architecture="mace", model_paths=MODEL_PATH, **kwargs
+        system=system, architecture="mace", calc_kwargs=calc_kwargs
     )
     results = single_point.run_single_point(properties)[prop_key]
 
     # Check correct values returned
-    idx = kwargs.pop("idx", None)
     if idx is not None:
         if len(idx) == 1:
             assert results[idx[0]] == pytest.approx(expected)
@@ -52,10 +49,10 @@ def test_potential_energy(system, expected, properties, prop_key, kwargs):
 
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
-    data_path = DATA_PATH / "NaCl.cif"
-    model_path = MODEL_PATH
     single_point = SinglePoint(
-        system=data_path, architecture="mace", model_paths=model_path
+        system=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
     )
 
     results = single_point.run_single_point()
@@ -65,13 +62,11 @@ def test_single_point_none():
 
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
-    data_path = DATA_PATH / "benzene-traj.xyz"
-    model_path = MODEL_PATH
     single_point = SinglePoint(
-        system=data_path,
+        system=DATA_PATH / "benzene-traj.xyz",
         architecture="mace",
-        model_paths=model_path,
         read_kwargs={"index": ":"},
+        calc_kwargs={"model_paths": MODEL_PATH},
     )
 
     assert len(single_point.sys) == 2

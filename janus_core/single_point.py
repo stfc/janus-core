@@ -24,8 +24,8 @@ class SinglePoint:
         Device to run model on. Default is "cpu".
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. Default is {}.
-    **kwargs
-        Additional keyword arguments passed to the selected calculator.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
 
     Attributes
     ----------
@@ -52,7 +52,7 @@ class SinglePoint:
         architecture: Literal[architectures] = "mace_mp",
         device: Literal[devices] = "cpu",
         read_kwargs: Optional[dict[str, Any]] = None,
-        **kwargs,
+        calc_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Read the system being simulated and attach an MLIP calculator.
@@ -68,8 +68,8 @@ class SinglePoint:
             Device to run MLIP model on. Default is "cpu".
         read_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to ase.io.read. Default is {}.
-        **kwargs
-            Additional keyword arguments passed to the selected calculator.
+        calc_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to the selected calculator. Default is {}.
         """
         self.architecture = architecture
         self.device = device
@@ -77,8 +77,9 @@ class SinglePoint:
 
         # Read system and get calculator
         read_kwargs = read_kwargs if read_kwargs else {}
+        calc_kwargs = calc_kwargs if calc_kwargs else {}
         self.read_system(**read_kwargs)
-        self.set_calculator(**kwargs)
+        self.set_calculator(**calc_kwargs)
 
     def read_system(self, **kwargs) -> None:
         """
