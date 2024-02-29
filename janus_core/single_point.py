@@ -1,12 +1,21 @@
 """Prepare and perform single point calculations."""
 
 import pathlib
-from typing import Any, Literal, Optional, Union
+from typing import Any, Optional
 
 from ase.io import read
 from numpy import ndarray
 
-from janus_core.mlip_calculators import architectures, choose_calculator, devices
+from janus_core.mlip_calculators import choose_calculator
+
+from .janus_types import (
+    Architectures,
+    ASEReadArgs,
+    CalcResults,
+    Devices,
+    MaybeList,
+    MaybeSequence,
+)
 
 
 class SinglePoint:
@@ -20,22 +29,22 @@ class SinglePoint:
     architecture : Literal[architectures]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
-    device : Literal[devices]
+    device : Devices
         Device to run model on. Default is "cpu".
-    read_kwargs : Optional[dict[str, Any]]
+    read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. Default is {}.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : ASEReadArgs
         Keyword arguments to pass to the selected calculator. Default is {}.
 
     Attributes
     ----------
-    architecture : Literal[architectures]
+    architecture : Architectures
         MLIP architecture to use for single point calculations.
     structure : str
         Path of structure to simulate.
-    device : Literal[devices]
+    device : Devices
         Device to run MLIP model on.
-    struct : Union[Atoms, list[Atoms]
+    struct : MaybeList[Atoms]
         ASE Atoms or list of Atoms structures to simulate.
     structname : str
         Name of structure from its filename.
@@ -53,9 +62,9 @@ class SinglePoint:
     def __init__(
         self,
         structure: str,
-        architecture: Literal[architectures] = "mace_mp",
-        device: Literal[devices] = "cpu",
-        read_kwargs: Optional[dict[str, Any]] = None,
+        architecture: Architectures = "mace_mp",
+        device: Devices = "cpu",
+        read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
@@ -65,12 +74,12 @@ class SinglePoint:
         ----------
         structure : str
             Path of structure to simulate.
-        architecture : Literal[architectures]
+        architecture : Architectures
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
-        device : Literal[devices]
+        device : Devices
             Device to run MLIP model on. Default is "cpu".
-        read_kwargs : Optional[dict[str, Any]]
+        read_kwargs : Optional[ASEReadArgs]
             Keyword arguments to pass to ase.io.read. Default is {}.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
@@ -101,14 +110,14 @@ class SinglePoint:
         self.structname = pathlib.Path(self.structure).stem
 
     def set_calculator(
-        self, read_kwargs: Optional[dict[str, Any]] = None, **kwargs
+        self, read_kwargs: Optional[ASEReadArgs] = None, **kwargs
     ) -> None:
         """
         Configure calculator and attach to structure.
 
         Parameters
         ----------
-        read_kwargs : Optional[dict[str, Any]]
+        read_kwargs : Optional[ASEReadArgs]
             Keyword arguments to pass to ase.io.read. Default is {}.
         **kwargs
             Additional keyword arguments passed to the selected calculator.
@@ -128,13 +137,13 @@ class SinglePoint:
         else:
             self.struct.calc = calculator
 
-    def _get_potential_energy(self) -> Union[float, list[float]]:
+    def _get_potential_energy(self) -> MaybeList[float]:
         """
         Calculate potential energy using MLIP.
 
         Returns
         -------
-        Union[float, list[float]]
+        MaybeList[float]
             Potential energy of structure(s).
         """
         if isinstance(self.struct, list):
@@ -142,13 +151,13 @@ class SinglePoint:
 
         return self.struct.get_potential_energy()
 
-    def _get_forces(self) -> Union[ndarray, list[ndarray]]:
+    def _get_forces(self) -> MaybeList[ndarray]:
         """
         Calculate forces using MLIP.
 
         Returns
         -------
-        Union[ndarray, list[ndarray]]
+        MaybeList[ndarray]
             Forces of structure(s).
         """
         if isinstance(self.struct, list):
@@ -156,13 +165,13 @@ class SinglePoint:
 
         return self.struct.get_forces()
 
-    def _get_stress(self) -> Union[ndarray, list[ndarray]]:
+    def _get_stress(self) -> MaybeList[ndarray]:
         """
         Calculate stress using MLIP.
 
         Returns
         -------
-        Union[ndarray, list[ndarray]]
+        MaybeList[ndarray]
             Stress of structure(s).
         """
         if isinstance(self.struct, list):
@@ -170,26 +179,22 @@ class SinglePoint:
 
         return self.struct.get_stress()
 
-    def run_single_point(
-        self, properties: Optional[Union[str, list[str]]] = None
-    ) -> dict[str, Any]:
+    def run_single_point(self, properties: MaybeSequence[str] = ()) -> CalcResults:
         """
         Run single point calculations.
 
         Parameters
         ----------
-        properties : Optional[Union[str, list[str]]]
+        properties : MaybeSequence[str]
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
 
         Returns
         -------
-        dict[str, Any]
+        CalcResults
             Dictionary of calculated results.
         """
-        results = {}
-        if properties is None:
-            properties = []
+        results: CalcResults = {}
         if isinstance(properties, str):
             properties = [properties]
 

@@ -1,28 +1,29 @@
 """Geometry optimization."""
 
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from ase import Atoms
 from ase.io import read, write
+from ase.optimize import LBFGS
 
 try:
     from ase.filters import FrechetCellFilter as DefaultFilter
 except ImportError:
     from ase.constraints import ExpCellFilter as DefaultFilter
 
-from ase.optimize import LBFGS
+from .janus_types import ASEOptArgs, ASEOptRunArgs, ASEWriteArgs
 
 
 def optimize(
     atoms: Atoms,
     fmax: float = 0.1,
-    dyn_kwargs: Optional[dict[str, Any]] = None,
-    filter_func: Optional[callable] = DefaultFilter,
+    dyn_kwargs: Optional[ASEOptRunArgs] = None,
+    filter_func: Optional[Callable] = DefaultFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
-    optimizer: callable = LBFGS,
-    opt_kwargs: Optional[dict[str, Any]] = None,
-    struct_kwargs: Optional[dict[str, Any]] = None,
-    traj_kwargs: Optional[dict[str, Any]] = None,
+    optimizer: Callable = LBFGS,
+    opt_kwargs: Optional[ASEOptArgs] = None,
+    struct_kwargs: Optional[ASEWriteArgs] = None,
+    traj_kwargs: Optional[ASEWriteArgs] = None,
 ) -> Atoms:
     """
     Optimize geometry of input structure.
@@ -33,7 +34,7 @@ def optimize(
         Atoms object to optimize geometry for.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
-    dyn_kwargs : Optional[dict[str, Any]]
+    dyn_kwargs : Optional[ASEOptRunArgs]
         Keyword arguments to pass to dyn.run. Default is {}.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
@@ -42,12 +43,12 @@ def optimize(
         Keyword arguments to pass to filter_func. Default is {}.
     optimizer : callable
         ASE optimization function. Default is `LBFGS`.
-    opt_kwargs : Optional[dict[str, Any]]
+    opt_kwargs : Optional[ASEOptArgs]
         Keyword arguments to pass to optimizer. Default is {}.
-    struct_kwargs : Optional[dict[str, Any]]
+    struct_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write to save optimized structure.
         Must include "filename" keyword. Default is {}.
-    traj_kwargs : Optional[dict[str, Any]]
+    traj_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
 

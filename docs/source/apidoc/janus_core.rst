@@ -53,3 +53,14 @@ janus\_core.single\_point module
    :private-members:
    :undoc-members:
    :show-inheritance:
+
+
+janus\_core.janus\_types module
+-------------------------------
+
+.. automodule:: janus_core.janus_types
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+   :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
