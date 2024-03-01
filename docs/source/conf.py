@@ -26,12 +26,16 @@ import janus_core
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "numpydoc",
     "sphinx.ext.autodoc",
-    "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinxcontrib.contentui",
 ]
+
+numpydoc_validation_checks = {"all", "EX01", "SA01", "ES01"}
+numpydoc_validation_exclude = {r"\.__weakref__$", r"\.__repr__$"}
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

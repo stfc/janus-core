@@ -24,7 +24,8 @@ def optimize(
     struct_kwargs: Optional[dict[str, Any]] = None,
     traj_kwargs: Optional[dict[str, Any]] = None,
 ) -> Atoms:
-    """Optimize geometry of input structure.
+    """
+    Optimize geometry of input structure.
 
     Parameters
     ----------
@@ -33,21 +34,21 @@ def optimize(
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
     dyn_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to dyn.run. Default is {}.
+        Keyword arguments to pass to dyn.run. Default is {}.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
         Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to filter_func. Default is {}.
-    optimzer : callable
+        Keyword arguments to pass to filter_func. Default is {}.
+    optimizer : callable
         ASE optimization function. Default is `LBFGS`.
     opt_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to optimzer. Default is {}.
+        Keyword arguments to pass to optimizer. Default is {}.
     struct_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to ase.io.write to save optimized structure.
+        Keyword arguments to pass to ase.io.write to save optimized structure.
         Must include "filename" keyword. Default is {}.
     traj_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to ase.io.write to save optimization trajectory.
+        Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
 
     Returns
