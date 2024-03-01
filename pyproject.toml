@@ -22,6 +22,9 @@ classifiers = [
 repository = "https://github.com/stfc/janus-core/"
 documentation = "https://stfc.github.io/janus-core/"
 
+[tool.poetry.scripts]
+janus = "janus_core.cli:app"
+
 [tool.poetry.dependencies]
 python = "^3.9"
 ase = "^3.22.1"
