@@ -62,7 +62,9 @@ def parse_dict_class(value: str):
 
 @app.command()
 def singlepoint(
-    system: Annotated[str, typer.Option(help="Path to system to perform calculations")],
+    structure: Annotated[
+        str, typer.Option(help="Path to structure to perform calculations")
+    ],
     architecture: Annotated[
         str, typer.Option("--arch", help="MLIP architecture to use for calculations")
     ] = "mace_mp",
@@ -96,8 +98,8 @@ def singlepoint(
 
     Parameters
     ----------
-    system : str
-        System to simulate.
+    structure : str
+        Structure to simulate.
     architecture : Optional[str]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -119,7 +121,7 @@ def singlepoint(
         raise ValueError("calc_kwargs must be a dictionary")
 
     s_point = SinglePoint(
-        system=system,
+        structure=structure,
         architecture=architecture,
         device=device,
         read_kwargs=read_kwargs,

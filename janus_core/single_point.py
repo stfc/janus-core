@@ -15,8 +15,8 @@ class SinglePoint:
 
     Parameters
     ----------
-    system : str
-        System to simulate.
+    structure : str
+        Structure to simulate.
     architecture : Literal[architectures]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -31,36 +31,40 @@ class SinglePoint:
     ----------
     architecture : Literal[architectures]
         MLIP architecture to use for single point calculations.
-    system : str
-        System to simulate.
+    structure : str
+        Path of structure to simulate.
     device : Literal[devices]
         Device to run MLIP model on.
+    struct : Union[Atoms, list[Atoms]
+        ASE Atoms or list of Atoms structures to simulate.
+    structname : str
+        Name of structure from its filename.
 
     Methods
     -------
-    read_system(**kwargs)
-        Read system and system name.
+    read_structure(**kwargs)
+        Read structure and structure name.
     set_calculator(**kwargs)
-        Configure calculator and attach to system.
+        Configure calculator and attach to structure.
     run_single_point(properties=None)
         Run single point calculations.
     """
 
     def __init__(
         self,
-        system: str,
+        structure: str,
         architecture: Literal[architectures] = "mace_mp",
         device: Literal[devices] = "cpu",
         read_kwargs: Optional[dict[str, Any]] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
-        Read the system being simulated and attach an MLIP calculator.
+        Read the structure being simulated and attach an MLIP calculator.
 
         Parameters
         ----------
-        system : str
-            System to simulate.
+        structure : str
+            Path of structure to simulate.
         architecture : Literal[architectures]
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
@@ -73,17 +77,17 @@ class SinglePoint:
         """
         self.architecture = architecture
         self.device = device
-        self.system = system
+        self.structure = structure
 
-        # Read system and get calculator
+        # Read structure and get calculator
         read_kwargs = read_kwargs if read_kwargs else {}
         calc_kwargs = calc_kwargs if calc_kwargs else {}
-        self.read_system(**read_kwargs)
+        self.read_structure(**read_kwargs)
         self.set_calculator(**calc_kwargs)
 
-    def read_system(self, **kwargs) -> None:
+    def read_structure(self, **kwargs) -> None:
         """
-        Read system and system name.
+        Read structure and structure name.
 
         If the file contains multiple structures, only the last configuration
         will be read by default.
@@ -93,14 +97,14 @@ class SinglePoint:
         **kwargs
             Keyword arguments passed to ase.io.read.
         """
-        self.sys = read(self.system, **kwargs)
-        self.sysname = pathlib.Path(self.system).stem
+        self.struct = read(self.structure, **kwargs)
+        self.structname = pathlib.Path(self.structure).stem
 
     def set_calculator(
         self, read_kwargs: Optional[dict[str, Any]] = None, **kwargs
     ) -> None:
         """
-        Configure calculator and attach to system.
+        Configure calculator and attach to structure.
 
         Parameters
         ----------
@@ -114,15 +118,15 @@ class SinglePoint:
             device=self.device,
             **kwargs,
         )
-        if self.sys is None:
+        if self.struct is None:
             read_kwargs = read_kwargs if read_kwargs else {}
-            self.read_system(**read_kwargs)
+            self.read_structure(**read_kwargs)
 
-        if isinstance(self.sys, list):
-            for sys in self.sys:
-                sys.calc = calculator
+        if isinstance(self.struct, list):
+            for struct in self.struct:
+                struct.calc = calculator
         else:
-            self.sys.calc = calculator
+            self.struct.calc = calculator
 
     def _get_potential_energy(self) -> Union[float, list[float]]:
         """
@@ -131,12 +135,12 @@ class SinglePoint:
         Returns
         -------
         Union[float, list[float]]
-            Potential energy of system(s).
+            Potential energy of structure(s).
         """
-        if isinstance(self.sys, list):
-            return [sys.get_potential_energy() for sys in self.sys]
+        if isinstance(self.struct, list):
+            return [struct.get_potential_energy() for struct in self.struct]
 
-        return self.sys.get_potential_energy()
+        return self.struct.get_potential_energy()
 
     def _get_forces(self) -> Union[ndarray, list[ndarray]]:
         """
@@ -145,12 +149,12 @@ class SinglePoint:
         Returns
         -------
         Union[ndarray, list[ndarray]]
-            Forces of system(s).
+            Forces of structure(s).
         """
-        if isinstance(self.sys, list):
-            return [sys.get_forces() for sys in self.sys]
+        if isinstance(self.struct, list):
+            return [struct.get_forces() for struct in self.struct]
 
-        return self.sys.get_forces()
+        return self.struct.get_forces()
 
     def _get_stress(self) -> Union[ndarray, list[ndarray]]:
         """
@@ -159,12 +163,12 @@ class SinglePoint:
         Returns
         -------
         Union[ndarray, list[ndarray]]
-            Stress of system(s).
+            Stress of structure(s).
         """
-        if isinstance(self.sys, list):
-            return [sys.get_stress() for sys in self.sys]
+        if isinstance(self.struct, list):
+            return [struct.get_stress() for struct in self.struct]
 
-        return self.sys.get_stress()
+        return self.struct.get_stress()
 
     def run_single_point(
         self, properties: Optional[Union[str, list[str]]] = None

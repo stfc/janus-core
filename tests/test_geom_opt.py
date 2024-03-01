@@ -40,14 +40,14 @@ test_data = [
 def test_optimize(architecture, structure, expected, kwargs):
     """Test optimizing geometry using MACE."""
     single_point = SinglePoint(
-        system=DATA_PATH / structure,
+        structure=DATA_PATH / structure,
         architecture=architecture,
         calc_kwargs={"model_paths": MODEL_PATH},
     )
 
     init_energy = single_point.run_single_point("energy")["energy"]
 
-    atoms = optimize(single_point.sys, **kwargs)
+    atoms = optimize(single_point.struct, **kwargs)
 
     assert atoms.get_potential_energy() < init_energy
     assert atoms.get_potential_energy() == pytest.approx(expected)
@@ -58,7 +58,7 @@ def test_saving_struct(tmp_path):
     struct_path = tmp_path / "NaCl.xyz"
 
     single_point = SinglePoint(
-        system=DATA_PATH / "NaCl.cif",
+        structure=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -66,7 +66,7 @@ def test_saving_struct(tmp_path):
     init_energy = single_point.run_single_point("energy")["energy"]
 
     optimize(
-        single_point.sys,
+        single_point.struct,
         struct_kwargs={"filename": struct_path, "format": "extxyz"},
     )
     opt_struct = read(struct_path)
@@ -77,11 +77,13 @@ def test_saving_struct(tmp_path):
 def test_saving_traj(tmp_path):
     """Test saving optimization trajectory output."""
     single_point = SinglePoint(
-        system=DATA_PATH / "NaCl.cif",
+        structure=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
-    optimize(single_point.sys, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")})
+    optimize(
+        single_point.struct, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")}
+    )
     traj = read(tmp_path / "NaCl.traj", index=":")
     assert len(traj) == 3
 
@@ -89,7 +91,7 @@ def test_saving_traj(tmp_path):
 def test_traj_reformat(tmp_path):
     """Test saving optimization trajectory in different format."""
     single_point = SinglePoint(
-        system=DATA_PATH / "NaCl.cif",
+        structure=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -98,7 +100,7 @@ def test_traj_reformat(tmp_path):
     traj_path_xyz = tmp_path / "NaCl-traj.xyz"
 
     optimize(
-        single_point.sys,
+        single_point.struct,
         opt_kwargs={"trajectory": str(traj_path_binary)},
         traj_kwargs={"filename": traj_path_xyz},
     )
@@ -110,10 +112,10 @@ def test_traj_reformat(tmp_path):
 def test_missing_traj_kwarg(tmp_path):
     """Test saving optimization trajectory in different format."""
     single_point = SinglePoint(
-        system=DATA_PATH / "NaCl.cif",
+        structure=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
     traj_path = tmp_path / "NaCl-traj.xyz"
     with pytest.raises(ValueError):
-        optimize(single_point.sys, traj_kwargs={"filename": traj_path})
+        optimize(single_point.struct, traj_kwargs={"filename": traj_path})

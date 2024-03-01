@@ -29,7 +29,7 @@ def test_singlepoint_help():
 
 def test_singlepoint():
     """Test singlepoint calculation."""
-    result = runner.invoke(app, ["singlepoint", "--system", DATA_PATH / "NaCl.cif"])
+    result = runner.invoke(app, ["singlepoint", "--structure", DATA_PATH / "NaCl.cif"])
     assert result.exit_code == 0
     assert "{'energy': -" in result.stdout
     assert "'forces': array" in result.stdout
@@ -42,7 +42,7 @@ def test_singlepoint_properties():
         app,
         [
             "singlepoint",
-            "--system",
+            "--structure",
             DATA_PATH / "NaCl.cif",
             "--property",
             "energy",
@@ -62,7 +62,7 @@ def test_singlepoint_read_kwargs():
         app,
         [
             "singlepoint",
-            "--system",
+            "--structure",
             DATA_PATH / "benzene-traj.xyz",
             "--read-kwargs",
             "{'index': ':'}",
@@ -80,7 +80,7 @@ def test_singlepoint_calc_kwargs():
         app,
         [
             "singlepoint",
-            "--system",
+            "--structure",
             DATA_PATH / "NaCl.cif",
             "--calc-kwargs",
             "{'default_dtype': 'float32'}",

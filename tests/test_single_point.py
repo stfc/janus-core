@@ -25,13 +25,13 @@ test_data = [
 
 
 @pytest.mark.parametrize(
-    "system, expected, properties, prop_key, calc_kwargs, idx", test_data
+    "structure, expected, properties, prop_key, calc_kwargs, idx", test_data
 )
-def test_potential_energy(system, expected, properties, prop_key, calc_kwargs, idx):
+def test_potential_energy(structure, expected, properties, prop_key, calc_kwargs, idx):
     """Test single point energy using MACE calculators."""
     calc_kwargs["model_paths"] = MODEL_PATH
     single_point = SinglePoint(
-        system=system, architecture="mace", calc_kwargs=calc_kwargs
+        structure=structure, architecture="mace", calc_kwargs=calc_kwargs
     )
     results = single_point.run_single_point(properties)[prop_key]
 
@@ -50,7 +50,7 @@ def test_potential_energy(system, expected, properties, prop_key, calc_kwargs, i
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
-        system=DATA_PATH / "NaCl.cif",
+        structure=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -63,13 +63,13 @@ def test_single_point_none():
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
-        system=DATA_PATH / "benzene-traj.xyz",
+        structure=DATA_PATH / "benzene-traj.xyz",
         architecture="mace",
         read_kwargs={"index": ":"},
         calc_kwargs={"model_paths": MODEL_PATH},
     )
 
-    assert len(single_point.sys) == 2
+    assert len(single_point.struct) == 2
     results = single_point.run_single_point("energy")
     assert results["energy"][0] == pytest.approx(-76.0605725422795)
     assert results["energy"][1] == pytest.approx(-74.80419118083256)
