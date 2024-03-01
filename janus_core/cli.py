@@ -11,12 +11,35 @@ app = typer.Typer()
 
 
 class TyperDict:  #  pylint: disable=too-few-public-methods
-    """Custom dictionary for typer."""
+    """
+    Custom dictionary for typer.
+
+    Parameters
+    ----------
+    value : str
+        Value of string representing a dictionary.
+    """
 
     def __init__(self, value: str):
+        """
+        Initialise class.
+
+        Parameters
+        ----------
+        value : str
+            Value of string representing a dictionary.
+        """
         self.value = value
 
     def __str__(self):
+        """
+        String representation of class.
+
+        Returns
+        -------
+        str
+            Class name and value of string representing a dictionary.
+        """
         return f"<TyperDict: value={self.value}>"
 
 
@@ -83,9 +106,9 @@ def singlepoint(
     properties : Optional[str]
         Physical properties to calculate. Default is "energy".
     read_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to ase.io.read. Default is {}.
+        Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
-        kwargs to pass to the selected calculator. Default is {}.
+        Keyword arguments to pass to the selected calculator. Default is {}.
     """
     read_kwargs = read_kwargs.value if read_kwargs else {}
     calc_kwargs = calc_kwargs.value if calc_kwargs else {}
