@@ -16,7 +16,7 @@ devices = ["cpu", "cuda", "mps"]
 
 def choose_calculator(
     architecture: Literal[architectures] = "mace",
-    device: Literal[devices] = "cuda",
+    device: Literal[devices] = "cpu",
     **kwargs,
 ) -> Calculator:
     """
@@ -27,7 +27,7 @@ def choose_calculator(
     architecture : Literal[architectures], optional
         MLIP architecture. Default is "mace".
     device : Literal[devices]
-        Device to run calculator on. Default is "cuda".
+        Device to run calculator on. Default is "cpu".
     **kwargs
         Additional keyword arguments passed to the selected calculator.
 
