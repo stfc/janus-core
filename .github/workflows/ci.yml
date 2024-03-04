@@ -38,6 +38,7 @@ jobs:
       with:
         parallel: true
         flag-name: run-${{ matrix.python-version }}
+        file: ./coverage.xml
 
   coverage:
     needs: tests
