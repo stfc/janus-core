@@ -38,7 +38,8 @@ jobs:
       with:
         parallel: true
         flag-name: run-${{ matrix.python-version }}
-        file: ./coverage.xml
+        file: coverage.xml
+        base-path: janus_core
 
   coverage:
     needs: tests
