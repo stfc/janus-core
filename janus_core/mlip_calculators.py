@@ -58,7 +58,7 @@ def choose_calculator(
         from mace.calculators import mace_mp
 
         kwargs.setdefault("default_dtype", "float64")
-        kwargs.setdefault("model", "small")
+        kwargs["model"] = kwargs.pop("model_paths", "small")
         calculator = mace_mp(**kwargs)
 
     elif architecture == "mace_off":
@@ -66,7 +66,7 @@ def choose_calculator(
         from mace.calculators import mace_off
 
         kwargs.setdefault("default_dtype", "float64")
-        kwargs.setdefault("model", "small")
+        kwargs["model"] = kwargs.pop("model_paths", "small")
         calculator = mace_off(**kwargs)
 
     elif architecture == "m3gnet":

@@ -14,6 +14,16 @@ test_data_mace = [
     ),
     ("mace_off", "cpu", {}),
     ("mace_mp", "cpu", {}),
+    (
+        "mace_mp",
+        "cpu",
+        {"model_paths": Path(__file__).parent / "models" / "mace_mp_small.model"},
+    ),
+    (
+        "mace_off",
+        "cpu",
+        {"model_paths": "small"},
+    ),
 ]
 
 test_data_extras = [("m3gnet", "cpu"), ("chgnet", "")]
