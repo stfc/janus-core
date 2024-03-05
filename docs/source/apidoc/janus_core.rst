@@ -4,6 +4,16 @@ janus\_core package
 Submodules
 ----------
 
+janus\_core.cli module
+----------------------
+
+.. automodule:: janus_core.cli
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.geom\_opt module
 ----------------------------
 

@@ -22,10 +22,14 @@ classifiers = [
 repository = "https://github.com/stfc/janus-core/"
 documentation = "https://stfc.github.io/janus-core/"
 
+[tool.poetry.scripts]
+janus = "janus_core.cli:app"
+
 [tool.poetry.dependencies]
 python = "^3.9"
 ase = "^3.22.1"
 mace-torch = "^0.3.4"
+typer = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.4.1"}
