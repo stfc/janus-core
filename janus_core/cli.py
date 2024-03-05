@@ -73,8 +73,10 @@ def singlepoint(
         list[str],
         typer.Option(
             "--property",
-            help="Properties to calculate. If not specified, 'energy', 'forces', \
-                and 'stress' will be returned.",
+            help=(
+                "Properties to calculate. If not specified, 'energy', 'forces' "
+                "and 'stress' will be returned."
+            ),
         ),
     ] = None,
     read_kwargs: Annotated[
@@ -90,6 +92,17 @@ def singlepoint(
         typer.Option(
             parser=parse_dict_class,
             help="Keyword arguments to pass to selected calculator  [default: {}]",
+            metavar="DICT",
+        ),
+    ] = None,
+    write_kwargs: Annotated[
+        TyperDict,
+        typer.Option(
+            parser=parse_dict_class,
+            help=(
+                "Keyword arguments to pass to ase.io.write to save "
+                "results [default: {}]"
+            ),
             metavar="DICT",
         ),
     ] = None,
@@ -112,9 +125,12 @@ def singlepoint(
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    write_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to ase.io.write to save results. Default is {}.
     """
     read_kwargs = read_kwargs.value if read_kwargs else {}
     calc_kwargs = calc_kwargs.value if calc_kwargs else {}
+    write_kwargs = write_kwargs.value if write_kwargs else {}
 
     if not isinstance(read_kwargs, dict):
         raise ValueError("read_kwargs must be a dictionary")
@@ -128,7 +144,7 @@ def singlepoint(
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
     )
-    print(s_point.run_single_point(properties=properties))
+    print(s_point.run_single_point(properties=properties, write_kwargs=write_kwargs))
 
 
 @app.command()

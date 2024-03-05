@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ase.io import read
 from typer.testing import CliRunner
 
 from janus_core.cli import app
@@ -90,3 +91,22 @@ def test_singlepoint_calc_kwargs():
     )
     assert result.exit_code == 0
     assert "Using float32 for MACECalculator" in result.stdout
+
+
+def test_singlepoint_write_kwargs(tmp_path):
+    """Test setting write_kwargs for singlepoint calculation."""
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--structure",
+            DATA_PATH / "NaCl.cif",
+            "--write-kwargs",
+            f"{{'filename': '{str(tmp_path / 'NaCl.xyz')}'}}",
+            "--property",
+            "energy",
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(tmp_path / "NaCl.xyz")
+    assert "forces" in atoms.arrays
