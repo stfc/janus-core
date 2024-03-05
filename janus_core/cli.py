@@ -73,7 +73,8 @@ def singlepoint(
         list[str],
         typer.Option(
             "--property",
-            help="Properties to calculate. If not specified, 'energy', 'forces', and 'stress' will be returned.",
+            help="Properties to calculate. If not specified, 'energy', 'forces', \
+                and 'stress' will be returned.",
         ),
     ] = None,
     read_kwargs: Annotated[
