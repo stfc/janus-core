@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ase.io import read
 import pytest
 
 from janus_core.single_point import SinglePoint
@@ -73,3 +74,33 @@ def test_single_point_traj():
     results = single_point.run_single_point("energy")
     assert results["energy"][0] == pytest.approx(-76.0605725422795)
     assert results["energy"][1] == pytest.approx(-74.80419118083256)
+
+
+def test_single_point_write(tmp_path):
+    """Test writing singlepoint results."""
+    data_path = DATA_PATH / "NaCl.cif"
+    results_path = tmp_path / "NaCl.xyz"
+    single_point = SinglePoint(
+        structure=data_path,
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+
+    assert "forces" not in single_point.struct.arrays
+    single_point.run_single_point(write_kwargs={"filename": results_path})
+
+    atoms = read(results_path)
+    assert atoms.get_potential_energy() is not None
+    assert "forces" in atoms.arrays
+
+
+def test_single_point_write_missing():
+    """Test writing singlepoint results."""
+    data_path = DATA_PATH / "NaCl.cif"
+    single_point = SinglePoint(
+        structure=data_path,
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+    with pytest.raises(ValueError):
+        single_point.run_single_point(write_kwargs={"file": "file.xyz"})
