@@ -1,9 +1,9 @@
 """Prepare and perform single point calculations."""
 
-import pathlib
+from pathlib import Path
 from typing import Any, Optional
 
-from ase.io import read
+from ase.io import read, write
 from numpy import ndarray
 
 from janus_core.mlip_calculators import choose_calculator
@@ -107,7 +107,7 @@ class SinglePoint:
             Keyword arguments passed to ase.io.read.
         """
         self.struct = read(self.structure, **kwargs)
-        self.structname = pathlib.Path(self.structure).stem
+        self.structname = Path(self.structure).stem
 
     def set_calculator(
         self, read_kwargs: Optional[ASEReadArgs] = None, **kwargs
@@ -179,7 +179,11 @@ class SinglePoint:
 
         return self.struct.get_stress()
 
-    def run_single_point(self, properties: MaybeSequence[str] = ()) -> CalcResults:
+    def run_single_point(
+        self,
+        properties: MaybeSequence[str] = (),
+        write_kwargs: Optional[dict[str, Any]] = None,
+    ) -> CalcResults:
         """
         Run single point calculations.
 
@@ -188,6 +192,9 @@ class SinglePoint:
         properties : MaybeSequence[str]
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
+        write_kwargs : Optional[dict[str, Any]] = None,
+            Keyword arguments to pass to ase.io.write to save structure with
+            results of calculations. Must include "filename" keyword. Default is {}.
 
         Returns
         -------
@@ -198,11 +205,18 @@ class SinglePoint:
         if isinstance(properties, str):
             properties = [properties]
 
+        write_kwargs = write_kwargs if write_kwargs else {}
+        if write_kwargs and "filename" not in write_kwargs:
+            raise ValueError("'filename' must be included in write_kwargs")
+
         if "energy" in properties or len(properties) == 0:
             results["energy"] = self._get_potential_energy()
         if "forces" in properties or len(properties) == 0:
             results["forces"] = self._get_forces()
         if "stress" in properties or len(properties) == 0:
             results["stress"] = self._get_stress()
+
+        if write_kwargs:
+            write(images=self.struct, **write_kwargs)
 
         return results
