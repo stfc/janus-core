@@ -1,6 +1,16 @@
 janus\_core package
 ===================
 
+Module contents
+---------------
+
+.. automodule:: janus_core
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -28,16 +38,6 @@ janus\_core.single\_point module
 --------------------------------
 
 .. automodule:: janus_core.single_point
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: janus_core
    :members:
    :special-members:
    :private-members:
