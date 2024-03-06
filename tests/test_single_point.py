@@ -77,8 +77,31 @@ def test_single_point_traj():
     assert results["energy"][1] == pytest.approx(-74.80419118083256)
 
 
-def test_single_point_write(tmp_path):
+def test_single_point_write():
     """Test writing singlepoint results."""
+    data_path = DATA_PATH / "NaCl.cif"
+    results_path = Path(".").absolute() / "NaCl-results.xyz"
+    single_point = SinglePoint(
+        structure=data_path,
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+
+    assert "forces" not in single_point.struct.arrays
+
+    # Check results file does not already exist
+    assert not Path(results_path).exists()
+
+    single_point.run_single_point(write_results=True)
+    atoms = read(results_path)
+    assert atoms.get_potential_energy() is not None
+    assert "forces" in atoms.arrays
+
+    Path(results_path).unlink()
+
+
+def test_single_point_write_kwargs(tmp_path):
+    """Test passing write_kwargs to singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
     results_path = tmp_path / "NaCl.xyz"
     single_point = SinglePoint(
@@ -88,23 +111,13 @@ def test_single_point_write(tmp_path):
     )
 
     assert "forces" not in single_point.struct.arrays
-    single_point.run_single_point(write_kwargs={"filename": results_path})
+    single_point.run_single_point(
+        write_results=True, write_kwargs={"filename": results_path}
+    )
 
     atoms = read(results_path)
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.arrays
-
-
-def test_single_point_write_missing():
-    """Test writing singlepoint results."""
-    data_path = DATA_PATH / "NaCl.cif"
-    single_point = SinglePoint(
-        structure=data_path,
-        architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
-    )
-    with pytest.raises(ValueError):
-        single_point.run_single_point(write_kwargs={"file": "file.xyz"})
 
 
 def test_single_point_write_nan(tmp_path):
@@ -120,7 +133,9 @@ def test_single_point_write_nan(tmp_path):
     assert isfinite(single_point.run_single_point("energy")["energy"]).all()
     assert not isfinite(single_point.run_single_point("stress")["stress"]).all()
 
-    single_point.run_single_point(write_kwargs={"filename": results_path})
+    single_point.run_single_point(
+        write_results=True, write_kwargs={"filename": results_path}
+    )
     atoms = read(results_path)
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.calc.results

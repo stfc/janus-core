@@ -201,6 +201,7 @@ class SinglePoint:
     def run_single_point(
         self,
         properties: MaybeSequence[str] = (),
+        write_results: bool = False,
         write_kwargs: Optional[dict[str, Any]] = None,
     ) -> CalcResults:
         """
@@ -211,9 +212,11 @@ class SinglePoint:
         properties : MaybeSequence[str]
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
+        write_results : bool
+            True to write out structure with results of calculations. Default is False.
         write_kwargs : Optional[dict[str, Any]] = None,
-            Keyword arguments to pass to ase.io.write to save structure with
-            results of calculations. Must include "filename" keyword. Default is {}.
+            Keyword arguments to pass to ase.io.write if saving structure with
+            results of calculations. Default is {}.
 
         Returns
         -------
@@ -237,7 +240,10 @@ class SinglePoint:
 
         self._clean_results()
 
-        if write_kwargs:
+        if write_results:
+            if "filename" not in write_kwargs:
+                filename = f"{self.structname}-results.xyz"
+                write_kwargs["filename"] = Path(".").absolute() / filename
             write(images=self.struct, **write_kwargs)
 
         return results
