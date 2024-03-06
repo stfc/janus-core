@@ -95,3 +95,9 @@ jobs:
       run: |
         poetry run pre-commit install
         poetry run pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
+
+    - name: Check all docs
+      run: |
+        diff -y --suppress-common-lines \
+             <(git ls-files janus_core/** | sed '/.py$/!d; s/\/__init__.py//; s#/#.#g; s/.py$//') \
+             <(sed -nr '/automodule/{s/.*::\s*//;p}' docs/source/apidoc/*)
