@@ -101,6 +101,7 @@ def test_singlepoint_write_kwargs(tmp_path):
             "singlepoint",
             "--structure",
             DATA_PATH / "NaCl.cif",
+            "--write-results",
             "--write-kwargs",
             f"{{'filename': '{str(tmp_path / 'NaCl.xyz')}'}}",
             "--property",

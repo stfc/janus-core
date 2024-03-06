@@ -95,6 +95,9 @@ def singlepoint(
             metavar="DICT",
         ),
     ] = None,
+    write_results: Annotated[
+        bool, typer.Option(help="Write out structure with results of calculations")
+    ] = False,
     write_kwargs: Annotated[
         TyperDict,
         typer.Option(
@@ -125,8 +128,10 @@ def singlepoint(
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    write_results : bool
+        True to write out structure with results of calculations. Default is False.
     write_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to ase.io.write to save results. Default is {}.
+        Keyword arguments to pass to ase.io.write if saving results. Default is {}.
     """
     read_kwargs = read_kwargs.value if read_kwargs else {}
     calc_kwargs = calc_kwargs.value if calc_kwargs else {}
@@ -136,6 +141,8 @@ def singlepoint(
         raise ValueError("read_kwargs must be a dictionary")
     if not isinstance(calc_kwargs, dict):
         raise ValueError("calc_kwargs must be a dictionary")
+    if not isinstance(write_kwargs, dict):
+        raise ValueError("write_kwargs must be a dictionary")
 
     s_point = SinglePoint(
         structure=structure,
@@ -144,7 +151,13 @@ def singlepoint(
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
     )
-    print(s_point.run_single_point(properties=properties, write_kwargs=write_kwargs))
+    print(
+        s_point.run_single_point(
+            properties=properties,
+            write_results=write_results,
+            write_kwargs=write_kwargs,
+        )
+    )
 
 
 @app.command()
