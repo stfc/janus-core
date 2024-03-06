@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ase.io import read, write
-from numpy import ndarray
+from numpy import isfinite, ndarray
 
 from janus_core.mlip_calculators import choose_calculator
 
@@ -179,6 +179,25 @@ class SinglePoint:
 
         return self.struct.get_stress()
 
+    def _clean_results(self):
+        """Remove results with NaN or inf values from calc.results dictionary."""
+
+        if isinstance(self.struct, list):
+            for image in self.struct:
+                rm_keys = []
+                for prop in image.calc.results:
+                    if not isfinite(image.calc.results[prop]).all():
+                        rm_keys.append(prop)
+                for prop in rm_keys:
+                    image.calc.results.pop(prop)
+        else:
+            rm_keys = []
+            for prop in self.struct.calc.results:
+                if not isfinite(self.struct.calc.results[prop]).all():
+                    rm_keys.append(prop)
+            for prop in rm_keys:
+                self.struct.calc.results.pop(prop)
+
     def run_single_point(
         self,
         properties: MaybeSequence[str] = (),
@@ -215,6 +234,8 @@ class SinglePoint:
             results["forces"] = self._get_forces()
         if "stress" in properties or len(properties) == 0:
             results["stress"] = self._get_stress()
+
+        self._clean_results()
 
         if write_kwargs:
             write(images=self.struct, **write_kwargs)

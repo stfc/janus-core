@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from ase.io import read
+from numpy import isfinite
 import pytest
 
 from janus_core.single_point import SinglePoint
@@ -104,3 +105,23 @@ def test_single_point_write_missing():
     )
     with pytest.raises(ValueError):
         single_point.run_single_point(write_kwargs={"file": "file.xyz"})
+
+
+def test_single_point_write_nan(tmp_path):
+    """Test non-finite singlepoint results removed."""
+    data_path = DATA_PATH / "H2O.cif"
+    results_path = tmp_path / "H2O.xyz"
+    single_point = SinglePoint(
+        structure=data_path,
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+
+    assert isfinite(single_point.run_single_point("energy")["energy"]).all()
+    assert not isfinite(single_point.run_single_point("stress")["stress"]).all()
+
+    single_point.run_single_point(write_kwargs={"filename": results_path})
+    atoms = read(results_path)
+    assert atoms.get_potential_energy() is not None
+    assert "forces" in atoms.calc.results
+    assert "stress" not in atoms.calc.results
