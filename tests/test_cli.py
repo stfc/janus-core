@@ -28,37 +28,71 @@ def test_singlepoint_help():
     assert "Usage: root singlepoint [OPTIONS]" in result.stdout
 
 
-def test_singlepoint():
+def test_singlepoint(tmp_path):
     """Test singlepoint calculation."""
-    result = runner.invoke(app, ["singlepoint", "--structure", DATA_PATH / "NaCl.cif"])
-    assert result.exit_code == 0
-    assert "{'energy': -" in result.stdout
-    assert "'forces': array" in result.stdout
-    assert "'stress': array" in result.stdout
+    results_path = tmp_path / "NaCl-results.xyz"
 
-
-def test_singlepoint_properties():
-    """Test properties for singlepoint calculation."""
     result = runner.invoke(
         app,
         [
             "singlepoint",
             "--structure",
             DATA_PATH / "NaCl.cif",
-            "--property",
-            "energy",
-            "--property",
-            "forces",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
         ],
     )
     assert result.exit_code == 0
-    assert "{'energy': -" in result.stdout
-    assert "'forces': array" in result.stdout
-    assert "'stress': array" not in result.stdout
+
+    atoms = read(results_path)
+    assert atoms.get_potential_energy() is not None
+    assert "forces" in atoms.arrays
 
 
-def test_singlepoint_read_kwargs():
+def test_singlepoint_properties(tmp_path):
+    """Test properties for singlepoint calculation."""
+    results_path = tmp_path / "H2O-results.xyz"
+
+    # Check energy is can be calculated successfully
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--structure",
+            DATA_PATH / "H2O.cif",
+            "--property",
+            "energy",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
+        ],
+    )
+    assert result.exit_code == 0
+
+    atoms = read(results_path)
+    results_path.unlink()
+    assert atoms.get_potential_energy() is not None
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--structure",
+            DATA_PATH / "H2O.cif",
+            "--property",
+            "stress",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
+        ],
+    )
+    assert result.exit_code == 1
+    assert not results_path.is_file()
+    assert isinstance(result.exception, ValueError)
+
+
+def test_singlepoint_read_kwargs(tmp_path):
     """Test setting read_kwargs for singlepoint calculation."""
+    results_path = tmp_path / "benzene-traj-results.xyz"
+
     result = runner.invoke(
         app,
         [
@@ -67,16 +101,22 @@ def test_singlepoint_read_kwargs():
             DATA_PATH / "benzene-traj.xyz",
             "--read-kwargs",
             "{'index': ':'}",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
             "--property",
             "energy",
         ],
     )
     assert result.exit_code == 0
-    assert "'energy': [" in result.stdout
+
+    atoms = read(results_path, index=":")
+    assert isinstance(atoms, list)
 
 
-def test_singlepoint_calc_kwargs():
+def test_singlepoint_calc_kwargs(tmp_path):
     """Test setting calc_kwargs for singlepoint calculation."""
+    results_path = tmp_path / "NaCl-results.xyz"
+
     result = runner.invoke(
         app,
         [
@@ -85,6 +125,8 @@ def test_singlepoint_calc_kwargs():
             DATA_PATH / "NaCl.cif",
             "--calc-kwargs",
             "{'default_dtype': 'float32'}",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
             "--property",
             "energy",
         ],
@@ -93,21 +135,23 @@ def test_singlepoint_calc_kwargs():
     assert "Using float32 for MACECalculator" in result.stdout
 
 
-def test_singlepoint_write_kwargs(tmp_path):
-    """Test setting write_kwargs for singlepoint calculation."""
+def test_singlepoint_default_write():
+    """Test default write path."""
+    results_path = Path(".").absolute() / "NaCl-results.xyz"
+    assert not Path(results_path).exists()
+
     result = runner.invoke(
         app,
         [
             "singlepoint",
             "--structure",
             DATA_PATH / "NaCl.cif",
-            "--write-results",
-            "--write-kwargs",
-            f"{{'filename': '{str(tmp_path / 'NaCl.xyz')}'}}",
             "--property",
             "energy",
         ],
     )
     assert result.exit_code == 0
-    atoms = read(tmp_path / "NaCl.xyz")
+    atoms = read(results_path)
     assert "forces" in atoms.arrays
+
+    results_path.unlink()

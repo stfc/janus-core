@@ -179,8 +179,17 @@ class SinglePoint:
 
         return self.struct.get_stress()
 
-    def _clean_results(self):
-        """Remove results with NaN or inf values from calc.results dictionary."""
+    def _clean_results(self, properties: Optional[list[str]] = None) -> None:
+        """
+        Remove results with NaN or inf values from calc.results dictionary.
+
+        Parameters
+        ----------
+        properties : Optional[list[str]]
+            Physical properties requested to be calculated. Default is [].
+        """
+        if properties is None:
+            properties = []
 
         if isinstance(self.struct, list):
             for image in self.struct:
@@ -189,6 +198,10 @@ class SinglePoint:
                     if not isfinite(image.calc.results[prop]).all():
                         rm_keys.append(prop)
                 for prop in rm_keys:
+                    if prop in properties:
+                        raise ValueError(
+                            f"'{prop}' contains non-finite values for this structure."
+                        )
                     image.calc.results.pop(prop)
         else:
             rm_keys = []
@@ -196,6 +209,10 @@ class SinglePoint:
                 if not isfinite(self.struct.calc.results[prop]).all():
                     rm_keys.append(prop)
             for prop in rm_keys:
+                if prop in properties:
+                    raise ValueError(
+                        f"'{prop}' contains non-finite values for this structure."
+                    )
                 self.struct.calc.results.pop(prop)
 
     def run_single_point(
@@ -227,6 +244,12 @@ class SinglePoint:
         if isinstance(properties, str):
             properties = [properties]
 
+        for prop in properties:
+            if prop not in ["energy", "forces", "stress"]:
+                raise NotImplementedError(
+                    f"Property '{prop}' cannot currently be calculated."
+                )
+
         write_kwargs = write_kwargs if write_kwargs else {}
         if write_kwargs and "filename" not in write_kwargs:
             raise ValueError("'filename' must be included in write_kwargs")
@@ -238,7 +261,7 @@ class SinglePoint:
         if "stress" in properties or len(properties) == 0:
             results["stress"] = self._get_stress()
 
-        self._clean_results()
+        self._clean_results(properties=properties)
 
         if write_results:
             if "filename" not in write_kwargs:

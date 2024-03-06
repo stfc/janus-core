@@ -95,15 +95,12 @@ def singlepoint(
             metavar="DICT",
         ),
     ] = None,
-    write_results: Annotated[
-        bool, typer.Option(help="Write out structure with results of calculations")
-    ] = False,
     write_kwargs: Annotated[
         TyperDict,
         typer.Option(
             parser=parse_dict_class,
             help=(
-                "Keyword arguments to pass to ase.io.write to save "
+                "Keyword arguments to pass to ase.io.write when saving "
                 "results [default: {}]"
             ),
             metavar="DICT",
@@ -111,7 +108,7 @@ def singlepoint(
     ] = None,
 ):
     """
-    Perform single point calculations.
+    Perform single point calculations and save to file.
 
     Parameters
     ----------
@@ -128,10 +125,8 @@ def singlepoint(
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    write_results : bool
-        True to write out structure with results of calculations. Default is False.
     write_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to ase.io.write if saving results. Default is {}.
+        Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     """
     read_kwargs = read_kwargs.value if read_kwargs else {}
     calc_kwargs = calc_kwargs.value if calc_kwargs else {}
@@ -151,12 +146,8 @@ def singlepoint(
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
     )
-    print(
-        s_point.run_single_point(
-            properties=properties,
-            write_results=write_results,
-            write_kwargs=write_kwargs,
-        )
+    s_point.run_single_point(
+        properties=properties, write_results=True, write_kwargs=write_kwargs
     )
 
 

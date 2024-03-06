@@ -81,16 +81,14 @@ def test_single_point_write():
     """Test writing singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
     results_path = Path(".").absolute() / "NaCl-results.xyz"
+    assert not Path(results_path).exists()
+
     single_point = SinglePoint(
         structure=data_path,
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
-
     assert "forces" not in single_point.struct.arrays
-
-    # Check results file does not already exist
-    assert not Path(results_path).exists()
 
     single_point.run_single_point(write_results=True)
     atoms = read(results_path)
@@ -104,17 +102,17 @@ def test_single_point_write_kwargs(tmp_path):
     """Test passing write_kwargs to singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
     results_path = tmp_path / "NaCl.xyz"
+
     single_point = SinglePoint(
         structure=data_path,
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
-
     assert "forces" not in single_point.struct.arrays
+
     single_point.run_single_point(
         write_results=True, write_kwargs={"filename": results_path}
     )
-
     atoms = read(results_path)
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.arrays
@@ -131,7 +129,8 @@ def test_single_point_write_nan(tmp_path):
     )
 
     assert isfinite(single_point.run_single_point("energy")["energy"]).all()
-    assert not isfinite(single_point.run_single_point("stress")["stress"]).all()
+    with pytest.raises(ValueError):
+        single_point.run_single_point("stress")
 
     single_point.run_single_point(
         write_results=True, write_kwargs={"filename": results_path}
@@ -140,3 +139,14 @@ def test_single_point_write_nan(tmp_path):
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.calc.results
     assert "stress" not in atoms.calc.results
+
+
+def test_invalid_prop():
+    """Test invalid property request."""
+    single_point = SinglePoint(
+        structure=DATA_PATH / "H2O.cif",
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+    with pytest.raises(NotImplementedError):
+        single_point.run_single_point("invalid")
