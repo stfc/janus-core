@@ -12,6 +12,7 @@ from janus_core.mlip_calculators import choose_calculator
 from .janus_types import (
     Architectures,
     ASEReadArgs,
+    ASEWriteArgs,
     CalcResults,
     Devices,
     MaybeList,
@@ -186,7 +187,7 @@ class SinglePoint:
         properties: Optional[list[str]] = None,
     ) -> None:
         """
-        Remove any invalid properties from from calculator results.
+        Remove any invalid properties from calculator results.
 
         Parameters
         ----------
@@ -196,11 +197,13 @@ class SinglePoint:
             Physical properties requested to be calculated. Default is [].
         """
         properties = properties if properties else []
-
         rm_keys = []
+
+        # Find any properties with non-finite values
         for prop in struct.calc.results:
             if not isfinite(struct.calc.results[prop]).all():
                 rm_keys.append(prop)
+        # Raise error if property was explicitly requested, otherwise remove
         for prop in rm_keys:
             if prop in properties:
                 raise ValueError(
@@ -229,7 +232,7 @@ class SinglePoint:
         self,
         properties: MaybeSequence[str] = (),
         write_results: bool = False,
-        write_kwargs: Optional[dict[str, Any]] = None,
+        write_kwargs: Optional[ASEWriteArgs] = None,
     ) -> CalcResults:
         """
         Run single point calculations.
@@ -241,7 +244,7 @@ class SinglePoint:
             "forces", and "stress" will be returned.
         write_results : bool
             True to write out structure with results of calculations. Default is False.
-        write_kwargs : Optional[dict[str, Any]] = None,
+        write_kwargs : Optional[ASEWriteArgs],
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
 
