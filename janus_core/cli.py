@@ -107,6 +107,9 @@ def singlepoint(
             metavar="DICT",
         ),
     ] = None,
+    log_file: Annotated[
+        str, typer.Option("--log", help="File to save logs")
+    ] = "singlepoint.log",
 ):
     """
     Perform single point calculations and save to file.
@@ -128,6 +131,8 @@ def singlepoint(
         Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
+    log_file : Optional[str]
+        Name of log file to write logs to. Default is "singlepoint.log".
     """
     read_kwargs = read_kwargs.value if read_kwargs else {}
     calc_kwargs = calc_kwargs.value if calc_kwargs else {}
@@ -146,6 +151,7 @@ def singlepoint(
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
+        log_file=log_file,
     )
     s_point.run_single_point(
         properties=properties, write_results=True, write_kwargs=write_kwargs
