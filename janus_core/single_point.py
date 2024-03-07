@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any, Optional
 
+from ase import Atoms
 from ase.io import read, write
 from numpy import isfinite, ndarray
 
@@ -179,6 +180,34 @@ class SinglePoint:
 
         return self.struct.get_stress()
 
+    @staticmethod
+    def _remove_invalid_props(
+        struct: Atoms,
+        properties: Optional[list[str]] = None,
+    ) -> None:
+        """
+        Remove any invalid properties from from calculator results.
+
+        Parameters
+        ----------
+        struct : Atoms
+            Structure with attached results from calculator.
+        properties : Optional[list[str]]
+            Physical properties requested to be calculated. Default is [].
+        """
+        properties = properties if properties else []
+
+        rm_keys = []
+        for prop in struct.calc.results:
+            if not isfinite(struct.calc.results[prop]).all():
+                rm_keys.append(prop)
+        for prop in rm_keys:
+            if prop in properties:
+                raise ValueError(
+                    f"'{prop}' contains non-finite values for this structure."
+                )
+            struct.calc.results.pop(prop)
+
     def _clean_results(self, properties: Optional[list[str]] = None) -> None:
         """
         Remove results with NaN or inf values from calc.results dictionary.
@@ -188,32 +217,13 @@ class SinglePoint:
         properties : Optional[list[str]]
             Physical properties requested to be calculated. Default is [].
         """
-        if properties is None:
-            properties = []
+        properties = properties if properties else []
 
         if isinstance(self.struct, list):
             for image in self.struct:
-                rm_keys = []
-                for prop in image.calc.results:
-                    if not isfinite(image.calc.results[prop]).all():
-                        rm_keys.append(prop)
-                for prop in rm_keys:
-                    if prop in properties:
-                        raise ValueError(
-                            f"'{prop}' contains non-finite values for this structure."
-                        )
-                    image.calc.results.pop(prop)
+                self._remove_invalid_props(image, properties)
         else:
-            rm_keys = []
-            for prop in self.struct.calc.results:
-                if not isfinite(self.struct.calc.results[prop]).all():
-                    rm_keys.append(prop)
-            for prop in rm_keys:
-                if prop in properties:
-                    raise ValueError(
-                        f"'{prop}' contains non-finite values for this structure."
-                    )
-                self.struct.calc.results.pop(prop)
+            self._remove_invalid_props(self.struct, properties)
 
     def run_single_point(
         self,
