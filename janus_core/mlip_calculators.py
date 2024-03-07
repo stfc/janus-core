@@ -6,17 +6,14 @@ Similar in spirit to matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
-from typing import Literal
-
 from ase.calculators.calculator import Calculator
 
-architectures = ["mace", "mace_mp", "mace_off", "m3gnet", "chgnet"]
-devices = ["cpu", "cuda", "mps"]
+from .janus_types import Architectures, Devices
 
 
 def choose_calculator(
-    architecture: Literal[architectures] = "mace",
-    device: Literal[devices] = "cpu",
+    architecture: Architectures = "mace",
+    device: Devices = "cpu",
     **kwargs,
 ) -> Calculator:
     """
@@ -24,9 +21,9 @@ def choose_calculator(
 
     Parameters
     ----------
-    architecture : Literal[architectures], optional
+    architecture : Architectures, optional
         MLIP architecture. Default is "mace".
-    device : Literal[devices]
+    device : Devices
         Device to run calculator on. Default is "cpu".
     **kwargs
         Additional keyword arguments passed to the selected calculator.
@@ -85,7 +82,8 @@ def choose_calculator(
 
     else:
         raise ValueError(
-            f"Unrecognized {architecture=}. Suported architectures are {architectures}"
+            f"Unrecognized {architecture=}. Suported architectures "
+            f"are {', '.join(Architectures.__args__)}"
         )
 
     calculator.parameters["version"] = __version__
