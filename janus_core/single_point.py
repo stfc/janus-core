@@ -33,7 +33,7 @@ class SinglePoint:
         Device to run model on. Default is "cpu".
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. Default is {}.
-    calc_kwargs : ASEReadArgs
+    calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
 
     Attributes
