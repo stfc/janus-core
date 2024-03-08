@@ -155,3 +155,25 @@ def test_singlepoint_default_write():
     assert "forces" in atoms.arrays
 
     results_path.unlink()
+
+
+def test_singlepoint_log(tmp_path, caplog):
+    """Test log correctly written for singlepoint."""
+    results_path = tmp_path / "NaCl-results.xyz"
+    with caplog.at_level("INFO", logger="janus_core.single_point"):
+        result = runner.invoke(
+            app,
+            [
+                "singlepoint",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--property",
+                "energy",
+                "--write-kwargs",
+                f"{{'filename': '{str(results_path)}'}}",
+                "--log",
+                f"{tmp_path}/test.log",
+            ],
+        )
+        assert "Starting single point calculation" in caplog.text
+        assert result.exit_code == 0
