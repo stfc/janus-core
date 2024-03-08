@@ -1,16 +1,18 @@
 """Prepare and perform single point calculations."""
 
-import pathlib
+from pathlib import Path
 from typing import Any, Optional
 
-from ase.io import read
-from numpy import ndarray
+from ase import Atoms
+from ase.io import read, write
+from numpy import isfinite, ndarray
 
 from janus_core.mlip_calculators import choose_calculator
 
 from .janus_types import (
     Architectures,
     ASEReadArgs,
+    ASEWriteArgs,
     CalcResults,
     Devices,
     MaybeList,
@@ -107,7 +109,7 @@ class SinglePoint:
             Keyword arguments passed to ase.io.read.
         """
         self.struct = read(self.structure, **kwargs)
-        self.structname = pathlib.Path(self.structure).stem
+        self.structname = Path(self.structure).stem
 
     def set_calculator(
         self, read_kwargs: Optional[ASEReadArgs] = None, **kwargs
@@ -179,7 +181,59 @@ class SinglePoint:
 
         return self.struct.get_stress()
 
-    def run_single_point(self, properties: MaybeSequence[str] = ()) -> CalcResults:
+    @staticmethod
+    def _remove_invalid_props(
+        struct: Atoms,
+        properties: Optional[list[str]] = None,
+    ) -> None:
+        """
+        Remove any invalid properties from calculator results.
+
+        Parameters
+        ----------
+        struct : Atoms
+            Structure with attached results from calculator.
+        properties : Optional[list[str]]
+            Physical properties requested to be calculated. Default is [].
+        """
+        properties = properties if properties else []
+        rm_keys = []
+
+        # Find any properties with non-finite values
+        for prop in struct.calc.results:
+            if not isfinite(struct.calc.results[prop]).all():
+                rm_keys.append(prop)
+        # Raise error if property was explicitly requested, otherwise remove
+        for prop in rm_keys:
+            if prop in properties:
+                raise ValueError(
+                    f"'{prop}' contains non-finite values for this structure."
+                )
+            struct.calc.results.pop(prop)
+
+    def _clean_results(self, properties: Optional[list[str]] = None) -> None:
+        """
+        Remove results with NaN or inf values from calc.results dictionary.
+
+        Parameters
+        ----------
+        properties : Optional[list[str]]
+            Physical properties requested to be calculated. Default is [].
+        """
+        properties = properties if properties else []
+
+        if isinstance(self.struct, list):
+            for image in self.struct:
+                self._remove_invalid_props(image, properties)
+        else:
+            self._remove_invalid_props(self.struct, properties)
+
+    def run_single_point(
+        self,
+        properties: MaybeSequence[str] = (),
+        write_results: bool = False,
+        write_kwargs: Optional[ASEWriteArgs] = None,
+    ) -> CalcResults:
         """
         Run single point calculations.
 
@@ -188,6 +242,11 @@ class SinglePoint:
         properties : MaybeSequence[str]
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
+        write_results : bool
+            True to write out structure with results of calculations. Default is False.
+        write_kwargs : Optional[ASEWriteArgs],
+            Keyword arguments to pass to ase.io.write if saving structure with
+            results of calculations. Default is {}.
 
         Returns
         -------
@@ -198,11 +257,29 @@ class SinglePoint:
         if isinstance(properties, str):
             properties = [properties]
 
+        for prop in properties:
+            if prop not in ["energy", "forces", "stress"]:
+                raise NotImplementedError(
+                    f"Property '{prop}' cannot currently be calculated."
+                )
+
+        write_kwargs = write_kwargs if write_kwargs else {}
+        if write_kwargs and "filename" not in write_kwargs:
+            raise ValueError("'filename' must be included in write_kwargs")
+
         if "energy" in properties or len(properties) == 0:
             results["energy"] = self._get_potential_energy()
         if "forces" in properties or len(properties) == 0:
             results["forces"] = self._get_forces()
         if "stress" in properties or len(properties) == 0:
             results["stress"] = self._get_stress()
+
+        self._clean_results(properties=properties)
+
+        if write_results:
+            if "filename" not in write_kwargs:
+                filename = f"{self.structname}-results.xyz"
+                write_kwargs["filename"] = Path(".").absolute() / filename
+            write(images=self.struct, **write_kwargs)
 
         return results
