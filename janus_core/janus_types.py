@@ -58,16 +58,13 @@ class ASEOptRunArgs(TypedDict, total=False):
     steps: int
 
 
-class Log(Enum):
+class LogLevel(Enum):
     """Supported options for logger levels."""
 
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
     ERROR = logging.ERROR
-
-
-LogType = Literal[Log.DEBUG, Log.INFO, Log.ERROR, Log.WARNING]
 
 
 # Janus specific

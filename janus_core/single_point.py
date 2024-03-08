@@ -16,6 +16,7 @@ from janus_core.janus_types import (
     Devices,
     MaybeList,
     MaybeSequence,
+    PathLike,
 )
 from janus_core.log import config_logger
 from janus_core.mlip_calculators import choose_calculator
@@ -45,7 +46,7 @@ class SinglePoint:
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    log_file : Optional[str]
+    log_file : Optional[PathLike]
         Name of log file if writing logs. Default is None.
 
     Attributes
@@ -82,7 +83,7 @@ class SinglePoint:
         device: Devices = "cpu",
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
-        log_file: Optional[str] = None,
+        log_file: Optional[PathLike] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -107,7 +108,7 @@ class SinglePoint:
             Keyword arguments to pass to ase.io.read. Default is {}.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
-        log_file : Optional[str]
+        log_file : Optional[PathLike]
             Name of log file if writing logs. Default is None.
         """
         if struct and struct_path:
@@ -122,10 +123,7 @@ class SinglePoint:
                 "or a path to the structure file (`struct_path`)"
             )
 
-        if log_file is not None:
-            self.logger = config_logger(name=__name__, filename=log_file)
-        else:
-            self.logger = None
+        self.logger = config_logger(name=__name__, filename=log_file)
 
         read_kwargs = read_kwargs if read_kwargs else {}
         calc_kwargs = calc_kwargs if calc_kwargs else {}
@@ -319,7 +317,7 @@ class SinglePoint:
         if write_kwargs and "filename" not in write_kwargs:
             raise ValueError("'filename' must be included in write_kwargs")
 
-        if self.logger is not None:
+        if self.logger:
             self.logger.info("Starting single point calculation")
 
         if "energy" in properties or len(properties) == 0:
@@ -331,7 +329,7 @@ class SinglePoint:
 
         self._clean_results(properties=properties)
 
-        if self.logger is not None:
+        if self.logger:
             self.logger.info("Single point calculation complete")
 
         if write_results:

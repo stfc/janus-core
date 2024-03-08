@@ -108,7 +108,7 @@ def singlepoint(
         ),
     ] = None,
     log_file: Annotated[
-        str, typer.Option("--log", help="File to save logs")
+        Path, typer.Option("--log", help="Path to save logs to")
     ] = "singlepoint.log",
 ):
     """
@@ -131,8 +131,8 @@ def singlepoint(
         Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
-    log_file : Optional[str]
-        Name of log file to write logs to. Default is "singlepoint.log".
+    log_file : Optional[Path]
+        Path to write logs to. Default is "singlepoint.log".
     """
     read_kwargs = read_kwargs.value if read_kwargs else {}
     calc_kwargs = calc_kwargs.value if calc_kwargs else {}

@@ -1,8 +1,9 @@
-"""Configure logger."""
+"""Configure logger with yaml-styled format."""
 
 import logging
+from typing import Optional
 
-from janus_core.janus_types import LogType
+from janus_core.janus_types import LogLevel
 
 FORMAT = """
 - timestamp: %(asctime)s
@@ -15,37 +16,40 @@ FORMAT = """
 
 def config_logger(
     name: str,
-    level: LogType = logging.INFO,
-    filename: str = "janus.log",
+    filename: Optional[str] = None,
+    level: LogLevel = logging.INFO,
     capture_warnings: bool = True,
 ):
     """
-    Configure logger.
+    Configure logger with yaml-styled format.
 
     Parameters
     ----------
     name : str
-        Name of logger.
-    level : LogType
+        Name of logger. Default is None.
+    filename : Optional[str]
+        Name of log file if writing logs. Default is None.
+    level : LogLevel
         Threshold for logger. Default is logging.INFO.
-    filename : str
-        Name of log file to write logs to. Default is "janus.log".
     capture_warnings : bool
         Whether to capture warnings in log. Default is True.
 
     Returns
     -------
-    logging.Logger
-        Configured logger.
+    Optional[logging.Logger]
+        Configured logger if `filename` has been specified.
     """
-    logger = logging.getLogger(name)
-    logging.basicConfig(
-        level=level,
-        filename=filename,
-        filemode="w",
-        format=FORMAT,
-        encoding="utf-8",
-    )
-    logging.captureWarnings(capture=capture_warnings)
+    if filename:
+        logger = logging.getLogger(name)
 
+        logging.basicConfig(
+            level=level,
+            filename=filename,
+            filemode="w",
+            format=FORMAT,
+            encoding="utf-8",
+        )
+        logging.captureWarnings(capture=capture_warnings)
+    else:
+        logger = None
     return logger
