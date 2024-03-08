@@ -36,7 +36,7 @@ def test_singlepoint(tmp_path):
         app,
         [
             "singlepoint",
-            "--structure",
+            "--struct",
             DATA_PATH / "NaCl.cif",
             "--write-kwargs",
             f"{{'filename': '{str(results_path)}'}}",
@@ -58,7 +58,7 @@ def test_singlepoint_properties(tmp_path):
         app,
         [
             "singlepoint",
-            "--structure",
+            "--struct",
             DATA_PATH / "H2O.cif",
             "--property",
             "energy",
@@ -76,7 +76,7 @@ def test_singlepoint_properties(tmp_path):
         app,
         [
             "singlepoint",
-            "--structure",
+            "--struct",
             DATA_PATH / "H2O.cif",
             "--property",
             "stress",
@@ -97,7 +97,7 @@ def test_singlepoint_read_kwargs(tmp_path):
         app,
         [
             "singlepoint",
-            "--structure",
+            "--struct",
             DATA_PATH / "benzene-traj.xyz",
             "--read-kwargs",
             "{'index': ':'}",
@@ -121,7 +121,7 @@ def test_singlepoint_calc_kwargs(tmp_path):
         app,
         [
             "singlepoint",
-            "--structure",
+            "--struct",
             DATA_PATH / "NaCl.cif",
             "--calc-kwargs",
             "{'default_dtype': 'float32'}",
@@ -144,7 +144,7 @@ def test_singlepoint_default_write():
         app,
         [
             "singlepoint",
-            "--structure",
+            "--struct",
             DATA_PATH / "NaCl.cif",
             "--property",
             "energy",

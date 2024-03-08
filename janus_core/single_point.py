@@ -27,8 +27,15 @@ class SinglePoint:
 
     Parameters
     ----------
-    structure : str
-        Structure to simulate.
+    struct : Optional[MaybeSequence[Atoms]]
+        Structure or list of structures to simulate. Required if `struct_path` is None.
+        Default is None.
+    struct_path : Optional[str]
+        Path of structure to simulate. Required if `struct` is None.
+        Default is None.
+    struct_name : Optional[str]
+        Name of structure. Default is "struct" if `struct` is specified, else
+        inferred from `struct_path`.
     architecture : Literal[architectures]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -43,14 +50,14 @@ class SinglePoint:
     ----------
     architecture : Architectures
         MLIP architecture to use for single point calculations.
-    structure : str
-        Path of structure to simulate.
+    struct : MaybeSequence[Atoms]
+        ASE Atoms or list of Atoms structures to simulate.
     device : Devices
         Device to run MLIP model on.
-    struct : MaybeList[Atoms]
-        ASE Atoms or list of Atoms structures to simulate.
-    structname : str
-        Name of structure from its filename.
+    struct_path : Optional[str]
+        Path of structure to simulate.
+    struct_name : Optional[str]
+        Name of structure.
 
     Methods
     -------
@@ -64,7 +71,9 @@ class SinglePoint:
 
     def __init__(
         self,
-        structure: str,
+        struct: Optional[MaybeSequence[Atoms]] = None,
+        struct_path: Optional[str] = None,
+        struct_name: Optional[str] = None,
         architecture: Architectures = "mace_mp",
         device: Devices = "cpu",
         read_kwargs: Optional[ASEReadArgs] = None,
@@ -75,8 +84,15 @@ class SinglePoint:
 
         Parameters
         ----------
-        structure : str
-            Path of structure to simulate.
+        struct : Optional[MaybeSequence[Atoms]]
+            Structure or list of structures to simulate.
+            Required if `struct_path` is None. Default is None.
+        struct_path : Optional[str]
+            Path of structure to simulate. Required if `struct` is None.
+            Default is None.
+        struct_name : Optional[str]
+            Name of structure. Default is "struct" if `struct` is specified, else
+            inferred from `struct_path`.
         architecture : Architectures
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
@@ -87,14 +103,29 @@ class SinglePoint:
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
         """
-        self.architecture = architecture
-        self.device = device
-        self.structure = structure
+        if struct and struct_path:
+            raise ValueError("Only one of `struct` and `struct_path` may be specified")
 
-        # Read structure and get calculator
+        if not struct and not struct_path:
+            raise ValueError("Please specify either `struct` or `struct_path`")
+
         read_kwargs = read_kwargs if read_kwargs else {}
         calc_kwargs = calc_kwargs if calc_kwargs else {}
-        self.read_structure(**read_kwargs)
+
+        self.architecture = architecture
+        self.device = device
+        self.struct_path = struct_path
+        self.struct_name = struct_name
+
+        # Read structure if given as path
+        if self.struct_path:
+            self.read_structure(**read_kwargs)
+        else:
+            self.struct = struct
+            if not self.struct_name:
+                self.struct_name = "struct"
+
+        # Configure calculator
         self.set_calculator(**calc_kwargs)
 
     def read_structure(self, **kwargs) -> None:
@@ -109,8 +140,12 @@ class SinglePoint:
         **kwargs
             Keyword arguments passed to ase.io.read.
         """
-        self.struct = read(self.structure, **kwargs)
-        self.structname = Path(self.structure).stem
+        if self.struct_path:
+            self.struct = read(self.struct_path, **kwargs)
+            if not self.struct_name:
+                self.struct_name = Path(self.struct_path).stem
+        else:
+            raise ValueError("`struct_path` must be defined")
 
     def set_calculator(
         self, read_kwargs: Optional[ASEReadArgs] = None, **kwargs
@@ -277,7 +312,7 @@ class SinglePoint:
 
         if write_results:
             if "filename" not in write_kwargs:
-                filename = f"{self.structname}-results.xyz"
+                filename = f"{self.struct_name}-results.xyz"
                 write_kwargs["filename"] = Path(".").absolute() / filename
             write(images=self.struct, **write_kwargs)
 
