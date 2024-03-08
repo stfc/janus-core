@@ -1,5 +1,6 @@
 """Prepare and perform single point calculations."""
 
+from collections.abc import Collection
 from pathlib import Path
 from typing import Any, Optional
 
@@ -184,7 +185,7 @@ class SinglePoint:
     @staticmethod
     def _remove_invalid_props(
         struct: Atoms,
-        properties: Optional[list[str]] = None,
+        properties: Collection[str] = (),
     ) -> None:
         """
         Remove any invalid properties from calculator results.
@@ -193,35 +194,33 @@ class SinglePoint:
         ----------
         struct : Atoms
             Structure with attached results from calculator.
-        properties : Optional[list[str]]
-            Physical properties requested to be calculated. Default is [].
+        properties : Collection[str]
+            Physical properties requested to be calculated. Default is ().
         """
-        properties = properties if properties else []
-        rm_keys = []
-
         # Find any properties with non-finite values
-        for prop in struct.calc.results:
-            if not isfinite(struct.calc.results[prop]).all():
-                rm_keys.append(prop)
+        rm_keys = [
+            prop
+            for prop in struct.calc.results
+            if not isfinite(struct.calc.results[prop]).all()
+        ]
+
         # Raise error if property was explicitly requested, otherwise remove
         for prop in rm_keys:
             if prop in properties:
                 raise ValueError(
                     f"'{prop}' contains non-finite values for this structure."
                 )
-            struct.calc.results.pop(prop)
+            del struct.calc.results[prop]
 
-    def _clean_results(self, properties: Optional[list[str]] = None) -> None:
+    def _clean_results(self, properties: Collection[str] = ()) -> None:
         """
         Remove results with NaN or inf values from calc.results dictionary.
 
         Parameters
         ----------
-        properties : Optional[list[str]]
-            Physical properties requested to be calculated. Default is [].
+        properties : Collection[str]
+            Physical properties requested to be calculated. Default is ().
         """
-        properties = properties if properties else []
-
         if isinstance(self.struct, list):
             for image in self.struct:
                 self._remove_invalid_props(image, properties)
