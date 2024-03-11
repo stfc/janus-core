@@ -34,8 +34,8 @@ class SinglePoint:
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
     struct_name : Optional[str]
-        Name of structure. Default is "struct" if `struct` is specified, else
-        inferred from `struct_path`.
+        Name of structure. Default is inferred from chemical formula if `struct`
+        is specified, else inferred from `struct_path`.
     architecture : Literal[architectures]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -91,8 +91,8 @@ class SinglePoint:
             Path of structure to simulate. Required if `struct` is None.
             Default is None.
         struct_name : Optional[str]
-            Name of structure. Default is "struct" if `struct` is specified, else
-            inferred from `struct_path`.
+            Name of structure. Default is inferred from chemical formula if `struct`
+            is specified, else inferred from `struct_path`.
         architecture : Architectures
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
@@ -123,7 +123,7 @@ class SinglePoint:
         else:
             self.struct = struct
             if not self.struct_name:
-                self.struct_name = "struct"
+                self.struct_name = self.struct.get_chemical_formula()
 
         # Configure calculator
         self.set_calculator(**calc_kwargs)

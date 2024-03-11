@@ -175,7 +175,7 @@ def test_default_atoms_name():
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
-    assert single_point.struct_name == "struct"
+    assert single_point.struct_name == "Cl4Na4"
 
 
 def test_default_path_name():
