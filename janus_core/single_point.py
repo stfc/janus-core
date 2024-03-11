@@ -28,7 +28,7 @@ class SinglePoint:
     Parameters
     ----------
     struct : Optional[MaybeSequence[Atoms]]
-        Structure or list of structures to simulate. Required if `struct_path` is None.
+        ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
         Default is None.
     struct_path : Optional[str]
         Path of structure to simulate. Required if `struct` is None.
@@ -51,7 +51,7 @@ class SinglePoint:
     architecture : Architectures
         MLIP architecture to use for single point calculations.
     struct : MaybeSequence[Atoms]
-        ASE Atoms or list of Atoms structures to simulate.
+        ASE Atoms structure(s) to simulate.
     device : Devices
         Device to run MLIP model on.
     struct_path : Optional[str]
@@ -85,8 +85,8 @@ class SinglePoint:
         Parameters
         ----------
         struct : Optional[MaybeSequence[Atoms]]
-            Structure or list of structures to simulate.
-            Required if `struct_path` is None. Default is None.
+            ASE Atoms structure(s) to simulate. Required if `struct_path`
+            is None. Default is None.
         struct_path : Optional[str]
             Path of structure to simulate. Required if `struct` is None.
             Default is None.
@@ -104,10 +104,16 @@ class SinglePoint:
             Keyword arguments to pass to the selected calculator. Default is {}.
         """
         if struct and struct_path:
-            raise ValueError("Only one of `struct` and `struct_path` may be specified")
+            raise ValueError(
+                "You cannot specify both the ASE Atoms structure (`struct`) "
+                "and a path to the structure file (`struct_path`)"
+            )
 
         if not struct and not struct_path:
-            raise ValueError("Please specify either `struct` or `struct_path`")
+            raise ValueError(
+                "Please specify either the ASE Atoms structure (`struct`) "
+                "or a path to the structure file (`struct_path`)"
+            )
 
         read_kwargs = read_kwargs if read_kwargs else {}
         calc_kwargs = calc_kwargs if calc_kwargs else {}
@@ -228,7 +234,7 @@ class SinglePoint:
         Parameters
         ----------
         struct : Atoms
-            Structure with attached results from calculator.
+            ASE Atoms structure with attached calculator results.
         properties : Collection[str]
             Physical properties requested to be calculated. Default is ().
         """
