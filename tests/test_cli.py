@@ -138,7 +138,7 @@ def test_singlepoint_calc_kwargs(tmp_path):
 def test_singlepoint_default_write():
     """Test default write path."""
     results_path = Path(".").absolute() / "NaCl-results.xyz"
-    assert not Path(results_path).exists()
+    assert not results_path.exists()
 
     result = runner.invoke(
         app,
