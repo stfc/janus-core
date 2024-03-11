@@ -36,11 +36,11 @@ test_data = [
 ]
 
 
-@pytest.mark.parametrize("architecture, structure, expected, kwargs", test_data)
-def test_optimize(architecture, structure, expected, kwargs):
+@pytest.mark.parametrize("architecture, struct_path, expected, kwargs", test_data)
+def test_optimize(architecture, struct_path, expected, kwargs):
     """Test optimizing geometry using MACE."""
     single_point = SinglePoint(
-        structure=DATA_PATH / structure,
+        struct_path=DATA_PATH / struct_path,
         architecture=architecture,
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -58,7 +58,7 @@ def test_saving_struct(tmp_path):
     struct_path = tmp_path / "NaCl.xyz"
 
     single_point = SinglePoint(
-        structure=DATA_PATH / "NaCl.cif",
+        struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -77,7 +77,7 @@ def test_saving_struct(tmp_path):
 def test_saving_traj(tmp_path):
     """Test saving optimization trajectory output."""
     single_point = SinglePoint(
-        structure=DATA_PATH / "NaCl.cif",
+        struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -91,7 +91,7 @@ def test_saving_traj(tmp_path):
 def test_traj_reformat(tmp_path):
     """Test saving optimization trajectory in different format."""
     single_point = SinglePoint(
-        structure=DATA_PATH / "NaCl.cif",
+        struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -112,7 +112,7 @@ def test_traj_reformat(tmp_path):
 def test_missing_traj_kwarg(tmp_path):
     """Test saving optimization trajectory in different format."""
     single_point = SinglePoint(
-        structure=DATA_PATH / "NaCl.cif",
+        struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )

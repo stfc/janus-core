@@ -1,6 +1,7 @@
 """Set up commandline interface."""
 
 import ast
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -62,8 +63,8 @@ def parse_dict_class(value: str):
 
 @app.command()
 def singlepoint(
-    structure: Annotated[
-        str, typer.Option(help="Path to structure to perform calculations")
+    struct_path: Annotated[
+        Path, typer.Option("--struct", help="Path of structure to simulate")
     ],
     architecture: Annotated[
         str, typer.Option("--arch", help="MLIP architecture to use for calculations")
@@ -112,8 +113,8 @@ def singlepoint(
 
     Parameters
     ----------
-    structure : str
-        Structure to simulate.
+    struct_path : Path
+        Path of structure to simulate.
     architecture : Optional[str]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -140,7 +141,7 @@ def singlepoint(
         raise ValueError("write_kwargs must be a dictionary")
 
     s_point = SinglePoint(
-        structure=structure,
+        struct_path=struct_path,
         architecture=architecture,
         device=device,
         read_kwargs=read_kwargs,

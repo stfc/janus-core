@@ -27,13 +27,15 @@ test_data = [
 
 
 @pytest.mark.parametrize(
-    "structure, expected, properties, prop_key, calc_kwargs, idx", test_data
+    "struct_path, expected, properties, prop_key, calc_kwargs, idx", test_data
 )
-def test_potential_energy(structure, expected, properties, prop_key, calc_kwargs, idx):
+def test_potential_energy(
+    struct_path, expected, properties, prop_key, calc_kwargs, idx
+):
     """Test single point energy using MACE calculators."""
     calc_kwargs["model_paths"] = MODEL_PATH
     single_point = SinglePoint(
-        structure=structure, architecture="mace", calc_kwargs=calc_kwargs
+        struct_path=struct_path, architecture="mace", calc_kwargs=calc_kwargs
     )
     results = single_point.run_single_point(properties)[prop_key]
 
@@ -52,7 +54,7 @@ def test_potential_energy(structure, expected, properties, prop_key, calc_kwargs
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
-        structure=DATA_PATH / "NaCl.cif",
+        struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -65,7 +67,7 @@ def test_single_point_none():
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
-        structure=DATA_PATH / "benzene-traj.xyz",
+        struct_path=DATA_PATH / "benzene-traj.xyz",
         architecture="mace",
         read_kwargs={"index": ":"},
         calc_kwargs={"model_paths": MODEL_PATH},
@@ -84,7 +86,7 @@ def test_single_point_write():
     assert not Path(results_path).exists()
 
     single_point = SinglePoint(
-        structure=data_path,
+        struct_path=data_path,
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -104,7 +106,7 @@ def test_single_point_write_kwargs(tmp_path):
     results_path = tmp_path / "NaCl.xyz"
 
     single_point = SinglePoint(
-        structure=data_path,
+        struct_path=data_path,
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -123,7 +125,7 @@ def test_single_point_write_nan(tmp_path):
     data_path = DATA_PATH / "H2O.cif"
     results_path = tmp_path / "H2O.xyz"
     single_point = SinglePoint(
-        structure=data_path,
+        struct_path=data_path,
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
@@ -144,9 +146,78 @@ def test_single_point_write_nan(tmp_path):
 def test_invalid_prop():
     """Test invalid property request."""
     single_point = SinglePoint(
-        structure=DATA_PATH / "H2O.cif",
+        struct_path=DATA_PATH / "H2O.cif",
         architecture="mace",
         calc_kwargs={"model_paths": MODEL_PATH},
     )
     with pytest.raises(NotImplementedError):
         single_point.run_single_point("invalid")
+
+
+def test_atoms():
+    """Test passing ASE Atoms structure."""
+    struct = read(DATA_PATH / "NaCl.cif")
+    single_point = SinglePoint(
+        struct=struct,
+        struct_name="NaCl",
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+    assert single_point.struct_name == "NaCl"
+    assert single_point.run_single_point("energy")["energy"] < 0
+
+
+def test_default_atoms_name():
+    """Test default structure name when passing ASE Atoms structure."""
+    struct = read(DATA_PATH / "NaCl.cif")
+    single_point = SinglePoint(
+        struct=struct,
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+    assert single_point.struct_name == "Cl4Na4"
+
+
+def test_default_path_name():
+    """Test default structure name when passing structure path."""
+    struct_path = DATA_PATH / "NaCl.cif"
+    single_point = SinglePoint(
+        struct_path=struct_path,
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+    assert single_point.struct_name == "NaCl"
+
+
+def test_path_specify_name():
+    """Test specifying structure name with structure path."""
+    struct_path = DATA_PATH / "NaCl.cif"
+    single_point = SinglePoint(
+        struct_path=struct_path,
+        struct_name="example_name",
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+    assert single_point.struct_name == "example_name"
+
+
+def test_atoms_and_path():
+    """Test passing ASE Atoms structure and structure path togther."""
+    struct = read(DATA_PATH / "NaCl.cif")
+    struct_path = DATA_PATH / "NaCl.cif"
+    with pytest.raises(ValueError):
+        SinglePoint(
+            struct=struct,
+            struct_path=struct_path,
+            architecture="mace",
+            calc_kwargs={"model_paths": MODEL_PATH},
+        )
+
+
+def test_no_atoms_or_path():
+    """Test passing neither ASE Atoms structure nor structure path."""
+    with pytest.raises(ValueError):
+        SinglePoint(
+            architecture="mace",
+            calc_kwargs={"model_paths": MODEL_PATH},
+        )
