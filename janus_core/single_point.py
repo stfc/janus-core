@@ -8,9 +8,7 @@ from ase import Atoms
 from ase.io import read, write
 from numpy import isfinite, ndarray
 
-from janus_core.mlip_calculators import choose_calculator
-
-from .janus_types import (
+from janus_core.janus_types import (
     Architectures,
     ASEReadArgs,
     ASEWriteArgs,
@@ -18,7 +16,10 @@ from .janus_types import (
     Devices,
     MaybeList,
     MaybeSequence,
+    PathLike,
 )
+from janus_core.log import config_logger
+from janus_core.mlip_calculators import choose_calculator
 
 
 class SinglePoint:
@@ -45,6 +46,8 @@ class SinglePoint:
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    log_file : Optional[PathLike]
+        Name of log file if writing logs. Default is None.
 
     Attributes
     ----------
@@ -58,6 +61,8 @@ class SinglePoint:
         Path of structure to simulate.
     struct_name : Optional[str]
         Name of structure.
+    logger : logging.Logger
+        Logger if log file has been specified.
 
     Methods
     -------
@@ -78,6 +83,7 @@ class SinglePoint:
         device: Devices = "cpu",
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
+        log_file: Optional[PathLike] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -102,6 +108,8 @@ class SinglePoint:
             Keyword arguments to pass to ase.io.read. Default is {}.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
+        log_file : Optional[PathLike]
+            Name of log file if writing logs. Default is None.
         """
         if struct and struct_path:
             raise ValueError(
@@ -114,6 +122,8 @@ class SinglePoint:
                 "Please specify either the ASE Atoms structure (`struct`) "
                 "or a path to the structure file (`struct_path`)"
             )
+
+        self.logger = config_logger(name=__name__, filename=log_file)
 
         read_kwargs = read_kwargs if read_kwargs else {}
         calc_kwargs = calc_kwargs if calc_kwargs else {}
@@ -307,6 +317,9 @@ class SinglePoint:
         if write_kwargs and "filename" not in write_kwargs:
             raise ValueError("'filename' must be included in write_kwargs")
 
+        if self.logger:
+            self.logger.info("Starting single point calculation")
+
         if "energy" in properties or len(properties) == 0:
             results["energy"] = self._get_potential_energy()
         if "forces" in properties or len(properties) == 0:
@@ -315,6 +328,9 @@ class SinglePoint:
             results["stress"] = self._get_stress()
 
         self._clean_results(properties=properties)
+
+        if self.logger:
+            self.logger.info("Single point calculation complete")
 
         if write_results:
             if "filename" not in write_kwargs:

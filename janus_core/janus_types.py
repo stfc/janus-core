@@ -3,6 +3,8 @@ Module containing types used in Janus-Core.
 """
 
 from collections.abc import Sequence
+from enum import Enum
+import logging
 from pathlib import Path, PurePath
 from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
 
@@ -54,6 +56,15 @@ class ASEOptRunArgs(TypedDict, total=False):
 
     fmax: float
     steps: int
+
+
+class LogLevel(Enum):
+    """Supported options for logger levels."""
+
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
 
 
 # Janus specific
