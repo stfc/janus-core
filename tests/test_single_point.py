@@ -64,6 +64,20 @@ def test_single_point_none():
         assert prop in results
 
 
+def test_single_point_clean():
+    """Test single point stress using MACE calculator."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "H2O.cif",
+        architecture="mace",
+        calc_kwargs={"model_paths": MODEL_PATH},
+    )
+
+    results = single_point.run_single_point()
+    for prop in ["energy", "forces"]:
+        assert prop in results
+    assert "stress" not in results
+
+
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(

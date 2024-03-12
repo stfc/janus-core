@@ -236,18 +236,23 @@ class SinglePoint:
     @staticmethod
     def _remove_invalid_props(
         struct: Atoms,
+        results: CalcResults = None,
         properties: Collection[str] = (),
     ) -> None:
         """
-        Remove any invalid properties from calculator results.
+        Remove any invalid properties from calculated results.
 
         Parameters
         ----------
         struct : Atoms
             ASE Atoms structure with attached calculator results.
+        results : CalcResults
+            Dictionary of calculated results. Default is {}.
         properties : Collection[str]
             Physical properties requested to be calculated. Default is ().
         """
+        results = results if results else {}
+
         # Find any properties with non-finite values
         rm_keys = [
             prop
@@ -262,21 +267,29 @@ class SinglePoint:
                     f"'{prop}' contains non-finite values for this structure."
                 )
             del struct.calc.results[prop]
+            if prop in results:
+                del results[prop]
 
-    def _clean_results(self, properties: Collection[str] = ()) -> None:
+    def _clean_results(
+        self, results: CalcResults = None, properties: Collection[str] = ()
+    ) -> None:
         """
-        Remove results with NaN or inf values from calc.results dictionary.
+        Remove NaN and inf values from results and calc.results dictionaries.
 
         Parameters
         ----------
+        results : CalcResults
+            Dictionary of calculated results. Default is {}.
         properties : Collection[str]
             Physical properties requested to be calculated. Default is ().
         """
+        results = results if results else {}
+
         if isinstance(self.struct, list):
             for image in self.struct:
-                self._remove_invalid_props(image, properties)
+                self._remove_invalid_props(image, results, properties)
         else:
-            self._remove_invalid_props(self.struct, properties)
+            self._remove_invalid_props(self.struct, results, properties)
 
     def run_single_point(
         self,
@@ -327,7 +340,8 @@ class SinglePoint:
         if "stress" in properties or len(properties) == 0:
             results["stress"] = self._get_stress()
 
-        self._clean_results(properties=properties)
+        # Remove meaningless values from results e.g. stress for non-periodic systems
+        self._clean_results(results, properties=properties)
 
         if self.logger:
             self.logger.info("Single point calculation complete")
