@@ -6,24 +6,15 @@ import pytest
 
 from janus_core.mlip_calculators import choose_calculator
 
+MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
+
 test_data_mace = [
-    (
-        "mace",
-        "cpu",
-        {"model_paths": Path(__file__).parent / "models" / "mace_mp_small.model"},
-    ),
+    ("mace", "cpu", {"model": MODEL_PATH}),
+    ("mace", "cpu", {"model_paths": MODEL_PATH}),
     ("mace_off", "cpu", {}),
     ("mace_mp", "cpu", {}),
-    (
-        "mace_mp",
-        "cpu",
-        {"model_paths": Path(__file__).parent / "models" / "mace_mp_small.model"},
-    ),
-    (
-        "mace_off",
-        "cpu",
-        {"model_paths": "small"},
-    ),
+    ("mace_mp", "cpu", {"model": MODEL_PATH}),
+    ("mace_off", "cpu", {"model": "small"}),
 ]
 
 test_data_extras = [("m3gnet", "cpu"), ("chgnet", "")]
@@ -51,3 +42,25 @@ def test_invalid_arch():
     """Test error raised for invalid architecture."""
     with pytest.raises(ValueError):
         choose_calculator(architecture="invalid")
+
+
+def test_model_model_paths():
+    """Test error raised if both model and model_paths are specified."""
+    with pytest.raises(ValueError):
+        choose_calculator(
+            architecture="mace",
+            model=MODEL_PATH,
+            model_paths=MODEL_PATH,
+        )
+    with pytest.raises(ValueError):
+        choose_calculator(
+            architecture="mace_mp",
+            model=MODEL_PATH,
+            model_paths=MODEL_PATH,
+        )
+    with pytest.raises(ValueError):
+        choose_calculator(
+            architecture="mace_off",
+            model=MODEL_PATH,
+            model_paths=MODEL_PATH,
+        )
