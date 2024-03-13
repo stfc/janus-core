@@ -43,10 +43,17 @@ def choose_calculator(
     # pylint: disable=import-outside-toplevel, too-many-branches, import-error
     # Optional imports handled via `architecture`. We could catch these,
     # but the error message is clear if imports are missing.
+    if "model" in kwargs and "model_paths" in kwargs:
+        raise ValueError("Please specify either `model` or `model_paths`")
+
     if architecture == "mace":
         from mace import __version__
         from mace.calculators import MACECalculator
 
+        # `model_paths` is keyword for path to model, so take from kwargs if specified
+        # Otherwise, take `model` if specified, then default to `None`, which will
+        # raise a ValueError
+        kwargs.setdefault("model_paths", kwargs.pop("model", None))
         kwargs.setdefault("default_dtype", "float64")
         calculator = MACECalculator(device=device, **kwargs)
 
@@ -54,16 +61,20 @@ def choose_calculator(
         from mace import __version__
         from mace.calculators import mace_mp
 
+        # `model` is keyword for path to model, so take from kwargs if specified
+        # Otherwise, take `model_paths` if specified, then default to "small"
+        kwargs.setdefault("model", kwargs.pop("model_paths", "small"))
         kwargs.setdefault("default_dtype", "float64")
-        kwargs["model"] = kwargs.pop("model_paths", "small")
         calculator = mace_mp(**kwargs)
 
     elif architecture == "mace_off":
         from mace import __version__
         from mace.calculators import mace_off
 
+        # `model` is keyword for path to model, so take from kwargs if specified
+        # Otherwise, take `model_paths` if specified, then default to "small"
+        kwargs.setdefault("model", kwargs.pop("model_paths", "small"))
         kwargs.setdefault("default_dtype", "float64")
-        kwargs["model"] = kwargs.pop("model_paths", "small")
         calculator = mace_off(**kwargs)
 
     elif architecture == "m3gnet":

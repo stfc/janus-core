@@ -33,7 +33,7 @@ def test_potential_energy(
     struct_path, expected, properties, prop_key, calc_kwargs, idx
 ):
     """Test single point energy using MACE calculators."""
-    calc_kwargs["model_paths"] = MODEL_PATH
+    calc_kwargs["model"] = MODEL_PATH
     single_point = SinglePoint(
         struct_path=struct_path, architecture="mace", calc_kwargs=calc_kwargs
     )
@@ -56,7 +56,7 @@ def test_single_point_none():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     results = single_point.run_single_point()
@@ -69,7 +69,7 @@ def test_single_point_clean():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     results = single_point.run_single_point()
@@ -84,7 +84,7 @@ def test_single_point_traj():
         struct_path=DATA_PATH / "benzene-traj.xyz",
         architecture="mace",
         read_kwargs={"index": ":"},
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     assert len(single_point.struct) == 2
@@ -102,7 +102,7 @@ def test_single_point_write():
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     assert "forces" not in single_point.struct.arrays
 
@@ -122,7 +122,7 @@ def test_single_point_write_kwargs(tmp_path):
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     assert "forces" not in single_point.struct.arrays
 
@@ -141,7 +141,7 @@ def test_single_point_write_nan(tmp_path):
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     assert isfinite(single_point.run_single_point("energy")["energy"]).all()
@@ -162,7 +162,7 @@ def test_invalid_prop():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     with pytest.raises(NotImplementedError):
         single_point.run_single_point("invalid")
@@ -175,7 +175,7 @@ def test_atoms():
         struct=struct,
         struct_name="NaCl",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     assert single_point.struct_name == "NaCl"
     assert single_point.run_single_point("energy")["energy"] < 0
@@ -187,7 +187,7 @@ def test_default_atoms_name():
     single_point = SinglePoint(
         struct=struct,
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     assert single_point.struct_name == "Cl4Na4"
 
@@ -198,7 +198,7 @@ def test_default_path_name():
     single_point = SinglePoint(
         struct_path=struct_path,
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     assert single_point.struct_name == "NaCl"
 
@@ -210,7 +210,7 @@ def test_path_specify_name():
         struct_path=struct_path,
         struct_name="example_name",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     assert single_point.struct_name == "example_name"
 
@@ -224,7 +224,7 @@ def test_atoms_and_path():
             struct=struct,
             struct_path=struct_path,
             architecture="mace",
-            calc_kwargs={"model_paths": MODEL_PATH},
+            calc_kwargs={"model": MODEL_PATH},
         )
 
 
@@ -233,5 +233,5 @@ def test_no_atoms_or_path():
     with pytest.raises(ValueError):
         SinglePoint(
             architecture="mace",
-            calc_kwargs={"model_paths": MODEL_PATH},
+            calc_kwargs={"model": MODEL_PATH},
         )

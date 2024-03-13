@@ -42,7 +42,7 @@ def test_optimize(architecture, struct_path, expected, kwargs):
     single_point = SinglePoint(
         struct_path=DATA_PATH / struct_path,
         architecture=architecture,
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     init_energy = single_point.run_single_point("energy")["energy"]
@@ -60,7 +60,7 @@ def test_saving_struct(tmp_path):
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     init_energy = single_point.run_single_point("energy")["energy"]
@@ -79,7 +79,7 @@ def test_saving_traj(tmp_path):
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     optimize(
         single_point.struct, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")}
@@ -93,7 +93,7 @@ def test_traj_reformat(tmp_path):
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
 
     traj_path_binary = tmp_path / "NaCl.traj"
@@ -114,7 +114,7 @@ def test_missing_traj_kwarg(tmp_path):
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
-        calc_kwargs={"model_paths": MODEL_PATH},
+        calc_kwargs={"model": MODEL_PATH},
     )
     traj_path = tmp_path / "NaCl-traj.xyz"
     with pytest.raises(ValueError):
