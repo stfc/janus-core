@@ -178,6 +178,9 @@ def geomopt(
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
+    traj_file: Annotated[
+        str, typer.Option("--traj", help="Path to save trajectory to")
+    ] = None,
     log_file: LogFile = "geomopt.log",
 ):
     """
@@ -201,6 +204,8 @@ def geomopt(
         Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
+    traj_file : Optional[str]
+        Path to save optimization trajectory to. Default is None.
     log_file : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
     """
@@ -224,4 +229,13 @@ def geomopt(
         log_file=log_file,
     )
 
-    optimize(s_point.struct, fmax=fmax)
+    opt_kwargs = {"trajectory": traj_file} if traj_file else None
+    traj_kwargs = {"filename": traj_file} if traj_file else None
+
+    optimize(
+        s_point.struct,
+        fmax=fmax,
+        opt_kwargs=opt_kwargs,
+        traj_kwargs=traj_kwargs,
+        log_kwargs={"filename": log_file, "filemode": "a"},
+    )

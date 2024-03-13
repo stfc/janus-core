@@ -1,7 +1,8 @@
-"""Test singlepoint commandline interface."""
+"""Test geomopt commandline interface."""
 
 from pathlib import Path
 
+from ase.io import read
 from typer.testing import CliRunner
 
 from janus_core.cli import app
@@ -36,3 +37,38 @@ def test_geomopt(tmp_path):
         ],
     )
     assert result.exit_code == 0
+
+
+def test_geomopt_log(tmp_path, caplog):
+    """Test log correctly written for geomopt."""
+    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
+        result = runner.invoke(
+            app,
+            [
+                "geomopt",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--log",
+                f"{tmp_path}/test.log",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Starting geometry optimization" in caplog.text
+
+
+def test_geomopt_traj(tmp_path):
+    """Test log correctly written for geomopt."""
+    traj_path = f"{tmp_path}/test.xyz"
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--traj",
+            traj_path,
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(traj_path)
+    assert "forces" in atoms.arrays

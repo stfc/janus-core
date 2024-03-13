@@ -144,6 +144,9 @@ class SinglePoint:
         # Configure calculator
         self.set_calculator(**calc_kwargs)
 
+        if self.logger:
+            self.logger.info("Single point calculator configured")
+
     def read_structure(self, **kwargs) -> None:
         """
         Read structure and structure name.

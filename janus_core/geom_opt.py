@@ -11,7 +11,8 @@ try:
 except ImportError:
     from ase.constraints import ExpCellFilter as DefaultFilter
 
-from .janus_types import ASEOptArgs, ASEOptRunArgs, ASEWriteArgs
+from janus_core.janus_types import ASEOptArgs, ASEOptRunArgs, ASEWriteArgs
+from janus_core.log import config_logger
 
 
 def optimize(
@@ -24,6 +25,7 @@ def optimize(
     opt_kwargs: Optional[ASEOptArgs] = None,
     struct_kwargs: Optional[ASEWriteArgs] = None,
     traj_kwargs: Optional[ASEWriteArgs] = None,
+    log_kwargs: Optional[dict[str, any]] = None,
 ) -> Atoms:
     """
     Optimize geometry of input structure.
@@ -52,6 +54,8 @@ def optimize(
     traj_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
+    log_kwargs : Optional[dict[str, any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
 
     Returns
     -------
@@ -63,23 +67,33 @@ def optimize(
     opt_kwargs = opt_kwargs if opt_kwargs else {}
     struct_kwargs = struct_kwargs if struct_kwargs else {}
     traj_kwargs = traj_kwargs if traj_kwargs else {}
+    log_kwargs = log_kwargs if log_kwargs else {}
 
     if struct_kwargs and "filename" not in struct_kwargs:
-        raise ValueError("'filename' must be included in struct_kwargs")
+        raise ValueError("'filename' must be included in `struct_kwargs`")
 
     if traj_kwargs and "filename" not in traj_kwargs:
-        raise ValueError("'filename' must be included in traj_kwargs")
+        raise ValueError("'filename' must be included in `traj_kwargs`")
 
     if traj_kwargs and "trajectory" not in opt_kwargs:
         raise ValueError(
-            "'trajectory' must be a key in opt_kwargs to save the trajectory."
+            "'trajectory' must be a key in `opt_kwargs` to save the trajectory."
         )
+
+    if log_kwargs and "filename" not in log_kwargs:
+        raise ValueError("'filename' must be included in `log_kwargs`")
+
+    log_kwargs.setdefault("name", __name__)
+    logger = config_logger(**log_kwargs)
 
     if filter_func is not None:
         filtered_atoms = filter_func(atoms, **filter_kwargs)
         dyn = optimizer(filtered_atoms, **opt_kwargs)
     else:
         dyn = optimizer(atoms, **opt_kwargs)
+
+    if logger:
+        logger.info("Starting geometry optimization")
 
     dyn.run(fmax=fmax, **dyn_kwargs)
 
@@ -91,5 +105,8 @@ def optimize(
     if traj_kwargs:
         traj = read(opt_kwargs["trajectory"], index=":")
         write(images=traj, **traj_kwargs)
+
+    if logger:
+        logger.info("Geometry optimization complete")
 
     return atoms
