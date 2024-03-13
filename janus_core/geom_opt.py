@@ -34,6 +34,7 @@ def optimize(
         Atoms object to optimize geometry for.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
+        Default is 0.1.
     dyn_kwargs : Optional[ASEOptRunArgs]
         Keyword arguments to pass to dyn.run. Default is {}.
     filter_func : Optional[callable]

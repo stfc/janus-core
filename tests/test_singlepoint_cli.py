@@ -1,4 +1,4 @@
-"""Test commandline interface."""
+"""Test singlepoint commandline interface."""
 
 from pathlib import Path
 
