@@ -27,7 +27,7 @@ Tools for machine learnt interatomic potentials
 - [ ] fine tunning MLIPs (MACE only planned)
 - [ ] Rare events simulations, via PLUMED
 
-the code relies heavily on ASE, unless somethign else is mentioned.
+The code relies heavily on ASE, unless something else is mentioned.
 
 
 ## Development
