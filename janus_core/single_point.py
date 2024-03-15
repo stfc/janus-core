@@ -16,7 +16,6 @@ from janus_core.janus_types import (
     Devices,
     MaybeList,
     MaybeSequence,
-    PathLike,
 )
 from janus_core.log import config_logger
 from janus_core.mlip_calculators import choose_calculator
@@ -46,8 +45,8 @@ class SinglePoint:
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    log_file : Optional[PathLike]
-        Name of log file if writing logs. Default is None.
+    log_kwargs : Optional[dict[str, any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
 
     Attributes
     ----------
@@ -83,7 +82,7 @@ class SinglePoint:
         device: Devices = "cpu",
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
-        log_file: Optional[PathLike] = None,
+        log_kwargs: Optional[dict[str, any]] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -108,8 +107,8 @@ class SinglePoint:
             Keyword arguments to pass to ase.io.read. Default is {}.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
-        log_file : Optional[PathLike]
-            Name of log file if writing logs. Default is None.
+        log_kwargs : Optional[dict[str, any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
         """
         if struct and struct_path:
             raise ValueError(
@@ -123,10 +122,15 @@ class SinglePoint:
                 "or a path to the structure file (`struct_path`)"
             )
 
-        self.logger = config_logger(name=__name__, filename=log_file)
-
         read_kwargs = read_kwargs if read_kwargs else {}
         calc_kwargs = calc_kwargs if calc_kwargs else {}
+        log_kwargs = log_kwargs if log_kwargs else {}
+
+        if log_kwargs and "filename" not in log_kwargs:
+            raise ValueError("'filename' must be included in `log_kwargs`")
+
+        log_kwargs.setdefault("name", __name__)
+        self.logger = config_logger(**log_kwargs)
 
         self.architecture = architecture
         self.device = device

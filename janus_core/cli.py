@@ -160,7 +160,7 @@ def singlepoint(
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_file=log_file,
+        log_kwargs={"filename": log_file, "filemode": "a"},
     )
     s_point.run_single_point(
         properties=properties, write_results=True, write_kwargs=write_kwargs
@@ -242,7 +242,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_file=log_file,
+        log_kwargs={"filename": log_file, "filemode": "w"},
     )
 
     opt_kwargs = {"trajectory": traj_file} if traj_file else None
