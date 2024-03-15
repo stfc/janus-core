@@ -20,7 +20,7 @@ Tools for machine learnt interatomic potentials
 - [ ] Molecular Dynamics:
   - NVE
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
-  - NPT (Nosé-Hoover (Melchiona flavour)
+  - NPT (Nosé-Hoover (Melchiona flavour))
 - [ ] Nudge Elastic Bands
 - [ ] phonons (via vibroscopy)
 - [ ] training ML potentials (MACE only planned)
