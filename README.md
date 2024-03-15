@@ -9,6 +9,31 @@
 
 Tools for machine learnt interatomic potentials
 
+## Features in development
+
+- [x] Support for multiple MLIPs
+  - MACE
+  - M3GNET
+  - CHGNET
+- [x] Single point calculations
+- [ ] Geometry optimisation
+- [ ] Molecular Dynamics
+  - NVE
+  - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
+  - NPT (Nosé-Hoover (Melchiona flavour))
+- [ ] Nudge Elastic Band
+- [ ] Phonons
+  - vibroscopy
+- [ ] Training ML potentials
+  - MACE
+- [ ] Fine tunning MLIPs
+  - MACE
+- [ ] Rare events simulations
+  - PLUMED
+
+The code relies heavily on ASE, unless something else is mentioned.
+
+
 ## Development
 
 1. Install [poetry](https://python-poetry.org/docs/#installation)
