@@ -160,7 +160,7 @@ def singlepoint(
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "a"},
+        log_kwargs={"filename": log_file, "filemode": "w"},
     )
     s_point.run_single_point(
         properties=properties, write_results=True, write_kwargs=write_kwargs
