@@ -45,7 +45,7 @@ class SinglePoint:
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    log_kwargs : Optional[dict[str, any]]
+    log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
 
     Attributes
@@ -82,7 +82,7 @@ class SinglePoint:
         device: Devices = "cpu",
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
-        log_kwargs: Optional[dict[str, any]] = None,
+        log_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -107,7 +107,7 @@ class SinglePoint:
             Keyword arguments to pass to ase.io.read. Default is {}.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
-        log_kwargs : Optional[dict[str, any]]
+        log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         """
         if struct and struct_path:

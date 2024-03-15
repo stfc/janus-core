@@ -27,7 +27,7 @@ def optimize(  # pylint: disable=too-many-arguments
     write_results: bool = False,
     write_kwargs: Optional[ASEWriteArgs] = None,
     traj_kwargs: Optional[ASEWriteArgs] = None,
-    log_kwargs: Optional[dict[str, any]] = None,
+    log_kwargs: Optional[dict[str, Any]] = None,
 ) -> Atoms:
     """
     Optimize geometry of input structure.
@@ -58,7 +58,7 @@ def optimize(  # pylint: disable=too-many-arguments
     traj_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
-    log_kwargs : Optional[dict[str, any]]
+    log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
 
     Returns
