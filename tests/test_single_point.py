@@ -97,7 +97,7 @@ def test_single_point_write():
     """Test writing singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
     results_path = Path(".").absolute() / "NaCl-results.xyz"
-    assert not Path(results_path).exists()
+    assert not results_path.exists()
 
     single_point = SinglePoint(
         struct_path=data_path,

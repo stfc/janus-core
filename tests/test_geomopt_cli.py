@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ase import Atoms
 from ase.io import read
 from typer.testing import CliRunner
 
@@ -20,9 +21,53 @@ def test_geomopt_help():
     assert "Usage: root geomopt [OPTIONS]" in result.stdout
 
 
-def test_geomopt(tmp_path):
+def test_geomopt():
     """Test geomopt calculation."""
-    results_path = tmp_path / "NaCl-results.xyz"
+    results_path = Path(".").absolute() / "Cl4Na4-opt.xyz"
+    assert not results_path.exists()
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--max-force",
+            "0.2",
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(results_path)
+    assert isinstance(atoms, Atoms)
+    results_path.unlink()
+
+
+def test_geomopt_log(tmp_path, caplog):
+    """Test log correctly written for geomopt."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+
+    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
+        result = runner.invoke(
+            app,
+            [
+                "geomopt",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--write-kwargs",
+                f"{{'filename': '{str(results_path)}'}}",
+                "--log",
+                f"{tmp_path}/test.log",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Starting geometry optimization" in caplog.text
+        assert "Using filter" not in caplog.text
+
+
+def test_geomopt_traj(tmp_path):
+    """Test trajectory correctly written for geomopt."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    traj_path = f"{tmp_path}/test.xyz"
 
     result = runner.invoke(
         app,
@@ -32,39 +77,6 @@ def test_geomopt(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--write-kwargs",
             f"{{'filename': '{str(results_path)}'}}",
-            "--max-force",
-            "0.2",
-        ],
-    )
-    assert result.exit_code == 0
-
-
-def test_geomopt_log(tmp_path, caplog):
-    """Test log correctly written for geomopt."""
-    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
-        result = runner.invoke(
-            app,
-            [
-                "geomopt",
-                "--struct",
-                DATA_PATH / "NaCl.cif",
-                "--log",
-                f"{tmp_path}/test.log",
-            ],
-        )
-        assert result.exit_code == 0
-        assert "Starting geometry optimization" in caplog.text
-
-
-def test_geomopt_traj(tmp_path):
-    """Test log correctly written for geomopt."""
-    traj_path = f"{tmp_path}/test.xyz"
-    result = runner.invoke(
-        app,
-        [
-            "geomopt",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
             "--traj",
             traj_path,
         ],
@@ -72,3 +84,61 @@ def test_geomopt_traj(tmp_path):
     assert result.exit_code == 0
     atoms = read(traj_path)
     assert "forces" in atoms.arrays
+
+
+def test_fully_opt(tmp_path):
+    """Test passing --fully-opt without --vectors-only"""
+    results_path = tmp_path / "NaCl-opt.xyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
+            "--fully-opt",
+        ],
+    )
+    assert result.exit_code == 0
+
+
+def test_fully_opt_and_vectors(tmp_path, caplog):
+    """Test passing --fully-opt with --vectors-only."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
+        result = runner.invoke(
+            app,
+            [
+                "geomopt",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--fully-opt",
+                "--vectors-only",
+                "--write-kwargs",
+                f"{{'filename': '{str(results_path)}'}}",
+                "--log",
+                f"{tmp_path}/test.log",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Using filter" in caplog.text
+
+
+def test_vectors_not_fully_opt(tmp_path):
+    """Test passing --vectors-only without --fully-opt."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
+            "--vectors-only",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)

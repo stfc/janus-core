@@ -168,13 +168,21 @@ def singlepoint(
 
 
 @app.command()
-def geomopt(
+def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     struct_path: StructPath,
     fmax: Annotated[
         float, typer.Option("--max-force", help="Maximum force for convergence")
     ] = 0.1,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
+    fully_opt: Annotated[
+        bool,
+        typer.Option("--fully-opt", help="Optimise cell and atomic positions"),
+    ] = False,
+    vectors_only: Annotated[
+        bool,
+        typer.Option("--vectors-only", help="Allow only hydrostatic deformations"),
+    ] = False,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
@@ -198,6 +206,10 @@ def geomopt(
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
+    fully_opt : bool
+        Whether to optimize the cell as well as atomic positions. Default is False.
+    vectors_only : bool
+        Whether to allow only hydrostatic deformations. Default is False.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
@@ -220,6 +232,10 @@ def geomopt(
     if not isinstance(write_kwargs, dict):
         raise ValueError("write_kwargs must be a dictionary")
 
+    if not fully_opt and vectors_only:
+        raise ValueError("--vectors-only requires --fully-opt to be set")
+
+    # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct_path,
         architecture=architecture,
@@ -231,11 +247,20 @@ def geomopt(
 
     opt_kwargs = {"trajectory": traj_file} if traj_file else None
     traj_kwargs = {"filename": traj_file} if traj_file else None
+    filter_kwargs = {"hydrostatic_strain": vectors_only} if fully_opt else None
 
+    # Use default filter if passed --fully-opt, otherwise override with None
+    fully_opt_dict = {} if fully_opt else {"filter_func": None}
+
+    # Run geometry optimization and save output structure
     optimize(
         s_point.struct,
         fmax=fmax,
+        filter_kwargs=filter_kwargs,
+        **fully_opt_dict,
         opt_kwargs=opt_kwargs,
+        write_results=True,
+        write_kwargs=write_kwargs,
         traj_kwargs=traj_kwargs,
         log_kwargs={"filename": log_file, "filemode": "a"},
     )
