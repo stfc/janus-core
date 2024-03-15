@@ -67,7 +67,8 @@ def test_saving_struct(tmp_path):
 
     optimize(
         single_point.struct,
-        struct_kwargs={"filename": struct_path, "format": "extxyz"},
+        write_results=True,
+        write_kwargs={"filename": struct_path, "format": "extxyz"},
     )
     opt_struct = read(struct_path)
 
