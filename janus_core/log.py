@@ -1,7 +1,7 @@
 """Configure logger with yaml-styled format."""
 
 import logging
-from typing import Optional
+from typing import Literal, Optional
 
 from janus_core.janus_types import LogLevel
 
@@ -19,7 +19,7 @@ def config_logger(
     filename: Optional[str] = None,
     level: LogLevel = logging.INFO,
     capture_warnings: bool = True,
-    filemode: str = "w",
+    filemode: Literal["r", "w", "a", "x", "r+", "w+", "a+", "x+"] = "w",
 ):
     """
     Configure logger with yaml-styled format.

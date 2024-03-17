@@ -62,9 +62,11 @@ poetry add git+https://gitlab.com:ase/ase.git#b31569210d739bd12c8ad2b6ec0290108e
 
 ## Examples
 
-Perform a single point calcuation:
+### Single Point Calculations
+
+Perform a single point calcuation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif
+janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
 This will calculate the energy, stress and forces and save this in `NaCl-results.xyz`, in addition to generating a log file, `singlepoint.log`.
@@ -72,17 +74,22 @@ This will calculate the energy, stress and forces and save this in `NaCl-results
 Additional options may be specified. For example:
 
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif --property energy --arch mace_mp --calc-kwargs "{'model' : './tests/models/mace_mp_small.model'}" --log './example.log' --write-kwargs "{'filename': './example.xyz'}"
+janus singlepoint --struct tests/data/NaCl.cif --arch mace --calc-kwargs "{'model' : '/path/to/your/ml.model'}" --property energy --log './example.log' --write-kwargs "{'filename': './example.xyz'}"
 ```
 
-This defines the MLIP architecture and path to the saved model, as well as changing where the log and results files are saved.
+This defines the MLIP architecture and path to your locally saved model, as well as changing where the log and results files are saved.
 
 Note: the MACE calculator currently returns energy, forces and stress together, so in this case the choice of property will not change the output.
 
+For all options, run `janus singlepoint --help`.
 
-Perform geometry optimization:
+
+### Geometry optimization
+
+Perform geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
+
 ```shell
-janus geomopt --struct tests/data/H2O.cif
+janus geomopt --struct tests/data/H2O.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
 This will calculate optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`.
@@ -90,10 +97,12 @@ This will calculate optimize the atomic positions and save the resulting structu
 Additional options may be specified. This shares most options with `singlepoint`, as well as a few additional options, such as:
 
 ```shell
-janus geomopt --struct tests/data/NaCl.cif --fully-opt --vectors-only --traj 'NaCl-traj.xyz'
+janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --fully-opt --vectors-only --traj 'NaCl-traj.xyz'
 ```
 
 This allows the cell to be optimised, allowing only hydrostatic deformation, and saves the optimization trajector in addition to the final structure and log.
+
+For all options, run `janus geomopt --help`.
 
 ## License
 

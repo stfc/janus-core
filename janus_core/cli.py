@@ -177,22 +177,25 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     device: Device = "cpu",
     fully_opt: Annotated[
         bool,
-        typer.Option("--fully-opt", help="Optimise cell and atomic positions"),
+        typer.Option(
+            "--fully-opt",
+            help="Fully optimize the cell vectors, angles, and atomic positions",
+        ),
     ] = False,
     vectors_only: Annotated[
         bool,
-        typer.Option("--vectors-only", help="Allow only hydrostatic deformations"),
+        typer.Option("--vectors-only", help="Allow only cell vectors to change"),
     ] = False,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
     traj_file: Annotated[
-        str, typer.Option("--traj", help="Path to save trajectory to")
+        str, typer.Option("--traj", help="Path to save optimization frames to")
     ] = None,
     log_file: LogFile = "geomopt.log",
 ):
     """
-    Perform geometry optimization and save to file.
+    Perform geometry optimization and save optimized structure to file.
 
     Parameters
     ----------
