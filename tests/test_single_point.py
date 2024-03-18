@@ -7,6 +7,7 @@ from numpy import isfinite
 import pytest
 
 from janus_core.single_point import SinglePoint
+from tests.utils import read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -96,8 +97,8 @@ def test_single_point_traj():
 def test_single_point_write():
     """Test writing singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
-    results_path = Path(".").absolute() / "NaCl-results.xyz"
-    assert not Path(results_path).exists()
+    results_path = Path("./NaCl-results.xyz").absolute()
+    assert not results_path.exists()
 
     single_point = SinglePoint(
         struct_path=data_path,
@@ -107,11 +108,10 @@ def test_single_point_write():
     assert "forces" not in single_point.struct.arrays
 
     single_point.run_single_point(write_results=True)
-    atoms = read(results_path)
+
+    atoms = read_atoms(results_path)
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.arrays
-
-    Path(results_path).unlink()
 
 
 def test_single_point_write_kwargs(tmp_path):

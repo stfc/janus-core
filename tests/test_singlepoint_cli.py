@@ -1,4 +1,4 @@
-"""Test commandline interface."""
+"""Test singlepoint commandline interface."""
 
 from pathlib import Path
 
@@ -6,6 +6,7 @@ from ase.io import read
 from typer.testing import CliRunner
 
 from janus_core.cli import app
+from tests.utils import read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -28,9 +29,9 @@ def test_singlepoint_help():
     assert "Usage: root singlepoint [OPTIONS]" in result.stdout
 
 
-def test_singlepoint(tmp_path):
+def test_singlepoint():
     """Test singlepoint calculation."""
-    results_path = tmp_path / "NaCl-results.xyz"
+    results_path = Path("./NaCl-results.xyz").absolute()
 
     result = runner.invoke(
         app,
@@ -38,20 +39,19 @@ def test_singlepoint(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--write-kwargs",
-            f"{{'filename': '{str(results_path)}'}}",
         ],
     )
-    assert result.exit_code == 0
 
-    atoms = read(results_path)
+    atoms = read_atoms(results_path)
+    assert result.exit_code == 0
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.arrays
 
 
 def test_singlepoint_properties(tmp_path):
     """Test properties for singlepoint calculation."""
-    results_path = tmp_path / "H2O-results.xyz"
+    results_path_1 = tmp_path / "H2O-energy-results.xyz"
+    results_path_2 = tmp_path / "H2O-stress-results.xyz"
 
     # Check energy is can be calculated successfully
     result = runner.invoke(
@@ -63,13 +63,12 @@ def test_singlepoint_properties(tmp_path):
             "--property",
             "energy",
             "--write-kwargs",
-            f"{{'filename': '{str(results_path)}'}}",
+            f"{{'filename': '{str(results_path_1)}'}}",
         ],
     )
     assert result.exit_code == 0
 
-    atoms = read(results_path)
-    results_path.unlink()
+    atoms = read(results_path_1)
     assert atoms.get_potential_energy() is not None
 
     result = runner.invoke(
@@ -81,11 +80,11 @@ def test_singlepoint_properties(tmp_path):
             "--property",
             "stress",
             "--write-kwargs",
-            f"{{'filename': '{str(results_path)}'}}",
+            f"{{'filename': '{str(results_path_2)}'}}",
         ],
     )
     assert result.exit_code == 1
-    assert not results_path.is_file()
+    assert not results_path_2.is_file()
     assert isinstance(result.exception, ValueError)
 
 
@@ -133,28 +132,6 @@ def test_singlepoint_calc_kwargs(tmp_path):
     )
     assert result.exit_code == 0
     assert "Using float32 for MACECalculator" in result.stdout
-
-
-def test_singlepoint_default_write():
-    """Test default write path."""
-    results_path = Path(".").absolute() / "NaCl-results.xyz"
-    assert not results_path.exists()
-
-    result = runner.invoke(
-        app,
-        [
-            "singlepoint",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--property",
-            "energy",
-        ],
-    )
-    assert result.exit_code == 0
-    atoms = read(results_path)
-    assert "forces" in atoms.arrays
-
-    results_path.unlink()
 
 
 def test_singlepoint_log(tmp_path, caplog):
