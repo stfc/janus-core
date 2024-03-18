@@ -73,8 +73,10 @@ def optimize(  # pylint: disable=too-many-arguments
     traj_kwargs = traj_kwargs if traj_kwargs else {}
     log_kwargs = log_kwargs if log_kwargs else {}
 
-    if write_kwargs and "filename" not in write_kwargs:
-        raise ValueError("'filename' must be included in `write_kwargs`")
+    write_kwargs.setdefault(
+        "filename",
+        Path(f"./{atoms.get_chemical_formula()}-opt.xyz").absolute(),
+    )
 
     if traj_kwargs and "filename" not in traj_kwargs:
         raise ValueError("'filename' must be included in `traj_kwargs`")
@@ -107,10 +109,6 @@ def optimize(  # pylint: disable=too-many-arguments
 
     # Write out optimized structure
     if write_results:
-        if "filename" not in write_kwargs:
-            write_kwargs["filename"] = Path(
-                f"./{atoms.get_chemical_formula()}-opt.xyz"
-            ).absolute()
         write(images=atoms, **write_kwargs)
 
     # Reformat trajectory file from binary

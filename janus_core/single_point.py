@@ -334,8 +334,11 @@ class SinglePoint:
                 )
 
         write_kwargs = write_kwargs if write_kwargs else {}
-        if write_kwargs and "filename" not in write_kwargs:
-            raise ValueError("'filename' must be included in write_kwargs")
+
+        write_kwargs.setdefault(
+            "filename",
+            Path(f"./{self.struct_name}-results.xyz").absolute(),
+        )
 
         if self.logger:
             self.logger.info("Starting single point calculation")
@@ -354,9 +357,6 @@ class SinglePoint:
             self.logger.info("Single point calculation complete")
 
         if write_results:
-            if "filename" not in write_kwargs:
-                filename = f"{self.struct_name}-results.xyz"
-                write_kwargs["filename"] = Path(".").absolute() / filename
             write(images=self.struct, **write_kwargs)
 
         return results
