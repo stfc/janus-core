@@ -10,6 +10,7 @@ from ase.io import read
 import pytest
 
 from janus_core.geom_opt import optimize
+from janus_core.mlip_calculators import choose_calculator
 from janus_core.single_point import SinglePoint
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -120,3 +121,40 @@ def test_missing_traj_kwarg(tmp_path):
     traj_path = tmp_path / "NaCl-traj.xyz"
     with pytest.raises(ValueError):
         optimize(single_point.struct, traj_kwargs={"filename": traj_path})
+
+
+def test_hydrostatic_strain():
+    """Test setting hydrostatic strain for filter."""
+    single_point_1 = SinglePoint(
+        struct_path="./tests/data/NaCl-deformed.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    single_point_2 = SinglePoint(
+        struct_path="./tests/data/NaCl-deformed.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    atoms_1 = optimize(
+        single_point_1.struct, filter_kwargs={"hydrostatic_strain": True}
+    )
+    atoms_2 = optimize(
+        single_point_2.struct, filter_kwargs={"hydrostatic_strain": False}
+    )
+
+    expected_1 = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
+    expected_2 = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
+    assert atoms_1.cell.cellpar() == pytest.approx(expected_1)
+    assert atoms_2.cell.cellpar() == pytest.approx(expected_2)
+
+
+def test_set_calc():
+    """Test setting the calculator without SinglePoint."""
+    atoms = read(DATA_PATH / "NaCl.cif")
+    atoms.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+
+    init_energy = atoms.get_potential_energy()
+    opt_atoms = optimize(atoms)
+    assert opt_atoms.get_potential_energy() < init_energy

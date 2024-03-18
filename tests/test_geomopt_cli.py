@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from ase.io import read
+import pytest
 from typer.testing import CliRunner
 
 from janus_core.cli import app
@@ -85,22 +86,28 @@ def test_geomopt_traj(tmp_path):
     assert "forces" in atoms.arrays
 
 
-def test_fully_opt(tmp_path):
+def test_fully_opt(tmp_path, caplog):
     """Test passing --fully-opt without --vectors-only"""
     results_path = tmp_path / "NaCl-opt.xyz"
 
-    result = runner.invoke(
-        app,
-        [
-            "geomopt",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--write-kwargs",
-            f"{{'filename': '{str(results_path)}'}}",
-            "--fully-opt",
-        ],
-    )
-    assert result.exit_code == 0
+    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
+        result = runner.invoke(
+            app,
+            [
+                "geomopt",
+                "--struct",
+                DATA_PATH / "NaCl-deformed.cif",
+                "--write-kwargs",
+                f"{{'filename': '{str(results_path)}'}}",
+                "--fully-opt",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Using filter" in caplog.text
+
+        atoms = read(results_path)
+        expected = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
+        assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
 def test_fully_opt_and_vectors(tmp_path, caplog):
@@ -112,7 +119,7 @@ def test_fully_opt_and_vectors(tmp_path, caplog):
             [
                 "geomopt",
                 "--struct",
-                DATA_PATH / "NaCl.cif",
+                DATA_PATH / "NaCl-deformed.cif",
                 "--fully-opt",
                 "--vectors-only",
                 "--write-kwargs",
@@ -123,6 +130,10 @@ def test_fully_opt_and_vectors(tmp_path, caplog):
         )
         assert result.exit_code == 0
         assert "Using filter" in caplog.text
+
+        atoms = read(results_path)
+        expected = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
+        assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
 def test_vectors_not_fully_opt(tmp_path):
