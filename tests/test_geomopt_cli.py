@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from ase import Atoms
 from ase.io import read
 from typer.testing import CliRunner
 
 from janus_core.cli import app
+from tests.utils import read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -23,7 +23,7 @@ def test_geomopt_help():
 
 def test_geomopt():
     """Test geomopt calculation."""
-    results_path = Path(".").absolute() / "Cl4Na4-opt.xyz"
+    results_path = Path("./Cl4Na4-opt.xyz").absolute()
     assert not results_path.exists()
 
     result = runner.invoke(
@@ -36,10 +36,9 @@ def test_geomopt():
             "0.2",
         ],
     )
+
+    read_atoms(results_path)
     assert result.exit_code == 0
-    atoms = read(results_path)
-    assert isinstance(atoms, Atoms)
-    results_path.unlink()
 
 
 def test_geomopt_log(tmp_path, caplog):
