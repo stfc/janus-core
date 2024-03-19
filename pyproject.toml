@@ -82,6 +82,7 @@ good-names = ["e"]
 # Configuration for [pytest](https://docs.pytest.org)
 python_files = "test_*.py"
 addopts = '--cov-report xml'
+pythonpath = ["."]
 
 [tool.coverage.run]
 # Configuration of [coverage.py](https://coverage.readthedocs.io)
