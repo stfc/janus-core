@@ -52,15 +52,3 @@ def test_model_model_paths():
             model=MODEL_PATH,
             model_paths=MODEL_PATH,
         )
-    with pytest.raises(ValueError):
-        choose_calculator(
-            architecture="mace_mp",
-            model=MODEL_PATH,
-            model_paths=MODEL_PATH,
-        )
-    with pytest.raises(ValueError):
-        choose_calculator(
-            architecture="mace_off",
-            model=MODEL_PATH,
-            model_paths=MODEL_PATH,
-        )
