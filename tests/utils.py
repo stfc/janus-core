@@ -1,4 +1,4 @@
-"""Utility functions for tests"""
+"""Utility functions for tests."""
 
 from pathlib import Path
 from typing import Union

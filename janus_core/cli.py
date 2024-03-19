@@ -82,7 +82,11 @@ CalcKwargs = Annotated[
     TyperDict,
     typer.Option(
         parser=parse_dict_class,
-        help="Keyword arguments to pass to selected calculator  [default: {}]",
+        help=(
+            "Keyword arguments to pass to selected calculator. For the default "
+            "architecture ('mace_mp'), {'model':'small'} is set by default  "
+            "[default: {}]"
+        ),
         metavar="DICT",
     ),
 ]
@@ -92,7 +96,7 @@ WriteKwargs = Annotated[
         parser=parse_dict_class,
         help=(
             "Keyword arguments to pass to ase.io.write when saving "
-            "results [default: {}]"
+            "results  [default: {}]"
         ),
         metavar="DICT",
     ),
@@ -162,9 +166,7 @@ def singlepoint(
         calc_kwargs=calc_kwargs,
         log_kwargs={"filename": log_file, "filemode": "w"},
     )
-    s_point.run_single_point(
-        properties=properties, write_results=True, write_kwargs=write_kwargs
-    )
+    s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
 
 
 @app.command()
@@ -184,7 +186,13 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     ] = False,
     vectors_only: Annotated[
         bool,
-        typer.Option("--vectors-only", help="Allow only cell vectors to change"),
+        typer.Option(
+            "--vectors-only",
+            help=(
+                "Disable optimizing cell angles, so only cell vectors and atomic "
+                "positions are optimized. Requires --fully-opt to be set"
+            ),
+        ),
     ] = False,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
