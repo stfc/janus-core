@@ -46,7 +46,7 @@ def test_optimize(architecture, struct_path, expected, kwargs):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    init_energy = single_point.run_single_point("energy")["energy"]
+    init_energy = single_point.run("energy")["energy"]
 
     atoms = optimize(single_point.struct, **kwargs)
 
@@ -64,7 +64,7 @@ def test_saving_struct(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    init_energy = single_point.run_single_point("energy")["energy"]
+    init_energy = single_point.run("energy")["energy"]
 
     optimize(
         single_point.struct,

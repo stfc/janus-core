@@ -38,7 +38,7 @@ def test_potential_energy(
     single_point = SinglePoint(
         struct_path=struct_path, architecture="mace", calc_kwargs=calc_kwargs
     )
-    results = single_point.run_single_point(properties)[prop_key]
+    results = single_point.run(properties)[prop_key]
 
     # Check correct values returned
     if idx is not None:
@@ -60,7 +60,7 @@ def test_single_point_none():
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    results = single_point.run_single_point()
+    results = single_point.run()
     for prop in ["energy", "forces", "stress"]:
         assert prop in results
 
@@ -73,7 +73,7 @@ def test_single_point_clean():
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    results = single_point.run_single_point()
+    results = single_point.run()
     for prop in ["energy", "forces"]:
         assert prop in results
     assert "stress" not in results
@@ -89,7 +89,7 @@ def test_single_point_traj():
     )
 
     assert len(single_point.struct) == 2
-    results = single_point.run_single_point("energy")
+    results = single_point.run("energy")
     assert results["energy"][0] == pytest.approx(-76.0605725422795)
     assert results["energy"][1] == pytest.approx(-74.80419118083256)
 
@@ -107,7 +107,7 @@ def test_single_point_write():
     )
     assert "forces" not in single_point.struct.arrays
 
-    single_point.run_single_point(write_results=True)
+    single_point.run(write_results=True)
 
     atoms = read_atoms(results_path)
     assert atoms.get_potential_energy() is not None
@@ -126,9 +126,7 @@ def test_single_point_write_kwargs(tmp_path):
     )
     assert "forces" not in single_point.struct.arrays
 
-    single_point.run_single_point(
-        write_results=True, write_kwargs={"filename": results_path}
-    )
+    single_point.run(write_results=True, write_kwargs={"filename": results_path})
     atoms = read(results_path)
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.arrays
@@ -144,13 +142,11 @@ def test_single_point_write_nan(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    assert isfinite(single_point.run_single_point("energy")["energy"]).all()
+    assert isfinite(single_point.run("energy")["energy"]).all()
     with pytest.raises(ValueError):
-        single_point.run_single_point("stress")
+        single_point.run("stress")
 
-    single_point.run_single_point(
-        write_results=True, write_kwargs={"filename": results_path}
-    )
+    single_point.run(write_results=True, write_kwargs={"filename": results_path})
     atoms = read(results_path)
     assert atoms.get_potential_energy() is not None
     assert "forces" in atoms.calc.results
@@ -165,7 +161,7 @@ def test_invalid_prop():
         calc_kwargs={"model": MODEL_PATH},
     )
     with pytest.raises(NotImplementedError):
-        single_point.run_single_point("invalid")
+        single_point.run("invalid")
 
 
 def test_atoms():
@@ -178,7 +174,7 @@ def test_atoms():
         calc_kwargs={"model": MODEL_PATH},
     )
     assert single_point.struct_name == "NaCl"
-    assert single_point.run_single_point("energy")["energy"] < 0
+    assert single_point.run("energy")["energy"] < 0
 
 
 def test_default_atoms_name():

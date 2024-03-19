@@ -162,9 +162,7 @@ def singlepoint(
         calc_kwargs=calc_kwargs,
         log_kwargs={"filename": log_file, "filemode": "w"},
     )
-    s_point.run_single_point(
-        properties=properties, write_results=True, write_kwargs=write_kwargs
-    )
+    s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
 
 
 @app.command()

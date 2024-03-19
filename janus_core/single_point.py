@@ -69,7 +69,7 @@ class SinglePoint:
         Read structure and structure name.
     set_calculator(**kwargs)
         Configure calculator and attach to structure.
-    run_single_point(properties=None)
+    run(properties=None)
         Run single point calculations.
     """
 
@@ -298,7 +298,7 @@ class SinglePoint:
         else:
             self._remove_invalid_props(self.struct, results, properties)
 
-    def run_single_point(
+    def run(
         self,
         properties: MaybeSequence[str] = (),
         write_results: bool = False,
