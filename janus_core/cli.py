@@ -286,7 +286,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 
     # Check trajectory not duplicated
     if "trajectory" in opt_kwargs:
-        raise ValueError("'trajectory' must be passed through the --traj_file option")
+        raise ValueError("'trajectory' must be passed through the --traj option")
 
     # Set same name to overwrite saved binary with xyz
     opt_kwargs["trajectory"] = traj_file if traj_file else None
