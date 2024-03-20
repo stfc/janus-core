@@ -162,3 +162,27 @@ def test_converge_warning():
     )
     with pytest.warns(UserWarning):
         optimize(single_point.struct, steps=1)
+
+
+def test_restart(tmp_path):
+    """Test restarting geometry optimization."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-deformed.cif",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    init_energy = single_point.run("energy")["energy"]
+
+    with pytest.warns(UserWarning):
+        optimize(
+            single_point.struct, steps=2, opt_kwargs={"restart": tmp_path / "NaCl.pkl"}
+        )
+
+    intermediate_energy = single_point.run("energy")["energy"]
+    assert intermediate_energy < init_energy
+
+    optimize(
+        single_point.struct, steps=2, opt_kwargs={"restart": tmp_path / "NaCl.pkl"}
+    )
+    final_energy = single_point.run("energy")["energy"]
+    assert final_energy < intermediate_energy
