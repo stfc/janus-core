@@ -13,11 +13,14 @@ try:
 except ImportError:
     from ase.constraints import ExpCellFilter as DefaultFilter
 
+from numpy import linalg
+
 from janus_core.janus_types import ASEOptArgs, ASEWriteArgs
 from janus_core.log import config_logger
+from janus_core.utils import none_to_dict
 
 
-def optimize(  # pylint: disable=too-many-arguments,too-many-locals
+def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     atoms: Atoms,
     fmax: float = 0.1,
     steps: int = 1000,
@@ -67,11 +70,9 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals
     atoms: Atoms
         Structure with geometry optimized.
     """
-    filter_kwargs = filter_kwargs if filter_kwargs else {}
-    opt_kwargs = opt_kwargs if opt_kwargs else {}
-    write_kwargs = write_kwargs if write_kwargs else {}
-    traj_kwargs = traj_kwargs if traj_kwargs else {}
-    log_kwargs = log_kwargs if log_kwargs else {}
+    [filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs, log_kwargs] = none_to_dict(
+        [filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs, log_kwargs]
+    )
 
     write_kwargs.setdefault(
         "filename",
@@ -106,8 +107,21 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals
         logger.info("Starting geometry optimization")
 
     converged = dyn.run(fmax=fmax, steps=steps)
+
+    # Calculate current maximum force
+    if filter_func is not None:
+        max_force = linalg.norm(filtered_atoms.get_forces(), axis=1).max()
+    else:
+        max_force = linalg.norm(atoms.get_forces(), axis=1).max()
+
+    if logger:
+        logger.info("Max force: %.6f", max_force)
+
     if not converged:
-        warnings.warn(f"Optimization has not converged after {steps} steps")
+        warnings.warn(
+            f"Optimization has not converged after {steps} steps. "
+            f"Current max force {max_force} > target force {fmax}"
+        )
 
     # Write out optimized structure
     if write_results:
