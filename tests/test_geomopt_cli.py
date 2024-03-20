@@ -155,7 +155,7 @@ def test_vectors_not_fully_opt(tmp_path):
 
 
 def duplicate_traj(tmp_path):
-    """Check trajecory not passed via traj_kwargs"""
+    """Test trajectory file cannot be not passed via traj_kwargs."""
     traj_path = tmp_path / "NaCl-traj.xyz"
     result = runner.invoke(
         app,
@@ -163,8 +163,8 @@ def duplicate_traj(tmp_path):
             "geomopt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--traj-kwargs",
-            f"{{'trajecory': '{str(traj_path)}'}}",
+            "--opt-kwargs",
+            f"{{'trajectory': '{str(traj_path)}'}}",
         ],
     )
     assert result.exit_code == 1
