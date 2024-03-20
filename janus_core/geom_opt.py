@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Any, Callable, Optional
+import warnings
 
 from ase import Atoms
 from ase.io import read, write
@@ -16,7 +17,7 @@ from janus_core.janus_types import ASEOptArgs, ASEWriteArgs
 from janus_core.log import config_logger
 
 
-def optimize(  # pylint: disable=too-many-arguments
+def optimize(  # pylint: disable=too-many-arguments,too-many-locals
     atoms: Atoms,
     fmax: float = 0.1,
     steps: int = 1000,
@@ -104,7 +105,9 @@ def optimize(  # pylint: disable=too-many-arguments
     if logger:
         logger.info("Starting geometry optimization")
 
-    dyn.run(fmax=fmax, steps=steps)
+    converged = dyn.run(fmax=fmax, steps=steps)
+    if not converged:
+        warnings.warn(f"Optimization has not converged after {steps} steps")
 
     # Write out optimized structure
     if write_results:
