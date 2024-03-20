@@ -51,13 +51,6 @@ class ASEOptArgs(TypedDict, total=False):
     trajectory: Optional[str]
 
 
-class ASEOptRunArgs(TypedDict, total=False):
-    """Main arugments for running ase optimisers."""
-
-    fmax: float
-    steps: int
-
-
 class LogLevel(Enum):
     """Supported options for logger levels."""
 

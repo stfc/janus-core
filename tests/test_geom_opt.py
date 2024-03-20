@@ -32,7 +32,7 @@ test_data = [
         "mace",
         "NaCl.cif",
         -27.03561540212425,
-        {"filter_func": UnitCellFilter, "dyn_kwargs": {"steps": 1}},
+        {"filter_func": UnitCellFilter, "steps": 1},
     ),
 ]
 

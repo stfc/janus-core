@@ -175,6 +175,9 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     fmax: Annotated[
         float, typer.Option("--max-force", help="Maximum force for convergence")
     ] = 0.1,
+    steps: Annotated[
+        int, typer.Option("--steps", help="Maximum number of optimization steps")
+    ] = 1000,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
     fully_opt: Annotated[
@@ -212,6 +215,8 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
+    steps : int
+        Set maximum number of optimization steps to run. Default is 1000.
     architecture : Optional[str]
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
@@ -267,6 +272,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     optimize(
         s_point.struct,
         fmax=fmax,
+        steps=steps,
         filter_kwargs=filter_kwargs,
         **fully_opt_dict,
         opt_kwargs=opt_kwargs,

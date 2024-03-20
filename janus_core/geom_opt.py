@@ -12,14 +12,14 @@ try:
 except ImportError:
     from ase.constraints import ExpCellFilter as DefaultFilter
 
-from janus_core.janus_types import ASEOptArgs, ASEOptRunArgs, ASEWriteArgs
+from janus_core.janus_types import ASEOptArgs, ASEWriteArgs
 from janus_core.log import config_logger
 
 
 def optimize(  # pylint: disable=too-many-arguments
     atoms: Atoms,
     fmax: float = 0.1,
-    dyn_kwargs: Optional[ASEOptRunArgs] = None,
+    steps: int = 1000,
     filter_func: Optional[Callable] = DefaultFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
     optimizer: Callable = LBFGS,
@@ -39,8 +39,8 @@ def optimize(  # pylint: disable=too-many-arguments
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
-    dyn_kwargs : Optional[ASEOptRunArgs]
-        Keyword arguments to pass to dyn.run. Default is {}.
+    steps : int
+        Set maximum number of optimization steps to run. Default is 1000.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
         Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
@@ -66,7 +66,6 @@ def optimize(  # pylint: disable=too-many-arguments
     atoms: Atoms
         Structure with geometry optimized.
     """
-    dyn_kwargs = dyn_kwargs if dyn_kwargs else {}
     filter_kwargs = filter_kwargs if filter_kwargs else {}
     opt_kwargs = opt_kwargs if opt_kwargs else {}
     write_kwargs = write_kwargs if write_kwargs else {}
@@ -105,7 +104,7 @@ def optimize(  # pylint: disable=too-many-arguments
     if logger:
         logger.info("Starting geometry optimization")
 
-    dyn.run(fmax=fmax, **dyn_kwargs)
+    dyn.run(fmax=fmax, steps=steps)
 
     # Write out optimized structure
     if write_results:
