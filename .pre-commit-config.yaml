@@ -39,6 +39,10 @@ repos:
           docs/.*|
       )$
     entry: pylint
+    args:
+      [
+        "--good-names=e,i,j,k"
+      ]
 
 - repo: https://github.com/numpy/numpydoc
   rev: v1.6.0

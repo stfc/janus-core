@@ -16,7 +16,7 @@ Tools for machine learnt interatomic potentials
   - M3GNET
   - CHGNET
 - [x] Single point calculations
-- [ ] Geometry optimisation
+- [x] Geometry optimisation
 - [ ] Molecular Dynamics
   - NVE
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
