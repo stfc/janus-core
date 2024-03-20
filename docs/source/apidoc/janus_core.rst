@@ -74,3 +74,14 @@ janus\_core.janus\_types module
    :undoc-members:
    :show-inheritance:
    :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
+
+
+janus\_core.utils module
+--------------------------------
+
+.. automodule:: janus_core.utils
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
