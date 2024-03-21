@@ -17,7 +17,7 @@ from ase.md.verlet import VelocityVerlet
 import numpy as np
 
 from janus_core.geom_opt import optimize
-from janus_core.janus_types import PathLike
+from janus_core.janus_types import Ensembles, PathLike
 from janus_core.log import config_logger
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
@@ -79,7 +79,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Keyword arguments to pass to log config. Default is None.
         output_every : int
             Frequency to output MD logs to. Default is 100.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is None.
 
         Attributes
@@ -113,7 +113,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         traj_every: int = 100,
         log_kwargs: Optional[dict[str, Any]] = None,
         output_every: int = 100,
-        ensemble: str = None,
+        ensemble: Optional[Ensembles] = None,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -170,7 +170,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Keyword arguments to pass to log config. Default is None.
         output_every : int
             Frequency to output MD logs to. Default is 100.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is None.
         """
         self.struct = struct
@@ -380,7 +380,7 @@ class NPT(MolecularDynamics):
         Bulk modulus, in GPa. Default is 2.0.
     pressure : float
         Pressure, in bar. Default is 0.0.
-    ensemble : str
+    ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "npt".
     **kwargs
         Additional keyword arguments.
@@ -398,7 +398,7 @@ class NPT(MolecularDynamics):
         barostat_time: float = 75.0,
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
-        ensemble: str = "npt",
+        ensemble: Ensembles = "npt",
         **kwargs,
     ) -> None:
         """
@@ -416,7 +416,7 @@ class NPT(MolecularDynamics):
             Bulk modulus, in GPa. Default is 2.0.
         pressure : float
             Pressure, in bar. Default is 0.0.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "npt".
         **kwargs
             Additional keyword arguments.
@@ -453,7 +453,7 @@ class NVT(MolecularDynamics):
         Additional arguments.
     friction : float
         Friction coefficient in fs^-1. Default is 0.005.
-    ensemble : str
+    ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nvt".
     **kwargs
         Additional keyword arguments.
@@ -468,7 +468,7 @@ class NVT(MolecularDynamics):
         self,
         *args,
         friction: float = 0.005,
-        ensemble: str = "nvt",
+        ensemble: Ensembles = "nvt",
         **kwargs,
     ) -> None:
         """
@@ -480,7 +480,7 @@ class NVT(MolecularDynamics):
             Additional arguments.
         friction : float
             Friction coefficient in fs^-1. Default is 0.005.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nvt".
         **kwargs
             Additional keyword arguments.
@@ -505,7 +505,7 @@ class NVE(MolecularDynamics):
     ----------
     *args
         Additional arguments.
-    ensemble : str
+    ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nve".
     **kwargs
         Additional keyword arguments.
@@ -516,7 +516,7 @@ class NVE(MolecularDynamics):
         Configured NVE dynamics.
     """
 
-    def __init__(self, *args, ensemble: str = "nve", **kwargs) -> None:
+    def __init__(self, *args, ensemble: Ensembles = "nve", **kwargs) -> None:
         """
         Initialise dynamics for NVE simulation.
 
@@ -524,7 +524,7 @@ class NVE(MolecularDynamics):
         ----------
         *args
             Additional arguments.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nve".
         **kwargs
             Additional keyword arguments.
@@ -548,7 +548,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         Additional arguments.
     thermostat_time : float
         Thermostat time, in fs. Default is 50.0.
-    ensemble : str
+    ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nvt-nh".
     **kwargs
         Additional keyword arguments.
@@ -558,7 +558,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         self,
         *args,
         thermostat_time: float = 50.0,
-        ensemble: str = "nvt-nh",
+        ensemble: Ensembles = "nvt-nh",
         **kwargs,
     ) -> None:
         """
@@ -570,7 +570,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             Additional arguments.
         thermostat_time : float
             Thermostat time, in fs. Default is 50.0.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nvt-nh".
         **kwargs
             Additional keyword arguments.
@@ -600,7 +600,7 @@ class NPH(NPT):
         Bulk modulus, in GPa. Default is 2.0.
     pressure : float
         Pressure, in bar. Default is 0.0.
-    ensemble : str
+    ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nph".
     **kwargs
         Additional keyword arguments.
@@ -617,7 +617,7 @@ class NPH(NPT):
         thermostat_time: float = 50.0,
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
-        ensemble: str = "nph",
+        ensemble: Ensembles = "nph",
         **kwargs,
     ) -> None:
         """
@@ -633,7 +633,7 @@ class NPH(NPT):
             Bulk modulus, in GPa. Default is 2.0.
         pressure : float
             Pressure, in bar. Default is 0.0.
-        ensemble : str
+        ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nph".
         **kwargs
             Additional keyword arguments.

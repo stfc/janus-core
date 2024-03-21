@@ -63,6 +63,7 @@ class LogLevel(Enum):
 # Janus specific
 Architectures = Literal["mace", "mace_mp", "mace_off", "m3gnet", "chgnet"]
 Devices = Literal["cpu", "cuda", "mps"]
+Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh"]
 
 
 class CalcResults(TypedDict, total=False):
