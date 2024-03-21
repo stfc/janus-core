@@ -86,6 +86,19 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         ----------
         logger : logging.Logger
             Logger if log file has been specified.
+
+        Methods
+        -------
+        optimize_structure()
+            Perform geometry optimization.
+        reset_velocities()
+            Reset velocities and (optionally) rotation of system.
+        rotate_restart_files()
+            Rotate restart files.
+        run()
+            Run molecular dynamics simulation.
+        write_frame()
+            Write frame.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
@@ -209,7 +222,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.pressure = None
         self.n_atoms = len(self.struct)
 
-        if not self.struct_name and isinstance(self.struct, PathLike):
+        # Infer names for structure and output files if not specified
+        # Cannot use PathLike for isinstance in Python 3.9
+        if not self.struct_name and isinstance(self.struct, (Path, str)):
             self.struct_name = Path(self.struct).stem
         else:
             self.struct_name = self.struct.get_chemical_formula()
