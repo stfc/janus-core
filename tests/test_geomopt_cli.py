@@ -152,3 +152,64 @@ def test_vectors_not_fully_opt(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def duplicate_traj(tmp_path):
+    """Test trajectory file cannot be not passed via traj_kwargs."""
+    traj_path = tmp_path / "NaCl-traj.xyz"
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--opt-kwargs",
+            f"{{'trajectory': '{str(traj_path)}'}}",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
+
+
+def test_restart(tmp_path):
+    """Test restarting geometry optimization."""
+    data_path = DATA_PATH / "NaCl-deformed.cif"
+    restart_path = tmp_path / "NaCl-res.pkl"
+    results_path = tmp_path / "NaCl-opt.xyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            data_path,
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
+            "--opt-kwargs",
+            f"{{'restart': '{str(restart_path)}'}}",
+            "--steps",
+            2,
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(results_path)
+    intermediate_energy = atoms.get_potential_energy()
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--write-kwargs",
+            f"{{'filename': '{str(results_path)}'}}",
+            "--opt-kwargs",
+            f"{{'restart': '{str(restart_path)}'}}",
+            "--steps",
+            2,
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(results_path)
+    final_energy = atoms.get_potential_energy()
+    assert final_energy < intermediate_energy

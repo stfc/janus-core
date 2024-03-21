@@ -19,6 +19,7 @@ from janus_core.janus_types import (
 )
 from janus_core.log import config_logger
 from janus_core.mlip_calculators import choose_calculator
+from janus_core.utils import none_to_dict
 
 
 class SinglePoint:
@@ -122,9 +123,9 @@ class SinglePoint:
                 "or a path to the structure file (`struct_path`)"
             )
 
-        read_kwargs = read_kwargs if read_kwargs else {}
-        calc_kwargs = calc_kwargs if calc_kwargs else {}
-        log_kwargs = log_kwargs if log_kwargs else {}
+        [read_kwargs, calc_kwargs, log_kwargs] = none_to_dict(
+            [read_kwargs, calc_kwargs, log_kwargs]
+        )
 
         if log_kwargs and "filename" not in log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")

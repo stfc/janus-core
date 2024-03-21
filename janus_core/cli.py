@@ -62,6 +62,32 @@ def parse_dict_class(value: str):
     return TyperDict(ast.literal_eval(value))
 
 
+def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
+    """
+    Convert list of TyperDict objects to list of dictionaries.
+
+    Parameters
+    ----------
+    typer_dicts : list[TyperDict]
+        List of TyperDict objects to convert.
+
+    Returns
+    -------
+    list[dict]
+        List of converted dictionaries.
+
+    Raises
+    ------
+    ValueError
+        If items in list are not converted to dicts.
+    """
+    for i, typer_dict in enumerate(typer_dicts):
+        typer_dicts[i] = typer_dict.value if typer_dict else {}
+        if not isinstance(typer_dicts[i], dict):
+            raise ValueError(f"{typer_dicts[i]} must be passed as a dictionary")
+    return typer_dicts
+
+
 # Shared type aliases
 StructPath = Annotated[
     Path, typer.Option("--struct", help="Path of structure to simulate")
@@ -147,16 +173,9 @@ def singlepoint(
     log_file : Optional[Path]
         Path to write logs to. Default is "singlepoint.log".
     """
-    read_kwargs = read_kwargs.value if read_kwargs else {}
-    calc_kwargs = calc_kwargs.value if calc_kwargs else {}
-    write_kwargs = write_kwargs.value if write_kwargs else {}
-
-    if not isinstance(read_kwargs, dict):
-        raise ValueError("read_kwargs must be a dictionary")
-    if not isinstance(calc_kwargs, dict):
-        raise ValueError("calc_kwargs must be a dictionary")
-    if not isinstance(write_kwargs, dict):
-        raise ValueError("write_kwargs must be a dictionary")
+    [read_kwargs, calc_kwargs, write_kwargs] = parse_typer_dicts(
+        [read_kwargs, calc_kwargs, write_kwargs]
+    )
 
     s_point = SinglePoint(
         struct_path=struct_path,
@@ -175,6 +194,9 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     fmax: Annotated[
         float, typer.Option("--max-force", help="Maximum force for convergence")
     ] = 0.1,
+    steps: Annotated[
+        int, typer.Option("--steps", help="Maximum number of optimization steps")
+    ] = 1000,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
     fully_opt: Annotated[
@@ -196,6 +218,14 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     ] = False,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
+    opt_kwargs: Annotated[
+        TyperDict,
+        typer.Option(
+            parser=parse_dict_class,
+            help=("Keyword arguments to pass to optimizer  [default: {}]"),
+            metavar="DICT",
+        ),
+    ] = None,
     write_kwargs: WriteKwargs = None,
     traj_file: Annotated[
         str, typer.Option("--traj", help="Path to save optimization frames to")
@@ -212,6 +242,8 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
+    steps : int
+        Set maximum number of optimization steps to run. Default is 1000.
     architecture : Optional[str]
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
@@ -225,23 +257,19 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    write_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to ase.io.write when saving results. Default is {}.
+    opt_kwargs : Optional[ASEOptArgs]
+        Keyword arguments to pass to optimizer. Default is {}.
+    write_kwargs : Optional[ASEWriteArgs]
+        Keyword arguments to pass to ase.io.write when saving optimized structure.
+        Default is {}.
     traj_file : Optional[str]
         Path to save optimization trajectory to. Default is None.
     log_file : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
     """
-    read_kwargs = read_kwargs.value if read_kwargs else {}
-    calc_kwargs = calc_kwargs.value if calc_kwargs else {}
-    write_kwargs = write_kwargs.value if write_kwargs else {}
-
-    if not isinstance(read_kwargs, dict):
-        raise ValueError("read_kwargs must be a dictionary")
-    if not isinstance(calc_kwargs, dict):
-        raise ValueError("calc_kwargs must be a dictionary")
-    if not isinstance(write_kwargs, dict):
-        raise ValueError("write_kwargs must be a dictionary")
+    [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = parse_typer_dicts(
+        [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
+    )
 
     if not fully_opt and vectors_only:
         raise ValueError("--vectors-only requires --fully-opt to be set")
@@ -256,8 +284,14 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         log_kwargs={"filename": log_file, "filemode": "w"},
     )
 
-    opt_kwargs = {"trajectory": traj_file} if traj_file else None
+    # Check trajectory not duplicated
+    if "trajectory" in opt_kwargs:
+        raise ValueError("'trajectory' must be passed through the --traj option")
+
+    # Set same name to overwrite saved binary with xyz
+    opt_kwargs["trajectory"] = traj_file if traj_file else None
     traj_kwargs = {"filename": traj_file} if traj_file else None
+
     filter_kwargs = {"hydrostatic_strain": vectors_only} if fully_opt else None
 
     # Use default filter if passed --fully-opt, otherwise override with None
@@ -267,6 +301,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     optimize(
         s_point.struct,
         fmax=fmax,
+        steps=steps,
         filter_kwargs=filter_kwargs,
         **fully_opt_dict,
         opt_kwargs=opt_kwargs,

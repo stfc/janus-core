@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Any, Callable, Optional
+import warnings
 
 from ase import Atoms
 from ase.io import read, write
@@ -12,14 +13,17 @@ try:
 except ImportError:
     from ase.constraints import ExpCellFilter as DefaultFilter
 
-from janus_core.janus_types import ASEOptArgs, ASEOptRunArgs, ASEWriteArgs
+from numpy import linalg
+
+from janus_core.janus_types import ASEOptArgs, ASEWriteArgs
 from janus_core.log import config_logger
+from janus_core.utils import none_to_dict
 
 
-def optimize(  # pylint: disable=too-many-arguments
+def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     atoms: Atoms,
     fmax: float = 0.1,
-    dyn_kwargs: Optional[ASEOptRunArgs] = None,
+    steps: int = 1000,
     filter_func: Optional[Callable] = DefaultFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
     optimizer: Callable = LBFGS,
@@ -39,8 +43,8 @@ def optimize(  # pylint: disable=too-many-arguments
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
-    dyn_kwargs : Optional[ASEOptRunArgs]
-        Keyword arguments to pass to dyn.run. Default is {}.
+    steps : int
+        Set maximum number of optimization steps to run. Default is 1000.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
         Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
@@ -66,12 +70,9 @@ def optimize(  # pylint: disable=too-many-arguments
     atoms: Atoms
         Structure with geometry optimized.
     """
-    dyn_kwargs = dyn_kwargs if dyn_kwargs else {}
-    filter_kwargs = filter_kwargs if filter_kwargs else {}
-    opt_kwargs = opt_kwargs if opt_kwargs else {}
-    write_kwargs = write_kwargs if write_kwargs else {}
-    traj_kwargs = traj_kwargs if traj_kwargs else {}
-    log_kwargs = log_kwargs if log_kwargs else {}
+    [filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs, log_kwargs] = none_to_dict(
+        [filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs, log_kwargs]
+    )
 
     write_kwargs.setdefault(
         "filename",
@@ -105,7 +106,22 @@ def optimize(  # pylint: disable=too-many-arguments
     if logger:
         logger.info("Starting geometry optimization")
 
-    dyn.run(fmax=fmax, **dyn_kwargs)
+    converged = dyn.run(fmax=fmax, steps=steps)
+
+    # Calculate current maximum force
+    if filter_func is not None:
+        max_force = linalg.norm(filtered_atoms.get_forces(), axis=1).max()
+    else:
+        max_force = linalg.norm(atoms.get_forces(), axis=1).max()
+
+    if logger:
+        logger.info("Max force: %.6f", max_force)
+
+    if not converged:
+        warnings.warn(
+            f"Optimization has not converged after {steps} steps. "
+            f"Current max force {max_force} > target force {fmax}"
+        )
 
     # Write out optimized structure
     if write_results:

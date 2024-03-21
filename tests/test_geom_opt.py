@@ -28,12 +28,6 @@ test_data = [
         {"filter_func": UnitCellFilter, "filter_kwargs": {"scalar_pressure": 0.0001}},
     ),
     ("mace", "NaCl.cif", -27.046353221978332, {"opt_kwargs": {"alpha": 100}}),
-    (
-        "mace",
-        "NaCl.cif",
-        -27.03561540212425,
-        {"filter_func": UnitCellFilter, "dyn_kwargs": {"steps": 1}},
-    ),
 ]
 
 
@@ -158,3 +152,37 @@ def test_set_calc():
     init_energy = atoms.get_potential_energy()
     opt_atoms = optimize(atoms)
     assert opt_atoms.get_potential_energy() < init_energy
+
+
+def test_converge_warning():
+    """Test warning raised if not converged."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-deformed.cif",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    with pytest.warns(UserWarning):
+        optimize(single_point.struct, steps=1)
+
+
+def test_restart(tmp_path):
+    """Test restarting geometry optimization."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-deformed.cif",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    init_energy = single_point.run("energy")["energy"]
+
+    with pytest.warns(UserWarning):
+        optimize(
+            single_point.struct, steps=2, opt_kwargs={"restart": tmp_path / "NaCl.pkl"}
+        )
+
+    intermediate_energy = single_point.run("energy")["energy"]
+    assert intermediate_energy < init_energy
+
+    optimize(
+        single_point.struct, steps=2, opt_kwargs={"restart": tmp_path / "NaCl.pkl"}
+    )
+    final_energy = single_point.run("energy")["energy"]
+    assert final_energy < intermediate_energy
