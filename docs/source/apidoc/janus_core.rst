@@ -85,3 +85,15 @@ janus\_core.utils module
    :private-members:
    :undoc-members:
    :show-inheritance:
+
+
+janus\_core.md module
+--------------------------------
+
+.. automodule:: janus_core.md
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
