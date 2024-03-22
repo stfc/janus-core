@@ -90,17 +90,22 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
 
 # Shared type aliases
 StructPath = Annotated[
-    Path, typer.Option("--struct", help="Path of structure to simulate")
+    Path, typer.Option("--struct", help="Path of structure to simulate.")
 ]
 Architecture = Annotated[
-    str, typer.Option("--arch", help="MLIP architecture to use for calculations")
+    str, typer.Option("--arch", help="MLIP architecture to use for calculations.")
 ]
-Device = Annotated[str, typer.Option(help="Device to run calculations on")]
+Device = Annotated[str, typer.Option(help="Device to run calculations on.")]
 ReadKwargs = Annotated[
     TyperDict,
     typer.Option(
         parser=parse_dict_class,
-        help="Keyword arguments to pass to ase.io.read  [default: {}]",
+        help=(
+            """
+            Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key' : value}".  [default: "{}"]
+            """
+        ),
         metavar="DICT",
     ),
 ]
@@ -109,9 +114,11 @@ CalcKwargs = Annotated[
     typer.Option(
         parser=parse_dict_class,
         help=(
-            "Keyword arguments to pass to selected calculator. For the default "
-            "architecture ('mace_mp'), {'model':'small'} is set by default  "
-            "[default: {}]"
+            """
+            Keyword arguments to pass to selected calculator. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}". For the default
+            architecture ('mace_mp'), "{'model':'small'}" is set unless overwritten.
+            """
         ),
         metavar="DICT",
     ),
@@ -121,16 +128,19 @@ WriteKwargs = Annotated[
     typer.Option(
         parser=parse_dict_class,
         help=(
-            "Keyword arguments to pass to ase.io.write when saving "
-            "results  [default: {}]"
+            """
+            Keyword arguments to pass to ase.io.write when saving results. Must be
+            passed as a dictionary wrapped in quotes, e.g. "{'key' : value}".
+             [default: "{}"]
+            """
         ),
         metavar="DICT",
     ),
 ]
-LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to")]
+LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to.")]
 
 
-@app.command()
+@app.command(help="Perform single point calculations and save to file.")
 def singlepoint(
     struct_path: StructPath,
     architecture: Architecture = "mace_mp",
@@ -188,48 +198,65 @@ def singlepoint(
     s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
 
 
-@app.command()
+@app.command(
+    help="Perform geometry optimization and save optimized structure to file.",
+)
 def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     struct_path: StructPath,
     fmax: Annotated[
-        float, typer.Option("--max-force", help="Maximum force for convergence")
+        float, typer.Option("--max-force", help="Maximum force for convergence.")
     ] = 0.1,
     steps: Annotated[
-        int, typer.Option("--steps", help="Maximum number of optimization steps")
+        int, typer.Option("--steps", help="Maximum number of optimization steps.")
     ] = 1000,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
-    fully_opt: Annotated[
-        bool,
-        typer.Option(
-            "--fully-opt",
-            help="Fully optimize the cell vectors, angles, and atomic positions",
-        ),
-    ] = False,
     vectors_only: Annotated[
         bool,
         typer.Option(
             "--vectors-only",
-            help=(
-                "Disable optimizing cell angles, so only cell vectors and atomic "
-                "positions are optimized. Requires --fully-opt to be set"
-            ),
+            help=("Optimize cell vectors, as well as atomic positions."),
         ),
     ] = False,
+    fully_opt: Annotated[
+        bool,
+        typer.Option(
+            "--fully-opt",
+            help="Fully optimize the cell vectors, angles, and atomic positions.",
+        ),
+    ] = False,
+    opt_file: Annotated[
+        Path,
+        typer.Option(
+            "--opt",
+            help=(
+                "Path to save optimized structure. Default is inferred from name "
+                "of structure file."
+            ),
+        ),
+    ] = None,
+    traj_file: Annotated[
+        str,
+        typer.Option(
+            "--traj", help="Path if saving optimization frames.  [default: None]"
+        ),
+    ] = None,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     opt_kwargs: Annotated[
         TyperDict,
         typer.Option(
             parser=parse_dict_class,
-            help=("Keyword arguments to pass to optimizer  [default: {}]"),
+            help=(
+                """
+                Keyword arguments to pass to optimizer. Must be passed as a dictionary
+                wrapped in quotes, e.g. "{'key' : value}".  [default: "{}"]
+                """
+            ),
             metavar="DICT",
         ),
     ] = None,
     write_kwargs: WriteKwargs = None,
-    traj_file: Annotated[
-        str, typer.Option("--traj", help="Path to save optimization frames to")
-    ] = None,
     log_file: LogFile = "geomopt.log",
 ):
     """
@@ -249,10 +276,17 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
-    fully_opt : bool
-        Whether to optimize the cell as well as atomic positions. Default is False.
     vectors_only : bool
-        Whether to allow only hydrostatic deformations. Default is False.
+        Whether to optimize cell vectors, as well as atomic positions, by setting
+        `hydrostatic_strain` in the filter function. Default is False.
+    fully_opt : bool
+        Whether to fully optimize the cell vectors, angles, and atomic positions.
+        Default is False.
+    opt_file : Optional[Path]
+        Path to save optimized structure, or last structure if optimization did not
+        converge. Default is inferred from name of structure file.
+    traj_file : Optional[str]
+        Path if saving optimization frames. Default is None.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
@@ -262,17 +296,12 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     write_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
-    traj_file : Optional[str]
-        Path to save optimization trajectory to. Default is None.
     log_file : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
     """
     [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
     )
-
-    if not fully_opt and vectors_only:
-        raise ValueError("--vectors-only requires --fully-opt to be set")
 
     # Set up single point calculator
     s_point = SinglePoint(
@@ -284,18 +313,31 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         log_kwargs={"filename": log_file, "filemode": "w"},
     )
 
-    # Check trajectory not duplicated
+    # Check optimized structure path not duplicated
+    if "filename" in write_kwargs:
+        raise ValueError("'filename' must be passed through the --opt option")
+
+    # Check trajectory path not duplicated
     if "trajectory" in opt_kwargs:
         raise ValueError("'trajectory' must be passed through the --traj option")
 
-    # Set same name to overwrite saved binary with xyz
+    # Set default filname for writing optimized structure if not specified
+    if opt_file:
+        write_kwargs["filename"] = opt_file
+    else:
+        write_kwargs["filename"] = f"{s_point.struct_name}-opt.xyz"
+
+    # Set same trajectory filenames to overwrite saved binary with xyz
     opt_kwargs["trajectory"] = traj_file if traj_file else None
     traj_kwargs = {"filename": traj_file} if traj_file else None
 
-    filter_kwargs = {"hydrostatic_strain": vectors_only} if fully_opt else None
+    # Set hydrostatic_strain
+    # If not passed --fully-opt or --vectors-only, will be unused
+    filter_kwargs = {"hydrostatic_strain": vectors_only}
 
-    # Use default filter if passed --fully-opt, otherwise override with None
-    fully_opt_dict = {} if fully_opt else {"filter_func": None}
+    # Use default filter if passed --fully-opt or --vectors-only
+    # Otherwise override with None
+    fully_opt_dict = {} if (fully_opt or vectors_only) else {"filter_func": None}
 
     # Run geometry optimization and save output structure
     optimize(
