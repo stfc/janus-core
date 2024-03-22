@@ -155,6 +155,16 @@ def singlepoint(
             ),
         ),
     ] = None,
+    out_file: Annotated[
+        Path,
+        typer.Option(
+            "--out",
+            help=(
+                "Path to save structure with calculated results. Default is inferred "
+                "from name of structure file."
+            ),
+        ),
+    ] = None,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
@@ -174,6 +184,9 @@ def singlepoint(
         Device to run model on. Default is "cpu".
     properties : Optional[str]
         Physical properties to calculate. Default is "energy".
+    out_file : Optional[Path]
+        Path to save structure with calculated results. Default is inferred from name
+        of the structure file.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
@@ -186,6 +199,14 @@ def singlepoint(
     [read_kwargs, calc_kwargs, write_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
+
+    # Check filename for results not duplicated
+    if "filename" in write_kwargs:
+        raise ValueError("'filename' must be passed through the --out option")
+
+    # Default filname for saving results determined in SinglePoint if not specified
+    if out_file:
+        write_kwargs["filename"] = out_file
 
     s_point = SinglePoint(
         struct_path=struct_path,
@@ -225,10 +246,10 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
             help="Fully optimize the cell vectors, angles, and atomic positions.",
         ),
     ] = False,
-    opt_file: Annotated[
+    out_file: Annotated[
         Path,
         typer.Option(
-            "--opt",
+            "--out",
             help=(
                 "Path to save optimized structure. Default is inferred from name "
                 "of structure file."
@@ -282,7 +303,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     fully_opt : bool
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
-    opt_file : Optional[Path]
+    out_file : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
     traj_file : Optional[str]
@@ -315,15 +336,15 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 
     # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
-        raise ValueError("'filename' must be passed through the --opt option")
+        raise ValueError("'filename' must be passed through the --out option")
 
     # Check trajectory path not duplicated
     if "trajectory" in opt_kwargs:
         raise ValueError("'trajectory' must be passed through the --traj option")
 
     # Set default filname for writing optimized structure if not specified
-    if opt_file:
-        write_kwargs["filename"] = opt_file
+    if out_file:
+        write_kwargs["filename"] = out_file
     else:
         write_kwargs["filename"] = f"{s_point.struct_name}-opt.xyz"
 
