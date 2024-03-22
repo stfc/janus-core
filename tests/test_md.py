@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
+import numpy as np
 import pytest
 
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
@@ -243,3 +244,119 @@ def test_restart_nvt(tmp_path):
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
     assert len(traj) == 8
+
+
+def test_minimize(tmp_path):
+    """Test geometry optimzation before dynamics."""
+    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
+    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    init_energy = single_point.struct.get_potential_energy()
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_file=traj_path,
+        traj_every=1,
+        md_file=md_path,
+        output_every=1,
+        minimize=True,
+    )
+    nvt.run()
+
+    final_energy = single_point.struct.get_potential_energy()
+    assert final_energy < init_energy
+
+
+def test_reset_velocities(tmp_path):
+    """Test rescaling velocities before dynamics."""
+    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
+    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "H2O.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    # Give structure arbitrary velocities
+    single_point.struct.set_velocities(np.ones((3, 3)))
+    init_momentum = np.sum(single_point.struct.get_momenta())
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_file=traj_path,
+        traj_every=1,
+        md_file=md_path,
+        output_every=1,
+        rescale_velocities=True,
+        equil_steps=1,
+    )
+    nvt.run()
+
+    final_momentum = np.sum(single_point.struct.get_momenta())
+    assert abs(final_momentum) < abs(init_momentum)
+    assert init_momentum != pytest.approx(0)
+    assert final_momentum == pytest.approx(0)
+
+
+def test_remove_rot(tmp_path):
+    """Test removing rotation before dynamics."""
+    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
+    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "H2O.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    # Give structure arbitrary angular velocities
+    single_point.struct.set_velocities(np.arange(9).reshape(3, 3))
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_file=traj_path,
+        traj_every=1,
+        md_file=md_path,
+        output_every=1,
+        rescale_velocities=True,
+        equil_steps=1,
+    )
+    nvt.run()
+
+    # Calculate total angular momentum based on ASE's ZeroRotation function
+    _, basis = single_point.struct.get_moments_of_inertia(vectors=True)
+    tot_ang_mom = np.dot(basis, single_point.struct.get_angular_momentum())
+    init_ang_mom = np.sum(tot_ang_mom)
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_file=traj_path,
+        traj_every=1,
+        md_file=md_path,
+        output_every=1,
+        rescale_velocities=True,
+        remove_rot=True,
+        equil_steps=1,
+    )
+    nvt.run()
+
+    # Calculate total angular momentum based on ASE's ZeroRotation function
+    _, basis = single_point.struct.get_moments_of_inertia(vectors=True)
+    tot_ang_mom = np.dot(basis, single_point.struct.get_angular_momentum())
+    final_ang_mom = np.sum(tot_ang_mom)
+
+    assert abs(final_ang_mom) < abs(init_ang_mom)
+    assert init_ang_mom != pytest.approx(0)
+    assert final_ang_mom == pytest.approx(0)
