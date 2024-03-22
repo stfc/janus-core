@@ -99,6 +99,10 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         if logger:
             logger.info("Using filter %s", filter_func.__name__)
             logger.info("Using optimizer %s", optimizer.__name__)
+            if "hydrostatic_strain" in filter_kwargs:
+                logger.info(
+                    "hydrostatic_strain: %s", filter_kwargs["hydrostatic_strain"]
+                )
 
     else:
         dyn = optimizer(atoms, **opt_kwargs)
