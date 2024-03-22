@@ -401,3 +401,73 @@ def test_traj_start(tmp_path):
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
     assert len(traj) == 2
+
+
+def test_minimize_every(tmp_path):
+    """Test setting minimize_every."""
+    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=4,
+        traj_start=100,
+        md_file=md_path,
+        output_every=100,
+        minimize=True,
+        minimize_every=2,
+        equil_steps=4,
+        log_kwargs={"filename": log_file, "force": True},
+    )
+    nvt.run()
+
+    with open(log_file, encoding="utf8") as file:
+        log_txt = file.readlines()
+        assert any("Minimizing at step 0" in line for line in log_txt)
+        assert not any("Minimizing at step 1" in line for line in log_txt)
+        assert any("Minimizing at step 2" in line for line in log_txt)
+
+
+def test_rescale_every(tmp_path):
+    """Test setting minimize_every."""
+    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=4,
+        traj_start=100,
+        md_file=md_path,
+        output_every=1,
+        rescale_velocities=True,
+        remove_rot=True,
+        rescale_every=3,
+        equil_steps=4,
+        log_kwargs={"filename": log_file, "force": True},
+    )
+    nvt.run()
+
+    # Note: four timesteps required as rescaling is performed before start of step
+    with open(log_file, encoding="utf8") as file:
+        log_txt = file.readlines()
+        assert any("Velocities reset at step 0" in line for line in log_txt)
+        assert not any("Velocities reset at step 1" in line for line in log_txt)
+        assert any("Velocities reset at step 3" in line for line in log_txt)
+
+        assert any("Rotation reset at step 0" in line for line in log_txt)
+        assert not any("Rotation reset at step 1" in line for line in log_txt)
+        assert any("Rotation reset at step 3" in line for line in log_txt)

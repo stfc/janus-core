@@ -3,6 +3,7 @@
 import datetime as clock
 from pathlib import Path
 from typing import Any, Optional
+from warnings import warn
 
 from ase import Atoms, units
 from ase.io import write
@@ -222,6 +223,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.rescale_every = rescale_every
         self.restart = restart
         self.restart_stem = restart_stem
+        self.restart_every = restart_every
         self.rotate_restart = rotate_restart
         self.restarts_to_keep = restarts_to_keep
         self.md_file = md_file
@@ -229,19 +231,31 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.traj_append = traj_append
         self.traj_start = traj_start
         self.traj_every = traj_every
-        self.restart_every = restart_every
+        self.log_kwargs = log_kwargs
         self.output_every = output_every
         self.ensemble = ensemble
 
-        log_kwargs = log_kwargs if log_kwargs else {}  # pylint: disable=duplicate-code
-        if log_kwargs and "filename" not in log_kwargs:
+        self.log_kwargs = (
+            log_kwargs if log_kwargs else {}
+        )  # pylint: disable=duplicate-code
+        if self.log_kwargs and "filename" not in self.log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
-        log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
+        self.log_kwargs.setdefault("name", __name__)
+        self.logger = config_logger(**self.log_kwargs)
+
+        # Warn if attempting to rescale/minimize during dynamics
+        # but equil_steps is too low
+        if rescale_velocities and equil_steps < rescale_every:
+            warn("Velocities and angular momentum will not be reset during dynamics")
+        if minimize and equil_steps < minimize_every:
+            warn("Geometry will not be minimized during dynamics")
+
+        # Warn if attempting to remove rotation without resetting velocities
+        if remove_rot and not rescale_velocities:
+            warn("Rotation will not be removed unless `rescale_velocities` is True")
 
         self.minimize_kwargs = minimize_kwargs if minimize_kwargs else {}
-
         self.restart_files = []
         self.dyn = None
         self.n_atoms = len(self.struct)
@@ -278,12 +292,23 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         if self.dyn.nsteps < self.equil_steps:
             MaxwellBoltzmannDistribution(self.struct, temperature_K=self.temp)
             Stationary(self.struct)
+            if self.logger:
+                self.logger.info("Velocities reset at step %s", self.dyn.nsteps)
             if self.remove_rot:
                 ZeroRotation(self.struct)
+                if self.logger:
+                    self.logger.info("Rotation reset at step %s", self.dyn.nsteps)
 
     def optimize_structure(self) -> None:
         """Perform geometry optimization."""
         if self.dyn.nsteps < self.equil_steps:
+            if self.logger:
+                self.minimize_kwargs["log_kwargs"] = {
+                    "filename": self.log_kwargs["filename"],
+                    "name": self.logger.name,
+                    "filemode": "a",
+                }
+                self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimize(self.struct, **self.minimize_kwargs)
 
     @staticmethod
@@ -401,6 +426,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
     def run(self) -> None:
         """Run molecular dynamics simulation."""
+        if self.logger:
+            self.logger.info("Starting molecular dynamics simulation")
+
         self.struct.info["real_time"] = clock.datetime.now()
 
         if self.restart:
@@ -435,6 +463,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             self.dyn.attach(self.optimize_structure, interval=self.minimize_every)
 
         self.dyn.run(self.steps)
+
+        if self.logger:
+            self.logger.info("Molecular dynamics simulation complete")
 
 
 class NPT(MolecularDynamics):
