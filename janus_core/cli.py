@@ -283,7 +283,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
     opt_file : Optional[Path]
-        Path to save optimized structure. Default is inferred from name of
+        Path to save optimized structure or last structure if optimization did not converge. Default is inferred from name of
         structure file.
     traj_file : Optional[str]
         Path if saving optimization frames. Default is None.
