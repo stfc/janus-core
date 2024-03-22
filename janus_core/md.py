@@ -27,78 +27,97 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     """
     Configure shared molecular dynamics simulation options.
 
-        Parameters
-        ----------
-        struct : Atoms
-            Structure to simulate.
-        struct_name : str
-            Name of structure to simulate. Default is inferred from filepath or
-            chemical formula.
-        timestep : float
-            Timestep for integrator, in fs. Default is 1.0.
-        steps : int
-            Number of steps in simulation. Default is 0.
-        temp : float
-            Temperature, in K. Default is 300.
-        minimize : bool
-            Minimize structure during equilibration. Default is False.
-        minimize_every : int
-            Interval between minimizations. Default is -1, which disables further
-            minimization.
-        equil_steps : int
-            Number of equilibration steps. Default is 0.
-        rescale_velocities : bool
-            Whether to rescale velocities. Default is False.
-        remove_rot : bool
-            Whether to remove rotation. Default is False.
-        rescale_every : int
-            Frequency to rescale velocities. Default is 10.
-        restart : bool
-            Whether restarting dynamics. Default is False.
-        restart_stem : str
-            Stem for restart file name. Default inferred from struct_name and ensemble.
-        restart_every : int
-            Frequency of steps to save restart info. Default is 1000.
-        rotate_restart : bool
-            Whether to rotate restart files. Default is False.
-        restarts_to_keep : int
-            Restart files to keep. Default is 4.
-        md_file : Optional[PathLike]
-            MD file to save. Default inferred from struct_name, ensemble and
-            temperature.
-        traj_file : Optional[PathLike]
-            Trajectory file to save. Default inferred from struct_name, ensemble and
-            temperature.
-        traj_append : bool
-            Whether to append trajectory. Default is False.
-        traj_start : int
-            Step to start saving trajectory. Default is 0.
-        traj_every : int
-            Frequency of steps to save trajectory. Default is 100.
-        log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to log config. Default is None.
-        output_every : int
-            Frequency to output MD logs to. Default is 100.
-        ensemble : Ensembles
-            Name for thermodynamic ensemble. Default is None.
+    Parameters
+    ----------
+    struct : Atoms
+        Structure to simulate.
+    struct_name : str
+        Name of structure to simulate. Default is inferred from filepath or
+        chemical formula.
+    timestep : float
+        Timestep for integrator, in fs. Default is 1.0.
+    steps : int
+        Number of steps in simulation. Default is 0.
+    temp : float
+        Temperature, in K. Default is 300.
+    equil_steps : int
+        Maximum number of steps at which to perform optimization and reset velocities.
+        Default is 0.
+    minimize : bool
+        Minimize structure during equilibration. Default is False.
+    minimize_every : int
+        Interval between minimizations. Default is -1, which disables further
+        minimization.
+    minimize_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to geometry optimizer. Default is {}.
+    rescale_velocities : bool
+        Whether to rescale velocities. Default is False.
+    remove_rot : bool
+        Whether to remove rotation. Default is False.
+    rescale_every : int
+        Frequency to rescale velocities. Default is 10.
+    restart : bool
+        Whether restarting dynamics. Default is False.
+    restart_stem : str
+        Stem for restart file name. Default inferred from struct_name and ensemble.
+    restart_every : int
+        Frequency of steps to save restart info. Default is 1000.
+    rotate_restart : bool
+        Whether to rotate restart files. Default is False.
+    restarts_to_keep : int
+        Restart files to keep. Default is 4.
+    md_file : Optional[PathLike]
+        MD file to save. Default inferred from struct_name, ensemble and
+        temperature.
+    traj_file : Optional[PathLike]
+        Trajectory file to save. Default inferred from struct_name, ensemble and
+        temperature.
+    traj_append : bool
+        Whether to append trajectory. Default is False.
+    traj_start : int
+        Step to start saving trajectory. Default is 0.
+    traj_every : int
+        Frequency of steps to save trajectory. Default is 100.
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to log config. Default is None.
+    output_every : int
+        Frequency to output MD logs to. Default is 100.
+    ensemble : Ensembles
+        Name for thermodynamic ensemble. Default is None.
 
-        Attributes
-        ----------
-        logger : logging.Logger
-            Logger if log file has been specified.
+    Attributes
+    ----------
+    logger : logging.Logger
+        Logger if log file has been specified.
+    dyn : Dynamics
+        Dynamics object to run simulation.
+    n_atoms : int
+        Number of atoms in structure being simulated.
+    restart_files : list[PathLike]
+        List of files saved to restart dynamics.
+    offset : int
+        Number of previous steps if restarting simulation.
 
-        Methods
-        -------
-        optimize_structure()
-            Perform geometry optimization.
-        reset_velocities()
-            Reset velocities and (optionally) rotation of system.
-        rotate_restart_files()
-            Rotate restart files.
-        run()
-            Run molecular dynamics simulation.
-        write_frame()
-            Write frame.
+    Methods
+    -------
+    optimize_structure()
+        Perform geometry optimization.
+    reset_velocities()
+        Reset velocities and (optionally) rotation of system.
+    rotate_restart_files()
+        Rotate restart files.
+    run()
+        Run molecular dynamics simulation.
+    write_md_log()
+        Write molecular dynamics log.
+    write_traj()
+        Write current structure to trajectory file.
+    write_restart()
+        Write restart file and (optionally) rotate files saved.
+    get_log_stats()
+        Get thermodynamical statistics to be written to molecular dynamics log.
+    get_log_header()
+        Get header string for molecular dynamics log.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
@@ -108,9 +127,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         timestep: float = 1.0,
         steps: int = 0,
         temp: float = 300,
+        equil_steps: int = 0,
         minimize: bool = False,
         minimize_every: int = -1,
-        equil_steps: int = 0,
+        minimize_kwargs: Optional[dict[str, Any]] = None,
         rescale_velocities: bool = False,
         remove_rot: bool = False,
         rescale_every: int = 10,
@@ -144,13 +164,16 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Number of steps in simulation. Default is 0.
         temp : float
             Temperature, in K. Default is 300.
+        equil_steps : int
+            Maximum number of steps at which to perform optimization and reset
+            velocities. Default is 0.
         minimize : bool
             Minimize structure during equilibration. Default is False.
         minimize_every : int
             Interval between minimizations. Default is -1, which disables further
             minimization.
-        equil_steps : int
-            Number of equilibration steps. Default is 0.
+        minimize_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to geometry optimizer. Default is {}.
         rescale_velocities : bool
             Whether to rescale velocities. Default is False.
         remove_rot : bool
@@ -191,9 +214,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.timestep = timestep * units.fs
         self.steps = steps
         self.temp = temp
+        self.equil_steps = equil_steps
         self.minimize = minimize
         self.minimize_every = minimize_every
-        self.equil_steps = equil_steps
         self.rescale_velocities = rescale_velocities
         self.remove_rot = remove_rot
         self.rescale_every = rescale_every
@@ -217,9 +240,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)
 
+        self.minimize_kwargs = minimize_kwargs if minimize_kwargs else {}
+
         self.restart_files = []
         self.dyn = None
-        self.pressure = None
         self.n_atoms = len(self.struct)
 
         # Infer names for structure and output files if not specified
@@ -260,17 +284,36 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     def optimize_structure(self) -> None:
         """Perform geometry optimization."""
         if self.dyn.nsteps < self.equil_steps:
-            optimize(self.struct)
+            optimize(self.struct, **self.minimize_kwargs)
 
-    def write_frame(self) -> None:
-        """Write frame."""
-        if self.dyn.nsteps > self.traj_start and self.dyn.nsteps % self.traj_every == 0:
-            self.dyn.atoms.write(
-                self.traj_file,
-                write_info=True,
-                columns=["symbols", "positions", "momenta", "masses"],
-                append=True,
-            )
+    @staticmethod
+    def get_log_header() -> str:
+        """
+        Get header string for molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Header for molecular dynamics log.
+        """
+        log_header = (
+            "Step | real time[s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
+            "c_T [eV/K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | "
+            "Pressure [bar] | Pxx [bar] | Pyy [bar] | Pzz[bar] | Pyz[bar] | "
+            "Pxz[bar] | Pxy[bar]"
+        )
+
+        return log_header
+
+    def get_log_stats(self) -> str:
+        """
+        Get thermodynamical statistics to be written to molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Thermodynamical statistics to be written out.
+        """
         e_pot = self.dyn.atoms.get_potential_energy() / self.n_atoms
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
         c_T = e_kin / (1.5 * units.kB)  # pylint: disable=invalid-name
@@ -308,7 +351,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             pressure = 0.0
             density = 0.0
             pressure_tensor = np.zeros(6)
-        print_stat = (
+
+        log_stats = (
             f"{step:10d} {real_time.total_seconds():.3f} {time:13.2f} {e_pot:.3e} "
             f"{e_kin:.3e} {c_T:.3f} {e_pot + e_kin:.3e} {density:.3f} "
             f"{volume:.3e} {pressure:.3e} {pressure_tensor[0]:.3e} "
@@ -317,16 +361,34 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             f"{pressure_tensor[5]:.3e}"
         )
 
-        if self.ensemble == "npt":
-            print_stat += f"{self.pressure} {self.temp}"
-        if self.ensemble in ("nvt", "nvt-nh"):
-            print_stat += f"{self.temp}"
+        return log_stats
 
+    def write_md_log(self) -> None:
+        """Write molecular dynamics log."""
+        log_stats = self.get_log_stats()
         with open(self.md_file, "a", encoding="utf8") as md_log:
-            print(print_stat, file=md_log)
+            print(log_stats, file=md_log)
 
-        if step % self.restart_every == 0:
-            restart_file = f"{self.restart_stem}-{self.temp:.2f}K-{step}.xyz"
+    def write_traj(self) -> None:
+        """Write current structure to trajectory file."""
+        if self.dyn.nsteps > self.traj_start:
+            # Append if restarting or already started writing
+            append = self.restart or (
+                self.dyn.nsteps - self.traj_start > self.traj_every
+            )
+
+            self.dyn.atoms.write(
+                self.traj_file,
+                write_info=True,
+                columns=["symbols", "positions", "momenta", "masses"],
+                append=append,
+            )
+
+    def write_restart(self) -> None:
+        """Write restart file and (optionally) rotate files saved."""
+        step = self.offset + self.dyn.nsteps
+        if step > 0:
+            restart_file = f"{self.restart_stem}-{self.temp}-{step}.xyz"
             write(
                 restart_file,
                 self.struct,
@@ -342,33 +404,29 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.struct.info["real_time"] = clock.datetime.now()
 
         if self.restart:
-            with open(self.md_file, encoding="utf8") as md_log:
-                last_line = md_log.readlines()[-1].split()
             try:
-                self.offset = int(last_line[0])
-            except IndexError:
-                self.offset = 0
+                with open(self.md_file, encoding="utf8") as md_log:
+                    last_line = md_log.readlines()[-1].split()
+                try:
+                    self.offset = int(last_line[0])
+                except (IndexError, ValueError) as e:
+                    raise ValueError("Unable to read restart file") from e
+            except FileNotFoundError as e:
+                raise FileNotFoundError("Unable to read restart file") from e
 
         else:
             if self.minimize:
-                optimize(self.struct)
-            self.reset_velocities()
+                optimize(self.struct, **self.minimize_kwargs)
+            if self.rescale_velocities:
+                self.reset_velocities()
 
-            print_h = (
-                "    Step  | real time[s] |     Time [fs] |   Epot/N [eV] | "
-                "Ekin/N [eV] |  T [K] | Etot/N [eV] | Density [g/cm^3] |Volume [A^3] "
-                "| Pressure [bar] |   Pxx [bar] |   Pyy [bar] |   Pzz[bar] |   "
-                "Pyz[bar] |   Pxz[bar] |   Pxy[bar]"
-            )
-            if self.ensemble in ("nvt", "nvt-nh"):
-                print_h += " |Target T [K]"
-            if self.ensemble == "npt":
-                print_h += " |Target Pressure[bar] |  T [K]"
-
+            log_header = self.get_log_header()
             with open(self.md_file, "w", encoding="utf8") as md_log:
-                print(print_h, file=md_log)
+                print(log_header, file=md_log)
 
-        self.dyn.attach(self.write_frame, interval=self.output_every)
+        self.dyn.attach(self.write_md_log, interval=self.output_every)
+        self.dyn.attach(self.write_traj, interval=self.traj_every)
+        self.dyn.attach(self.write_restart, interval=self.restart_every)
 
         if self.rescale_velocities:
             self.dyn.attach(self.reset_velocities, interval=self.rescale_every)
@@ -457,6 +515,31 @@ class NPT(MolecularDynamics):
             externalstress=self.pressure * units.bar,
         )
 
+    def get_log_stats(self) -> str:
+        """
+        Get thermodynamical statistics to be written to molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Thermodynamical statistics to be written out.
+        """
+        log_stats = MolecularDynamics.get_log_stats(self)
+        return log_stats + f" {self.pressure} {self.temp}"
+
+    @staticmethod
+    def get_log_header() -> str:
+        """
+        Get header string for molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Header for molecular dynamics log.
+        """
+        log_header = MolecularDynamics.get_log_header()
+        return log_header + " | Pressure[bar] | T [K]"
+
 
 class NVT(MolecularDynamics):
     """
@@ -510,6 +593,31 @@ class NVT(MolecularDynamics):
             friction=friction / units.fs,
             append_trajectory=self.traj_append,
         )
+
+    def get_log_stats(self) -> str:
+        """
+        Get thermodynamical statistics to be written to molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Thermodynamical statistics to be written out.
+        """
+        log_stats = MolecularDynamics.get_log_stats(self)
+        return log_stats + f" {self.temp}"
+
+    @staticmethod
+    def get_log_header() -> str:
+        """
+        Get header string for molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Header for molecular dynamics log.
+        """
+        log_header = MolecularDynamics.get_log_header()
+        return log_header + " | T [K]"
 
 
 class NVE(MolecularDynamics):
@@ -599,6 +707,31 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             *args,
             **kwargs,
         )
+
+    def get_log_stats(self) -> str:
+        """
+        Get thermodynamical statistics to be written to molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Thermodynamical statistics to be written out.
+        """
+        log_stats = MolecularDynamics.get_log_stats(self)
+        return log_stats + f" {self.temp}"
+
+    @staticmethod
+    def get_log_header() -> str:
+        """
+        Get header string for molecular dynamics log.
+
+        Returns
+        -------
+        str
+            Header for molecular dynamics log.
+        """
+        log_header = MolecularDynamics.get_log_header()
+        return log_header + " | T [K]"
 
 
 class NPH(NPT):
