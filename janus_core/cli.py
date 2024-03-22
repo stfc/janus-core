@@ -90,17 +90,22 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
 
 # Shared type aliases
 StructPath = Annotated[
-    Path, typer.Option("--struct", help="Path of structure to simulate")
+    Path, typer.Option("--struct", help="Path of structure to simulate.")
 ]
 Architecture = Annotated[
-    str, typer.Option("--arch", help="MLIP architecture to use for calculations")
+    str, typer.Option("--arch", help="MLIP architecture to use for calculations.")
 ]
-Device = Annotated[str, typer.Option(help="Device to run calculations on")]
+Device = Annotated[str, typer.Option(help="Device to run calculations on.")]
 ReadKwargs = Annotated[
     TyperDict,
     typer.Option(
         parser=parse_dict_class,
-        help="Keyword arguments to pass to ase.io.read  [default: {}]",
+        help=(
+            """
+            Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key' : value}".  [default: "{}"]
+            """
+        ),
         metavar="DICT",
     ),
 ]
@@ -109,9 +114,11 @@ CalcKwargs = Annotated[
     typer.Option(
         parser=parse_dict_class,
         help=(
-            "Keyword arguments to pass to selected calculator. For the default "
-            "architecture ('mace_mp'), {'model':'small'} is set by default  "
-            "[default: {}]"
+            """
+            Keyword arguments to pass to selected calculator. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}". For the default
+            architecture ('mace_mp'), "{'model':'small'}" is set unless overwritten.
+            """
         ),
         metavar="DICT",
     ),
@@ -121,13 +128,16 @@ WriteKwargs = Annotated[
     typer.Option(
         parser=parse_dict_class,
         help=(
-            "Keyword arguments to pass to ase.io.write when saving "
-            "results  [default: {}]"
+            """
+            Keyword arguments to pass to ase.io.write when saving results. Must be
+            passed as a dictionary wrapped in quotes, e.g. "{'key' : value}".
+             [default: "{}"]
+            """
         ),
         metavar="DICT",
     ),
 ]
-LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to")]
+LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to.")]
 
 
 @app.command(help="Perform single point calculations and save to file.")
@@ -194,10 +204,10 @@ def singlepoint(
 def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     struct_path: StructPath,
     fmax: Annotated[
-        float, typer.Option("--max-force", help="Maximum force for convergence")
+        float, typer.Option("--max-force", help="Maximum force for convergence.")
     ] = 0.1,
     steps: Annotated[
-        int, typer.Option("--steps", help="Maximum number of optimization steps")
+        int, typer.Option("--steps", help="Maximum number of optimization steps.")
     ] = 1000,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -205,14 +215,14 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         bool,
         typer.Option(
             "--vectors-only",
-            help=("Optimize cell vectors, as well as atomic positions"),
+            help=("Optimize cell vectors, as well as atomic positions."),
         ),
     ] = False,
     fully_opt: Annotated[
         bool,
         typer.Option(
             "--fully-opt",
-            help="Fully optimize the cell vectors, angles, and atomic positions",
+            help="Fully optimize the cell vectors, angles, and atomic positions.",
         ),
     ] = False,
     opt_file: Annotated[
@@ -221,7 +231,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
             "--opt",
             help=(
                 "Path to save optimized structure. Default is inferred from name "
-                "of structure file"
+                "of structure file."
             ),
         ),
     ] = None,
@@ -237,7 +247,12 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         TyperDict,
         typer.Option(
             parser=parse_dict_class,
-            help=("Keyword arguments to pass to optimizer  [default: {}]"),
+            help=(
+                """
+                Keyword arguments to pass to optimizer. Must be passed as a dictionary
+                wrapped in quotes, e.g. "{'key' : value}".  [default: "{}"]
+                """
+            ),
             metavar="DICT",
         ),
     ] = None,
