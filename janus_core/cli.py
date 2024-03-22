@@ -130,7 +130,7 @@ WriteKwargs = Annotated[
 LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to")]
 
 
-@app.command()
+@app.command(help="Perform single point calculations and save to file.")
 def singlepoint(
     struct_path: StructPath,
     architecture: Architecture = "mace_mp",
@@ -188,7 +188,9 @@ def singlepoint(
     s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
 
 
-@app.command()
+@app.command(
+    help="Perform geometry optimization and save optimized structure to file.",
+)
 def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     struct_path: StructPath,
     fmax: Annotated[
