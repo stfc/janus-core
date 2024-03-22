@@ -146,7 +146,7 @@ def test_nve(tmp_path):
 
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
-    assert len(traj) == 1
+    assert len(traj) == 2
 
     with open(md_path, encoding="utf8") as md_file:
         lines = md_file.readlines()
@@ -243,7 +243,7 @@ def test_restart_nvt(tmp_path):
 
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
-    assert len(traj) == 8
+    assert len(traj) == 10
 
 
 def test_minimize(tmp_path):
@@ -360,3 +360,44 @@ def test_remove_rot(tmp_path):
     assert abs(final_ang_mom) < abs(init_ang_mom)
     assert init_ang_mom != pytest.approx(0)
     assert final_ang_mom == pytest.approx(0)
+
+
+def test_traj_start(tmp_path):
+    """Test starting trajectory after n steps."""
+    traj_path = tmp_path / "Cl4Na4-nvt-nh-300.0-traj.xyz"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=3,
+        traj_file=traj_path,
+        traj_every=1,
+        restart_every=100,
+        output_every=100,
+    )
+    nvt.run()
+
+    traj = read(traj_path, index=":")
+    assert all(isinstance(image, Atoms) for image in traj)
+    assert len(traj) == 4
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=3,
+        traj_file=traj_path,
+        traj_every=1,
+        traj_start=2,
+        restart_every=100,
+        output_every=100,
+    )
+    nvt.run()
+
+    traj = read(traj_path, index=":")
+    assert all(isinstance(image, Atoms) for image in traj)
+    assert len(traj) == 2

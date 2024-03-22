@@ -371,10 +371,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
     def write_traj(self) -> None:
         """Write current structure to trajectory file."""
-        if self.dyn.nsteps > self.traj_start:
+        if self.dyn.nsteps >= self.traj_start:
             # Append if restarting or already started writing
             append = self.restart or (
-                self.dyn.nsteps - self.traj_start > self.traj_every
+                self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
             self.dyn.atoms.write(
