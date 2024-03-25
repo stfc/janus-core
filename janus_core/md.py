@@ -57,6 +57,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Whether to remove rotation. Default is False.
     rescale_every : int
         Frequency to rescale velocities. Default is 10.
+    file_prefix : Optional[PathLike]
+        Prefix for output filenames. Default is inferred from structure, ensemble,
+        and temperature.
     restart : bool
         Whether restarting dynamics. Default is False.
     restart_stem : str
@@ -135,6 +138,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         rescale_velocities: bool = False,
         remove_rot: bool = False,
         rescale_every: int = 10,
+        file_prefix: Optional[PathLike] = None,
         restart: bool = False,
         restart_stem: Optional[PathLike] = None,
         restart_every: int = 1000,
@@ -181,10 +185,13 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Whether to remove rotation. Default is False.
         rescale_every : int
             Frequency to rescale velocities. Default is 10.
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames. Default is inferred from structure, ensemble,
+            and temperature.
         restart : bool
             Whether restarting dynamics. Default is False.
         restart_stem : str
-            Stem for restart file name. Default inferred from struct_name and ensemble.
+            Stem for restart file name. Default inferred from `file_prefix`.
         restart_every : int
             Frequency of steps to save restart info. Default is 1000.
         rotate_restart : bool
@@ -192,11 +199,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         restarts_to_keep : int
             Restart files to keep. Default is 4.
         md_file : Optional[PathLike]
-            MD file to save.  Default inferred from struct_name, ensemble and
-            temperature.
+            MD file to save.  Default inferred from `file_prefix`.
         traj_file : Optional[PathLike]
-            Trajectory file to save. Default inferred from struct_name, ensemble and
-            temperature.
+            Trajectory file to save. Default inferred from `file_prefix`.
         traj_append : bool
             Whether to append trajectory. Default is False.
         traj_start : int
@@ -221,6 +226,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.rescale_velocities = rescale_velocities
         self.remove_rot = remove_rot
         self.rescale_every = rescale_every
+        self.file_prefix = file_prefix
         self.restart = restart
         self.restart_stem = restart_stem
         self.restart_every = restart_every
@@ -260,21 +266,11 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.dyn = None
         self.n_atoms = len(self.struct)
 
-        # Infer names for structure and output files if not specified
-        # Cannot use PathLike for isinstance in Python 3.9
-        if not self.struct_name and isinstance(self.struct, (Path, str)):
-            self.struct_name = Path(self.struct).stem
-        else:
+        # Infer names for structure and if not specified
+        if not self.struct_name:
             self.struct_name = self.struct.get_chemical_formula()
 
-        if not self.md_file:
-            self.md_file = f"{self.struct_name}-{self.ensemble}-{self.temp}-md.log"
-
-        if not self.traj_file:
-            self.traj_file = f"{self.struct_name}-{self.ensemble}-{self.temp}-traj.xyz"
-
-        if not self.restart_stem:
-            self.restart_stem = f"res-{self.struct_name}-{self.ensemble}"
+        self.configure_filenames()
 
         self.offset = 0
 
@@ -310,6 +306,20 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 }
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimize(self.struct, **self.minimize_kwargs)
+
+    def configure_filenames(self) -> None:
+        """Setup filenames for output files."""
+        if not self.file_prefix:
+            self.file_prefix = f"{self.struct_name}-{self.ensemble}-T{self.temp}"
+
+        if not self.md_file:
+            self.md_file = f"{self.file_prefix}-stats.dat"
+
+        if not self.traj_file:
+            self.traj_file = f"{self.file_prefix}-traj.xyz"
+
+        if not self.restart_stem:
+            self.restart_stem = f"{self.file_prefix}-res"
 
     @staticmethod
     def get_log_header() -> str:
@@ -413,7 +423,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
-            restart_file = f"{self.restart_stem}-{self.temp}-{step}.xyz"
+            restart_file = f"{self.restart_stem}-{step}.xyz"
             write(
                 restart_file,
                 self.struct,
@@ -486,6 +496,9 @@ class NPT(MolecularDynamics):
         Pressure, in bar. Default is 0.0.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "npt".
+    file_prefix : Optional[PathLike]
+        Prefix for output filenames. Default is inferred from structure, ensemble,
+        temperature, and pressure.
     **kwargs
         Additional keyword arguments.
 
@@ -503,6 +516,7 @@ class NPT(MolecularDynamics):
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
         ensemble: Ensembles = "npt",
+        file_prefix: Optional[PathLike] = None,
         **kwargs,
     ) -> None:
         """
@@ -522,11 +536,13 @@ class NPT(MolecularDynamics):
             Pressure, in bar. Default is 0.0.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "npt".
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames. Default is inferred from structure, ensemble,
+            temperature, and pressure.
         **kwargs
             Additional keyword arguments.
         """
-        self.ensemble = ensemble
-        super().__init__(ensemble=self.ensemble, *args, **kwargs)
+        super().__init__(ensemble=ensemble, file_prefix=file_prefix, *args, **kwargs)
 
         self.pressure = pressure
         self.ttime = thermostat_time * units.fs
@@ -535,6 +551,20 @@ class NPT(MolecularDynamics):
             pfactor = (barostat_time * units.fs) ** 2 * scaled_bulk_modulus
         else:
             pfactor = None
+
+        # Reconfigure filenames to include pressure if `file_prefix` not specified
+        # Requires super().__init__ first to determine `self.struct_name`
+        if "file_prefix" not in kwargs and not isinstance(self, NVT_NH):
+            self.file_prefix = (
+                f"{self.struct_name}-{self.ensemble}-T{self.temp}-p{self.pressure}"
+            )
+            if "md_file" not in kwargs:
+                self.md_file = ""
+            if "traj_file" not in kwargs:
+                self.traj_file = ""
+            if "restart_stem" not in kwargs:
+                self.restart_stem = ""
+            self.configure_filenames()
 
         self.dyn = ASE_NPT(
             self.struct,
@@ -614,8 +644,7 @@ class NVT(MolecularDynamics):
         **kwargs
             Additional keyword arguments.
         """
-        self.ensemble = ensemble
-        super().__init__(ensemble=self.ensemble, *args, **kwargs)
+        super().__init__(ensemble=ensemble, *args, **kwargs)
 
         self.dyn = Langevin(
             self.struct,
@@ -683,8 +712,7 @@ class NVE(MolecularDynamics):
         **kwargs
             Additional keyword arguments.
         """
-        self.ensemble = ensemble
-        super().__init__(ensemble=self.ensemble, *args, **kwargs)
+        super().__init__(ensemble=ensemble, *args, **kwargs)
         self.dyn = VelocityVerlet(
             self.struct,
             timestep=self.timestep,
@@ -729,11 +757,9 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         **kwargs
             Additional keyword arguments.
         """
-        self.ensemble = ensemble
-        self.ttime = thermostat_time
         super().__init__(
-            ensemble=self.ensemble,
-            thermostat_time=self.ttime,
+            ensemble=ensemble,
+            thermostat_time=thermostat_time,
             barostat_time=None,
             *args,
             **kwargs,
@@ -781,6 +807,9 @@ class NPH(NPT):
         Pressure, in bar. Default is 0.0.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nph".
+    file_prefix : Optional[PathLike]
+        Prefix for output filenames. Default is inferred from structure, ensemble,
+        temperature, and pressure.
     **kwargs
         Additional keyword arguments.
 
@@ -797,6 +826,7 @@ class NPH(NPT):
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
         ensemble: Ensembles = "nph",
+        file_prefix: Optional[PathLike] = None,
         **kwargs,
     ) -> None:
         """
@@ -814,16 +844,19 @@ class NPH(NPT):
             Pressure, in bar. Default is 0.0.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nph".
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames. Default is inferred from structure, ensemble,
+            temperature, and pressure.
         **kwargs
             Additional keyword arguments.
         """
-        self.ensemble = ensemble
         super().__init__(
             *args,
             thermostat_time=thermostat_time,
             barostat_time=None,
             bulk_modulus=bulk_modulus,
             pressure=pressure,
-            ensemble=self.ensemble,
+            ensemble=ensemble,
+            file_prefix=file_prefix,
             **kwargs,
         )

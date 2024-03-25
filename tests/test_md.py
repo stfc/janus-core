@@ -36,13 +36,17 @@ def test_init(ensemble, expected):
     assert dyn.ensemble == expected
 
 
-def test_npt(tmp_path):
+def test_npt():
     """Test NPT molecular dynamics."""
-    restart_stem = tmp_path / "res-Cl4Na4-npt"
-    restart_path_1 = tmp_path / "res-Cl4Na4-npt-300.0-2.xyz"
-    restart_path_2 = tmp_path / "res-Cl4Na4-npt-300.0-4.xyz"
-    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.xyz")
+    restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.xyz")
+    traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.xyz")
+    md_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
+
+    assert not restart_path_1.exists()
+    assert not restart_path_2.exists()
+    assert not traj_path.exists()
+    assert not md_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -54,36 +58,43 @@ def test_npt(tmp_path):
         pressure=1.0,
         temp=300.0,
         steps=4,
-        traj_file=traj_path,
         traj_every=1,
-        restart_stem=restart_stem,
         restart_every=2,
-        md_file=md_path,
         output_every=1,
     )
-    npt.run()
 
-    restart_atoms_1 = read(restart_path_1)
-    assert isinstance(restart_atoms_1, Atoms)
-    restart_atoms_2 = read(restart_path_2)
-    assert isinstance(restart_atoms_2, Atoms)
+    try:
+        npt.run()
 
-    traj = read(traj_path, index=":")
-    assert all(isinstance(image, Atoms) for image in traj)
-    assert len(traj) == 4
+        restart_atoms_1 = read(restart_path_1)
+        assert isinstance(restart_atoms_1, Atoms)
+        restart_atoms_2 = read(restart_path_2)
+        assert isinstance(restart_atoms_2, Atoms)
 
-    with open(md_path, encoding="utf8") as md_file:
-        lines = md_file.readlines()
-        assert "Pressure[bar] | T [K]" in lines[0]
-        assert len(lines) == 5
+        traj = read(traj_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 4
+
+        with open(md_path, encoding="utf8") as md_file:
+            lines = md_file.readlines()
+            assert "Pressure[bar] | T [K]" in lines[0]
+            assert len(lines) == 5
+    finally:
+        restart_path_1.unlink(missing_ok=True)
+        restart_path_2.unlink(missing_ok=True)
+        traj_path.unlink(missing_ok=True)
+        md_path.unlink(missing_ok=True)
 
 
-def test_nvt_nh(tmp_path):
+def test_nvt_nh():
     """Test NVT-Nosé–Hoover  molecular dynamics."""
-    restart_stem = tmp_path / "res-Cl4Na4-nvt-nh"
-    restart_path = tmp_path / "res-Cl4Na4-nvt-nh-300.0-3.xyz"
-    traj_path = tmp_path / "Cl4Na4-nvt-nh-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-nvt-nh-300.0-md.log"
+    restart_path = Path("Cl4Na4-nvt-nh-T300.0-res-3.xyz")
+    traj_path = Path("Cl4Na4-nvt-nh-T300.0-traj.xyz")
+    md_path = Path("Cl4Na4-nvt-nh-T300.0-stats.dat")
+
+    assert not restart_path.exists()
+    assert not traj_path.exists()
+    assert not md_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -94,34 +105,36 @@ def test_nvt_nh(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=3,
-        traj_file=traj_path,
         traj_every=1,
-        restart_stem=restart_stem,
         restart_every=3,
-        md_file=md_path,
         output_every=1,
     )
-    nvt_nh.run()
 
-    restart_atoms = read(restart_path)
-    assert isinstance(restart_atoms, Atoms)
+    try:
+        nvt_nh.run()
 
-    traj = read(traj_path, index=":")
-    assert all(isinstance(image, Atoms) for image in traj)
-    assert len(traj) == 3
+        restart_atoms = read(restart_path)
+        assert isinstance(restart_atoms, Atoms)
 
-    with open(md_path, encoding="utf8") as md_file:
-        lines = md_file.readlines()
-        assert " | T [K]" in lines[0]
-        assert len(lines) == 4
+        traj = read(traj_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 3
+
+        with open(md_path, encoding="utf8") as md_file:
+            lines = md_file.readlines()
+            assert " | T [K]" in lines[0]
+            assert len(lines) == 4
+    finally:
+        restart_path.unlink(missing_ok=True)
+        traj_path.unlink(missing_ok=True)
+        md_path.unlink(missing_ok=True)
 
 
 def test_nve(tmp_path):
     """Test NVE molecular dynamics."""
-    restart_stem = tmp_path / "res-Cl4Na4-nve"
-    restart_path = tmp_path / "res-Cl4Na4-nve-300.0-4.xyz"
-    traj_path = tmp_path / "Cl4Na4-nve-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-nve-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.xyz"
+    md_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -132,17 +145,11 @@ def test_nve(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=4,
-        traj_file=traj_path,
         traj_every=3,
-        restart_stem=restart_stem,
-        restart_every=4,
-        md_file=md_path,
         output_every=1,
+        file_prefix=file_prefix,
     )
     nve.run()
-
-    restart_atoms = read(restart_path)
-    assert isinstance(restart_atoms, Atoms)
 
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
@@ -155,12 +162,15 @@ def test_nve(tmp_path):
         assert len(lines) == 6
 
 
-def test_nph(tmp_path):
+def test_nph():
     """Test NPH molecular dynamics."""
-    restart_stem = tmp_path / "res-Cl4Na4-nph"
-    restart_path = tmp_path / "res-Cl4Na4-nph-300.0-4.xyz"
-    traj_path = tmp_path / "Cl4Na4-nph-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-nph-300.0-md.log"
+    restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.xyz")
+    traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.xyz")
+    md_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
+
+    assert not restart_path.exists()
+    assert not traj_path.exists()
+    assert not md_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -171,33 +181,36 @@ def test_nph(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=3,
-        traj_file=traj_path,
         traj_every=2,
-        restart_stem=restart_stem,
         restart_every=4,
-        md_file=md_path,
         output_every=2,
     )
-    nph.run()
 
-    with pytest.raises(FileNotFoundError):
-        read(restart_path)
+    try:
+        nph.run()
 
-    traj = read(traj_path, index=":")
-    assert all(isinstance(image, Atoms) for image in traj)
-    assert len(traj) == 1
+        with pytest.raises(FileNotFoundError):
+            read(restart_path)
 
-    with open(md_path, encoding="utf8") as md_file:
-        lines = md_file.readlines()
-        assert " | Epot/N [eV]" in lines[0]
-        assert len(lines) == 2
+        traj = read(traj_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 1
+
+        with open(md_path, encoding="utf8") as md_file:
+            lines = md_file.readlines()
+            assert " | Epot/N [eV]" in lines[0]
+            assert len(lines) == 2
+    finally:
+        restart_path.unlink(missing_ok=True)
+        traj_path.unlink(missing_ok=True)
+        md_path.unlink(missing_ok=True)
 
 
 def test_restart_nvt(tmp_path):
     """Test restarting NVT molecular dynamics."""
-    restart_stem = tmp_path / "res-Cl4Na4-nvt"
-    traj_path = tmp_path / "Cl4Na4-nvt-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-nvt-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
+    md_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -208,12 +221,10 @@ def test_restart_nvt(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=4,
-        traj_file=traj_path,
         traj_every=1,
-        restart_stem=restart_stem,
         restart_every=4,
-        md_file=md_path,
         output_every=1,
+        file_prefix=file_prefix,
     )
     nvt.run()
 
@@ -223,13 +234,11 @@ def test_restart_nvt(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=4,
-        traj_file=traj_path,
         traj_every=1,
-        restart_stem=restart_stem,
         restart_every=4,
-        md_file=md_path,
         output_every=1,
         restart=True,
+        file_prefix=file_prefix,
     )
     nvt_restart.run()
     assert nvt_restart.offset == 4
@@ -248,8 +257,7 @@ def test_restart_nvt(tmp_path):
 
 def test_minimize(tmp_path):
     """Test geometry optimzation before dynamics."""
-    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -262,11 +270,10 @@ def test_minimize(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=0,
-        traj_file=traj_path,
         traj_every=1,
-        md_file=md_path,
         output_every=1,
         minimize=True,
+        file_prefix=file_prefix,
     )
     nvt.run()
 
@@ -276,8 +283,7 @@ def test_minimize(tmp_path):
 
 def test_reset_velocities(tmp_path):
     """Test rescaling velocities before dynamics."""
-    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
@@ -288,17 +294,17 @@ def test_reset_velocities(tmp_path):
     single_point.struct.set_velocities(np.ones((3, 3)))
     init_momentum = np.sum(single_point.struct.get_momenta())
 
-    nvt = NVT(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=0,
-        traj_file=traj_path,
-        traj_every=1,
-        md_file=md_path,
-        output_every=1,
-        rescale_velocities=True,
-        equil_steps=1,
-    )
+    with pytest.warns(UserWarning, match="Velocities and angular momentum will not"):
+        nvt = NVT(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=0,
+            traj_every=1,
+            output_every=1,
+            rescale_velocities=True,
+            equil_steps=1,
+            file_prefix=file_prefix,
+        )
     nvt.run()
 
     final_momentum = np.sum(single_point.struct.get_momenta())
@@ -309,8 +315,7 @@ def test_reset_velocities(tmp_path):
 
 def test_remove_rot(tmp_path):
     """Test removing rotation before dynamics."""
-    traj_path = tmp_path / "Cl4Na4-npt-300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
@@ -320,36 +325,24 @@ def test_remove_rot(tmp_path):
     # Give structure arbitrary angular velocities
     single_point.struct.set_velocities(np.arange(9).reshape(3, 3))
 
-    nvt = NVT(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=0,
-        traj_file=traj_path,
-        traj_every=1,
-        md_file=md_path,
-        output_every=1,
-        rescale_velocities=True,
-        equil_steps=1,
-    )
-    nvt.run()
-
     # Calculate total angular momentum based on ASE's ZeroRotation function
     _, basis = single_point.struct.get_moments_of_inertia(vectors=True)
     tot_ang_mom = np.dot(basis, single_point.struct.get_angular_momentum())
     init_ang_mom = np.sum(tot_ang_mom)
 
-    nvt = NVT(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=0,
-        traj_file=traj_path,
-        traj_every=1,
-        md_file=md_path,
-        output_every=1,
-        rescale_velocities=True,
-        remove_rot=True,
-        equil_steps=1,
-    )
+    with pytest.warns(UserWarning, match="Velocities and angular momentum will not"):
+        nvt = NVT(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=0,
+            traj_every=1,
+            output_every=1,
+            rescale_velocities=True,
+            remove_rot=True,
+            equil_steps=1,
+            file_prefix=file_prefix,
+        )
+
     nvt.run()
 
     # Calculate total angular momentum based on ASE's ZeroRotation function
@@ -364,7 +357,8 @@ def test_remove_rot(tmp_path):
 
 def test_traj_start(tmp_path):
     """Test starting trajectory after n steps."""
-    traj_path = tmp_path / "Cl4Na4-nvt-nh-300.0-traj.xyz"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -375,10 +369,10 @@ def test_traj_start(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=3,
-        traj_file=traj_path,
         traj_every=1,
         restart_every=100,
         output_every=100,
+        file_prefix=file_prefix,
     )
     nvt.run()
 
@@ -390,11 +384,11 @@ def test_traj_start(tmp_path):
         struct=single_point.struct,
         temp=300.0,
         steps=3,
-        traj_file=traj_path,
         traj_every=1,
         traj_start=2,
         restart_every=100,
         output_every=100,
+        file_prefix=file_prefix,
     )
     nvt.run()
 
@@ -405,7 +399,7 @@ def test_traj_start(tmp_path):
 
 def test_minimize_every(tmp_path):
     """Test setting minimize_every."""
-    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -417,13 +411,13 @@ def test_minimize_every(tmp_path):
     nvt = NVT(
         struct=single_point.struct,
         temp=300.0,
-        steps=4,
+        steps=6,
         traj_start=100,
-        md_file=md_path,
         output_every=100,
         minimize=True,
         minimize_every=2,
         equil_steps=4,
+        file_prefix=file_prefix,
         log_kwargs={"filename": log_file, "force": True},
     )
     nvt.run()
@@ -433,11 +427,12 @@ def test_minimize_every(tmp_path):
         assert any("Minimizing at step 0" in line for line in log_txt)
         assert not any("Minimizing at step 1" in line for line in log_txt)
         assert any("Minimizing at step 2" in line for line in log_txt)
+        assert not any("Minimizing at step 4" in line for line in log_txt)
 
 
 def test_rescale_every(tmp_path):
     """Test setting minimize_every."""
-    md_path = tmp_path / "Cl4Na4-npt-300.0-md.log"
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -451,12 +446,12 @@ def test_rescale_every(tmp_path):
         temp=300.0,
         steps=4,
         traj_start=100,
-        md_file=md_path,
         output_every=1,
         rescale_velocities=True,
         remove_rot=True,
         rescale_every=3,
         equil_steps=4,
+        file_prefix=file_prefix,
         log_kwargs={"filename": log_file, "force": True},
     )
     nvt.run()
