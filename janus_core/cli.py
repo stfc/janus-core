@@ -386,13 +386,22 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     steps: Annotated[int, typer.Option(help="Number of steps in simulation.")] = 0,
     temp: Annotated[float, typer.Option(help="Temperature, in K.")] = 300.0,
     thermostat_time: Annotated[
-        float, typer.Option(help="Thermostat time, in fs.")
+        float,
+        typer.Option(
+            help="Thermostat time for NPT, NVT Nosé-Hoover, or NPH simulation, in fs."
+        ),
     ] = 50.0,
-    barostat_time: Annotated[float, typer.Option(help="Barostat time, in fs")] = 75.0,
-    bulk_modulus: Annotated[float, typer.Option(help="Bulk modulus, in GPa.")] = 2.0,
-    pressure: Annotated[float, typer.Option(help="Pressure, in bar")] = 0.0,
+    barostat_time: Annotated[
+        float, typer.Option(help="Barostat time for NPT simulation, in fs.")
+    ] = 75.0,
+    bulk_modulus: Annotated[
+        float, typer.Option(help="Bulk modulus for NPT or NPH simulation, in GPa.")
+    ] = 2.0,
+    pressure: Annotated[
+        float, typer.Option(help="Pressure fpr NPT or NPH simulation, in bar.")
+    ] = 0.0,
     friction: Annotated[
-        float, typer.Option(help="Friction coefficient in fs^-1")
+        float, typer.Option(help="Friction coefficient for NVT simulation, in fs^-1.")
     ] = 0.005,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
