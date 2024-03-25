@@ -41,12 +41,12 @@ def test_npt():
     restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.xyz")
     restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.xyz")
     traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.xyz")
-    md_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
+    stats_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
     assert not traj_path.exists()
-    assert not md_path.exists()
+    assert not stats_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -60,7 +60,7 @@ def test_npt():
         steps=4,
         traj_every=1,
         restart_every=2,
-        output_every=1,
+        stats_every=1,
     )
 
     try:
@@ -75,26 +75,26 @@ def test_npt():
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 4
 
-        with open(md_path, encoding="utf8") as md_file:
-            lines = md_file.readlines()
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
             assert "Pressure[bar] | T [K]" in lines[0]
             assert len(lines) == 5
     finally:
         restart_path_1.unlink(missing_ok=True)
         restart_path_2.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
-        md_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
 
 
 def test_nvt_nh():
     """Test NVT-Nosé–Hoover  molecular dynamics."""
     restart_path = Path("Cl4Na4-nvt-nh-T300.0-res-3.xyz")
     traj_path = Path("Cl4Na4-nvt-nh-T300.0-traj.xyz")
-    md_path = Path("Cl4Na4-nvt-nh-T300.0-stats.dat")
+    stats_path = Path("Cl4Na4-nvt-nh-T300.0-stats.dat")
 
     assert not restart_path.exists()
     assert not traj_path.exists()
-    assert not md_path.exists()
+    assert not stats_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -107,7 +107,7 @@ def test_nvt_nh():
         steps=3,
         traj_every=1,
         restart_every=3,
-        output_every=1,
+        stats_every=1,
     )
 
     try:
@@ -120,21 +120,21 @@ def test_nvt_nh():
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 3
 
-        with open(md_path, encoding="utf8") as md_file:
-            lines = md_file.readlines()
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
             assert " | T [K]" in lines[0]
             assert len(lines) == 4
     finally:
         restart_path.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
-        md_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
 
 
 def test_nve(tmp_path):
     """Test NVE molecular dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
     traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
+    stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -146,7 +146,7 @@ def test_nve(tmp_path):
         temp=300.0,
         steps=4,
         traj_every=3,
-        output_every=1,
+        stats_every=1,
         file_prefix=file_prefix,
     )
     nve.run()
@@ -155,8 +155,8 @@ def test_nve(tmp_path):
     assert all(isinstance(image, Atoms) for image in traj)
     assert len(traj) == 2
 
-    with open(md_path, encoding="utf8") as md_file:
-        lines = md_file.readlines()
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
         assert " | Epot/N [eV]" in lines[0]
         # Includes step 0
         assert len(lines) == 6
@@ -166,11 +166,11 @@ def test_nph():
     """Test NPH molecular dynamics."""
     restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.xyz")
     traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.xyz")
-    md_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
+    stats_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
 
     assert not restart_path.exists()
     assert not traj_path.exists()
-    assert not md_path.exists()
+    assert not stats_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -183,7 +183,7 @@ def test_nph():
         steps=3,
         traj_every=2,
         restart_every=4,
-        output_every=2,
+        stats_every=2,
     )
 
     try:
@@ -196,21 +196,21 @@ def test_nph():
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 1
 
-        with open(md_path, encoding="utf8") as md_file:
-            lines = md_file.readlines()
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
             assert " | Epot/N [eV]" in lines[0]
             assert len(lines) == 2
     finally:
         restart_path.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
-        md_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
 
 
 def test_restart_nvt(tmp_path):
     """Test restarting NVT molecular dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
-    md_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
+    stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -223,7 +223,7 @@ def test_restart_nvt(tmp_path):
         steps=4,
         traj_every=1,
         restart_every=4,
-        output_every=1,
+        stats_every=1,
         file_prefix=file_prefix,
     )
     nvt.run()
@@ -236,15 +236,15 @@ def test_restart_nvt(tmp_path):
         steps=4,
         traj_every=1,
         restart_every=4,
-        output_every=1,
+        stats_every=1,
         restart=True,
         file_prefix=file_prefix,
     )
     nvt_restart.run()
     assert nvt_restart.offset == 4
 
-    with open(md_path, encoding="utf8") as md_file:
-        lines = md_file.readlines()
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
         assert " | T [K]" in lines[0]
         # Includes step 0, and step 4 from restart
         assert len(lines) == 11
@@ -271,7 +271,7 @@ def test_minimize(tmp_path):
         temp=300.0,
         steps=0,
         traj_every=1,
-        output_every=1,
+        stats_every=1,
         minimize=True,
         file_prefix=file_prefix,
     )
@@ -300,7 +300,7 @@ def test_reset_velocities(tmp_path):
             temp=300.0,
             steps=0,
             traj_every=1,
-            output_every=1,
+            stats_every=1,
             rescale_velocities=True,
             equil_steps=1,
             file_prefix=file_prefix,
@@ -336,7 +336,7 @@ def test_remove_rot(tmp_path):
             temp=300.0,
             steps=0,
             traj_every=1,
-            output_every=1,
+            stats_every=1,
             rescale_velocities=True,
             remove_rot=True,
             equil_steps=1,
@@ -371,7 +371,7 @@ def test_traj_start(tmp_path):
         steps=3,
         traj_every=1,
         restart_every=100,
-        output_every=100,
+        stats_every=100,
         file_prefix=file_prefix,
     )
     nvt.run()
@@ -387,7 +387,7 @@ def test_traj_start(tmp_path):
         traj_every=1,
         traj_start=2,
         restart_every=100,
-        output_every=100,
+        stats_every=100,
         file_prefix=file_prefix,
     )
     nvt.run()
@@ -413,7 +413,7 @@ def test_minimize_every(tmp_path):
         temp=300.0,
         steps=6,
         traj_start=100,
-        output_every=100,
+        stats_every=100,
         minimize=True,
         minimize_every=2,
         equil_steps=4,
@@ -446,7 +446,7 @@ def test_rescale_every(tmp_path):
         temp=300.0,
         steps=4,
         traj_start=100,
-        output_every=1,
+        stats_every=1,
         rescale_velocities=True,
         remove_rot=True,
         rescale_every=3,
@@ -484,7 +484,7 @@ def test_rotate_restart(tmp_path):
         temp=300.0,
         steps=3,
         traj_start=100,
-        output_every=100,
+        stats_every=100,
         rotate_restart=True,
         restart_every=1,
         restarts_to_keep=2,

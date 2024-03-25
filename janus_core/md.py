@@ -35,6 +35,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     struct_name : str
         Name of structure to simulate. Default is inferred from filepath or
         chemical formula.
+    ensemble : Ensembles
+        Name for thermodynamic ensemble. Default is None.
     timestep : float
         Timestep for integrator, in fs. Default is 1.0.
     steps : int
@@ -45,10 +47,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Maximum number of steps at which to perform optimization and reset velocities.
         Default is 0.
     minimize : bool
-        Minimize structure during equilibration. Default is False.
+        Whether to minimize structure during equilibration. Default is False.
     minimize_every : int
-        Interval between minimizations. Default is -1, which disables further
-        minimization.
+        Frequency of minimizations. Default is -1, which disables minimization after
+        beginning dynamics.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
     rescale_velocities : bool
@@ -63,19 +65,19 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     restart : bool
         Whether restarting dynamics. Default is False.
     restart_stem : str
-        Stem for restart file name. Default inferred from struct_name and ensemble.
+        Stem for restart file name. Default inferred from `file_prefix`.
     restart_every : int
         Frequency of steps to save restart info. Default is 1000.
     rotate_restart : bool
         Whether to rotate restart files. Default is False.
     restarts_to_keep : int
         Restart files to keep if rotating. Default is 4.
-    md_file : Optional[PathLike]
-        MD file to save. Default inferred from struct_name, ensemble and
-        temperature.
+    stats_file : Optional[PathLike]
+        File to save thermodynamical statistics. Default inferred from `file_prefix`.
+    stats_every : int
+        Frequency to output statistics. Default is 100.
     traj_file : Optional[PathLike]
-        Trajectory file to save. Default inferred from struct_name, ensemble and
-        temperature.
+        Trajectory file to save. Default inferred from `file_prefix`.
     traj_append : bool
         Whether to append trajectory. Default is False.
     traj_start : int
@@ -84,10 +86,6 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Frequency of steps to save trajectory. Default is 100.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to log config. Default is None.
-    output_every : int
-        Frequency to output MD logs to. Default is 100.
-    ensemble : Ensembles
-        Name for thermodynamic ensemble. Default is None.
 
     Attributes
     ----------
@@ -128,6 +126,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self,
         struct: Atoms,
         struct_name: Optional[str] = None,
+        ensemble: Optional[Ensembles] = None,
         timestep: float = 1.0,
         steps: int = 0,
         temp: float = 300,
@@ -144,14 +143,13 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         restart_every: int = 1000,
         rotate_restart: bool = False,
         restarts_to_keep: int = 4,
-        md_file: Optional[PathLike] = None,
+        stats_file: Optional[PathLike] = None,
+        stats_every: int = 100,
         traj_file: Optional[PathLike] = None,
         traj_append: bool = False,
         traj_start: int = 0,
         traj_every: int = 100,
         log_kwargs: Optional[dict[str, Any]] = None,
-        output_every: int = 100,
-        ensemble: Optional[Ensembles] = None,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -163,6 +161,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         struct_name : str
             Name of structure to simulate. Default is inferred from filepath or
             chemical formula.
+        ensemble : Ensembles
+            Name for thermodynamic ensemble. Default is None.
         timestep : float
             Timestep for integrator, in fs. Default is 1.0.
         steps : int
@@ -173,10 +173,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Maximum number of steps at which to perform optimization and reset
             velocities. Default is 0.
         minimize : bool
-            Minimize structure during equilibration. Default is False.
+            Whether to minimize structure during equilibration. Default is False.
         minimize_every : int
-            Interval between minimizations. Default is -1, which disables further
-            minimization.
+            Frequency of minimizations. Default is -1, which disables minimization
+            after beginning dynamics.
         minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
         rescale_velocities : bool
@@ -198,8 +198,11 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Whether to rotate restart files. Default is False.
         restarts_to_keep : int
             Restart files to keep if rotating. Default is 4.
-        md_file : Optional[PathLike]
-            MD file to save.  Default inferred from `file_prefix`.
+        stats_file : Optional[PathLike]
+            File to save thermodynamical statistics. Default inferred from
+            `file_prefix`.
+        stats_every : int
+            Frequency to output statistics. Default is 100.
         traj_file : Optional[PathLike]
             Trajectory file to save. Default inferred from `file_prefix`.
         traj_append : bool
@@ -210,10 +213,6 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Frequency of steps to save trajectory. Default is 100.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to log config. Default is None.
-        output_every : int
-            Frequency to output MD logs to. Default is 100.
-        ensemble : Ensembles
-            Name for thermodynamic ensemble. Default is None.
         """
         self.struct = struct
         self.struct_name = struct_name
@@ -232,13 +231,13 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.restart_every = restart_every
         self.rotate_restart = rotate_restart
         self.restarts_to_keep = restarts_to_keep
-        self.md_file = md_file
+        self.stats_file = stats_file
+        self.stats_every = stats_every
         self.traj_file = traj_file
         self.traj_append = traj_append
         self.traj_start = traj_start
         self.traj_every = traj_every
         self.log_kwargs = log_kwargs
-        self.output_every = output_every
         self.ensemble = ensemble
 
         self.log_kwargs = (
@@ -312,8 +311,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         if not self.file_prefix:
             self.file_prefix = f"{self.struct_name}-{self.ensemble}-T{self.temp}"
 
-        if not self.md_file:
-            self.md_file = f"{self.file_prefix}-stats.dat"
+        if not self.stats_file:
+            self.stats_file = f"{self.file_prefix}-stats.dat"
 
         if not self.traj_file:
             self.traj_file = f"{self.file_prefix}-traj.xyz"
@@ -401,7 +400,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     def write_md_log(self) -> None:
         """Write molecular dynamics log."""
         log_stats = self.get_log_stats()
-        with open(self.md_file, "a", encoding="utf8") as md_log:
+        with open(self.stats_file, "a", encoding="utf8") as md_log:
             print(log_stats, file=md_log)
 
     def write_traj(self) -> None:
@@ -443,7 +442,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         if self.restart:
             try:
-                with open(self.md_file, encoding="utf8") as md_log:
+                with open(self.stats_file, encoding="utf8") as md_log:
                     last_line = md_log.readlines()[-1].split()
                 try:
                     self.offset = int(last_line[0])
@@ -459,10 +458,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 self.reset_velocities()
 
             log_header = self.get_log_header()
-            with open(self.md_file, "w", encoding="utf8") as md_log:
+            with open(self.stats_file, "w", encoding="utf8") as md_log:
                 print(log_header, file=md_log)
 
-        self.dyn.attach(self.write_md_log, interval=self.output_every)
+        self.dyn.attach(self.write_md_log, interval=self.stats_every)
         self.dyn.attach(self.write_traj, interval=self.traj_every)
         self.dyn.attach(self.write_restart, interval=self.restart_every)
 
@@ -558,8 +557,8 @@ class NPT(MolecularDynamics):
             self.file_prefix = (
                 f"{self.struct_name}-{self.ensemble}-T{self.temp}-p{self.pressure}"
             )
-            if "md_file" not in kwargs:
-                self.md_file = ""
+            if "stats_file" not in kwargs:
+                self.stats_file = ""
             if "traj_file" not in kwargs:
                 self.traj_file = ""
             if "restart_stem" not in kwargs:
