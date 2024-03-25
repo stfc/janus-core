@@ -69,7 +69,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     rotate_restart : bool
         Whether to rotate restart files. Default is False.
     restarts_to_keep : int
-        Restart files to keep. Default is 4.
+        Restart files to keep if rotating. Default is 4.
     md_file : Optional[PathLike]
         MD file to save. Default inferred from struct_name, ensemble and
         temperature.
@@ -197,7 +197,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         rotate_restart : bool
             Whether to rotate restart files. Default is False.
         restarts_to_keep : int
-            Restart files to keep. Default is 4.
+            Restart files to keep if rotating. Default is 4.
         md_file : Optional[PathLike]
             MD file to save.  Default inferred from `file_prefix`.
         traj_file : Optional[PathLike]

@@ -466,3 +466,32 @@ def test_rescale_every(tmp_path):
         assert any("Rotation reset at step 0" in line for line in log_txt)
         assert not any("Rotation reset at step 1" in line for line in log_txt)
         assert any("Rotation reset at step 3" in line for line in log_txt)
+
+
+def test_rotate_restart(tmp_path):
+    """Test setting rotate_restart."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    restart_path_1 = tmp_path / "Cl4Na4-nvt-T300.0-res-1.xyz"
+    restart_path_2 = tmp_path / "Cl4Na4-nvt-T300.0-res-2.xyz"
+    restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.xyz"
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=3,
+        traj_start=100,
+        output_every=100,
+        rotate_restart=True,
+        restart_every=1,
+        restarts_to_keep=2,
+        file_prefix=file_prefix,
+    )
+    nvt.run()
+
+    assert not restart_path_1.exists()
+    assert restart_path_2.exists()
+    assert restart_path_3.exists()
