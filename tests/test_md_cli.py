@@ -65,6 +65,7 @@ def test_md(ensemble, tmp_path):
 def test_md_log(tmp_path, caplog):
     """Test log correctly written for MD."""
     file_prefix = tmp_path / "nvt-T300"
+    stats_path = tmp_path / "nvt-T300-stats.dat"
 
     with caplog.at_level("INFO", logger="janus_core.md"):
         result = runner.invoke(
@@ -79,8 +80,29 @@ def test_md_log(tmp_path, caplog):
                 "--file-prefix",
                 file_prefix,
                 "--steps",
-                2,
+                20,
+                "--stats-every",
+                1,
             ],
         )
         assert result.exit_code == 0
         assert " Starting molecular dynamics simulation" in caplog.text
+
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
+            # Includes step 0
+            assert len(lines) == 22
+
+            # Test constant volume
+            assert lines[0].split(" | ")[8] == "Volume [A^3]"
+            init_volume = float(lines[1].split()[8])
+            final_volume = float(lines[-1].split()[8])
+            assert init_volume == 179.4
+            assert init_volume == pytest.approx(final_volume)
+
+            # Test constant temperature
+            assert lines[0].split(" | ")[16] == "T [K]\n"
+            init_temp = float(lines[1].split()[16])
+            final_temp = float(lines[-1].split()[16])
+            assert init_temp == 300.0
+            assert final_temp == pytest.approx(final_temp)
