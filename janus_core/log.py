@@ -20,6 +20,7 @@ def config_logger(
     level: LogLevel = logging.INFO,
     capture_warnings: bool = True,
     filemode: Literal["r", "w", "a", "x", "r+", "w+", "a+", "x+"] = "w",
+    force: bool = False,
 ):
     """
     Configure logger with yaml-styled format.
@@ -36,6 +37,9 @@ def config_logger(
         Whether to capture warnings in log. Default is True.
     filemode : str
         Mode of file to open. Default is "w".
+    force : bool
+        If true, remove and close existing handlers attached to the root logger before
+        configuration. Default is False.
 
     Returns
     -------
@@ -51,6 +55,7 @@ def config_logger(
             filemode=filemode,
             format=FORMAT,
             encoding="utf-8",
+            force=force,
         )
         logging.captureWarnings(capture=capture_warnings)
     else:
