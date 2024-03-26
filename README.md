@@ -116,8 +116,8 @@ janus md npt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model'
 This will generate several output files:
 
 - Thermodynamical statistics every 100 steps, written to `NaCl-npt-T300.0-p1.0-stats.dat`
-- The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0--traj.xyz`
-- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0--res-1000.xyz`
+- The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0-traj.xyz`
+- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0-res-1000.xyz`
 - A log of the processes carried out, written to `md.log`
 
 
@@ -128,6 +128,14 @@ janus md nvt --struct tests/data/NaCl.cif --steps 1000 --timestep 0.5 --temp 300
 ```
 
 This performs an NVT molecular dynamics simulation at 300K for 1000 steps (0.5 ps), including performing geometry optimization, rescaling velocities, and removing rotation, both before beginning dynamics and at steps 100 and 200 of the simulation.
+
+
+```shell
+janus md nve --struct tests/data/NaCl.cif --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.xyz" --stats-every 10 --stats-file "example-statistics.dat"
+```
+
+This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps), saving the trajectory every 10 steps after the first 100, and the thermodynamical statistics every 10 steps, as well as changing the output file names for both.
+
 
 For all options, run `janus md --help`.
 
