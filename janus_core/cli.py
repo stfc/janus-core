@@ -381,7 +381,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     help="Run molecular dynamics simulation, and save trajectory and statistics.",
 )
 def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
-    ensemble: Annotated[str, typer.Argument(help="Name of thermodynamic ensemble.")],
+    ensemble: Annotated[str, typer.Option(help="Name of thermodynamic ensemble.")],
     struct_path: StructPath,
     steps: Annotated[int, typer.Option(help="Number of steps in simulation.")] = 0,
     timestep: Annotated[

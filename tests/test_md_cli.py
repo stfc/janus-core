@@ -41,6 +41,7 @@ def test_md(ensemble, tmp_path):
         app,
         [
             "md",
+            "--ensemble",
             ensemble,
             "--struct",
             DATA_PATH / "NaCl.cif",
@@ -72,6 +73,7 @@ def test_md_log(tmp_path, caplog):
             app,
             [
                 "md",
+                "--ensemble",
                 "nvt",
                 "--struct",
                 DATA_PATH / "NaCl.cif",
@@ -117,6 +119,7 @@ def test_seed(tmp_path):
         app,
         [
             "md",
+            "--ensemble",
             "nvt",
             "--struct",
             DATA_PATH / "NaCl.cif",
@@ -147,6 +150,7 @@ def test_seed(tmp_path):
         app,
         [
             "md",
+            "--ensemble",
             "nvt",
             "--struct",
             DATA_PATH / "NaCl.cif",

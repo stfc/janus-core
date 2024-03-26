@@ -110,7 +110,7 @@ For all options, run `janus geomopt --help`.
 Run an NPT molecular dynamics simulation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field) at 300K and 1 bar for 1000 steps (1 ps):
 
 ```shell
-janus md npt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --temp 300 --steps 1000 --pressure 1.0
+janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --temp 300 --steps 1000 --pressure 1.0
 ```
 
 This will generate several output files:
@@ -124,14 +124,14 @@ This will generate several output files:
 Additional options may be specified. For example:
 
 ```shell
-janus md nvt --struct tests/data/NaCl.cif --steps 1000 --timestep 0.5 --temp 300 --minimize --minimize-every 100 --rescale-velocities --remove-rot --rescale-every 100 --equil-steps 200
+janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1000 --timestep 0.5 --temp 300 --minimize --minimize-every 100 --rescale-velocities --remove-rot --rescale-every 100 --equil-steps 200
 ```
 
 This performs an NVT molecular dynamics simulation at 300K for 1000 steps (0.5 ps), including performing geometry optimization, rescaling velocities, and removing rotation, both before beginning dynamics and at steps 100 and 200 of the simulation.
 
 
 ```shell
-janus md nve --struct tests/data/NaCl.cif --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.xyz" --stats-every 10 --stats-file "example-statistics.dat"
+janus md --ensemble nve --struct tests/data/NaCl.cif --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.xyz" --stats-every 10 --stats-file "example-statistics.dat"
 ```
 
 This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps), saving the trajectory every 10 steps after the first 100, and the thermodynamical statistics every 10 steps, as well as changing the output file names for both.
