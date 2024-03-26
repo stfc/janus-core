@@ -92,17 +92,45 @@ Perform geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/ma
 janus geomopt --struct tests/data/H2O.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will calculate optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`.
+This will optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`.
 
 Additional options may be specified. This shares most options with `singlepoint`, as well as a few additional options, such as:
 
 ```shell
-janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --fully-opt --vectors-only --traj 'NaCl-traj.xyz'
+janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --vectors-only --traj 'NaCl-traj.xyz'
 ```
 
 This allows the cell to be optimised, allowing only hydrostatic deformation, and saves the optimization trajector in addition to the final structure and log.
 
 For all options, run `janus geomopt --help`.
+
+
+### Molecular dynamics
+
+Run an NPT molecular dynamics simulation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field) at 300K and 1 bar for 1000 steps (1 ps):
+
+```shell
+janus md npt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --temp 300 --steps 1000 --pressure 1.0
+```
+
+This will generate several output files:
+
+- Thermodynamical statistics every 100 steps, written to `NaCl-npt-T300.0-p1.0-stats.dat`
+- The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0--traj.xyz`
+- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0--res-1000.xyz`
+- A log of the processes carried out, written to `md.log`
+
+
+Additional options may be specified. For example:
+
+```shell
+janus md nvt --struct tests/data/NaCl.cif --steps 1000 --timestep 0.5 --temp 300 --minimize --minimize-every 100 --rescale-velocities --remove-rot --rescale-every 100 --equil-steps 200
+```
+
+This performs an NVT molecular dynamics simulation at 300K for 1000 steps (0.5 ps), including performing geometry optimization, rescaling velocities, and removing rotation, both before beginning dynamics and at steps 100 and 200 of the simulation.
+
+For all options, run `janus md --help`.
+
 
 ## License
 
