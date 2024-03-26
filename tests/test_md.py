@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
+from janus_core.mlip_calculators import choose_calculator
 from janus_core.single_point import SinglePoint
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -206,8 +207,8 @@ def test_nph():
         stats_path.unlink(missing_ok=True)
 
 
-def test_restart_nvt(tmp_path):
-    """Test restarting NVT molecular dynamics."""
+def test_restart(tmp_path):
+    """Test restarting molecular dynamics simulation."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
@@ -495,3 +496,32 @@ def test_rotate_restart(tmp_path):
     assert not restart_path_1.exists()
     assert restart_path_2.exists()
     assert restart_path_3.exists()
+
+
+def test_atoms_struct(tmp_path):
+    """Test restarting NVT molecular dynamics."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
+    stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
+
+    struct = read(DATA_PATH / "NaCl.cif")
+    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+
+    nvt = NVT(
+        struct=struct,
+        temp=300.0,
+        steps=4,
+        stats_every=1,
+        traj_every=1,
+        file_prefix=file_prefix,
+    )
+    nvt.run()
+
+    traj = read(traj_path, index=":")
+    assert len(traj) == 5
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        assert " | Epot/N [eV]" in lines[0]
+        # Includes step 0
+        assert len(lines) == 6
