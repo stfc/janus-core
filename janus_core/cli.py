@@ -384,6 +384,9 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     ensemble: Annotated[str, typer.Argument(help="Name of thermodynamic ensemble.")],
     struct_path: StructPath,
     steps: Annotated[int, typer.Option(help="Number of steps in simulation.")] = 0,
+    timestep: Annotated[
+        float, typer.Option(help="Timestep for integrator, in fs.")
+    ] = 1.0,
     temp: Annotated[float, typer.Option(help="Temperature, in K.")] = 300.0,
     thermostat_time: Annotated[
         float,
@@ -407,9 +410,6 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     device: Device = "cpu",
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
-    timestep: Annotated[
-        float, typer.Option(help="Timestep for integrator, in fs.")
-    ] = 1.0,
     equil_steps: Annotated[
         int,
         typer.Option(
@@ -521,6 +521,8 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Path of structure to simulate.
     steps : int
         Number of steps in simulation. Default is 0.
+    timestep : float
+        Timestep for integrator, in fs. Default is 1.0.
     temp : float
         Temperature, in K. Default is 300.
     thermostat_time : float
@@ -542,8 +544,6 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    timestep : float
-        Timestep for integrator, in fs. Default is 1.0.
     equil_steps : int
         Maximum number of steps at which to perform optimization and reset velocities.
         Default is 0.

@@ -37,10 +37,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         chemical formula.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is None.
-    timestep : float
-        Timestep for integrator, in fs. Default is 1.0.
     steps : int
         Number of steps in simulation. Default is 0.
+    timestep : float
+        Timestep for integrator, in fs. Default is 1.0.
     temp : float
         Temperature, in K. Default is 300.
     equil_steps : int
@@ -127,8 +127,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         struct: Atoms,
         struct_name: Optional[str] = None,
         ensemble: Optional[Ensembles] = None,
-        timestep: float = 1.0,
         steps: int = 0,
+        timestep: float = 1.0,
         temp: float = 300,
         equil_steps: int = 0,
         minimize: bool = False,
@@ -163,10 +163,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             chemical formula.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is None.
-        timestep : float
-            Timestep for integrator, in fs. Default is 1.0.
         steps : int
             Number of steps in simulation. Default is 0.
+        timestep : float
+            Timestep for integrator, in fs. Default is 1.0.
         temp : float
             Temperature, in K. Default is 300.
         equil_steps : int
@@ -553,15 +553,15 @@ class NPT(MolecularDynamics):
 
         # Reconfigure filenames to include pressure if `file_prefix` not specified
         # Requires super().__init__ first to determine `self.struct_name`
-        if "file_prefix" not in kwargs and not isinstance(self, NVT_NH):
+        if not file_prefix and not isinstance(self, NVT_NH):
             self.file_prefix = (
                 f"{self.struct_name}-{self.ensemble}-T{self.temp}-p{self.pressure}"
             )
-            if "stats_file" not in kwargs:
+            if not kwargs.get("stats_file"):
                 self.stats_file = ""
-            if "traj_file" not in kwargs:
+            if not kwargs.get("traj_file"):
                 self.traj_file = ""
-            if "restart_stem" not in kwargs:
+            if not kwargs.get("restart_stem"):
                 self.restart_stem = ""
             self.configure_filenames()
 
