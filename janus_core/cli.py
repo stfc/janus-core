@@ -509,6 +509,10 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         int, typer.Option(help="Frequency of steps to save trajectory.")
     ] = 100,
     log_file: LogFile = "md.log",
+    seed: Annotated[
+        Optional[int],
+        typer.Option(help="Random seed for numpy.random and random functions."),
+    ] = None,
 ):
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -586,7 +590,10 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     traj_every : int
         Frequency of steps to save trajectory. Default is 100.
     log_file : Optional[Path]
-        Path to write logs to. Default is "md.log.".
+        Path to write logs to. Default is "md.log".
+    seed : Optional[int]
+        Random seed used by numpy.random and random functions, such as in Langevin.
+        Default is None.
     """
     [read_kwargs, calc_kwargs, minimize_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
@@ -638,6 +645,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         "traj_start": traj_start,
         "traj_every": traj_every,
         "log_kwargs": log_kwargs,
+        "seed": seed,
     }
 
     if ensemble == "nvt":

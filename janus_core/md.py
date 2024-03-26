@@ -2,6 +2,7 @@
 
 import datetime as clock
 from pathlib import Path
+import random
 from typing import Any, Optional
 from warnings import warn
 
@@ -86,6 +87,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Frequency of steps to save trajectory. Default is 100.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to log config. Default is None.
+    seed : Optional[int]
+        Random seed used by numpy.random and random functions, such as in Langevin.
+        Default is None.
 
     Attributes
     ----------
@@ -150,6 +154,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         traj_start: int = 0,
         traj_every: int = 100,
         log_kwargs: Optional[dict[str, Any]] = None,
+        seed: Optional[int] = None,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -213,6 +218,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Frequency of steps to save trajectory. Default is 100.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to log config. Default is None.
+        seed : Optional[int]
+            Random seed used by numpy.random and random functions, such as in Langevin.
+            Default is None.
         """
         self.struct = struct
         self.struct_name = struct_name
@@ -239,6 +247,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.traj_every = traj_every
         self.log_kwargs = log_kwargs
         self.ensemble = ensemble
+        self.seed = seed
 
         self.log_kwargs = (
             log_kwargs if log_kwargs else {}
@@ -275,6 +284,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         if "masses" not in self.struct.arrays.keys():
             self.struct.set_masses()
+
+        if self.seed:
+            np.random.seed(seed)
+            random.seed(seed)
 
     def rotate_restart_files(self) -> None:
         """Rotate restart files."""

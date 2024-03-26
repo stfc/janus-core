@@ -106,3 +106,71 @@ def test_md_log(tmp_path, caplog):
             final_temp = float(lines[-1].split()[16])
             assert init_temp == 300.0
             assert final_temp == pytest.approx(final_temp)
+
+
+def test_seed(tmp_path):
+    """Test seed enables reproducable results for NVT."""
+    file_prefix = tmp_path / "nvt-T300"
+    stats_path = tmp_path / "nvt-T300-stats.dat"
+
+    result_1 = runner.invoke(
+        app,
+        [
+            "md",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--temp",
+            300,
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            20,
+            "--stats-every",
+            20,
+            "--seed",
+            42,
+        ],
+    )
+    assert result_1.exit_code == 0
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        # Includes step 0
+        assert len(lines) == 3
+
+        final_stats_1 = lines[2].split()
+
+    stats_path.unlink()
+
+    result_2 = runner.invoke(
+        app,
+        [
+            "md",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--temp",
+            300,
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            20,
+            "--stats-every",
+            20,
+            "--seed",
+            42,
+        ],
+    )
+    assert result_2.exit_code == 0
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        # Includes step 0
+        assert len(lines) == 3
+
+        final_stats_2 = lines[2].split()
+
+    for i, (stats_1, stats_2) in enumerate(zip(final_stats_1, final_stats_2)):
+        if i != 1:
+            assert stats_1 == stats_2
