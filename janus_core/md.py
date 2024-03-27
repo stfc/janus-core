@@ -1,6 +1,6 @@
 """Run molecular dynamics simulations."""
 
-import datetime as clock
+import datetime
 from pathlib import Path
 import random
 from typing import Any, Optional
@@ -369,7 +369,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.dyn.atoms.info["time_fs"] = time
         self.dyn.atoms.info["step"] = step
 
-        time_now = clock.datetime.now()
+        time_now = datetime.datetime.now()
         real_time = time_now - self.dyn.atoms.info["real_time"]
         self.dyn.atoms.info["real_time"] = time_now
 
@@ -450,7 +450,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         if self.logger:
             self.logger.info("Starting molecular dynamics simulation")
 
-        self.struct.info["real_time"] = clock.datetime.now()
+        self.struct.info["real_time"] = datetime.datetime.now()
 
         if self.restart:
             try:
