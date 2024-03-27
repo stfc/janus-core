@@ -1,10 +1,12 @@
 """Set up commandline interface."""
 
 import ast
+import datetime
 from pathlib import Path
 from typing import Annotated, Optional, get_args
 
 import typer
+import yaml
 
 from janus_core.geom_opt import optimize
 from janus_core.janus_types import Ensembles
@@ -47,7 +49,7 @@ class TyperDict:  #  pylint: disable=too-few-public-methods
         return f"<TyperDict: value={self.value}>"
 
 
-def parse_dict_class(value: str):
+def _parse_dict_class(value: str):
     """
     Convert string input into a dictionary.
 
@@ -64,7 +66,7 @@ def parse_dict_class(value: str):
     return TyperDict(ast.literal_eval(value))
 
 
-def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
+def _parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     """
     Convert list of TyperDict objects to list of dictionaries.
 
@@ -90,6 +92,22 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     return typer_dicts
 
 
+def _iter_path_to_str(dictionary: dict) -> None:
+    """
+    Recursively iterate over dictionary, converting Path values to strings.
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary to be converted.
+    """
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            _iter_path_to_str(value)
+        elif isinstance(value, Path):
+            dictionary[key] = str(value)
+
+
 # Shared type aliases
 StructPath = Annotated[
     Path, typer.Option("--struct", help="Path of structure to simulate.")
@@ -101,7 +119,7 @@ Device = Annotated[str, typer.Option(help="Device to run calculations on.")]
 ReadKwargs = Annotated[
     TyperDict,
     typer.Option(
-        parser=parse_dict_class,
+        parser=_parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
@@ -114,7 +132,7 @@ ReadKwargs = Annotated[
 CalcKwargs = Annotated[
     TyperDict,
     typer.Option(
-        parser=parse_dict_class,
+        parser=_parse_dict_class,
         help=(
             """
             Keyword arguments to pass to selected calculator. Must be passed as a
@@ -128,7 +146,7 @@ CalcKwargs = Annotated[
 WriteKwargs = Annotated[
     TyperDict,
     typer.Option(
-        parser=parse_dict_class,
+        parser=_parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.write when saving results. Must be
@@ -198,7 +216,7 @@ def singlepoint(
     log_file : Optional[Path]
         Path to write logs to. Default is "singlepoint.log".
     """
-    [read_kwargs, calc_kwargs, write_kwargs] = parse_typer_dicts(
+    [read_kwargs, calc_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
 
@@ -269,7 +287,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     opt_kwargs: Annotated[
         TyperDict,
         typer.Option(
-            parser=parse_dict_class,
+            parser=_parse_dict_class,
             help=(
                 """
                 Keyword arguments to pass to optimizer. Must be passed as a dictionary
@@ -322,7 +340,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     log_file : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
     """
-    [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = parse_typer_dicts(
+    [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
     )
 
@@ -433,7 +451,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     minimize_kwargs: Annotated[
         TyperDict,
         typer.Option(
-            parser=parse_dict_class,
+            parser=_parse_dict_class,
             help=(
                 """
                 Keyword arguments to pass to optimizer. Must be passed as a dictionary
@@ -513,6 +531,10 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Optional[int],
         typer.Option(help="Random seed for numpy.random and random functions."),
     ] = None,
+    summary: Annotated[
+        Path,
+        typer.Option(help="Path to save summary of inputs and start/end time."),
+    ] = "summary.yml",
 ):
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -594,8 +616,10 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
+    summary : Path
+        Path to save summary of inputs and start/end time.
     """
-    [read_kwargs, calc_kwargs, minimize_kwargs] = parse_typer_dicts(
+    [read_kwargs, calc_kwargs, minimize_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
     )
 
@@ -648,6 +672,27 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         "seed": seed,
     }
 
+    inputs = {"ensemble": ensemble}
+    for key, value in dyn_kwargs.items():
+        inputs[key] = value
+
+    inputs["struct"] = {
+        "struct_path": str(struct_path),
+        "n_atoms": len(s_point.struct),
+        "formula": s_point.struct.get_chemical_formula(),
+    }
+
+    # Convert all paths to strings
+    _iter_path_to_str(inputs)
+
+    save_info = [
+        {"command": "janus md"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
     if ensemble == "nvt":
         for key in ["thermostat_time", "barostat_time", "bulk_modulus", "pressure"]:
             del dyn_kwargs[key]
@@ -679,3 +724,10 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         dyn = NVT_NH(**dyn_kwargs)
 
     dyn.run()
+
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump(
+            [{"end_time": datetime.datetime.today().strftime("%d/%m/%Y, %H:%M:%S")}],
+            outfile,
+            default_flow_style=False,
+        )
