@@ -6,6 +6,7 @@ from ase import Atoms
 from ase.io import read
 import pytest
 from typer.testing import CliRunner
+import yaml
 
 from janus_core.cli import app
 
@@ -36,6 +37,7 @@ def test_md(ensemble, tmp_path):
     """Test all MD simulations are able to run."""
     file_prefix = tmp_path / f"{ensemble}-T300"
     traj_path = tmp_path / f"{ensemble}-T300-traj.xyz"
+    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -53,6 +55,8 @@ def test_md(ensemble, tmp_path):
             2,
             "--traj-every",
             1,
+            "--summary",
+            summary_path,
         ],
     )
 
@@ -67,6 +71,7 @@ def test_md_log(tmp_path, caplog):
     """Test log correctly written for MD."""
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
+    summary_path = tmp_path / "summary.yml"
 
     with caplog.at_level("INFO", logger="janus_core.md"):
         result = runner.invoke(
@@ -85,6 +90,8 @@ def test_md_log(tmp_path, caplog):
                 20,
                 "--stats-every",
                 1,
+                "--summary",
+                summary_path,
             ],
         )
         assert result.exit_code == 0
@@ -114,6 +121,7 @@ def test_seed(tmp_path):
     """Test seed enables reproducable results for NVT."""
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
+    summary_path = tmp_path / "summary.yml"
 
     result_1 = runner.invoke(
         app,
@@ -133,6 +141,8 @@ def test_seed(tmp_path):
             20,
             "--seed",
             42,
+            "--summary",
+            summary_path,
         ],
     )
     assert result_1.exit_code == 0
@@ -164,6 +174,8 @@ def test_seed(tmp_path):
             20,
             "--seed",
             42,
+            "--summary",
+            summary_path,
         ],
     )
     assert result_2.exit_code == 0
@@ -178,3 +190,45 @@ def test_seed(tmp_path):
     for i, (stats_1, stats_2) in enumerate(zip(final_stats_1, final_stats_2)):
         if i != 1:
             assert stats_1 == stats_2
+
+
+def test_summary(tmp_path):
+    """Test summary file can be read correctly."""
+    file_prefix = tmp_path / "nvt-T300"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nve",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--temp",
+            300,
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--traj-every",
+            1,
+            "--summary",
+            summary_path,
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    # Read summary
+    with open(summary_path, encoding="utf8") as file:
+        summary = yaml.safe_load(file)
+
+    assert "command" in summary[0]
+    assert "start_time" in summary[1]
+    assert "inputs" in summary[2]
+    assert "end_time" in summary[3]
+
+    assert "ensemble" in summary[2]["inputs"]
+    assert "struct" in summary[2]["inputs"]
+    assert "n_atoms" in summary[2]["inputs"]["struct"]
