@@ -5,6 +5,7 @@ import datetime
 from pathlib import Path
 from typing import Annotated, Optional, get_args
 
+from ase import Atoms
 import typer
 import yaml
 
@@ -256,12 +257,23 @@ def singlepoint(  # pylint: disable=too-many-locals
     del inputs["log_kwargs"]
     inputs["log"] = log_file
 
-    inputs["struct"] = {
-        "n_atoms": len(s_point.struct),
-        "struct_path": struct_path,
-        "struct_name": s_point.struct_name,
-        "formula": s_point.struct.get_chemical_formula(),
-    }
+    if isinstance(s_point.struct, Atoms):
+        inputs["struct"] = {
+            "n_atoms": len(s_point.struct),
+            "struct_path": struct_path,
+            "struct_name": s_point.struct_name,
+            "formula": s_point.struct.get_chemical_formula(),
+        }
+    else:
+        inputs["traj"] = {
+            "length": len(s_point.struct),
+            "struct_path": struct_path,
+            "struct_name": s_point.struct_name,
+            "struct": {
+                "n_atoms": len(s_point.struct[0]),
+                "formula": s_point.struct[0].get_chemical_formula(),
+            },
+        }
 
     inputs["run"] = {
         "properties": properties,
