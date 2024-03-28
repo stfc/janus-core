@@ -14,6 +14,10 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
+# Many pylint now warnings raised due to similar log/summary flags
+# These depend on tmp_path, so not easily refactorisable
+# pylint: disable=duplicate-code
+
 
 def test_md_help():
     """Test calling `janus md --help`."""
@@ -37,6 +41,7 @@ def test_md(ensemble, tmp_path):
     """Test all MD simulations are able to run."""
     file_prefix = tmp_path / f"{ensemble}-T300"
     traj_path = tmp_path / f"{ensemble}-T300-traj.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -55,6 +60,8 @@ def test_md(ensemble, tmp_path):
             2,
             "--traj-every",
             1,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -71,6 +78,7 @@ def test_log(tmp_path, caplog):
     """Test log correctly written for MD."""
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     with caplog.at_level("INFO", logger="janus_core.md"):
@@ -90,12 +98,14 @@ def test_log(tmp_path, caplog):
                 20,
                 "--stats-every",
                 1,
+                "--log",
+                log_path,
                 "--summary",
                 summary_path,
             ],
         )
         assert result.exit_code == 0
-        assert " Starting molecular dynamics simulation" in caplog.text
+        assert "Starting molecular dynamics simulation" in caplog.text
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
@@ -121,6 +131,7 @@ def test_seed(tmp_path):
     """Test seed enables reproducable results for NVT."""
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result_1 = runner.invoke(
@@ -141,6 +152,8 @@ def test_seed(tmp_path):
             20,
             "--seed",
             42,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -174,6 +187,8 @@ def test_seed(tmp_path):
             20,
             "--seed",
             42,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -195,6 +210,7 @@ def test_seed(tmp_path):
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
     file_prefix = tmp_path / "nvt-T300"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -213,6 +229,8 @@ def test_summary(tmp_path):
             2,
             "--traj-every",
             1,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],

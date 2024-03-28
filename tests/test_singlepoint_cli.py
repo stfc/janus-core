@@ -13,6 +13,10 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
+# Many pylint warnings now raised due to similar log/summary flags
+# These depend on tmp_path, so not easily refactorisable
+# pylint: disable=duplicate-code
+
 
 def test_janus_help():
     """Test calling `janus --help`."""
@@ -33,6 +37,7 @@ def test_singlepoint_help():
 def test_singlepoint(tmp_path):
     """Test singlepoint calculation."""
     results_path = Path("./NaCl-results.xyz").absolute()
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -41,6 +46,8 @@ def test_singlepoint(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -57,6 +64,7 @@ def test_properties(tmp_path):
     """Test properties for singlepoint calculation."""
     results_path_1 = tmp_path / "H2O-energy-results.xyz"
     results_path_2 = tmp_path / "H2O-stress-results.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     # Check energy is can be calculated successfully
@@ -70,6 +78,8 @@ def test_properties(tmp_path):
             "energy",
             "--out",
             results_path_1,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -89,6 +99,8 @@ def test_properties(tmp_path):
             "stress",
             "--out",
             results_path_2,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -101,6 +113,7 @@ def test_properties(tmp_path):
 def test_read_kwargs(tmp_path):
     """Test setting read_kwargs for singlepoint calculation."""
     results_path = tmp_path / "benzene-traj-results.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -115,6 +128,8 @@ def test_read_kwargs(tmp_path):
             results_path,
             "--property",
             "energy",
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -125,9 +140,10 @@ def test_read_kwargs(tmp_path):
     assert isinstance(atoms, list)
 
 
-def test_singlepoint_calc_kwargs(tmp_path):
+def test_calc_kwargs(tmp_path):
     """Test setting calc_kwargs for singlepoint calculation."""
     results_path = tmp_path / "NaCl-results.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -142,6 +158,8 @@ def test_singlepoint_calc_kwargs(tmp_path):
             results_path,
             "--property",
             "energy",
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -180,6 +198,7 @@ def test_log(tmp_path, caplog):
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
     results_path = tmp_path / "benzene-traj-results.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -192,6 +211,8 @@ def test_summary(tmp_path):
             "{'index': ':'}",
             "--out",
             results_path,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],

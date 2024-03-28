@@ -14,6 +14,10 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
+# Many pylint now warnings raised due to similar log/summary flags
+# These depend on tmp_path, so not easily refactorisable
+# pylint: disable=duplicate-code
+
 
 def test_help():
     """Test calling `janus geomopt --help`."""
@@ -26,6 +30,7 @@ def test_help():
 def test_geomopt(tmp_path):
     """Test geomopt calculation."""
     results_path = Path("./NaCl-opt.xyz").absolute()
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     assert not results_path.exists()
@@ -38,6 +43,8 @@ def test_geomopt(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--max-force",
             "0.2",
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -77,6 +84,7 @@ def test_traj(tmp_path):
     """Test trajectory correctly written for geomopt."""
     results_path = tmp_path / "NaCl-opt.xyz"
     traj_path = f"{tmp_path}/test.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -89,6 +97,8 @@ def test_traj(tmp_path):
             results_path,
             "--traj",
             traj_path,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -101,6 +111,7 @@ def test_traj(tmp_path):
 def test_fully_opt(tmp_path, caplog):
     """Test passing --fully-opt without --vectors-only"""
     results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     with caplog.at_level("INFO", logger="janus_core.geom_opt"):
@@ -113,6 +124,8 @@ def test_fully_opt(tmp_path, caplog):
                 "--out",
                 results_path,
                 "--fully-opt",
+                "--log",
+                log_path,
                 "--summary",
                 summary_path,
             ],
@@ -161,6 +174,7 @@ def test_fully_opt_and_vectors(tmp_path, caplog):
 def test_vectors_not_fully_opt(tmp_path, caplog):
     """Test passing --vectors-only without --fully-opt."""
     results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     with caplog.at_level("INFO", logger="janus_core.geom_opt"):
@@ -173,6 +187,8 @@ def test_vectors_not_fully_opt(tmp_path, caplog):
                 "--out",
                 results_path,
                 "--vectors-only",
+                "--log",
+                log_path,
                 "--summary",
                 summary_path,
             ],
@@ -184,6 +200,7 @@ def test_vectors_not_fully_opt(tmp_path, caplog):
 def test_duplicate_traj(tmp_path):
     """Test trajectory file cannot be not passed via traj_kwargs."""
     traj_path = tmp_path / "NaCl-traj.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -194,6 +211,8 @@ def test_duplicate_traj(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--opt-kwargs",
             f"{{'trajectory': '{str(traj_path)}'}}",
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -207,6 +226,7 @@ def test_restart(tmp_path):
     data_path = DATA_PATH / "NaCl-deformed.cif"
     restart_path = tmp_path / "NaCl-res.pkl"
     results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -221,6 +241,8 @@ def test_restart(tmp_path):
             f"{{'restart': '{str(restart_path)}'}}",
             "--steps",
             2,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -241,6 +263,8 @@ def test_restart(tmp_path):
             f"{{'restart': '{str(restart_path)}'}}",
             "--steps",
             2,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
@@ -254,6 +278,7 @@ def test_restart(tmp_path):
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
     results_path = tmp_path / "NaCl-results.xyz"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
@@ -264,6 +289,8 @@ def test_summary(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             results_path,
+            "--log",
+            log_path,
             "--summary",
             summary_path,
         ],
