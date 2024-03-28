@@ -1,9 +1,12 @@
+*.dat
 *.lock
 *.log
 *.pyc
 *.swo
 *.swp
 *.xml
+*.xyz
+*.yml
 ~*
 *~
 .project
