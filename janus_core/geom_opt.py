@@ -21,7 +21,7 @@ from janus_core.utils import none_to_dict
 
 
 def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    atoms: Atoms,
+    struct: Atoms,
     fmax: float = 0.1,
     steps: int = 1000,
     filter_func: Optional[Callable] = DefaultFilter,
@@ -38,7 +38,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     Parameters
     ----------
-    atoms : Atoms
+    struct : Atoms
         Atoms object to optimize geometry for.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
@@ -67,7 +67,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     Returns
     -------
-    atoms: Atoms
+    struct: Atoms
         Structure with geometry optimized.
     """
     [filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs, log_kwargs] = none_to_dict(
@@ -76,7 +76,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     write_kwargs.setdefault(
         "filename",
-        Path(f"./{atoms.get_chemical_formula()}-opt.xyz").absolute(),
+        Path(f"./{struct.get_chemical_formula()}-opt.xyz").absolute(),
     )
 
     if traj_kwargs and "filename" not in traj_kwargs:
@@ -94,8 +94,8 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     logger = config_logger(**log_kwargs)
 
     if filter_func is not None:
-        filtered_atoms = filter_func(atoms, **filter_kwargs)
-        dyn = optimizer(filtered_atoms, **opt_kwargs)
+        filtered_struct = filter_func(struct, **filter_kwargs)
+        dyn = optimizer(filtered_struct, **opt_kwargs)
         if logger:
             logger.info("Using filter %s", filter_func.__name__)
             logger.info("Using optimizer %s", optimizer.__name__)
@@ -105,7 +105,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
                 )
 
     else:
-        dyn = optimizer(atoms, **opt_kwargs)
+        dyn = optimizer(struct, **opt_kwargs)
 
     if logger:
         logger.info("Starting geometry optimization")
@@ -114,9 +114,9 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     # Calculate current maximum force
     if filter_func is not None:
-        max_force = linalg.norm(filtered_atoms.get_forces(), axis=1).max()
+        max_force = linalg.norm(filtered_struct.get_forces(), axis=1).max()
     else:
-        max_force = linalg.norm(atoms.get_forces(), axis=1).max()
+        max_force = linalg.norm(struct.get_forces(), axis=1).max()
 
     if logger:
         logger.info("Max force: %.6f", max_force)
@@ -129,7 +129,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     # Write out optimized structure
     if write_results:
-        write(images=atoms, **write_kwargs)
+        write(images=struct, **write_kwargs)
 
     # Reformat trajectory file from binary
     if traj_kwargs:
@@ -139,4 +139,4 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     if logger:
         logger.info("Geometry optimization complete")
 
-    return atoms
+    return struct
