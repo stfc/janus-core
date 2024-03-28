@@ -67,7 +67,7 @@ def test_md(ensemble, tmp_path):
     assert isinstance(atoms, Atoms)
 
 
-def test_md_log(tmp_path, caplog):
+def test_log(tmp_path, caplog):
     """Test log correctly written for MD."""
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
@@ -225,6 +225,7 @@ def test_summary(tmp_path):
         summary = yaml.safe_load(file)
 
     assert "command" in summary[0]
+    assert "janus md" in summary[0]["command"]
     assert "start_time" in summary[1]
     assert "inputs" in summary[2]
     assert "end_time" in summary[3]
