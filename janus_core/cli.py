@@ -158,10 +158,13 @@ WriteKwargs = Annotated[
     ),
 ]
 LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to.")]
+Summary = Annotated[
+    Path, typer.Option(help="Path to save summary of inputs and start/end time.")
+]
 
 
 @app.command(help="Perform single point calculations and save to file.")
-def singlepoint(
+def singlepoint(  # pylint: disable=too-many-locals
     struct_path: StructPath,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -189,6 +192,7 @@ def singlepoint(
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
     log_file: LogFile = "singlepoint.log",
+    summary: Summary = "singlepoint_summary.yml",
 ):
     """
     Perform single point calculations and save to file.
@@ -215,6 +219,9 @@ def singlepoint(
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log_file : Optional[Path]
         Path to write logs to. Default is "singlepoint.log".
+    summary : Path
+        Path to save summary of inputs and start/end time. Default is
+        singlepoint_summary.yml.
     """
     [read_kwargs, calc_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
@@ -228,15 +235,61 @@ def singlepoint(
     if out_file:
         write_kwargs["filename"] = out_file
 
-    s_point = SinglePoint(
-        struct_path=struct_path,
-        architecture=architecture,
-        device=device,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w"},
-    )
+    singlepoint_kwargs = {
+        "struct_path": struct_path,
+        "architecture": architecture,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log_file, "filemode": "w"},
+    }
+
+    # Initialise singlepoint structure and calculator
+    s_point = SinglePoint(**singlepoint_kwargs)
+
+    # Store inputs for yaml summary
+    inputs = {}
+    for key, value in singlepoint_kwargs.items():
+        inputs[key] = value
+
+    # Store only filename as filemode is not set by user
+    del inputs["log_kwargs"]
+    inputs["log"] = log_file
+
+    inputs["struct"] = {
+        "n_atoms": len(s_point.struct),
+        "struct_path": struct_path,
+        "struct_name": s_point.struct_name,
+        "formula": s_point.struct.get_chemical_formula(),
+    }
+
+    inputs["run"] = {
+        "properties": properties,
+        "write_kwargs": write_kwargs,
+    }
+
+    # Convert all paths to strings in inputs nested dictionary
+    _iter_path_to_str(inputs)
+
+    # Save summary information before singlepoint calculation begins
+    save_info = [
+        {"command": "janus singlepoint"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
+    # Run singlepoint calculation
     s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
+
+    # Save time after simulation has finished
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump(
+            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            outfile,
+            default_flow_style=False,
+        )
 
 
 @app.command(
@@ -299,6 +352,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     ] = None,
     write_kwargs: WriteKwargs = None,
     log_file: LogFile = "geomopt.log",
+    summary: Summary = "geomopt_summary.yml",
 ):
     """
     Perform geometry optimization and save optimized structure to file.
@@ -339,6 +393,9 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         Default is {}.
     log_file : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
+    summary : Path
+        Path to save summary of inputs and start/end time. Default is
+        geomopt_summary.yml.
     """
     [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
@@ -380,19 +437,65 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     # Otherwise override with None
     fully_opt_dict = {} if (fully_opt or vectors_only) else {"filter_func": None}
 
-    # Run geometry optimization and save output structure
-    optimize(
-        s_point.struct,
-        fmax=fmax,
-        steps=steps,
-        filter_kwargs=filter_kwargs,
+    # Dictionary of inputs for optimize function
+    optimize_kwargs = {
+        "struct": s_point.struct,
+        "fmax": fmax,
+        "steps": steps,
+        "filter_kwargs": filter_kwargs,
         **fully_opt_dict,
-        opt_kwargs=opt_kwargs,
-        write_results=True,
-        write_kwargs=write_kwargs,
-        traj_kwargs=traj_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "a"},
-    )
+        "opt_kwargs": opt_kwargs,
+        "write_results": True,
+        "write_kwargs": write_kwargs,
+        "traj_kwargs": traj_kwargs,
+        "log_kwargs": {"filename": log_file, "filemode": "a"},
+    }
+
+    # Store inputs for yaml summary
+    inputs = {}
+    for key, value in optimize_kwargs.items():
+        inputs[key] = value
+
+    # Store only filename as filemode is not set by user
+    del inputs["log_kwargs"]
+    inputs["log"] = log_file
+
+    inputs["struct"] = {
+        "n_atoms": len(s_point.struct),
+        "struct_path": struct_path,
+        "struct_name": s_point.struct_name,
+        "formula": s_point.struct.get_chemical_formula(),
+    }
+
+    inputs["calc"] = {
+        "architecture": architecture,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+    }
+
+    # Convert all paths to strings in inputs nested dictionary
+    _iter_path_to_str(inputs)
+
+    # Save summary information before optimization begins
+    save_info = [
+        {"command": "janus geomopt"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
+    # Run geometry optimization and save output structure
+    optimize(**optimize_kwargs)
+
+    # Time after optimization has finished
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump(
+            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            outfile,
+            default_flow_style=False,
+        )
 
 
 @app.command(
@@ -531,10 +634,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Optional[int],
         typer.Option(help="Random seed for numpy.random and random functions."),
     ] = None,
-    summary: Annotated[
-        Path,
-        typer.Option(help="Path to save summary of inputs and start/end time."),
-    ] = "summary.yml",
+    summary: Summary = "md_summary.yml",
 ):
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -617,7 +717,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
     summary : Path
-        Path to save summary of inputs and start/end time.
+        Path to save summary of inputs and start/end time. Default is md_summary.yml.
     """
     [read_kwargs, calc_kwargs, minimize_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
@@ -672,27 +772,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         "seed": seed,
     }
 
-    inputs = {"ensemble": ensemble}
-    for key, value in dyn_kwargs.items():
-        inputs[key] = value
-
-    inputs["struct"] = {
-        "struct_path": str(struct_path),
-        "n_atoms": len(s_point.struct),
-        "formula": s_point.struct.get_chemical_formula(),
-    }
-
-    # Convert all paths to strings
-    _iter_path_to_str(inputs)
-
-    save_info = [
-        {"command": "janus md"},
-        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
-        {"inputs": inputs},
-    ]
-    with open(summary, "w", encoding="utf8") as outfile:
-        yaml.dump(save_info, outfile, default_flow_style=False)
-
+    # Instantiate MD ensemble
     if ensemble == "nvt":
         for key in ["thermostat_time", "barostat_time", "bulk_modulus", "pressure"]:
             del dyn_kwargs[key]
@@ -723,11 +803,48 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
             del dyn_kwargs[key]
         dyn = NVT_NH(**dyn_kwargs)
 
+    # Store inputs for yaml summary
+    inputs = {"ensemble": ensemble}
+    for key, value in dyn_kwargs.items():
+        inputs[key] = value
+
+    # Store only filename as filemode is not set by user
+    del inputs["log_kwargs"]
+    inputs["log"] = log_file
+
+    inputs["struct"] = {
+        "n_atoms": len(s_point.struct),
+        "struct_path": struct_path,
+        "struct_name": s_point.struct_name,
+        "formula": s_point.struct.get_chemical_formula(),
+    }
+
+    inputs["calc"] = {
+        "architecture": architecture,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+    }
+
+    # Convert all paths to strings in inputs nested dictionary
+    _iter_path_to_str(inputs)
+
+    # Save summary information before simulation begins
+    save_info = [
+        {"command": "janus md"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
+    # Run molecular dynamics
     dyn.run()
 
+    # Save time after simulation has finished
     with open(summary, "a", encoding="utf8") as outfile:
         yaml.dump(
-            [{"end_time": datetime.datetime.today().strftime("%d/%m/%Y, %H:%M:%S")}],
+            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
             outfile,
             default_flow_style=False,
         )
