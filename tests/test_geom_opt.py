@@ -42,10 +42,10 @@ def test_optimize(architecture, struct_path, expected, kwargs):
 
     init_energy = single_point.run("energy")["energy"]
 
-    atoms = optimize(single_point.struct, **kwargs)
+    struct = optimize(single_point.struct, **kwargs)
 
-    assert atoms.get_potential_energy() < init_energy
-    assert atoms.get_potential_energy() == pytest.approx(expected)
+    assert struct.get_potential_energy() < init_energy
+    assert struct.get_potential_energy() == pytest.approx(expected)
 
 
 def test_saving_struct(tmp_path):
@@ -131,27 +131,27 @@ def test_hydrostatic_strain():
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    atoms_1 = optimize(
+    struct_1 = optimize(
         single_point_1.struct, filter_kwargs={"hydrostatic_strain": True}
     )
-    atoms_2 = optimize(
+    struct_2 = optimize(
         single_point_2.struct, filter_kwargs={"hydrostatic_strain": False}
     )
 
     expected_1 = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
     expected_2 = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
-    assert atoms_1.cell.cellpar() == pytest.approx(expected_1)
-    assert atoms_2.cell.cellpar() == pytest.approx(expected_2)
+    assert struct_1.cell.cellpar() == pytest.approx(expected_1)
+    assert struct_2.cell.cellpar() == pytest.approx(expected_2)
 
 
 def test_set_calc():
     """Test setting the calculator without SinglePoint."""
-    atoms = read(DATA_PATH / "NaCl.cif")
-    atoms.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+    struct = read(DATA_PATH / "NaCl.cif")
+    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
 
-    init_energy = atoms.get_potential_energy()
-    opt_atoms = optimize(atoms)
-    assert opt_atoms.get_potential_energy() < init_energy
+    init_energy = struct.get_potential_energy()
+    opt_struct = optimize(struct)
+    assert opt_struct.get_potential_energy() < init_energy
 
 
 def test_converge_warning():

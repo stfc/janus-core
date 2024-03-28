@@ -1,10 +1,13 @@
 """Set up commandline interface."""
 
 import ast
+import datetime
 from pathlib import Path
 from typing import Annotated, Optional, get_args
 
+from ase import Atoms
 import typer
+import yaml
 
 from janus_core.geom_opt import optimize
 from janus_core.janus_types import Ensembles
@@ -47,7 +50,7 @@ class TyperDict:  #  pylint: disable=too-few-public-methods
         return f"<TyperDict: value={self.value}>"
 
 
-def parse_dict_class(value: str):
+def _parse_dict_class(value: str):
     """
     Convert string input into a dictionary.
 
@@ -64,7 +67,7 @@ def parse_dict_class(value: str):
     return TyperDict(ast.literal_eval(value))
 
 
-def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
+def _parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     """
     Convert list of TyperDict objects to list of dictionaries.
 
@@ -90,6 +93,22 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     return typer_dicts
 
 
+def _iter_path_to_str(dictionary: dict) -> None:
+    """
+    Recursively iterate over dictionary, converting Path values to strings.
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary to be converted.
+    """
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            _iter_path_to_str(value)
+        elif isinstance(value, Path):
+            dictionary[key] = str(value)
+
+
 # Shared type aliases
 StructPath = Annotated[
     Path, typer.Option("--struct", help="Path of structure to simulate.")
@@ -101,7 +120,7 @@ Device = Annotated[str, typer.Option(help="Device to run calculations on.")]
 ReadKwargs = Annotated[
     TyperDict,
     typer.Option(
-        parser=parse_dict_class,
+        parser=_parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
@@ -114,7 +133,7 @@ ReadKwargs = Annotated[
 CalcKwargs = Annotated[
     TyperDict,
     typer.Option(
-        parser=parse_dict_class,
+        parser=_parse_dict_class,
         help=(
             """
             Keyword arguments to pass to selected calculator. Must be passed as a
@@ -128,7 +147,7 @@ CalcKwargs = Annotated[
 WriteKwargs = Annotated[
     TyperDict,
     typer.Option(
-        parser=parse_dict_class,
+        parser=_parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.write when saving results. Must be
@@ -140,10 +159,13 @@ WriteKwargs = Annotated[
     ),
 ]
 LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to.")]
+Summary = Annotated[
+    Path, typer.Option(help="Path to save summary of inputs and start/end time.")
+]
 
 
 @app.command(help="Perform single point calculations and save to file.")
-def singlepoint(
+def singlepoint(  # pylint: disable=too-many-locals
     struct_path: StructPath,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -171,6 +193,7 @@ def singlepoint(
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
     log_file: LogFile = "singlepoint.log",
+    summary: Summary = "singlepoint_summary.yml",
 ):
     """
     Perform single point calculations and save to file.
@@ -197,8 +220,11 @@ def singlepoint(
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log_file : Optional[Path]
         Path to write logs to. Default is "singlepoint.log".
+    summary : Path
+        Path to save summary of inputs and start/end time. Default is
+        singlepoint_summary.yml.
     """
-    [read_kwargs, calc_kwargs, write_kwargs] = parse_typer_dicts(
+    [read_kwargs, calc_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
 
@@ -210,15 +236,72 @@ def singlepoint(
     if out_file:
         write_kwargs["filename"] = out_file
 
-    s_point = SinglePoint(
-        struct_path=struct_path,
-        architecture=architecture,
-        device=device,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w"},
-    )
+    singlepoint_kwargs = {
+        "struct_path": struct_path,
+        "architecture": architecture,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log_file, "filemode": "w"},
+    }
+
+    # Initialise singlepoint structure and calculator
+    s_point = SinglePoint(**singlepoint_kwargs)
+
+    # Store inputs for yaml summary
+    inputs = {}
+    for key, value in singlepoint_kwargs.items():
+        inputs[key] = value
+
+    # Store only filename as filemode is not set by user
+    del inputs["log_kwargs"]
+    inputs["log"] = log_file
+
+    if isinstance(s_point.struct, Atoms):
+        inputs["struct"] = {
+            "n_atoms": len(s_point.struct),
+            "struct_path": struct_path,
+            "struct_name": s_point.struct_name,
+            "formula": s_point.struct.get_chemical_formula(),
+        }
+    else:
+        inputs["traj"] = {
+            "length": len(s_point.struct),
+            "struct_path": struct_path,
+            "struct_name": s_point.struct_name,
+            "struct": {
+                "n_atoms": len(s_point.struct[0]),
+                "formula": s_point.struct[0].get_chemical_formula(),
+            },
+        }
+
+    inputs["run"] = {
+        "properties": properties,
+        "write_kwargs": write_kwargs,
+    }
+
+    # Convert all paths to strings in inputs nested dictionary
+    _iter_path_to_str(inputs)
+
+    # Save summary information before singlepoint calculation begins
+    save_info = [
+        {"command": "janus singlepoint"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
+    # Run singlepoint calculation
     s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
+
+    # Save time after simulation has finished
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump(
+            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            outfile,
+            default_flow_style=False,
+        )
 
 
 @app.command(
@@ -269,7 +352,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     opt_kwargs: Annotated[
         TyperDict,
         typer.Option(
-            parser=parse_dict_class,
+            parser=_parse_dict_class,
             help=(
                 """
                 Keyword arguments to pass to optimizer. Must be passed as a dictionary
@@ -281,6 +364,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     ] = None,
     write_kwargs: WriteKwargs = None,
     log_file: LogFile = "geomopt.log",
+    summary: Summary = "geomopt_summary.yml",
 ):
     """
     Perform geometry optimization and save optimized structure to file.
@@ -321,8 +405,11 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         Default is {}.
     log_file : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
+    summary : Path
+        Path to save summary of inputs and start/end time. Default is
+        geomopt_summary.yml.
     """
-    [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = parse_typer_dicts(
+    [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
     )
 
@@ -362,19 +449,65 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     # Otherwise override with None
     fully_opt_dict = {} if (fully_opt or vectors_only) else {"filter_func": None}
 
-    # Run geometry optimization and save output structure
-    optimize(
-        s_point.struct,
-        fmax=fmax,
-        steps=steps,
-        filter_kwargs=filter_kwargs,
+    # Dictionary of inputs for optimize function
+    optimize_kwargs = {
+        "struct": s_point.struct,
+        "fmax": fmax,
+        "steps": steps,
+        "filter_kwargs": filter_kwargs,
         **fully_opt_dict,
-        opt_kwargs=opt_kwargs,
-        write_results=True,
-        write_kwargs=write_kwargs,
-        traj_kwargs=traj_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "a"},
-    )
+        "opt_kwargs": opt_kwargs,
+        "write_results": True,
+        "write_kwargs": write_kwargs,
+        "traj_kwargs": traj_kwargs,
+        "log_kwargs": {"filename": log_file, "filemode": "a"},
+    }
+
+    # Store inputs for yaml summary
+    inputs = {}
+    for key, value in optimize_kwargs.items():
+        inputs[key] = value
+
+    # Store only filename as filemode is not set by user
+    del inputs["log_kwargs"]
+    inputs["log"] = log_file
+
+    inputs["struct"] = {
+        "n_atoms": len(s_point.struct),
+        "struct_path": struct_path,
+        "struct_name": s_point.struct_name,
+        "formula": s_point.struct.get_chemical_formula(),
+    }
+
+    inputs["calc"] = {
+        "architecture": architecture,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+    }
+
+    # Convert all paths to strings in inputs nested dictionary
+    _iter_path_to_str(inputs)
+
+    # Save summary information before optimization begins
+    save_info = [
+        {"command": "janus geomopt"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
+    # Run geometry optimization and save output structure
+    optimize(**optimize_kwargs)
+
+    # Time after optimization has finished
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump(
+            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            outfile,
+            default_flow_style=False,
+        )
 
 
 @app.command(
@@ -433,7 +566,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     minimize_kwargs: Annotated[
         TyperDict,
         typer.Option(
-            parser=parse_dict_class,
+            parser=_parse_dict_class,
             help=(
                 """
                 Keyword arguments to pass to optimizer. Must be passed as a dictionary
@@ -513,6 +646,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Optional[int],
         typer.Option(help="Random seed for numpy.random and random functions."),
     ] = None,
+    summary: Summary = "md_summary.yml",
 ):
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -594,8 +728,10 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
+    summary : Path
+        Path to save summary of inputs and start/end time. Default is md_summary.yml.
     """
-    [read_kwargs, calc_kwargs, minimize_kwargs] = parse_typer_dicts(
+    [read_kwargs, calc_kwargs, minimize_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
     )
 
@@ -648,6 +784,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         "seed": seed,
     }
 
+    # Instantiate MD ensemble
     if ensemble == "nvt":
         for key in ["thermostat_time", "barostat_time", "bulk_modulus", "pressure"]:
             del dyn_kwargs[key]
@@ -678,4 +815,48 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
             del dyn_kwargs[key]
         dyn = NVT_NH(**dyn_kwargs)
 
+    # Store inputs for yaml summary
+    inputs = {"ensemble": ensemble}
+    for key, value in dyn_kwargs.items():
+        inputs[key] = value
+
+    # Store only filename as filemode is not set by user
+    del inputs["log_kwargs"]
+    inputs["log"] = log_file
+
+    inputs["struct"] = {
+        "n_atoms": len(s_point.struct),
+        "struct_path": struct_path,
+        "struct_name": s_point.struct_name,
+        "formula": s_point.struct.get_chemical_formula(),
+    }
+
+    inputs["calc"] = {
+        "architecture": architecture,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+    }
+
+    # Convert all paths to strings in inputs nested dictionary
+    _iter_path_to_str(inputs)
+
+    # Save summary information before simulation begins
+    save_info = [
+        {"command": "janus md"},
+        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
+        {"inputs": inputs},
+    ]
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(save_info, outfile, default_flow_style=False)
+
+    # Run molecular dynamics
     dyn.run()
+
+    # Save time after simulation has finished
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump(
+            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            outfile,
+            default_flow_style=False,
+        )
