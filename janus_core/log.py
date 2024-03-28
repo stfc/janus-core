@@ -38,6 +38,9 @@ class CustomFormatter(logging.Formatter):
         str
             Formatted log message.
         """
+        # Replace "" with '' to prevent invalid wrapping
+        record.msg = record.msg.replace('"', "'")
+
         # Convert new lines into yaml list
         if len(record.msg.split("\n")) > 1:
             msg = record.msg
