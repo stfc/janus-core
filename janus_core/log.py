@@ -11,7 +11,48 @@ FORMAT = """
   message: %(message)s
   trace: %(module)s
   line: %(lineno)d
-""".strip()
+"""
+
+
+class CustomFormatter(logging.Formatter):
+    """
+    Custom formatter to convert multiline messages into yaml list.
+
+    Methods
+    -------
+    format(record)
+        Format log message to convert new lines into a yaml list.
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        """
+        Format log message to convert new lines into a yaml list.
+
+        Parameters
+        ----------
+        record : logging.LogRecord
+            Log record to be formatted.
+
+        Returns
+        -------
+        str
+            Formatted log message.
+        """
+        # Convert new lines into yaml list
+        if len(record.msg.split("\n")) > 1:
+            msg = record.msg
+            record.msg = "\n"
+            for line in msg.split("\n"):
+                # Exclude empty lines
+                if line.strip():
+                    record.msg += f'    - "{line.strip()}"\n'
+            # Remove final newline (single character)
+            record.msg = record.msg[:-1]
+        else:
+            # Wrap line in quotes here rather than in FORMAT due to list
+            record.msg = f'"{record.msg}"'
+
+        return super().format(record)
 
 
 def config_logger(
@@ -49,13 +90,19 @@ def config_logger(
     if filename:
         logger = logging.getLogger(name)
 
+        handler = logging.FileHandler(
+            filename,
+            filemode,
+            encoding="utf-8",
+        )
+        handler.setLevel(level)
+        formatter = CustomFormatter(FORMAT)
+        handler.setFormatter(formatter)
+
         logging.basicConfig(
             level=level,
-            filename=filename,
-            filemode=filemode,
-            format=FORMAT,
-            encoding="utf-8",
             force=force,
+            handlers=[handler],
         )
         logging.captureWarnings(capture=capture_warnings)
     else:
