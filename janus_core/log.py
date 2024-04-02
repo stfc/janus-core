@@ -14,9 +14,26 @@ FORMAT = """
 """
 
 
-class CustomFormatter(logging.Formatter):
+class CustomFormatter(logging.Formatter):  # numpydoc ignore=PR02
     """
     Custom formatter to convert multiline messages into yaml list.
+
+    Parameters
+    ----------
+    fmt : str
+        A format string in the given style for the logged output as a whole. Default is
+        '%(message)s'.
+    datefmt : str
+        A format string in the given style for the date/time portion of the logged
+        output. Default is taken from logging.Formatter.formatTime().
+    style : str
+        Determines how the format string will be merged with its data. Can be one of
+        '%', '{' or '$'. Default is '%'.
+    validate : bool
+        If True, incorrect or mismatched fmt and style will raise a ValueError. Default
+        is True.
+    defaults : dict[str, Any]
+         A dictionary with default values to use in custom fields.
 
     Methods
     -------
