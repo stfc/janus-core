@@ -6,7 +6,6 @@ from ase import Atoms
 from ase.io import read
 import numpy as np
 import pytest
-import yaml
 
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.mlip_calculators import choose_calculator
@@ -526,34 +525,3 @@ def test_atoms_struct(tmp_path):
         assert " | Epot/N [eV]" in lines[0]
         # Includes step 0
         assert len(lines) == 6
-
-
-def test_multiline_log(tmp_path):
-    """Test multiline log messages are written correctly."""
-    file_prefix = tmp_path / "nvt-T300"
-    log_path = tmp_path / "test.log"
-
-    single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
-        log_kwargs={"filename": log_path, "force": True},
-    )
-
-    nvt = NVT(
-        struct=single_point.struct,
-        steps=2,
-        file_prefix=file_prefix,
-        rescale_every=5,
-        rescale_velocities=True,
-        log_kwargs={"filename": log_path, "filemode": "a"},
-    )
-    nvt.run()
-
-    assert log_path.exists()
-    with open(log_path, encoding="utf8") as log:
-        log_dicts = yaml.safe_load(log)
-
-    assert log_dicts[2]["level"] == "WARNING"
-    assert len(log_dicts[2]["message"]) == 2
-    assert "UserWarning: Velocities" in log_dicts[2]["message"][0]

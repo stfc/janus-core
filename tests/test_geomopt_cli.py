@@ -49,35 +49,42 @@ def test_geomopt(tmp_path):
             summary_path,
         ],
     )
-
     read_atoms(results_path)
     assert result.exit_code == 0
 
 
-def test_log(tmp_path, caplog):
+def test_log(tmp_path):
     """Test log correctly written for geomopt."""
     results_path = tmp_path / "NaCl-opt.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
-        result = runner.invoke(
-            app,
-            [
-                "geomopt",
-                "--struct",
-                DATA_PATH / "NaCl.cif",
-                "--out",
-                results_path,
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "Starting geometry optimization" in caplog.text
-        assert "Using filter" not in caplog.text
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read log file
+    with open(log_path, encoding="utf8") as log_file:
+        logs = yaml.safe_load(log_file)
+
+    # Check for correct messages anywhere in logs
+    messages = ""
+    for log in logs:
+        messages += log["message"]
+    assert "Starting geometry optimization" in messages
+    assert "Using filter" not in messages
 
 
 def test_traj(tmp_path):
@@ -108,93 +115,117 @@ def test_traj(tmp_path):
     assert "forces" in atoms.arrays
 
 
-def test_fully_opt(tmp_path, caplog):
+def test_fully_opt(tmp_path):
     """Test passing --fully-opt without --vectors-only"""
     results_path = tmp_path / "NaCl-opt.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
-        result = runner.invoke(
-            app,
-            [
-                "geomopt",
-                "--struct",
-                DATA_PATH / "NaCl-deformed.cif",
-                "--out",
-                results_path,
-                "--fully-opt",
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "Using filter" in caplog.text
-        assert "hydrostatic_strain: False" in caplog.text
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--out",
+            results_path,
+            "--fully-opt",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
 
-        atoms = read(results_path)
-        expected = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
-        assert atoms.cell.cellpar() == pytest.approx(expected)
+    # Read log file
+    with open(log_path, encoding="utf8") as log_file:
+        logs = yaml.safe_load(log_file)
+
+    # Check for correct messages anywhere in logs
+    messages = ""
+    for log in logs:
+        messages += log["message"]
+    assert "Using filter" in messages
+    assert "hydrostatic_strain: False" in messages
+
+    atoms = read(results_path)
+    expected = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
+    assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
-def test_fully_opt_and_vectors(tmp_path, caplog):
+def test_fully_opt_and_vectors(tmp_path):
     """Test passing --fully-opt with --vectors-only."""
     results_path = tmp_path / "NaCl-opt.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
-        result = runner.invoke(
-            app,
-            [
-                "geomopt",
-                "--struct",
-                DATA_PATH / "NaCl-deformed.cif",
-                "--fully-opt",
-                "--vectors-only",
-                "--out",
-                results_path,
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "Using filter" in caplog.text
-        assert "hydrostatic_strain: True" in caplog.text
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--fully-opt",
+            "--vectors-only",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
 
-        atoms = read(results_path)
-        expected = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
-        assert atoms.cell.cellpar() == pytest.approx(expected)
+    # Read log file
+    with open(log_path, encoding="utf8") as log_file:
+        logs = yaml.safe_load(log_file)
+
+    # Check for correct messages anywhere in logs
+    messages = ""
+    for log in logs:
+        messages += log["message"]
+    assert "Using filter" in messages
+    assert "hydrostatic_strain: True" in messages
+
+    atoms = read(results_path)
+    expected = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
+    assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
-def test_vectors_not_fully_opt(tmp_path, caplog):
+def test_vectors_not_fully_opt(tmp_path):
     """Test passing --vectors-only without --fully-opt."""
     results_path = tmp_path / "NaCl-opt.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    with caplog.at_level("INFO", logger="janus_core.geom_opt"):
-        result = runner.invoke(
-            app,
-            [
-                "geomopt",
-                "--struct",
-                DATA_PATH / "NaCl.cif",
-                "--out",
-                results_path,
-                "--vectors-only",
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "hydrostatic_strain: True" in caplog.text
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            results_path,
+            "--vectors-only",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read log file
+    with open(log_path, encoding="utf8") as log_file:
+        logs = yaml.safe_load(log_file)
+
+    # Check for correct messages anywhere in logs
+    messages = ""
+    for log in logs:
+        messages += log["message"]
+    assert "hydrostatic_strain: True" in messages
 
 
 def test_duplicate_traj(tmp_path):
