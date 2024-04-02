@@ -74,57 +74,64 @@ def test_md(ensemble, tmp_path):
     assert isinstance(atoms, Atoms)
 
 
-def test_log(tmp_path, caplog):
+def test_log(tmp_path):
     """Test log correctly written for MD."""
     file_prefix = tmp_path / "nvt-T300"
-    stats_path = tmp_path / "nvt-T300-stats.dat"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    with caplog.at_level("INFO", logger="janus_core.md"):
-        result = runner.invoke(
-            app,
-            [
-                "md",
-                "--ensemble",
-                "nvt",
-                "--struct",
-                DATA_PATH / "NaCl.cif",
-                "--temp",
-                300,
-                "--file-prefix",
-                file_prefix,
-                "--steps",
-                20,
-                "--stats-every",
-                1,
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
-            ],
-        )
-        assert result.exit_code == 0
-        assert "Starting molecular dynamics simulation" in caplog.text
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--temp",
+            300,
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            20,
+            "--stats-every",
+            1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
 
-        with open(stats_path, encoding="utf8") as stats_file:
-            lines = stats_file.readlines()
-            # Includes step 0
-            assert len(lines) == 22
+    # Read log file
+    with open(log_path, encoding="utf8") as log_file:
+        logs = yaml.safe_load(log_file)
 
-            # Test constant volume
-            assert lines[0].split(" | ")[8] == "Volume [A^3]"
-            init_volume = float(lines[1].split()[8])
-            final_volume = float(lines[-1].split()[8])
-            assert init_volume == 179.4
-            assert init_volume == pytest.approx(final_volume)
+    # Check for correct messages anywhere in logs
+    messages = ""
+    for log in logs:
+        messages += log["message"]
+    assert "Starting molecular dynamics simulation" in messages
 
-            # Test constant temperature
-            assert lines[0].split(" | ")[16] == "Target T [K]\n"
-            init_temp = float(lines[1].split()[16])
-            final_temp = float(lines[-1].split()[16])
-            assert init_temp == 300.0
-            assert final_temp == pytest.approx(final_temp)
+    with open(tmp_path / "nvt-T300-stats.dat", encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        # Includes step 0
+        assert len(lines) == 22
+
+        # Test constant volume
+        assert lines[0].split(" | ")[8] == "Volume [A^3]"
+        init_volume = float(lines[1].split()[8])
+        final_volume = float(lines[-1].split()[8])
+        assert init_volume == 179.4
+        assert init_volume == pytest.approx(final_volume)
+
+        # Test constant temperature
+        assert lines[0].split(" | ")[16] == "Target T [K]\n"
+        init_temp = float(lines[1].split()[16])
+        final_temp = float(lines[-1].split()[16])
+        assert init_temp == 300.0
+        assert final_temp == pytest.approx(final_temp)
 
 
 def test_seed(tmp_path):

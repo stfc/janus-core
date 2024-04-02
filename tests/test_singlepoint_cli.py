@@ -168,31 +168,39 @@ def test_calc_kwargs(tmp_path):
     assert "Using float32 for MACECalculator" in result.stdout
 
 
-def test_log(tmp_path, caplog):
+def test_log(tmp_path):
     """Test log correctly written for singlepoint."""
     results_path = tmp_path / "NaCl-results.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    with caplog.at_level("INFO", logger="janus_core.single_point"):
-        result = runner.invoke(
-            app,
-            [
-                "singlepoint",
-                "--struct",
-                DATA_PATH / "NaCl.cif",
-                "--out",
-                results_path,
-                "--property",
-                "energy",
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
-            ],
-        )
-        assert "Starting single point calculation" in caplog.text
-        assert result.exit_code == 0
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            results_path,
+            "--property",
+            "energy",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read log file
+    with open(log_path, encoding="utf8") as log_file:
+        logs = yaml.safe_load(log_file)
+
+    # Check for correct messages anywhere in logs
+    messages = ""
+    for log in logs:
+        messages += log["message"]
+    assert "Starting single point calculation" in messages
 
 
 def test_summary(tmp_path):

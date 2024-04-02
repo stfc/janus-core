@@ -2,6 +2,7 @@
 
 import ast
 import datetime
+import logging
 from pathlib import Path
 from typing import Annotated, Optional, get_args
 
@@ -242,7 +243,7 @@ def singlepoint(  # pylint: disable=too-many-locals
         "device": device,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log_file, "filemode": "w"},
+        "log_kwargs": {"filename": log_file, "filemode": "w", "force": True},
     }
 
     # Initialise singlepoint structure and calculator
@@ -302,6 +303,7 @@ def singlepoint(  # pylint: disable=too-many-locals
             outfile,
             default_flow_style=False,
         )
+    logging.shutdown()
 
 
 @app.command(
@@ -420,7 +422,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w"},
+        log_kwargs={"filename": log_file, "filemode": "w", "force": True},
     )
 
     # Check optimized structure path not duplicated
@@ -508,6 +510,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
             outfile,
             default_flow_style=False,
         )
+    logging.shutdown()
 
 
 @app.command(
@@ -745,7 +748,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w"},
+        log_kwargs={"filename": log_file, "filemode": "w", "force": True},
     )
 
     log_kwargs = {"filename": log_file, "filemode": "a"}
@@ -860,3 +863,4 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
             outfile,
             default_flow_style=False,
         )
+    logging.shutdown()
