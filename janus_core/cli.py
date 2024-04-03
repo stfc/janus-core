@@ -8,6 +8,7 @@ from typing import Annotated, Optional, get_args
 
 from ase import Atoms
 import typer
+from typer_config import use_yaml_config
 import yaml
 
 from janus_core.geom_opt import optimize
@@ -166,6 +167,7 @@ Summary = Annotated[
 
 
 @app.command(help="Perform single point calculations and save to file.")
+@use_yaml_config()
 def singlepoint(  # pylint: disable=too-many-locals
     struct_path: StructPath,
     architecture: Architecture = "mace_mp",
@@ -307,6 +309,7 @@ def singlepoint(  # pylint: disable=too-many-locals
 @app.command(
     help="Perform geometry optimization and save optimized structure to file.",
 )
+@use_yaml_config()
 def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     struct_path: StructPath,
     fmax: Annotated[
@@ -512,6 +515,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 @app.command(
     help="Run molecular dynamics simulation, and save trajectory and statistics.",
 )
+@use_yaml_config()
 def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     ensemble: Annotated[str, typer.Option(help="Name of thermodynamic ensemble.")],
     struct_path: StructPath,
