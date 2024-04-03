@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli import app
-from tests.utils import read_atoms
+from tests.utils import check_log_contents, read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -192,15 +192,7 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
-    # Read log file
-    with open(log_path, encoding="utf8") as log_file:
-        logs = yaml.safe_load(log_file)
-
-    # Check for correct messages anywhere in logs
-    messages = ""
-    for log in logs:
-        messages += log["message"]
-    assert "Starting single point calculation" in messages
+    check_log_contents(log_path, contains=["Starting single point calculation"])
 
 
 def test_summary(tmp_path):

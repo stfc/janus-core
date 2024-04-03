@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli import app
+from tests.utils import check_log_contents
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -104,15 +105,7 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
-    # Read log file
-    with open(log_path, encoding="utf8") as log_file:
-        logs = yaml.safe_load(log_file)
-
-    # Check for correct messages anywhere in logs
-    messages = ""
-    for log in logs:
-        messages += log["message"]
-    assert "Starting molecular dynamics simulation" in messages
+    check_log_contents(log_path, contains=["Starting molecular dynamics simulation"])
 
     with open(tmp_path / "nvt-T300-stats.dat", encoding="utf8") as stats_file:
         lines = stats_file.readlines()
