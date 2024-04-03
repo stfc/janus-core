@@ -58,3 +58,13 @@ class Stats:
                 re.sub(r"[\[].*?[\]]", "", x).rstrip().lstrip() for x in head
             ]
         self.rows, self.columns = self.data.shape
+
+    def summary(self) -> None:
+        """
+        Summary of timeseries contained, units, headers.
+        """
+
+        print(f"contains {self.columns} timeseries, each with {self.rows} elements")
+        print("index label units")
+        for i, x,y in enumerate(zip(self.labels,self.units)):
+            print(f"{i} {x} {y}")

@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from janus_core.stats import Stats
 
 DATA_PATH = Path(__file__).parent / "data"
