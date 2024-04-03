@@ -94,7 +94,7 @@ def _parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     return typer_dicts
 
 
-def _iter_path_to_str(dictionary: dict) -> None:
+def _dict_paths_to_strs(dictionary: dict) -> None:
     """
     Recursively iterate over dictionary, converting Path values to strings.
 
@@ -105,7 +105,7 @@ def _iter_path_to_str(dictionary: dict) -> None:
     """
     for key, value in dictionary.items():
         if isinstance(value, dict):
-            _iter_path_to_str(value)
+            _dict_paths_to_strs(value)
         elif isinstance(value, Path):
             dictionary[key] = str(value)
 
@@ -243,16 +243,14 @@ def singlepoint(  # pylint: disable=too-many-locals
         "device": device,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log_file, "filemode": "w", "force": True},
+        "log_kwargs": {"filename": log_file, "filemode": "w"},
     }
 
     # Initialise singlepoint structure and calculator
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary
-    inputs = {}
-    for key, value in singlepoint_kwargs.items():
-        inputs[key] = value
+    inputs = singlepoint_kwargs.copy()
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
@@ -282,7 +280,7 @@ def singlepoint(  # pylint: disable=too-many-locals
     }
 
     # Convert all paths to strings in inputs nested dictionary
-    _iter_path_to_str(inputs)
+    _dict_paths_to_strs(inputs)
 
     # Save summary information before singlepoint calculation begins
     save_info = [
@@ -422,7 +420,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w", "force": True},
+        log_kwargs={"filename": log_file, "filemode": "w"},
     )
 
     # Check optimized structure path not duplicated
@@ -466,9 +464,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     }
 
     # Store inputs for yaml summary
-    inputs = {}
-    for key, value in optimize_kwargs.items():
-        inputs[key] = value
+    inputs = optimize_kwargs.copy()
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
@@ -489,7 +485,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     }
 
     # Convert all paths to strings in inputs nested dictionary
-    _iter_path_to_str(inputs)
+    _dict_paths_to_strs(inputs)
 
     # Save summary information before optimization begins
     save_info = [
@@ -748,7 +744,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w", "force": True},
+        log_kwargs={"filename": log_file, "filemode": "w"},
     )
 
     log_kwargs = {"filename": log_file, "filemode": "a"}
@@ -819,9 +815,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         dyn = NVT_NH(**dyn_kwargs)
 
     # Store inputs for yaml summary
-    inputs = {"ensemble": ensemble}
-    for key, value in dyn_kwargs.items():
-        inputs[key] = value
+    inputs = dyn_kwargs | {"ensemble": ensemble}
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
@@ -842,7 +836,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     }
 
     # Convert all paths to strings in inputs nested dictionary
-    _iter_path_to_str(inputs)
+    _dict_paths_to_strs(inputs)
 
     # Save summary information before simulation begins
     save_info = [
