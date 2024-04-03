@@ -97,3 +97,14 @@ janus\_core.md module
    :inherited-members:
    :undoc-members:
    :show-inheritance:
+
+janus\_core.stats
+--------------------------------
+
+.. automodule:: janus_core.stats
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
