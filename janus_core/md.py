@@ -345,7 +345,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """
         log_header = (
             "Step | real time[s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
-            "c_T [eV/K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | "
+            "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | "
             "Pressure [bar] | Pxx [bar] | Pyy [bar] | Pzz[bar] | Pyz[bar] | "
             "Pxz[bar] | Pxy[bar]"
         )
@@ -800,7 +800,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             Header for molecular dynamics log.
         """
         log_header = MolecularDynamics.get_log_header()
-        return log_header + " | T [K]"
+        return log_header + " | T* [K]"
 
 
 class NPH(NPT):
