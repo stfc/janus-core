@@ -48,8 +48,8 @@ class Stats:
             File that contains the stats of a molecular dynamics simulation.
         """
         self.data = genfromtxt(filename, skip_header=1)
-        with open(filename, "r+", encoding="utf-8") as f:
-            head = f.readline().split("|")
+        with open(filename, "r+", encoding="utf-8") as file:
+            head = file.readline().split("|")
             self.units = [
                 re.search(r"\[.+?\]", x).group(0) if re.search(r"\[.+?\]", x) else ""
                 for x in head
