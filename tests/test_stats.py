@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from janus_core.stats import Stats
+from pytest import approx
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -15,6 +16,7 @@ def test_stats():
 
     assert stat_data.rows == 100
     assert stat_data.columns == 18
+    assert stat_data.data[99,17] == approx(300.0)
     assert stat_data.units[0] == ""
     assert stat_data.units[17] == "[K]"
     assert stat_data.labels[0] == "Step"
