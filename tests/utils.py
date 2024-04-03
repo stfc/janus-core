@@ -37,7 +37,7 @@ def read_atoms(path: Path) -> Union[Atoms, None]:
 
 def check_log_contents(
     log_path: PathLike,
-    contains: Optional[MaybeSequence[str]] = None,
+    includes: Optional[MaybeSequence[str]] = None,
     excludes: Optional[MaybeSequence[str]] = None,
 ) -> None:
     """
@@ -47,22 +47,23 @@ def check_log_contents(
     ----------
     log_path : PathLike
         Path to log file to check messsages of.
-    contains : MaybeSequence[str]
+    includes : MaybeSequence[str]
         Messages that must appear in the log file. Default is None.
     excludes : MaybeSequence[str]
         Messages that must not appear in the log file. Default is None.
     """
     # Convert single strings to iterable
-    contains = [contains] if isinstance(contains, str) else contains
+    includes = [includes] if isinstance(includes, str) else includes
     excludes = [excludes] if isinstance(excludes, str) else excludes
 
     # Read log file
     with open(log_path, encoding="utf8") as log_file:
         logs = yaml.safe_load(log_file)
-    messages = "".join(log["message"] for log in logs)
+    # Nested join as log["message"] may be a list
+    messages = "".join("".join(log["message"]) for log in logs)
 
-    if contains:
-        for msg in contains:
+    if includes:
+        for msg in includes:
             assert msg in messages
     if excludes:
         for msg in excludes:

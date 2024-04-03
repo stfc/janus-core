@@ -192,7 +192,7 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, contains=["Starting single point calculation"])
+    check_log_contents(log_path, includes=["Starting single point calculation"])
 
 
 def test_summary(tmp_path):
