@@ -19,5 +19,5 @@ def test_stats():
     assert s.columns == 18
     assert s.units[0] == ""
     assert s.units[17] == "[K]"
-    assert s.units[0] == "Steps"
+    assert s.units[0] == "Step"
     assert s.units[17] == "T*"
