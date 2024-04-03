@@ -5,41 +5,59 @@ from typing import Literal, Optional
 
 from janus_core.janus_types import LogLevel
 
-FORMAT = """
-- timestamp: %(asctime)s
-  level: %(levelname)s
-  message: %(message)s
-  trace: %(module)s
-  line: %(lineno)d
-"""
 
-
-class CustomFormatter(logging.Formatter):  # numpydoc ignore=PR02
+class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
     """
     Custom formatter to convert multiline messages into yaml list.
 
     Parameters
     ----------
-    fmt : str
+    fmt : Optional[str]
         A format string in the given style for the logged output as a whole. Default is
-        '%(message)s'.
-    datefmt : str
+        defined by `FORMAT`.
+    datefmt : Optional[str]
         A format string in the given style for the date/time portion of the logged
         output. Default is taken from logging.Formatter.formatTime().
-    style : str
+    style : Literal['%'] | Literal['{'] | Literal['$']
         Determines how the format string will be merged with its data. Can be one of
         '%', '{' or '$'. Default is '%'.
     validate : bool
         If True, incorrect or mismatched fmt and style will raise a ValueError. Default
         is True.
-    defaults : dict[str, Any]
-         A dictionary with default values to use in custom fields.
+    defaults : Optional[dict[str, logging.Any]]
+         A dictionary with default values to use in custom fields. Default is None.
+    *args
+        Arguments to pass to logging.Formatter.__init__.
+    **kwargs
+        Keyword arguments to pass to logging.Formatter.__init__.
 
     Methods
     -------
     format(record)
         Format log message to convert new lines into a yaml list.
     """
+
+    FORMAT = (
+        "\n- timestamp: %(asctime)s\n"
+        "  level: %(levelname)s\n"
+        "  message: %(message)s\n"
+        "  trace: %(module)s\n"
+        "  line: %(lineno)d\n"
+    )
+
+    def __init__(self, *args, **kwargs) -> None:
+        """
+        Set default string format to yaml style.
+
+        Parameters
+        ----------
+        *args
+            Arguments to pass to logging.Formatter.__init__.
+        **kwargs
+            Keyword arguments to pass to logging.Formatter.__init__.
+        """
+        kwargs.setdefault("fmt", self.FORMAT)
+        super().__init__(*args, **kwargs)
 
     def format(self, record: logging.LogRecord) -> str:
         """
@@ -59,19 +77,10 @@ class CustomFormatter(logging.Formatter):  # numpydoc ignore=PR02
         record.msg = record.msg.replace('"', "'")
 
         # Convert new lines into yaml list
-        if len(record.msg.split("\n")) > 1:
-            msg = record.msg
-            record.msg = "\n"
-            for line in msg.split("\n"):
-                # Exclude empty lines
-                if line.strip():
-                    record.msg += f'    - "{line.strip()}"\n'
-            # Remove final newline (single character)
-            record.msg = record.msg[:-1]
-        else:
-            # Wrap line in quotes here rather than in FORMAT due to list
-            record.msg = f'"{record.msg}"'
-
+        msg = record.msg
+        record.msg = "\n" + "\n".join(
+            [f'    - "{line.strip()}"' for line in msg.split("\n") if line.strip()],
+        )
         return super().format(record)
 
 
@@ -116,7 +125,7 @@ def config_logger(
             encoding="utf-8",
         )
         handler.setLevel(level)
-        formatter = CustomFormatter(FORMAT)
+        formatter = YamlFormatter()
         handler.setFormatter(formatter)
 
         logging.basicConfig(

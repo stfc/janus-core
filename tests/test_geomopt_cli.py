@@ -76,7 +76,7 @@ def test_log(tmp_path):
     assert result.exit_code == 0
 
     check_log_contents(
-        log_path, contains="Starting geometry optimization", excludes="Using filter"
+        log_path, includes="Starting geometry optimization", excludes="Using filter"
     )
 
 
@@ -131,7 +131,7 @@ def test_fully_opt(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, contains=["Using filter", "hydrostatic_strain: False"])
+    check_log_contents(log_path, includes=["Using filter", "hydrostatic_strain: False"])
 
     atoms = read(results_path)
     expected = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
@@ -162,7 +162,7 @@ def test_fully_opt_and_vectors(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, contains=["Using filter", "hydrostatic_strain: True"])
+    check_log_contents(log_path, includes=["Using filter", "hydrostatic_strain: True"])
 
     atoms = read(results_path)
     expected = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
@@ -192,7 +192,7 @@ def test_vectors_not_fully_opt(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, contains=["Using filter", "hydrostatic_strain: True"])
+    check_log_contents(log_path, includes=["Using filter", "hydrostatic_strain: True"])
 
 
 def test_duplicate_traj(tmp_path):

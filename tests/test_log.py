@@ -3,13 +3,14 @@
 import yaml
 
 from janus_core.log import config_logger
+from tests.utils import check_log_contents
 
 
 def test_multiline_log(tmp_path):
     """Test multiline log is written correctly."""
     log_path = tmp_path / "test.log"
 
-    logger = config_logger(name=__name__, filename=log_path, force=True)
+    logger = config_logger(name=__name__, filename=log_path)
     logger.info(
         """
         Line 1
@@ -17,9 +18,13 @@ def test_multiline_log(tmp_path):
         Line 3
         """
     )
+    logger.info("Line 4")
+
     assert log_path.exists()
     with open(log_path, encoding="utf8") as log:
         log_dicts = yaml.safe_load(log)
 
     assert log_dicts[0]["level"] == "INFO"
     assert len(log_dicts[0]["message"]) == 3
+
+    check_log_contents(log_path, includes=["Line 1", "Line 4"])

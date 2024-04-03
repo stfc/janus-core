@@ -105,7 +105,7 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, contains=["Starting molecular dynamics simulation"])
+    check_log_contents(log_path, includes=["Starting molecular dynamics simulation"])
 
     with open(tmp_path / "nvt-T300-stats.dat", encoding="utf8") as stats_file:
         lines = stats_file.readlines()
