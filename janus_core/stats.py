@@ -150,13 +150,13 @@ class Stats:
         """
         Read MD stats and store them in `data`.
         """
-        self.data = genfromtxt(self.source, skip_header=1)
+        self._data = genfromtxt(self.source, skip_header=1)
         with open(self.source, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
-            self.units = [
+            self._units = [
                 match[0] if (match := re.search(r"\[.+?\]", x)) else "" for x in head
             ]
-            self.labels = [re.sub(r"[\[].*?\]", "", x).strip() for x in head]
+            self._labels = [re.sub(r"[\[].*?\]", "", x).strip() for x in head]
         self.rows, self.columns = self.data.shape
 
     def summary(self) -> None:
