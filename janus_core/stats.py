@@ -100,12 +100,9 @@ class Stats:
         with open(filename, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
             self.units = [
-                match[0] if (match := re.search(r"\[.+?\]", x)) else ""
-                for x in head
+                match[0] if (match := re.search(r"\[.+?\]", x)) else "" for x in head
             ]
-            self.labels = [
-                re.sub(r"[\[].*?\]", "", x).strip() for x in head
-            ]
+            self.labels = [re.sub(r"[\[].*?\]", "", x).strip() for x in head]
         self.rows, self.columns = self.data.shape
 
     def summary(self) -> None:
