@@ -4,7 +4,7 @@ Module that reads the md stats output timeseries.
 
 import re
 
-from numpy import float64, genfromtxt
+from numpy import float64, genfromtxt, zeros
 from numpy.typing import NDArray
 
 from janus_core.janus_types import PathLike
@@ -32,7 +32,7 @@ class Stats:
             File that contains the stats of a molecular dynamics simulation.
         """
 
-        self._data = np.zeros(0, 0)
+        self._data = zeros((0, 0))
         self._labels = ()
         self._units = ()
         self._source = source
@@ -62,7 +62,6 @@ class Stats:
         """
         return self.data.shape[1]
 
-
     @property
     def source(self) -> PathLike:
         """
@@ -74,18 +73,6 @@ class Stats:
             Filename for the source of `data`.
         """
         return self._source
-
-    @source.setter
-    def source(self, val_source: PathLike) -> None:
-        """
-        Set the filename for the data source.
-
-        Parameters
-        ----------
-        val_source : PathLike
-            Filename for the `data` source.
-        """
-        self._source = val_source
 
     @property
     def labels(self) -> list[str]:
@@ -135,12 +122,18 @@ class Stats:
             ]
             self._labels = [re.sub(r"[\[].*?\]", "", x).strip() for x in head]
 
-    def summary(self) -> None:
+    def __repr__(self) -> str:
         """
         Summary of timeseries contained, units, headers.
+
+        Returns
+        -------
+        str
+           Summary of the `data`.
         """
 
-        print(f"contains {self.columns} timeseries, each with {self.rows} elements")
-        print("index label units")
+        header = f"contains {self.columns} timeseries, each with {self.rows} elements"
+        header += "\nindex label units"
         for index, (label, unit) in enumerate(zip(self.labels, self.units)):
-            print(f"{index} {label} {unit}")
+            header += f"\n{index} {label} {unit}"
+        return header

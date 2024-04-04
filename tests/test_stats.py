@@ -23,7 +23,7 @@ def test_stats(capsys):
     assert stat_data.labels[0] == "Step"
     assert stat_data.labels[17] == "T*"
 
-    stat_data.summary()
+    print(stat_data)
     std_out_err = capsys.readouterr()
     assert std_out_err.err == ""
     assert "index label units" in std_out_err.out
