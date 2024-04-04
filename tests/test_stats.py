@@ -10,7 +10,7 @@ DATA_PATH = Path(__file__).parent / "data"
 
 
 def test_stats(capsys):
-    """Test readind md stats"""
+    """Test reading md stats."""
     data_path = DATA_PATH / "md-stats.dat"
 
     stat_data = Stats(data_path)
