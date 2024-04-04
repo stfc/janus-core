@@ -124,18 +124,6 @@ class Stats:
         """
         return self._labels
 
-    @labels.setter
-    def labels(self, val_labels: list[str]) -> None:
-        """
-        Set labels for columns.
-
-        Parameters
-        ----------
-        val_labels : list[str]
-            List of labels for columns in `data`.
-        """
-        self._labels = val_labels
-
     @property
     def units(self) -> list[str]:
         """
