@@ -4,7 +4,8 @@ Module that reads the md stats output timeseries.
 
 import re
 
-from numpy import genfromtxt
+from numpy import float64, genfromtxt
+from numpy.typing import NDArray
 
 from janus_core.janus_types import PathLike
 
@@ -33,10 +34,10 @@ class Stats:
 
         self._rows = 0
         self._columns = 0
-        self.data = None
-        self.labels = None
-        self.units = None
-        self.source = source
+        self._data = None
+        self._labels = None
+        self._units = None
+        self._source = source
         self.read(source)
 
     @property
@@ -86,6 +87,102 @@ class Stats:
             Number of columns in `data`.
         """
         self._columns = val_cols
+
+    @property
+    def source(self) -> PathLike:
+        """
+        Return filename which is the source of data.
+
+        Returns
+        -------
+        PathLike
+            Filename for the source of `data`.
+        """
+        return self._source
+
+    @source.setter
+    def source(self, val_source: PathLike) -> None:
+        """
+        Set the filename for the data source.
+
+        Parameters
+        ----------
+        val_source : PathLike
+            Filename for the `data` source.
+        """
+        self._source = val_source
+
+    @property
+    def labels(self) -> list[str]:
+        """
+        Return a list of labels for the columns in `data`.
+
+        Returns
+        -------
+        list[str]
+            List of labels for the columns in `data`.
+        """
+        return self._labels
+
+    @labels.setter
+    def labels(self, val_labels: list[str]) -> None:
+        """
+        Set labels for columns.
+
+        Parameters
+        ----------
+        val_labels : list[str]
+            List of labels for columns in `data`.
+        """
+        self._labels = val_labels
+
+    @property
+    def units(self) -> list[str]:
+        """
+        Return a list of units for the columns in `data`.
+
+        Returns
+        -------
+        list[str]
+            List of units for the columns in `data`.
+        """
+        return self._units
+
+    @units.setter
+    def units(self, val_units: list[str]) -> None:
+        """
+        Set units for columns.
+
+        Parameters
+        ----------
+        val_units : list[str]
+            List of units for columns in `data`.
+        """
+        self._units = val_units
+
+    @property
+    def data(self) -> NDArray[float64]:
+        """
+        Return the timeseries `data`.
+
+        Returns
+        -------
+        NDArray[float64]
+            Data for timeseries in `data`.
+        """
+        return self._data
+
+    @data.setter
+    def data(self, val_data: NDArray[float64]) -> None:
+        """
+        Set data for timeseries.
+
+        Parameters
+        ----------
+        val_data : NDArray[float64]
+            Data for timeseries in `data`.
+        """
+        self._data = val_data
 
     def read(self, filename: PathLike) -> None:
         """
