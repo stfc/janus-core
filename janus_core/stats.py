@@ -100,7 +100,7 @@ class Stats:
         with open(filename, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
             self.units = [
-                re.search(r"\[.+?\]", x).group(0) if re.search(r"\[.+?\]", x) else ""
+                match[0] if (match := re.search(r"\[.+?\]", x)) else ""
                 for x in head
             ]
             self.labels = [
