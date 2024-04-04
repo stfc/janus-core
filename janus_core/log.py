@@ -37,13 +37,13 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         Format log message to convert new lines into a yaml list.
     """
 
-    FORMAT = (
-        "\n- timestamp: %(asctime)s\n"
-        "  level: %(levelname)s\n"
-        "  message: %(message)s\n"
-        "  trace: %(module)s\n"
-        "  line: %(lineno)d\n"
-    )
+    FORMAT = """
+- timestamp: %(asctime)s
+  level: %(levelname)s
+  message: %(message)s
+  trace: %(module)s
+  line: %(lineno)d
+"""
 
     def __init__(self, *args, **kwargs) -> None:
         """
@@ -77,9 +77,10 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         record.msg = record.msg.replace('"', "'")
 
         # Convert new lines into yaml list
-        msg = record.msg
         record.msg = "\n" + "\n".join(
-            f'    - "{line.strip()}"' for line in msg.split("\n") if line.strip()
+            f'    - "{line.strip()}"'
+            for line in record.msg.splitlines()
+            if line.strip()
         )
         return super().format(record)
 
