@@ -18,7 +18,7 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
     datefmt : Optional[str]
         A format string in the given style for the date/time portion of the logged
         output. Default is taken from logging.Formatter.formatTime().
-    style : Literal['%'] | Literal['{'] | Literal['$']
+    style : Literal['%', '{', '$']
         Determines how the format string will be merged with its data. Can be one of
         '%', '{' or '$'. Default is '%'.
     validate : bool
@@ -79,7 +79,7 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         # Convert new lines into yaml list
         msg = record.msg
         record.msg = "\n" + "\n".join(
-            [f'    - "{line.strip()}"' for line in msg.split("\n") if line.strip()],
+            f'    - "{line.strip()}"' for line in msg.split("\n") if line.strip()
         )
         return super().format(record)
 
