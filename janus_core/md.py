@@ -344,10 +344,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Header for molecular dynamics log.
         """
         log_header = (
-            "Step | real time[s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
-            "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | "
-            "Pressure [bar] | Pxx [bar] | Pyy [bar] | Pzz[bar] | Pyz[bar] | "
-            "Pxz[bar] | Pxy[bar]"
+            "Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
+            "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [bar] | "
+            "Pxx [bar] | Pyy [bar] | Pzz [bar] | Pyz [bar] | Pxz [bar] | Pxy [bar]"
         )
 
         return log_header
@@ -363,7 +362,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """
         e_pot = self.dyn.atoms.get_potential_energy() / self.n_atoms
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
-        current_temp = e_kin / (1.5 * units.kB)  # pylint: disable=invalid-name
+        current_temp = e_kin / (1.5 * units.kB)
 
         time = self.offset * self.timestep + self.dyn.get_time() / units.fs
         step = self.offset + self.dyn.nsteps
@@ -611,7 +610,7 @@ class NPT(MolecularDynamics):
             Header for molecular dynamics log.
         """
         log_header = MolecularDynamics.get_log_header()
-        return log_header + " | Pressure[bar] | T [K]"
+        return log_header + " | Target P [bar] | Target T [K]"
 
 
 class NVT(MolecularDynamics):
@@ -689,7 +688,7 @@ class NVT(MolecularDynamics):
             Header for molecular dynamics log.
         """
         log_header = MolecularDynamics.get_log_header()
-        return log_header + " | T [K]"
+        return log_header + " | Target T [K]"
 
 
 class NVE(MolecularDynamics):
@@ -800,7 +799,8 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             Header for molecular dynamics log.
         """
         log_header = MolecularDynamics.get_log_header()
-        return log_header + " | T* [K]"
+
+        return log_header + " | Target T [K]"
 
 
 class NPH(NPT):
