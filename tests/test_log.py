@@ -3,7 +3,7 @@
 import yaml
 
 from janus_core.log import config_logger
-from tests.utils import check_log_contents
+from tests.utils import assert_log_contains
 
 
 def test_multiline_log(tmp_path):
@@ -27,4 +27,4 @@ def test_multiline_log(tmp_path):
     assert log_dicts[0]["level"] == "INFO"
     assert len(log_dicts[0]["message"]) == 3
 
-    check_log_contents(log_path, includes=["Line 1", "Line 4"])
+    assert_log_contains(log_path, includes=["Line 1", "Line 4"])

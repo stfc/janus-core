@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli import app
-from tests.utils import check_log_contents
+from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -105,7 +105,7 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, includes=["Starting molecular dynamics simulation"])
+    assert_log_contains(log_path, includes=["Starting molecular dynamics simulation"])
 
     with open(tmp_path / "nvt-T300-stats.dat", encoding="utf8") as stats_file:
         lines = stats_file.readlines()

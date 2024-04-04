@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli import app
-from tests.utils import check_log_contents, read_atoms
+from tests.utils import assert_log_contains, read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -192,7 +192,7 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
-    check_log_contents(log_path, includes=["Starting single point calculation"])
+    assert_log_contains(log_path, includes=["Starting single point calculation"])
 
 
 def test_summary(tmp_path):

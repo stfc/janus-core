@@ -1,7 +1,7 @@
 """Utility functions for tests."""
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 from ase import Atoms
 from ase.io import read
@@ -35,8 +35,9 @@ def read_atoms(path: Path) -> Union[Atoms, None]:
     return atoms if atoms else None
 
 
-def check_log_contents(
-    log_path: PathLike, *,
+def assert_log_contains(
+    log_path: PathLike,
+    *,
     includes: MaybeSequence[str] = (),
     excludes: MaybeSequence[str] = (),
 ) -> None:
