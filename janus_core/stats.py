@@ -19,6 +19,8 @@ class Stats:
         File that contains the stats of a molecular dynamics simulation.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, source: PathLike) -> None:
         """
         Initialise MD stats reader.
@@ -29,13 +31,61 @@ class Stats:
             File that contains the stats of a molecular dynamics simulation.
         """
 
-        self.rows = 0
-        self.columns = 0
+        self._rows = 0
+        self._columns = 0
         self.data = None
         self.labels = None
         self.units = None
         self.source = source
         self.read(source)
+
+    @property
+    def rows(self) -> int:
+        """
+        Return number of rows.
+
+        Returns
+        -------
+        int
+            Number of rows in `data`.
+        """
+        return self._rows
+
+    @rows.setter
+    def rows(self, val_rows: int) -> None:
+        """
+        Set number of rows.
+
+        Parameters
+        ----------
+        val_rows : int
+            Number of rows in `data`.
+        """
+        self._rows = val_rows
+
+    @property
+    def columns(self) -> int:
+        """
+        Return number of columns.
+
+        Returns
+        -------
+        int
+            Number of columns in `data`.
+        """
+        return self._columns
+
+    @columns.setter
+    def columns(self, val_cols: int) -> None:
+        """
+        Set number of columns.
+
+        Parameters
+        ----------
+        val_cols : int
+            Number of columns in `data`.
+        """
+        self._columns = val_cols
 
     def read(self, filename: PathLike) -> None:
         """
