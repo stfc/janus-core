@@ -48,19 +48,7 @@ class Stats:
         int
             Number of rows in `data`.
         """
-        return self._rows
-
-    @rows.setter
-    def rows(self, val_rows: int) -> None:
-        """
-        Set number of rows.
-
-        Parameters
-        ----------
-        val_rows : int
-            Number of rows in `data`.
-        """
-        self._rows = val_rows
+        return self.data.shape[0]
 
     @property
     def columns(self) -> int:
@@ -72,19 +60,8 @@ class Stats:
         int
             Number of columns in `data`.
         """
-        return self._columns
+        return self.data.shape[1]
 
-    @columns.setter
-    def columns(self, val_cols: int) -> None:
-        """
-        Set number of columns.
-
-        Parameters
-        ----------
-        val_cols : int
-            Number of columns in `data`.
-        """
-        self._columns = val_cols
 
     @property
     def source(self) -> PathLike:
