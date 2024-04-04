@@ -117,10 +117,10 @@ class Stats:
         self._data = genfromtxt(self.source, skip_header=1)
         with open(self.source, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
-            self._units = [
+            self._units = tuple(
                 match[0] if (match := re.search(r"\[.+?\]", x)) else "" for x in head
-            ]
-            self._labels = [re.sub(r"[\[].*?\]", "", x).strip() for x in head]
+            )
+            self._labels = tuple(re.sub(r"[\[].*?\]", "", x).strip() for x in head)
 
     def __repr__(self) -> str:
         """
