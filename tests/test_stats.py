@@ -19,9 +19,9 @@ def test_stats(capsys):
     assert stat_data.columns == 18
     assert stat_data.data[99, 17] == approx(300.0)
     assert stat_data.units[0] == ""
-    assert stat_data.units[17] == "[K]"
+    assert stat_data.units[17] == "K"
     assert stat_data.labels[0] == "Step"
-    assert stat_data.labels[17] == "T*"
+    assert stat_data.labels[17] == "Target T"
 
     print(stat_data)
     std_out_err = capsys.readouterr()

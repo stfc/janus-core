@@ -799,7 +799,6 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             Header for molecular dynamics log.
         """
         log_header = MolecularDynamics.get_log_header()
-
         return log_header + " | Target T [K]"
 
 
