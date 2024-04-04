@@ -89,7 +89,7 @@ class Stats:
 
     def read(self, filename: PathLike) -> None:
         """
-        Read MD stats and store them.
+        Read MD stats and store them in `data`.
 
         Parameters
         ----------
