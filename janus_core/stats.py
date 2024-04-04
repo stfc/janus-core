@@ -75,25 +75,25 @@ class Stats:
         return self._source
 
     @property
-    def labels(self) -> list[str]:
+    def labels(self) -> tuple[str, ...]:
         """
         Return a list of labels for the columns in `data`.
 
         Returns
         -------
-        list[str]
+        tuple[str, ...]
             List of labels for the columns in `data`.
         """
         return self._labels
 
     @property
-    def units(self) -> list[str]:
+    def units(self) -> tuple[str, ...]:
         """
         Return a list of units for the columns in `data`.
 
         Returns
         -------
-        list[str]
+        tuple[str, ...]
             List of units for the columns in `data`.
         """
         return self._units
