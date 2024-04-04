@@ -2,13 +2,14 @@
 
 from pathlib import Path
 
-from janus_core.stats import Stats
 from pytest import approx
+
+from janus_core.stats import Stats
 
 DATA_PATH = Path(__file__).parent / "data"
 
 
-def test_stats():
+def test_stats(capsys):
     """Test readind md stats"""
     data_path = DATA_PATH / "md-stats.dat"
 
@@ -16,8 +17,17 @@ def test_stats():
 
     assert stat_data.rows == 100
     assert stat_data.columns == 18
-    assert stat_data.data[99,17] == approx(300.0)
+    assert stat_data.data[99, 17] == approx(300.0)
     assert stat_data.units[0] == ""
     assert stat_data.units[17] == "[K]"
     assert stat_data.labels[0] == "Step"
     assert stat_data.labels[17] == "T*"
+
+    stat_data.summary()
+    std_out_err = capsys.readouterr()
+    assert std_out_err.err == ""
+    assert "index label units" in std_out_err.out
+    assert (
+        f"contains {stat_data.columns} timeseries, each with {stat_data.rows} elements"
+        in std_out_err.out
+    )

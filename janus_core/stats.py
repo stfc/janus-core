@@ -66,5 +66,5 @@ class Stats:
 
         print(f"contains {self.columns} timeseries, each with {self.rows} elements")
         print("index label units")
-        for index, label, unit in enumerate(zip(self.labels, self.units)):
+        for index, (label, unit) in enumerate(zip(self.labels, self.units)):
             print(f"{index} {label} {unit}")
