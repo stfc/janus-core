@@ -32,11 +32,9 @@ class Stats:
             File that contains the stats of a molecular dynamics simulation.
         """
 
-        self._rows = 0
-        self._columns = 0
-        self._data = None
-        self._labels = None
-        self._units = None
+        self._data = np.zeros(0, 0)
+        self._labels = ()
+        self._units = ()
         self._source = source
         self.read()
 
