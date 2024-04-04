@@ -36,9 +36,9 @@ def read_atoms(path: Path) -> Union[Atoms, None]:
 
 
 def check_log_contents(
-    log_path: PathLike,
-    includes: Optional[MaybeSequence[str]] = None,
-    excludes: Optional[MaybeSequence[str]] = None,
+    log_path: PathLike, *,
+    includes: MaybeSequence[str] = (),
+    excludes: MaybeSequence[str] = (),
 ) -> None:
     """
     Check messages are present or not within a yaml-formatted log file.
@@ -62,9 +62,5 @@ def check_log_contents(
     # Nested join as log["message"] may be a list
     messages = "".join("".join(log["message"]) for log in logs)
 
-    if includes:
-        for msg in includes:
-            assert msg in messages
-    if excludes:
-        for msg in excludes:
-            assert msg not in messages
+    assert all(inc in messages for inc in includes)
+    assert all(exc not in messages for exc in excludes)
