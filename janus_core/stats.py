@@ -148,18 +148,6 @@ class Stats:
         """
         return self._data
 
-    @data.setter
-    def data(self, val_data: NDArray[float64]) -> None:
-        """
-        Set data for timeseries.
-
-        Parameters
-        ----------
-        val_data : NDArray[float64]
-            Data for timeseries in `data`.
-        """
-        self._data = val_data
-
     def read(self) -> None:
         """
         Read MD stats and store them in `data`.
