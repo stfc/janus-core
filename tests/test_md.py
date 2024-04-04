@@ -78,7 +78,7 @@ def test_npt():
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
-            assert "Pressure[bar] | T [K]" in lines[0]
+            assert "Target P [bar] | Target T [K]" in lines[0]
             assert len(lines) == 5
     finally:
         restart_path_1.unlink(missing_ok=True)
@@ -246,7 +246,7 @@ def test_restart(tmp_path):
 
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
-        assert " | T [K]" in lines[0]
+        assert " | Target T [K]" in lines[0]
         # Includes step 0, and step 4 from restart
         assert len(lines) == 11
         assert 8 == int(lines[-1].split()[0])
