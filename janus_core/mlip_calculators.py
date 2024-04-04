@@ -51,7 +51,7 @@ def choose_calculator(
         from mace.calculators import MACECalculator
 
         # `model_paths` is keyword for path to model, so take from kwargs if specified
-        # Otherwise, take `model` if specified, then default to `None`, which will
+        # Otherwise, take `model` if specified, then default to `""`, which will
         # raise a ValueError
         kwargs.setdefault("model_paths", kwargs.pop("model", ""))
         kwargs.setdefault("default_dtype", "float64")
