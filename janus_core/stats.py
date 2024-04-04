@@ -38,7 +38,7 @@ class Stats:
         self._labels = None
         self._units = None
         self._source = source
-        self.read(source)
+        self.read()
 
     @property
     def rows(self) -> int:
@@ -184,17 +184,12 @@ class Stats:
         """
         self._data = val_data
 
-    def read(self, filename: PathLike) -> None:
+    def read(self) -> None:
         """
         Read MD stats and store them in `data`.
-
-        Parameters
-        ----------
-        filename : PathLike
-            File that contains the stats of a molecular dynamics simulation.
         """
-        self.data = genfromtxt(filename, skip_header=1)
-        with open(filename, "r+", encoding="utf-8") as file:
+        self.data = genfromtxt(self.source, skip_header=1)
+        with open(self.source, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
             self.units = [
                 match[0] if (match := re.search(r"\[.+?\]", x)) else "" for x in head
