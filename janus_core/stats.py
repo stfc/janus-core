@@ -148,18 +148,6 @@ class Stats:
         """
         return self._units
 
-    @units.setter
-    def units(self, val_units: list[str]) -> None:
-        """
-        Set units for columns.
-
-        Parameters
-        ----------
-        val_units : list[str]
-            List of units for columns in `data`.
-        """
-        self._units = val_units
-
     @property
     def data(self) -> NDArray[float64]:
         """
