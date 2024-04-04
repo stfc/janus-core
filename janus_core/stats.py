@@ -118,9 +118,9 @@ class Stats:
         with open(self.source, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
             self._units = tuple(
-                match[0] if (match := re.search(r"\[.+?\]", x)) else "" for x in head
+                match[1] if (match := re.search(r"\[(.+?)\]", x)) else "" for x in head
             )
-            self._labels = tuple(re.sub(r"[\[].*?\]", "", x).strip() for x in head)
+            self._labels = tuple(re.sub(r"\[.*?\]", "", x).strip() for x in head)
 
     def __repr__(self) -> str:
         """

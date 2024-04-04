@@ -1,4 +1,4 @@
-Step | real time[s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | Pressure [bar] | Pxx [bar] | Pyy [bar] | Pzz[bar] | Pyz[bar] | Pxz[bar] | Pxy[bar] | Pressure[bar] | T* [K]
+Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [bar] | Pxx [bar] | Pyy [bar] | Pzz [bar] | Pyz [bar] | Pxz [bar] | Pxy [bar] | Target P [bar] | Target T [K]
       1000 33.928       1000.00 -7.350e+00 3.696e-02 285.958 -7.313e+00 0.811 6.405e+03 -4.552e+03 -3.264e+03 -2.575e+03 -7.816e+03 -4.548e+02 1.177e+03 2.518e+03 0.0 300.0
       2000 24.355       2000.00 -7.360e+00 3.627e-02 280.568 -7.324e+00 0.809 6.420e+03 4.235e+02 -1.368e+03 3.203e+03 -5.649e+02 -5.305e+01 -1.296e+03 9.061e+02 0.0 300.0
       3000 24.476       3000.00 -7.361e+00 3.335e-02 258.041 -7.328e+00 0.798 6.509e+03 -4.971e+02 -1.162e+03 1.234e+01 -3.418e+02 5.940e+02 -1.787e+03 1.359e+03 0.0 300.0
