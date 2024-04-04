@@ -19,7 +19,7 @@ class Stats:
         File that contains the stats of a molecular dynamics simulation.
     """
 
-    def __init__(self, source: PathLike = None) -> None:
+    def __init__(self, source: PathLike) -> None:
         """
         Initialise MD stats reader.
 
@@ -34,11 +34,10 @@ class Stats:
         self.data = None
         self.labels = None
         self.units = None
-        if source is not None:
-            self.source = source
-            self.read(source)
+        self.source = source
+        self.read(source)
 
-    def read(self, filename: PathLike = None) -> None:
+    def read(self, filename: PathLike) -> None:
         """
         Read MD stats and store them.
 
