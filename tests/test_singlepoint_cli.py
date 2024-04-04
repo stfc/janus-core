@@ -234,3 +234,17 @@ def test_summary(tmp_path):
     assert "length" in sp_summary[2]["inputs"]["traj"]
     assert "struct" in sp_summary[2]["inputs"]["traj"]
     assert "n_atoms" in sp_summary[2]["inputs"]["traj"]["struct"]
+
+
+def test_config():
+    """Test passing a config.yml file."""
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--config",
+            DATA_PATH / "config.yml",
+        ],
+    )
+    read_atoms(Path("NaCl-results.xyz"))
+    assert result.exit_code == 0

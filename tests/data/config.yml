@@ -1,0 +1,3 @@
+struct_path: "tests/data/NaCl.cif"
+properties: ["energy"]
+out_file: "NaCl-results.xyz"
