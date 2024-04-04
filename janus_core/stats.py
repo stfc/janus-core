@@ -104,7 +104,7 @@ class Stats:
                 for x in head
             ]
             self.labels = [
-                re.sub(r"[\[].*?[\]]", "", x).rstrip().lstrip() for x in head
+                re.sub(r"[\[].*?\]", "", x).strip() for x in head
             ]
         self.rows, self.columns = self.data.shape
 
