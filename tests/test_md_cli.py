@@ -103,7 +103,7 @@ def test_md_log(tmp_path, caplog):
             assert init_volume == pytest.approx(final_volume)
 
             # Test constant temperature
-            assert lines[0].split(" | ")[16] == "T [K]\n"
+            assert lines[0].split(" | ")[16] == "Target T [K]\n"
             init_temp = float(lines[1].split()[16])
             final_temp = float(lines[-1].split()[16])
             assert init_temp == 300.0
