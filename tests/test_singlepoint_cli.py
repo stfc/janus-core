@@ -237,7 +237,7 @@ def test_summary(tmp_path):
 
 
 def test_config(tmp_path):
-    """Test passing a config.yml file and overwriting some values."""
+    """Test passing a config file with read kwargs, and values to be overwritten."""
     results_path = tmp_path / "benzene-traj-results.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -254,7 +254,7 @@ def test_config(tmp_path):
             "--summary",
             summary_path,
             "--config",
-            DATA_PATH / "config.yml",
+            DATA_PATH / "singlepoint_config.yml",
         ],
     )
     assert result.exit_code == 0
@@ -265,6 +265,5 @@ def test_config(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
 
-    assert "index" in sp_summary[2]["inputs"]["read_kwargs"]
     assert "index" in sp_summary[2]["inputs"]["read_kwargs"]
     assert sp_summary[2]["inputs"]["read_kwargs"]["index"] == ":"
