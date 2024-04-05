@@ -142,7 +142,7 @@ For all options, run `janus md --help`.
 
 ### Using configuration files
 
-Default values for all commandline options may be specifed through a Yaml 1.1 formatted configuration file by adding the `--config` option.
+Default values for all command line options may be specifed through a Yaml 1.1 formatted configuration file by adding the `--config` option. If an option is present on both command line and config file, the command line one takes precedence.
 
 For example, with the following configuration file and command:
 
