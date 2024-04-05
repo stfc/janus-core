@@ -41,7 +41,7 @@ def test_geomopt(tmp_path):
             "geomopt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--max-force",
+            "--fmax",
             "0.2",
             "--log",
             log_path,
