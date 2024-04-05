@@ -17,7 +17,7 @@ Tools for machine learnt interatomic potentials
   - CHGNET
 - [x] Single point calculations
 - [x] Geometry optimisation
-- [ ] Molecular Dynamics
+- [x] Molecular Dynamics
   - NVE
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
   - NPT (Nosé-Hoover (Melchiona flavour))
@@ -138,6 +138,38 @@ This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps
 
 
 For all options, run `janus md --help`.
+
+
+### Using configuration files
+
+Default values for all commandline options may be specifed through a Yaml 1.1 formatted configuration file by adding the `--config` option.
+
+For example, with the following configuration file and command:
+
+```yaml
+struct_path: "NaCl.cif"
+properties:
+  - "energy"
+out_file: "NaCl-results.xyz"
+arch: mace_mp
+calc_kwargs:
+  model: medium
+```
+
+```shell
+janus singlepoint --struct KCl.cif --out KCl-results.cif --config config.yml
+```
+
+This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "medium" force-field, saving the results to `KCl-results.cif`.
+
+
+> [!NOTE]
+> `properties` must be passed as a Yaml list, as above, not as a string.
+
+> [!WARNING]
+> Options in the Yaml file must match their Python variable name, which may differ from the option flag.
+> If an option in the configuration file does not match any variable names, an error will **not** be raised.
+> Please check the summary file to ensure the configuration has been read correctly.
 
 
 ## License
