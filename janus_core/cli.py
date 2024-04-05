@@ -4,7 +4,7 @@ import ast
 import datetime
 import logging
 from pathlib import Path
-from typing import Annotated, Optional, get_args
+from typing import Annotated, Optional, Union, get_args
 
 from ase import Atoms
 import typer
@@ -12,7 +12,7 @@ from typer_config import use_yaml_config
 import yaml
 
 from janus_core.geom_opt import optimize
-from janus_core.janus_types import Ensembles
+from janus_core.janus_types import ASEReadArgs, Ensembles
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.single_point import SinglePoint
 
@@ -52,7 +52,7 @@ class TyperDict:  #  pylint: disable=too-few-public-methods
         return f"<TyperDict: value={self.value}>"
 
 
-def _parse_dict_class(value: str):
+def _parse_dict_class(value: Union[str, ASEReadArgs]):
     """
     Convert string input into a dictionary.
 
@@ -66,6 +66,8 @@ def _parse_dict_class(value: str):
     TyperDict
         Parsed string as a dictionary.
     """
+    if isinstance(value, dict):
+        return TyperDict(value)
     return TyperDict(ast.literal_eval(value))
 
 
@@ -91,7 +93,10 @@ def _parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     for i, typer_dict in enumerate(typer_dicts):
         typer_dicts[i] = typer_dict.value if typer_dict else {}
         if not isinstance(typer_dicts[i], dict):
-            raise ValueError(f"{typer_dicts[i]} must be passed as a dictionary")
+            raise ValueError(
+                f"""{typer_dicts[i]} must be passed as a dictionary wrapped in quotes.\
+ For example, "{{'key' : value}}" """
+            )
     return typer_dicts
 
 
@@ -168,7 +173,9 @@ Summary = Annotated[
 
 @app.command(help="Perform single point calculations and save to file.")
 @use_yaml_config()
-def singlepoint(  # pylint: disable=too-many-locals
+def singlepoint(
+    # pylint: disable=too-many-locals
+    # numpydoc ignore=PR02
     struct_path: StructPath,
     architecture: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -226,6 +233,8 @@ def singlepoint(  # pylint: disable=too-many-locals
     summary : Path
         Path to save summary of inputs and start/end time. Default is
         singlepoint_summary.yml.
+    config : Path
+        Path to yaml configuration file to define the above options. Default is None.
     """
     [read_kwargs, calc_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
@@ -310,7 +319,9 @@ def singlepoint(  # pylint: disable=too-many-locals
     help="Perform geometry optimization and save optimized structure to file.",
 )
 @use_yaml_config()
-def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
+def geomopt(
+    # pylint: disable=too-many-arguments,too-many-locals
+    # numpydoc ignore=PR02
     struct_path: StructPath,
     fmax: Annotated[
         float, typer.Option("--max-force", help="Maximum force for convergence.")
@@ -411,6 +422,8 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     summary : Path
         Path to save summary of inputs and start/end time. Default is
         geomopt_summary.yml.
+    config : Path
+        Path to yaml configuration file to define the above options. Default is None.
     """
     [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
@@ -516,7 +529,9 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     help="Run molecular dynamics simulation, and save trajectory and statistics.",
 )
 @use_yaml_config()
-def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
+def md(
+    # pylint: disable=too-many-arguments,too-many-locals,invalid-name
+    # numpydoc ignore=PR02
     ensemble: Annotated[str, typer.Option(help="Name of thermodynamic ensemble.")],
     struct_path: StructPath,
     steps: Annotated[int, typer.Option(help="Number of steps in simulation.")] = 0,
@@ -733,6 +748,8 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Default is None.
     summary : Path
         Path to save summary of inputs and start/end time. Default is md_summary.yml.
+    config : Path
+        Path to yaml configuration file to define the above options. Default is None.
     """
     [read_kwargs, calc_kwargs, minimize_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]

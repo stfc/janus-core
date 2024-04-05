@@ -236,15 +236,35 @@ def test_summary(tmp_path):
     assert "n_atoms" in sp_summary[2]["inputs"]["traj"]["struct"]
 
 
-def test_config():
-    """Test passing a config.yml file."""
+def test_config(tmp_path):
+    """Test passing a config.yml file and overwriting some values."""
+    results_path = tmp_path / "benzene-traj-results.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     result = runner.invoke(
         app,
         [
             "singlepoint",
+            "--struct",
+            DATA_PATH / "benzene-traj.xyz",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
             "--config",
             DATA_PATH / "config.yml",
         ],
     )
-    read_atoms(Path("NaCl-results.xyz"))
     assert result.exit_code == 0
+    atoms = read(results_path, index=":")
+    assert len(atoms) == 2
+
+    # Read singlepoint summary file
+    with open(summary_path, encoding="utf8") as file:
+        sp_summary = yaml.safe_load(file)
+
+    assert "index" in sp_summary[2]["inputs"]["read_kwargs"]
+    assert "index" in sp_summary[2]["inputs"]["read_kwargs"]
+    assert sp_summary[2]["inputs"]["read_kwargs"]["index"] == ":"
