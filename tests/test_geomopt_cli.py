@@ -300,15 +300,15 @@ def test_summary(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         geomopt_summary = yaml.safe_load(file)
 
-    assert "command" in geomopt_summary[0]
-    assert "janus geomopt" in geomopt_summary[0]["command"]
-    assert "start_time" in geomopt_summary[1]
-    assert "end_time" in geomopt_summary[3]
+    assert "command" in geomopt_summary
+    assert "janus geomopt" in geomopt_summary["command"]
+    assert "start_time" in geomopt_summary
+    assert "end_time" in geomopt_summary
 
-    assert "inputs" in geomopt_summary[2]
-    assert "opt_kwargs" in geomopt_summary[2]["inputs"]
-    assert "struct" in geomopt_summary[2]["inputs"]
-    assert "n_atoms" in geomopt_summary[2]["inputs"]["struct"]
+    assert "inputs" in geomopt_summary
+    assert "opt_kwargs" in geomopt_summary["inputs"]
+    assert "struct" in geomopt_summary["inputs"]
+    assert "n_atoms" in geomopt_summary["inputs"]["struct"]
 
 
 def test_config(tmp_path):
@@ -339,5 +339,5 @@ def test_config(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         geomopt_summary = yaml.safe_load(file)
 
-    assert "alpha" in geomopt_summary[2]["inputs"]["opt_kwargs"]
-    assert geomopt_summary[2]["inputs"]["opt_kwargs"]["alpha"] == 100
+    assert "alpha" in geomopt_summary["inputs"]["opt_kwargs"]
+    assert geomopt_summary["inputs"]["opt_kwargs"]["alpha"] == 100

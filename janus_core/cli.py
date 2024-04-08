@@ -281,6 +281,7 @@ def singlepoint(
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
+    del inputs["struct_path"]
     inputs["log"] = log
 
     if isinstance(s_point.struct, Atoms):
@@ -310,11 +311,11 @@ def singlepoint(
     _dict_paths_to_strs(inputs)
 
     # Save summary information before singlepoint calculation begins
-    save_info = [
-        {"command": "janus singlepoint"},
-        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
-        {"inputs": inputs},
-    ]
+    save_info = {
+        "command": "janus singlepoint",
+        "start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
+        "inputs": inputs,
+    }
     with open(summary, "w", encoding="utf8") as outfile:
         yaml.dump(save_info, outfile, default_flow_style=False)
 
@@ -324,7 +325,7 @@ def singlepoint(
     # Save time after simulation has finished
     with open(summary, "a", encoding="utf8") as outfile:
         yaml.dump(
-            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            {"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
             outfile,
             default_flow_style=False,
         )
@@ -511,11 +512,11 @@ def geomopt(
     _dict_paths_to_strs(inputs)
 
     # Save summary information before optimization begins
-    save_info = [
-        {"command": "janus geomopt"},
-        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
-        {"inputs": inputs},
-    ]
+    save_info = {
+        "command": "janus geomopt",
+        "start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
+        "inputs": inputs,
+    }
     with open(summary, "w", encoding="utf8") as outfile:
         yaml.dump(save_info, outfile, default_flow_style=False)
 
@@ -525,7 +526,7 @@ def geomopt(
     # Time after optimization has finished
     with open(summary, "a", encoding="utf8") as outfile:
         yaml.dump(
-            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            {"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
             outfile,
             default_flow_style=False,
         )
@@ -867,11 +868,11 @@ def md(
     _dict_paths_to_strs(inputs)
 
     # Save summary information before simulation begins
-    save_info = [
-        {"command": "janus md"},
-        {"start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
-        {"inputs": inputs},
-    ]
+    save_info = {
+        "command": "janus md",
+        "start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
+        "inputs": inputs,
+    }
     with open(summary, "w", encoding="utf8") as outfile:
         yaml.dump(save_info, outfile, default_flow_style=False)
 
@@ -881,7 +882,7 @@ def md(
     # Save time after simulation has finished
     with open(summary, "a", encoding="utf8") as outfile:
         yaml.dump(
-            [{"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}],
+            {"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
             outfile,
             default_flow_style=False,
         )

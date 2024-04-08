@@ -215,16 +215,16 @@ def test_summary(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
 
-    assert "command" in sp_summary[0]
-    assert "janus singlepoint" in sp_summary[0]["command"]
-    assert "start_time" in sp_summary[1]
-    assert "inputs" in sp_summary[2]
-    assert "end_time" in sp_summary[3]
+    assert "command" in sp_summary
+    assert "janus singlepoint" in sp_summary["command"]
+    assert "start_time" in sp_summary
+    assert "inputs" in sp_summary
+    assert "end_time" in sp_summary
 
-    assert "traj" in sp_summary[2]["inputs"]
-    assert "length" in sp_summary[2]["inputs"]["traj"]
-    assert "struct" in sp_summary[2]["inputs"]["traj"]
-    assert "n_atoms" in sp_summary[2]["inputs"]["traj"]["struct"]
+    assert "traj" in sp_summary["inputs"]
+    assert "length" in sp_summary["inputs"]["traj"]
+    assert "struct" in sp_summary["inputs"]["traj"]
+    assert "n_atoms" in sp_summary["inputs"]["traj"]["struct"]
 
 
 def test_config(tmp_path):
@@ -256,5 +256,5 @@ def test_config(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
 
-    assert "index" in sp_summary[2]["inputs"]["read_kwargs"]
-    assert sp_summary[2]["inputs"]["read_kwargs"]["index"] == ":"
+    assert "index" in sp_summary["inputs"]["read_kwargs"]
+    assert sp_summary["inputs"]["read_kwargs"]["index"] == ":"
