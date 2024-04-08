@@ -23,8 +23,7 @@ def test_help():
     """Test calling `janus geomopt --help`."""
     result = runner.invoke(app, ["geomopt", "--help"])
     assert result.exit_code == 0
-    # Command is returned as "root"
-    assert "Usage: root geomopt [OPTIONS]" in result.stdout
+    assert "Usage: janus geomopt [OPTIONS]" in result.stdout
 
 
 def test_geomopt(tmp_path):

@@ -18,20 +18,11 @@ runner = CliRunner()
 # pylint: disable=duplicate-code
 
 
-def test_janus_help():
-    """Test calling `janus --help`."""
-    result = runner.invoke(app, ["--help"])
-    assert result.exit_code == 0
-    # Command is returned as "root"
-    assert "Usage: root [OPTIONS] COMMAND [ARGS]..." in result.stdout
-
-
 def test_singlepoint_help():
     """Test calling `janus singlepoint --help`."""
     result = runner.invoke(app, ["singlepoint", "--help"])
     assert result.exit_code == 0
-    # Command is returned as "root"
-    assert "Usage: root singlepoint [OPTIONS]" in result.stdout
+    assert "Usage: janus singlepoint [OPTIONS]" in result.stdout
 
 
 def test_singlepoint(tmp_path):

@@ -11,12 +11,13 @@ import typer
 from typer_config import use_yaml_config
 import yaml
 
+from janus_core import __version__
 from janus_core.geom_opt import optimize
 from janus_core.janus_types import ASEReadArgs, Ensembles
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.single_point import SinglePoint
 
-app = typer.Typer()
+app = typer.Typer(name="janus", no_args_is_help=True)
 
 
 class TyperDict:  #  pylint: disable=too-few-public-methods
@@ -167,6 +168,25 @@ LogPath = Annotated[Path, typer.Option(help="Path to save logs to.")]
 Summary = Annotated[
     Path, typer.Option(help="Path to save summary of inputs and start/end time.")
 ]
+
+
+@app.callback(invoke_without_command=True, help="")
+def print_version(
+    version: Annotated[
+        bool, typer.Option("--version", help="Print janus version and exit.")
+    ] = None,
+) -> False:
+    """
+    Print current janus-core version and exit.
+
+    Parameters
+    ----------
+    version : bool
+        Whether to print the current janus-core version.
+    """
+    if version:
+        print(f"janus-core version: {__version__}")
+        raise typer.Exit()
 
 
 @app.command(help="Perform single point calculations and save to file.")
