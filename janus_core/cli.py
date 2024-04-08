@@ -261,6 +261,7 @@ def singlepoint(
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
+    del inputs["struct_path"]
     inputs["log"] = log
 
     if isinstance(s_point.struct, Atoms):
