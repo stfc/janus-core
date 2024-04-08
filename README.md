@@ -17,7 +17,7 @@ Tools for machine learnt interatomic potentials
   - CHGNET
 - [x] Single point calculations
 - [x] Geometry optimisation
-- [ ] Molecular Dynamics
+- [x] Molecular Dynamics
   - NVE
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
   - NPT (Nosé-Hoover (Melchiona flavour))
@@ -69,15 +69,15 @@ Perform a single point calcuation (using the [MACE-MP](https://github.com/ACEsui
 janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will calculate the energy, stress and forces and save this in `NaCl-results.xyz`, in addition to generating a log file, `singlepoint.log`.
+This will calculate the energy, stress and forces and save this in `NaCl-results.xyz`, in addition to generating a log file, `singlepoint.log`, and summary of inputs, `singlepoint_summary.yml`.
 
 Additional options may be specified. For example:
 
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif --arch mace --calc-kwargs "{'model' : '/path/to/your/ml.model'}" --property energy --log './example.log' --write-kwargs "{'filename': './example.xyz'}"
+janus singlepoint --struct tests/data/NaCl.cif --arch mace --calc-kwargs "{'model' : '/path/to/your/ml.model'}" --properties energy --properties forces --log ./example.log --out ./example.xyz
 ```
 
-This defines the MLIP architecture and path to your locally saved model, as well as changing where the log and results files are saved.
+This calculates both forces and energies, defines the MLIP architecture and path to your locally saved model, and changes where the log and results files are saved.
 
 Note: the MACE calculator currently returns energy, forces and stress together, so in this case the choice of property will not change the output.
 
@@ -92,7 +92,7 @@ Perform geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/ma
 janus geomopt --struct tests/data/H2O.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`.
+This will optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`, and summary of inputs, `geomopt_summary.yml`.
 
 Additional options may be specified. This shares most options with `singlepoint`, as well as a few additional options, such as:
 
@@ -119,7 +119,7 @@ This will generate several output files:
 - The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0-traj.xyz`
 - The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0-res-1000.xyz`
 - A log of the processes carried out, written to `md.log`
-
+- A summary of the inputs and start/end time, written to `md_summary.yml`.
 
 Additional options may be specified. For example:
 
@@ -138,6 +138,41 @@ This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps
 
 
 For all options, run `janus md --help`.
+
+
+### Using configuration files
+
+Default values for all command line options may be specifed through a Yaml 1.1 formatted configuration file by adding the `--config` option. If an option is present in both the command line and configuration file, the command line value takes precedence.
+
+For example, with the following configuration file and command:
+
+```yaml
+struct: "NaCl.cif"
+properties:
+  - "energy"
+out: "NaCl-results.xyz"
+arch: mace_mp
+calc_kwargs:
+  model: medium
+```
+
+```shell
+janus singlepoint --struct KCl.cif --out KCl-results.cif --config config.yml
+```
+
+This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "medium" force-field, saving the results to `KCl-results.cif`.
+
+
+> [!NOTE]
+> `properties` must be passed as a Yaml list, as above, not as a string.
+
+> [!WARNING]
+> Options in the Yaml file must use `_` instead of `-`.
+> For example, `calc_kwargs` should be used in the configuration file for the `--calc-kwargs` option.
+
+> [!WARNING]
+> If an option in the configuration file does not match any variable names, an error will **not** be raised.
+> Please check the summary file to ensure the configuration has been read correctly.
 
 
 ## License

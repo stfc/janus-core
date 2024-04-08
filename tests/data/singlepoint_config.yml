@@ -1,0 +1,8 @@
+struct_path: "NaCl.cif"
+properties:
+  - "energy"
+out_file: "NaCl-results.xyz"
+calc_kwargs:
+  model: "small"
+read_kwargs:
+  index: ":"

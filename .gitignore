@@ -5,6 +5,7 @@
 *.swo
 *.swp
 *.xml
+*.cif
 *.xyz
 *.yml
 ~*

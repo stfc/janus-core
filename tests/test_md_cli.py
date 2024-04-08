@@ -53,8 +53,6 @@ def test_md(ensemble, tmp_path):
             ensemble,
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--temp",
-            300,
             "--file-prefix",
             file_prefix,
             "--steps",
@@ -89,8 +87,6 @@ def test_log(tmp_path):
             "nvt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--temp",
-            300,
             "--file-prefix",
             file_prefix,
             "--steps",
@@ -142,8 +138,6 @@ def test_seed(tmp_path):
             "nvt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--temp",
-            300,
             "--file-prefix",
             file_prefix,
             "--steps",
@@ -177,8 +171,6 @@ def test_seed(tmp_path):
             "nvt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--temp",
-            300,
             "--file-prefix",
             file_prefix,
             "--steps",
@@ -221,8 +213,6 @@ def test_summary(tmp_path):
             "nve",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--temp",
-            300,
             "--file-prefix",
             file_prefix,
             "--steps",
@@ -251,3 +241,41 @@ def test_summary(tmp_path):
     assert "ensemble" in summary[2]["inputs"]
     assert "struct" in summary[2]["inputs"]
     assert "n_atoms" in summary[2]["inputs"]["struct"]
+
+
+def test_config(tmp_path):
+    """Test passing a config file with ."""
+    file_prefix = tmp_path / "nvt-T300"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nve",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+            "--config",
+            DATA_PATH / "md_config.yml",
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read md summary file
+    with open(summary_path, encoding="utf8") as file:
+        md_summary = yaml.safe_load(file)
+
+    # Check temperature is passed correctly
+    assert md_summary[2]["inputs"]["temp"] == 200
+    # Check explicit option overwrites config
+    assert md_summary[2]["inputs"]["ensemble"] == "nve"

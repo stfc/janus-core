@@ -74,7 +74,7 @@ def test_properties(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "H2O.cif",
-            "--property",
+            "--properties",
             "energy",
             "--out",
             results_path_1,
@@ -95,7 +95,7 @@ def test_properties(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "H2O.cif",
-            "--property",
+            "--properties",
             "stress",
             "--out",
             results_path_2,
@@ -126,7 +126,7 @@ def test_read_kwargs(tmp_path):
             "{'index': ':'}",
             "--out",
             results_path,
-            "--property",
+            "--properties",
             "energy",
             "--log",
             log_path,
@@ -156,7 +156,7 @@ def test_calc_kwargs(tmp_path):
             "{'default_dtype': 'float32'}",
             "--out",
             results_path,
-            "--property",
+            "--properties",
             "energy",
             "--log",
             log_path,
@@ -182,7 +182,7 @@ def test_log(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             results_path,
-            "--property",
+            "--properties",
             "energy",
             "--log",
             log_path,
@@ -234,3 +234,36 @@ def test_summary(tmp_path):
     assert "length" in sp_summary[2]["inputs"]["traj"]
     assert "struct" in sp_summary[2]["inputs"]["traj"]
     assert "n_atoms" in sp_summary[2]["inputs"]["traj"]["struct"]
+
+
+def test_config(tmp_path):
+    """Test passing a config file with read kwargs, and values to be overwritten."""
+    results_path = tmp_path / "benzene-traj-results.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "benzene-traj.xyz",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+            "--config",
+            DATA_PATH / "singlepoint_config.yml",
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(results_path, index=":")
+    assert len(atoms) == 2
+
+    # Read singlepoint summary file
+    with open(summary_path, encoding="utf8") as file:
+        sp_summary = yaml.safe_load(file)
+
+    assert "index" in sp_summary[2]["inputs"]["read_kwargs"]
+    assert sp_summary[2]["inputs"]["read_kwargs"]["index"] == ":"

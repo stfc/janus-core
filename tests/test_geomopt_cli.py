@@ -41,7 +41,7 @@ def test_geomopt(tmp_path):
             "geomopt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--max-force",
+            "--fmax",
             "0.2",
             "--log",
             log_path,
@@ -295,19 +295,50 @@ def test_summary(tmp_path):
             summary_path,
         ],
     )
-
     assert result.exit_code == 0
 
     # Read geomopt summary file
     with open(summary_path, encoding="utf8") as file:
-        md_summary = yaml.safe_load(file)
+        geomopt_summary = yaml.safe_load(file)
 
-    assert "command" in md_summary[0]
-    assert "janus geomopt" in md_summary[0]["command"]
-    assert "start_time" in md_summary[1]
-    assert "end_time" in md_summary[3]
+    assert "command" in geomopt_summary[0]
+    assert "janus geomopt" in geomopt_summary[0]["command"]
+    assert "start_time" in geomopt_summary[1]
+    assert "end_time" in geomopt_summary[3]
 
-    assert "inputs" in md_summary[2]
-    assert "opt_kwargs" in md_summary[2]["inputs"]
-    assert "struct" in md_summary[2]["inputs"]
-    assert "n_atoms" in md_summary[2]["inputs"]["struct"]
+    assert "inputs" in geomopt_summary[2]
+    assert "opt_kwargs" in geomopt_summary[2]["inputs"]
+    assert "struct" in geomopt_summary[2]["inputs"]
+    assert "n_atoms" in geomopt_summary[2]["inputs"]["struct"]
+
+
+def test_config(tmp_path):
+    """Test passing a config file with opt_kwargs."""
+    results_path = tmp_path / "NaCl-results.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+            "--config",
+            DATA_PATH / "geomopt_config.yml",
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read geomopt summary file
+    with open(summary_path, encoding="utf8") as file:
+        geomopt_summary = yaml.safe_load(file)
+
+    assert "alpha" in geomopt_summary[2]["inputs"]["opt_kwargs"]
+    assert geomopt_summary[2]["inputs"]["opt_kwargs"]["alpha"] == 100

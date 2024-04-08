@@ -1,0 +1,4 @@
+struct_path: "NaCl.cif"
+out_file: "NaCl-results.xyz"
+opt_kwargs:
+  alpha: 100

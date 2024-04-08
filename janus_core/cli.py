@@ -4,14 +4,15 @@ import ast
 import datetime
 import logging
 from pathlib import Path
-from typing import Annotated, Optional, get_args
+from typing import Annotated, Optional, Union, get_args
 
 from ase import Atoms
 import typer
+from typer_config import use_yaml_config
 import yaml
 
 from janus_core.geom_opt import optimize
-from janus_core.janus_types import Ensembles
+from janus_core.janus_types import ASEReadArgs, Ensembles
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.single_point import SinglePoint
 
@@ -51,7 +52,7 @@ class TyperDict:  #  pylint: disable=too-few-public-methods
         return f"<TyperDict: value={self.value}>"
 
 
-def _parse_dict_class(value: str):
+def _parse_dict_class(value: Union[str, ASEReadArgs]):
     """
     Convert string input into a dictionary.
 
@@ -65,6 +66,8 @@ def _parse_dict_class(value: str):
     TyperDict
         Parsed string as a dictionary.
     """
+    if isinstance(value, dict):
+        return TyperDict(value)
     return TyperDict(ast.literal_eval(value))
 
 
@@ -90,7 +93,10 @@ def _parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     for i, typer_dict in enumerate(typer_dicts):
         typer_dicts[i] = typer_dict.value if typer_dict else {}
         if not isinstance(typer_dicts[i], dict):
-            raise ValueError(f"{typer_dicts[i]} must be passed as a dictionary")
+            raise ValueError(
+                f"""{typer_dicts[i]} must be passed as a dictionary wrapped in quotes.\
+ For example, "{{'key' : value}}" """
+            )
     return typer_dicts
 
 
@@ -111,11 +117,9 @@ def _dict_paths_to_strs(dictionary: dict) -> None:
 
 
 # Shared type aliases
-StructPath = Annotated[
-    Path, typer.Option("--struct", help="Path of structure to simulate.")
-]
+StructPath = Annotated[Path, typer.Option(help="Path of structure to simulate.")]
 Architecture = Annotated[
-    str, typer.Option("--arch", help="MLIP architecture to use for calculations.")
+    str, typer.Option(help="MLIP architecture to use for calculations.")
 ]
 Device = Annotated[str, typer.Option(help="Device to run calculations on.")]
 ReadKwargs = Annotated[
@@ -159,31 +163,32 @@ WriteKwargs = Annotated[
         metavar="DICT",
     ),
 ]
-LogFile = Annotated[Path, typer.Option("--log", help="Path to save logs to.")]
+LogPath = Annotated[Path, typer.Option(help="Path to save logs to.")]
 Summary = Annotated[
     Path, typer.Option(help="Path to save summary of inputs and start/end time.")
 ]
 
 
 @app.command(help="Perform single point calculations and save to file.")
-def singlepoint(  # pylint: disable=too-many-locals
-    struct_path: StructPath,
-    architecture: Architecture = "mace_mp",
+@use_yaml_config()
+def singlepoint(
+    # pylint: disable=too-many-locals
+    # numpydoc ignore=PR02
+    struct: StructPath,
+    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     properties: Annotated[
         list[str],
         typer.Option(
-            "--property",
             help=(
                 "Properties to calculate. If not specified, 'energy', 'forces' "
                 "and 'stress' will be returned."
             ),
         ),
     ] = None,
-    out_file: Annotated[
+    out: Annotated[
         Path,
         typer.Option(
-            "--out",
             help=(
                 "Path to save structure with calculated results. Default is inferred "
                 "from name of structure file."
@@ -193,7 +198,7 @@ def singlepoint(  # pylint: disable=too-many-locals
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
-    log_file: LogFile = "singlepoint.log",
+    log: LogPath = "singlepoint.log",
     summary: Summary = "singlepoint_summary.yml",
 ):
     """
@@ -201,16 +206,16 @@ def singlepoint(  # pylint: disable=too-many-locals
 
     Parameters
     ----------
-    struct_path : Path
+    struct : Path
         Path of structure to simulate.
-    architecture : Optional[str]
+    arch : Optional[str]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
     properties : Optional[str]
         Physical properties to calculate. Default is "energy".
-    out_file : Optional[Path]
+    out : Optional[Path]
         Path to save structure with calculated results. Default is inferred from name
         of the structure file.
     read_kwargs : Optional[dict[str, Any]]
@@ -219,11 +224,13 @@ def singlepoint(  # pylint: disable=too-many-locals
         Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
-    log_file : Optional[Path]
+    log : Optional[Path]
         Path to write logs to. Default is "singlepoint.log".
     summary : Path
         Path to save summary of inputs and start/end time. Default is
         singlepoint_summary.yml.
+    config : Path
+        Path to yaml configuration file to define the above options. Default is None.
     """
     [read_kwargs, calc_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
@@ -234,16 +241,16 @@ def singlepoint(  # pylint: disable=too-many-locals
         raise ValueError("'filename' must be passed through the --out option")
 
     # Default filname for saving results determined in SinglePoint if not specified
-    if out_file:
-        write_kwargs["filename"] = out_file
+    if out:
+        write_kwargs["filename"] = out
 
     singlepoint_kwargs = {
-        "struct_path": struct_path,
-        "architecture": architecture,
+        "struct_path": struct,
+        "architecture": arch,
         "device": device,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log_file, "filemode": "w"},
+        "log_kwargs": {"filename": log, "filemode": "w"},
     }
 
     # Initialise singlepoint structure and calculator
@@ -254,19 +261,19 @@ def singlepoint(  # pylint: disable=too-many-locals
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
-    inputs["log"] = log_file
+    inputs["log"] = log
 
     if isinstance(s_point.struct, Atoms):
         inputs["struct"] = {
             "n_atoms": len(s_point.struct),
-            "struct_path": struct_path,
+            "struct_path": struct,
             "struct_name": s_point.struct_name,
             "formula": s_point.struct.get_chemical_formula(),
         }
     else:
         inputs["traj"] = {
             "length": len(s_point.struct),
-            "struct_path": struct_path,
+            "struct_path": struct,
             "struct_name": s_point.struct_name,
             "struct": {
                 "n_atoms": len(s_point.struct[0]),
@@ -307,45 +314,39 @@ def singlepoint(  # pylint: disable=too-many-locals
 @app.command(
     help="Perform geometry optimization and save optimized structure to file.",
 )
-def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
-    struct_path: StructPath,
-    fmax: Annotated[
-        float, typer.Option("--max-force", help="Maximum force for convergence.")
-    ] = 0.1,
+@use_yaml_config()
+def geomopt(
+    # pylint: disable=too-many-arguments,too-many-locals
+    # numpydoc ignore=PR02
+    struct: StructPath,
+    fmax: Annotated[float, typer.Option(help="Maximum force for convergence.")] = 0.1,
     steps: Annotated[
-        int, typer.Option("--steps", help="Maximum number of optimization steps.")
+        int, typer.Option(help="Maximum number of optimization steps.")
     ] = 1000,
-    architecture: Architecture = "mace_mp",
+    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     vectors_only: Annotated[
         bool,
-        typer.Option(
-            "--vectors-only",
-            help=("Optimize cell vectors, as well as atomic positions."),
-        ),
+        typer.Option(help="Optimize cell vectors, as well as atomic positions."),
     ] = False,
     fully_opt: Annotated[
         bool,
         typer.Option(
-            "--fully-opt",
             help="Fully optimize the cell vectors, angles, and atomic positions.",
         ),
     ] = False,
-    out_file: Annotated[
+    out: Annotated[
         Path,
         typer.Option(
-            "--out",
             help=(
                 "Path to save optimized structure. Default is inferred from name "
                 "of structure file."
             ),
         ),
     ] = None,
-    traj_file: Annotated[
+    traj: Annotated[
         str,
-        typer.Option(
-            "--traj", help="Path if saving optimization frames.  [default: None]"
-        ),
+        typer.Option(help="Path if saving optimization frames.  [default: None]"),
     ] = None,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
@@ -363,7 +364,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         ),
     ] = None,
     write_kwargs: WriteKwargs = None,
-    log_file: LogFile = "geomopt.log",
+    log: LogPath = "geomopt.log",
     summary: Summary = "geomopt_summary.yml",
 ):
     """
@@ -371,14 +372,14 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 
     Parameters
     ----------
-    struct_path : Path
+    struct : Path
         Path of structure to simulate.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
     steps : int
         Set maximum number of optimization steps to run. Default is 1000.
-    architecture : Optional[str]
+    arch : Optional[str]
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
     device : Optional[str]
@@ -389,10 +390,10 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     fully_opt : bool
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
-    out_file : Optional[Path]
+    out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
-    traj_file : Optional[str]
+    traj : Optional[str]
         Path if saving optimization frames. Default is None.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. Default is {}.
@@ -403,11 +404,13 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
     write_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
-    log_file : Optional[Path]
+    log : Optional[Path]
         Path to write logs to. Default is "geomopt.log".
     summary : Path
         Path to save summary of inputs and start/end time. Default is
         geomopt_summary.yml.
+    config : Path
+        Path to yaml configuration file to define the above options. Default is None.
     """
     [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
@@ -415,12 +418,12 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 
     # Set up single point calculator
     s_point = SinglePoint(
-        struct_path=struct_path,
-        architecture=architecture,
+        struct_path=struct,
+        architecture=arch,
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w"},
+        log_kwargs={"filename": log, "filemode": "w"},
     )
 
     # Check optimized structure path not duplicated
@@ -432,14 +435,14 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         raise ValueError("'trajectory' must be passed through the --traj option")
 
     # Set default filname for writing optimized structure if not specified
-    if out_file:
-        write_kwargs["filename"] = out_file
+    if out:
+        write_kwargs["filename"] = out
     else:
         write_kwargs["filename"] = f"{s_point.struct_name}-opt.xyz"
 
     # Set same trajectory filenames to overwrite saved binary with xyz
-    opt_kwargs["trajectory"] = traj_file if traj_file else None
-    traj_kwargs = {"filename": traj_file} if traj_file else None
+    opt_kwargs["trajectory"] = traj if traj else None
+    traj_kwargs = {"filename": traj} if traj else None
 
     # Set hydrostatic_strain
     # If not passed --fully-opt or --vectors-only, will be unused
@@ -460,7 +463,7 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
         "write_results": True,
         "write_kwargs": write_kwargs,
         "traj_kwargs": traj_kwargs,
-        "log_kwargs": {"filename": log_file, "filemode": "a"},
+        "log_kwargs": {"filename": log, "filemode": "a"},
     }
 
     # Store inputs for yaml summary
@@ -468,17 +471,17 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
-    inputs["log"] = log_file
+    inputs["log"] = log
 
     inputs["struct"] = {
         "n_atoms": len(s_point.struct),
-        "struct_path": struct_path,
+        "struct_path": struct,
         "struct_name": s_point.struct_name,
         "formula": s_point.struct.get_chemical_formula(),
     }
 
     inputs["calc"] = {
-        "architecture": architecture,
+        "arch": arch,
         "device": device,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
@@ -512,9 +515,12 @@ def geomopt(  # pylint: disable=too-many-arguments,too-many-locals
 @app.command(
     help="Run molecular dynamics simulation, and save trajectory and statistics.",
 )
-def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
+@use_yaml_config()
+def md(
+    # pylint: disable=too-many-arguments,too-many-locals,invalid-name
+    # numpydoc ignore=PR02
     ensemble: Annotated[str, typer.Option(help="Name of thermodynamic ensemble.")],
-    struct_path: StructPath,
+    struct: StructPath,
     steps: Annotated[int, typer.Option(help="Number of steps in simulation.")] = 0,
     timestep: Annotated[
         float, typer.Option(help="Timestep for integrator, in fs.")
@@ -538,7 +544,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     friction: Annotated[
         float, typer.Option(help="Friction coefficient for NVT simulation, in fs^-1.")
     ] = 0.005,
-    architecture: Architecture = "mace_mp",
+    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
@@ -640,7 +646,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     traj_every: Annotated[
         int, typer.Option(help="Frequency of steps to save trajectory.")
     ] = 100,
-    log_file: LogFile = "md.log",
+    log: LogPath = "md.log",
     seed: Annotated[
         Optional[int],
         typer.Option(help="Random seed for numpy.random and random functions."),
@@ -654,7 +660,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     ----------
     ensemble : str
         Name of thermodynamic ensemble.
-    struct_path : Path
+    struct : Path
         Path of structure to simulate.
     steps : int
         Number of steps in simulation. Default is 0.
@@ -672,7 +678,7 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Pressure, in bar. Default is 0.0.
     friction : float
         Friction coefficient in fs^-1. Default is 0.005.
-    architecture : Optional[str]
+    arch : Optional[str]
         MLIP architecture to use for molecular dynamics.
         Default is "mace_mp".
     device : Optional[str]
@@ -722,13 +728,15 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
         Step to start saving trajectory. Default is 0.
     traj_every : int
         Frequency of steps to save trajectory. Default is 100.
-    log_file : Optional[Path]
+    log : Optional[Path]
         Path to write logs to. Default is "md.log".
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
     summary : Path
         Path to save summary of inputs and start/end time. Default is md_summary.yml.
+    config : Path
+        Path to yaml configuration file to define the above options. Default is None.
     """
     [read_kwargs, calc_kwargs, minimize_kwargs] = _parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
@@ -739,15 +747,15 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
 
     # Set up single point calculator
     s_point = SinglePoint(
-        struct_path=struct_path,
-        architecture=architecture,
+        struct_path=struct,
+        architecture=arch,
         device=device,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log_file, "filemode": "w"},
+        log_kwargs={"filename": log, "filemode": "w"},
     )
 
-    log_kwargs = {"filename": log_file, "filemode": "a"}
+    log_kwargs = {"filename": log, "filemode": "a"}
 
     dyn_kwargs = {
         "struct": s_point.struct,
@@ -819,17 +827,17 @@ def md(  # pylint: disable=too-many-arguments,too-many-locals,invalid-name
 
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
-    inputs["log"] = log_file
+    inputs["log"] = log
 
     inputs["struct"] = {
         "n_atoms": len(s_point.struct),
-        "struct_path": struct_path,
+        "struct_path": struct,
         "struct_name": s_point.struct_name,
         "formula": s_point.struct.get_chemical_formula(),
     }
 
     inputs["calc"] = {
-        "architecture": architecture,
+        "arch": arch,
         "device": device,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
