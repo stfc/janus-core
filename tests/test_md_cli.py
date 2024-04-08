@@ -24,8 +24,7 @@ def test_md_help():
     """Test calling `janus md --help`."""
     result = runner.invoke(app, ["md", "--help"])
     assert result.exit_code == 0
-    # Command is returned as "root"
-    assert "Usage: root md [OPTIONS]" in result.stdout
+    assert "Usage: janus md [OPTIONS]" in result.stdout
 
 
 test_data = [
