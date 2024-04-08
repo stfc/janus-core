@@ -232,15 +232,15 @@ def test_summary(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         summary = yaml.safe_load(file)
 
-    assert "command" in summary[0]
-    assert "janus md" in summary[0]["command"]
-    assert "start_time" in summary[1]
-    assert "inputs" in summary[2]
-    assert "end_time" in summary[3]
+    assert "command" in summary
+    assert "janus md" in summary["command"]
+    assert "start_time" in summary
+    assert "inputs" in summary
+    assert "end_time" in summary
 
-    assert "ensemble" in summary[2]["inputs"]
-    assert "struct" in summary[2]["inputs"]
-    assert "n_atoms" in summary[2]["inputs"]["struct"]
+    assert "ensemble" in summary["inputs"]
+    assert "struct" in summary["inputs"]
+    assert "n_atoms" in summary["inputs"]["struct"]
 
 
 def test_config(tmp_path):
@@ -276,6 +276,6 @@ def test_config(tmp_path):
         md_summary = yaml.safe_load(file)
 
     # Check temperature is passed correctly
-    assert md_summary[2]["inputs"]["temp"] == 200
+    assert md_summary["inputs"]["temp"] == 200
     # Check explicit option overwrites config
-    assert md_summary[2]["inputs"]["ensemble"] == "nve"
+    assert md_summary["inputs"]["ensemble"] == "nve"
