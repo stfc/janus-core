@@ -90,7 +90,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     temp_end : Optional[float]
         Maximum temperature for heating, in K. Default is None, which disables heating.
     temp_step : Optional[float]
-        Size of temperature steps when heating, in K. Default is None, which disables heating.
+        Size of temperature steps when heating, in K. Default is None, which disables
+        heating.
     temp_time : Optional[float]
         Time between heating steps, in fs. Default is None, which disables heating.
     log_kwargs : Optional[dict[str, Any]]
@@ -235,7 +236,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Maximum temperature for heating, in K. Default is None, which disables
             heating.
         temp_step : Optional[float]
-            Size of temperature steps when heating, in K. Default is None, which disables heating.
+            Size of temperature steps when heating, in K. Default is None, which
+            disables heating.
         temp_time : Optional[float]
             Time between heating steps, in fs. Default is None, which disables heating.
         log_kwargs : Optional[dict[str, Any]]
@@ -300,7 +302,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Start and end temperatures must be different")
 
         # Warn if mix of None and not None
-        if (self.temp_start or self.temp_end or self.temp_step or self.temp_time) and not (
+        if (
+            self.temp_start or self.temp_end or self.temp_step or self.temp_time
+        ) and not (
             self.temp_start and self.temp_end and self.temp_step and self.temp_time
         ):
             warn(
