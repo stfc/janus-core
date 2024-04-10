@@ -201,4 +201,4 @@ Contributors to this project were funded by
 [license-link]: https://opensource.org/licenses/BSD-3-Clause
 [doi-link]: https://zenodo.org/badge/latestdoi/754081470
 [doi-badge]: https://zenodo.org/badge/754081470.svg
-[logo]: https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/janus-core.png
+[logo]: https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/janus-core-100.png
