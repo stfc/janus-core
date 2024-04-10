@@ -8,6 +8,7 @@
 # janus-core
 
 ![logo][logo]
+
 Tools for machine learnt interatomic potentials
 
 ## Features in development
