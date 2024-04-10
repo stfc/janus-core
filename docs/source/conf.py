@@ -114,6 +114,7 @@ pygments_style = "sphinx"
 
 html_theme = "furo"
 html_title = f"janus-core v{release}"
+html_logo = "images/janus-core.png"
 html_theme_options = {
     "source_repository": "https://github.com/stfc/janus-core/",
     "source_branch": "main",
