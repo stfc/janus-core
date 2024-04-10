@@ -578,7 +578,6 @@ def test_noramp_heating(tmp_path):
     with pytest.raises(ValueError):
         NVT(
             struct=single_point.struct,
-            temp=300.0,
             file_prefix=file_prefix,
             temp_start=10,
             temp_end=10,
