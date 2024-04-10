@@ -667,6 +667,20 @@ def md(
     traj_every: Annotated[
         int, typer.Option(help="Frequency of steps to save trajectory.")
     ] = 100,
+    temp_start: Annotated[
+        Optional[float],
+        typer.Option(help="Temperature to start heating, in K.  [default: None]"),
+    ] = None,
+    temp_end: Annotated[
+        Optional[float],
+        typer.Option(help="Maximum temperature for heating, in K.  [default: None]"),
+    ] = None,
+    temp_step: Annotated[
+        float, typer.Option(help="Size of temperature steps when heating, in K.")
+    ] = 10,
+    temp_time: Annotated[
+        float, typer.Option(help="Time between heating steps, in fs.")
+    ] = 10,
     log: LogPath = "md.log",
     seed: Annotated[
         Optional[int],
@@ -749,6 +763,16 @@ def md(
         Step to start saving trajectory. Default is 0.
     traj_every : int
         Frequency of steps to save trajectory. Default is 100.
+    temp_start : Optional[float]
+        Temperature to start heating, in K. Default is None, which disables
+        heating.
+    temp_end : Optional[float]
+        Maximum temperature for heating, in K. Default is None, which disables
+        heating.
+    temp_step : float
+        Size of temperature steps when heating, in K. Default is 10.
+    temp_time : float
+        Time between heating steps, in fs. Default is 10.
     log : Optional[Path]
         Path to write logs to. Default is "md.log".
     seed : Optional[int]
@@ -808,6 +832,10 @@ def md(
         "traj_append": traj_append,
         "traj_start": traj_start,
         "traj_every": traj_every,
+        "temp_start": temp_start,
+        "temp_end": temp_end,
+        "temp_step": temp_step,
+        "temp_time": temp_time,
         "log_kwargs": log_kwargs,
         "seed": seed,
     }

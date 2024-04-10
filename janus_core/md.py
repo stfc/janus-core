@@ -88,7 +88,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     temp_start : Optional[float]
         Temperature to start heating, in K. Default is None, which disables heating.
     temp_end : Optional[float]
-        Temperature to finish heating, in K. Default is None, which disables heating.
+        Maximum temperature for heating, in K. Default is None, which disables heating.
     temp_step : float
         Size of temperature steps when heating, in K. Default is 10.
     temp_time : float
@@ -232,7 +232,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Temperature to start heating, in K. Default is None, which disables
             heating.
         temp_end : Optional[float]
-            Temperature to finish heating, in K. Default is None, which disables
+            Maximum temperature for heating, in K. Default is None, which disables
             heating.
         temp_step : float
             Size of temperature steps when heating, in K. Default is 10.
@@ -529,9 +529,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         # Run temperature ramp
         if self.temp_start and self.temp_end and self.temp_step:
-            heating_steps = self.temp_time // self.timestep
+            heating_steps = int(self.temp_time // self.timestep)
 
-            n_temps = 1 + (self.temp_end - self.temp_start) // self.temp_step
+            n_temps = int(1 + (self.temp_end - self.temp_start) // self.temp_step)
             temps = [self.temp_start + i * self.temp_step for i in range(n_temps)]
 
             if self.logger:
