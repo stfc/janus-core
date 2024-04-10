@@ -6,6 +6,10 @@
 Welcome to janus-core's documentation!
 ======================================
 
+.. image::  images/janus-core.png
+   :height: 100px
+   :target: https://github.com/stfc/janus-core/
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
