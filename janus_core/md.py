@@ -89,10 +89,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Temperature to start heating, in K. Default is None, which disables heating.
     temp_end : Optional[float]
         Maximum temperature for heating, in K. Default is None, which disables heating.
-    temp_step : float
-        Size of temperature steps when heating, in K. Default is 10.
-    temp_time : float
-        Time between heating steps, in fs. Default is 10.
+    temp_step : Optional[float]
+        Size of temperature steps when heating, in K. Default is None, which disables heating.
+    temp_time : Optional[float]
+        Time between heating steps, in fs. Default is None, which disables heating.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to log config. Default is None.
     seed : Optional[int]
@@ -163,8 +163,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         traj_every: int = 100,
         temp_start: Optional[float] = None,
         temp_end: Optional[float] = None,
-        temp_step: float = 10,
-        temp_time: float = 10,
+        temp_step: Optional[float] = None,
+        temp_time: Optional[float] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
     ) -> None:
@@ -234,10 +234,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         temp_end : Optional[float]
             Maximum temperature for heating, in K. Default is None, which disables
             heating.
-        temp_step : float
-            Size of temperature steps when heating, in K. Default is 10.
-        temp_time : float
-            Time between heating steps, in fs. Default is 10.
+        temp_step : Optional[float]
+            Size of temperature steps when heating, in K. Default is None, which disables heating.
+        temp_time : Optional[float]
+            Time between heating steps, in fs. Default is None, which disables heating.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to log config. Default is None.
         seed : Optional[int]
@@ -300,8 +300,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Start and end temperatures must be different")
 
         # Warn if mix of None and not None
-        if (self.temp_start or self.temp_end or self.temp_step) and not (
-            self.temp_start or self.temp_end or self.temp_step
+        if (self.temp_start or self.temp_end or self.temp_step or self.temp_time) and not (
+            self.temp_start and self.temp_end and self.temp_step and self.temp_time
         ):
             warn(
                 "`temp_start`, `temp_end` and `temp_step` must all be specified for "
