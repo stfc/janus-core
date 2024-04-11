@@ -328,7 +328,12 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             path.unlink(missing_ok=True)
 
     def _set_velocity_distribution(self) -> None:
-        """Set velocities to current target temperature and (optionally) rotation of system."""
+        """
+        Set velocities to current target temperature.
+        
+        Sets Maxwell-Boltzmann velocity distribution, as well as removing
+        centre-of-mass momentum, and (optionally) total angular momentum.
+        """
         MaxwellBoltzmannDistribution(self.struct, temperature_K=self.temp)
         Stationary(self.struct)
         if self.logger:
