@@ -10,6 +10,8 @@ import pytest
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.mlip_calculators import choose_calculator
 from janus_core.single_point import SinglePoint
+from janus_core.stats import Stats
+from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -419,16 +421,14 @@ def test_minimize_every(tmp_path):
         minimize_every=2,
         equil_steps=4,
         file_prefix=file_prefix,
-        log_kwargs={"filename": log_file, "force": True},
+        log_kwargs={"filename": log_file},
     )
     nvt.run()
-
-    with open(log_file, encoding="utf8") as file:
-        log_txt = file.readlines()
-        assert any("Minimizing at step 0" in line for line in log_txt)
-        assert not any("Minimizing at step 1" in line for line in log_txt)
-        assert any("Minimizing at step 2" in line for line in log_txt)
-        assert not any("Minimizing at step 4" in line for line in log_txt)
+    assert_log_contains(
+        log_file,
+        includes=["Minimizing at step 0", "Minimizing at step 2"],
+        excludes=["Minimizing at step 1", "Minimizing at step 4"],
+    )
 
 
 def test_rescale_every(tmp_path):
@@ -453,20 +453,24 @@ def test_rescale_every(tmp_path):
         rescale_every=3,
         equil_steps=4,
         file_prefix=file_prefix,
-        log_kwargs={"filename": log_file, "force": True},
+        log_kwargs={"filename": log_file},
     )
     nvt.run()
-
     # Note: four timesteps required as rescaling is performed before start of step
-    with open(log_file, encoding="utf8") as file:
-        log_txt = file.readlines()
-        assert any("Velocities reset at step 0" in line for line in log_txt)
-        assert not any("Velocities reset at step 1" in line for line in log_txt)
-        assert any("Velocities reset at step 3" in line for line in log_txt)
-
-        assert any("Rotation reset at step 0" in line for line in log_txt)
-        assert not any("Rotation reset at step 1" in line for line in log_txt)
-        assert any("Rotation reset at step 3" in line for line in log_txt)
+    assert_log_contains(
+        log_file,
+        includes=[
+            "Velocities reset at step 0",
+            "Velocities reset at step 3",
+            "Rotation reset at step 0",
+            "Rotation reset at step 3",
+        ],
+        excludes=[
+            "Velocities reset at step 1",
+            "Minimizing at step 4",
+            "Rotation reset at step 1",
+        ],
+    )
 
 
 def test_rotate_restart(tmp_path):
@@ -525,3 +529,104 @@ def test_atoms_struct(tmp_path):
         assert " | Epot/N [eV]" in lines[0]
         # Includes step 0
         assert len(lines) == 6
+
+
+def test_heating(tmp_path):
+    """Test heating with no MD."""
+    file_prefix = tmp_path / "NaCl-heating"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_every=10,
+        stats_every=1,
+        file_prefix=file_prefix,
+        temp_start=10,
+        temp_end=40,
+        temp_step=20,
+        temp_time=0.5,
+        log_kwargs={"filename": log_file},
+    )
+    nvt.run()
+    assert_log_contains(
+        log_file,
+        includes=[
+            "Beginning temperature ramp at 10K",
+            "Temperature ramp complete at 30K",
+        ],
+        excludes=["Starting molecular dynamics simulation"],
+    )
+
+
+def test_noramp_heating(tmp_path):
+    """Test ValueError is thrown for invalid temperature ramp."""
+    file_prefix = tmp_path / "NaCl-heating"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(ValueError):
+        NVT(
+            struct=single_point.struct,
+            file_prefix=file_prefix,
+            temp_start=10,
+            temp_end=10,
+            temp_step=20,
+        )
+
+
+def test_heating_md(tmp_path):
+    """Test heating followed by MD."""
+    file_prefix = tmp_path / "NaCl-heating"
+    stats_path = tmp_path / "NaCl-heating-stats.dat"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=25.0,
+        steps=5,
+        traj_every=100,
+        stats_every=2,
+        file_prefix=file_prefix,
+        temp_start=10,
+        temp_end=20,
+        temp_step=10,
+        temp_time=2,
+        log_kwargs={"filename": log_file},
+    )
+    nvt.run()
+    assert_log_contains(
+        log_file,
+        includes=[
+            "Beginning temperature ramp at 10K",
+            "Temperature ramp complete at 20K",
+            "Starting molecular dynamics simulation",
+            "Molecular dynamics simulation complete",
+        ],
+    )
+    stat_data = Stats(stats_path)
+    assert stat_data.rows == 5
+    assert stat_data.columns == 17
+    assert stat_data.data[0, 16] == pytest.approx(10.0)
+    assert stat_data.data[2, 16] == pytest.approx(20.0)
+    assert stat_data.data[4, 16] == pytest.approx(25.0)
+    assert stat_data.labels[0] == "# Step"
+    assert stat_data.units[0] == ""
+    assert stat_data.units[16] == "K"
+    assert stat_data.labels[16] == "Target T"

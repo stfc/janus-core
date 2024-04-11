@@ -8,6 +8,7 @@
 # janus-core
 
 ![logo][logo]
+
 Tools for machine learnt interatomic potentials
 
 ## Features in development
@@ -139,6 +140,25 @@ This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps
 
 
 For all options, run `janus md --help`.
+
+
+### Heating
+
+Run an NVT heating simultation from 20K to 300K in steps of 20K, with 10fs at each temperature:
+
+```shell
+janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10
+```
+
+This produces the same output files as an MD simulation.
+
+MD can also be carried out after heating using the same options as described in #molecular-dynamics. For example:
+
+```shell
+janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10 --steps 1000 --temp 300
+```
+
+This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
 
 
 ### Using configuration files

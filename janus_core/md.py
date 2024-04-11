@@ -85,6 +85,15 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Step to start saving trajectory. Default is 0.
     traj_every : int
         Frequency of steps to save trajectory. Default is 100.
+    temp_start : Optional[float]
+        Temperature to start heating, in K. Default is None, which disables heating.
+    temp_end : Optional[float]
+        Maximum temperature for heating, in K. Default is None, which disables heating.
+    temp_step : Optional[float]
+        Size of temperature steps when heating, in K. Default is None, which disables
+        heating.
+    temp_time : Optional[float]
+        Time between heating steps, in fs. Default is None, which disables heating.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to log config. Default is None.
     seed : Optional[int]
@@ -106,20 +115,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
     Methods
     -------
-    optimize_structure()
-        Perform geometry optimization.
-    reset_velocities()
-        Reset velocities and (optionally) rotation of system.
-    rotate_restart_files()
-        Rotate restart files.
     run()
-        Run molecular dynamics simulation.
-    write_md_log()
-        Write molecular dynamics log.
-    write_traj()
-        Write current structure to trajectory file.
-    write_restart()
-        Write restart file and (optionally) rotate files saved.
+        Run molecular dynamics simulation and/or heating ramp.
     get_log_stats()
         Get thermodynamical statistics to be written to molecular dynamics log.
     get_log_header()
@@ -153,6 +150,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         traj_append: bool = False,
         traj_start: int = 0,
         traj_every: int = 100,
+        temp_start: Optional[float] = None,
+        temp_end: Optional[float] = None,
+        temp_step: Optional[float] = None,
+        temp_time: Optional[float] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
     ) -> None:
@@ -216,6 +217,17 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Step to start saving trajectory. Default is 0.
         traj_every : int
             Frequency of steps to save trajectory. Default is 100.
+        temp_start : Optional[float]
+            Temperature to start heating, in K. Default is None, which disables
+            heating.
+        temp_end : Optional[float]
+            Maximum temperature for heating, in K. Default is None, which disables
+            heating.
+        temp_step : Optional[float]
+            Size of temperature steps when heating, in K. Default is None, which
+            disables heating.
+        temp_time : Optional[float]
+            Time between heating steps, in fs. Default is None, which disables heating.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to log config. Default is None.
         seed : Optional[int]
@@ -245,6 +257,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.traj_append = traj_append
         self.traj_start = traj_start
         self.traj_every = traj_every
+        self.temp_start = temp_start
+        self.temp_end = temp_end
+        self.temp_step = temp_step
+        self.temp_time = temp_time * units.fs if temp_time else None
         self.log_kwargs = log_kwargs
         self.ensemble = ensemble
         self.seed = seed
@@ -269,6 +285,22 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         if remove_rot and not rescale_velocities:
             warn("Rotation will not be removed unless `rescale_velocities` is True")
 
+        # Check temperatures for heating differ
+        if self.temp_start is not None and self.temp_start == self.temp_end:
+            raise ValueError("Start and end temperatures must be different")
+
+        # Warn if mix of None and not None
+        self.ramp_temp = (
+            self.temp_start and self.temp_end and self.temp_step and self.temp_time
+        )
+        if (
+            self.temp_start or self.temp_end or self.temp_step or self.temp_time
+        ) and not self.ramp_temp:
+            warn(
+                "`temp_start`, `temp_end` and `temp_step` must all be specified for "
+                "heating to run"
+            )
+
         self.minimize_kwargs = minimize_kwargs if minimize_kwargs else {}
         self.restart_files = []
         self.dyn = None
@@ -289,25 +321,34 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             np.random.seed(seed)
             random.seed(seed)
 
-    def rotate_restart_files(self) -> None:
+    def _rotate_restart_files(self) -> None:
         """Rotate restart files."""
         if len(self.restart_files) > self.restarts_to_keep:
             path = Path(self.restart_files.pop(0))
             path.unlink(missing_ok=True)
 
-    def reset_velocities(self) -> None:
-        """Reset velocities and (optionally) rotation of system."""
-        if self.dyn.nsteps < self.equil_steps:
-            MaxwellBoltzmannDistribution(self.struct, temperature_K=self.temp)
-            Stationary(self.struct)
-            if self.logger:
-                self.logger.info("Velocities reset at step %s", self.dyn.nsteps)
-            if self.remove_rot:
-                ZeroRotation(self.struct)
-                if self.logger:
-                    self.logger.info("Rotation reset at step %s", self.dyn.nsteps)
+    def _set_velocity_distribution(self) -> None:
+        """
+        Set velocities to current target temperature.
 
-    def optimize_structure(self) -> None:
+        Sets Maxwell-Boltzmann velocity distribution, as well as removing
+        centre-of-mass momentum, and (optionally) total angular momentum.
+        """
+        MaxwellBoltzmannDistribution(self.struct, temperature_K=self.temp)
+        Stationary(self.struct)
+        if self.logger:
+            self.logger.info("Velocities reset at step %s", self.dyn.nsteps)
+        if self.remove_rot:
+            ZeroRotation(self.struct)
+            if self.logger:
+                self.logger.info("Rotation reset at step %s", self.dyn.nsteps)
+
+    def _reset_velocities(self) -> None:
+        """Reset velocities and (optionally) rotation of system while equilibrating."""
+        if self.dyn.nsteps < self.equil_steps:
+            self._set_velocity_distribution()
+
+    def _optimize_structure(self) -> None:
         """Perform geometry optimization."""
         if self.dyn.nsteps < self.equil_steps:
             if self.logger:
@@ -344,7 +385,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Header for molecular dynamics log.
         """
         log_header = (
-            "Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
+            "# Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
             "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [bar] | "
             "Pxx [bar] | Pyy [bar] | Pzz [bar] | Pyz [bar] | Pxz [bar] | Pxy [bar]"
         )
@@ -409,13 +450,13 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         return log_stats
 
-    def write_md_log(self) -> None:
+    def _write_stats_file(self) -> None:
         """Write molecular dynamics log."""
         log_stats = self.get_log_stats()
-        with open(self.stats_file, "a", encoding="utf8") as md_log:
-            print(log_stats, file=md_log)
+        with open(self.stats_file, "a", encoding="utf8") as stats_file:
+            print(log_stats, file=stats_file)
 
-    def write_traj(self) -> None:
+    def _write_traj(self) -> None:
         """Write current structure to trajectory file."""
         if self.dyn.nsteps >= self.traj_start:
             # Append if restarting or already started writing
@@ -430,7 +471,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 append=append,
             )
 
-    def write_restart(self) -> None:
+    def _write_restart(self) -> None:
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
@@ -443,19 +484,15 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             )
             if self.rotate_restart:
                 self.restart_files.append(restart_file)
-                self.rotate_restart_files()
+                self._rotate_restart_files()
 
     def run(self) -> None:
-        """Run molecular dynamics simulation."""
-        if self.logger:
-            self.logger.info("Starting molecular dynamics simulation")
-
-        self.struct.info["real_time"] = datetime.datetime.now()
-
+        """Run molecular dynamics simulation and/or temperature ramp."""
+        # Check if restarting simulation
         if self.restart:
             try:
-                with open(self.stats_file, encoding="utf8") as md_log:
-                    last_line = md_log.readlines()[-1].split()
+                with open(self.stats_file, encoding="utf8") as stats_file:
+                    last_line = stats_file.readlines()[-1].split()
                 try:
                     self.offset = int(last_line[0])
                 except (IndexError, ValueError) as e:
@@ -467,26 +504,59 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             if self.minimize:
                 optimize(self.struct, **self.minimize_kwargs)
             if self.rescale_velocities:
-                self.reset_velocities()
+                self._reset_velocities()
 
             log_header = self.get_log_header()
-            with open(self.stats_file, "w", encoding="utf8") as md_log:
-                print(log_header, file=md_log)
+            with open(self.stats_file, "w", encoding="utf8") as stats_file:
+                print(log_header, file=stats_file)
 
-        self.dyn.attach(self.write_md_log, interval=self.stats_every)
-        self.dyn.attach(self.write_traj, interval=self.traj_every)
-        self.dyn.attach(self.write_restart, interval=self.restart_every)
+        self.dyn.attach(self._write_stats_file, interval=self.stats_every)
+        self.dyn.attach(self._write_traj, interval=self.traj_every)
+        self.dyn.attach(self._write_restart, interval=self.restart_every)
 
         if self.rescale_velocities:
-            self.dyn.attach(self.reset_velocities, interval=self.rescale_every)
+            self.dyn.attach(self._reset_velocities, interval=self.rescale_every)
 
         if self.minimize and self.minimize_every > 0:
-            self.dyn.attach(self.optimize_structure, interval=self.minimize_every)
+            self.dyn.attach(self._optimize_structure, interval=self.minimize_every)
 
-        self.dyn.run(self.steps)
+        # Note current time
+        self.struct.info["real_time"] = datetime.datetime.now()
+        self._run_dynamics()
 
-        if self.logger:
-            self.logger.info("Molecular dynamics simulation complete")
+    def _run_dynamics(self) -> None:
+        """Run dynamics and/or temperature ramp."""
+        # Store temperature for final MD
+        md_temp = self.temp
+        if self.ramp_temp:
+            self.temp = self.temp_start
+
+        # Set velocities to match current temperature
+        self._set_velocity_distribution()
+
+        # Run temperature ramp
+        if self.ramp_temp:
+            heating_steps = int(self.temp_time // self.timestep)
+
+            n_temps = int(1 + (self.temp_end - self.temp_start) // self.temp_step)
+            temps = [self.temp_start + i * self.temp_step for i in range(n_temps)]
+
+            if self.logger:
+                self.logger.info("Beginning temperature ramp at %sK", temps[0])
+            for temp in temps:
+                self.temp = temp
+                self.dyn.run(heating_steps)
+            if self.logger:
+                self.logger.info("Temperature ramp complete at %sK", temps[-1])
+
+        # Run MD
+        if self.steps > 0:
+            if self.logger:
+                self.logger.info("Starting molecular dynamics simulation")
+            self.temp = md_temp
+            self.dyn.run(self.steps)
+            if self.logger:
+                self.logger.info("Molecular dynamics simulation complete")
 
 
 class NPT(MolecularDynamics):

@@ -278,3 +278,40 @@ def test_config(tmp_path):
     assert md_summary["inputs"]["temp"] == 200
     # Check explicit option overwrites config
     assert md_summary["inputs"]["ensemble"] == "nve"
+
+
+def test_heating(tmp_path):
+    """Test heating before MD."""
+    file_prefix = tmp_path / "nvt-T300"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--stats-every",
+            1,
+            "--steps",
+            5,
+            "--temp-start",
+            10,
+            "--temp-end",
+            20,
+            "--temp-step",
+            50,
+            "--temp-time",
+            0.05,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
