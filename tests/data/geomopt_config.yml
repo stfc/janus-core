@@ -1,4 +1,4 @@
-struct_path: "NaCl.cif"
-out_file: "NaCl-results.xyz"
-opt_kwargs:
+struct: "NaCl.cif"
+out: "NaCl-results.xyz"
+opt-kwargs:
   alpha: 100

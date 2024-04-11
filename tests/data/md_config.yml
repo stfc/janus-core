@@ -1,2 +1,5 @@
 ensemble: "nvt"
 temp: 200
+minimize-kwargs:
+  filter-kwargs:
+    hydrostatic-strain: True
