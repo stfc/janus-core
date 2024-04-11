@@ -10,6 +10,7 @@ import pytest
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.mlip_calculators import choose_calculator
 from janus_core.single_point import SinglePoint
+from janus_core.stats import Stats
 from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -588,6 +589,7 @@ def test_noramp_heating(tmp_path):
 def test_heating_md(tmp_path):
     """Test heating followed by MD."""
     file_prefix = tmp_path / "NaCl-heating"
+    stats_path = tmp_path / "NaCl-heating-stats.dat"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -600,12 +602,12 @@ def test_heating_md(tmp_path):
         temp=25.0,
         steps=5,
         traj_every=100,
-        stats_every=1,
+        stats_every=2,
         file_prefix=file_prefix,
         temp_start=10,
         temp_end=20,
         temp_step=10,
-        temp_time=0.5,
+        temp_time=2,
         log_kwargs={"filename": log_file},
     )
     nvt.run()
@@ -618,3 +620,13 @@ def test_heating_md(tmp_path):
             "Molecular dynamics simulation complete",
         ],
     )
+    stat_data = Stats(stats_path)
+    assert stat_data.rows == 5
+    assert stat_data.columns == 17
+    assert stat_data.data[0, 16] == pytest.approx(10.0)
+    assert stat_data.data[2, 16] == pytest.approx(20.0)
+    assert stat_data.data[4, 16] == pytest.approx(25.0)
+    assert stat_data.labels[0] == "# Step"
+    assert stat_data.units[0] == ""
+    assert stat_data.units[16] == "K"
+    assert stat_data.labels[16] == "Target T"
