@@ -260,6 +260,7 @@ def test_config(tmp_path):
             file_prefix,
             "--steps",
             2,
+            "--minimize",
             "--log",
             log_path,
             "--summary",
@@ -278,6 +279,14 @@ def test_config(tmp_path):
     assert md_summary["inputs"]["temp"] == 200
     # Check explicit option overwrites config
     assert md_summary["inputs"]["ensemble"] == "nve"
+    # Check nested dictionary
+    assert (
+        md_summary["inputs"]["minimize_kwargs"]["filter_kwargs"]["hydrostatic_strain"]
+        is True
+    )
+
+    # Check hydrostatic strain passed correctly
+    assert_log_contains(log_path, includes=["hydrostatic_strain: True"])
 
 
 def test_heating(tmp_path):

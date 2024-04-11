@@ -350,7 +350,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
     def _optimize_structure(self) -> None:
         """Perform geometry optimization."""
-        if self.dyn.nsteps < self.equil_steps:
+        if self.dyn.nsteps == 0 or self.dyn.nsteps < self.equil_steps:
             if self.logger:
                 self.minimize_kwargs["log_kwargs"] = {
                     "filename": self.log_kwargs["filename"],
@@ -502,7 +502,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         else:
             if self.minimize:
-                optimize(self.struct, **self.minimize_kwargs)
+                self._optimize_structure()
             if self.rescale_velocities:
                 self._reset_velocities()
 

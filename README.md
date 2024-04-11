@@ -173,7 +173,7 @@ properties:
   - "energy"
 out: "NaCl-results.xyz"
 arch: mace_mp
-calc_kwargs:
+calc-kwargs:
   model: medium
 ```
 
@@ -186,10 +186,6 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 
 > [!NOTE]
 > `properties` must be passed as a Yaml list, as above, not as a string.
-
-> [!WARNING]
-> Options in the Yaml file must use `_` instead of `-`.
-> For example, `calc_kwargs` should be used in the configuration file for the `--calc-kwargs` option.
 
 > [!WARNING]
 > If an option in the configuration file does not match any variable names, an error will **not** be raised.

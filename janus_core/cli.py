@@ -4,11 +4,11 @@ import ast
 import datetime
 import logging
 from pathlib import Path
-from typing import Annotated, Optional, Union, get_args
+from typing import Annotated, Any, Optional, Union, get_args
 
 from ase import Atoms
 import typer
-from typer_config import use_yaml_config
+from typer_config import conf_callback_factory, use_config, yaml_loader
 import yaml
 
 from janus_core import __version__
@@ -16,6 +16,7 @@ from janus_core.geom_opt import optimize
 from janus_core.janus_types import ASEReadArgs, Ensembles
 from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
 from janus_core.single_point import SinglePoint
+from janus_core.utils import dict_paths_to_strs, dict_remove_hyphens
 
 app = typer.Typer(name="janus", no_args_is_help=True)
 
@@ -101,21 +102,29 @@ def _parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     return typer_dicts
 
 
-def _dict_paths_to_strs(dictionary: dict) -> None:
+def yaml_converter_loader(config_file: str) -> dict[str, Any]:
     """
-    Recursively iterate over dictionary, converting Path values to strings.
+    Load yaml configuration and replace hyphens with underscores.
 
     Parameters
     ----------
-    dictionary : dict
-        Dictionary to be converted.
-    """
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            _dict_paths_to_strs(value)
-        elif isinstance(value, Path):
-            dictionary[key] = str(value)
+    config_file : str
+        Yaml configuration file to read.
 
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary with loaded configuration.
+    """
+    if not config_file:
+        return {}
+
+    config = yaml_loader(config_file)
+    # Replace all "-"" with "_" in conf
+    return dict_remove_hyphens(config)
+
+
+yaml_converter_callback = conf_callback_factory(yaml_converter_loader)
 
 # Shared type aliases
 StructPath = Annotated[Path, typer.Option(help="Path of structure to simulate.")]
@@ -190,7 +199,7 @@ def print_version(
 
 
 @app.command(help="Perform single point calculations and save to file.")
-@use_yaml_config()
+@use_config(yaml_converter_callback)
 def singlepoint(
     # pylint: disable=too-many-locals
     # numpydoc ignore=PR02
@@ -308,7 +317,7 @@ def singlepoint(
     }
 
     # Convert all paths to strings in inputs nested dictionary
-    _dict_paths_to_strs(inputs)
+    dict_paths_to_strs(inputs)
 
     # Save summary information before singlepoint calculation begins
     save_info = {
@@ -335,7 +344,7 @@ def singlepoint(
 @app.command(
     help="Perform geometry optimization and save optimized structure to file.",
 )
-@use_yaml_config()
+@use_config(yaml_converter_callback)
 def geomopt(
     # pylint: disable=too-many-arguments,too-many-locals
     # numpydoc ignore=PR02
@@ -509,7 +518,7 @@ def geomopt(
     }
 
     # Convert all paths to strings in inputs nested dictionary
-    _dict_paths_to_strs(inputs)
+    dict_paths_to_strs(inputs)
 
     # Save summary information before optimization begins
     save_info = {
@@ -536,7 +545,7 @@ def geomopt(
 @app.command(
     help="Run molecular dynamics simulation, and save trajectory and statistics.",
 )
-@use_yaml_config()
+@use_config(yaml_converter_callback)
 def md(
     # pylint: disable=too-many-arguments,too-many-locals,invalid-name
     # numpydoc ignore=PR02
@@ -895,7 +904,7 @@ def md(
     }
 
     # Convert all paths to strings in inputs nested dictionary
-    _dict_paths_to_strs(inputs)
+    dict_paths_to_strs(inputs)
 
     # Save summary information before simulation begins
     save_info = {
