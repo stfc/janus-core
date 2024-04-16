@@ -360,20 +360,23 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimize(self.struct, **self.minimize_kwargs)
 
-    def configure_filenames(self) -> None:
+    def configure_filenames(self, pressure: Optional[float] = None) -> None:
         """Setup filenames for output files."""
+        temp = ""
         if not self.file_prefix:
-            self.file_prefix = f"{self.struct_name}-{self.ensemble}-T{self.temp}"
+            self.file_prefix = f"{self.struct_name}-{self.ensemble}"
+            if pressure is not None:
+                 self.file_prefix = f"{self.file_prefix}-p{pressure}" 
+            if self.temp_start and self.temp_end:
+               temp = f"-T{self.temp_start}-T{self.temp_end}"
+            else:
+               temp = f"-T{self.temp}"
 
         if not self.stats_file:
-            self.stats_file = f"{self.file_prefix}-stats.dat"
+            self.stats_file = f"{self.file_prefix}{temp}-stats.dat"
 
         if not self.traj_file:
-            self.traj_file = f"{self.file_prefix}-traj.xyz"
-
-        if not self.restart_stem:
-            self.restart_stem = f"{self.file_prefix}-res"
-
+            self.traj_file = f"{self.file_prefix}{temp}-traj.xyz"
     @staticmethod
     def get_log_header() -> str:
         """
@@ -471,18 +474,25 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 append=append,
             )
 
-    def _write_restart(self) -> None:
+    def _write_restart(self, final: bool = False) -> None:
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
-            restart_file = f"{self.restart_stem}-{step}.xyz"
+            if not self.restart_stem:
+                if not final:
+                    restart_file = f"{self.file_prefix}-T{self.temp}-res-{step}.xyz" 
+                else:
+                    restart_file = f"{self.file_prefix}-T{self.temp}-final.xyz"
+            else:
+                restart_file = f"{self.restart_stem}-res-{step}.xyz"
+            columns = ["symbols", "positions", "momenta", "masses"] if not final else None
             write(
                 restart_file,
                 self.struct,
                 write_info=True,
-                columns=["symbols", "positions", "momenta", "masses"],
+                columns=columns
             )
-            if self.rotate_restart:
+            if not final and self.rotate_restart:
                 self.restart_files.append(restart_file)
                 self._rotate_restart_files()
 
@@ -513,6 +523,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.dyn.attach(self._write_stats_file, interval=self.stats_every)
         self.dyn.attach(self._write_traj, interval=self.traj_every)
         self.dyn.attach(self._write_restart, interval=self.restart_every)
+        self.dyn.attach(lambda : self._write_restart("final.xyz"), interval=self.steps)
 
         if self.rescale_velocities:
             self.dyn.attach(self._reset_velocities, interval=self.rescale_every)
@@ -546,6 +557,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             for temp in temps:
                 self.temp = temp
                 self.dyn.run(heating_steps)
+                self._write_restart(True)
             if self.logger:
                 self.logger.info("Temperature ramp complete at %sK", temps[-1])
 
@@ -555,6 +567,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 self.logger.info("Starting molecular dynamics simulation")
             self.temp = md_temp
             self.dyn.run(self.steps)
+            self._write_restart(True)
             if self.logger:
                 self.logger.info("Molecular dynamics simulation complete")
 
@@ -636,16 +649,14 @@ class NPT(MolecularDynamics):
         # Reconfigure filenames to include pressure if `file_prefix` not specified
         # Requires super().__init__ first to determine `self.struct_name`
         if not file_prefix and not isinstance(self, NVT_NH):
-            self.file_prefix = (
-                f"{self.struct_name}-{self.ensemble}-T{self.temp}-p{self.pressure}"
-            )
+            self.file_prefix = ""
             if not kwargs.get("stats_file"):
                 self.stats_file = ""
             if not kwargs.get("traj_file"):
                 self.traj_file = ""
             if not kwargs.get("restart_stem"):
                 self.restart_stem = ""
-            self.configure_filenames()
+            self.configure_filenames(self.pressure)
 
         self.dyn = ASE_NPT(
             self.struct,
@@ -941,3 +952,4 @@ class NPH(NPT):
             file_prefix=file_prefix,
             **kwargs,
         )
+

@@ -41,10 +41,10 @@ def test_init(ensemble, expected):
 
 def test_npt():
     """Test NPT molecular dynamics."""
-    restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.xyz")
-    restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.xyz")
-    traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.xyz")
-    stats_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
+    restart_path_1 = Path("Cl4Na4-npt-p1.0-T300.0-res-2.xyz")
+    restart_path_2 = Path("Cl4Na4-npt-p1.0-T300.0-res-4.xyz")
+    traj_path = Path("Cl4Na4-npt-p1.0-T300.0-traj.xyz")
+    stats_path = Path("Cl4Na4-npt-p1.0-T300.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
@@ -167,9 +167,9 @@ def test_nve(tmp_path):
 
 def test_nph():
     """Test NPH molecular dynamics."""
-    restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.xyz")
-    traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.xyz")
-    stats_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
+    restart_path = Path("Cl4Na4-nph-p0.0-T300.0-res-2.xyz")
+    traj_path = Path("Cl4Na4-nph-p0.0-T300.0-traj.xyz")
+    stats_path = Path("Cl4Na4-nph-p0.0-T300.0-stats.dat")
 
     assert not restart_path.exists()
     assert not traj_path.exists()
@@ -475,7 +475,7 @@ def test_rescale_every(tmp_path):
 
 def test_rotate_restart(tmp_path):
     """Test setting rotate_restart."""
-    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    file_prefix = tmp_path / "Cl4Na4-nvt"
     restart_path_1 = tmp_path / "Cl4Na4-nvt-T300.0-res-1.xyz"
     restart_path_2 = tmp_path / "Cl4Na4-nvt-T300.0-res-2.xyz"
     restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.xyz"
