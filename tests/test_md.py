@@ -647,3 +647,56 @@ def test_heating_md(tmp_path):
     assert stat_data.units[0] == ""
     assert stat_data.units[16] == "K"
     assert stat_data.labels[16] == "Target T"
+
+def test_heating_file_stems():
+    """Test default heating file stems."""
+    
+    traj_path = Path("Cl4Na4-nvt-T10-T20-traj.xyz")
+    stats_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
+    final_10_path = Path("Cl4Na4-nvt-T10-final.xyz")
+    final_20_path = Path("Cl4Na4-nvt-T20-final.xyz") 
+    
+    assert not traj_path.exists()
+    assert not stats_path.exists()
+    assert not final_10_path.exists()
+    assert not final_20_path.exists()
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=25.0,
+        steps=0,
+        traj_every=100,
+        stats_every=2,
+        temp_start=10,
+        temp_end=20,
+        temp_step=10,
+        temp_time=2
+    )
+    try:
+        nvt.run()
+        final_10_atoms = read(final_10_path)
+        assert isinstance(final_10_atoms, Atoms)
+        final_20_atoms = read(final_20_path)
+        assert isinstance(final_20_atoms, Atoms)
+
+        traj = read(traj_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 1
+
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
+            assert "Target T [K]" in lines[0]
+            assert len(lines) == 4
+
+    finally:
+        traj_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
+        final_10_path.unlink(missing_ok=True)
+        final_20_path.unlink(missing_ok=True)
+
+
