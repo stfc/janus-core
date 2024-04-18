@@ -523,7 +523,6 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.dyn.attach(self._write_stats_file, interval=self.stats_every)
         self.dyn.attach(self._write_traj, interval=self.traj_every)
         self.dyn.attach(self._write_restart, interval=self.restart_every)
-        self.dyn.attach(lambda : self._write_restart("final.xyz"), interval=self.steps)
 
         if self.rescale_velocities:
             self.dyn.attach(self._reset_velocities, interval=self.rescale_every)

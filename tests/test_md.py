@@ -43,11 +43,13 @@ def test_npt():
     """Test NPT molecular dynamics."""
     restart_path_1 = Path("Cl4Na4-npt-p1.0-T300.0-res-2.xyz")
     restart_path_2 = Path("Cl4Na4-npt-p1.0-T300.0-res-4.xyz")
+    restart_final = Path("Cl4Na4-npt-p1.0-T300.0-final.xyz")
     traj_path = Path("Cl4Na4-npt-p1.0-T300.0-traj.xyz")
     stats_path = Path("Cl4Na4-npt-p1.0-T300.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
+    assert not restart_final.exists()
     assert not traj_path.exists()
     assert not stats_path.exists()
 
@@ -73,7 +75,8 @@ def test_npt():
         assert isinstance(restart_atoms_1, Atoms)
         restart_atoms_2 = read(restart_path_2)
         assert isinstance(restart_atoms_2, Atoms)
-
+        restart_atoms_final = read(restart_final)
+        assert isinstance(restart_atoms_final, Atoms)
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 4
@@ -85,6 +88,7 @@ def test_npt():
     finally:
         restart_path_1.unlink(missing_ok=True)
         restart_path_2.unlink(missing_ok=True)
+        restart_final.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)
 
@@ -92,12 +96,15 @@ def test_npt():
 def test_nvt_nh():
     """Test NVT-Nosé–Hoover  molecular dynamics."""
     restart_path = Path("Cl4Na4-nvt-nh-T300.0-res-3.xyz")
+    restart_final_path = Path("Cl4Na4-nvt-nh-T300.0-final.xyz")
     traj_path = Path("Cl4Na4-nvt-nh-T300.0-traj.xyz")
     stats_path = Path("Cl4Na4-nvt-nh-T300.0-stats.dat")
 
     assert not restart_path.exists()
+    assert not restart_final_path.exists()
     assert not traj_path.exists()
     assert not stats_path.exists()
+   
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -119,6 +126,9 @@ def test_nvt_nh():
         restart_atoms = read(restart_path)
         assert isinstance(restart_atoms, Atoms)
 
+        restart_final_atoms = read(restart_final_path)
+        assert isinstance(restart_final_atoms, Atoms)
+ 
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 3
@@ -129,6 +139,7 @@ def test_nvt_nh():
             assert len(lines) == 4
     finally:
         restart_path.unlink(missing_ok=True)
+        restart_final_path.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)
 
@@ -168,10 +179,12 @@ def test_nve(tmp_path):
 def test_nph():
     """Test NPH molecular dynamics."""
     restart_path = Path("Cl4Na4-nph-p0.0-T300.0-res-2.xyz")
+    restart_final_path = Path("Cl4Na4-nph-p0.0-T300.0-final.xyz")
     traj_path = Path("Cl4Na4-nph-p0.0-T300.0-traj.xyz")
     stats_path = Path("Cl4Na4-nph-p0.0-T300.0-stats.dat")
 
     assert not restart_path.exists()
+    assert not restart_final_path.exists()
     assert not traj_path.exists()
     assert not stats_path.exists()
 
@@ -195,6 +208,9 @@ def test_nph():
         with pytest.raises(FileNotFoundError):
             read(restart_path)
 
+        restart_final_atoms = read(restart_final_path)
+        assert isinstance(restart_final_atoms, Atoms)
+        
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 1
@@ -205,6 +221,7 @@ def test_nph():
             assert len(lines) == 2
     finally:
         restart_path.unlink(missing_ok=True)
+        restart_final_path.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)
 
