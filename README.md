@@ -152,7 +152,7 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 
 This produces the same output files as an MD simulation.
 
-MD can also be carried out after heating using the same options as described in #molecular-dynamics. For example:
+MD can also be carried out after heating using the same options as described in [Molecular dynamics](#molecular-dynamics). For example:
 
 ```shell
 janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10 --steps 1000 --temp 300
