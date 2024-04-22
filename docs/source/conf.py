@@ -192,4 +192,5 @@ html_search_language = "en"
 nitpick_ignore = [
     ("py:class", "Logger"),
     ("py:class", "numpy.float64"),
+    ("py:class", "typer.models.Context"),
 ]

@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Annotated, Optional, get_args
 
-from typer import Option, Typer
+from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH
@@ -19,6 +19,7 @@ from janus_core.cli.types import (
     Summary,
 )
 from janus_core.cli.utils import (
+    check_config,
     end_summary,
     parse_typer_dicts,
     start_summary,
@@ -37,6 +38,7 @@ app = Typer()
 def md(
     # pylint: disable=too-many-arguments,too-many-locals,invalid-name,duplicate-code
     # numpydoc ignore=PR02
+    ctx: Context,
     ensemble: Annotated[str, Option(help="Name of thermodynamic ensemble.")],
     struct: StructPath,
     steps: Annotated[int, Option(help="Number of steps in simulation.")] = 0,
@@ -166,6 +168,8 @@ def md(
 
     Parameters
     ----------
+    ctx : Context
+        Typer (Click) Context. Automatically set.
     ensemble : str
         Name of thermodynamic ensemble.
     struct : Path
@@ -258,6 +262,9 @@ def md(
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
+    # Check options from configuration file are all valid
+    check_config(ctx)
+
     [read_kwargs, calc_kwargs, minimize_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
     )
