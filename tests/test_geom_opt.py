@@ -6,12 +6,13 @@ try:
     from ase.filters import UnitCellFilter
 except ImportError:
     from ase.constraints import UnitCellFilter
+
 from ase.io import read
 import pytest
 
-from janus_core.geom_opt import optimize
-from janus_core.mlip_calculators import choose_calculator
-from janus_core.single_point import SinglePoint
+from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.single_point import SinglePoint
+from janus_core.helpers.mlip_calculators import choose_calculator
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"

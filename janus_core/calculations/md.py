@@ -18,9 +18,9 @@ from ase.md.velocitydistribution import (
 from ase.md.verlet import VelocityVerlet
 import numpy as np
 
-from janus_core.geom_opt import optimize
-from janus_core.janus_types import Ensembles, PathLike
-from janus_core.log import config_logger
+from janus_core.calculations.geom_opt import optimize
+from janus_core.helpers.janus_types import Ensembles, PathLike
+from janus_core.helpers.log import config_logger
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 

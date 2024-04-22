@@ -8,7 +8,7 @@ Similar in spirit to matcalc and quacc approaches
 
 from ase.calculators.calculator import Calculator
 
-from .janus_types import Architectures, Devices
+from janus_core.helpers.janus_types import Architectures, Devices
 
 
 def choose_calculator(

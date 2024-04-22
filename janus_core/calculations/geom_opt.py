@@ -15,9 +15,9 @@ except ImportError:
 
 from numpy import linalg
 
-from janus_core.janus_types import ASEOptArgs, ASEWriteArgs
-from janus_core.log import config_logger
-from janus_core.utils import none_to_dict
+from janus_core.helpers.janus_types import ASEOptArgs, ASEWriteArgs
+from janus_core.helpers.log import config_logger
+from janus_core.helpers.utils import none_to_dict
 
 
 def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches

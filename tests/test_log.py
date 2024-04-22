@@ -2,7 +2,7 @@
 
 import yaml
 
-from janus_core.log import config_logger
+from janus_core.helpers.log import config_logger
 from tests.utils import assert_log_contains
 
 

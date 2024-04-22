@@ -6,7 +6,7 @@ from ase.io import read
 from numpy import isfinite
 import pytest
 
-from janus_core.single_point import SinglePoint
+from janus_core.calculations.single_point import SinglePoint
 from tests.utils import read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"

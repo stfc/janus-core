@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from janus_core.utils import dict_paths_to_strs, dict_remove_hyphens
+from janus_core.helpers.utils import dict_paths_to_strs, dict_remove_hyphens
 
 
 def test_dict_paths_to_strs():

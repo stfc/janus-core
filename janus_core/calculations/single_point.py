@@ -8,7 +8,7 @@ from ase import Atoms
 from ase.io import read, write
 from numpy import isfinite, ndarray
 
-from janus_core.janus_types import (
+from janus_core.helpers.janus_types import (
     Architectures,
     ASEReadArgs,
     ASEWriteArgs,
@@ -17,9 +17,9 @@ from janus_core.janus_types import (
     MaybeList,
     MaybeSequence,
 )
-from janus_core.log import config_logger
-from janus_core.mlip_calculators import choose_calculator
-from janus_core.utils import none_to_dict
+from janus_core.helpers.log import config_logger
+from janus_core.helpers.mlip_calculators import choose_calculator
+from janus_core.helpers.utils import none_to_dict
 
 
 class SinglePoint:

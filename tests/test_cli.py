@@ -2,7 +2,7 @@
 
 from typer.testing import CliRunner
 
-from janus_core.cli import app
+from janus_core.cli.cli import app
 
 runner = CliRunner()
 

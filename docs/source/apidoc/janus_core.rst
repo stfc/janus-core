@@ -14,50 +14,100 @@ Module contents
 Submodules
 ----------
 
-janus\_core.cli module
-----------------------
+janus\_core.cli.cli module
+--------------------------
 
-.. automodule:: janus_core.cli
+.. automodule:: janus_core.cli.cli
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.geom\_opt module
+janus\_core.cli.singlepoint module
+----------------------------------
+
+.. automodule:: janus_core.cli.singlepoint
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.geomopt module
+------------------------------
+
+.. automodule:: janus_core.cli.geomopt
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.md module
+-------------------------
+
+.. automodule:: janus_core.cli.md
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.types module
 ----------------------------
 
-.. automodule:: janus_core.geom_opt
+.. automodule:: janus_core.cli.types
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.log module
-------------------------------------
+janus\_core.cli.utils module
+----------------------------
 
-.. automodule:: janus_core.log
+.. automodule:: janus_core.cli.utils
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.mlip\_calculators module
-------------------------------------
+janus\_core.calculations.geom\_opt module
+-----------------------------------------
 
-.. automodule:: janus_core.mlip_calculators
+.. automodule:: janus_core.calculations.geom_opt
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.single\_point module
---------------------------------
+janus\_core.helpers.log module
+------------------------------
 
-.. automodule:: janus_core.single_point
+.. automodule:: janus_core.helpers.log
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.mlip\_calculators module
+--------------------------------------------
+
+.. automodule:: janus_core.helpers.mlip_calculators
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.calculations.single\_point module
+---------------------------------------------
+
+.. automodule:: janus_core.calculations.single_point
    :members:
    :special-members:
    :private-members:
@@ -65,10 +115,10 @@ janus\_core.single\_point module
    :show-inheritance:
 
 
-janus\_core.janus\_types module
--------------------------------
+janus\_core.helpers.janus\_types module
+---------------------------------------
 
-.. automodule:: janus_core.janus_types
+.. automodule:: janus_core.helpers.janus_types
    :members:
    :private-members:
    :undoc-members:
@@ -76,10 +126,10 @@ janus\_core.janus\_types module
    :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
 
 
-janus\_core.utils module
+janus\_core.helpers.utils module
 --------------------------------
 
-.. automodule:: janus_core.utils
+.. automodule:: janus_core.helpers.utils
    :members:
    :special-members:
    :private-members:
@@ -87,10 +137,10 @@ janus\_core.utils module
    :show-inheritance:
 
 
-janus\_core.md module
---------------------------------
+janus\_core.calculations.md module
+----------------------------------
 
-.. automodule:: janus_core.md
+.. automodule:: janus_core.calculations.md
    :members:
    :special-members:
    :private-members:
@@ -98,10 +148,10 @@ janus\_core.md module
    :undoc-members:
    :show-inheritance:
 
-janus\_core.stats
---------------------------------
+janus\_core.helpers.stats
+-------------------------
 
-.. automodule:: janus_core.stats
+.. automodule:: janus_core.helpers.stats
    :members:
    :special-members:
    :private-members:
