@@ -324,3 +324,21 @@ def test_heating(tmp_path):
         ],
     )
     assert result.exit_code == 0
+
+
+def test_invalid_config():
+    """Test passing a config file with an invalid option name."""
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--ensemble",
+            "nvt",
+            "--config",
+            DATA_PATH / "invalid.yml",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
