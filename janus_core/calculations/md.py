@@ -360,23 +360,37 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimize(self.struct, **self.minimize_kwargs)
 
-    def configure_filenames(self, pressure: Optional[float] = None) -> None:
+    def _parameter_prefix(self) -> str:
+        """
+        Ouput additional ensemble parameters for file stems.
+
+        Returns
+        -------
+        str
+            Additional ensemble parameters written to a str.
+        """
+        return ""
+
+    def configure_filenames(self) -> None:
         """Setup filenames for output files."""
+
         temp = ""
         if not self.file_prefix:
-            self.file_prefix = f"{self.struct_name}-{self.ensemble}"
-            if pressure is not None:
-                 self.file_prefix = f"{self.file_prefix}-p{pressure}" 
+            self.file_prefix = (
+                f"{self.struct_name}-{self.ensemble}{self._parameter_prefix()}"
+            )
             if self.temp_start and self.temp_end:
-               temp = f"-T{self.temp_start}-T{self.temp_end}"
-            else:
-               temp = f"-T{self.temp}"
+                temp = f"-T{self.temp_start}-T{self.temp_end}"
+
+            if self.steps > 0:
+                temp = f"{temp}-T{self.temp}"
 
         if not self.stats_file:
             self.stats_file = f"{self.file_prefix}{temp}-stats.dat"
 
         if not self.traj_file:
             self.traj_file = f"{self.file_prefix}{temp}-traj.xyz"
+
     @staticmethod
     def get_log_header() -> str:
         """
@@ -474,25 +488,27 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 append=append,
             )
 
-    def _write_restart(self, final: bool = False) -> None:
+    def _write_final_state(self) -> None:
+        """Write the final system state."""
+        if not self.restart_stem:
+            restart_file = f"{self.file_prefix}-T{self.temp}-final.xyz"
+        write(restart_file, self.struct, write_info=True, columns=None)
+
+    def _write_restart(self) -> None:
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
             if not self.restart_stem:
-                if not final:
-                    restart_file = f"{self.file_prefix}-T{self.temp}-res-{step}.xyz" 
-                else:
-                    restart_file = f"{self.file_prefix}-T{self.temp}-final.xyz"
+                restart_file = f"{self.file_prefix}-T{self.temp}-res-{step}.xyz"
             else:
                 restart_file = f"{self.restart_stem}-res-{step}.xyz"
-            columns = ["symbols", "positions", "momenta", "masses"] if not final else None
             write(
                 restart_file,
                 self.struct,
                 write_info=True,
-                columns=columns
+                columns=["symbols", "positions", "momenta", "masses"],
             )
-            if not final and self.rotate_restart:
+            if self.rotate_restart:
                 self.restart_files.append(restart_file)
                 self._rotate_restart_files()
 
@@ -556,7 +572,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             for temp in temps:
                 self.temp = temp
                 self.dyn.run(heating_steps)
-                self._write_restart(True)
+                self._write_final_state()
             if self.logger:
                 self.logger.info("Temperature ramp complete at %sK", temps[-1])
 
@@ -566,7 +582,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 self.logger.info("Starting molecular dynamics simulation")
             self.temp = md_temp
             self.dyn.run(self.steps)
-            self._write_restart(True)
+            self._write_final_state()
             if self.logger:
                 self.logger.info("Molecular dynamics simulation complete")
 
@@ -635,27 +651,15 @@ class NPT(MolecularDynamics):
         **kwargs
             Additional keyword arguments.
         """
+        self.pressure = pressure
         super().__init__(ensemble=ensemble, file_prefix=file_prefix, *args, **kwargs)
 
-        self.pressure = pressure
         self.ttime = thermostat_time * units.fs
         scaled_bulk_modulus = bulk_modulus * units.GPa
         if barostat_time:
             pfactor = (barostat_time * units.fs) ** 2 * scaled_bulk_modulus
         else:
             pfactor = None
-
-        # Reconfigure filenames to include pressure if `file_prefix` not specified
-        # Requires super().__init__ first to determine `self.struct_name`
-        if not file_prefix and not isinstance(self, NVT_NH):
-            self.file_prefix = ""
-            if not kwargs.get("stats_file"):
-                self.stats_file = ""
-            if not kwargs.get("traj_file"):
-                self.traj_file = ""
-            if not kwargs.get("restart_stem"):
-                self.restart_stem = ""
-            self.configure_filenames(self.pressure)
 
         self.dyn = ASE_NPT(
             self.struct,
@@ -666,6 +670,17 @@ class NPT(MolecularDynamics):
             append_trajectory=self.traj_append,
             externalstress=self.pressure * units.bar,
         )
+
+    def _parameter_prefix(self) -> str:
+        """
+        Ouput additional ensemble parameters for file stems.
+
+        Returns
+        -------
+        str
+            Additional ensemble parameters written to a str.
+        """
+        return f"-p{self.pressure}"
 
     def get_log_stats(self) -> str:
         """
@@ -856,6 +871,17 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             **kwargs,
         )
 
+    def _parameter_prefix(self) -> str:
+        """
+        Ouput additional ensemble parameters for file stems.
+
+        Returns
+        -------
+        str
+            Additional ensemble parameters written to a str.
+        """
+        return ""
+
     def get_log_stats(self) -> str:
         """
         Get thermodynamical statistics to be written to molecular dynamics log.
@@ -951,4 +977,3 @@ class NPH(NPT):
             file_prefix=file_prefix,
             **kwargs,
         )
-

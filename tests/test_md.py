@@ -104,7 +104,6 @@ def test_nvt_nh():
     assert not restart_final_path.exists()
     assert not traj_path.exists()
     assert not stats_path.exists()
-   
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -128,7 +127,7 @@ def test_nvt_nh():
 
         restart_final_atoms = read(restart_final_path)
         assert isinstance(restart_final_atoms, Atoms)
- 
+
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 3
@@ -210,7 +209,7 @@ def test_nph():
 
         restart_final_atoms = read(restart_final_path)
         assert isinstance(restart_final_atoms, Atoms)
-        
+
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 1
@@ -648,18 +647,21 @@ def test_heating_md(tmp_path):
     assert stat_data.units[16] == "K"
     assert stat_data.labels[16] == "Target T"
 
+
 def test_heating_file_stems():
     """Test default heating file stems."""
-    
-    traj_path = Path("Cl4Na4-nvt-T10-T20-traj.xyz")
-    stats_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
+
+    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.xyz")
+    stats_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
     final_10_path = Path("Cl4Na4-nvt-T10-final.xyz")
-    final_20_path = Path("Cl4Na4-nvt-T20-final.xyz") 
-    
-    assert not traj_path.exists()
-    assert not stats_path.exists()
+    final_20_path = Path("Cl4Na4-nvt-T20-final.xyz")
+    final_path = Path("Cl4Na4-nvt-T25.0-final.xyz")
+
+    assert not traj_heating_path.exists()
+    assert not stats_heating_path.exists()
     assert not final_10_path.exists()
     assert not final_20_path.exists()
+    assert not final_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -669,13 +671,13 @@ def test_heating_file_stems():
     nvt = NVT(
         struct=single_point.struct,
         temp=25.0,
-        steps=0,
+        steps=100,
         traj_every=100,
         stats_every=2,
         temp_start=10,
         temp_end=20,
         temp_step=10,
-        temp_time=2
+        temp_time=2,
     )
     try:
         nvt.run()
@@ -684,19 +686,21 @@ def test_heating_file_stems():
         final_20_atoms = read(final_20_path)
         assert isinstance(final_20_atoms, Atoms)
 
-        traj = read(traj_path, index=":")
+        traj = read(traj_heating_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
-        assert len(traj) == 1
+        assert len(traj) == 2
 
-        with open(stats_path, encoding="utf8") as stats_file:
+        with open(stats_heating_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
             assert "Target T [K]" in lines[0]
-            assert len(lines) == 4
+            assert len(lines) == 54
+
+        final = read(final_path)
+        assert isinstance(final, Atoms)
 
     finally:
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
+        traj_heating_path.unlink(missing_ok=True)
+        stats_heating_path.unlink(missing_ok=True)
         final_10_path.unlink(missing_ok=True)
         final_20_path.unlink(missing_ok=True)
-
-
+        final_path.unlink(missing_ok=True)
