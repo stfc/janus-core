@@ -14,10 +14,10 @@ Module contents
 Submodules
 ----------
 
-janus\_core.cli.cli module
---------------------------
+janus\_core.cli.janus module
+----------------------------
 
-.. automodule:: janus_core.cli.cli
+.. automodule:: janus_core.cli.janus
    :members:
    :special-members:
    :private-members:

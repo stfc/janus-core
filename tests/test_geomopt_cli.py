@@ -7,7 +7,7 @@ import pytest
 from typer.testing import CliRunner
 import yaml
 
-from janus_core.cli.cli import app
+from janus_core.cli.janus import app
 from tests.utils import assert_log_contains, read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
