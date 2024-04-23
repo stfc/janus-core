@@ -1,4 +1,4 @@
-"""Set up singlepoint commandline interface."""
+"""Set up geomopt commandline interface."""
 
 from pathlib import Path
 from typing import Annotated

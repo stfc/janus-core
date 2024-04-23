@@ -1,4 +1,4 @@
-"""Set up singlepoint commandline interface."""
+"""Set up md commandline interface."""
 
 from pathlib import Path
 from typing import Annotated, Optional, get_args
