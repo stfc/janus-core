@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """Run molecular dynamics simulations."""
 
 import datetime
@@ -360,36 +361,73 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimize(self.struct, **self.minimize_kwargs)
 
+    @property
     def _parameter_prefix(self) -> str:
         """
-        Ouput additional ensemble parameters for file stems.
+        Ensemble parameters for output files.
 
         Returns
         -------
         str
-            Additional ensemble parameters written to a str.
+           Formatted temperature range if heating and target temp if running md.
         """
-        return ""
+
+        temperature_prefix = ""
+        if self.temp_start and self.temp_end:
+            temperature_prefix = f"-T{self.temp_start}-T{self.temp_end}"
+
+        if self.steps > 0:
+            temperature_prefix = f"{temperature_prefix}-T{self.temp}"
+
+        return temperature_prefix
+
+    @property
+    def _final_file(self) -> str:
+        """
+        Final state file name.
+
+        Returns
+        -------
+        str
+           File name for final state.
+        """
+
+        if not self.restart_stem:
+            return f"{self.struct_name}-{self.ensemble}-T{self.temp}-final.xyz"
+        # respect the users choice
+        return f"{self.restart_stem}-T{self.temp}-final.xyz"
+
+    @property
+    def _restart_file(self) -> str:
+        """
+        Restart file name.
+
+        Returns
+        -------
+        str
+           File name for restart files.
+        """
+        step = self.offset + self.dyn.nsteps
+        if not self.restart_stem:
+            return f"{self.struct_name}-{self.ensemble}-T{self.temp}-res-{step}.xyz"
+        return f"{self.restart_stem}-T{self.temp}-res-{step}.xyz"
 
     def configure_filenames(self) -> None:
         """Setup filenames for output files."""
 
-        temp = ""
         if not self.file_prefix:
             self.file_prefix = (
-                f"{self.struct_name}-{self.ensemble}{self._parameter_prefix()}"
+                f"{self.struct_name}-{self.ensemble}{self._parameter_prefix}"
             )
-            if self.temp_start and self.temp_end:
-                temp = f"-T{self.temp_start}-T{self.temp_end}"
-
-            if self.steps > 0:
-                temp = f"{temp}-T{self.temp}"
+        else:
+            if not self.restart_stem:
+                self.restart_stem = f"{self.file_prefix}"
 
         if not self.stats_file:
-            self.stats_file = f"{self.file_prefix}{temp}-stats.dat"
+            self.stats_file = f"{self.file_prefix}-stats.dat"
 
         if not self.traj_file:
-            self.traj_file = f"{self.file_prefix}{temp}-traj.xyz"
+            self.traj_file = f"{self.file_prefix}-traj.xyz"
 
     @staticmethod
     def get_log_header() -> str:
@@ -490,26 +528,25 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
     def _write_final_state(self) -> None:
         """Write the final system state."""
-        if not self.restart_stem:
-            restart_file = f"{self.file_prefix}-T{self.temp}-final.xyz"
-        write(restart_file, self.struct, write_info=True, columns=None)
+        write(
+            self._final_file,
+            self.struct,
+            write_info=True,
+            columns=["symbols", "positions", "momenta", "masses"],
+        )
 
     def _write_restart(self) -> None:
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
-            if not self.restart_stem:
-                restart_file = f"{self.file_prefix}-T{self.temp}-res-{step}.xyz"
-            else:
-                restart_file = f"{self.restart_stem}-res-{step}.xyz"
             write(
-                restart_file,
+                self._restart_file,
                 self.struct,
                 write_info=True,
                 columns=["symbols", "positions", "momenta", "masses"],
             )
             if self.rotate_restart:
-                self.restart_files.append(restart_file)
+                self.restart_files.append(self._restart_file)
                 self._rotate_restart_files()
 
     def run(self) -> None:
@@ -671,16 +708,61 @@ class NPT(MolecularDynamics):
             externalstress=self.pressure * units.bar,
         )
 
+    @property
     def _parameter_prefix(self) -> str:
         """
-        Ouput additional ensemble parameters for file stems.
+        Ensemble parameters for output files.
 
         Returns
         -------
         str
-            Additional ensemble parameters written to a str.
+           Formatted temperature range if heating and target temp if running md.
         """
-        return f"-p{self.pressure}"
+
+        temperature_prefix = ""
+        if self.temp_start and self.temp_end:
+            temperature_prefix = f"-T{self.temp_start}-T{self.temp_end}"
+
+        if self.steps > 0:
+            temperature_prefix = f"{temperature_prefix}-T{self.temp}"
+
+        pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
+        return f"{pressure}{temperature_prefix}"
+
+    @property
+    def _final_file(self) -> str:
+        """
+        Final state file name.
+
+        Returns
+        -------
+        str
+           File name for final state, includes pressure.
+        """
+
+        pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
+        if not self.restart_stem:
+            return (
+                f"{self.struct_name}-{self.ensemble}{pressure}-T{self.temp}-final.xyz"
+            )
+        return f"{self.restart_stem}{pressure}-T{self.temp}-final.xyz"
+
+    @property
+    def _restart_file(self) -> str:
+        """
+        Restart file name.
+
+        Returns
+        -------
+        str
+           File name for restart file, includes pressure.
+        """
+        step = self.offset + self.dyn.nsteps
+        pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
+        ending = f"-T{self.temp}-res-{step}.xyz"
+        if not self.restart_stem:
+            return f"{self.struct_name}-{self.ensemble}{pressure}{ending}"
+        return f"{self.restart_stem}{pressure}{ending}"
 
     def get_log_stats(self) -> str:
         """
@@ -870,17 +952,6 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             *args,
             **kwargs,
         )
-
-    def _parameter_prefix(self) -> str:
-        """
-        Ouput additional ensemble parameters for file stems.
-
-        Returns
-        -------
-        str
-            Additional ensemble parameters written to a str.
-        """
-        return ""
 
     def get_log_stats(self) -> str:
         """
