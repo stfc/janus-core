@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from typer import Context
 from typer_config import conf_callback_factory, yaml_loader
 import yaml
 
@@ -104,3 +105,19 @@ def end_summary(summary: Path) -> None:
             default_flow_style=False,
         )
     logging.shutdown()
+
+
+def check_config(ctx: Context) -> None:
+    """
+    Check options in configuration file are valid options for CLI command.
+
+    Parameters
+    ----------
+    ctx : Context
+        Typer (Click) Context within command.
+    """
+    # Compare options from config file (default_map) to function definition (params)
+    for option in ctx.default_map:
+        # Check options individually so can inform user of specific issue
+        if option not in ctx.params:
+            raise ValueError(f"'{option}' in configuration file is not a valid option")

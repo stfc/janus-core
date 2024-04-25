@@ -187,10 +187,6 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 > [!NOTE]
 > `properties` must be passed as a Yaml list, as above, not as a string.
 
-> [!WARNING]
-> If an option in the configuration file does not match any variable names, an error will **not** be raised.
-> Please check the summary file to ensure the configuration has been read correctly.
-
 
 ## License
 

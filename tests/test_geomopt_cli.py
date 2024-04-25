@@ -341,3 +341,19 @@ def test_config(tmp_path):
 
     assert "alpha" in geomopt_summary["inputs"]["opt_kwargs"]
     assert geomopt_summary["inputs"]["opt_kwargs"]["alpha"] == 100
+
+
+def test_invalid_config():
+    """Test passing a config file with an invalid option name."""
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--config",
+            DATA_PATH / "invalid.yml",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)

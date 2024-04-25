@@ -258,3 +258,19 @@ def test_config(tmp_path):
 
     assert "index" in sp_summary["inputs"]["read_kwargs"]
     assert sp_summary["inputs"]["read_kwargs"]["index"] == ":"
+
+
+def test_invalid_config():
+    """Test passing a config file with an invalid option name."""
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "benzene-traj.xyz",
+            "--config",
+            DATA_PATH / "invalid.yml",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)

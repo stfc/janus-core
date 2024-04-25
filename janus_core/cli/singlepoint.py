@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Annotated
 
 from ase import Atoms
-from typer import Option, Typer
+from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.single_point import SinglePoint
@@ -19,6 +19,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import (
+    check_config,
     end_summary,
     parse_typer_dicts,
     start_summary,
@@ -32,8 +33,9 @@ app = Typer()
 @app.command(help="Perform single point calculations and save to file.")
 @use_config(yaml_converter_callback)
 def singlepoint(
-    # pylint: disable=too-many-locals,duplicate-code
+    # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
     # numpydoc ignore=PR02
+    ctx: Context,
     struct: StructPath,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -66,6 +68,8 @@ def singlepoint(
 
     Parameters
     ----------
+    ctx : Context
+        Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
     arch : Optional[str]
@@ -92,6 +96,9 @@ def singlepoint(
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
+    # Check options from configuration file are all valid
+    check_config(ctx)
+
     [read_kwargs, calc_kwargs, write_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
