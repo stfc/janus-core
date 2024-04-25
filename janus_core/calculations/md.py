@@ -719,15 +719,8 @@ class NPT(MolecularDynamics):
            Formatted temperature range if heating and target temp if running md.
         """
 
-        temperature_prefix = ""
-        if self.temp_start and self.temp_end:
-            temperature_prefix = f"-T{self.temp_start}-T{self.temp_end}"
-
-        if self.steps > 0:
-            temperature_prefix = f"{temperature_prefix}-T{self.temp}"
-
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        return f"{pressure}{temperature_prefix}"
+        return f"{super()._parameter_prefix}{pressure}"
 
     @property
     def _final_file(self) -> str:
@@ -743,9 +736,9 @@ class NPT(MolecularDynamics):
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
         if not self.restart_stem:
             return (
-                f"{self.struct_name}-{self.ensemble}{pressure}-T{self.temp}-final.xyz"
+                f"{self.struct_name}-{self.ensemble}-T{self.temp}{pressure}-final.xyz"
             )
-        return f"{self.restart_stem}{pressure}-T{self.temp}-final.xyz"
+        return f"{self.restart_stem}-T{self.temp}{pressure}-final.xyz"
 
     @property
     def _restart_file(self) -> str:
@@ -759,10 +752,10 @@ class NPT(MolecularDynamics):
         """
         step = self.offset + self.dyn.nsteps
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        ending = f"-T{self.temp}-res-{step}.xyz"
+        ending = f"-T{self.temp}{pressure}-res-{step}.xyz"
         if not self.restart_stem:
-            return f"{self.struct_name}-{self.ensemble}{pressure}{ending}"
-        return f"{self.restart_stem}{pressure}{ending}"
+            return f"{self.struct_name}-{self.ensemble}{ending}"
+        return f"{self.restart_stem}{ending}"
 
     def get_log_stats(self) -> str:
         """

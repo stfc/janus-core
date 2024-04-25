@@ -41,11 +41,11 @@ def test_init(ensemble, expected):
 
 def test_npt():
     """Test NPT molecular dynamics."""
-    restart_path_1 = Path("Cl4Na4-npt-p1.0-T300.0-res-2.xyz")
-    restart_path_2 = Path("Cl4Na4-npt-p1.0-T300.0-res-4.xyz")
-    restart_final = Path("Cl4Na4-npt-p1.0-T300.0-final.xyz")
-    traj_path = Path("Cl4Na4-npt-p1.0-T300.0-traj.xyz")
-    stats_path = Path("Cl4Na4-npt-p1.0-T300.0-stats.dat")
+    restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.xyz")
+    restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.xyz")
+    restart_final = Path("Cl4Na4-npt-T300.0-p1.0-final.xyz")
+    traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.xyz")
+    stats_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
@@ -177,10 +177,10 @@ def test_nve(tmp_path):
 
 def test_nph():
     """Test NPH molecular dynamics."""
-    restart_path = Path("Cl4Na4-nph-p0.0-T300.0-res-2.xyz")
-    restart_final_path = Path("Cl4Na4-nph-p0.0-T300.0-final.xyz")
-    traj_path = Path("Cl4Na4-nph-p0.0-T300.0-traj.xyz")
-    stats_path = Path("Cl4Na4-nph-p0.0-T300.0-stats.dat")
+    restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.xyz")
+    restart_final_path = Path("Cl4Na4-nph-T300.0-p0.0-final.xyz")
+    traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.xyz")
+    stats_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
 
     assert not restart_path.exists()
     assert not restart_final_path.exists()
@@ -648,8 +648,60 @@ def test_heating_md(tmp_path):
     assert stat_data.labels[16] == "Target T"
 
 
-def test_heating_file_stems():
-    """Test default heating file stems."""
+def test_heating_files():
+    "Test default heating file names" ""
+    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.xyz")
+    stats_heating_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
+    final_10_path = Path("Cl4Na4-nvt-T10-final.xyz")
+    final_20_path = Path("Cl4Na4-nvt-T20-final.xyz")
+
+    assert not traj_heating_path.exists()
+    assert not stats_heating_path.exists()
+    assert not final_10_path.exists()
+    assert not final_20_path.exists()
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=25.0,
+        steps=0,
+        traj_every=2,
+        stats_every=2,
+        temp_start=10,
+        temp_end=20,
+        temp_step=10,
+        temp_time=2,
+    )
+    try:
+        nvt.run()
+        final_10_atoms = read(final_10_path)
+        assert isinstance(final_10_atoms, Atoms)
+        final_20_atoms = read(final_20_path)
+        assert isinstance(final_20_atoms, Atoms)
+
+        traj = read(traj_heating_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 3
+
+        stats = Stats(source=stats_heating_path)
+        assert stats.rows == 3
+        assert stats.data[0, 16] == 10.0
+        assert stats.data[1, 16] == 10.0
+        assert stats.data[2, 16] == 20.0
+
+    finally:
+        traj_heating_path.unlink(missing_ok=True)
+        stats_heating_path.unlink(missing_ok=True)
+        final_10_path.unlink(missing_ok=True)
+        final_20_path.unlink(missing_ok=True)
+
+
+def test_heating_md_files():
+    """Test default heating files when also running md"""
 
     traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.xyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
@@ -690,10 +742,11 @@ def test_heating_file_stems():
         assert all(isinstance(image, Atoms) for image in traj)
         assert len(traj) == 2
 
-        with open(stats_heating_path, encoding="utf8") as stats_file:
-            lines = stats_file.readlines()
-            assert "Target T [K]" in lines[0]
-            assert len(lines) == 54
+        stats = Stats(source=stats_heating_path)
+        assert stats.rows == 54
+        assert stats.data[0, 16] == 10
+        assert stats.data[2, 16] == 20
+        assert stats.data[53, 16] == 25
 
         final = read(final_path)
         assert isinstance(final, Atoms)
