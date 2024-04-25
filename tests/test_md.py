@@ -649,7 +649,7 @@ def test_heating_md(tmp_path):
 
 
 def test_heating_files():
-    "Test default heating file names" ""
+    """Test default heating file names."""
     traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.xyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
     final_10_path = Path("Cl4Na4-nvt-T10-final.xyz")
