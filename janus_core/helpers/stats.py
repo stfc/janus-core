@@ -2,7 +2,9 @@
 Module that reads the md stats output timeseries.
 """
 
+from functools import singledispatchmethod
 import re
+from types import EllipsisType
 
 from numpy import float64, genfromtxt, zeros
 from numpy.typing import NDArray
@@ -37,6 +39,31 @@ class Stats:
         self._units = ()
         self._source = source
         self.read()
+
+    @singledispatchmethod
+    def __getitem__(self, ind):
+        raise IndexError(f"Unknown index {ind}")
+
+    @__getitem__.register(int)
+    @__getitem__.register(slice)
+    @__getitem__.register(EllipsisType)
+    def _(self, ind):
+        return self.data[:, ind]
+
+    @__getitem__.register(tuple)
+    def _(self, ind):
+        return self.data[ind]
+
+    @__getitem__.register(str)
+    def _(self, ind):
+        # Case-insensitive fuzzy match, only has to be `in` the labels
+        index = next((index
+                      for index, label in enumerate(self.labels)
+                      if ind.lower() in label.lower()),
+                     None)
+        if index is None:
+            raise IndexError(f"{ind} not found in labels")
+        return self[index]
 
     @property
     def rows(self) -> int:

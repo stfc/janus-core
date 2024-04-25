@@ -23,6 +23,11 @@ def test_stats(capsys):
     assert stat_data.labels[0] == "# Step"
     assert stat_data.labels[17] == "Target T"
 
+    # Check getitem form
+    assert (stat_data["target t"] == stat_data.data[:, 17]).all()
+    assert (stat_data[:, 17] == stat_data.data[:, 17]).all()
+    assert (stat_data[17] == stat_data.data[:, 17]).all()
+
     print(stat_data)
     std_out_err = capsys.readouterr()
     assert std_out_err.err == ""
