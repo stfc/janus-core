@@ -393,7 +393,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """
 
         if not self.restart_stem:
-            return f"{self.struct_name}-{self.ensemble}-T{self.temp}-final.xyz"
+            return f"{self.file_prefix}-T{self.temp}-final.xyz"
         # respect the users choice
         return f"{self.restart_stem}-T{self.temp}-final.xyz"
 
@@ -409,25 +409,25 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """
         step = self.offset + self.dyn.nsteps
         if not self.restart_stem:
-            return f"{self.struct_name}-{self.ensemble}-T{self.temp}-res-{step}.xyz"
+            return f"{self.file_prefix}-T{self.temp}-res-{step}.xyz"
         return f"{self.restart_stem}-T{self.temp}-res-{step}.xyz"
 
     def configure_filenames(self) -> None:
         """Setup filenames for output files."""
 
         if not self.file_prefix:
-            self.file_prefix = (
-                f"{self.struct_name}-{self.ensemble}{self._parameter_prefix}"
-            )
+            self.file_prefix = f"{self.struct_name}-{self.ensemble}"
+            data_prefix = f"{self.file_prefix}{self._parameter_prefix}"
         else:
+            data_prefix = f"{self.file_prefix}"
             if not self.restart_stem:
                 self.restart_stem = f"{self.file_prefix}"
 
         if not self.stats_file:
-            self.stats_file = f"{self.file_prefix}-stats.dat"
+            self.stats_file = f"{data_prefix}-stats.dat"
 
         if not self.traj_file:
-            self.traj_file = f"{self.file_prefix}-traj.xyz"
+            self.traj_file = f"{data_prefix}-traj.xyz"
 
     @staticmethod
     def get_log_header() -> str:
@@ -735,9 +735,7 @@ class NPT(MolecularDynamics):
 
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
         if not self.restart_stem:
-            return (
-                f"{self.struct_name}-{self.ensemble}-T{self.temp}{pressure}-final.xyz"
-            )
+            return f"{self.file_prefix}-T{self.temp}{pressure}-final.xyz"
         return f"{self.restart_stem}-T{self.temp}{pressure}-final.xyz"
 
     @property
@@ -752,10 +750,9 @@ class NPT(MolecularDynamics):
         """
         step = self.offset + self.dyn.nsteps
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        ending = f"-T{self.temp}{pressure}-res-{step}.xyz"
         if not self.restart_stem:
-            return f"{self.struct_name}-{self.ensemble}{ending}"
-        return f"{self.restart_stem}{ending}"
+            return f"{self.file_prefix}-T{self.temp}{pressure}-res-{step}.xyz"
+        return f"{self.restart_stem}-T{self.temp}{pressure}-res-{step}.xyz"
 
     def get_log_stats(self) -> str:
         """
