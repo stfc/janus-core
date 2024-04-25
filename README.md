@@ -117,10 +117,10 @@ janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwarg
 
 This will generate several output files:
 
-- Thermodynamical statistics every 100 steps, written to `NaCl-npt-p1.0-T300.0-stats.dat`
-- The structure trajectory every 100 steps, written to `NaCl-npt-p1.0-T300.0-traj.xyz`
-- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-p1.0-T300.0-res-1000.xyz`
-- The final structure written to `NaCl-npt-p1.0-T300.0-final.xyz`
+- Thermodynamical statistics every 100 steps, written to `NaCl-npt-T300.0-p1.0-stats.dat`
+- The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0-traj.xyz`
+- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0-res-1000.xyz`
+- The final structure written to `NaCl-npt-T300.0-p1.0-final.xyz`
 - A log of the processes carried out, written to `md.log`
 - A summary of the inputs and start/end time, written to `md_summary.yml`.
 
