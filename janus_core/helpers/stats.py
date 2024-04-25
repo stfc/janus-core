@@ -7,7 +7,7 @@ import re
 from numpy import float64, genfromtxt, zeros
 from numpy.typing import NDArray
 
-from janus_core.janus_types import PathLike
+from janus_core.helpers.janus_types import PathLike
 
 
 class Stats:

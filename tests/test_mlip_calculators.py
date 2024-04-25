@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from janus_core.mlip_calculators import choose_calculator
+from janus_core.helpers.mlip_calculators import choose_calculator
 
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 

@@ -3,7 +3,7 @@
 import logging
 from typing import Literal, Optional
 
-from janus_core.janus_types import LogLevel
+from janus_core.helpers.janus_types import LogLevel
 
 
 class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02

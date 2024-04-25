@@ -7,7 +7,7 @@ from ase import Atoms
 from ase.io import read
 import yaml
 
-from janus_core.janus_types import MaybeSequence, PathLike
+from janus_core.helpers.janus_types import MaybeSequence, PathLike
 
 
 def read_atoms(path: Path) -> Union[Atoms, None]:

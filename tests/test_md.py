@@ -7,10 +7,10 @@ from ase.io import read
 import numpy as np
 import pytest
 
-from janus_core.md import NPH, NPT, NVE, NVT, NVT_NH
-from janus_core.mlip_calculators import choose_calculator
-from janus_core.single_point import SinglePoint
-from janus_core.stats import Stats
+from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH
+from janus_core.calculations.single_point import SinglePoint
+from janus_core.helpers.mlip_calculators import choose_calculator
+from janus_core.helpers.stats import Stats
 from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"

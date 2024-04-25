@@ -1,6 +1,4 @@
-"""
-Module containing types used in Janus-Core.
-"""
+"""Module containing types used in Janus-Core."""
 
 from collections.abc import Sequence
 from enum import Enum
@@ -51,7 +49,7 @@ class ASEOptArgs(TypedDict, total=False):
     trajectory: Optional[str]
 
 
-class LogLevel(Enum):
+class LogLevel(Enum):  # numpydoc ignore=PR01
     """Supported options for logger levels."""
 
     DEBUG = logging.DEBUG

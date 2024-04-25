@@ -23,7 +23,7 @@ repository = "https://github.com/stfc/janus-core/"
 documentation = "https://stfc.github.io/janus-core/"
 
 [tool.poetry.scripts]
-janus = "janus_core.cli:app"
+janus = "janus_core.cli.janus:app"
 
 [tool.poetry.dependencies]
 python = "^3.9"

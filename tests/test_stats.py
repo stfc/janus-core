@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pytest import approx
 
-from janus_core.stats import Stats
+from janus_core.helpers.stats import Stats
 
 DATA_PATH = Path(__file__).parent / "data"
 
