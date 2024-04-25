@@ -1,3 +1,5 @@
 """Tools for machine learnt interatomic potentials."""
 
-__version__ = "0.2.0b6"
+from importlib.metadata import version
+
+__version__ = version("janus-core")
