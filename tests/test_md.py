@@ -743,10 +743,10 @@ def test_heating_md_files():
         assert len(traj) == 2
 
         stats = Stats(source=stats_heating_path)
-        assert stats.rows == 54
+        assert stats.rows == 53
         assert stats.data[0, 16] == 10
         assert stats.data[2, 16] == 20
-        assert stats.data[53, 16] == 25
+        assert stats.data[52, 16] == 25
 
         final = read(final_path)
         assert isinstance(final, Atoms)
