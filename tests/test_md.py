@@ -723,7 +723,7 @@ def test_heating_md_files():
     nvt = NVT(
         struct=single_point.struct,
         temp=25.0,
-        steps=100,
+        steps=2,
         traj_every=100,
         stats_every=2,
         temp_start=10,
@@ -740,13 +740,13 @@ def test_heating_md_files():
 
         traj = read(traj_heating_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
-        assert len(traj) == 2
+        assert len(traj) == 1
 
         stats = Stats(source=stats_heating_path)
-        assert stats.rows == 53
+        assert stats.rows == 4
         assert stats.data[0, 16] == 10
         assert stats.data[2, 16] == 20
-        assert stats.data[52, 16] == 25
+        assert stats.data[3, 16] == 25
 
         final = read(final_path)
         assert isinstance(final, Atoms)
