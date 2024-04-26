@@ -120,6 +120,7 @@ This will generate several output files:
 - Thermodynamical statistics every 100 steps, written to `NaCl-npt-T300.0-p1.0-stats.dat`
 - The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0-traj.xyz`
 - The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0-res-1000.xyz`
+- The final structure written to `NaCl-npt-T300.0-p1.0-final.xyz`
 - A log of the processes carried out, written to `md.log`
 - A summary of the inputs and start/end time, written to `md_summary.yml`.
 
@@ -150,7 +151,14 @@ Run an NVT heating simultation from 20K to 300K in steps of 20K, with 10fs at ea
 janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10
 ```
 
-This produces the same output files as an MD simulation.
+The produced statistics and trajectory files will indicate the heating range `NaCl-nvt-T20.0-T300.0-stats.dat`, `NaCl-nvt-T20.0-T300.0-traj.xyz`. There will also be final structure files at each temperature point:
+
+```
+NaCl-nvt-T20.0-final.xyz
+NaCl-nvt-T40.0-final.xyz
+...
+NaCl-nvt-T300.0-final.xyz
+```
 
 MD can also be carried out after heating using the same options as described in [Molecular dynamics](#molecular-dynamics). For example:
 
@@ -159,6 +167,8 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 ```
 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
+
+When MD is run with heating the trajectory ```NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz``` and statistics ```NaCl-nvt-T20.0-T300.0-T300.0-stats.dat``` files will indicate the heating range and MD temperature (which may be different). With heating and MD trajectories/statistics within the same files.
 
 
 ### Using configuration files
