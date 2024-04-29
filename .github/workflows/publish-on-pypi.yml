@@ -33,22 +33,15 @@ jobs:
       run: |
         [[ "$(poetry version --short)" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || echo prerelease=true >> $GITHUB_OUTPUT
 
-    - name: Get versions from __init__ and pyproject.toml
+    - name: Get version from pyproject.toml
       run: |
         export PYTHONPATH=$(pwd)
-        echo "VERSION=$(python .github/scripts/check_version.py)" >> $GITHUB_ENV
-        echo "POETRYVERSION=$(poetry version --short)" >> $GITHUB_ENV
+        echo "VERSION=$(poetry version --short)" >> $GITHUB_ENV
 
-    - name: Check __init__ matches pyproject.toml
-      if: ${{ env.VERSION != env.POETRYVERSION }}
-      run: |
-        echo "Version in __init__.py and pyproject.toml do not match"
-        exit 1
-
-    - name: Check versions match tag
+    - name: Check version matches tag
       if: ${{ ! contains(github.ref, env.VERSION) }}
       run: |
-        echo "Git tag does not match version in __init__.py"
+        echo "Git tag does not match version in pyproject.toml"
         exit 1
 
     - name: Create Release
