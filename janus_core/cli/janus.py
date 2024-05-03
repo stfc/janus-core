@@ -8,11 +8,13 @@ from janus_core import __version__
 from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
 from janus_core.cli.singlepoint import singlepoint
+from janus_core.cli.train import train
 
 app = Typer(name="janus", no_args_is_help=True)
 app.command()(singlepoint)
 app.command()(geomopt)
 app.command()(md)
+app.command()(train)
 
 
 @app.callback(invoke_without_command=True, help="")
