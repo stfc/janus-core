@@ -3,7 +3,10 @@
 from pathlib import Path
 from typing import Optional
 
-from mace.cli.run_train import run as run_train
+try:
+    from mace.cli.run_train import run as run_train
+except ImportError as e:
+    raise NotImplementedError("Please update MACE to use this module.") from e
 from mace.tools import build_default_arg_parser as mace_parser
 import yaml
 
