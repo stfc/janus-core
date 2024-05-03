@@ -54,6 +54,16 @@ janus\_core.cli.md module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.cli.train module
+----------------------------
+
+.. automodule:: janus_core.cli.train
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.cli.types module
 ----------------------------
 
@@ -98,6 +108,16 @@ janus\_core.helpers.mlip\_calculators module
 --------------------------------------------
 
 .. automodule:: janus_core.helpers.mlip_calculators
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.train module
+--------------------------------
+
+.. automodule:: janus_core.helpers.train
    :members:
    :special-members:
    :private-members:
