@@ -2,6 +2,7 @@
 """Run molecular dynamics simulations."""
 
 import datetime
+from math import isclose
 from pathlib import Path
 import random
 from typing import Any, Optional
@@ -292,10 +293,16 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         # Warn if mix of None and not None
         self.ramp_temp = (
-            self.temp_start and self.temp_end and self.temp_step and self.temp_time
+            self.temp_start is not None
+            and self.temp_end is not None
+            and self.temp_step
+            and self.temp_time
         )
         if (
-            self.temp_start or self.temp_end or self.temp_step or self.temp_time
+            self.temp_start is not None
+            or self.temp_end is not None
+            or self.temp_step
+            or self.temp_time
         ) and not self.ramp_temp:
             warn(
                 "`temp_start`, `temp_end` and `temp_step` must all be specified for "
@@ -335,12 +342,16 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         Sets Maxwell-Boltzmann velocity distribution, as well as removing
         centre-of-mass momentum, and (optionally) total angular momentum.
         """
-        MaxwellBoltzmannDistribution(self.struct, temperature_K=self.temp)
-        Stationary(self.struct)
+        atoms = self.struct
+        if self.dyn.nsteps >= 0:
+            atoms = self.dyn.atoms
+
+        MaxwellBoltzmannDistribution(atoms, temperature_K=self.temp)
+        Stationary(atoms)
         if self.logger:
             self.logger.info("Velocities reset at step %s", self.dyn.nsteps)
         if self.remove_rot:
-            ZeroRotation(self.struct)
+            ZeroRotation(atoms)
             if self.logger:
                 self.logger.info("Rotation reset at step %s", self.dyn.nsteps)
 
@@ -373,7 +384,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """
 
         temperature_prefix = ""
-        if self.temp_start and self.temp_end:
+        if self.temp_start is not None and self.temp_end:
             temperature_prefix = f"-T{self.temp_start}-T{self.temp_end}"
 
         if self.steps > 0:
@@ -607,7 +618,12 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             if self.logger:
                 self.logger.info("Beginning temperature ramp at %sK", temps[0])
             for temp in temps:
+                if isclose(temp, 0.0):
+                    continue
                 self.temp = temp
+                self._set_velocity_distribution()
+                if not isinstance(self, NVE):
+                    self.dyn.set_temperature(temperature_K=self.temp)
                 self.dyn.run(heating_steps)
                 self._write_final_state()
             if self.logger:
@@ -618,6 +634,10 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             if self.logger:
                 self.logger.info("Starting molecular dynamics simulation")
             self.temp = md_temp
+            if self.ramp_temp:
+                self._set_velocity_distribution()
+                if not isinstance(self, NVE):
+                    self.dyn.set_temperature(temperature_K=self.temp)
             self.dyn.run(self.steps)
             self._write_final_state()
             if self.logger:
@@ -697,7 +717,6 @@ class NPT(MolecularDynamics):
             pfactor = (barostat_time * units.fs) ** 2 * scaled_bulk_modulus
         else:
             pfactor = None
-
         self.dyn = ASE_NPT(
             self.struct,
             timestep=self.timestep,
