@@ -42,6 +42,9 @@ numpydoc_validation_exclude = {
 }
 numpydoc_class_members_toctree = False
 
+# Mock import of MACE module to avoid breaking build
+autodoc_mock_imports = ["mace.cli.run_train"]
+
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
