@@ -13,6 +13,13 @@ app = Typer(name="janus", no_args_is_help=True)
 app.command()(singlepoint)
 app.command()(geomopt)
 app.command()(md)
+# Train not imlpemented in older versions of MACE
+try:
+    from janus_core.cli.train import train
+
+    app.command()(train)
+except NotImplementedError:
+    pass
 
 
 @app.callback(invoke_without_command=True, help="")
