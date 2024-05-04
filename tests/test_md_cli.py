@@ -40,7 +40,10 @@ test_data = [
 def test_md(ensemble, tmp_path):
     """Test all MD simulations are able to run."""
     file_prefix = tmp_path / f"{ensemble}-T300"
-    traj_path = tmp_path / f"{ensemble}-T300-traj.xyz"
+    if ensemble in ["npt", "nph"]:
+        traj_path = tmp_path / f"{ensemble}-T300-{ensemble}-T300.0-p0.0-traj.xyz"
+    else:
+        traj_path = tmp_path / f"{ensemble}-T300-{ensemble}-T300.0-traj.xyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -102,7 +105,9 @@ def test_log(tmp_path):
 
     assert_log_contains(log_path, includes=["Starting molecular dynamics simulation"])
 
-    with open(tmp_path / "nvt-T300-stats.dat", encoding="utf8") as stats_file:
+    with open(
+        tmp_path / "nvt-T300-nvt-T300.0-stats.dat", encoding="utf8"
+    ) as stats_file:
         lines = stats_file.readlines()
         # Includes step 0
         assert len(lines) == 22
@@ -125,7 +130,7 @@ def test_log(tmp_path):
 def test_seed(tmp_path):
     """Test seed enables reproducable results for NVT."""
     file_prefix = tmp_path / "nvt-T300"
-    stats_path = tmp_path / "nvt-T300-stats.dat"
+    stats_path = tmp_path / "nvt-T300-nvt-T300.0-stats.dat"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 

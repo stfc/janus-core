@@ -419,9 +419,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             self.file_prefix = f"{self.struct_name}-{self.ensemble}"
             data_prefix = f"{self.file_prefix}{self._parameter_prefix}"
         else:
-            data_prefix = f"{self.file_prefix}"
+            data_prefix = f"{self.file_prefix}-{self.ensemble}{self._parameter_prefix}"
             if not self.restart_stem:
-                self.restart_stem = f"{self.file_prefix}"
+                self.restart_stem = f"{self.file_prefix}-{self.ensemble}"
 
         if not self.stats_file:
             self.stats_file = f"{data_prefix}-stats.dat"

@@ -101,8 +101,8 @@ def md(
         Option(
             help=(
                 """
-                Prefix for output filenames. Default is inferred from structure,
-                ensemble, and temperature.
+                Prefix for output filenames. Default is inferred from structure name.
+                ensemble, temperature, and pressure, if any, are added to this.
                 """
             ),
         ),

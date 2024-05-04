@@ -145,7 +145,7 @@ def test_nvt_nh():
 
 def test_nve(tmp_path):
     """Test NVE molecular dynamics."""
-    file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
+    file_prefix = tmp_path / "Cl4Na4"
     traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.xyz"
     stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
 
@@ -227,7 +227,7 @@ def test_nph():
 
 def test_restart(tmp_path):
     """Test restarting molecular dynamics simulation."""
-    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    file_prefix = tmp_path / "Cl4Na4"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
@@ -376,7 +376,7 @@ def test_remove_rot(tmp_path):
 
 def test_traj_start(tmp_path):
     """Test starting trajectory after n steps."""
-    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    file_prefix = tmp_path / "Cl4Na4"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
 
     single_point = SinglePoint(
@@ -491,7 +491,7 @@ def test_rescale_every(tmp_path):
 
 def test_rotate_restart(tmp_path):
     """Test setting rotate_restart."""
-    file_prefix = tmp_path / "Cl4Na4-nvt"
+    file_prefix = tmp_path / "Cl4Na4"
     restart_path_1 = tmp_path / "Cl4Na4-nvt-T300.0-res-1.xyz"
     restart_path_2 = tmp_path / "Cl4Na4-nvt-T300.0-res-2.xyz"
     restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.xyz"
@@ -520,7 +520,7 @@ def test_rotate_restart(tmp_path):
 
 def test_atoms_struct(tmp_path):
     """Test restarting NVT molecular dynamics."""
-    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    file_prefix = tmp_path / "Cl4Na4"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
@@ -605,7 +605,7 @@ def test_noramp_heating(tmp_path):
 def test_heating_md(tmp_path):
     """Test heating followed by MD."""
     file_prefix = tmp_path / "NaCl-heating"
-    stats_path = tmp_path / "NaCl-heating-stats.dat"
+    stats_path = tmp_path / "NaCl-heating-nvt-T10-T20-T25.0-stats.dat"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
