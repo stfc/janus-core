@@ -364,7 +364,7 @@ def test_struct_name(tmp_path):
             "--temp",
             "10",
             "--struct-name",
-            str(struct_name),
+            str(struct_path),
         ],
     )
     assert result.exit_code == 0
