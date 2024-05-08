@@ -342,3 +342,31 @@ def test_invalid_config():
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_struct_name(tmp_path):
+    """ "Test specifying the structure name."""
+    stats_path = tmp_path / "EXAMPLE-nvt-T10.0-stats.dat"
+    traj_path = tmp_path / "EXAMPLE-nvt-T10.0-traj.xyz"
+    final_path = tmp_path / "EXAMPLE-nvt-T10.0-final.xyz"
+    struct_name = tmp_path / "EXAMPLE"
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--ensemble",
+            "nvt",
+            "--steps",
+            "2",
+            "--temp",
+            "10",
+            "--struct-name",
+            str(struct_name),
+        ],
+    )
+    assert result.exit_code == 0
+    assert stats_path.exists()
+    assert traj_path.exists()
+    assert final_path.exists()
