@@ -41,7 +41,17 @@ def md(
     ctx: Context,
     ensemble: Annotated[str, Option(help="Name of thermodynamic ensemble.")],
     struct: StructPath,
-    struct_name: Annotated[str, Option(help="Name of structure to simulate.")] = None,
+    struct_name: Annotated[
+        str,
+        Option(
+            help=(
+                """
+                Name of structure to simulate. Default is inferred from filepath or
+                chemical formula.
+                """
+            )
+        ),
+    ] = None,
     steps: Annotated[int, Option(help="Number of steps in simulation.")] = 0,
     timestep: Annotated[float, Option(help="Timestep for integrator, in fs.")] = 1.0,
     temp: Annotated[float, Option(help="Temperature, in K.")] = 300.0,
@@ -176,7 +186,8 @@ def md(
     struct : Path
         Path of structure to simulate.
     struct_name : str
-        Name of structure to simulate. Default is None.
+        Name of structure to simulate. Default is inferred from filepath or chemical
+        formula.
     steps : int
         Number of steps in simulation. Default is 0.
     timestep : float
