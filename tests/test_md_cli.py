@@ -346,10 +346,11 @@ def test_invalid_config():
 
 def test_struct_name(tmp_path):
     """ "Test specifying the structure name."""
-    stats_path = tmp_path / "EXAMPLE-nvt-T10.0-stats.dat"
-    traj_path = tmp_path / "EXAMPLE-nvt-T10.0-traj.xyz"
-    final_path = tmp_path / "EXAMPLE-nvt-T10.0-final.xyz"
-    struct_name = tmp_path / "EXAMPLE"
+    struct_name = "EXAMPLE"
+    struct_path = tmp_path / struct_name
+    stats_path = tmp_path / f"{struct_name}-nvt-T10.0-stats.dat"
+    traj_path = tmp_path / f"{struct_name}-nvt-T10.0-traj.xyz"
+    final_path = tmp_path / f"{struct_name}-nvt-T10.0-final.xyz"
     result = runner.invoke(
         app,
         [
