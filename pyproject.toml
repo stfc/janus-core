@@ -33,6 +33,7 @@ pyyaml = "^6.0.1"
 typer = "^0.9.0"
 typer-config = "^1.4.0"
 phonopy = "^2.23.1"
+seekpath = "^2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.4.1"}
