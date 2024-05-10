@@ -309,6 +309,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
                 "heating to run"
             )
 
+        if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
+            raise ValueError("Start and end temperatures must be positive")
+
         self.minimize_kwargs = minimize_kwargs if minimize_kwargs else {}
         self.restart_files = []
         self.dyn = None
