@@ -387,7 +387,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         """
 
         temperature_prefix = ""
-        if self.temp_start is not None and self.temp_end:
+        if self.temp_start is not None and self.temp_end is not None:
             temperature_prefix = f"-T{self.temp_start}-T{self.temp_end}"
 
         if self.steps > 0:
