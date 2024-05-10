@@ -615,8 +615,15 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         if self.ramp_temp:
             heating_steps = int(self.temp_time // self.timestep)
 
-            n_temps = int(1 + (self.temp_end - self.temp_start) // self.temp_step)
-            temps = [self.temp_start + i * self.temp_step for i in range(n_temps)]
+            # Always include start temperature in ramp, and include end temperature
+            # if separated by an integer number of temperature steps
+            n_temps = int(1 + abs(self.temp_end - self.temp_start) // self.temp_step)
+
+            # Add or subtract temperatures
+            ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
+            temps = [
+                self.temp_start + ramp_sign * i * self.temp_step for i in range(n_temps)
+            ]
 
             if self.logger:
                 self.logger.info("Beginning temperature ramp at %sK", temps[0])
