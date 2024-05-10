@@ -549,7 +549,10 @@ def test_atoms_struct(tmp_path):
 
 def test_heating(tmp_path):
     """Test heating with no MD."""
+    # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-heating"
+    final_T0_file = tmp_path / "NaCl-heating-T0.0-final.xyz"
+    final_T20_file = tmp_path / "NaCl-heating-T20.0-final.xyz"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -563,10 +566,10 @@ def test_heating(tmp_path):
         temp=300.0,
         steps=0,
         traj_every=10,
-        stats_every=1,
+        stats_every=10,
         file_prefix=file_prefix,
-        temp_start=10,
-        temp_end=40,
+        temp_start=0.0,
+        temp_end=20.0,
         temp_step=20,
         temp_time=0.5,
         log_kwargs={"filename": log_file},
@@ -575,11 +578,13 @@ def test_heating(tmp_path):
     assert_log_contains(
         log_file,
         includes=[
-            "Beginning temperature ramp at 10K",
-            "Temperature ramp complete at 30K",
+            "Beginning temperature ramp at 0.0K",
+            "Temperature ramp complete at 20.0K",
         ],
         excludes=["Starting molecular dynamics simulation"],
     )
+    assert final_T0_file.exists()
+    assert final_T20_file.exists()
 
 
 def test_noramp_heating(tmp_path):
