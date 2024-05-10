@@ -628,10 +628,11 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             if self.logger:
                 self.logger.info("Beginning temperature ramp at %sK", temps[0])
             for temp in temps:
-                if isclose(temp, 0.0):
-                    continue
                 self.temp = temp
                 self._set_velocity_distribution()
+                if isclose(temp, 0.0):
+                    self._write_final_state()
+                    continue
                 if not isinstance(self, NVE):
                     self.dyn.set_temperature(temperature_K=self.temp)
                 self.dyn.run(heating_steps)
