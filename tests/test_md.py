@@ -787,3 +787,51 @@ def test_ramp_negative(tmp_path):
             temp_step=20,
             temp_time=10,
         )
+
+
+def test_cooling(tmp_path):
+    """Test cooling with no MD."""
+    # pylint: disable=invalid-name
+    file_prefix = tmp_path / "NaCl-cooling"
+    final_T0_file = tmp_path / "NaCl-cooling-T0.0-final.xyz"
+    final_T10_file = tmp_path / "NaCl-cooling-T10.0-final.xyz"
+    final_T20_file = tmp_path / "NaCl-cooling-T20.0-final.xyz"
+    stats_cooling_path = tmp_path / "NaCl-cooling-stats.dat"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_every=10,
+        stats_every=1,
+        file_prefix=file_prefix,
+        temp_start=20.0,
+        temp_end=0.0,
+        temp_step=10,
+        temp_time=0.5,
+        log_kwargs={"filename": log_file},
+    )
+    nvt.run()
+    assert_log_contains(
+        log_file,
+        includes=[
+            "Beginning temperature ramp at 20.0K",
+            "Temperature ramp complete at 0.0K",
+        ],
+        excludes=["Starting molecular dynamics simulation"],
+    )
+    assert final_T0_file.exists()
+    assert final_T10_file.exists()
+    assert final_T20_file.exists()
+
+    stats = Stats(source=stats_cooling_path)
+    assert stats.rows == 2
+    assert stats.data[0, 16] == 20.0
+    assert stats.data[1, 16] == 10.0
