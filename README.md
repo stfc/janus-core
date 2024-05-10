@@ -26,9 +26,9 @@ Tools for machine learnt interatomic potentials
 - [ ] Nudge Elastic Band
 - [ ] Phonons
   - vibroscopy
-- [ ] Training ML potentials
+- [x] Training ML potentials
   - MACE
-- [ ] Fine tunning MLIPs
+- [x] Fine tunning MLIPs
   - MACE
 - [ ] Rare events simulations
   - PLUMED
@@ -197,6 +197,26 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 > [!NOTE]
 > `properties` must be passed as a Yaml list, as above, not as a string.
 
+
+### Training and fine-tuning MACE models
+
+> [!NOTE]
+> This currently requires use of the [develop branch of MACE](https://github.com/ACEsuit/mace/tree/develop).
+> This can be installed by running `poetry add git+https://github.com/ACEsuit/mace.git#develop`, followed by `poetry install`.
+
+MACE models can be trained by passing a configuration file to the [MACE CLI](https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py):
+
+```shell
+janus train --mlip-config /path/to/training/config.yml
+```
+
+This will create `logs`, `checkpoints` and `results` folders, as well as saving the trained model, and a compiled version of the model.
+
+Foundational models can also be fine-tuned, by including the `foundation_model` option in your configuration file, and using `--fine-tune` option:
+
+```shell
+janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
+```
 
 ## License
 
