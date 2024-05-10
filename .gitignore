@@ -8,6 +8,8 @@
 *.cif
 *.xyz
 *.yml
+*.yaml
+*.pdf
 ~*
 *~
 .project
