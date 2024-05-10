@@ -757,3 +757,33 @@ def test_heating_md_files():
         final_10_path.unlink(missing_ok=True)
         final_20_path.unlink(missing_ok=True)
         final_path.unlink(missing_ok=True)
+
+
+def test_ramp_negative(tmp_path):
+    """Test ValueError is thrown for negative values in temperature ramp."""
+    file_prefix = tmp_path / "NaCl-heating"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(ValueError):
+        NVT(
+            struct=single_point.struct,
+            file_prefix=file_prefix,
+            temp_start=-5,
+            temp_end=10,
+            temp_step=20,
+            temp_time=10,
+        )
+    with pytest.raises(ValueError):
+        NVT(
+            struct=single_point.struct,
+            file_prefix=file_prefix,
+            temp_start=5,
+            temp_end=-5,
+            temp_step=20,
+            temp_time=10,
+        )
