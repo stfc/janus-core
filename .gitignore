@@ -21,3 +21,7 @@ dist/
 pip-wheel-metadata/
 __pycache__/
 .tox/
+checkpoints/
+results/
+logs/
+*.model
