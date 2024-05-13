@@ -1,6 +1,6 @@
 """Phonons."""
 
-from typing import Optional
+from typing import Any, Optional
 
 from ase import Atoms
 from numpy import ndarray
@@ -34,6 +34,8 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
     optimize_struct : bool
         Whether to perform geometry optimisation before calculating phonons.
         Default is False.
+    optimize_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to geometry optimizer. Default is {}.
 
     Attributes
     ----------
@@ -53,6 +55,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         t_min: float = 0.0,
         t_max: float = 1000.0,
         optimize_struct: bool = False,
+        optimize_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise Phonons class.
@@ -76,6 +79,8 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         optimize_struct : bool
             Whether to perform geometry optimisation before calculating phonons.
             Default is False.
+        optimize_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to geometry optimizer. Default is {}.
         """
         self.struct = struct
         if struct_name:
@@ -91,6 +96,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.t_min = t_min
         self.t_max = t_max
         self.optimize_struct = optimize_struct
+        self.optimize_kwargs = optimize_kwargs if optimize_kwargs else {}
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
@@ -107,7 +113,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Whether to write out results to file. Default is False.
         """
         if self.optimize_struct:
-            optimize(self.struct)
+            optimize(self.struct, **self.optimize_kwargs)
 
         cell = self.ASE_to_PhonopyAtoms(self.struct)
 
