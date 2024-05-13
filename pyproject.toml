@@ -79,7 +79,7 @@ line-length = 88
 [tool.pylint.format]
 max-line-length = 88
 max-args = 10
-good-names = ["e", "i", "j", "k", "ax"]
+good-names = ["e", "i", "j", "k"]
 
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)

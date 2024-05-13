@@ -3,11 +3,8 @@
 from typing import Optional
 
 from ase import Atoms
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import ImageGrid
 from numpy import ndarray
 import phonopy
-from phonopy.phonon.dos import get_pdos_indices
 from phonopy.structure.atoms import PhonopyAtoms
 
 from janus_core.calculations.geom_opt import optimize
@@ -100,9 +97,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.calc = self.struct.calc
         self.results = {}
 
-    def calculate_phonons(
-        self, write_results: bool = False, plot_results: bool = False
-    ) -> None:
+    def calculate_phonons(self, write_results: bool = False) -> None:
         """
         Calculate phonons.
 
@@ -110,8 +105,6 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         ----------
         write_results : bool
             Whether to write out results to file. Default is False.
-        plot_results : bool
-            Whether to plot results. Default is False.
         """
         if self.optimize_struct:
             optimize(self.struct)
@@ -145,12 +138,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if write_results:
             self.write_phonon_results()
 
-        if plot_results:
-            self.plot_phonon_results()
-
-    def calculate_dos(
-        self, mesh: Optional[MaybeList[float]] = None, plot_results=True
-    ) -> None:
+    def calculate_dos(self, mesh: Optional[MaybeList[float]] = None) -> None:
         """
         Calculate density of states and projected density of states.
 
@@ -158,15 +146,13 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         ----------
         mesh : MaybeList[float]
             Mesh for sampling. Default is [10, 10, 10].
-        plot_results : bool
-            Whether to plot results for DOS and PDOS. Default is True.
         """
         if not mesh:
             mesh = [10, 10, 10]
 
         # Calculate phonons is not already run
         if "phonon" not in self.results:
-            self.calculate_phonons(write_results=False, plot_results=False)
+            self.calculate_phonons(write_results=False)
 
         self.results["phonon"].run_mesh(mesh)
         self.results["phonon"].run_total_dos()
@@ -175,9 +161,6 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             mesh, with_eigenvectors=True, is_mesh_symmetry=False
         )
         self.results["phonon"].run_projected_dos()
-
-        if plot_results:
-            self.plot_dos_results()
 
     def write_phonon_results(self) -> None:
         """Write results of phonon calculations."""
@@ -200,64 +183,6 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
                 temps, c_vs, free_energies, entropies
             ):
                 print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
-
-    def plot_phonon_results(
-        self,
-        ymin: float = 0.0,
-        ymax: float = 10.0,
-    ) -> None:
-        """
-        Plot results of phonon calculations.
-
-        Parameters
-        ----------
-        ymin : float
-            Minimum y-value for zoomed band structure. Default is 0.0.
-        ymax : float
-            Maximum y-value for zoomed band structure. Default is 10.0.
-        """
-        bands_plot = self.results["phonon"].plot_band_structure()
-        bands_plot.savefig(f"{self.struct_name}-bs-auto-ase.pdf")
-
-        ncols = self.results["phonon"].band_structure.path_connections.count(False)
-        fig, ax = plt.subplots(ncols=ncols, nrows=1, layout="constrained")
-        self.results["phonon"].band_structure.plot(ax)
-
-        for i in range(ncols):
-            ax[i].set_ylim(ymin, ymax)
-            if i > 0:
-                ax[i].get_yaxis().set_visible(False)
-        fig.savefig(f"{self.struct_name}-bs-ase-auto-zoom.pdf")
-
-    def plot_dos_results(
-        self,
-        ymin: float = 0.0,
-        ymax: float = 10.0,
-    ) -> None:
-        """
-        Plot results of DOS and PDOS calculations.
-
-        Parameters
-        ----------
-        ymin : float
-            Minimum y-value for zoomed band structure. Default is 0.0.
-        ymax : float
-            Maximum y-value for zoomed band structure. Default is 10.0.
-        """
-        dos_plot = self.results["phonon"].plot_total_dos()
-        dos_plot.savefig(f"{self.struct_name}-dos.pdf")
-
-        projected_dos_plot = self.results["phonon"].plot_projected_dos()
-        projected_dos_plot.savefig(f"{self.struct_name}-pdos.pdf")
-
-        bands_dos_plot = self.results["phonon"].plot_band_structure_and_dos()
-        bands_dos_plot.savefig(f"{self.struct_name}-bs-dos.pdf")
-
-        self.plot_band_structure_dos_and_pdos(f"{self.struct_name}-bs-pdos.pdf")
-
-        self.plot_band_structure_dos_and_pdos(
-            f"{self.struct_name}-bs-pdos-zoom.pdf", ymin, ymax
-        )
 
     # No magnetic moments considered
     def Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:
@@ -322,69 +247,3 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         """
         atoms = self.Phonopy_to_ASEAtoms(struct)
         return atoms.get_forces()
-
-    def plot_band_structure_dos_and_pdos(
-        self,
-        fig_name: Optional[str] = None,
-        ymin: Optional[float] = None,
-        ymax: Optional[float] = None,
-    ) -> None:
-        """
-        Plot band structure DOS and PDOS.
-
-        Parameters
-        ----------
-        fig_name : Optional[str]
-            Name for saved figure. Default is None.
-        ymin : Optional[float]
-            Minimum y-value for zoomed plot. Default is None.
-        ymax : Optional[float]
-            Maximum y-value for zoomed plot. Default is None.
-        """
-        pdi = get_pdos_indices(self.results["phonon"].primitive_symmetry)
-        legend = ["Total"] + [
-            self.results["phonon"].primitive.symbols[x[0]] for x in pdi
-        ]
-        ncols = self.results["phonon"].band_structure.path_connections.count(False) + 1
-        fig = plt.figure()
-        axs = ImageGrid(
-            fig,
-            111,  # similar to subplot(111)
-            nrows_ncols=(1, ncols),
-            axes_pad=0.11,
-            label_mode="L",
-        )
-        if ymin is None:
-            self.results["phonon"].band_structure.plot(axs[:-1])
-        else:
-            ncols = self.results["phonon"].band_structure.path_connections.count(False)
-            self.results["phonon"].band_structure.plot(axs[:-1])
-            for i in range(ncols):
-                axs[i].set_ylim(ymin, ymax)
-            if i > 0:
-                axs[i].get_yaxis().set_visible(False)
-
-        self.results["phonon"].total_dos.plot(
-            axs[-1], xlabel="", ylabel="", draw_grid=False, flip_xy=True
-        )
-        self.results["phonon"].pdos.plot(
-            axs[-1],
-            indices=pdi,
-            xlabel="",
-            ylabel="",
-            legend=legend,
-            draw_grid=False,
-            flip_xy=True,
-        )
-        ylim = axs[-1].get_ylim()
-        if ymin is None:
-            xlim = axs[-1].get_xlim()
-        else:
-            xlim = [ymin, ymax]
-
-        aspect = (xlim[1] - xlim[0]) / (ylim[1] - ylim[0]) * 3
-        axs[-1].set_aspect(aspect)
-        axs[-1].axhline(y=0, linestyle=":", linewidth=0.5, color="b")
-        axs[-1].set_xlim((xlim[0], xlim[1]))
-        plt.savefig(fig_name)
-        plt.show()

@@ -41,7 +41,7 @@ repos:
     entry: pylint
     args:
       [
-        "--good-names=e,i,j,k,ax"
+        "--good-names=e,i,j,k"
       ]
 
 - repo: https://github.com/numpy/numpydoc
