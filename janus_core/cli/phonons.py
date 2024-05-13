@@ -65,7 +65,7 @@ def phonons(
     summary: Summary = "phonons_summary.yml",
 ):
     """
-    Perform geometry optimization and save optimized structure to file.
+    Perform phonon calculations and write out results.
 
     Parameters
     ----------

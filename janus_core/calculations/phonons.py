@@ -1,4 +1,4 @@
-"""Phonons."""
+"""Phonon calculations."""
 
 from typing import Any, Optional
 
@@ -15,7 +15,7 @@ from janus_core.helpers.utils import none_to_dict
 
 class Phonons:  # pylint: disable=too-many-instance-attributes
     """
-    Configure, calculate and output phonon calculations.
+    Configure, perform phonon calculations and write out results.
 
     Parameters
     ----------
