@@ -24,7 +24,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Structrure to calculate phonons for.
     struct_name : Optional[str]
         Name of structure. Default is inferred from chemical formula if `struct`.
-    supercell : int
+    supercell : MaybeList[int]
         Size of supercell for calculation. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
@@ -50,7 +50,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self,
         struct: Atoms,
         struct_name: Optional[str] = None,
-        supercell: int = 2,
+        supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
         t_step: float = 50.0,
         t_min: float = 0.0,
@@ -66,7 +66,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Structrure to calculate phonons for.
         struct_name : Optional[str]
             Name of structure. Default is inferred from chemical formula if `struct`.
-        supercell : int
+        supercell : MaybeList[int]
             Size of supercell for calculation. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
@@ -85,7 +85,10 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             self.struct_name = self.struct_name
         else:
             self.struct_name = self.struct.get_chemical_formula()
-        self.supercell = supercell
+
+        # Ensure supercell is a list
+        self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
+
         self.displacement = displacement
         self.t_step = t_step
         self.t_min = t_min
@@ -116,9 +119,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         cell = self.ASE_to_PhonopyAtoms(self.struct)
 
         supercell_matrix = (
-            (self.supercell, 0, 0),
-            (0, self.supercell, 0),
-            (0, 0, self.supercell),
+            (self.supercell[0], 0, 0),
+            (0, self.supercell[1], 0),
+            (0, 0, self.supercell[2]),
         )
         phonon = phonopy.Phonopy(cell, supercell_matrix)
         phonon.generate_displacements(distance=self.displacement)
