@@ -40,6 +40,22 @@ def phonons(
         list[int],
         Option(help="Supercell lattice vectors."),
     ],
+    displacement: Annotated[
+        float,
+        Option(help="Displacement for force constants calculation, in A."),
+    ] = 0.01,
+    temp_start: Annotated[
+        float,
+        Option(help="Start temperature for CV calculations, in K."),
+    ] = 0.0,
+    temp_end: Annotated[
+        float,
+        Option(help="End temperature for CV calculations, in K."),
+    ] = 1000.0,
+    temp_step: Annotated[
+        float,
+        Option(help="Temperature step for CV calculations, in K."),
+    ] = 50,
     dos: Annotated[
         bool,
         Option(help="Whether to calculate the DOS."),
@@ -75,6 +91,14 @@ def phonons(
         Path of structure to simulate.
     supercell : List[int]
         Supercell lattice vectors. Can be passed as a single value, or list of three.
+    displacement : float
+        Displacement for force constants calculation, in A. Default is 0.01.
+    temp_start : float
+        Start temperature for CV calculations, in K. Default is 0.0.
+    temp_end : float
+        End temperature for CV calculations, in K. Default is 1000.0.
+    temp_step : float
+        Temperature step for CV calculations, in K. Default is 50.0.
     dos : bool
         Whether to calculate and save the DOS. Default is False.
     pdos : bool
@@ -139,6 +163,10 @@ def phonons(
     phonons_kwargs = {
         "struct": s_point.struct,
         "supercell": supercell,
+        "displacement": displacement,
+        "t_min": temp_start,
+        "t_max": temp_end,
+        "t_step": temp_step,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
         "log_kwargs": log_kwargs,
