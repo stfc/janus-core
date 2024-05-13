@@ -9,6 +9,8 @@ from phonopy.structure.atoms import PhonopyAtoms
 
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import MaybeList
+from janus_core.helpers.log import config_logger
+from janus_core.helpers.utils import none_to_dict
 
 
 class Phonons:  # pylint: disable=too-many-instance-attributes
@@ -31,11 +33,13 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Start temperature for CV calculations, in K. Default is 0.0.
     t_max : float
         End temperature for CV calculations, in K. Default is 1000.0.
-    optimize_struct : bool
+    minimize : bool
         Whether to perform geometry optimisation before calculating phonons.
         Default is False.
-    optimize_kwargs : Optional[dict[str, Any]]
+    minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
 
     Attributes
     ----------
@@ -43,9 +47,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         ASE Calculator attached to strucutre.
     results : dict
         Results of phonon calculations.
+    logger : logging.Logger
+        Logger if log file has been specified.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         struct: Atoms,
         struct_name: Optional[str] = None,
@@ -54,8 +60,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         t_step: float = 50.0,
         t_min: float = 0.0,
         t_max: float = 1000.0,
-        optimize_struct: bool = False,
-        optimize_kwargs: Optional[dict[str, Any]] = None,
+        minimize: bool = False,
+        minimize_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise Phonons class.
@@ -76,44 +83,54 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Start temperature for CV calculations, in K. Default is 0.0.
         t_max : float
             End temperature for CV calculations, in K. Default is 1000.0.
-        optimize_struct : bool
+        minimize : bool
             Whether to perform geometry optimisation before calculating phonons.
             Default is False.
-        optimize_kwargs : Optional[dict[str, Any]]
+        minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
+        log_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
         """
+        [minimize_kwargs, log_kwargs] = none_to_dict([minimize_kwargs, log_kwargs])
+
         self.struct = struct
         if struct_name:
             self.struct_name = self.struct_name
         else:
             self.struct_name = self.struct.get_chemical_formula()
 
-        # Ensure supercell is a list
+        # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
+        if len(self.supercell) != 3:
+            raise ValueError("`supercell` must be an integer, or list of length 3")
 
         self.displacement = displacement
         self.t_step = t_step
         self.t_min = t_min
         self.t_max = t_max
-        self.optimize_struct = optimize_struct
-        self.optimize_kwargs = optimize_kwargs if optimize_kwargs else {}
+        self.minimize = minimize
+        self.minimize_kwargs = minimize_kwargs
+
+        self.log_kwargs = log_kwargs
+        self.log_kwargs.setdefault("name", __name__)
+        self.logger = config_logger(**self.log_kwargs)
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
         self.calc = self.struct.calc
         self.results = {}
 
-    def calculate_phonons(self, write_results: bool = False) -> None:
+    def calc_phonons(self, write_results: bool = True) -> None:
         """
         Calculate phonons.
 
         Parameters
         ----------
         write_results : bool
-            Whether to write out results to file. Default is False.
+            Whether to write out results to file. Default is True.
         """
-        if self.optimize_struct:
-            optimize(self.struct, **self.optimize_kwargs)
+        if self.minimize:
+            optimize(self.struct, **self.minimize_kwargs)
 
         cell = self.ASE_to_PhonopyAtoms(self.struct)
 
@@ -144,29 +161,59 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if write_results:
             self.write_phonon_results()
 
-    def calculate_dos(self, mesh: Optional[MaybeList[float]] = None) -> None:
+    def calc_dos(
+        self, mesh: Optional[MaybeList[float]] = None, write_results=True
+    ) -> None:
         """
-        Calculate density of states and projected density of states.
+        Calculate density of states.
 
         Parameters
         ----------
         mesh : MaybeList[float]
             Mesh for sampling. Default is [10, 10, 10].
+        write_results : bool
+            Whether to write out results to file. Default is True.
         """
         if not mesh:
             mesh = [10, 10, 10]
 
         # Calculate phonons is not already run
         if "phonon" not in self.results:
-            self.calculate_phonons(write_results=False)
+            self.calc_phonons(write_results=False)
 
         self.results["phonon"].run_mesh(mesh)
         self.results["phonon"].run_total_dos()
+
+        if write_results:
+            self.results["phonon"].total_dos.write()
+
+    def calc_pdos(
+        self, mesh: Optional[MaybeList[float]] = None, write_results: bool = True
+    ) -> None:
+        """
+        Calculate projected density of states.
+
+        Parameters
+        ----------
+        mesh : MaybeList[float]
+            Mesh for sampling. Default is [10, 10, 10].
+        write_results : bool
+            Whether to write out results to file. Default is True.
+        """
+        if not mesh:
+            mesh = [10, 10, 10]
+
+        # Calculate phonons is not already run
+        if "phonon" not in self.results:
+            self.calc_phonons(write_results=False)
 
         self.results["phonon"].run_mesh(
             mesh, with_eigenvectors=True, is_mesh_symmetry=False
         )
         self.results["phonon"].run_projected_dos()
+
+        if write_results:
+            self.results["phonon"].projected_dos.write()
 
     def write_phonon_results(self) -> None:
         """Write results of phonon calculations."""
