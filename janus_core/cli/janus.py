@@ -7,12 +7,14 @@ from typer import Exit, Option, Typer
 from janus_core import __version__
 from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
+from janus_core.cli.phonons import phonons
 from janus_core.cli.singlepoint import singlepoint
 
 app = Typer(name="janus", no_args_is_help=True)
 app.command()(singlepoint)
 app.command()(geomopt)
 app.command()(md)
+app.command()(phonons)
 # Train not imlpemented in older versions of MACE
 try:
     from janus_core.cli.train import train
