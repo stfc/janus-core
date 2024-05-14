@@ -41,6 +41,13 @@ def eos(
         Optional[str],
         Option(help="Name of structure name."),
     ] = None,
+    min_lattice: Annotated[
+        float, Option(help="Minimum lattice constant scale factor.")
+    ] = 0.95,
+    max_lattice: Annotated[
+        float, Option(help="Maximum lattice constant scale factor.")
+    ] = 1.05,
+    n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 5,
     minimize: Annotated[
         bool, Option(help="Whether to minimize structure before calculations.")
     ] = False,
@@ -78,6 +85,12 @@ def eos(
     struct_name : Optional[PathLike]
         Name of structure to simulate. Default is inferred from filepath or chemical
         formula.
+    min_lattice : float
+        Minimum lattice constant scale factor. Default is 0.95.
+    max_lattice : float
+        Maximum lattice constant scale factor. Default is 1.05.
+    n_lattice : int
+        Number of lattice constants to use. Default is 5.
     minimize : bool
         Whether to minimize structure before calculations. Default is False.
     fmax : float
@@ -133,6 +146,9 @@ def eos(
     eos_kwargs = {
         "struct": s_point.struct,
         "struct_name": s_point.struct_name,
+        "min_lattice": min_lattice,
+        "max_lattice": max_lattice,
+        "n_lattice": n_lattice,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
         "file_prefix": file_prefix,
