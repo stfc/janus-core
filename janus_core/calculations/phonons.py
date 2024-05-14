@@ -131,7 +131,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
 
     def calc_phonons(self, write_results: bool = True) -> None:
         """
-        Calculate phonons.
+        Calculate phonons and optionally write results.
 
         Parameters
         ----------
@@ -160,21 +160,55 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
 
         phonon.produce_force_constants()
         phonon.run_mesh()
-        phonon.run_thermal_properties(
-            t_step=self.t_step, t_max=self.t_max, t_min=self.t_min
-        )
-
         self.results["phonon"] = phonon
-        self.results["thermal_properties"] = phonon.get_thermal_properties_dict()
 
         if write_results:
-            self.write_phonon_results()
+            self.results["phonon"].save(
+                f"{self.file_prefix}-ase.yml", settings={"force_constants": True}
+            )
+
+            self.results["phonon"].auto_band_structure(
+                write_yaml=True, filename=f"{self.file_prefix}-auto-band.yml"
+            )
+
+    def calc_thermal_props(self, write_results: bool = True) -> None:
+        """
+        Calculate thermal properties and optionally write results.
+
+        Parameters
+        ----------
+        write_results : bool
+            Whether to write out results to file. Default is True.
+        """
+        # Calculate phonons is not already run
+        if "phonon" not in self.results:
+            self.calc_phonons(write_results=False)
+
+        self.results["phonon"].run_thermal_properties(
+            t_step=self.t_step, t_max=self.t_max, t_min=self.t_min
+        )
+        self.results["thermal_properties"] = self.results[
+            "phonon"
+        ].get_thermal_properties_dict()
+
+        if write_results:
+            with open(f"{self.file_prefix}-cv.dat", "w", encoding="utf8") as out:
+                temps = self.results["thermal_properties"]["temperatures"]
+                c_vs = self.results["thermal_properties"]["heat_capacity"]
+                entropies = self.results["thermal_properties"]["entropy"]
+                free_energies = self.results["thermal_properties"]["free_energy"]
+
+                print("#Temperature [K] | Cv | H | S ", file=out)
+                for temp, c_v, free_energy, entropy in zip(
+                    temps, c_vs, free_energies, entropies
+                ):
+                    print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
 
     def calc_dos(
         self, mesh: Optional[MaybeList[float]] = None, write_results=True
     ) -> None:
         """
-        Calculate density of states.
+        Calculate density of states and optionally write results.
 
         Parameters
         ----------
@@ -200,7 +234,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self, mesh: Optional[MaybeList[float]] = None, write_results: bool = True
     ) -> None:
         """
-        Calculate projected density of states.
+        Calculate projected density of states and optionally write results.
 
         Parameters
         ----------
@@ -223,28 +257,6 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
 
         if write_results:
             self.results["phonon"].projected_dos.write()
-
-    def write_phonon_results(self) -> None:
-        """Write results of phonon calculations."""
-        self.results["phonon"].save(
-            f"{self.file_prefix}-ase.yml", settings={"force_constants": True}
-        )
-
-        self.results["phonon"].auto_band_structure(
-            write_yaml=True, filename=f"{self.file_prefix}-auto-band.yml"
-        )
-
-        with open(f"{self.file_prefix}-cv.dat", "w", encoding="utf8") as out:
-            temps = self.results["thermal_properties"]["temperatures"]
-            c_vs = self.results["thermal_properties"]["heat_capacity"]
-            entropies = self.results["thermal_properties"]["entropy"]
-            free_energies = self.results["thermal_properties"]["free_energy"]
-
-            print("#Temperature [K] | Cv | H | S ", file=out)
-            for temp, c_v, free_energy, entropy in zip(
-                temps, c_vs, free_energies, entropies
-            ):
-                print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
 
     # No magnetic moments considered
     def Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:

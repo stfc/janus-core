@@ -45,6 +45,10 @@ def phonons(
         float,
         Option(help="Displacement for force constants calculation, in A."),
     ] = 0.01,
+    thermal: Annotated[
+        bool,
+        Option(help="Whether to calculate thermal properties."),
+    ] = False,
     temp_start: Annotated[
         float,
         Option(help="Start temperature for CV calculations, in K."),
@@ -105,12 +109,17 @@ def phonons(
         Supercell lattice vectors. Can be passed as a single value, or list of three.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    thermal : bool
+        Whether to calculate thermal properties. Default is False.
     temp_start : float
-        Start temperature for CV calculations, in K. Default is 0.0.
+        Start temperature for CV calculations, in K. Unused if `thermal` is False.
+        Default is 0.0.
     temp_end : float
-        End temperature for CV calculations, in K. Default is 1000.0.
+        End temperature for CV calculations, in K. Unused if `thermal` is False.
+        Default is 1000.0.
     temp_step : float
-        Temperature step for CV calculations, in K. Default is 50.0.
+        Temperature step for CV calculations, in K. Unused if `thermal` is False.
+        Default is 50.0.
     dos : bool
         Whether to calculate and save the DOS. Default is False.
     pdos : bool
@@ -220,6 +229,10 @@ def phonons(
 
     # Calculate phonons
     phonon.calc_phonons()
+
+    # Calculate DOS and PDOS is specified
+    if thermal:
+        phonon.calc_thermal_props()
 
     # Calculate DOS and PDOS is specified
     if dos:
