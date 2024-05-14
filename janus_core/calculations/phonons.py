@@ -8,7 +8,7 @@ import phonopy
 from phonopy.structure.atoms import PhonopyAtoms
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import MaybeList
+from janus_core.helpers.janus_types import MaybeList, PathLike
 from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict
 
@@ -38,6 +38,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Default is False.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
+    file_prefix : Optional[PathLike]
+        Prefix for output filenames. Default is inferred from structure name, or
+        chemical formula of the structure.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
 
@@ -62,6 +65,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         t_max: float = 1000.0,
         minimize: bool = False,
         minimize_kwargs: Optional[dict[str, Any]] = None,
+        file_prefix: Optional[PathLike] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
@@ -88,6 +92,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Default is False.
         minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames. Default is inferred from structure name, or
+            chemical formula of the structure.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         """
@@ -98,6 +105,8 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             self.struct_name = self.struct_name
         else:
             self.struct_name = self.struct.get_chemical_formula()
+
+        self.file_prefix = file_prefix if file_prefix else self.struct_name
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -218,14 +227,14 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
     def write_phonon_results(self) -> None:
         """Write results of phonon calculations."""
         self.results["phonon"].save(
-            f"{self.struct_name}-ase.yml", settings={"force_constants": True}
+            f"{self.file_prefix}-ase.yml", settings={"force_constants": True}
         )
 
         self.results["phonon"].auto_band_structure(
-            write_yaml=True, filename=f"{self.struct_name}-auto-band.yml"
+            write_yaml=True, filename=f"{self.file_prefix}-auto-band.yml"
         )
 
-        with open(f"{self.struct_name}-cv.dat", "w", encoding="utf8") as out:
+        with open(f"{self.file_prefix}-cv.dat", "w", encoding="utf8") as out:
             temps = self.results["thermal_properties"]["temperatures"]
             c_vs = self.results["thermal_properties"]["heat_capacity"]
             entropies = self.results["thermal_properties"]["entropy"]

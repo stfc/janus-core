@@ -1,6 +1,7 @@
 """Set up phonons commandline interface."""
 
-from typing import Annotated
+from pathlib import Path
+from typing import Annotated, Optional
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -77,6 +78,17 @@ def phonons(
     device: Device = "cpu",
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
+    file_prefix: Annotated[
+        Optional[Path],
+        Option(
+            help=(
+                """
+                Prefix for output filenames. Default is inferred from structure name,
+                or chemical formula.
+                """
+            ),
+        ),
+    ] = None,
     log: LogPath = "phonons.log",
     summary: Summary = "phonons_summary.yml",
 ):
@@ -119,6 +131,9 @@ def phonons(
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    file_prefix : Optional[PathLike]
+        Prefix for output filenames. Default is inferred from structure name, or
+        chemical formula.
     log : Optional[Path]
         Path to write logs to. Default is "phonons.log".
     summary : Path
@@ -169,6 +184,7 @@ def phonons(
         "t_step": temp_step,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
+        "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
     }
 
