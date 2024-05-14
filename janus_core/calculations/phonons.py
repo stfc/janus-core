@@ -228,7 +228,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].run_total_dos()
 
         if write_results:
-            self.results["phonon"].total_dos.write()
+            self.results["phonon"].total_dos.write(f"{self.file_prefix}-dos.dat")
 
     def calc_pdos(
         self, mesh: Optional[MaybeList[float]] = None, write_results: bool = True
@@ -256,7 +256,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].run_projected_dos()
 
         if write_results:
-            self.results["phonon"].projected_dos.write()
+            self.results["phonon"].projected_dos.write(f"{self.file_prefix}-pdos.dat")
 
     # No magnetic moments considered
     def Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:
