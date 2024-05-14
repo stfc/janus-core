@@ -24,6 +24,7 @@ Tools for machine learnt interatomic potentials
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
   - NPT (Nosé-Hoover (Melchiona flavour))
 - [ ] Nudge Elastic Band
+- [x] Equation of State
 - [ ] Phonons
   - vibroscopy
 - [x] Training ML potentials
@@ -169,6 +170,19 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
 
 When MD is run with heating the trajectory ```NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz``` and statistics ```NaCl-nvt-T20.0-T300.0-T300.0-stats.dat``` files will indicate the heating range and MD temperature (which may be different). With heating and MD trajectories/statistics within the same files.
+
+
+### Equation of State
+
+Fit the equation of state for a structure (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
+
+```shell
+janus eos --struct tests/data/NaCl.cif --min-lattice 0.9 --max-lattice 1.1 --n-lattice 9 --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+```
+
+This will save the energies and volumes for nine lattice constants in `NaCl-eos-raw.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos-raw.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`. A binary trajectory file storing the structures with different different lattice constants, `NaCl-eos.traj`, will also be saved.
+
+For all options, run `janus eos --help`.
 
 
 ### Using configuration files
