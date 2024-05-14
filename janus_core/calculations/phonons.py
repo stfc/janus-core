@@ -102,7 +102,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
 
         self.struct = struct
         if struct_name:
-            self.struct_name = self.struct_name
+            self.struct_name = struct_name
         else:
             self.struct_name = self.struct.get_chemical_formula()
 
