@@ -139,6 +139,12 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Whether to write out results to file. Default is True.
         """
         if self.minimize:
+            if self.logger:
+                self.minimize_kwargs["log_kwargs"] = {
+                    "filename": self.log_kwargs["filename"],
+                    "name": self.logger.name,
+                    "filemode": "a",
+                }
             optimize(self.struct, **self.minimize_kwargs)
 
         cell = self.ASE_to_PhonopyAtoms(self.struct)
