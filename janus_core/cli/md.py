@@ -185,7 +185,7 @@ def md(
         Name of thermodynamic ensemble.
     struct : Path
         Path of structure to simulate.
-    struct_name : str
+    struct_name : Optional[str]
         Name of structure to simulate. Default is inferred from filepath or chemical
         formula.
     steps : int

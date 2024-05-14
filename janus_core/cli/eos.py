@@ -82,7 +82,7 @@ def eos(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    struct_name : Optional[PathLike]
+    struct_name : Optional[str]
         Name of structure to simulate. Default is inferred from filepath or chemical
         formula.
     min_lattice : float
