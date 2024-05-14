@@ -176,7 +176,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
 
         if write_results:
             self.results["phonon"].save(
-                f"{self.file_prefix}-ase.yml", settings={"force_constants": True}
+                f"{self.file_prefix}-params.yml", settings={"force_constants": True}
             )
 
             self.results["phonon"].auto_band_structure(

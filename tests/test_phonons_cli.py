@@ -22,7 +22,7 @@ def test_phonons(tmp_path):
     """Test calculating phonons."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    phonon_results = tmp_path / "NaCl-ase.yml"
+    phonon_results = tmp_path / "NaCl-params.yml"
     autoband_results = tmp_path / "NaCl-auto-band.yml"
     result = runner.invoke(
         app,
