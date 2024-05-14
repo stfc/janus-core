@@ -147,6 +147,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
                 }
             optimize(self.struct, **self.minimize_kwargs)
 
+        if self.logger:
+            self.logger.info("Beginning phonons calculation")
+
         cell = self.ASE_to_PhonopyAtoms(self.struct)
 
         supercell_matrix = (
@@ -167,6 +170,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         phonon.produce_force_constants()
         phonon.run_mesh()
         self.results["phonon"] = phonon
+
+        if self.logger:
+            self.logger.info("Phonons calculation complete")
 
         if write_results:
             self.results["phonon"].save(
@@ -190,12 +196,18 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if "phonon" not in self.results:
             self.calc_phonons(write_results=False)
 
+        if self.logger:
+            self.logger.info("Beginning thermal properties calculation")
+
         self.results["phonon"].run_thermal_properties(
             t_step=self.t_step, t_max=self.t_max, t_min=self.t_min
         )
         self.results["thermal_properties"] = self.results[
             "phonon"
         ].get_thermal_properties_dict()
+
+        if self.logger:
+            self.logger.info("Thermal properties calculation complete")
 
         if write_results:
             with open(f"{self.file_prefix}-cv.dat", "w", encoding="utf8") as out:
@@ -230,8 +242,14 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if "phonon" not in self.results:
             self.calc_phonons(write_results=False)
 
+        if self.logger:
+            self.logger.info("Beginning DOS calculation")
+
         self.results["phonon"].run_mesh(mesh)
         self.results["phonon"].run_total_dos()
+
+        if self.logger:
+            self.logger.info("DOS calculation complete")
 
         if write_results:
             self.results["phonon"].total_dos.write(f"{self.file_prefix}-dos.dat")
@@ -256,10 +274,16 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if "phonon" not in self.results:
             self.calc_phonons(write_results=False)
 
+        if self.logger:
+            self.logger.info("Beginning PDOS calculation")
+
         self.results["phonon"].run_mesh(
             mesh, with_eigenvectors=True, is_mesh_symmetry=False
         )
         self.results["phonon"].run_projected_dos()
+
+        if self.logger:
+            self.logger.info("PDOS calculation complete")
 
         if write_results:
             self.results["phonon"].projected_dos.write(f"{self.file_prefix}-pdos.dat")
