@@ -219,6 +219,10 @@ def phonons(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    inputs["dos"] = dos
+    inputs["pdos"] = pdos
+    inputs["thermal"] = thermal
+
     inputs["struct"] = {
         "n_atoms": len(s_point.struct),
         "struct_path": struct,
