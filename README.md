@@ -24,8 +24,8 @@ Tools for machine learnt interatomic potentials
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
   - NPT (Nosé-Hoover (Melchiona flavour))
 - [ ] Nudge Elastic Band
-- [ ] Phonons
-  - vibroscopy
+- [x] Phonons
+  - Phonopy
 - [x] Training ML potentials
   - MACE
 - [x] Fine tunning MLIPs
@@ -169,6 +169,27 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
 
 When MD is run with heating the trajectory ```NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz``` and statistics ```NaCl-nvt-T20.0-T300.0-T300.0-stats.dat``` files will indicate the heating range and MD temperature (which may be different). With heating and MD trajectories/statistics within the same files.
+
+
+### Phonons
+
+Calculate phonons with a 2x3x4 supercell, after geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/mace-mp):
+
+```shell
+janus phonons --struct tests/data/NaCl.cif --supercell 2 --supercell 3 --supercell 4 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+```
+
+This will save the Phonopy parameters, including displacements and force constants, to `NaCl-params.yml`, and the calculated band structure to `NaCl-auto-band.yml`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
+
+Further calculations, including thermal properties, DOS, and PDOS, can also be calculated (using a 2x2x2 supercell):
+
+```shell
+janus phonons --struct tests/data/NaCl.cif --supercell 2 --dos --pdos --thermal --temp-start 0 --temp-end 300 --temp-step 50
+```
+
+This will create additional output files: `NaCl-cv.dat` for the thermal properties (heat capacity, entropy, and free energy) between 0K and 300K, `NaCl-dos.dat` for the DOS, and `NaCl-pdos.dat` for the PDOS.
+
+For all options, run `janus phonons --help`.
 
 
 ### Using configuration files
