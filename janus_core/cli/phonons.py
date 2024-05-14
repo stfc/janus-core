@@ -40,7 +40,7 @@ def phonons(
     supercell: Annotated[
         list[int],
         Option(help="Supercell lattice vectors."),
-    ],
+    ] = None,
     displacement: Annotated[
         float,
         Option(help="Displacement for force constants calculation, in A."),
@@ -107,6 +107,7 @@ def phonons(
         Path of structure to simulate.
     supercell : List[int]
         Supercell lattice vectors. Can be passed as a single value, or list of three.
+        Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     thermal : bool
@@ -175,6 +176,11 @@ def phonons(
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
+    # Set default supercell
+    if not supercell:
+        supercell = [2, 2, 2]
+
+    # Convert single value to list for supercell matrix
     if len(supercell) == 1:
         supercell *= 3
     if len(supercell) != 3:
