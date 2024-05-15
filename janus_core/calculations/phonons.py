@@ -5,6 +5,7 @@ from typing import Any, Optional
 from ase import Atoms
 from numpy import ndarray
 import phonopy
+from phonopy.file_IO import write_force_constants_to_hdf5
 from phonopy.structure.atoms import PhonopyAtoms
 
 from janus_core.calculations.geom_opt import optimize
@@ -175,13 +176,40 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             self.logger.info("Phonons calculation complete")
 
         if write_results:
-            self.results["phonon"].save(
-                f"{self.file_prefix}-params.yml", settings={"force_constants": True}
-            )
+            self.write_phonons()
 
-            self.results["phonon"].auto_band_structure(
-                write_yaml=True, filename=f"{self.file_prefix}-auto-band.yml"
-            )
+    def write_phonons(
+        self,
+        *,
+        params_file: Optional[PathLike] = None,
+        force_const_file: Optional[PathLike] = None,
+        bands_file: Optional[PathLike] = None,
+    ) -> None:
+        """
+        Write results of phonon calculations.
+
+        Parameters
+        ----------
+        params_file : Optional[PathLike]
+            Name of yaml file to save phonon parameters. Default is inferred from
+            `file_prefix`.
+        force_const_file : Optional[PathLike]
+            Name of hdf5 file to save force constants. Default is inferred from
+            `file_prefix`.
+        bands_file : Optional[PathLike]
+            Name of yaml file to save band structure. Default is inferred from
+            `file_prefix`.
+        """
+        params_file = params_file if params_file else f"{self.file_prefix}-params.yml"
+        bands_file = bands_file if bands_file else f"{self.file_prefix}-auto_band.yml"
+        if not force_const_file:
+            force_const_file = f"{self.file_prefix}-force_consts.hdf5"
+
+        phonon = self.results["phonon"]
+
+        phonon.save(params_file, settings={"force_constants": False})
+        write_force_constants_to_hdf5(phonon.force_constants, filename=force_const_file)
+        phonon.auto_band_structure(write_yaml=True, filename=bands_file)
 
     def calc_thermal_props(self, write_results: bool = True) -> None:
         """
@@ -210,17 +238,31 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             self.logger.info("Thermal properties calculation complete")
 
         if write_results:
-            with open(f"{self.file_prefix}-cv.dat", "w", encoding="utf8") as out:
-                temps = self.results["thermal_properties"]["temperatures"]
-                c_vs = self.results["thermal_properties"]["heat_capacity"]
-                entropies = self.results["thermal_properties"]["entropy"]
-                free_energies = self.results["thermal_properties"]["free_energy"]
+            self.write_thermal_props()
 
-                print("#Temperature [K] | Cv | H | S ", file=out)
-                for temp, c_v, free_energy, entropy in zip(
-                    temps, c_vs, free_energies, entropies
-                ):
-                    print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
+    def write_thermal_props(self, filename: Optional[PathLike] = None) -> None:
+        """
+        Write results of thermal properties calculations.
+
+        Parameters
+        ----------
+        filename : Optional[PathLike]
+            Name of data file to save thermal properties. Default is inferred from
+            `file_prefix`.
+        """
+        filename = filename if filename else f"{self.file_prefix}-cv.dat"
+
+        with open(filename, "w", encoding="utf8") as out:
+            temps = self.results["thermal_properties"]["temperatures"]
+            c_vs = self.results["thermal_properties"]["heat_capacity"]
+            entropies = self.results["thermal_properties"]["entropy"]
+            free_energies = self.results["thermal_properties"]["free_energy"]
+
+            print("#Temperature [K] | Cv | H | S ", file=out)
+            for temp, c_v, free_energy, entropy in zip(
+                temps, c_vs, free_energies, entropies
+            ):
+                print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
 
     def calc_dos(
         self, mesh: Optional[MaybeList[float]] = None, write_results=True
@@ -252,7 +294,20 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             self.logger.info("DOS calculation complete")
 
         if write_results:
-            self.results["phonon"].total_dos.write(f"{self.file_prefix}-dos.dat")
+            self.write_dos()
+
+    def write_dos(self, filename: Optional[PathLike] = None) -> None:
+        """
+        Write results of DOS calculation.
+
+        Parameters
+        ----------
+        filename : Optional[PathLike]
+            Name of data file to save the calculated DOS. Default is inferred from
+            `file_prefix`.
+        """
+        filename = filename if filename else f"{self.file_prefix}-dos.dat"
+        self.results["phonon"].total_dos.write(filename)
 
     def calc_pdos(
         self, mesh: Optional[MaybeList[float]] = None, write_results: bool = True
@@ -286,7 +341,20 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             self.logger.info("PDOS calculation complete")
 
         if write_results:
-            self.results["phonon"].projected_dos.write(f"{self.file_prefix}-pdos.dat")
+            self.write_pdos()
+
+    def write_pdos(self, filename: Optional[PathLike] = None) -> None:
+        """
+        Write results of PDOS calculation.
+
+        Parameters
+        ----------
+        filename : Optional[PathLike]
+            Name of data file to save the calculated PDOS. Default is inferred from
+            `file_prefix`.
+        """
+        filename = filename if filename else f"{self.file_prefix}-pdos.dat"
+        self.results["phonon"].projected_dos.write(filename)
 
     # No magnetic moments considered
     def Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:
