@@ -289,10 +289,8 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             free_energies = self.results["thermal_properties"]["free_energy"]
 
             print("#Temperature [K] | Cv | H | S ", file=out)
-            for temp, c_v, free_energy, entropy in zip(
-                temps, c_vs, free_energies, entropies
-            ):
-                print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
+            for properties in zip(temps, c_vs, free_energies, entropies):
+                print(*properties, file=out)
 
     def calc_dos(
         self, mesh: MaybeList[float] = (10, 10, 10), write_results=True
