@@ -42,9 +42,9 @@ def phonons(
         Option(help="Name of structure name."),
     ] = None,
     supercell: Annotated[
-        list[int],
-        Option(help="Supercell lattice vectors."),
-    ] = None,
+        str,
+        Option(help="Supercell lattice vectors in the form '1x2x3'."),
+    ] = "2x2x2",
     displacement: Annotated[
         float,
         Option(help="Displacement for force constants calculation, in A."),
@@ -112,9 +112,9 @@ def phonons(
     struct_name : Optional[PathLike]
         Name of structure to simulate. Default is inferred from filepath or chemical
         formula.
-    supercell : List[int]
-        Supercell lattice vectors. Can be passed as a single value, or list of three.
-        Default is 2.
+    supercell : str
+        Supercell lattice vectors. Must be passed in the form '1x2x3'. Default is
+        2x2x2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     thermal : bool
@@ -184,18 +184,17 @@ def phonons(
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
-    # Set default supercell
-    if not supercell:
-        supercell = [2, 2, 2]
+    # Convert supercell string to list
+    supercell = supercell.split("x")
 
-    # Convert single value to list for supercell matrix
-    if len(supercell) == 1:
-        supercell *= 3
+    # Validate supercell list
     if len(supercell) != 3:
-        raise ValueError(
-            """Please pass the lattice vectors via either --supercell x --supercell y \
---supercell z, or --supercell x."""
-        )
+        raise ValueError("Please pass three lattice vectors in the form 1x2x3")
+
+    if not all(vector.isdigit() for vector in supercell):
+        raise ValueError("Please pass lattice vectors as integers in the form 1x2x3")
+
+    supercell = [int(vector) for vector in supercell]
 
     # Dictionary of inputs for phonons
     phonons_kwargs = {
