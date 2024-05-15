@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
+import yaml
 
 from janus_core.cli.janus import app
 
@@ -113,3 +115,63 @@ def test_pdos(tmp_path):
     )
     assert result.exit_code == 0
     assert pdos_results.exists()
+
+
+def test_supercell(tmp_path):
+    """Test setting the supercell."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    param_file = tmp_path / "NaCl-params.yml"
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--supercell",
+            "2x3x4",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Check parameters
+    with open(param_file, encoding="utf8") as file:
+        params = yaml.safe_load(file)
+
+    assert "supercell_matrix" in params
+    assert len(params["supercell_matrix"]) == 3
+    assert params["supercell_matrix"][0] == [2, 0, 0]
+    assert params["supercell_matrix"][1] == [0, 3, 0]
+    assert params["supercell_matrix"][2] == [0, 0, 4]
+
+
+test_data = ["2", "2.1x2.1x2.1", "2x2xa"]
+
+
+@pytest.mark.parametrize("supercell", test_data)
+def test_invalid_supercell(supercell, tmp_path):
+    """Test errors are raise for invalid supercells."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--supercell",
+            supercell,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
