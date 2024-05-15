@@ -274,7 +274,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
                 print(f"{temp} {c_v} {free_energy} {entropy}", file=out)
 
     def calc_dos(
-        self, mesh: Optional[MaybeList[float]] = None, write_results=True
+        self, mesh: MaybeList[float] = (10, 10, 10), write_results=True
     ) -> None:
         """
         Calculate density of states and optionally write results.
@@ -282,13 +282,10 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Parameters
         ----------
         mesh : MaybeList[float]
-            Mesh for sampling. Default is [10, 10, 10].
+            Mesh for sampling. Default is (10, 10, 10).
         write_results : bool
             Whether to write out results to file. Default is True.
         """
-        if not mesh:
-            mesh = [10, 10, 10]
-
         # Calculate phonons is not already run
         if "phonon" not in self.results:
             self.calc_phonons(write_results=False)
@@ -319,7 +316,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].total_dos.write(filename)
 
     def calc_pdos(
-        self, mesh: Optional[MaybeList[float]] = None, write_results: bool = True
+        self, mesh: MaybeList[float] = (10, 10, 10), write_results: bool = True
     ) -> None:
         """
         Calculate projected density of states and optionally write results.
@@ -327,13 +324,10 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Parameters
         ----------
         mesh : MaybeList[float]
-            Mesh for sampling. Default is [10, 10, 10].
+            Mesh for sampling. Default is (10, 10, 10).
         write_results : bool
             Whether to write out results to file. Default is True.
         """
-        if not mesh:
-            mesh = [10, 10, 10]
-
         # Calculate phonons is not already run
         if "phonon" not in self.results:
             self.calc_phonons(write_results=False)
