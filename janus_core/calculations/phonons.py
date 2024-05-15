@@ -130,6 +130,28 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.calc = self.struct.calc
         self.results = {}
 
+    def _set_filename(
+        self, default_suffix: str, filename: Optional[PathLike] = None
+    ) -> str:
+        """
+        Set filename using the file prefix and suffix if not specified otherwise.
+
+        Parameters
+        ----------
+        default_suffix : str
+            Default suffix to use if `filename` is not specified.
+        filename : Optional[PathLike]
+            Filename to use, if specified. Default is None.
+
+        Returns
+        -------
+        str
+            Filename specified, or default filename.
+        """
+        if filename:
+            return filename
+        return f"{self.file_prefix}-{default_suffix}"
+
     def calc_phonons(self, write_results: bool = True) -> None:
         """
         Calculate phonons and optionally write results.
@@ -204,10 +226,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
             is False. Default is inferred from `file_prefix`.
         """
-        params_file = params_file if params_file else f"{self.file_prefix}-params.yml"
-        bands_file = bands_file if bands_file else f"{self.file_prefix}-auto_band.yml"
-        if not force_consts_file:
-            force_consts_file = f"{self.file_prefix}-force_consts.hdf5"
+        params_file = self._set_filename("params.yml", params_file)
+        bands_file = self._set_filename("auto_band.yml", bands_file)
+        force_consts_file = self._set_filename("force_consts.hdf5", force_consts_file)
 
         phonon = self.results["phonon"]
 
@@ -259,7 +280,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        filename = filename if filename else f"{self.file_prefix}-cv.dat"
+        filename = self._set_filename("cv.dat", filename)
 
         with open(filename, "w", encoding="utf8") as out:
             temps = self.results["thermal_properties"]["temperatures"]
@@ -312,7 +333,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of data file to save the calculated DOS. Default is inferred from
             `file_prefix`.
         """
-        filename = filename if filename else f"{self.file_prefix}-dos.dat"
+        filename = self._set_filename("dos.dat", filename)
         self.results["phonon"].total_dos.write(filename)
 
     def calc_pdos(
@@ -356,7 +377,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of data file to save the calculated PDOS. Default is inferred from
             `file_prefix`.
         """
-        filename = filename if filename else f"{self.file_prefix}-pdos.dat"
+        filename = self._set_filename("pdos.dat", filename)
         self.results["phonon"].projected_dos.write(filename)
 
     # No magnetic moments considered
