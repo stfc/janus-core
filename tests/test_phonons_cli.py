@@ -24,7 +24,6 @@ def test_phonons(tmp_path):
     summary_path = tmp_path / "summary.yml"
     phonon_results = tmp_path / "NaCl-params.yml"
     autoband_results = tmp_path / "NaCl-auto_band.yml"
-    force_const_results = tmp_path / "NaCl-force_consts.hdf5"
     result = runner.invoke(
         app,
         [
@@ -42,7 +41,6 @@ def test_phonons(tmp_path):
     assert result.exit_code == 0
     assert phonon_results.exists()
     assert autoband_results.exists()
-    assert force_const_results.exists()
 
 
 def test_thermal_props(tmp_path):

@@ -182,8 +182,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self,
         *,
         params_file: Optional[PathLike] = None,
-        force_const_file: Optional[PathLike] = None,
         bands_file: Optional[PathLike] = None,
+        force_consts_to_hdf5: bool = False,
+        force_consts_file: Optional[PathLike] = None,
     ) -> None:
         """
         Write results of phonon calculations.
@@ -193,23 +194,31 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         params_file : Optional[PathLike]
             Name of yaml file to save phonon parameters. Default is inferred from
             `file_prefix`.
-        force_const_file : Optional[PathLike]
-            Name of hdf5 file to save force constants. Default is inferred from
-            `file_prefix`.
         bands_file : Optional[PathLike]
             Name of yaml file to save band structure. Default is inferred from
             `file_prefix`.
+        force_consts_to_hdf5 : bool
+            Whether to save the force constants separately to an hdf5 file. Default is
+            False.
+        force_consts_file : Optional[PathLike]
+            Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
+            is False. Default is inferred from `file_prefix`.
         """
         params_file = params_file if params_file else f"{self.file_prefix}-params.yml"
         bands_file = bands_file if bands_file else f"{self.file_prefix}-auto_band.yml"
-        if not force_const_file:
-            force_const_file = f"{self.file_prefix}-force_consts.hdf5"
+        if not force_consts_file:
+            force_consts_file = f"{self.file_prefix}-force_consts.hdf5"
 
         phonon = self.results["phonon"]
 
-        phonon.save(params_file, settings={"force_constants": False})
-        write_force_constants_to_hdf5(phonon.force_constants, filename=force_const_file)
+        save_force_consts = not force_consts_to_hdf5
+        phonon.save(params_file, settings={"force_constants": save_force_consts})
         phonon.auto_band_structure(write_yaml=True, filename=bands_file)
+
+        if force_consts_to_hdf5:
+            write_force_constants_to_hdf5(
+                phonon.force_constants, filename=force_consts_file
+            )
 
     def calc_thermal_props(self, write_results: bool = True) -> None:
         """
