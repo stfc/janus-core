@@ -351,6 +351,8 @@ def test_struct_name(tmp_path):
     stats_path = tmp_path / f"{struct_name}-nvt-T10.0-stats.dat"
     traj_path = tmp_path / f"{struct_name}-nvt-T10.0-traj.xyz"
     final_path = tmp_path / f"{struct_name}-nvt-T10.0-final.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     result = runner.invoke(
         app,
         [
@@ -365,6 +367,10 @@ def test_struct_name(tmp_path):
             "10",
             "--struct-name",
             str(struct_path),
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     assert result.exit_code == 0
