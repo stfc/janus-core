@@ -4,8 +4,6 @@ from typing import Any, Optional
 
 from ase import Atoms
 from ase.eos import EquationOfState
-from ase.io import read
-from ase.io.trajectory import Trajectory
 from ase.units import kJ
 import numpy as np
 
@@ -20,8 +18,9 @@ def calc_eos(  # pylint: disable=too-many-locals
     struct_name: Optional[str] = None,
     min_lattice: float = 0.95,
     max_lattice: float = 1.05,
-    n_lattice: int = 5,
-    minimize: bool = False,
+    n_lattice: int = 11,
+    eos_type: Optional[str] = "birchmurnaghan",
+    minimize: bool = True,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     file_prefix: Optional[PathLike] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
@@ -40,9 +39,11 @@ def calc_eos(  # pylint: disable=too-many-locals
     max_lattice : float
         Maximum lattice constant scale factor. Default is 1.05.
     n_lattice : int
-        Number of lattice constants to use. Default is 5.
+        Number of lattice constants to use. Default is 11.
+    eos_type : Optional[str]
+        Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
-        Whether to optimize geometry. Default is False.
+        Whether to optimize geometry. Default is True.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to optimize. Default is None.
     file_prefix : Optional[PathLike]
@@ -53,17 +54,16 @@ def calc_eos(  # pylint: disable=too-many-locals
 
     Returns
     -------
-    EquationOfState
-        Equation of state ASE object for structure.
+    tuple[EquationOfState, float, float, float]
+        Tuple of equation of state ASE object for structure, and fitted minimum
+        bulk_modulus, volume and, energy.
     """
-    [log_kwargs] = none_to_dict([log_kwargs])
+    [minimize_kwargs, log_kwargs] = none_to_dict([minimize_kwargs, log_kwargs])
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
 
     struct_name = struct_name if struct_name else struct.get_chemical_formula()
     file_prefix = file_prefix if file_prefix else struct_name
-
-    traj_file = f"{file_prefix}-eos.traj"
 
     if not struct.calc:
         raise ValueError("Please attach a calculator to `struct`.")
@@ -87,26 +87,20 @@ def calc_eos(  # pylint: disable=too-many-locals
 
     cell = struct.get_cell()
 
-    traj = Trajectory(traj_file, "w")
-    lattice_scalars = np.linspace(min_lattice, max_lattice, n_lattice)
+    lattice_scalars = np.linspace(min_lattice, max_lattice, n_lattice) ** (1 / 3)
+    volumes = []
+    energies = []
     for lattice_scalar in lattice_scalars:
         struct.set_cell(cell * lattice_scalar, scale_atoms=True)
-        struct.get_potential_energy()
-        traj.write(struct)
-
-    # Read n_structs configurations
-    configs = read(f"{traj_file}@0:{n_lattice}")
-
-    # Extract volumes and energies:
-    volumes = [config.get_volume() for config in configs]
-    energies = [config.get_potential_energy() for config in configs]
+        energies.append(struct.get_potential_energy())
+        volumes.append(struct.get_volume())
 
     with open(f"{file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
         print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
         for lattice_scalar, energy, volume in zip(lattice_scalars, energies, volumes):
             print(f"{lattice_scalar} {energy} {volume}", file=out)
 
-    eos = EquationOfState(volumes, energies)
+    eos = EquationOfState(volumes, energies, eos_type)
 
     v_0, e_0, bulk_modulus = eos.fit()
     bulk_modulus *= 1.0e24 / kJ
@@ -114,4 +108,4 @@ def calc_eos(  # pylint: disable=too-many-locals
         print("#B [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
         print(f"{bulk_modulus} {e_0} {v_0}", file=out)
 
-    return eos
+    return eos, bulk_modulus, v_0, e_0
