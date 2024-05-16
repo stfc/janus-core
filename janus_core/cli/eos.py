@@ -47,10 +47,10 @@ def eos(
     max_lattice: Annotated[
         float, Option(help="Maximum lattice constant scale factor.")
     ] = 1.05,
-    n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 5,
+    n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 11,
     minimize: Annotated[
         bool, Option(help="Whether to minimize structure before calculations.")
-    ] = False,
+    ] = True,
     fmax: Annotated[
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
@@ -90,9 +90,9 @@ def eos(
     max_lattice : float
         Maximum lattice constant scale factor. Default is 1.05.
     n_lattice : int
-        Number of lattice constants to use. Default is 5.
+        Number of lattice constants to use. Default is 11.
     minimize : bool
-        Whether to minimize structure before calculations. Default is False.
+        Whether to minimize structure before calculations. Default is True.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
