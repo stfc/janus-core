@@ -129,7 +129,7 @@ def test_supercell(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--supercell",
-            "2x3x4",
+            "1x2x3",
             "--file-prefix",
             tmp_path / "NaCl",
             "--log",
@@ -146,9 +146,7 @@ def test_supercell(tmp_path):
 
     assert "supercell_matrix" in params
     assert len(params["supercell_matrix"]) == 3
-    assert params["supercell_matrix"][0] == [2, 0, 0]
-    assert params["supercell_matrix"][1] == [0, 3, 0]
-    assert params["supercell_matrix"][2] == [0, 0, 4]
+    assert params["supercell_matrix"] == [[1, 0, 0], [0, 2, 0], [0, 0, 3]]
 
 
 test_data = ["2", "2.1x2.1x2.1", "2x2xa"]
