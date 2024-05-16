@@ -8,7 +8,7 @@ from ase.units import kJ
 import numpy as np
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import PathLike
+from janus_core.helpers.janus_types import EoSNames, PathLike
 from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict
 
@@ -19,7 +19,7 @@ def calc_eos(  # pylint: disable=too-many-locals
     min_lattice: float = 0.95,
     max_lattice: float = 1.05,
     n_lattice: int = 11,
-    eos_type: Optional[str] = "birchmurnaghan",
+    eos_type: EoSNames = "birchmurnaghan",
     minimize: bool = True,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     file_prefix: Optional[PathLike] = None,
@@ -40,7 +40,7 @@ def calc_eos(  # pylint: disable=too-many-locals
         Maximum lattice constant scale factor. Default is 1.05.
     n_lattice : int
         Number of lattice constants to use. Default is 11.
-    eos_type : Optional[str]
+    eos_type : EoSNames
         Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
         Whether to optimize geometry. Default is True.

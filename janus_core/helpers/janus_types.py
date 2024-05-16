@@ -7,6 +7,7 @@ from pathlib import Path, PurePath
 from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
 
 from ase import Atoms
+from ase.eos import eos_names
 import numpy as np
 from numpy.typing import NDArray
 
@@ -49,6 +50,15 @@ class ASEOptArgs(TypedDict, total=False):
     trajectory: Optional[str]
 
 
+EoSNames = Literal[*eos_names]
+
+
+# Janus specific
+Architectures = Literal["mace", "mace_mp", "mace_off", "m3gnet", "chgnet"]
+Devices = Literal["cpu", "cuda", "mps"]
+Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh"]
+
+
 class LogLevel(Enum):  # numpydoc ignore=PR01
     """Supported options for logger levels."""
 
@@ -56,12 +66,6 @@ class LogLevel(Enum):  # numpydoc ignore=PR01
     INFO = logging.INFO
     WARNING = logging.WARNING
     ERROR = logging.ERROR
-
-
-# Janus specific
-Architectures = Literal["mace", "mace_mp", "mace_off", "m3gnet", "chgnet"]
-Devices = Literal["cpu", "cuda", "mps"]
-Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh"]
 
 
 class CalcResults(TypedDict, total=False):
