@@ -184,17 +184,16 @@ def phonons(
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
-    # Convert supercell string to list
-    supercell = supercell.split("x")
+    try:
+        supercell = [int(x) for x in supercell.split("x")]
+    except ValueError as exc:
+        raise ValueError(
+            "Please pass lattice vectors as integers in the form 1x2x3"
+        ) from exc
 
     # Validate supercell list
     if len(supercell) != 3:
         raise ValueError("Please pass three lattice vectors in the form 1x2x3")
-
-    if not all(vector.isdigit() for vector in supercell):
-        raise ValueError("Please pass lattice vectors as integers in the form 1x2x3")
-
-    supercell = [int(vector) for vector in supercell]
 
     # Dictionary of inputs for phonons
     phonons_kwargs = {
