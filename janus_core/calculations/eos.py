@@ -97,8 +97,8 @@ def calc_eos(  # pylint: disable=too-many-locals
 
     with open(f"{file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
         print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
-        for lattice_scalar, energy, volume in zip(lattice_scalars, energies, volumes):
-            print(f"{lattice_scalar} {energy} {volume}", file=out)
+        for eos_data in zip(lattice_scalars, energies, volumes):
+            print(*eos_data, file=out)
 
     eos = EquationOfState(volumes, energies, eos_type)
 
