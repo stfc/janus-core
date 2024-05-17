@@ -170,6 +170,11 @@ This performs the same initial heating, before running a further 1000 steps (1 p
 
 When MD is run with heating the trajectory ```NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz``` and statistics ```NaCl-nvt-T20.0-T300.0-T300.0-stats.dat``` files will indicate the heating range and MD temperature (which may be different). With heating and MD trajectories/statistics within the same files.
 
+Additional settings for geometry optimization, such as enabling optimization of cell vectors by setting `hydrostatic_strain = True` for the ASE filter, can be set using the `--minimize-kwargs` option:
+
+```shell
+janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 0 --temp-end 300 --temp-step 10 --temp-time 10 --minimize --minimize-kwargs "{'filter_kwargs': {'hydrostatic_strain' : True}}"
+```
 
 ### Using configuration files
 
