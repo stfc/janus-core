@@ -85,6 +85,9 @@ def calc_eos(  # pylint: disable=too-many-locals
             }
         optimize(struct, **minimize_kwargs)
 
+    if logger:
+        logger.info("Starting calculations for configurations")
+
     cell = struct.get_cell()
 
     lattice_scalars = np.linspace(min_lattice, max_lattice, n_lattice) ** (1 / 3)
@@ -95,6 +98,9 @@ def calc_eos(  # pylint: disable=too-many-locals
         energies.append(struct.get_potential_energy())
         volumes.append(struct.get_volume())
 
+    if logger:
+        logger.info("Calculations for configurations complete")
+
     with open(f"{file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
         print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
         for eos_data in zip(lattice_scalars, energies, volumes):
@@ -102,7 +108,14 @@ def calc_eos(  # pylint: disable=too-many-locals
 
     eos = EquationOfState(volumes, energies, eos_type)
 
+    if logger:
+        logger.info("Starting of fitting equation of state")
+
     v_0, e_0, bulk_modulus = eos.fit()
+
+    if logger:
+        logger.info("Equation of state fitting complete")
+
     bulk_modulus *= 1.0e24 / kJ
     with open(f"{file_prefix}-eos-fit.dat", "w", encoding="utf8") as out:
         print("#Bulk modulus [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
