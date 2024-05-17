@@ -7,7 +7,6 @@ from pathlib import Path, PurePath
 from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
 
 from ase import Atoms
-from ase.eos import eos_names
 import numpy as np
 from numpy.typing import NDArray
 
@@ -50,7 +49,18 @@ class ASEOptArgs(TypedDict, total=False):
     trajectory: Optional[str]
 
 
-EoSNames = Literal[*eos_names]
+# eos_names from ase.eos
+EoSNames = Literal[
+    "sj",
+    "taylor",
+    "murnaghan",
+    "birch",
+    "birchmurnaghan",
+    "pouriertarantola",
+    "vinet",
+    "antonschmidt",
+    "p3",
+]
 
 
 # Janus specific
