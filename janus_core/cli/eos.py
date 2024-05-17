@@ -47,7 +47,7 @@ def eos(
     max_lattice: Annotated[
         float, Option(help="Maximum lattice constant scale factor.")
     ] = 1.05,
-    n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 11,
+    n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 7,
     minimize: Annotated[
         bool, Option(help="Whether to minimize structure before calculations.")
     ] = True,
@@ -90,7 +90,7 @@ def eos(
     max_lattice : float
         Maximum lattice constant scale factor. Default is 1.05.
     n_lattice : int
-        Number of lattice constants to use. Default is 11.
+        Number of lattice constants to use. Default is 7.
     minimize : bool
         Whether to minimize structure before calculations. Default is True.
     fmax : float

@@ -18,7 +18,7 @@ def calc_eos(  # pylint: disable=too-many-locals
     struct_name: Optional[str] = None,
     min_lattice: float = 0.95,
     max_lattice: float = 1.05,
-    n_lattice: int = 11,
+    n_lattice: int = 7,
     eos_type: EoSNames = "birchmurnaghan",
     minimize: bool = True,
     minimize_kwargs: Optional[dict[str, Any]] = None,
@@ -39,7 +39,7 @@ def calc_eos(  # pylint: disable=too-many-locals
     max_lattice : float
         Maximum lattice constant scale factor. Default is 1.05.
     n_lattice : int
-        Number of lattice constants to use. Default is 11.
+        Number of lattice constants to use. Default is 7.
     eos_type : EoSNames
         Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
