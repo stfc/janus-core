@@ -22,6 +22,7 @@ def calc_eos(
     n_lattice: int = 7,
     eos_type: EoSNames = "birchmurnaghan",
     minimize: bool = True,
+    minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     write_results: bool = True,
     file_prefix: Optional[PathLike] = None,
@@ -45,7 +46,9 @@ def calc_eos(
     eos_type : EoSNames
         Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
-        Whether to optimize geometry. Default is True.
+        Whether to minimize initial structure before calculations. Default is True.
+    minimize_all : bool
+        Whether to optimize geometry for all generated structures. Default is False.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to optimize. Default is None.
     write_results : bool
@@ -82,6 +85,7 @@ def calc_eos(
 
     if minimize:
         if logger:
+            logger.info("Minimising initial structure")
             minimize_kwargs["log_kwargs"] = {
                 "filename": log_kwargs["filename"],
                 "name": logger.name,
@@ -99,6 +103,13 @@ def calc_eos(
     energies = []
     for lattice_scalar in lattice_scalars:
         struct.set_cell(cell * lattice_scalar, scale_atoms=True)
+
+        # Minimize new structure
+        if minimize_all:
+            if logger:
+                logger.info("Minimising lattice scalar = %s", lattice_scalar)
+            optimize(struct, **minimize_kwargs)
+
         energies.append(struct.get_potential_energy())
         volumes.append(struct.get_volume())
 

@@ -6,6 +6,7 @@ import pytest
 from typer.testing import CliRunner
 
 from janus_core.cli.janus import app
+from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -62,6 +63,13 @@ def test_eos(tmp_path):
     assert float(lines[1].split()[0]) == pytest.approx(27.186555689697165)
     assert float(lines[1].split()[1]) == pytest.approx(-27.046361904823204)
     assert float(lines[1].split()[2]) == pytest.approx(184.22281215770133)
+
+    # Check only initial structure is minimized
+    assert_log_contains(
+        log_path,
+        includes=["Minimising initial structure"],
+        excludes=["Minimising lattice scalar = 1.0"],
+    )
 
 
 def test_setting_lattice(tmp_path):
@@ -127,3 +135,31 @@ def test_invalid_lattice(option, value, tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_minimising_all(tmp_path):
+    """Test calculating the equation of state."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--minimize-all",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Check minimizes multiple structures
+    assert_log_contains(
+        log_path,
+        includes=["Minimising initial structure", "Minimising lattice scalar = 1.0"],
+    )

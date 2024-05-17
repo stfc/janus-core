@@ -53,8 +53,12 @@ def eos(
         str, Option(help="Type of fit for equation of state.")
     ] = "birchmurnaghan",
     minimize: Annotated[
-        bool, Option(help="Whether to minimize structure before calculations.")
+        bool, Option(help="Whether to minimize initial structure before calculations.")
     ] = True,
+    minimize_all: Annotated[
+        bool,
+        Option(help="Whether to minimize all generated structures for calculations."),
+    ] = False,
     fmax: Annotated[
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
@@ -98,7 +102,9 @@ def eos(
     eos_type : Optional[str]
         Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
-        Whether to minimize structure before calculations. Default is True.
+        Whether to minimize initial structure before calculations. Default is True.
+    minimize_all : bool
+        Whether to optimize geometry for all generated structures. Default is False.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
@@ -160,6 +166,7 @@ def eos(
         "n_lattice": n_lattice,
         "eos_type": eos_type,
         "minimize": minimize,
+        "minimize_all": minimize_all,
         "minimize_kwargs": minimize_kwargs,
         "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
