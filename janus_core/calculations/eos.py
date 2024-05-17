@@ -1,16 +1,79 @@
 """Equation of State."""
 
+from logging import Logger
 from typing import Any, Optional
 
 from ase import Atoms
 from ase.eos import EquationOfState
 from ase.units import kJ
-import numpy as np
+from numpy import float64, linspace
+from numpy.typing import NDArray
 
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import EoSNames, EoSResults, PathLike
 from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict
+
+
+def _calc_volumes_energies(
+    struct: Atoms,
+    min_lattice: float = 0.95,
+    max_lattice: float = 1.05,
+    n_lattice: int = 7,
+    minimize_all: bool = False,
+    minimize_kwargs: Optional[dict[str, Any]] = None,
+    logger: Optional[Logger] = None,
+) -> tuple[NDArray[float64], list[float], list[float]]:
+    """
+    Calculate volumes and energies for all lattice constants.
+
+    Parameters
+    ----------
+    struct : Atoms
+        Structure.
+    min_lattice : float
+        Minimum lattice constant scale factor. Default is 0.95.
+    max_lattice : float
+        Maximum lattice constant scale factor. Default is 1.05.
+    n_lattice : int
+        Number of lattice constants to use. Default is 7.
+    minimize_all : bool
+        Whether to optimize geometry for all generated structures. Default is False.
+    minimize_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to optimize. Default is None.
+        chemical formula of the structure.
+    logger : Optional[Logger]
+        Logger if log file has been specified.
+
+    Returns
+    -------
+    tuple[NDArray[float64], list[float], list[float]]
+        Tuple of lattice scalars and lists of the corresponding volumes and energies.
+    """
+    if logger:
+        logger.info("Starting calculations for configurations")
+
+    cell = struct.get_cell()
+
+    lattice_scalars = linspace(min_lattice, max_lattice, n_lattice) ** (1 / 3)
+    volumes = []
+    energies = []
+    for lattice_scalar in lattice_scalars:
+        struct.set_cell(cell * lattice_scalar, scale_atoms=True)
+
+        # Minimize new structure
+        if minimize_all:
+            if logger:
+                logger.info("Minimising lattice scalar = %s", lattice_scalar)
+            optimize(struct, **minimize_kwargs)
+
+        volumes.append(struct.get_volume())
+        energies.append(struct.get_potential_energy())
+
+    if logger:
+        logger.info("Calculations for configurations complete")
+
+    return lattice_scalars, volumes, energies
 
 
 def calc_eos(
@@ -93,28 +156,21 @@ def calc_eos(
             }
         optimize(struct, **minimize_kwargs)
 
-    if logger:
-        logger.info("Starting calculations for configurations")
+    # Set constant volume for geometry optimization of generated structures
+    if "filter_kwargs" in minimize_kwargs:
+        minimize_kwargs["filter_kwargs"]["constant_volume"] = True
+    else:
+        minimize_kwargs["filter_kwargs"] = {"constant_volume": True}
 
-    cell = struct.get_cell()
-
-    lattice_scalars = np.linspace(min_lattice, max_lattice, n_lattice) ** (1 / 3)
-    volumes = []
-    energies = []
-    for lattice_scalar in lattice_scalars:
-        struct.set_cell(cell * lattice_scalar, scale_atoms=True)
-
-        # Minimize new structure
-        if minimize_all:
-            if logger:
-                logger.info("Minimising lattice scalar = %s", lattice_scalar)
-            optimize(struct, **minimize_kwargs)
-
-        energies.append(struct.get_potential_energy())
-        volumes.append(struct.get_volume())
-
-    if logger:
-        logger.info("Calculations for configurations complete")
+    lattice_scalars, volumes, energies = _calc_volumes_energies(
+        struct,
+        min_lattice,
+        max_lattice,
+        n_lattice,
+        minimize_all,
+        minimize_kwargs,
+        logger,
+    )
 
     if write_results:
         with open(f"{file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:

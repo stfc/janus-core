@@ -103,6 +103,8 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
                 logger.info(
                     "hydrostatic_strain: %s", filter_kwargs["hydrostatic_strain"]
                 )
+            if "constant_volume" in filter_kwargs:
+                logger.info("constant_volume: %s", filter_kwargs["constant_volume"])
 
     else:
         dyn = optimizer(struct, **opt_kwargs)

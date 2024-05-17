@@ -138,7 +138,7 @@ def test_invalid_lattice(option, value, tmp_path):
 
 
 def test_minimising_all(tmp_path):
-    """Test calculating the equation of state."""
+    """Test minimising structures with different lattice constants."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     result = runner.invoke(
@@ -161,5 +161,9 @@ def test_minimising_all(tmp_path):
     # Check minimizes multiple structures
     assert_log_contains(
         log_path,
-        includes=["Minimising initial structure", "Minimising lattice scalar = 1.0"],
+        includes=[
+            "Minimising initial structure",
+            "Minimising lattice scalar = 1.0",
+            "constant_volume: True",
+        ],
     )
