@@ -13,7 +13,8 @@ from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict
 
 
-def calc_eos(  # pylint: disable=too-many-locals
+def calc_eos(
+    # pylint: disable=too-many-locals,too-many-arguments,too-many-branches
     struct: Atoms,
     struct_name: Optional[str] = None,
     min_lattice: float = 0.95,
@@ -22,6 +23,7 @@ def calc_eos(  # pylint: disable=too-many-locals
     eos_type: EoSNames = "birchmurnaghan",
     minimize: bool = True,
     minimize_kwargs: Optional[dict[str, Any]] = None,
+    write_results: bool = True,
     file_prefix: Optional[PathLike] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
 ) -> EoSResults:
@@ -46,6 +48,8 @@ def calc_eos(  # pylint: disable=too-many-locals
         Whether to optimize geometry. Default is True.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to optimize. Default is None.
+    write_results : bool
+        True to write out results of equation of state calculations. Default is True.
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula of the structure.
@@ -101,10 +105,11 @@ def calc_eos(  # pylint: disable=too-many-locals
     if logger:
         logger.info("Calculations for configurations complete")
 
-    with open(f"{file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
-        print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
-        for eos_data in zip(lattice_scalars, energies, volumes):
-            print(*eos_data, file=out)
+    if write_results:
+        with open(f"{file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
+            print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
+            for eos_data in zip(lattice_scalars, energies, volumes):
+                print(*eos_data, file=out)
 
     eos = EquationOfState(volumes, energies, eos_type)
 
@@ -112,14 +117,15 @@ def calc_eos(  # pylint: disable=too-many-locals
         logger.info("Starting of fitting equation of state")
 
     v_0, e_0, bulk_modulus = eos.fit()
+    bulk_modulus *= 1.0e24 / kJ
 
     if logger:
         logger.info("Equation of state fitting complete")
 
-    bulk_modulus *= 1.0e24 / kJ
-    with open(f"{file_prefix}-eos-fit.dat", "w", encoding="utf8") as out:
-        print("#Bulk modulus [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
-        print(bulk_modulus, e_0, v_0, file=out)
+    if write_results:
+        with open(f"{file_prefix}-eos-fit.dat", "w", encoding="utf8") as out:
+            print("#Bulk modulus [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
+            print(bulk_modulus, e_0, v_0, file=out)
 
     results = {
         "eos": eos,
