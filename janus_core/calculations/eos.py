@@ -105,8 +105,8 @@ def calc_eos(  # pylint: disable=too-many-locals
     v_0, e_0, bulk_modulus = eos.fit()
     bulk_modulus *= 1.0e24 / kJ
     with open(f"{file_prefix}-eos-fit.dat", "w", encoding="utf8") as out:
-        print("#B [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
-        print(f"{bulk_modulus} {e_0} {v_0}", file=out)
+        print("#Bulk modulus [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
+        print(bulk_modulus, e_0, v_0, file=out)
 
     results = {
         "eos": eos,
