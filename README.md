@@ -177,10 +177,16 @@ When MD is run with heating the trajectory ```NaCl-nvt-T20.0-T300.0-T300.0-traj.
 Fit the equation of state for a structure (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 
 ```shell
-janus eos --struct tests/data/NaCl.cif --min-lattice 0.9 --max-lattice 1.1 --n-lattice 9 --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+janus eos --struct tests/data/NaCl.cif --no-minimize --min-lattice 0.9 --max-lattice 1.1 --n-lattice 9 --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will save the energies and volumes for nine lattice constants in `NaCl-eos-raw.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos-raw.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`. A binary trajectory file storing the structures with different different lattice constants, `NaCl-eos.traj`, will also be saved.
+This will save the energies and volumes for nine lattice constants in `NaCl-eos-raw.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos-raw.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`.
+
+By default, geometry optimization will be performed on the initial structure, before calculations are performed for the range of lattice constants. Optimizations for all generated structures can also be performed (sharing the same maximum force convergence):
+
+```shell
+janus eos --struct tests/data/NaCl.cif --minimize-all --fmax 0.0001
+```
 
 For all options, run `janus eos --help`.
 
