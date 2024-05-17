@@ -59,16 +59,18 @@ def _calc_volumes_energies(
     volumes = []
     energies = []
     for lattice_scalar in lattice_scalars:
-        struct.set_cell(cell * lattice_scalar, scale_atoms=True)
+        c_struct = struct.copy()
+        c_struct.calc = struct.calc
+        c_struct.set_cell(cell * lattice_scalar, scale_atoms=True)
 
         # Minimize new structure
         if minimize_all:
             if logger:
                 logger.info("Minimising lattice scalar = %s", lattice_scalar)
-            optimize(struct, **minimize_kwargs)
+            optimize(c_struct, **minimize_kwargs)
 
-        volumes.append(struct.get_volume())
-        energies.append(struct.get_potential_energy())
+        volumes.append(c_struct.get_volume())
+        energies.append(c_struct.get_potential_energy())
 
     if logger:
         logger.info("Calculations for configurations complete")
