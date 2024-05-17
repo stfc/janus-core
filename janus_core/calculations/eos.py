@@ -8,7 +8,7 @@ from ase.units import kJ
 import numpy as np
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import EoSNames, PathLike
+from janus_core.helpers.janus_types import EoSNames, EoSResults, PathLike
 from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict
 
@@ -24,7 +24,7 @@ def calc_eos(  # pylint: disable=too-many-locals
     minimize_kwargs: Optional[dict[str, Any]] = None,
     file_prefix: Optional[PathLike] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
-) -> EquationOfState:
+) -> EoSResults:
     """
     Calculate equation of state.
 
@@ -54,9 +54,9 @@ def calc_eos(  # pylint: disable=too-many-locals
 
     Returns
     -------
-    tuple[EquationOfState, float, float, float]
-        Tuple of equation of state ASE object for structure, and fitted minimum
-        bulk_modulus, volume and, energy.
+    EoSResults
+        Dictionary containing equation of state ASE object, and fitted minimum
+        bulk_modulus, volume, and energy.
     """
     [minimize_kwargs, log_kwargs] = none_to_dict([minimize_kwargs, log_kwargs])
     log_kwargs.setdefault("name", __name__)
@@ -108,4 +108,11 @@ def calc_eos(  # pylint: disable=too-many-locals
         print("#B [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
         print(f"{bulk_modulus} {e_0} {v_0}", file=out)
 
-    return eos, bulk_modulus, v_0, e_0
+    results = {
+        "eos": eos,
+        "bulk_modulus": bulk_modulus,
+        "e_0": e_0,
+        "v_0": v_0,
+    }
+
+    return results

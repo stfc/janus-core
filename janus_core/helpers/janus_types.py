@@ -7,6 +7,7 @@ from pathlib import Path, PurePath
 from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
 
 from ase import Atoms
+from ase.eos import EquationOfState
 import numpy as np
 from numpy.typing import NDArray
 
@@ -84,3 +85,12 @@ class CalcResults(TypedDict, total=False):
     energy: MaybeList[float]
     forces: MaybeList[NDArray[np.float64]]
     stress: MaybeList[NDArray[np.float64]]
+
+
+class EoSResults(TypedDict, total=False):
+    """Return type from calculations."""
+
+    eos: EquationOfState
+    bulk_modulus: float
+    v_0: float
+    e_0: float
