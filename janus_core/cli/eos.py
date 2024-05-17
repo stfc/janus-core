@@ -1,7 +1,7 @@
 """Set up eos commandline interface."""
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, get_args
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -25,6 +25,7 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
+from janus_core.helpers.janus_types import EoSNames
 from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
@@ -48,6 +49,9 @@ def eos(
         float, Option(help="Maximum lattice constant scale factor.")
     ] = 1.05,
     n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 7,
+    eos_type: Annotated[
+        str, Option(help="Type of fit for equation of state.")
+    ] = "birchmurnaghan",
     minimize: Annotated[
         bool, Option(help="Whether to minimize structure before calculations.")
     ] = True,
@@ -91,6 +95,8 @@ def eos(
         Maximum lattice constant scale factor. Default is 1.05.
     n_lattice : int
         Number of lattice constants to use. Default is 7.
+    eos_type : Optional[str]
+        Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
         Whether to minimize structure before calculations. Default is True.
     fmax : float
@@ -124,6 +130,9 @@ def eos(
         [read_kwargs, calc_kwargs, minimize_kwargs]
     )
 
+    if not eos_type in get_args(EoSNames):
+        raise ValueError(f"Fit type must be one of: {get_args(EoSNames)}")
+
     # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct,
@@ -149,6 +158,7 @@ def eos(
         "min_lattice": min_lattice,
         "max_lattice": max_lattice,
         "n_lattice": n_lattice,
+        "eos_type": eos_type,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
         "file_prefix": file_prefix,
