@@ -143,10 +143,10 @@ def calc_eos(
     # Ensure lattice constants span correct range
     if n_lattice <= 1:
         raise ValueError("`n_lattice` must be greater than 1.")
-    if not 0 < min_lattice < 1:
-        raise ValueError("`min_lattice` must be between 0 and 1.")
-    if max_lattice <= 1:
-        raise ValueError("`max_lattice` must be greater than 1.")
+    if not 0 < min_volume < 1:
+        raise ValueError("`min_volume` must be between 0 and 1.")
+    if max_volume <= 1:
+        raise ValueError("`max_volume` must be greater than 1.")
 
     if minimize:
         if logger:
