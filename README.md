@@ -24,6 +24,7 @@ Tools for machine learnt interatomic potentials
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
   - NPT (Nosé-Hoover (Melchiona flavour))
 - [ ] Nudge Elastic Band
+- [x] Equation of State
 - [ ] Phonons
   - vibroscopy
 - [x] Training ML potentials
@@ -175,6 +176,25 @@ Additional settings for geometry optimization, such as enabling optimization of 
 ```shell
 janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 0 --temp-end 300 --temp-step 10 --temp-time 10 --minimize --minimize-kwargs "{'filter_kwargs': {'hydrostatic_strain' : True}}"
 ```
+
+### Equation of State
+
+Fit the equation of state for a structure (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
+
+```shell
+janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+```
+
+This will save the energies and volumes for nine lattice constants in `NaCl-eos.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`.
+
+By default, geometry optimization will be performed on the initial structure, before calculations are performed for the range of lattice constants consistent with minimum and maximum volumes supplied. Optimization at constant volume for all generated structures can also be performed (sharing the same maximum force convergence):
+
+```shell
+janus eos --struct tests/data/NaCl.cif --minimize-all --fmax 0.0001
+```
+
+For all options, run `janus eos --help`.
+
 
 ### Using configuration files
 

@@ -8,6 +8,7 @@
 *.cif
 *.xyz
 *.yml
+*.traj
 ~*
 *~
 .project
