@@ -19,7 +19,7 @@ def _calc_volumes_energies(
     struct: Atoms,
     min_volume: float = 0.95,
     max_volume: float = 1.05,
-    n_lattice: int = 7,
+    n_volumes: int = 7,
     minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     logger: Optional[Logger] = None,
