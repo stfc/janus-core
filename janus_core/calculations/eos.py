@@ -106,8 +106,8 @@ def calc_eos(
         Minimum volume scale factor. Default is 0.95.
     max_volume : float
         Maximum volume scale factor. Default is 1.05.
-    n_lattice : int
-        Number of lattice constants to use. Default is 7.
+    n_volumes : int
+        Number of volumes to use. Default is 7.
     eos_type : EoSNames
         Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
