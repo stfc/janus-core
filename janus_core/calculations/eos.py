@@ -32,9 +32,9 @@ def _calc_volumes_energies(
     struct : Atoms
         Structure.
     min_volume : float
-        Minimum lattice constant scale factor. Default is 0.95.
-    max_lattice : float
-        Maximum lattice constant scale factor. Default is 1.05.
+        Minimum volume constant scale factor. Default is 0.95.
+    max_volume : float
+        Maximum volume constant scale factor. Default is 1.05.
     n_lattice : int
         Number of lattice constants to use. Default is 7.
     minimize_all : bool
