@@ -42,13 +42,13 @@ def eos(
         Optional[str],
         Option(help="Name of structure name."),
     ] = None,
-    min_lattice: Annotated[
-        float, Option(help="Minimum lattice constant scale factor.")
+    min_volume: Annotated[
+        float, Option(help="Minimum volume scale factor.")
     ] = 0.95,
-    max_lattice: Annotated[
-        float, Option(help="Maximum lattice constant scale factor.")
+    max_volume: Annotated[
+        float, Option(help="Maximum volume scale factor.")
     ] = 1.05,
-    n_lattice: Annotated[int, Option(help="Number of lattice constants.")] = 7,
+    n_volumes: Annotated[int, Option(help="Number of volumes.")] = 7,
     eos_type: Annotated[
         str, Option(help="Type of fit for equation of state.")
     ] = "birchmurnaghan",
