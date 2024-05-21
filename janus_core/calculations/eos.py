@@ -166,8 +166,8 @@ def calc_eos(
 
     lattice_scalars, volumes, energies = _calc_volumes_energies(
         struct,
-        min_lattice,
-        max_lattice,
+        min_volume,
+        max_volume,
         n_lattice,
         minimize_all,
         minimize_kwargs,
