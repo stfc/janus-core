@@ -141,8 +141,8 @@ def calc_eos(
         raise ValueError("Please attach a calculator to `struct`.")
 
     # Ensure lattice constants span correct range
-    if n_lattice <= 1:
-        raise ValueError("`n_lattice` must be greater than 1.")
+    if n_volumes <= 1:
+        raise ValueError("`n_volumes` must be greater than 1.")
     if not 0 < min_volume < 1:
         raise ValueError("`min_volume` must be between 0 and 1.")
     if max_volume <= 1:
