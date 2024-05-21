@@ -18,7 +18,7 @@ from janus_core.helpers.utils import none_to_dict
 def _calc_volumes_energies(
     struct: Atoms,
     min_volume: float = 0.95,
-    max_lattice: float = 1.05,
+    max_volume: float = 1.05,
     n_lattice: int = 7,
     minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
