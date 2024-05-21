@@ -102,10 +102,10 @@ def calc_eos(
         Structure.
     struct_name : Optional[str]
         Name of structure. Default is None.
-    min_lattice : float
-        Minimum lattice constant scale factor. Default is 0.95.
-    max_lattice : float
-        Maximum lattice constant scale factor. Default is 1.05.
+    min_volume : float
+        Minimum volume scale factor. Default is 0.95.
+    max_volume : float
+        Maximum volume scale factor. Default is 1.05.
     n_lattice : int
         Number of lattice constants to use. Default is 7.
     eos_type : EoSNames
