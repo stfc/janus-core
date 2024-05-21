@@ -82,8 +82,8 @@ def calc_eos(
     # pylint: disable=too-many-locals,too-many-arguments,too-many-branches
     struct: Atoms,
     struct_name: Optional[str] = None,
-    min_lattice: float = 0.95,
-    max_lattice: float = 1.05,
+    min_volume: float = 0.95,
+    max_volume: float = 1.05,
     n_lattice: int = 7,
     eos_type: EoSNames = "birchmurnaghan",
     minimize: bool = True,
