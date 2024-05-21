@@ -93,12 +93,12 @@ def eos(
     struct_name : Optional[str]
         Name of structure to simulate. Default is inferred from filepath or chemical
         formula.
-    min_lattice : float
-        Minimum lattice constant scale factor. Default is 0.95.
-    max_lattice : float
-        Maximum lattice constant scale factor. Default is 1.05.
-    n_lattice : int
-        Number of lattice constants to use. Default is 7.
+    min_volume : float
+        Minimum volume scale factor. Default is 0.95.
+    max_volume : float
+        Maximum volume scale factor. Default is 1.05.
+    n_volumes : int
+        Number of volumes to use. Default is 7.
     eos_type : Optional[str]
         Type of fit for equation of state. Default is "birchmurnaghan".
     minimize : bool
