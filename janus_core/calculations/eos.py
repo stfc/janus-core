@@ -55,7 +55,7 @@ def _calc_volumes_energies(
 
     cell = struct.get_cell()
 
-    lattice_scalars = linspace(min_volume, max_volume, n_lattice) ** (1 / 3)
+    lattice_scalars = linspace(min_volume, max_volume, n_volumes) ** (1 / 3)
     volumes = []
     energies = []
     for lattice_scalar in lattice_scalars:
