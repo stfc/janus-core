@@ -186,6 +186,7 @@ def calc_eos(
         logger.info("Starting of fitting equation of state")
 
     v_0, e_0, bulk_modulus = eos.fit()
+    # transform bulk modulus unit in GPa
     bulk_modulus *= 1.0e24 / kJ
 
     if logger:
