@@ -42,12 +42,8 @@ def eos(
         Optional[str],
         Option(help="Name of structure name."),
     ] = None,
-    min_volume: Annotated[
-        float, Option(help="Minimum volume scale factor.")
-    ] = 0.95,
-    max_volume: Annotated[
-        float, Option(help="Maximum volume scale factor.")
-    ] = 1.05,
+    min_volume: Annotated[float, Option(help="Minimum volume scale factor.")] = 0.95,
+    max_volume: Annotated[float, Option(help="Maximum volume scale factor.")] = 1.05,
     n_volumes: Annotated[int, Option(help="Number of volumes.")] = 7,
     eos_type: Annotated[
         str, Option(help="Type of fit for equation of state.")
