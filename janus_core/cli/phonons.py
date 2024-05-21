@@ -55,7 +55,7 @@ def phonons(
     ] = False,
     temp_start: Annotated[
         float,
-        Option(help="Start temperature for CV calculations, in K."),
+        Option(help="Start temperature for thermal properties calculations, in K."),
     ] = 0.0,
     temp_end: Annotated[
         float,
