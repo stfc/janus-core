@@ -29,11 +29,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     t_step : float
-        Temperature step for CV calculations, in K. Default is 50.0.
+        Temperature step for thermal properties calculations, in K. Default is 50.0.
     t_min : float
-        Start temperature for CV calculations, in K. Default is 0.0.
+        Start temperature for thermal properties calculations, in K. Default is 0.0.
     t_max : float
-        End temperature for CV calculations, in K. Default is 1000.0.
+        End temperature for thermal properties calculations, in K. Default is 1000.0.
     minimize : bool
         Whether to perform geometry optimisation before calculating phonons.
         Default is False.
