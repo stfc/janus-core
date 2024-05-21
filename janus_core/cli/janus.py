@@ -5,6 +5,7 @@ from typing import Annotated
 from typer import Exit, Option, Typer
 
 from janus_core import __version__
+from janus_core.cli.eos import eos
 from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
 from janus_core.cli.phonons import phonons
@@ -15,6 +16,8 @@ app.command()(singlepoint)
 app.command()(geomopt)
 app.command()(md)
 app.command()(phonons)
+app.command()(eos)
+
 # Train not imlpemented in older versions of MACE
 try:
     from janus_core.cli.train import train

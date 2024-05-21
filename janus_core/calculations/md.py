@@ -166,7 +166,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         ----------
         struct : Atoms
             Structure to simulate.
-        struct_name : str
+        struct_name : Optional[str]
             Name of structure to simulate. Default is inferred from filepath or
             chemical formula.
         ensemble : Ensembles

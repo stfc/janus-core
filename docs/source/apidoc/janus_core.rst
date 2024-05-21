@@ -74,6 +74,16 @@ janus\_core.cli.phonons module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.cli.eos module
+--------------------------
+
+.. automodule:: janus_core.cli.eos
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.cli.types module
 ----------------------------
 
@@ -98,6 +108,16 @@ janus\_core.calculations.geom\_opt module
 -----------------------------------------
 
 .. automodule:: janus_core.calculations.geom_opt
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.calculations.eos module
+-----------------------------------
+
+.. automodule:: janus_core.calculations.eos
    :members:
    :special-members:
    :private-members:

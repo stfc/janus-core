@@ -11,6 +11,7 @@
 *.yaml
 *.pdf
 *.hdf5
+*.traj
 ~*
 *~
 .project
