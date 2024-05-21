@@ -35,7 +35,7 @@ def _calc_volumes_energies(
         Minimum volume scale factor. Default is 0.95.
     max_volume : float
         Maximum volume scale factor. Default is 1.05.
-    n_voumes : int
+    n_volumes : int
         Number of volumes to use. Default is 7.
     minimize_all : bool
         Whether to optimize geometry for all generated structures. Default is False.
