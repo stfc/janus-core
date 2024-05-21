@@ -168,7 +168,7 @@ def calc_eos(
         struct,
         min_volume,
         max_volume,
-        n_lattice,
+        n_volumes,
         minimize_all,
         minimize_kwargs,
         logger,
