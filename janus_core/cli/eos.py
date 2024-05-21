@@ -161,9 +161,9 @@ def eos(
     eos_kwargs = {
         "struct": s_point.struct,
         "struct_name": s_point.struct_name,
-        "min_lattice": min_lattice,
-        "max_lattice": max_lattice,
-        "n_lattice": n_lattice,
+        "min_volume": min_volume,
+        "max_volume": max_vilume,
+        "n_volumes": n_volumes,
         "eos_type": eos_type,
         "minimize": minimize,
         "minimize_all": minimize_all,
