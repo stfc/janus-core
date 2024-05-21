@@ -84,7 +84,7 @@ def calc_eos(
     struct_name: Optional[str] = None,
     min_volume: float = 0.95,
     max_volume: float = 1.05,
-    n_lattice: int = 7,
+    n_volumes: int = 7,
     eos_type: EoSNames = "birchmurnaghan",
     minimize: bool = True,
     minimize_all: bool = False,
