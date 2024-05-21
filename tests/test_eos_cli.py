@@ -109,7 +109,7 @@ def test_setting_lattice(tmp_path):
     assert float(lines[5].split()[0]) == pytest.approx(1.2 ** (1 / 3))
 
 
-test_data = [("--min-lattice", 1), ("--max-lattice", 0.9), ("--n-lattice", 0)]
+test_data = [("--min-volume", 1), ("--max-volume", 0.9), ("--n-volumes", 0)]
 
 
 @pytest.mark.parametrize("option, value", test_data)
