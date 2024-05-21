@@ -162,7 +162,7 @@ def eos(
         "struct": s_point.struct,
         "struct_name": s_point.struct_name,
         "min_volume": min_volume,
-        "max_volume": max_vilume,
+        "max_volume": max_volume,
         "n_volumes": n_volumes,
         "eos_type": eos_type,
         "minimize": minimize,
