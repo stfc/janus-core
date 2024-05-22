@@ -67,15 +67,15 @@ def phonons(
     ] = 50,
     band: Annotated[
         bool,
-        Option(help="Whether to save fc in hdf5."),
+        Option(help="Whether to compute band structure."),
     ] = False,
     hdf5: Annotated[
         bool,
-        Option(help="Whether to calculate the band structure."),
+        Option(help="Whether to save force constants in hdf5."),
     ] = True,
-    plot: Annotated[
+    plot_to_file: Annotated[
         bool,
-        Option(help="Whether to plot bandstructure and/or dos/pdos when calculated."),
+        Option(help="Whether to plot bandstructure and/pr dos/pdos when calculated."),
     ] = False,
     dos: Annotated[
         bool,
@@ -88,7 +88,13 @@ def phonons(
         ),
     ] = False,
     minimize: Annotated[
-        bool, Option(help="Whether to minimize structure before calculations.")
+        bool,
+        Option(
+            help="Whether to minimize structure before calculations.",
+        ),
+    ] = False,
+    symmetrize: Annotated[
+        bool, Option(help="Whether to symmetrize force constants.")
     ] = False,
     fmax: Annotated[
         float, Option(help="Maximum force for optimization convergence.")
@@ -132,26 +138,28 @@ def phonons(
     thermal : bool
         Whether to calculate thermal properties. Default is False.
     temp_start : float
-        Start temperature for CV calculations, in K. Unused if `thermal` is False.
+        Start temperature for thermal calculations, in K. Unused if `thermal` is False.
         Default is 0.0.
     temp_end : float
-        End temperature for CV calculations, in K. Unused if `thermal` is False.
+        End temperature for thermal calculations, in K. Unused if `thermal` is False.
         Default is 1000.0.
     temp_step : float
-        Temperature step for CV calculations, in K. Unused if `thermal` is False.
+        Temperature step for thermal calculations, in K. Unused if `thermal` is False.
         Default is 50.0.
+    band : bool
+        Whether to calculate and save the band structure. Default is False.
+    hdf5 : bool
+        Whether to save force constants in hdf5 format. Default is True.
+    plot_to_file : bool
+        Whether to plot. Default is False.
     dos : bool
         Whether to calculate and save the DOS. Default is False.
     pdos : bool
         Whether to calculate and save the PDOS. Default is False.
-    hdf5 : bool
-        Whether to save force constants in hdf5 format. Default is True.
-    band : bool
-        Whether to calculate and save the band structure. Default is False.
-    plot : bool
-        Whether to plot. Default is False.
     minimize : bool
         Whether to minimize structure before calculations. Default is False.
+    symmetrize : bool
+        Whether to symmetrize force constants. Default is False.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
@@ -180,7 +188,7 @@ def phonons(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, minimize_kwargs] = parse_typer_dicts(
+    read_kwargs, calc_kwargs, minimize_kwargs = parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs]
     )
 
@@ -227,7 +235,8 @@ def phonons(
         "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
         "hdf5": hdf5,
-        "plot": plot,
+        "symmetrize": symmetrize,
+        "plot_to_file": plot_to_file,
     }
 
     # Store inputs for yaml summary

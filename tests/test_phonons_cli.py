@@ -24,8 +24,8 @@ def test_phonons(tmp_path):
     """Test calculating phonons."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    phonon_results = tmp_path / "NaCl-params.yml"
-    autoband_results = tmp_path / "NaCl-auto_band.yml"
+    phonon_results = tmp_path / "NaCl-phonopy.yml"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml"
     result = runner.invoke(
         app,
         [
@@ -38,6 +38,7 @@ def test_phonons(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--band",
         ],
     )
     assert result.exit_code == 0
@@ -45,11 +46,37 @@ def test_phonons(tmp_path):
     assert autoband_results.exists()
 
 
+def test_hdf5(tmp_path):
+    """Test calculating phonons."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    phonon_results = tmp_path / "NaCl-phonopy.yml"
+    hdf5_results = tmp_path / "NaCl-force_constants.hdf5"
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--hdf5",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert phonon_results.exists()
+    assert hdf5_results.exists()
+
+
 def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    thermal_results = tmp_path / "NaCl-cv.dat"
+    thermal_results = tmp_path / "NaCl-thermal.dat"
     result = runner.invoke(
         app,
         [
@@ -117,11 +144,53 @@ def test_pdos(tmp_path):
     assert pdos_results.exists()
 
 
+def test_plot(tmp_path):
+    """Test for ploting routines"""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    pdos_results = tmp_path / "NaCl-pdos.dat"
+    dos_results = tmp_path / "NaCl-dos.dat"
+    hdf5_results = tmp_path / "NaCl-force_constants.hdf5"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    svgs = [
+        tmp_path / "NaCl-dos.svg",
+        tmp_path / "NaCl-pdos.svg",
+        tmp_path / "NaCl-bs-dos.svg",
+        tmp_path / "NaCl-auto_bands.svg",
+    ]
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--pdos",
+            "--dos",
+            "--band",
+            "--hdf5",
+            "--plot-to-file",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert pdos_results.exists()
+    assert dos_results.exists()
+    assert hdf5_results.exists()
+    assert autoband_results.exists()
+    for svg in svgs:
+        assert svg.exists()
+
+
 def test_supercell(tmp_path):
     """Test setting the supercell."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    param_file = tmp_path / "NaCl-params.yml"
+    param_file = tmp_path / "NaCl-phonopy.yml"
     result = runner.invoke(
         app,
         [

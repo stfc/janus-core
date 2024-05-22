@@ -40,8 +40,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
     hdf5 : bool
         Whether to write force constants in hdf format or not.
         Default is True.
-    plot : bool
+    plot_to_file : bool
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
+        Default is False.
+    symmetrize : bool
+        Whether to symmetrize force constants after cauclation.
         Default is False.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
@@ -71,8 +74,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         t_min: float = 0.0,
         t_max: float = 1000.0,
         minimize: bool = False,
-        hdf5: bool = False,
-        plot: bool = False,
+        hdf5: bool = True,
+        plot_to_file: bool = False,
+        symmetrize: bool = False,
         minimize_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -91,19 +95,22 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
         t_step : float
-            Temperature step for CV calculations, in K. Default is 50.0.
+            Temperature step for thermal calculations, in K. Default is 50.0.
         t_min : float
-            Start temperature for CV calculations, in K. Default is 0.0.
+            Start temperature for thermal calculations, in K. Default is 0.0.
         t_max : float
-            End temperature for CV calculations, in K. Default is 1000.0.
+            End temperature for thermal calculations, in K. Default is 1000.0.
         minimize : bool
             Whether to perform geometry optimisation before calculating phonons.
             Default is False.
         hdf5 : bool
             Whether to write force constants in hdf format or not.
             Default is True.
-        plot : bool
+        plot_to_file : bool
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
+            Default is False.
+        symmetrize : bool
+            Whether to symmetrize force constants after cauclation.
             Default is False.
         minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
@@ -140,7 +147,8 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.logger = config_logger(**self.log_kwargs)
 
         self.hdf5 = hdf5
-        self.plot = plot
+        self.plot_to_file = plot_to_file
+        self.symmetrize = symmetrize
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
@@ -210,6 +218,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         phonon.produce_force_constants()
         self.results["phonon"] = phonon
 
+        if self.symmetrize:
+            self.results["phonon"].symmetrize_force_constants(level=1)
+
         if self.logger:
             self.logger.info("Phonons calculation complete")
 
@@ -256,7 +267,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].auto_band_structure(
             write_yaml=write_bands, filename=bands_file
         )
-        if self.plot:
+        if self.plot_to_file:
             bplt = self.results["phonon"].plot_band_structure()
             plot_file = self._set_filename("auto_bands.svg", plot_file)
             bplt.savefig(plot_file)
@@ -402,7 +413,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         """
         filename = self._set_filename("dos.dat", filename)
         self.results["phonon"].total_dos.write(filename)
-        if self.plot:
+        if self.plot_to_file:
             bplt = self.results["phonon"].plot_total_dos()
             plot_file = self._set_filename("dos.svg", plot_file)
             bplt.savefig(plot_file)
@@ -459,7 +470,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         """
         filename = self._set_filename("pdos.dat", filename)
         self.results["phonon"].projected_dos.write(filename)
-        if self.plot:
+        if self.plot_to_file:
             bplt = self.results["phonon"].plot_projected_dos()
             plot_file = self._set_filename("pdos.svg", plot_file)
             bplt.savefig(plot_file)
