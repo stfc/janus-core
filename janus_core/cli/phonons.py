@@ -65,6 +65,18 @@ def phonons(
         float,
         Option(help="Temperature step for thermal properties calculations, in K."),
     ] = 50,
+    band: Annotated[
+        bool,
+        Option(help="Whether to save fc in hdf5."),
+    ] = False,
+    hdf5: Annotated[
+        bool,
+        Option(help="Whether to calculate the band structure."),
+    ] = True,
+    plot: Annotated[
+        bool,
+        Option(help="Whether to plot bandstructure and/pr dos/pdos when calculated."),
+    ] = False,
     dos: Annotated[
         bool,
         Option(help="Whether to calculate the DOS."),
@@ -132,6 +144,12 @@ def phonons(
         Whether to calculate and save the DOS. Default is False.
     pdos : bool
         Whether to calculate and save the PDOS. Default is False.
+    hdf5 : bool
+        Whether to save force constants in hdf5 format. Default is True.
+    band : bool
+        Whether to calculate and save the band structure. Default is False.
+    plot : bool
+        Whether to plot. Default is False.
     minimize : bool
         Whether to minimize structure before calculations. Default is False.
     fmax : float
@@ -208,6 +226,8 @@ def phonons(
         "minimize_kwargs": minimize_kwargs,
         "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
+        "hdf5": hdf5,
+        "plot": plot,
     }
 
     # Store inputs for yaml summary
@@ -217,6 +237,7 @@ def phonons(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    inputs["band"] = band
     inputs["dos"] = dos
     inputs["pdos"] = pdos
     inputs["thermal"] = thermal
@@ -244,8 +265,12 @@ def phonons(
     # Initialise phonons class
     phonon = Phonons(**phonons_kwargs)
 
+    # Calculate force constants
+    phonon.calc_force_constants()
+
     # Calculate phonons
-    phonon.calc_phonons()
+    if band:
+        phonon.calc_bands()
 
     # Calculate DOS and PDOS is specified
     if thermal:

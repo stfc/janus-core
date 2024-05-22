@@ -80,6 +80,7 @@ line-length = 88
 max-line-length = 88
 max-args = 10
 good-names = ["e", "i", "j", "k"]
+min-similarity-lines=9
 
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)

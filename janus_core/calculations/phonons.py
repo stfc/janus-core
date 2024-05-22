@@ -37,6 +37,12 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
     minimize : bool
         Whether to perform geometry optimisation before calculating phonons.
         Default is False.
+    hdf5 : bool
+        Whether to write force constants in hdf format or not.
+        Default is True.
+    plot : bool
+        Whether to plot various graphs as band stuctures, dos/pdos in svg.
+        Default is False.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
     file_prefix : Optional[PathLike]
@@ -65,6 +71,8 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         t_min: float = 0.0,
         t_max: float = 1000.0,
         minimize: bool = False,
+        hdf5: bool = False,
+        plot: bool = False,
         minimize_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -90,6 +98,12 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             End temperature for CV calculations, in K. Default is 1000.0.
         minimize : bool
             Whether to perform geometry optimisation before calculating phonons.
+            Default is False.
+        hdf5 : bool
+            Whether to write force constants in hdf format or not.
+            Default is True.
+        plot : bool
+            Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
         minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
@@ -125,6 +139,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**self.log_kwargs)
 
+        self.hdf5 = hdf5
+        self.plot = plot
+
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
         self.calc = self.struct.calc
@@ -152,9 +169,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             return filename
         return f"{self.file_prefix}-{default_suffix}"
 
-    def calc_phonons(self, write_results: bool = True) -> None:
+    def calc_force_constants(self, write_results: bool = True) -> None:
         """
-        Calculate phonons and optionally write results.
+        Calculate force constants and optionally write results.
 
         Parameters
         ----------
@@ -191,34 +208,74 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         ]
 
         phonon.produce_force_constants()
-        phonon.run_mesh()
         self.results["phonon"] = phonon
 
         if self.logger:
             self.logger.info("Phonons calculation complete")
 
         if write_results:
-            self.write_phonons()
+            self.write_force_constants(force_consts_to_hdf5=self.hdf5)
 
-    def write_phonons(
+    def calc_bands(self, write_results: bool = True) -> None:
+        """
+        Calculate band structure and optionally write and plot results.
+
+        Parameters
+        ----------
+        write_results : bool
+            Whether to write out results to file. Default is True.
+        """
+        # Calculate phonons is not already run
+        if "phonon" not in self.results:
+            self.calc_force_constants(write_results=False)
+        self.write_band_structure(write_bands=write_results)
+
+    def write_band_structure(
         self,
         *,
-        params_file: Optional[PathLike] = None,
+        write_bands: bool = None,
         bands_file: Optional[PathLike] = None,
+        plot_file: Optional[PathLike] = None,
+    ) -> None:
+        """
+        Write results of band structure calculations.
+
+        Parameters
+        ----------
+        write_bands : bool
+            Whether to write out results to file. Default is True.
+        bands_file : Optional[PathLike]
+            Name of yaml file to save band structure. Default is inferred from
+            `file_prefix`.
+        plot_file : Optional[PathLike]
+            Name of svg file to save band structure. Default is inferred from
+            `file_prefix`.
+        """
+
+        bands_file = self._set_filename("auto_bands.yml", bands_file)
+        self.results["phonon"].auto_band_structure(
+            write_yaml=write_bands, filename=bands_file
+        )
+        if self.plot:
+            bplt = self.results["phonon"].plot_band_structure()
+            plot_file = self._set_filename("auto_bands.svg", plot_file)
+            bplt.savefig(plot_file)
+
+    def write_force_constants(
+        self,
+        *,
+        phonopy_file: Optional[PathLike] = None,
         force_consts_to_hdf5: bool = False,
         force_consts_file: Optional[PathLike] = None,
     ) -> None:
         """
-        Write results of phonon calculations.
+        Write results of force constants calculations.
 
         Parameters
         ----------
-        params_file : Optional[PathLike]
-            Name of yaml file to save phonon parameters. Default is inferred from
-            `file_prefix`.
-        bands_file : Optional[PathLike]
-            Name of yaml file to save band structure. Default is inferred from
-            `file_prefix`.
+        phonopy_file : Optional[PathLike]
+            Name of yaml file to save params of phonopy and optionally force constants.
+            Default is inferred from `file_prefix`.
         force_consts_to_hdf5 : bool
             Whether to save the force constants separately to an hdf5 file. Default is
             False.
@@ -226,15 +283,15 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
             is False. Default is inferred from `file_prefix`.
         """
-        params_file = self._set_filename("params.yml", params_file)
-        bands_file = self._set_filename("auto_band.yml", bands_file)
-        force_consts_file = self._set_filename("force_consts.hdf5", force_consts_file)
+        phonopy_file = self._set_filename("phonopy.yml", phonopy_file)
+        force_consts_file = self._set_filename(
+            "force_constants.hdf5", force_consts_file
+        )
 
         phonon = self.results["phonon"]
 
         save_force_consts = not force_consts_to_hdf5
-        phonon.save(params_file, settings={"force_constants": save_force_consts})
-        phonon.auto_band_structure(write_yaml=True, filename=bands_file)
+        phonon.save(phonopy_file, settings={"force_constants": save_force_consts})
 
         if force_consts_to_hdf5:
             write_force_constants_to_hdf5(
@@ -252,11 +309,12 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         """
         # Calculate phonons is not already run
         if "phonon" not in self.results:
-            self.calc_phonons(write_results=False)
+            self.calc_force_constants(write_results=False)
 
         if self.logger:
             self.logger.info("Beginning thermal properties calculation")
 
+        self.results["phonon"].run_mesh()
         self.results["phonon"].run_thermal_properties(
             t_step=self.t_step, t_max=self.t_max, t_min=self.t_min
         )
@@ -280,7 +338,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        filename = self._set_filename("cv.dat", filename)
+        filename = self._set_filename("thermal.dat", filename)
 
         with open(filename, "w", encoding="utf8") as out:
             temps = self.results["thermal_properties"]["temperatures"]
@@ -307,7 +365,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         """
         # Calculate phonons is not already run
         if "phonon" not in self.results:
-            self.calc_phonons(write_results=False)
+            self.calc_force_constants(write_results=False)
 
         if self.logger:
             self.logger.info("Beginning DOS calculation")
@@ -321,7 +379,12 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if write_results:
             self.write_dos()
 
-    def write_dos(self, filename: Optional[PathLike] = None) -> None:
+    def write_dos(
+        self,
+        filename: Optional[PathLike] = None,
+        plot_file: Optional[PathLike] = None,
+        plot_bs_file: Optional[PathLike] = None,
+    ) -> None:
         """
         Write results of DOS calculation.
 
@@ -330,9 +393,23 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         filename : Optional[PathLike]
             Name of data file to save the calculated DOS. Default is inferred from
             `file_prefix`.
+        plot_file : Optional[PathLike]
+            Name of svg file to plot the DOS. Default is inferred from
+            `file_prefix`.
+        plot_bs_file : Optional[PathLike]
+            Name of svg file to plot the band structure and DOS.
+            Default is inferred from `file_prefix`.
         """
         filename = self._set_filename("dos.dat", filename)
         self.results["phonon"].total_dos.write(filename)
+        if self.plot:
+            bplt = self.results["phonon"].plot_total_dos()
+            plot_file = self._set_filename("dos.svg", plot_file)
+            bplt.savefig(plot_file)
+
+            bplt = self.results["phonon"].plot_band_structure_and_dos()
+            plot_bs_file = self._set_filename("bs-dos.svg", plot_bs_file)
+            bplt.savefig(plot_bs_file)
 
     def calc_pdos(
         self, mesh: MaybeList[float] = (10, 10, 10), write_results: bool = True
@@ -349,7 +426,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         """
         # Calculate phonons is not already run
         if "phonon" not in self.results:
-            self.calc_phonons(write_results=False)
+            self.calc_force_constants(write_results=False)
 
         if self.logger:
             self.logger.info("Beginning PDOS calculation")
@@ -365,7 +442,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         if write_results:
             self.write_pdos()
 
-    def write_pdos(self, filename: Optional[PathLike] = None) -> None:
+    def write_pdos(
+        self, filename: Optional[PathLike] = None, plot_file: Optional[PathLike] = None
+    ) -> None:
         """
         Write results of PDOS calculation.
 
@@ -374,9 +453,16 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         filename : Optional[PathLike]
             Name of data file to save the calculated PDOS. Default is inferred from
             `file_prefix`.
+        plot_file : Optional[PathLike]
+            Name of svg file to plot the calculated PDOS. Default is inferred from
+            `file_prefix`.
         """
         filename = self._set_filename("pdos.dat", filename)
         self.results["phonon"].projected_dos.write(filename)
+        if self.plot:
+            bplt = self.results["phonon"].plot_projected_dos()
+            plot_file = self._set_filename("pdos.svg", plot_file)
+            bplt.savefig(plot_file)
 
     # No magnetic moments considered
     def Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:

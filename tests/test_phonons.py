@@ -36,7 +36,7 @@ def test_calc_phonons():
         struct=struct,
     )
 
-    phonons.calc_phonons(write_results=False)
+    phonons.calc_force_constants(write_results=False)
     assert "phonon" in phonons.results
 
 
@@ -53,7 +53,7 @@ def test_optimize(tmp_path):
         log_kwargs={"filename": log_file},
         minimize=True,
     )
-    phonons.calc_phonons(write_results=False)
+    phonons.calc_force_constants(write_results=False)
 
     assert_log_contains(
         log_file,
