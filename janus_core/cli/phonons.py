@@ -75,7 +75,7 @@ def phonons(
     ] = True,
     plot: Annotated[
         bool,
-        Option(help="Whether to plot bandstructure and/pr dos/pdos when calculated."),
+        Option(help="Whether to plot bandstructure and/or dos/pdos when calculated."),
     ] = False,
     dos: Annotated[
         bool,
