@@ -7,6 +7,11 @@ try:
 except ImportError:
     from ase.constraints import UnitCellFilter
 
+try:
+    from ase.filters import FrechetCellFilter as DefaultFilter
+except ImportError:
+    from ase.constraints import ExpCellFilter as DefaultFilter
+
 from ase.io import read
 import pytest
 
@@ -187,3 +192,22 @@ def test_restart(tmp_path):
     )
     final_energy = single_point.run("energy")["energy"]
     assert final_energy < intermediate_energy
+
+
+def test_space_group():
+    """Test spacegroup of the  structure."""
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    optimize(
+        single_point.struct,
+        fmax=0.001,
+        filter_func=DefaultFilter,
+    )
+
+    assert single_point.struct.info["initial_spacegroup"] == "I4/mmm (139)"
+    assert single_point.struct.info["final_spacegroup"] == "Fm-3m (225)"

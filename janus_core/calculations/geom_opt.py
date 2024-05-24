@@ -17,13 +17,15 @@ from numpy import linalg
 
 from janus_core.helpers.janus_types import ASEOptArgs, ASEWriteArgs
 from janus_core.helpers.log import config_logger
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import none_to_dict, spacegroup
 
 
 def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     struct: Atoms,
     fmax: float = 0.1,
     steps: int = 1000,
+    symmetry_tolerance: float = 0.001,
+    angle_tolerance: float = -1.0,
     filter_func: Optional[Callable] = DefaultFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
     optimizer: Callable = LBFGS,
@@ -45,6 +47,12 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         Default is 0.1.
     steps : int
         Set maximum number of optimization steps to run. Default is 1000.
+    symmetry_tolerance : float
+        Atom displacement tolerance for spglib symmetry determination.
+        Default is 0.0001 Å.
+    angle_tolerance : float
+        Set angle tolerance crieria for spacegroup determination.
+        Default is -1.0 in degrees.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
         Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
@@ -93,6 +101,13 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
 
+    s_grp = spacegroup(struct, symmetry_tolerance, angle_tolerance)
+    message = f"Before optimisation spacegroup {s_grp}"
+    struct.info["initial_spacegroup"] = s_grp
+
+    if logger:
+        logger.info(message)
+
     if filter_func is not None:
         filtered_struct = filter_func(struct, **filter_kwargs)
         dyn = optimizer(filtered_struct, **opt_kwargs)
@@ -114,6 +129,10 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     converged = dyn.run(fmax=fmax, steps=steps)
 
+    s_grp = spacegroup(struct, symmetry_tolerance, angle_tolerance)
+    message = f"After optimisation spacegroup {s_grp}"
+    struct.info["final_spacegroup"] = s_grp
+
     # Calculate current maximum force
     if filter_func is not None:
         max_force = linalg.norm(filtered_struct.get_forces(), axis=1).max()
@@ -121,6 +140,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         max_force = linalg.norm(struct.get_forces(), axis=1).max()
 
     if logger:
+        logger.info(message)
         logger.info("Max force: %.6f", max_force)
 
     if not converged:
