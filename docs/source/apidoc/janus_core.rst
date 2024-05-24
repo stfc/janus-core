@@ -64,6 +64,16 @@ janus\_core.cli.train module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.cli.phonons module
+------------------------------
+
+.. automodule:: janus_core.cli.phonons
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.cli.eos module
 --------------------------
 
@@ -181,6 +191,17 @@ janus\_core.calculations.md module
 ----------------------------------
 
 .. automodule:: janus_core.calculations.md
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.calculations.phonons module
+---------------------------------------
+
+.. automodule:: janus_core.calculations.phonons
    :members:
    :special-members:
    :private-members:

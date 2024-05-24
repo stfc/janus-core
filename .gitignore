@@ -8,6 +8,9 @@
 *.cif
 *.xyz
 *.yml
+*.yaml
+*.pdf
+*.hdf5
 *.traj
 ~*
 *~

@@ -32,6 +32,8 @@ mace-torch = "^0.3.4"
 pyyaml = "^6.0.1"
 typer = "^0.9.0"
 typer-config = "^1.4.0"
+phonopy = "^2.23.1"
+seekpath = "^2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.4.1"}
@@ -65,7 +67,6 @@ optional = true
 dgl = "^1.1.3"
 chgnet = "^0.3.4"
 matgl = "^1.0.0"
-spglib = "<=2.2.0"
 torch-dftd = "^0.4.0"
 
 [build-system]
@@ -79,6 +80,7 @@ line-length = 88
 max-line-length = 88
 max-args = 10
 good-names = ["e", "i", "j", "k"]
+min-similarity-lines=9
 
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)
