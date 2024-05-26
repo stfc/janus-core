@@ -96,6 +96,17 @@ def phonons(
     symmetrize: Annotated[
         bool, Option(help="Whether to symmetrize force constants.")
     ] = False,
+    write_full: Annotated[
+        bool,
+        Option(
+            help=(
+                """
+            Whether to maximize the amount of information written
+            in various output files.
+                  """
+            ),
+        ),
+    ] = True,
     fmax: Annotated[
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
@@ -160,6 +171,9 @@ def phonons(
         Whether to minimize structure before calculations. Default is False.
     symmetrize : bool
         Whether to symmetrize force constants. Default is False.
+    write_full : bool
+        Whether to maximize information written in various output files.
+        Default is True.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
@@ -235,8 +249,9 @@ def phonons(
         "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
         "hdf5": hdf5,
-        "symmetrize": symmetrize,
         "plot_to_file": plot_to_file,
+        "symmetrize": symmetrize,
+        "write_full": write_full,
     }
 
     # Store inputs for yaml summary

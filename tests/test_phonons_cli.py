@@ -20,8 +20,8 @@ def test_help():
     assert "Usage: janus phonons [OPTIONS]" in result.stdout
 
 
-def test_phonons(tmp_path):
-    """Test calculating phonons."""
+def test_bands(tmp_path):
+    """Test calculating force constants and bands."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     phonon_results = tmp_path / "NaCl-phonopy.yml"
@@ -44,6 +44,34 @@ def test_phonons(tmp_path):
     assert result.exit_code == 0
     assert phonon_results.exists()
     assert autoband_results.exists()
+
+
+def test_bands_simple(tmp_path):
+    """Test calculating force constants and reduced bands information."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+            "--band",
+            "--no-write-full",
+        ],
+    )
+    assert result.exit_code == 0
+    assert autoband_results.exists()
+    with open(autoband_results, encoding="utf8") as file:
+        bands = yaml.safe_load(file)
+        assert "eigenvector" not in bands["phonon"][0]["band"][0].keys()
 
 
 def test_hdf5(tmp_path):
@@ -184,6 +212,9 @@ def test_plot(tmp_path):
     assert autoband_results.exists()
     for svg in svgs:
         assert svg.exists()
+    with open(autoband_results, encoding="utf8") as file:
+        bands = yaml.safe_load(file)
+        assert "eigenvector" in bands["phonon"][0]["band"][0].keys()
 
 
 def test_supercell(tmp_path):

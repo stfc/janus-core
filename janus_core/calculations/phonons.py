@@ -44,8 +44,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
     symmetrize : bool
-        Whether to symmetrize force constants after cauclation.
+        Whether to symmetrize force constants after calculation.
         Default is False.
+    write_full : bool
+        Whether to maximize information written in various output files.
+        Default is True.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
     file_prefix : Optional[PathLike]
@@ -65,6 +68,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
     """
 
     def __init__(  # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-locals
         self,
         struct: Atoms,
         struct_name: Optional[str] = None,
@@ -77,6 +81,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         hdf5: bool = True,
         plot_to_file: bool = False,
         symmetrize: bool = False,
+        write_full: bool = True,
         minimize_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -110,8 +115,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
         symmetrize : bool
-            Whether to symmetrize force constants after cauclation.
+            Whether to symmetrize force constants after calculations.
             Default is False.
+        write_full : bool
+            Whether to maximize information written in various output files.
+            Default is True.
         minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
         file_prefix : Optional[PathLike]
@@ -149,6 +157,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         self.hdf5 = hdf5
         self.plot_to_file = plot_to_file
         self.symmetrize = symmetrize
+        self.write_full = write_full
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
@@ -265,7 +274,10 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
 
         bands_file = self._set_filename("auto_bands.yml", bands_file)
         self.results["phonon"].auto_band_structure(
-            write_yaml=write_bands, filename=bands_file
+            write_yaml=write_bands,
+            filename=bands_file,
+            with_eigenvectors=self.write_full,
+            with_group_velocities=self.write_full,
         )
         if self.plot_to_file:
             bplt = self.results["phonon"].plot_band_structure()
