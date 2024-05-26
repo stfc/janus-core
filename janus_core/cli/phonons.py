@@ -101,8 +101,7 @@ def phonons(
         Option(
             help=(
                 """
-            Whether to maximize the amount of information written
-            in various output files.
+            Whether to write eigenvectors, group velocities, etc to bands file.
                   """
             ),
         ),
