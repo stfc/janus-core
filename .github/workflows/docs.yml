@@ -34,6 +34,10 @@ jobs:
         apt install -y pipx
         pipx install poetry
 
+    - name: add deps
+      run: |
+        apt install -y python3-dev build-essential
+
     - name: sphinx
       run: |
         export PATH="$HOME/.local/bin:$PATH"
