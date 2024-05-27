@@ -266,7 +266,7 @@ def test_restart(tmp_path):
         lines = stats_file.readlines()
         assert " | Target T [K]" in lines[0]
         # Includes step 0, and step 4 from restart
-        assert len(lines) == 11
+        assert len(lines) == 10
         assert 8 == int(lines[-1].split()[0])
 
     traj = read(traj_path, index=":")

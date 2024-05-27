@@ -474,7 +474,7 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
         current_temp = e_kin / (1.5 * units.kB)
 
-        time = self.offset * self.timestep + self.dyn.get_time() / units.fs
+        time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
         step = self.offset + self.dyn.nsteps
         self.dyn.atoms.info["time_fs"] = time
         self.dyn.atoms.info["step"] = step
@@ -522,6 +522,11 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
     def _write_stats_file(self) -> None:
         """Write molecular dynamics log."""
         log_stats = self.get_log_stats()
+
+        # we do not want to print step 0 in restarts
+        if self.restart and self.dyn.nsteps == 0:
+            return
+
         with open(self.stats_file, "a", encoding="utf8") as stats_file:
             print(log_stats, file=stats_file)
 
