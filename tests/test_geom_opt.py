@@ -190,7 +190,7 @@ def test_restart(tmp_path):
 
 
 def test_space_group():
-    """Test spacegroup of the  structure."""
+    """Test spacegroup of the structure."""
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-sg.cif",
