@@ -204,7 +204,15 @@ Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the
 janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will save the Phonopy parameters, including displacements and force constants, to `NaCl-params.yml`, and the calculated band structure to `NaCl-auto-band.yml`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
+This will save the Phonopy parameters, including displacements and force constants, to `NaCl-phonopy.yml` and `NaCl-force_constants.hdf5`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
+
+Additionally, the `--band` option can be added to calculate the band structure and save the results to `NaCl-auto_bands.yml`:
+
+```shell
+janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}" --band
+```
+
+If you need eigenvectors and group velocities written, add the `--write-full` option. This will generate a much larger file, but can be used to visualise phonon modes.
 
 Further calculations, including thermal properties, DOS, and PDOS, can also be calculated (using a 2x3x4 supercell):
 
@@ -212,7 +220,7 @@ Further calculations, including thermal properties, DOS, and PDOS, can also be c
 janus phonons --struct tests/data/NaCl.cif --supercell 2x3x4 --dos --pdos --thermal --temp-start 0 --temp-end 300 --temp-step 50
 ```
 
-This will create additional output files: `NaCl-cv.dat` for the thermal properties (heat capacity, entropy, and free energy) between 0K and 300K, `NaCl-dos.dat` for the DOS, and `NaCl-pdos.dat` for the PDOS.
+This will create additional output files: `NaCl-thermal.dat` for the thermal properties (heat capacity, entropy, and free energy) between 0K and 300K, `NaCl-dos.dat` for the DOS, and `NaCl-pdos.dat` for the PDOS.
 
 For all options, run `janus phonons --help`.
 
