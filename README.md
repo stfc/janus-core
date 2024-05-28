@@ -185,7 +185,7 @@ Fit the equation of state for a structure (using the [MACE-MP](https://github.co
 janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will save the energies and volumes for nine lattice constants in `NaCl-eos.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`.
+This will save the energies and volumes for nine lattice constants in `NaCl-eos-raw.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos-fit.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`.
 
 By default, geometry optimization will be performed on the initial structure, before calculations are performed for the range of lattice constants consistent with minimum and maximum volumes supplied. Optimization at constant volume for all generated structures can also be performed (sharing the same maximum force convergence):
 
