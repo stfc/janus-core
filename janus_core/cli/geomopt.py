@@ -58,7 +58,7 @@ def geomopt(
         ),
     ] = False,
     pressure: Annotated[
-        float, Option(help="Scalar pressure when optimizing cell vectors, in bar.")
+        float, Option(help="Scalar pressure when optimizing cell geometry, in bar.")
     ] = 0.0,
     out: Annotated[
         Path,
