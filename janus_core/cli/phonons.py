@@ -100,9 +100,7 @@ def phonons(
         bool,
         Option(
             help=(
-                """
-            Whether to write eigenvectors, group velocities, etc to bands file.
-                  """
+                "Whether to write eigenvectors, group velocities, etc. to bands file."
             ),
         ),
     ] = True,
