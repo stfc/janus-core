@@ -131,7 +131,8 @@ def test_fully_opt(tmp_path):
     assert result.exit_code == 0
 
     assert_log_contains(
-        log_path, includes=["Using filter", "hydrostatic_strain: False"]
+        log_path,
+        includes=["Using filter", "hydrostatic_strain: False", "scalar_pressure: 0.0"],
     )
 
     atoms = read(results_path)
@@ -194,6 +195,37 @@ def test_vectors_not_fully_opt(tmp_path):
     assert result.exit_code == 0
 
     assert_log_contains(log_path, includes=["Using filter", "hydrostatic_strain: True"])
+
+
+test_data = ["--vectors-only", "--fully-opt"]
+
+
+@pytest.mark.parametrize("option", test_data)
+def test_scalar_pressure(option, tmp_path):
+    """Test passing --pressure with --vectors-only."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--out",
+            results_path,
+            option,
+            "--pressure",
+            "100",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert_log_contains(log_path, includes=["scalar_pressure: 6.24"])
 
 
 def test_duplicate_traj(tmp_path):
