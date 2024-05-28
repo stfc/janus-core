@@ -105,7 +105,7 @@ def geomopt(
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
     pressure : float
-        Scalar pressure when optimizing cell vectors, in bar. Passed to the filter
+        Scalar pressure when optimizing cell geometry, in bar. Passed to the filter
         function if either `vectors_only` or `fully_opt` is True. Default is 0.0.
     out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
