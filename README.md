@@ -204,8 +204,9 @@ Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the
 janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
 
-This will save the Phonopy parameters, including displacements and force constants, to `NaCl-phonopy.yml` and `NaCl-force\_constants.hdf5`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
-Additionaly, to calculate band structure and generate `NaCl-auto-bands.yml` use:
+This will save the Phonopy parameters, including displacements and force constants, to `NaCl-phonopy.yml` and `NaCl-force_constants.hdf5`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
+
+Additionally, the `--band` option can be added to calculate the band structure and save the results to `NaCl-auto_bands.yml`:
 
 ```shell
 janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}" --band
