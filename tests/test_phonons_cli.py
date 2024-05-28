@@ -215,6 +215,7 @@ def test_plot(tmp_path):
     with open(autoband_results, encoding="utf8") as file:
         bands = yaml.safe_load(file)
         assert "eigenvector" in bands["phonon"][0]["band"][0].keys()
+        assert "group_velocity" in bands["phonon"][0]["band"][0].keys()
 
 
 def test_supercell(tmp_path):
