@@ -187,3 +187,21 @@ def test_restart(tmp_path):
     )
     final_energy = single_point.run("energy")["energy"]
     assert final_energy < intermediate_energy
+
+
+def test_space_group():
+    """Test spacegroup of the structure."""
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    optimize(
+        single_point.struct,
+        fmax=0.001,
+    )
+
+    assert single_point.struct.info["initial_spacegroup"] == "I4/mmm (139)"
+    assert single_point.struct.info["final_spacegroup"] == "Fm-3m (225)"
