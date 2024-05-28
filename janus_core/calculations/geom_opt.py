@@ -48,11 +48,11 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     steps : int
         Set maximum number of optimization steps to run. Default is 1000.
     symmetry_tolerance : float
-        Atom displacement tolerance for spglib symmetry determination.
-        Default is 0.0001 Å.
+        Atom displacement tolerance for spglib symmetry determination, in Å.
+        Default is 0.001.
     angle_tolerance : float
-        Set angle tolerance crieria for spacegroup determination.
-        Default is -1.0 in degrees.
+        Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
+        which means an internally optimized routine is used to judge symmetry.
     filter_func : Optional[callable]
         Apply constraints to atoms through ASE filter function.
         Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.

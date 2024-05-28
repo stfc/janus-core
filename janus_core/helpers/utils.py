@@ -18,11 +18,11 @@ def spacegroup(
     struct : Atoms
         Structure as an ase Atoms object.
     sym_tolerance : float
-        Atom displacement tolerance for spglib symmetry determination.
-        Default 0.001 Å.
+        Atom displacement tolerance for spglib symmetry determination, in Å.
+        Default is 0.001.
     angle_tolerance : float
-        Angle precision for spglib symmetry determination.
-        Default: -1.0 in degrees.
+        Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
+        which means an internally optimized routine is used to judge symmetry.
 
     Returns
     -------

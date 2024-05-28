@@ -7,11 +7,6 @@ try:
 except ImportError:
     from ase.constraints import UnitCellFilter
 
-try:
-    from ase.filters import FrechetCellFilter as DefaultFilter
-except ImportError:
-    from ase.constraints import ExpCellFilter as DefaultFilter
-
 from ase.io import read
 import pytest
 
@@ -206,7 +201,6 @@ def test_space_group():
     optimize(
         single_point.struct,
         fmax=0.001,
-        filter_func=DefaultFilter,
     )
 
     assert single_point.struct.info["initial_spacegroup"] == "I4/mmm (139)"
