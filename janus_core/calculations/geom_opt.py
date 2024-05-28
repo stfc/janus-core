@@ -20,7 +20,8 @@ from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict
 
 
-def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
+def optimize(
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
     struct: Atoms,
     fmax: float = 0.1,
     steps: int = 1000,
