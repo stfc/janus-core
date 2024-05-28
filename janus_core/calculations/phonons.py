@@ -67,8 +67,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         Logger if log file has been specified.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
-        # pylint: disable=too-many-locals
+    def __init__(  # pylint: disable=too-many-arguments,disable=too-many-locals
         self,
         struct: Atoms,
         struct_name: Optional[str] = None,
