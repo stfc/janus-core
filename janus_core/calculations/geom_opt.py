@@ -105,6 +105,8 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
                 )
             if "constant_volume" in filter_kwargs:
                 logger.info("constant_volume: %s", filter_kwargs["constant_volume"])
+            if "scalar_pressure" in filter_kwargs:
+                logger.info("scalar_pressure: %s", filter_kwargs["scalar_pressure"])
 
     else:
         dyn = optimizer(struct, **opt_kwargs)
