@@ -210,8 +210,8 @@ Additionaly, to calculate band structure and generate `NaCl-auto-bands.yml` use:
 ```shell
 janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}"
 ```
-If you need eigenvectors and group velocities written add `--write-full` option. Will generate a much bigger bands file but can be
-used to visualise phonon modes.
+
+If you need eigenvectors and group velocities written, add the `--write-full` option. This will generate a much larger file, but can be used to visualise phonon modes.
 
 Further calculations, including thermal properties, DOS, and PDOS, can also be calculated (using a 2x3x4 supercell):
 
