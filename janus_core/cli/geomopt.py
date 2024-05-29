@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Annotated
 
+from ase import units
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -40,7 +41,9 @@ def geomopt(
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
-    fmax: Annotated[float, Option(help="Maximum force for convergence.")] = 0.1,
+    fmax: Annotated[
+        float, Option(help="Maximum force for convergence, in eV/Å.")
+    ] = 0.1,
     steps: Annotated[int, Option(help="Maximum number of optimization steps.")] = 1000,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -54,6 +57,9 @@ def geomopt(
             help="Fully optimize the cell vectors, angles, and atomic positions.",
         ),
     ] = False,
+    pressure: Annotated[
+        float, Option(help="Scalar pressure when optimizing cell geometry, in bar.")
+    ] = 0.0,
     out: Annotated[
         Path,
         Option(
@@ -84,8 +90,7 @@ def geomopt(
     struct : Path
         Path of structure to simulate.
     fmax : float
-        Set force convergence criteria for optimizer in units eV/Å.
-        Default is 0.1.
+        Set force convergence criteria for optimizer, in eV/Å. Default is 0.1.
     steps : int
         Set maximum number of optimization steps to run. Default is 1000.
     arch : Optional[str]
@@ -99,6 +104,9 @@ def geomopt(
     fully_opt : bool
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
+    pressure : float
+        Scalar pressure when optimizing cell geometry, in bar. Passed to the filter
+        function if either `vectors_only` or `fully_opt` is True. Default is 0.0.
     out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
@@ -159,6 +167,7 @@ def geomopt(
     # Set hydrostatic_strain
     # If not passed --fully-opt or --vectors-only, will be unused
     filter_kwargs = {"hydrostatic_strain": vectors_only}
+    filter_kwargs["scalar_pressure"] = pressure * units.bar
 
     # Use default filter if passed --fully-opt or --vectors-only
     # Otherwise override with None

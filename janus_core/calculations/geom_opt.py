@@ -20,7 +20,8 @@ from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict, spacegroup
 
 
-def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
+def optimize(
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
     struct: Atoms,
     fmax: float = 0.1,
     steps: int = 1000,
@@ -120,6 +121,8 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
                 )
             if "constant_volume" in filter_kwargs:
                 logger.info("constant_volume: %s", filter_kwargs["constant_volume"])
+            if "scalar_pressure" in filter_kwargs:
+                logger.info("scalar_pressure: %s", filter_kwargs["scalar_pressure"])
 
     else:
         dyn = optimizer(struct, **opt_kwargs)
