@@ -200,4 +200,5 @@ nitpick_ignore = [
     ("py:class", "ellipsis"),
     ("py:class", "janus_core.helpers.stats.T"),
     ("py:class", "phonopy.structure.atoms.PhonopyAtoms"),
+    ("py:class", "ase.optimize.optimize.Optimizer"),
 ]
