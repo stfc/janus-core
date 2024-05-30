@@ -82,7 +82,8 @@ janus singlepoint --struct tests/data/NaCl.cif --arch mace --calc-kwargs "{'mode
 
 This calculates both forces and energies, defines the MLIP architecture and path to your locally saved model, and changes where the log and results files are saved.
 
-> [!NOTE]                                                                                                                            > The MACE calculator currently returns energy, forces and stress together, so in this case the choice of property will not change the output.
+> [!NOTE]
+> The MACE calculator currently returns energy, forces and stress together, so in this case the choice of property will not change the output.
 
 By default, all structures in a trajectory file will be read, but specific structures can be selected using --read-kwargs:
 
