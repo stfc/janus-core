@@ -341,7 +341,6 @@ class SinglePoint(FileNameMixin):
             Path(self._build_filename("results.xyz")).absolute(),
         )
 
-        print(write_kwargs)
         if self.logger:
             self.logger.info("Starting single point calculation")
 
