@@ -65,9 +65,11 @@ def calc_descriptors(
         Path(f"./{struct_name}-descriptors.xyz").absolute(),
     )
 
-    if isinstance(struct, Sequence) and any(not image.calc for image in struct):
+    if isinstance(struct, Sequence):
+        if any(not image.calc for image in struct):
             raise ValueError("Please attach a calculator to all images in `struct`.")
-    elif not struct.calc:
+    else:
+        if not struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
     if logger:
