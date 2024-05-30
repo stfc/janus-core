@@ -1,4 +1,4 @@
-"""Test eis commandline interface."""
+"""Test eos commandline interface."""
 
 from pathlib import Path
 

@@ -256,8 +256,8 @@ def test_config(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
 
-    assert "index" in sp_summary["inputs"]["read_kwargs"]
-    assert sp_summary["inputs"]["read_kwargs"]["index"] == ":"
+    assert "index" in sp_summary["inputs"]["calc"]["read_kwargs"]
+    assert sp_summary["inputs"]["calc"]["read_kwargs"]["index"] == ":"
 
 
 def test_invalid_config():

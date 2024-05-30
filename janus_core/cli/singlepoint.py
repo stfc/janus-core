@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-from ase import Atoms
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -22,6 +21,7 @@ from janus_core.cli.utils import (
     check_config,
     end_summary,
     parse_typer_dicts,
+    save_struct_calc,
     start_summary,
     yaml_converter_callback,
 )
@@ -124,30 +124,11 @@ def singlepoint(
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary
-    inputs = singlepoint_kwargs.copy()
 
     # Store only filename as filemode is not set by user
-    del inputs["log_kwargs"]
-    del inputs["struct_path"]
-    inputs["log"] = log
+    inputs = {"log": log}
 
-    if isinstance(s_point.struct, Atoms):
-        inputs["struct"] = {
-            "n_atoms": len(s_point.struct),
-            "struct_path": struct,
-            "struct_name": s_point.struct_name,
-            "formula": s_point.struct.get_chemical_formula(),
-        }
-    else:
-        inputs["traj"] = {
-            "length": len(s_point.struct),
-            "struct_path": struct,
-            "struct_name": s_point.struct_name,
-            "struct": {
-                "n_atoms": len(s_point.struct[0]),
-                "formula": s_point.struct[0].get_chemical_formula(),
-            },
-        }
+    save_struct_calc(inputs, s_point, arch, device, read_kwargs, calc_kwargs)
 
     inputs["run"] = {
         "properties": properties,
