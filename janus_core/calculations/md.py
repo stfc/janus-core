@@ -266,7 +266,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.ensemble = ensemble
         self.seed = seed
 
-        FileNameMixin.__init__(self, struct, struct_name, file_prefix, self.ensemble)
+        FileNameMixin.__init__(self, struct, struct_name, file_prefix, ensemble)
 
         self.log_kwargs = (
             log_kwargs if log_kwargs else {}

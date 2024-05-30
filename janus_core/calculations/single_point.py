@@ -338,7 +338,7 @@ class SinglePoint(FileNameMixin):
 
         write_kwargs.setdefault(
             "filename",
-            Path(self._build_filename("results.xyz")).absolute(),
+            self._build_filename("results.xyz").absolute(),
         )
 
         if self.logger:

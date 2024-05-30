@@ -55,20 +55,11 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
             Default prefix to use.
         *additional
             Components to add to file_prefix (joined by hyphens).
-
-        Methods
-        -------
-        _get_default_struct_name(struct, struct_name)
-             Return the name from the provided struct_name or generate from struct.
-        _get_default_prefix(file_prefix, struct_name)
-             Return a prefix from the provided file_prefix or from struct_name.
-        _build_filename(suffix, *additional, filename, prefix_override)
-             Return a standard format filename if filename not provided.
         """
         self.struct_name = self._get_default_struct_name(struct, struct_name)
 
-        self.file_prefix = "-".join(
-            (self._get_default_prefix(file_prefix, self.struct_name, *additional),)
+        self.file_prefix = Path(
+            self._get_default_prefix(file_prefix, self.struct_name, *additional)
         )
 
     @staticmethod
@@ -80,7 +71,7 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
         ----------
         struct : Atoms
             Structure of system.
-        struct_name : str
+        struct_name : Optional[str]
             Name of structure.
 
         Returns
@@ -145,9 +136,11 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
             Filename specified, or default filename.
         """
         if filename:
-            return filename
-        prefix = prefix_override if prefix_override is not None else self.file_prefix
-        return "-".join((prefix, *filter(None, additional), suffix))
+            return Path(filename)
+        prefix = (
+            prefix_override if prefix_override is not None else str(self.file_prefix)
+        )
+        return Path("-".join((prefix, *filter(None, additional), suffix)))
 
 
 def spacegroup(
