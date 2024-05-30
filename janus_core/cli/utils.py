@@ -1,15 +1,19 @@
 """Utility functions for CLI."""
 
+from collections.abc import Sequence
 import datetime
 import logging
 from pathlib import Path
 from typing import Any
 
+from ase import Atoms
 from typer import Context
 from typer_config import conf_callback_factory, yaml_loader
 import yaml
 
+from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import TyperDict
+from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices
 from janus_core.helpers.utils import dict_remove_hyphens
 
 
@@ -105,6 +109,59 @@ def end_summary(summary: Path) -> None:
             default_flow_style=False,
         )
     logging.shutdown()
+
+
+def save_struct_calc(
+    inputs: dict,
+    s_point: SinglePoint,
+    arch: Architectures,
+    device: Devices,
+    read_kwargs: ASEReadArgs,
+    calc_kwargs: dict[str, Any],
+) -> None:
+    """
+    Add structure and calculator input information to a dictionary.
+
+    Parameters
+    ----------
+
+    inputs : dict
+        Inputs dictionary to add information to.
+    s_point : SinglePoint
+        SinglePoint object storing structure with attached calculator.
+    arch : Architectures
+        MLIP architecture.
+    device : Devices
+        Device to run calculations on.
+    read_kwargs : ASEReadArgs
+        Keyword arguments to pass to ase.io.read.
+    calc_kwargs : dict[str, Any]]
+        Keyword arguments to pass to the calculator.
+    """
+    if isinstance(s_point.struct, Atoms):
+        inputs["struct"] = {
+            "n_atoms": len(s_point.struct),
+            "struct_path": s_point.struct_path,
+            "struct_name": s_point.struct_name,
+            "formula": s_point.struct.get_chemical_formula(),
+        }
+    elif isinstance(s_point.struct, Sequence):
+        inputs["traj"] = {
+            "length": len(s_point.struct),
+            "struct_path": s_point.struct_path,
+            "struct_name": s_point.struct_name,
+            "struct": {
+                "n_atoms": len(s_point.struct[0]),
+                "formula": s_point.struct[0].get_chemical_formula(),
+            },
+        }
+
+    inputs["calc"] = {
+        "arch": arch,
+        "device": device,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+    }
 
 
 def check_config(ctx: Context) -> None:

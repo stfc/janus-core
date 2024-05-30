@@ -22,6 +22,7 @@ from janus_core.cli.utils import (
     check_config,
     end_summary,
     parse_typer_dicts,
+    save_struct_calc,
     start_summary,
     yaml_converter_callback,
 )
@@ -34,7 +35,7 @@ app = Typer()
 @app.command(help="Calculate equation of state.")
 @use_config(yaml_converter_callback)
 def eos(
-    # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
@@ -175,19 +176,7 @@ def eos(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
-    inputs["struct"] = {
-        "n_atoms": len(s_point.struct),
-        "struct_path": struct,
-        "struct_name": s_point.struct_name,
-        "formula": s_point.struct.get_chemical_formula(),
-    }
-
-    inputs["calc"] = {
-        "arch": arch,
-        "device": device,
-        "read_kwargs": read_kwargs,
-        "calc_kwargs": calc_kwargs,
-    }
+    save_struct_calc(inputs, s_point, arch, device, read_kwargs, calc_kwargs)
 
     # Convert all paths to strings in inputs nested dictionary
     dict_paths_to_strs(inputs)
