@@ -53,12 +53,12 @@ def test_descriptors(tmp_path):
         includes=[
             "Starting descriptors calculation",
             "invariants_only: True",
-            "calc_elements: False",
+            "calc_per_element: False",
         ],
     )
 
 
-def test_calc_elements(tmp_path):
+def test_calc_per_element(tmp_path):
     """Test calculating MLIP descriptors for each element."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -71,7 +71,7 @@ def test_calc_elements(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             out_path,
-            "--calc-elements",
+            "--calc-per-element",
             "--log",
             log_path,
             "--summary",
@@ -92,7 +92,7 @@ def test_calc_elements(tmp_path):
         includes=[
             "Starting descriptors calculation",
             "invariants_only: True",
-            "calc_elements: True",
+            "calc_per_element: True",
         ],
     )
 
@@ -131,7 +131,7 @@ def test_invariant(tmp_path):
         includes=[
             "Starting descriptors calculation",
             "invariants_only: False",
-            "calc_elements: False",
+            "calc_per_element: False",
         ],
     )
 

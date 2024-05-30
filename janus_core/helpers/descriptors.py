@@ -18,7 +18,7 @@ def calc_descriptors(
     struct: MaybeSequence[Atoms],
     struct_name: Optional[str] = None,
     invariants_only: bool = True,
-    calc_elements: bool = False,
+    calc_per_element: bool = False,
     write_results: bool = False,
     write_kwargs: Optional[ASEWriteArgs] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
@@ -34,7 +34,7 @@ def calc_descriptors(
         Name of structure. Default is None.
     invariants_only : bool
         Whether only the invariant descriptors should be returned. Default is True.
-    calc_elements : bool
+    calc_per_element : bool
         Whether to calculate mean descriptors for each element. Default is False.
     write_results : bool
         True to write out structure with results of calculations. Default is False.
@@ -80,14 +80,14 @@ def calc_descriptors(
             image = _calc_descriptors(
                 image,
                 invariants_only=invariants_only,
-                calc_elements=calc_elements,
+                calc_per_element=calc_per_element,
                 logger=logger,
             )
     else:
         struct = _calc_descriptors(
             struct,
             invariants_only=invariants_only,
-            calc_elements=calc_elements,
+            calc_per_element=calc_per_element,
             logger=logger,
         )
 
@@ -103,7 +103,7 @@ def calc_descriptors(
 def _calc_descriptors(
     struct: Atoms,
     invariants_only: bool = True,
-    calc_elements: bool = False,
+    calc_per_element: bool = False,
     logger: Optional[Logger] = None,
 ) -> None:
     """
@@ -115,7 +115,7 @@ def _calc_descriptors(
         Structure(s) to calculate descriptors for.
     invariants_only : bool
         Whether only the invariant descriptors should be returned. Default is True.
-    calc_elements : bool
+    calc_per_element : bool
         Whether to calculate mean descriptors for each element. Default is False.
     logger : Optional[Logger]
         Logger if log file has been specified.
@@ -127,14 +127,14 @@ def _calc_descriptors(
     """
     if logger:
         logger.info("invariants_only: %s", invariants_only)
-        logger.info("calc_elements: %s", calc_elements)
+        logger.info("calc_per_element: %s", calc_per_element)
 
     # Calculate mean descriptor and save mean
     descriptors = struct.calc.get_descriptors(struct, invariants_only=invariants_only)
     descriptor = np.mean(descriptors)
     struct.info["descriptor"] = descriptor
 
-    if calc_elements:
+    if calc_per_element:
         elements = set(struct.get_chemical_symbols())
         for element in elements:
             pattern = [atom.index for atom in struct if atom.symbol == element]

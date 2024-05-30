@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
+import pytest
 
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.descriptors import calc_descriptors
@@ -36,7 +37,7 @@ def test_calc_descriptors(tmp_path):
     )
 
 
-def test_calc_elements(tmp_path):
+def test_calc_per_element(tmp_path):
     """Test calculating descriptors for each element from SinglePoint object."""
     log_file = tmp_path / "descriptors.log"
     single_point = SinglePoint(
@@ -47,10 +48,14 @@ def test_calc_elements(tmp_path):
 
     atoms = calc_descriptors(
         single_point.struct,
-        calc_elements=True,
+        calc_per_element=True,
         log_kwargs={"filename": log_file},
     )
     assert isinstance(atoms, Atoms)
     assert "descriptor" in atoms.info
     assert "Na_descriptor" in atoms.info
     assert "Cl_descriptor" in atoms.info
+
+    assert atoms.info["descriptor"] == pytest.approx(-0.005626419559511429)
+    assert atoms.info["Cl_descriptor"] == pytest.approx(-0.009215340539869301)
+    assert atoms.info["Na_descriptor"] == pytest.approx(-0.0020374985791535563)
