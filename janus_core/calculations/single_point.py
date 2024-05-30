@@ -44,7 +44,7 @@ class SinglePoint:
         Device to run model on. Default is "cpu".
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. By default,
-        read_kwargs["index"] = ":".
+        read_kwargs["index"] is ":".
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
@@ -107,7 +107,7 @@ class SinglePoint:
             Device to run MLIP model on. Default is "cpu".
         read_kwargs : Optional[ASEReadArgs]
             Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] = ":".
+            read_kwargs["index"] is ":".
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
         log_kwargs : Optional[dict[str, Any]]
