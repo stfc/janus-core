@@ -343,17 +343,14 @@ def md(
         for key in ["thermostat_time", "barostat_time", "bulk_modulus", "pressure"]:
             del dyn_kwargs[key]
         dyn = NVT(**dyn_kwargs)
-
-    if ensemble == "npt":
+    elif ensemble == "npt":
         del dyn_kwargs["friction"]
         dyn = NPT(**dyn_kwargs)
-
-    if ensemble == "nph":
+    elif ensemble == "nph":
         for key in ["friction", "barostat_time"]:
             del dyn_kwargs[key]
         dyn = NPH(**dyn_kwargs)
-
-    if ensemble == "nve":
+    elif ensemble == "nve":
         for key in [
             "thermostat_time",
             "barostat_time",
@@ -363,12 +360,12 @@ def md(
         ]:
             del dyn_kwargs[key]
         dyn = NVE(**dyn_kwargs)
-
-    if ensemble == "nvt-nh":
+    elif ensemble == "nvt-nh":
         for key in ["barostat_time", "bulk_modulus", "pressure", "friction"]:
             del dyn_kwargs[key]
         dyn = NVT_NH(**dyn_kwargs)
-
+    else:
+        raise ValueError(f"Unsupported Ensemble ({ensemble})")
     # Store inputs for yaml summary
     inputs = dyn_kwargs | {"ensemble": ensemble}
 

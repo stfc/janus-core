@@ -92,7 +92,7 @@ def config_logger(
     capture_warnings: bool = True,
     filemode: Literal["r", "w", "a", "x", "r+", "w+", "a+", "x+"] = "w",
     force: bool = True,
-):
+) -> Optional[logging.Logger]:
     """
     Configure logger with yaml-styled format.
 
