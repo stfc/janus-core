@@ -23,11 +23,12 @@ import numpy as np
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import Ensembles, PathLike
 from janus_core.helpers.log import config_logger
+from janus_core.helpers.utils import FileNameMixin
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
 
-class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
+class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     """
     Configure shared molecular dynamics simulation options.
 
@@ -237,7 +238,6 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
             Default is None.
         """
         self.struct = struct
-        self.struct_name = struct_name
         self.timestep = timestep * units.fs
         self.steps = steps
         self.temp = temp
@@ -247,7 +247,6 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.rescale_velocities = rescale_velocities
         self.remove_rot = remove_rot
         self.rescale_every = rescale_every
-        self.file_prefix = file_prefix
         self.restart = restart
         self.restart_stem = restart_stem
         self.restart_every = restart_every
@@ -266,6 +265,8 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.log_kwargs = log_kwargs
         self.ensemble = ensemble
         self.seed = seed
+
+        FileNameMixin.__init__(self, struct, struct_name, file_prefix, self.ensemble)
 
         self.log_kwargs = (
             log_kwargs if log_kwargs else {}
@@ -317,11 +318,16 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
         self.dyn = None
         self.n_atoms = len(self.struct)
 
-        # Infer names for structure and if not specified
-        if not self.struct_name:
-            self.struct_name = self.struct.get_chemical_formula()
-
-        self.configure_filenames()
+        self.stats_file = self._build_filename(
+            "stats.dat",
+            self._parameter_prefix if file_prefix is None else "",
+            filename=self.stats_file,
+        )
+        self.traj_file = self._build_filename(
+            "traj.xyz",
+            self._parameter_prefix if file_prefix is None else "",
+            filename=self.traj_file,
+        )
 
         self.offset = 0
 
@@ -388,12 +394,12 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
 
         temperature_prefix = ""
         if self.temp_start is not None and self.temp_end is not None:
-            temperature_prefix = f"-T{self.temp_start}-T{self.temp_end}"
+            temperature_prefix += f"-T{self.temp_start}-T{self.temp_end}"
 
         if self.steps > 0:
             temperature_prefix += f"-T{self.temp}"
 
-        return temperature_prefix
+        return temperature_prefix.lstrip("-")
 
     @property
     def _final_file(self) -> str:
@@ -406,10 +412,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
            File name for final state.
         """
 
-        if not self.restart_stem:
-            return f"{self.file_prefix}-T{self.temp}-final.xyz"
-        # respect the users choice
-        return f"{self.restart_stem}-T{self.temp}-final.xyz"
+        return self._build_filename(
+            "final.xyz", f"T{self.temp}", prefix_override=self.restart_stem
+        )
 
     @property
     def _restart_file(self) -> str:
@@ -422,26 +427,9 @@ class MolecularDynamics:  # pylint: disable=too-many-instance-attributes
            File name for restart files.
         """
         step = self.offset + self.dyn.nsteps
-        if not self.restart_stem:
-            return f"{self.file_prefix}-T{self.temp}-res-{step}.xyz"
-        return f"{self.restart_stem}-T{self.temp}-res-{step}.xyz"
-
-    def configure_filenames(self) -> None:
-        """Setup filenames for output files."""
-
-        if not self.file_prefix:
-            self.file_prefix = f"{self.struct_name}-{self.ensemble}"
-            data_prefix = f"{self.file_prefix}{self._parameter_prefix}"
-        else:
-            data_prefix = f"{self.file_prefix}"
-            if not self.restart_stem:
-                self.restart_stem = f"{self.file_prefix}"
-
-        if not self.stats_file:
-            self.stats_file = f"{data_prefix}-stats.dat"
-
-        if not self.traj_file:
-            self.traj_file = f"{data_prefix}-traj.xyz"
+        return self._build_filename(
+            f"res-{step}.xyz", f"T{self.temp}", prefix_override=self.restart_stem
+        )
 
     @staticmethod
     def get_log_header() -> str:
@@ -773,10 +761,10 @@ class NPT(MolecularDynamics):
            File name for final state, includes pressure.
         """
 
-        pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        if not self.restart_stem:
-            return f"{self.file_prefix}-T{self.temp}{pressure}-final.xyz"
-        return f"{self.restart_stem}-T{self.temp}{pressure}-final.xyz"
+        pressure = f"p{self.pressure}" if not isinstance(self, NVT_NH) else ""
+        return self._build_filename(
+            "final.xyz", f"T{self.temp}", pressure, prefix_override=self.restart_stem
+        )
 
     @property
     def _restart_file(self) -> str:
@@ -789,10 +777,13 @@ class NPT(MolecularDynamics):
            File name for restart file, includes pressure.
         """
         step = self.offset + self.dyn.nsteps
-        pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        if not self.restart_stem:
-            return f"{self.file_prefix}-T{self.temp}{pressure}-res-{step}.xyz"
-        return f"{self.restart_stem}-T{self.temp}{pressure}-res-{step}.xyz"
+        pressure = f"p{self.pressure}" if not isinstance(self, NVT_NH) else ""
+        return self._build_filename(
+            f"res-{step}.xyz",
+            f"T{self.temp}",
+            pressure,
+            prefix_override=self.restart_stem,
+        )
 
     def get_log_stats(self) -> str:
         """

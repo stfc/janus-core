@@ -121,13 +121,13 @@ def test_missing_traj_kwarg(tmp_path):
 def test_hydrostatic_strain():
     """Test setting hydrostatic strain for filter."""
     single_point_1 = SinglePoint(
-        struct_path="./tests/data/NaCl-deformed.cif",
+        struct_path=DATA_PATH / "NaCl-deformed.cif",
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
     single_point_2 = SinglePoint(
-        struct_path="./tests/data/NaCl-deformed.cif",
+        struct_path=DATA_PATH / "NaCl-deformed.cif",
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )

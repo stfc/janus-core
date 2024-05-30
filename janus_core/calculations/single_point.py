@@ -19,10 +19,10 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.log import config_logger
 from janus_core.helpers.mlip_calculators import choose_calculator
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
-class SinglePoint:
+class SinglePoint(FileNameMixin):
     """
     Prepare and perform single point calculations.
 
@@ -143,8 +143,8 @@ class SinglePoint:
             self.read_structure(**read_kwargs)
         else:
             self.struct = struct
-            if not self.struct_name:
-                self.struct_name = self.struct.get_chemical_formula()
+
+        FileNameMixin.__init__(self, self.struct, self.struct_name, None)
 
         # Configure calculator
         self.set_calculator(**calc_kwargs)
@@ -164,12 +164,12 @@ class SinglePoint:
         **kwargs
             Keyword arguments passed to ase.io.read.
         """
-        if self.struct_path:
-            self.struct = read(self.struct_path, **kwargs)
-            if not self.struct_name:
-                self.struct_name = Path(self.struct_path).stem
-        else:
+        if not self.struct_path:
             raise ValueError("`struct_path` must be defined")
+
+        self.struct = read(self.struct_path, **kwargs)
+        if not self.struct_name:
+            self.struct_name = Path(self.struct_path).stem
 
     def set_calculator(
         self, read_kwargs: Optional[ASEReadArgs] = None, **kwargs
@@ -338,9 +338,10 @@ class SinglePoint:
 
         write_kwargs.setdefault(
             "filename",
-            Path(f"./{self.struct_name}-results.xyz").absolute(),
+            Path(self._build_filename("results.xyz")).absolute(),
         )
 
+        print(write_kwargs)
         if self.logger:
             self.logger.info("Starting single point calculation")
 
