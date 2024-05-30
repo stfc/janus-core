@@ -84,7 +84,6 @@ def test_single_point_traj():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
         architecture="mace",
-        read_kwargs={"index": ":"},
         calc_kwargs={"model": MODEL_PATH},
     )
 

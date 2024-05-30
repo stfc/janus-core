@@ -43,7 +43,8 @@ class SinglePoint:
     device : Devices
         Device to run model on. Default is "cpu".
     read_kwargs : ASEReadArgs
-        Keyword arguments to pass to ase.io.read. Default is {}.
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is ":".
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
@@ -105,7 +106,8 @@ class SinglePoint:
         device : Devices
             Device to run MLIP model on. Default is "cpu".
         read_kwargs : Optional[ASEReadArgs]
-            Keyword arguments to pass to ase.io.read. Default is {}.
+            Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is ":".
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
         log_kwargs : Optional[dict[str, Any]]
@@ -137,6 +139,9 @@ class SinglePoint:
         self.device = device
         self.struct_path = struct_path
         self.struct_name = struct_name
+
+        # Read full trajectory by default
+        read_kwargs.setdefault("index", ":")
 
         # Read structure if given as path
         if self.struct_path:
@@ -196,6 +201,9 @@ class SinglePoint:
         if isinstance(self.struct, list):
             for struct in self.struct:
                 struct.calc = calculator
+            # Return single Atoms object if only one image in list
+            if len(self.struct) == 1:
+                self.struct = self.struct[0]
         else:
             self.struct.calc = calculator
 
