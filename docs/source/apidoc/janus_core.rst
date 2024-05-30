@@ -84,6 +84,16 @@ janus\_core.cli.eos module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.cli.descriptors module
+----------------------------------
+
+.. automodule:: janus_core.cli.descriptors
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.cli.types module
 ----------------------------
 
@@ -138,6 +148,16 @@ janus\_core.helpers.mlip\_calculators module
 --------------------------------------------
 
 .. automodule:: janus_core.helpers.mlip_calculators
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.descriptors module
+--------------------------------------
+
+.. automodule:: janus_core.helpers.descriptors
    :members:
    :special-members:
    :private-members:
