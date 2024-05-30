@@ -7,6 +7,7 @@ Similar in spirit to matcalc and quacc approaches
 """
 
 from ase.calculators.calculator import Calculator
+import torch
 
 from janus_core.helpers.janus_types import Architectures, Devices
 
@@ -81,14 +82,20 @@ def choose_calculator(
         from matgl import __version__, load_model
         from matgl.ext.ase import M3GNetCalculator
 
+        # Set before loading model to avoid type mismatches
+        torch.set_default_dtype(torch.float32)
+
         model = kwargs.setdefault("model", load_model("M3GNet-MP-2021.2.8-DIRECT-PES"))
         kwargs.setdefault("stress_weight", 1.0 / 160.21766208)
+
         calculator = M3GNetCalculator(potential=model, **kwargs)
 
     elif architecture == "chgnet":
         from chgnet import __version__
         from chgnet.model.dynamics import CHGNetCalculator
 
+        # Set to avoid type mismatches
+        torch.set_default_dtype(torch.float32)
         calculator = CHGNetCalculator(use_device=device, **kwargs)
 
     else:
