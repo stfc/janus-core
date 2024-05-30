@@ -205,7 +205,7 @@ For all options, run `janus eos --help`.
 
 ### Phonons
 
-Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/mace-mp):
+Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 
 ```shell
 janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}"
