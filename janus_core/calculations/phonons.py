@@ -11,10 +11,10 @@ from phonopy.structure.atoms import PhonopyAtoms
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import MaybeList, PathLike
 from janus_core.helpers.log import config_logger
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
-class Phonons:  # pylint: disable=too-many-instance-attributes
+class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     """
     Configure, perform phonon calculations and write out results.
 
@@ -127,15 +127,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         """
+        FileNameMixin.__init__(self, struct, struct_name, file_prefix)
+
         [minimize_kwargs, log_kwargs] = none_to_dict([minimize_kwargs, log_kwargs])
 
         self.struct = struct
-        if struct_name:
-            self.struct_name = struct_name
-        else:
-            self.struct_name = self.struct.get_chemical_formula()
-
-        self.file_prefix = file_prefix if file_prefix else self.struct_name
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -162,28 +158,6 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Please attach a calculator to `struct`.")
         self.calc = self.struct.calc
         self.results = {}
-
-    def _set_filename(
-        self, default_suffix: str, filename: Optional[PathLike] = None
-    ) -> str:
-        """
-        Set filename using the file prefix and suffix if not specified otherwise.
-
-        Parameters
-        ----------
-        default_suffix : str
-            Default suffix to use if `filename` is not specified.
-        filename : Optional[PathLike]
-            Filename to use, if specified. Default is None.
-
-        Returns
-        -------
-        str
-            Filename specified, or default filename.
-        """
-        if filename:
-            return filename
-        return f"{self.file_prefix}-{default_suffix}"
 
     def calc_force_constants(self, write_results: bool = True) -> None:
         """
@@ -271,7 +245,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             `file_prefix`.
         """
 
-        bands_file = self._set_filename("auto_bands.yml", bands_file)
+        bands_file = self._build_filename("auto_bands.yml", filename=bands_file)
         self.results["phonon"].auto_band_structure(
             write_yaml=write_bands,
             filename=bands_file,
@@ -280,7 +254,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
         )
         if self.plot_to_file:
             bplt = self.results["phonon"].plot_band_structure()
-            plot_file = self._set_filename("auto_bands.svg", plot_file)
+            plot_file = self._build_filename("auto_bands.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
     def write_force_constants(
@@ -305,9 +279,9 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
             is False. Default is inferred from `file_prefix`.
         """
-        phonopy_file = self._set_filename("phonopy.yml", phonopy_file)
-        force_consts_file = self._set_filename(
-            "force_constants.hdf5", force_consts_file
+        phonopy_file = self._build_filename("phonopy.yml", filename=phonopy_file)
+        force_consts_file = self._build_filename(
+            "force_constants.hdf5", filename=force_consts_file
         )
 
         phonon = self.results["phonon"]
@@ -360,7 +334,7 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        filename = self._set_filename("thermal.dat", filename)
+        filename = self._build_filename("thermal.dat", filename=filename)
 
         with open(filename, "w", encoding="utf8") as out:
             temps = self.results["thermal_properties"]["temperatures"]
@@ -422,15 +396,15 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of svg file to plot the band structure and DOS.
             Default is inferred from `file_prefix`.
         """
-        filename = self._set_filename("dos.dat", filename)
+        filename = self._build_filename("dos.dat", filename=filename)
         self.results["phonon"].total_dos.write(filename)
         if self.plot_to_file:
             bplt = self.results["phonon"].plot_total_dos()
-            plot_file = self._set_filename("dos.svg", plot_file)
+            plot_file = self._build_filename("dos.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
             bplt = self.results["phonon"].plot_band_structure_and_dos()
-            plot_bs_file = self._set_filename("bs-dos.svg", plot_bs_file)
+            plot_bs_file = self._build_filename("bs-dos.svg", filename=plot_bs_file)
             bplt.savefig(plot_bs_file)
 
     def calc_pdos(
@@ -479,11 +453,11 @@ class Phonons:  # pylint: disable=too-many-instance-attributes
             Name of svg file to plot the calculated PDOS. Default is inferred from
             `file_prefix`.
         """
-        filename = self._set_filename("pdos.dat", filename)
+        filename = self._build_filename("pdos.dat", filename=filename)
         self.results["phonon"].projected_dos.write(filename)
         if self.plot_to_file:
             bplt = self.results["phonon"].plot_projected_dos()
-            plot_file = self._set_filename("pdos.svg", plot_file)
+            plot_file = self._build_filename("pdos.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
     # No magnetic moments considered
