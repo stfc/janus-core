@@ -279,6 +279,27 @@ Foundational models can also be fine-tuned, by including the `foundation_model` 
 janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
 ```
 
+
+### Calculate MACE descriptors
+
+MACE descriptors can be calculated for structures (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
+
+```shell
+janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+```
+
+This will calculate the mean descriptor for this structure and save this as attached information (`descriptors`) in `NaCl-descriptors.xyz`, in addition to generating a log file, `descriptors.log`, and summary of inputs, `descriptors_summary.yml`.
+
+The mean descriptor per element can also be calculated, and all descriptors, rather than only the invariant part, can be used when calculating the means:
+
+```shell
+janus descriptors --struct tests/data/NaCl.cif --no-invariants-only --calc-per-element
+```
+
+This will generate the same output files, but additional labels (`Cl_descriptor` and `Na_descriptor`) will be saved in `NaCl-descriptors.xyz`.
+
+For all options, run `janus descriptors --help`.
+
 ## License
 
 [BSD 3-Clause License](LICENSE)
