@@ -31,7 +31,7 @@ def set_optimizer(
     logger: Optional[Logger] = None,
 ) -> tuple[Optimizer, Optional[Atoms]]:
     """
-    Set optimizer for geometry optimisation.
+    Set optimizer for geometry optimization.
 
     Parameters
     ----------
