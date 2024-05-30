@@ -5,4 +5,4 @@ out: "NaCl-results.xyz"
 calc-kwargs:
   model: "small"
 read-kwargs:
-  index: ":"
+  index: 0

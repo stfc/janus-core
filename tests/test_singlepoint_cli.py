@@ -250,14 +250,14 @@ def test_config(tmp_path):
     )
     assert result.exit_code == 0
     atoms = read(results_path, index=":")
-    assert len(atoms) == 2
+    assert len(atoms) == 1
 
     # Read singlepoint summary file
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
 
     assert "index" in sp_summary["inputs"]["calc"]["read_kwargs"]
-    assert sp_summary["inputs"]["calc"]["read_kwargs"]["index"] == ":"
+    assert sp_summary["inputs"]["calc"]["read_kwargs"]["index"] == 0
 
 
 def test_invalid_config():
