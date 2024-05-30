@@ -17,7 +17,8 @@ T = TypeVar("T")
 MaybeList = Union[T, list[T]]
 MaybeSequence = Union[T, Sequence[T]]
 PathLike = Union[str, Path]
-
+StartStopStep = tuple[Optional[int], Optional[int], int]
+SliceLike = Union[slice, range, int, StartStopStep]
 
 # ASE Arg types
 
@@ -43,11 +44,35 @@ class ASEWriteArgs(TypedDict, total=False):
 
 
 class ASEOptArgs(TypedDict, total=False):
-    """Main arugments for ase optimisers."""
+    """Main arguments for ase optimisers."""
 
     restart: Optional[bool]
     logfile: Optional[PathLike]
     trajectory: Optional[str]
+
+
+class PostProcessKwargs(TypedDict, total=False):
+    """Main arguments for MD post-processing."""
+
+    # RDF
+    rdf_compute: bool
+    rdf_rmax: float
+    rdf_nbins: int
+    rdf_elements: MaybeSequence[Union[str, int]]
+    rdf_by_elements: bool
+    rdf_start: int
+    rdf_stop: Optional[int]
+    rdf_step: int
+    rdf_output_file: Optional[str]
+    # VAF
+    vaf_compute: bool
+    vaf_velocities: bool
+    vaf_fft: bool
+    vaf_atoms: Sequence[Sequence[int]]
+    vaf_start: int
+    vaf_stop: Optional[int]
+    vaf_step: int
+    vaf_output_file: Optional[PathLike]
 
 
 # eos_names from ase.eos

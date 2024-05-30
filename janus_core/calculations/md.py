@@ -2,14 +2,16 @@
 """Run molecular dynamics simulations."""
 
 import datetime
+from itertools import combinations_with_replacement
 from math import isclose
 from pathlib import Path
 import random
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from warnings import warn
 
 from ase import Atoms, units
-from ase.io import write
+from ase.geometry.analysis import Analysis
+from ase.io import read, write
 from ase.md.langevin import Langevin
 from ase.md.npt import NPT as ASE_NPT
 from ase.md.velocitydistribution import (
@@ -21,8 +23,9 @@ from ase.md.verlet import VelocityVerlet
 import numpy as np
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import Ensembles, PathLike
+from janus_core.helpers.janus_types import Ensembles, PathLike, PostProcessKwargs
 from janus_core.helpers.log import config_logger
+from janus_core.helpers.post_process import compute_rdf, compute_vaf
 from janus_core.helpers.utils import FileNameMixin
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
@@ -97,6 +100,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         heating.
     temp_time : Optional[float]
         Time between heating steps, in fs. Default is None, which disables heating.
+    post_process_kwargs : Optional[PostProcessKwargs]
+        Keyword arguments to control post-processing operations.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to log config. Default is None.
     seed : Optional[int]
@@ -157,6 +162,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         temp_end: Optional[float] = None,
         temp_step: Optional[float] = None,
         temp_time: Optional[float] = None,
+        post_process_kwargs: Optional[PostProcessKwargs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
     ) -> None:
@@ -231,6 +237,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             disables heating.
         temp_time : Optional[float]
             Time between heating steps, in fs. Default is None, which disables heating.
+        post_process_kwargs : Optional[PostProcessKwargs]
+            Keyword arguments to control post-processing operations.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to log config. Default is None.
         seed : Optional[int]
@@ -262,6 +270,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.temp_end = temp_end
         self.temp_step = temp_step
         self.temp_time = temp_time * units.fs if temp_time else None
+        self.post_process_kwargs = (
+            post_process_kwargs if post_process_kwargs is not None else {}
+        )
         self.log_kwargs = log_kwargs
         self.ensemble = ensemble
         self.seed = seed
@@ -315,7 +326,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
         self.minimize_kwargs = minimize_kwargs if minimize_kwargs else {}
         self.restart_files = []
-        self.dyn = None
+        self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
         self.n_atoms = len(self.struct)
 
         self.stats_file = self._build_filename(
@@ -542,6 +553,91 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             columns=["symbols", "positions", "momenta", "masses"],
         )
 
+    def _post_process(self) -> None:
+        """Compute properties after MD run."""
+        # Nothing to do
+        if not any(
+            self.post_process_kwargs.get(kwarg, None)
+            for kwarg in ("rdf_compute", "vaf_compute")
+        ):
+            warn(
+                "Post-processing arguments present, but no computation requested. "
+                "Please set either 'rdf_compute' or 'vaf_compute' "
+                "to do post-processing."
+            )
+
+        data = read(self.traj_file, index=":")
+
+        ana = Analysis(data)
+
+        param_pref = self._parameter_prefix if self.file_prefix is None else ""
+
+        if self.post_process_kwargs.get("rdf_compute", False):
+            base_name = self.post_process_kwargs.get("rdf_output_file", None)
+            rdf_args = {
+                name: self.post_process_kwargs.get(key, default)
+                for name, (key, default) in (
+                    ("rmax", ("rdf_rmax", 2.5)),
+                    ("nbins", ("rdf_nbins", 50)),
+                    ("elements", ("rdf_elements", None)),
+                    ("by_elements", ("rdf_by_elements", False)),
+                )
+            }
+            slice_ = (
+                self.post_process_kwargs.get("rdf_start", len(data) - 1),
+                self.post_process_kwargs.get("rdf_stop", len(data)),
+                self.post_process_kwargs.get("rdf_step", 1),
+            )
+            rdf_args["index"] = slice_
+
+            if rdf_args["by_elements"]:
+                elements = (
+                    tuple(sorted(set(data[0].get_chemical_symbols())))
+                    if rdf_args["elements"] is None
+                    else rdf_args["elements"]
+                )
+
+                out_paths = [
+                    self._build_filename(
+                        "rdf.dat",
+                        param_pref,
+                        "_".join(element),
+                        prefix_override=base_name,
+                    )
+                    for element in combinations_with_replacement(elements, 2)
+                ]
+
+            else:
+                out_paths = [
+                    self._build_filename(
+                        "rdf.dat", param_pref, prefix_override=base_name
+                    )
+                ]
+
+            compute_rdf(data, ana, filename=out_paths, **rdf_args)
+
+        if self.post_process_kwargs.get("vaf_compute", False):
+
+            file_name = self.post_process_kwargs.get("vaf_output_file", None)
+            use_vel = self.post_process_kwargs.get("vaf_velocities", False)
+            fft = self.post_process_kwargs.get("vaf_fft", False)
+
+            out_path = self._build_filename("vaf.dat", param_pref, filename=file_name)
+            slice_ = (
+                self.post_process_kwargs.get("vaf_start", 0),
+                self.post_process_kwargs.get("vaf_stop", None),
+                self.post_process_kwargs.get("vaf_step", 1),
+            )
+
+            compute_vaf(
+                data,
+                out_path,
+                use_velocities=use_vel,
+                fft=fft,
+                index=slice_,
+                filter_atoms=self.post_process_kwargs.get("vaf_atoms", None),
+            )
+
     def _write_restart(self) -> None:
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
@@ -593,6 +689,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         # Note current time
         self.struct.info["real_time"] = datetime.datetime.now()
         self._run_dynamics()
+
+        if self.post_process_kwargs:
+            self._post_process()
 
     def _run_dynamics(self) -> None:
         """Run dynamics and/or temperature ramp."""
