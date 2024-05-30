@@ -115,7 +115,7 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
         *additional,
         filename: Optional[PathLike] = None,
         prefix_override: Optional[str] = None,
-    ) -> PathLike:
+    ) -> Path:
         """
         Set filename using the file prefix and suffix if not specified otherwise.
 
@@ -132,7 +132,7 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
 
         Returns
         -------
-        str
+        Path
             Filename specified, or default filename.
         """
         if filename:
