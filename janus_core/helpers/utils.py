@@ -87,7 +87,7 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
     @staticmethod
     def _get_default_prefix(
         file_prefix: Optional[PathLike], struct_name: str, *additional
-    ) -> PathLike:
+    ) -> str:
         """
         Determine the default prefix from the structure name or provided file_prefix.
 
