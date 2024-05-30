@@ -12,9 +12,7 @@ STRUCT = read(DATA_PATH / "benzene.xyz")
 
 
 class DummyFileHandler(FileNameMixin):  # pylint: disable=too-few-public-methods
-    """
-    Used for testing FileNameMixin methods.
-    """
+    """Used for testing FileNameMixin methods."""
 
     def build_filename(self, *args, **kwargs):
         """
@@ -41,9 +39,7 @@ class DummyFileHandler(FileNameMixin):  # pylint: disable=too-few-public-methods
     ),
 )
 def test_file_name_mixin_init(params, struct_name, file_prefix):
-    """
-    Test various options for initializing the mixin.
-    """
+    """Test various options for initializing the mixin."""
     file_mix = DummyFileHandler(*params)
 
     assert file_mix.struct_name == struct_name
@@ -109,9 +105,7 @@ def test_file_name_mixin_init(params, struct_name, file_prefix):
     ),
 )
 def test_file_name_mixin_build(mixin_params, file_args, file_kwargs, file_name):
-    """
-    Test building the filename for mixins
-    """
+    """Test building the filename for mixins."""
     file_mix = DummyFileHandler(*mixin_params)
 
     assert file_mix.build_filename(*file_args, **file_kwargs) == Path(file_name)
