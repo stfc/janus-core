@@ -47,8 +47,8 @@ def test_singlepoint(tmp_path):
     # Check atoms can read read, then delete file
     atoms = read_atoms(results_path)
     assert result.exit_code == 0
-    assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.calc.results
+    assert "mace_mp_energy" in atoms.info
+    assert "mace_mp_forces" in atoms.arrays
 
 
 def test_properties(tmp_path):
@@ -78,7 +78,7 @@ def test_properties(tmp_path):
     assert result.exit_code == 0
 
     atoms = read(results_path_1)
-    assert atoms.get_potential_energy() is not None
+    assert "mace_mp_energy" in atoms.info
 
     result = runner.invoke(
         app,
