@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
+import numpy as np
 import pytest
 from typer.testing import CliRunner
 import yaml
@@ -377,3 +378,90 @@ def test_struct_name(tmp_path):
     assert stats_path.exists()
     assert traj_path.exists()
     assert final_path.exists()
+
+
+def test_ensemble_kwargs(tmp_path):
+    """Test passing ensemble-kwargs to NPT."""
+    struct_path = DATA_PATH / "NaCl.cif"
+    file_prefix = tmp_path / "md"
+    log_path = tmp_path / "md.log"
+    summary_path = tmp_path / "summary.yml"
+    final_path = tmp_path / "md-T300.0-p0.0-final.xyz"
+    stats_path = tmp_path / "md-stats.dat"
+
+    ensemble_kwargs = "{'mask' : (0, 1, 0)}"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "npt",
+            "--struct",
+            struct_path,
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--ensemble-kwargs",
+            ensemble_kwargs,
+            "--stats-every",
+            1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert final_path.exists()
+    assert stats_path.exists()
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        # Includes step 0
+        assert len(lines) == 3
+
+    init_atoms = read(struct_path)
+    final_atoms = read(final_path)
+
+    assert np.array_equal(init_atoms.cell[0], final_atoms.cell[0])
+    assert not np.array_equal(init_atoms.cell[1], final_atoms.cell[1])
+    assert np.array_equal(init_atoms.cell[2], final_atoms.cell[2])
+
+
+def test_invalid_ensemble_kwargs(tmp_path):
+    """Test passing invalid key to ensemble-kwargs."""
+    file_prefix = tmp_path / "npt-T300"
+    log_path = tmp_path / "md.log"
+    summary_path = tmp_path / "summary.yml"
+
+    # Not an option for NVT
+    ensemble_kwargs = "{'mask': (0, 1, 0)}"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--ensemble-kwargs",
+            ensemble_kwargs,
+            "--traj-every",
+            1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert isinstance(result.exception, TypeError)

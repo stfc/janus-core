@@ -840,3 +840,23 @@ def test_cooling(tmp_path):
     assert stats.rows == 2
     assert stats.data[0, 16] == 20.0
     assert stats.data[1, 16] == 10.0
+
+
+def test_ensemble_kwargs(tmp_path):
+    """Test setting integrator kwargs."""
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    npt = NPT(
+        struct=single_point.struct,
+        ensemble_kwargs={"mask": (0, 1, 0)},
+        log_kwargs={"filename": log_file},
+    )
+
+    expected_mask = [[False, False, False], [False, True, False], [False, False, False]]
+    assert np.array_equal(npt.dyn.mask, expected_mask)
