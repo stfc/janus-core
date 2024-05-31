@@ -144,7 +144,7 @@ EnsembleKwargs = Annotated[
         parser=parse_dict_class,
         help=(
             """
-            Keyword arguments to pass to the integrator. Must be passed as a
+            Keyword arguments to pass to ensemble initialization. Must be passed as a
             dictionary wrapped in quotes, e.g. "{'key' : value}".
             """
         ),

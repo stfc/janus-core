@@ -670,7 +670,7 @@ class NPT(MolecularDynamics):
         Prefix for output filenames. Default is inferred from structure, ensemble,
         temperature, and pressure.
     ensemble_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to MD integrator. Default is {}.
+        Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
 
@@ -713,7 +713,7 @@ class NPT(MolecularDynamics):
             Prefix for output filenames. Default is inferred from structure, ensemble,
             temperature, and pressure.
         ensemble_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to MD integrator. Default is {}.
+            Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
@@ -831,7 +831,7 @@ class NVT(MolecularDynamics):
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nvt".
     ensemble_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to MD integrator. Default is {}.
+        Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
 
@@ -861,7 +861,7 @@ class NVT(MolecularDynamics):
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nvt".
         ensemble_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to MD integrator. Default is {}.
+            Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
@@ -914,7 +914,7 @@ class NVE(MolecularDynamics):
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nve".
     ensemble_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to MD integrator. Default is {}.
+        Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
 
@@ -941,7 +941,7 @@ class NVE(MolecularDynamics):
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nve".
         ensemble_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to MD integrator. Default is {}.
+            Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
@@ -969,7 +969,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nvt-nh".
     ensemble_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to MD integrator. Default is {}.
+        Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
     """
@@ -994,7 +994,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nvt-nh".
         ensemble_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to MD integrator. Default is {}.
+            Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
@@ -1054,7 +1054,7 @@ class NPH(NPT):
         Prefix for output filenames. Default is inferred from structure, ensemble,
         temperature, and pressure.
     ensemble_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to MD integrator. Default is {}.
+        Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
 
@@ -1094,7 +1094,7 @@ class NPH(NPT):
             Prefix for output filenames. Default is inferred from structure, ensemble,
             temperature, and pressure.
         ensemble_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to MD integrator. Default is {}.
+            Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """

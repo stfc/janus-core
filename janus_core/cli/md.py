@@ -208,7 +208,7 @@ def md(
     friction : float
         Friction coefficient in fs^-1. Default is 0.005.
     ensemble_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to the MD integrator. Default is {}.
+        Keyword arguments to pass to ensemble initialization. Default is {}.
     arch : Optional[str]
         MLIP architecture to use for molecular dynamics.
         Default is "mace_mp".
