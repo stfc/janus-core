@@ -138,6 +138,20 @@ MinimizeKwargs = Annotated[
     ),
 ]
 
+IntegratorKwargs = Annotated[
+    TyperDict,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to the integrator. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 LogPath = Annotated[Path, Option(help="Path to save logs to.")]
 
 Summary = Annotated[

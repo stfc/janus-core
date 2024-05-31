@@ -377,3 +377,37 @@ def test_struct_name(tmp_path):
     assert stats_path.exists()
     assert traj_path.exists()
     assert final_path.exists()
+
+
+def test_integrator_kwargs(tmp_path):
+    """Test passing integrator-kwargs to NPT."""
+    file_prefix = tmp_path / "npt-T300"
+    log_path = tmp_path / "md.log"
+    summary_path = tmp_path / "summary.yml"
+
+    integrator_kwargs = "{'mask': (0, 1, 0)}"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "npt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--integrator-kwargs",
+            integrator_kwargs,
+            "--traj-every",
+            1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+
+    assert result.exit_code == 0
