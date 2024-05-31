@@ -842,7 +842,7 @@ def test_cooling(tmp_path):
     assert stats.data[1, 16] == 10.0
 
 
-def test_integrator_kwargs(tmp_path):
+def test_ensemble_kwargs(tmp_path):
     """Test setting integrator kwargs."""
     log_file = tmp_path / "nvt.log"
 
@@ -854,7 +854,7 @@ def test_integrator_kwargs(tmp_path):
 
     npt = NPT(
         struct=single_point.struct,
-        integrator_kwargs={"mask": (0, 1, 0)},
+        ensemble_kwargs={"mask": (0, 1, 0)},
         log_kwargs={"filename": log_file},
     )
 
