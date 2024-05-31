@@ -138,7 +138,7 @@ MinimizeKwargs = Annotated[
     ),
 ]
 
-IntegratorKwargs = Annotated[
+EnsembleKwargs = Annotated[
     TyperDict,
     Option(
         parser=parse_dict_class,

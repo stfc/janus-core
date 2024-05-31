@@ -12,7 +12,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
-    IntegratorKwargs,
+    EnsembleKwargs,
     LogPath,
     MinimizeKwargs,
     ReadKwargs,
@@ -75,7 +75,7 @@ def md(
     friction: Annotated[
         float, Option(help="Friction coefficient for NVT simulation, in fs^-1.")
     ] = 0.005,
-    integrator_kwargs: IntegratorKwargs = None,
+    ensemble_kwargs: EnsembleKwargs = None,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     read_kwargs: ReadKwargs = None,
@@ -207,7 +207,7 @@ def md(
         Pressure, in bar. Default is 0.0.
     friction : float
         Friction coefficient in fs^-1. Default is 0.005.
-    integrator_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the MD integrator. Default is {}.
     arch : Optional[str]
         MLIP architecture to use for molecular dynamics.
@@ -284,8 +284,8 @@ def md(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, minimize_kwargs, integrator_kwargs] = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, minimize_kwargs, integrator_kwargs]
+    [read_kwargs, calc_kwargs, minimize_kwargs, ensemble_kwargs] = parse_typer_dicts(
+        [read_kwargs, calc_kwargs, minimize_kwargs, ensemble_kwargs]
     )
 
     if not ensemble in get_args(Ensembles):
@@ -340,7 +340,7 @@ def md(
         "temp_time": temp_time,
         "log_kwargs": log_kwargs,
         "seed": seed,
-        "integrator_kwargs": integrator_kwargs,
+        "ensemble_kwargs": ensemble_kwargs,
     }
 
     # Instantiate MD ensemble

@@ -669,7 +669,7 @@ class NPT(MolecularDynamics):
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from structure, ensemble,
         temperature, and pressure.
-    integrator_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to MD integrator. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -689,7 +689,7 @@ class NPT(MolecularDynamics):
         pressure: float = 0.0,
         ensemble: Ensembles = "npt",
         file_prefix: Optional[PathLike] = None,
-        integrator_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -712,7 +712,7 @@ class NPT(MolecularDynamics):
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure, ensemble,
             temperature, and pressure.
-        integrator_kwargs : Optional[dict[str, Any]]
+        ensemble_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to MD integrator. Default is {}.
         **kwargs
             Additional keyword arguments.
@@ -720,7 +720,7 @@ class NPT(MolecularDynamics):
         self.pressure = pressure
         super().__init__(ensemble=ensemble, file_prefix=file_prefix, *args, **kwargs)
 
-        integrator_kwargs = integrator_kwargs if integrator_kwargs else {}
+        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         self.ttime = thermostat_time * units.fs
 
         if barostat_time:
@@ -740,7 +740,7 @@ class NPT(MolecularDynamics):
             pfactor=pfactor,
             append_trajectory=self.traj_append,
             externalstress=self.pressure * units.bar,
-            **integrator_kwargs,
+            **ensemble_kwargs,
         )
 
     @property
@@ -830,7 +830,7 @@ class NVT(MolecularDynamics):
         Friction coefficient in fs^-1. Default is 0.005.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nvt".
-    integrator_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to MD integrator. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -846,7 +846,7 @@ class NVT(MolecularDynamics):
         *args,
         friction: float = 0.005,
         ensemble: Ensembles = "nvt",
-        integrator_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -860,21 +860,21 @@ class NVT(MolecularDynamics):
             Friction coefficient in fs^-1. Default is 0.005.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nvt".
-        integrator_kwargs : Optional[dict[str, Any]]
+        ensemble_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to MD integrator. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
         super().__init__(ensemble=ensemble, *args, **kwargs)
 
-        integrator_kwargs = integrator_kwargs if integrator_kwargs else {}
+        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         self.dyn = Langevin(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
             friction=friction / units.fs,
             append_trajectory=self.traj_append,
-            **integrator_kwargs,
+            **ensemble_kwargs,
         )
 
     def get_log_stats(self) -> str:
@@ -913,7 +913,7 @@ class NVE(MolecularDynamics):
         Additional arguments.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nve".
-    integrator_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to MD integrator. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -928,7 +928,7 @@ class NVE(MolecularDynamics):
         self,
         *args,
         ensemble: Ensembles = "nve",
-        integrator_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -940,19 +940,19 @@ class NVE(MolecularDynamics):
             Additional arguments.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nve".
-        integrator_kwargs : Optional[dict[str, Any]]
+        ensemble_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to MD integrator. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
         super().__init__(ensemble=ensemble, *args, **kwargs)
-        integrator_kwargs = integrator_kwargs if integrator_kwargs else {}
+        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
 
         self.dyn = VelocityVerlet(
             self.struct,
             timestep=self.timestep,
             append_trajectory=self.traj_append,
-            **integrator_kwargs,
+            **ensemble_kwargs,
         )
 
 
@@ -968,7 +968,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         Thermostat time, in fs. Default is 50.0.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nvt-nh".
-    integrator_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to MD integrator. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -979,7 +979,7 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         *args,
         thermostat_time: float = 50.0,
         ensemble: Ensembles = "nvt-nh",
-        integrator_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -993,17 +993,17 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             Thermostat time, in fs. Default is 50.0.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nvt-nh".
-        integrator_kwargs : Optional[dict[str, Any]]
+        ensemble_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to MD integrator. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
-        integrator_kwargs = integrator_kwargs if integrator_kwargs else {}
+        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         super().__init__(
             ensemble=ensemble,
             thermostat_time=thermostat_time,
             barostat_time=None,
-            integrator_kwargs=integrator_kwargs,
+            ensemble_kwargs=ensemble_kwargs,
             *args,
             **kwargs,
         )
@@ -1053,7 +1053,7 @@ class NPH(NPT):
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from structure, ensemble,
         temperature, and pressure.
-    integrator_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to MD integrator. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1072,7 +1072,7 @@ class NPH(NPT):
         pressure: float = 0.0,
         ensemble: Ensembles = "nph",
         file_prefix: Optional[PathLike] = None,
-        integrator_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """
@@ -1093,12 +1093,12 @@ class NPH(NPT):
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure, ensemble,
             temperature, and pressure.
-        integrator_kwargs : Optional[dict[str, Any]]
+        ensemble_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to MD integrator. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
-        integrator_kwargs = integrator_kwargs if integrator_kwargs else {}
+        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         super().__init__(
             *args,
             thermostat_time=thermostat_time,
@@ -1107,6 +1107,6 @@ class NPH(NPT):
             pressure=pressure,
             ensemble=ensemble,
             file_prefix=file_prefix,
-            integrator_kwargs=integrator_kwargs,
+            ensemble_kwargs=ensemble_kwargs,
             **kwargs,
         )
