@@ -110,7 +110,7 @@ Additional options may be specified. This shares most options with `singlepoint`
 janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --vectors-only --traj 'NaCl-traj.xyz'
 ```
 
-This allows the cell vectors to be optimised, allowing only hydrostatic deformation, and saves the optimization trajector in addition to the final structure and log.
+This allows the cell vectors to be optimised, allowing only hydrostatic deformation, and saves the optimization trajectory in addition to the final structure and log.
 
 Further options for the optimizer and filter can be specified using the `--minimize-kwargs` option. For example:
 
