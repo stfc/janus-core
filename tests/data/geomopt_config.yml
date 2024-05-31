@@ -1,4 +1,5 @@
 struct: "NaCl.cif"
 out: "NaCl-results.xyz"
-opt-kwargs:
-  alpha: 100
+minimize-kwargs:
+  opt-kwargs:
+    alpha: 100

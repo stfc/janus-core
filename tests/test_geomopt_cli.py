@@ -234,14 +234,16 @@ def test_duplicate_traj(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
+    minimize_kwargs = f"{{'opt_kwargs': {{'trajectory' : '{str(traj_path)}'}}}}"
+
     result = runner.invoke(
         app,
         [
             "geomopt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--opt-kwargs",
-            f"{{'trajectory': '{str(traj_path)}'}}",
+            "--minimize-kwargs",
+            minimize_kwargs,
             "--log",
             log_path,
             "--summary",
@@ -260,6 +262,8 @@ def test_restart(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
+    minimize_kwargs = f"{{'opt_kwargs': {{'restart': '{str(restart_path)}'}}}}"
+
     result = runner.invoke(
         app,
         [
@@ -268,8 +272,8 @@ def test_restart(tmp_path):
             data_path,
             "--out",
             results_path,
-            "--opt-kwargs",
-            f"{{'restart': '{str(restart_path)}'}}",
+            "--minimize-kwargs",
+            minimize_kwargs,
             "--steps",
             2,
             "--log",
@@ -290,8 +294,8 @@ def test_restart(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             results_path,
-            "--opt-kwargs",
-            f"{{'restart': '{str(restart_path)}'}}",
+            "--minimize-kwargs",
+            minimize_kwargs,
             "--steps",
             2,
             "--log",
@@ -389,3 +393,32 @@ def test_invalid_config():
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_const_volume(tmp_path):
+    """Test setting constant volume with --fully-opt."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    minimize_kwargs = "{'filter_kwargs': {'constant_volume' : True}}"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--out",
+            results_path,
+            "--fully-opt",
+            "--minimize-kwargs",
+            minimize_kwargs,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert_log_contains(log_path, includes=["constant_volume: True"])

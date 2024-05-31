@@ -14,7 +14,7 @@ from janus_core.cli.types import (
     CalcKwargs,
     Device,
     LogPath,
-    OptKwargs,
+    MinimizeKwargs,
     ReadKwargs,
     StructPath,
     Summary,
@@ -76,7 +76,7 @@ def geomopt(
     ] = None,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
-    opt_kwargs: OptKwargs = None,
+    minimize_kwargs: MinimizeKwargs = None,
     write_kwargs: WriteKwargs = None,
     log: LogPath = "geomopt.log",
     summary: Summary = "geomopt_summary.yml",
@@ -117,8 +117,8 @@ def geomopt(
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    opt_kwargs : Optional[ASEOptArgs]
-        Keyword arguments to pass to optimizer. Default is {}.
+    minimize_kwargs : Optional[dict[str, Any]]
+        Other keyword arguments to pass to geometry optimizer. Default is {}.
     write_kwargs : Optional[ASEWriteArgs]
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
@@ -133,8 +133,8 @@ def geomopt(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs] = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, opt_kwargs, write_kwargs]
+    [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs] = parse_typer_dicts(
+        [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
     )
 
     # Set up single point calculator
@@ -151,24 +151,43 @@ def geomopt(
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
 
-    # Check trajectory path not duplicated
-    if "trajectory" in opt_kwargs:
-        raise ValueError("'trajectory' must be passed through the --traj option")
-
     # Set default filname for writing optimized structure if not specified
     if out:
         write_kwargs["filename"] = out
     else:
         write_kwargs["filename"] = f"{s_point.struct_name}-opt.xyz"
 
-    # Set same trajectory filenames to overwrite saved binary with xyz
-    opt_kwargs["trajectory"] = traj if traj else None
-    traj_kwargs = {"filename": traj} if traj else None
+    if "opt_kwargs" in minimize_kwargs:
+        # Check trajectory path not duplicated
+        if "trajectory" in minimize_kwargs["opt_kwargs"]:
+            raise ValueError("'trajectory' must be passed through the --traj option")
+    else:
+        minimize_kwargs["opt_kwargs"] = {}
 
-    # Set hydrostatic_strain
-    # If not passed --fully-opt or --vectors-only, will be unused
-    filter_kwargs = {"hydrostatic_strain": vectors_only}
-    filter_kwargs["scalar_pressure"] = pressure * units.bar
+    if "traj_kwargs" not in minimize_kwargs:
+        minimize_kwargs["traj_kwargs"] = {}
+
+    # Set same trajectory filenames to overwrite saved binary with xyz
+    if traj:
+        minimize_kwargs["opt_kwargs"]["trajectory"] = traj
+        minimize_kwargs["traj_kwargs"]["filename"] = traj
+
+    # Check hydrostatic_strain and scalar pressure not duplicated
+    if "filter_kwargs" in minimize_kwargs:
+        if "hydrostatic_strain" in minimize_kwargs["filter_kwargs"]:
+            raise ValueError(
+                "'hydrostatic_strain' must be passed through the --vectors-only option"
+            )
+        if "scalar_pressure" in minimize_kwargs["filter_kwargs"]:
+            raise ValueError(
+                "'scalar_pressure' must be passed through the --pressure option"
+            )
+    else:
+        minimize_kwargs["filter_kwargs"] = {}
+
+    # Set hydrostatic_strain and scalar pressure
+    minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = vectors_only
+    minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure * units.bar
 
     # Use default filter if passed --fully-opt or --vectors-only
     # Otherwise override with None
@@ -179,12 +198,10 @@ def geomopt(
         "struct": s_point.struct,
         "fmax": fmax,
         "steps": steps,
-        "filter_kwargs": filter_kwargs,
         **fully_opt_dict,
-        "opt_kwargs": opt_kwargs,
+        **minimize_kwargs,
         "write_results": True,
         "write_kwargs": write_kwargs,
-        "traj_kwargs": traj_kwargs,
         "log_kwargs": {"filename": log, "filemode": "a"},
     }
 
