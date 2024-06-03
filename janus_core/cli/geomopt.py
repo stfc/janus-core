@@ -99,8 +99,8 @@ def geomopt(
     struct: StructPath,
     optimizer: Annotated[
         str,
-        Option(help="Name of ASE optimizer function to use.  [default: LBFGS]"),
-    ] = None,
+        Option(help="Name of ASE optimizer function to use."),
+    ] = "LBFGS",
     fmax: Annotated[
         float, Option(help="Maximum force for convergence, in eV/Å.")
     ] = 0.1,
@@ -221,9 +221,6 @@ def geomopt(
         calc_kwargs=calc_kwargs,
         log_kwargs={"filename": log, "filemode": "w"},
     )
-
-    # Set default optimizer
-    optimizer = optimizer if optimizer else "LBFGS"
 
     # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
