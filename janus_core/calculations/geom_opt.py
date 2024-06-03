@@ -91,13 +91,14 @@ def set_optimizer(
     filtered_struct = None
 
     optimizer, filter_func = _set_functions(optimizer, filter_func)
+    if logger:
+        logger.info("Using optimizer: %s", optimizer.__name__)
 
     if filter_func is not None:
         filtered_struct = filter_func(struct, **filter_kwargs)
         dyn = optimizer(filtered_struct, **opt_kwargs)
         if logger:
             logger.info("Using filter: %s", filter_func.__name__)
-            logger.info("Using optimizer: %s", optimizer.__name__)
             if "hydrostatic_strain" in filter_kwargs:
                 logger.info(
                     "hydrostatic_strain: %s", filter_kwargs["hydrostatic_strain"]
