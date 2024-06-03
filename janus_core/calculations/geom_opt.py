@@ -45,10 +45,16 @@ def _set_functions(
         Tuple of optimizer function and filter function, if set.
     """
     if isinstance(optimizer, str):
-        optimizer = getattr(ase.optimize, optimizer)
+        try:
+            optimizer = getattr(ase.optimize, optimizer)
+        except AttributeError as e:
+            raise AttributeError(f"No such optimizer ({optimizer})") from e
 
     if filter_func is not None and isinstance(filter_func, str):
-        filter_func = getattr(filters, filter_func)
+        try:
+            filter_func = getattr(filters, filter_func)
+        except AttributeError as e:
+            raise AttributeError(f"No such filter ({filter_func})") from e
 
     return optimizer, filter_func
 

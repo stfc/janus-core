@@ -230,6 +230,22 @@ def test_str_optimizer(tmp_path):
     )
 
 
+def test_invalid_str_optimizer():
+    """Test setting invalid optimizer function with string."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(AttributeError):
+        optimize(
+            single_point.struct,
+            fmax=0.001,
+            optimizer="test",
+        )
+
+
 def test_str_filter(tmp_path):
     """Test setting filter function with string."""
     log_file = tmp_path / "opt.log"
@@ -251,3 +267,19 @@ def test_str_filter(tmp_path):
         log_file,
         includes=["Starting geometry optimization", "Using filter: UnitCellFilter"],
     )
+
+
+def test_invalid_str_filter():
+    """Test setting invalid filter function with string."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(AttributeError):
+        optimize(
+            single_point.struct,
+            fmax=0.001,
+            filter_func="test",
+        )
