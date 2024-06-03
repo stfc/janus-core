@@ -241,6 +241,10 @@ def geomopt(
         # Use default filter unless filter function explicitly passed
         fully_opt_dict = {"filter_func": filter_func} if filter_func else {}
     else:
+        if filter_func:
+            raise ValueError(
+                "--vectors-only or --fully-opt must be set to use a filter function"
+            )
         # Override default filter function with None
         fully_opt_dict = {"filter_func": None}
 
