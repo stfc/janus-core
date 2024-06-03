@@ -69,7 +69,7 @@ def set_optimizer(
     struct : Atoms
         Atoms object to optimize geometry for.
     filter_func : Optional[Union[Callable, str]]
-        Fitler function, or name of function from ase.filters or ase.constraints, to
+        Filter function, or name of function from ase.filters or ase.constraints, to
         apply constraints to atoms. Default is `FrechetCellFilter` if available
         otherwise `ExpCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
@@ -147,7 +147,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
     filter_func : Optional[Union[Callable, str]]
-        Fitler function, or name of function from ase.filters or ase.constraints, to
+        Filter function, or name of function from ase.filters or ase.constraints, to
         apply constraints to atoms. Default is `FrechetCellFilter` if available
         otherwise `ExpCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
