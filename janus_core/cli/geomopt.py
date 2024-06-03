@@ -1,7 +1,7 @@
 """Set up geomopt commandline interface."""
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any, Optional
 
 from ase import units
 from typer import Context, Option, Typer
@@ -31,6 +31,61 @@ from janus_core.cli.utils import (
 from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
+
+
+def _set_minimize_kwargs(
+    minimize_kwargs: dict[str, Any],
+    traj: Optional[str],
+    vectors_only: bool,
+    pressure: float,
+) -> None:
+    """
+    Set minimize_kwargs dictionary values.
+
+    Parameters
+    ----------
+    minimize_kwargs : dict[str, Any]
+        Other keyword arguments to pass to geometry optimizer.
+    traj : Optional[str]
+        Path if saving optimization frames.
+    vectors_only : bool
+        Whether to optimize cell vectors, as well as atomic positions, by setting
+        `hydrostatic_strain` in the filter function.
+    pressure : float
+        Scalar pressure when optimizing cell geometry, in bar. Passed to the filter
+        function if either `vectors_only` or `fully_opt` is True.
+    """
+    if "opt_kwargs" in minimize_kwargs:
+        # Check trajectory path not duplicated
+        if "trajectory" in minimize_kwargs["opt_kwargs"]:
+            raise ValueError("'trajectory' must be passed through the --traj option")
+    else:
+        minimize_kwargs["opt_kwargs"] = {}
+
+    if "traj_kwargs" not in minimize_kwargs:
+        minimize_kwargs["traj_kwargs"] = {}
+
+    # Set same trajectory filenames to overwrite saved binary with xyz
+    if traj:
+        minimize_kwargs["opt_kwargs"]["trajectory"] = traj
+        minimize_kwargs["traj_kwargs"]["filename"] = traj
+
+    # Check hydrostatic_strain and scalar pressure not duplicated
+    if "filter_kwargs" in minimize_kwargs:
+        if "hydrostatic_strain" in minimize_kwargs["filter_kwargs"]:
+            raise ValueError(
+                "'hydrostatic_strain' must be passed through the --vectors-only option"
+            )
+        if "scalar_pressure" in minimize_kwargs["filter_kwargs"]:
+            raise ValueError(
+                "'scalar_pressure' must be passed through the --pressure option"
+            )
+    else:
+        minimize_kwargs["filter_kwargs"] = {}
+
+    # Set hydrostatic_strain and scalar pressure
+    minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = vectors_only
+    minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure * units.bar
 
 
 @app.command(
@@ -157,37 +212,7 @@ def geomopt(
     else:
         write_kwargs["filename"] = f"{s_point.struct_name}-opt.xyz"
 
-    if "opt_kwargs" in minimize_kwargs:
-        # Check trajectory path not duplicated
-        if "trajectory" in minimize_kwargs["opt_kwargs"]:
-            raise ValueError("'trajectory' must be passed through the --traj option")
-    else:
-        minimize_kwargs["opt_kwargs"] = {}
-
-    if "traj_kwargs" not in minimize_kwargs:
-        minimize_kwargs["traj_kwargs"] = {}
-
-    # Set same trajectory filenames to overwrite saved binary with xyz
-    if traj:
-        minimize_kwargs["opt_kwargs"]["trajectory"] = traj
-        minimize_kwargs["traj_kwargs"]["filename"] = traj
-
-    # Check hydrostatic_strain and scalar pressure not duplicated
-    if "filter_kwargs" in minimize_kwargs:
-        if "hydrostatic_strain" in minimize_kwargs["filter_kwargs"]:
-            raise ValueError(
-                "'hydrostatic_strain' must be passed through the --vectors-only option"
-            )
-        if "scalar_pressure" in minimize_kwargs["filter_kwargs"]:
-            raise ValueError(
-                "'scalar_pressure' must be passed through the --pressure option"
-            )
-    else:
-        minimize_kwargs["filter_kwargs"] = {}
-
-    # Set hydrostatic_strain and scalar pressure
-    minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = vectors_only
-    minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure * units.bar
+    _set_minimize_kwargs(minimize_kwargs, traj, vectors_only, pressure)
 
     # Use default filter if passed --fully-opt or --vectors-only
     # Otherwise override with None
