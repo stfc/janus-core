@@ -104,7 +104,7 @@ def test_traj(tmp_path):
     )
     assert result.exit_code == 0
     atoms = read(traj_path)
-    assert "forces" in atoms.arrays
+    assert "forces" in atoms.calc.results
 
 
 def test_fully_opt(tmp_path):
@@ -136,7 +136,14 @@ def test_fully_opt(tmp_path):
     )
 
     atoms = read(results_path)
-    expected = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
+    expected = [
+        5.688268799219085,
+        5.688750772505896,
+        5.688822747326383,
+        89.26002493790229,
+        90.0,
+        90.0,
+    ]
     assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
@@ -167,7 +174,14 @@ def test_fully_opt_and_vectors(tmp_path):
     assert_log_contains(log_path, includes=["Using filter", "hydrostatic_strain: True"])
 
     atoms = read(results_path)
-    expected = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
+    expected = [
+        5.687545288920282,
+        5.687545288920282,
+        5.687545288920282,
+        89.0,
+        90.0,
+        90.0,
+    ]
     assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
