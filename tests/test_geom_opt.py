@@ -13,6 +13,7 @@ import pytest
 from janus_core.calculations.geom_opt import optimize
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
+from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -205,3 +206,80 @@ def test_space_group():
 
     assert single_point.struct.info["initial_spacegroup"] == "I4/mmm (139)"
     assert single_point.struct.info["final_spacegroup"] == "Fm-3m (225)"
+
+
+def test_str_optimizer(tmp_path):
+    """Test setting optimizer function with string."""
+    log_file = tmp_path / "opt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    optimize(
+        single_point.struct,
+        fmax=0.001,
+        optimizer="FIRE",
+        log_kwargs={"filename": log_file},
+    )
+
+    assert_log_contains(
+        log_file, includes=["Starting geometry optimization", "Using optimizer: FIRE"]
+    )
+
+
+def test_invalid_str_optimizer():
+    """Test setting invalid optimizer function with string."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(AttributeError):
+        optimize(
+            single_point.struct,
+            fmax=0.001,
+            optimizer="test",
+        )
+
+
+def test_str_filter(tmp_path):
+    """Test setting filter function with string."""
+    log_file = tmp_path / "opt.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    optimize(
+        single_point.struct,
+        fmax=0.001,
+        filter_func="UnitCellFilter",
+        log_kwargs={"filename": log_file},
+    )
+
+    assert_log_contains(
+        log_file,
+        includes=["Starting geometry optimization", "Using filter: UnitCellFilter"],
+    )
+
+
+def test_invalid_str_filter():
+    """Test setting invalid filter function with string."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-sg.cif",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(AttributeError):
+        optimize(
+            single_point.struct,
+            fmax=0.001,
+            filter_func="test",
+        )

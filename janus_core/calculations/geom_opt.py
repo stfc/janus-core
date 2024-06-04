@@ -2,17 +2,20 @@
 
 from logging import Logger
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 import warnings
 
 from ase import Atoms
 from ase.io import read, write
+import ase.optimize
 from ase.optimize import LBFGS
 from ase.optimize.optimize import Optimizer
 
 try:
+    from ase import filters
     from ase.filters import FrechetCellFilter as DefaultFilter
 except ImportError:
+    import ase.constraints as filters
     from ase.constraints import ExpCellFilter as DefaultFilter
 
 from numpy import linalg
@@ -22,11 +25,45 @@ from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import none_to_dict, spacegroup
 
 
+def _set_functions(
+    optimizer: Union[Callable, str], filter_func: Optional[Union[Callable, str]] = None
+) -> tuple[Callable, Optional[Callable]]:
+    """
+    Set optimizer and filter functions.
+
+    Parameters
+    ----------
+    optimizer : Union[Callable, str]
+        Optimization function, or name of function from ase.optimize.
+    filter_func : Optional[Union[Callable], str]]
+        ASE filter function, or name of function from ase.filters or ase.constraints.
+        Default is None.
+
+    Returns
+    -------
+    tuple[Callable, Optional[Callable]]
+        Tuple of optimizer function and filter function, if set.
+    """
+    if isinstance(optimizer, str):
+        try:
+            optimizer = getattr(ase.optimize, optimizer)
+        except AttributeError as e:
+            raise AttributeError(f"No such optimizer: {optimizer}") from e
+
+    if filter_func is not None and isinstance(filter_func, str):
+        try:
+            filter_func = getattr(filters, filter_func)
+        except AttributeError as e:
+            raise AttributeError(f"No such filter: {filter_func}") from e
+
+    return optimizer, filter_func
+
+
 def set_optimizer(
     struct: Atoms,
-    filter_func: Optional[Callable] = DefaultFilter,
+    filter_func: Optional[Union[Callable, str]] = DefaultFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
-    optimizer: Callable = LBFGS,
+    optimizer: Union[Callable, str] = LBFGS,
     opt_kwargs: Optional[ASEOptArgs] = None,
     logger: Optional[Logger] = None,
 ) -> tuple[Optimizer, Optional[Atoms]]:
@@ -37,13 +74,15 @@ def set_optimizer(
     ----------
     struct : Atoms
         Atoms object to optimize geometry for.
-    filter_func : Optional[callable]
-        Apply constraints to atoms through ASE filter function.
-        Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
+    filter_func : Optional[Union[Callable, str]]
+        Filter function, or name of function from ase.filters or ase.constraints, to
+        apply constraints to atoms. Default is `FrechetCellFilter` if available
+        otherwise `ExpCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to filter_func. Default is {}.
-    optimizer : callable
-        ASE optimization function. Default is `LBFGS`.
+    optimizer : Union[Callable, str]
+        Optimization function, or name of function from ase.optimize. Default is
+        `LBFGS`.
     opt_kwargs : Optional[ASEOptArgs]
         Keyword arguments to pass to optimizer. Default is {}.
     logger : Optional[Logger]
@@ -56,12 +95,16 @@ def set_optimizer(
     """
     [filter_kwargs, opt_kwargs] = none_to_dict([filter_kwargs, opt_kwargs])
     filtered_struct = None
+
+    optimizer, filter_func = _set_functions(optimizer, filter_func)
+    if logger:
+        logger.info("Using optimizer: %s", optimizer.__name__)
+
     if filter_func is not None:
         filtered_struct = filter_func(struct, **filter_kwargs)
         dyn = optimizer(filtered_struct, **opt_kwargs)
         if logger:
-            logger.info("Using filter %s", filter_func.__name__)
-            logger.info("Using optimizer %s", optimizer.__name__)
+            logger.info("Using filter: %s", filter_func.__name__)
             if "hydrostatic_strain" in filter_kwargs:
                 logger.info(
                     "hydrostatic_strain: %s", filter_kwargs["hydrostatic_strain"]
@@ -109,13 +152,15 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     angle_tolerance : float
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
-    filter_func : Optional[callable]
-        Apply constraints to atoms through ASE filter function.
-        Default is `FrechetCellFilter` if available otherwise `ExpCellFilter`.
+    filter_func : Optional[Union[Callable, str]]
+        Filter function, or name of function from ase.filters or ase.constraints, to
+        apply constraints to atoms. Default is `FrechetCellFilter` if available
+        otherwise `ExpCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to filter_func. Default is {}.
-    optimizer : callable
-        ASE optimization function. Default is `LBFGS`.
+    optimizer : Union[Callable, str]
+        Optimization function, or name of function from ase.optimize. Default is
+        `LBFGS`.
     opt_kwargs : Optional[ASEOptArgs]
         Keyword arguments to pass to optimizer. Default is {}.
     write_results : bool

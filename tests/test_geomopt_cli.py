@@ -422,3 +422,88 @@ def test_const_volume(tmp_path):
     )
     assert result.exit_code == 0
     assert_log_contains(log_path, includes=["constant_volume: True"])
+
+
+def test_optimizer_str(tmp_path):
+    """Test setting optimizer function."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--out",
+            results_path,
+            "--optimizer",
+            "FIRE",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert_log_contains(
+        log_path,
+        includes=["Starting geometry optimization", "Using optimizer: FIRE"],
+    )
+
+
+def test_filter_str(tmp_path):
+    """Test setting filter function."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--out",
+            results_path,
+            "--fully-opt",
+            "--filter-func",
+            "UnitCellFilter",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert_log_contains(
+        log_path,
+        includes=["Starting geometry optimization", "Using filter: UnitCellFilter"],
+    )
+
+
+def test_filter_str_error(tmp_path):
+    """Test setting filter function without --fully-opt or --vectors-only."""
+    results_path = tmp_path / "NaCl-opt.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--out",
+            results_path,
+            "--filter-func",
+            "UnitCellFilter",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)

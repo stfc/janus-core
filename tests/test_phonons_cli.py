@@ -7,6 +7,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
+from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -274,3 +275,35 @@ def test_invalid_supercell(supercell, tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_minimize_kwargs(tmp_path):
+    """Test setting optimizer function."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    minimize_kwargs = "{'optimizer': 'FIRE'}"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--minimize",
+            "--minimize-kwargs",
+            minimize_kwargs,
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path,
+        includes=["Starting geometry optimization", "Using optimizer: FIRE"],
+    )
