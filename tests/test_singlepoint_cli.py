@@ -48,7 +48,7 @@ def test_singlepoint(tmp_path):
     atoms = read_atoms(results_path)
     assert result.exit_code == 0
     assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.arrays
+    assert "forces" in atoms.calc.results
 
 
 def test_properties(tmp_path):

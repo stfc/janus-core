@@ -104,13 +104,13 @@ def test_single_point_write():
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    assert "forces" not in single_point.struct.arrays
+    assert "forces" not in single_point.struct.calc.results
 
     single_point.run(write_results=True)
 
     atoms = read_atoms(results_path)
     assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.arrays
+    assert "forces" in atoms.calc.results
 
 
 def test_single_point_write_kwargs(tmp_path):
@@ -123,12 +123,12 @@ def test_single_point_write_kwargs(tmp_path):
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    assert "forces" not in single_point.struct.arrays
+    assert "forces" not in single_point.struct.calc.results
 
     single_point.run(write_results=True, write_kwargs={"filename": results_path})
     atoms = read(results_path)
     assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.arrays
+    assert "forces" in atoms.calc.results
 
 
 def test_single_point_write_nan(tmp_path):
