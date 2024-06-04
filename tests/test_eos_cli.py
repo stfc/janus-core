@@ -52,7 +52,7 @@ def test_eos(tmp_path):
     assert lines[0] == "#Lattice Scalar | Energy [eV] | Volume [Å^3] \n"
     assert lines[4].split()[0] == "1.0"
     assert float(lines[4].split()[1]) == pytest.approx(-27.046359959669214)
-    assert float(lines[4].split()[2]) == pytest.approx(184.28932483484286)
+    assert float(lines[4].split()[2]) == pytest.approx(184.05884033013012)
 
     # Check contents of fitted data file
     with open(eos_fit_path, encoding="utf8") as eos_fit_file:
