@@ -5,19 +5,12 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Union
 import warnings
 
-from ase import Atoms
+from ase import Atoms, filters
+from ase.filters import FrechetCellFilter
 from ase.io import read, write
 import ase.optimize
 from ase.optimize import LBFGS
 from ase.optimize.optimize import Optimizer
-
-try:
-    from ase import filters
-    from ase.filters import FrechetCellFilter as DefaultFilter
-except ImportError:
-    import ase.constraints as filters
-    from ase.constraints import ExpCellFilter as DefaultFilter
-
 from numpy import linalg
 
 from janus_core.helpers.janus_types import ASEOptArgs, ASEWriteArgs
@@ -36,8 +29,7 @@ def _set_functions(
     optimizer : Union[Callable, str]
         Optimization function, or name of function from ase.optimize.
     filter_func : Optional[Union[Callable], str]]
-        ASE filter function, or name of function from ase.filters or ase.constraints.
-        Default is None.
+        ASE filter function, or name of function from ase.filters. Default is None.
 
     Returns
     -------
@@ -61,7 +53,7 @@ def _set_functions(
 
 def set_optimizer(
     struct: Atoms,
-    filter_func: Optional[Union[Callable, str]] = DefaultFilter,
+    filter_func: Optional[Union[Callable, str]] = FrechetCellFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
     optimizer: Union[Callable, str] = LBFGS,
     opt_kwargs: Optional[ASEOptArgs] = None,
@@ -75,9 +67,8 @@ def set_optimizer(
     struct : Atoms
         Atoms object to optimize geometry for.
     filter_func : Optional[Union[Callable, str]]
-        Filter function, or name of function from ase.filters or ase.constraints, to
-        apply constraints to atoms. Default is `FrechetCellFilter` if available
-        otherwise `ExpCellFilter`.
+        Filter function, or name of function from ase.filters to apply constraints to
+        atoms. Default is `FrechetCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to filter_func. Default is {}.
     optimizer : Union[Callable, str]
@@ -125,7 +116,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     steps: int = 1000,
     symmetry_tolerance: float = 0.001,
     angle_tolerance: float = -1.0,
-    filter_func: Optional[Callable] = DefaultFilter,
+    filter_func: Optional[Callable] = FrechetCellFilter,
     filter_kwargs: Optional[dict[str, Any]] = None,
     optimizer: Callable = LBFGS,
     opt_kwargs: Optional[ASEOptArgs] = None,
@@ -153,9 +144,8 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
     filter_func : Optional[Union[Callable, str]]
-        Filter function, or name of function from ase.filters or ase.constraints, to
-        apply constraints to atoms. Default is `FrechetCellFilter` if available
-        otherwise `ExpCellFilter`.
+        Filter function, or name of function from ase.filters to apply constraints to
+        atoms. Default is `FrechetCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to filter_func. Default is {}.
     optimizer : Union[Callable, str]
