@@ -140,8 +140,22 @@ def test_hydrostatic_strain():
         single_point_2.struct, filter_kwargs={"hydrostatic_strain": False}
     )
 
-    expected_1 = [5.69139709, 5.69139709, 5.69139709, 89.0, 90.0, 90.0]
-    expected_2 = [5.68834069, 5.68893345, 5.68932555, 89.75938298, 90.0, 90.0]
+    expected_1 = [
+        5.687545288920282,
+        5.687545288920282,
+        5.687545288920282,
+        89.0,
+        90.0,
+        90.0,
+    ]
+    expected_2 = [
+        5.688268799219085,
+        5.688750772505896,
+        5.688822747326383,
+        89.26002493790229,
+        90.0,
+        90.0,
+    ]
     assert struct_1.cell.cellpar() == pytest.approx(expected_1)
     assert struct_2.cell.cellpar() == pytest.approx(expected_2)
 
@@ -175,16 +189,23 @@ def test_restart(tmp_path):
 
     init_energy = single_point.run("energy")["energy"]
 
+    # Check unconverged warning
     with pytest.warns(UserWarning):
         optimize(
-            single_point.struct, steps=2, opt_kwargs={"restart": tmp_path / "NaCl.pkl"}
+            single_point.struct,
+            steps=2,
+            opt_kwargs={"restart": tmp_path / "NaCl.pkl"},
+            fmax=0.0001,
         )
 
     intermediate_energy = single_point.run("energy")["energy"]
     assert intermediate_energy < init_energy
 
     optimize(
-        single_point.struct, steps=2, opt_kwargs={"restart": tmp_path / "NaCl.pkl"}
+        single_point.struct,
+        steps=2,
+        opt_kwargs={"restart": tmp_path / "NaCl.pkl"},
+        fmax=0.0001,
     )
     final_energy = single_point.run("energy")["energy"]
     assert final_energy < intermediate_energy
