@@ -60,7 +60,6 @@ def test_no_optimize(tmp_path):
 test_data_potentials = [("m3gnet", "cpu"), ("chgnet", "")]
 
 
-@pytest.mark.extra_mlips
 @pytest.mark.parametrize("arch, device", test_data_potentials)
 def test_extra_potentials(arch, device, tmp_path):
     """Test m3gnet and chgnet potentials."""

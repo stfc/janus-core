@@ -27,7 +27,6 @@ def test_mace(architecture, device, kwargs):
     assert calculator.parameters["version"] is not None
 
 
-@pytest.mark.extra_mlips
 @pytest.mark.parametrize("architecture, device", test_data_extras)
 def test_extra_mlips(architecture, device):
     """Test m3gnet and chgnet calculators can be configured."""
