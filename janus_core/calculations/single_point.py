@@ -219,7 +219,7 @@ class SinglePoint(FileNameMixin):
         tag = f"{self.architecture}_energy"
         if isinstance(self.struct, list):
             energies = [struct.get_potential_energy() for struct in self.struct]
-            for struct, energy  in zip(self.struct, energies):
+            for struct, energy in zip(self.struct, energies):
                 struct.info[tag] = energy
             return energies
 
@@ -239,7 +239,7 @@ class SinglePoint(FileNameMixin):
         tag = f"{self.architecture}_forces"
         if isinstance(self.struct, list):
             forces = [struct.get_forces() for struct in self.struct]
-            for force, struct in zip(forces, self.struct):
+            for struct, force in zip(self.struct, forces):
                 struct.arrays[tag] = force
             return forces
 
