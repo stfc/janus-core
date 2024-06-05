@@ -219,7 +219,7 @@ class SinglePoint(FileNameMixin):
         tag = f"{self.architecture}_energy"
         if isinstance(self.struct, list):
             energies = [struct.get_potential_energy() for struct in self.struct]
-            for energy, struct in zip(energies, self.struct):
+            for struct, energy  in zip(self.struct, energies):
                 struct.info[tag] = energy
             return energies
 
