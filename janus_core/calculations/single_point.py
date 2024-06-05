@@ -301,6 +301,7 @@ class SinglePoint(FileNameMixin):
                 )
             if prop in results:
                 del struct.info[f"{self.architecture}_{prop}"]
+                del struct.calc.results[prop]
                 del results[prop]
 
     def _clean_results(
