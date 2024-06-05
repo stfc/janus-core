@@ -216,10 +216,16 @@ class SinglePoint(FileNameMixin):
         MaybeList[float]
             Potential energy of structure(s).
         """
+        tag = f"{self.architecture}_energy"
         if isinstance(self.struct, list):
-            return [struct.get_potential_energy() for struct in self.struct]
+            energies = [struct.get_potential_energy() for struct in self.struct]
+            for struct, energy in zip(self.struct, energies):
+                struct.info[tag] = energy
+            return energies
 
-        return self.struct.get_potential_energy()
+        energy = self.struct.get_potential_energy()
+        self.struct.info[tag] = energy
+        return energy
 
     def _get_forces(self) -> MaybeList[ndarray]:
         """
@@ -230,10 +236,16 @@ class SinglePoint(FileNameMixin):
         MaybeList[ndarray]
             Forces of structure(s).
         """
+        tag = f"{self.architecture}_forces"
         if isinstance(self.struct, list):
-            return [struct.get_forces() for struct in self.struct]
+            forces = [struct.get_forces() for struct in self.struct]
+            for struct, force in zip(self.struct, forces):
+                struct.arrays[tag] = force
+            return forces
 
-        return self.struct.get_forces()
+        force = self.struct.get_forces()
+        self.struct.arrays[tag] = force
+        return force
 
     def _get_stress(self) -> MaybeList[ndarray]:
         """
@@ -244,13 +256,19 @@ class SinglePoint(FileNameMixin):
         MaybeList[ndarray]
             Stress of structure(s).
         """
+        tag = f"{self.architecture}_stress"
         if isinstance(self.struct, list):
-            return [struct.get_stress() for struct in self.struct]
+            stresses = [struct.get_stress() for struct in self.struct]
+            for struct, stress in zip(self.struct, stresses):
+                struct.info[tag] = stress
+            return stresses
 
-        return self.struct.get_stress()
+        stress = self.struct.get_stress()
+        self.struct.info[tag] = stress
+        return stress
 
-    @staticmethod
     def _remove_invalid_props(
+        self,
         struct: Atoms,
         results: CalcResults = None,
         properties: Collection[str] = (),
@@ -275,19 +293,21 @@ class SinglePoint(FileNameMixin):
             for prop in struct.calc.results
             if not isfinite(struct.calc.results[prop]).all()
         ]
-
         # Raise error if property was explicitly requested, otherwise remove
         for prop in rm_keys:
             if prop in properties:
                 raise ValueError(
                     f"'{prop}' contains non-finite values for this structure."
                 )
-            del struct.calc.results[prop]
             if prop in results:
+                del struct.info[f"{self.architecture}_{prop}"]
                 del results[prop]
 
     def _clean_results(
-        self, results: CalcResults = None, properties: Collection[str] = ()
+        self,
+        results: CalcResults = None,
+        properties: Collection[str] = (),
+        invalidate_calc: bool = False,
     ) -> None:
         """
         Remove NaN and inf values from results and calc.results dictionaries.
@@ -298,14 +318,22 @@ class SinglePoint(FileNameMixin):
             Dictionary of calculated results. Default is {}.
         properties : Collection[str]
             Physical properties requested to be calculated. Default is ().
+        invalidate_calc : bool
+            Remove calculator results if True. When True Atoms object loses
+            its property methods and true values are in info and arrays.
+            Default is False.
         """
         results = results if results else {}
 
         if isinstance(self.struct, list):
             for image in self.struct:
                 self._remove_invalid_props(image, results, properties)
+                if invalidate_calc:
+                    image.calc.results = {}
         else:
             self._remove_invalid_props(self.struct, results, properties)
+            if invalidate_calc:
+                self.struct.calc.results = {}
 
     def run(
         self,

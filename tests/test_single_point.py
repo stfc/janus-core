@@ -50,6 +50,8 @@ def test_potential_energy(
             raise ValueError(f"Invalid index: {idx}")
     else:
         assert results == pytest.approx(expected)
+        results_2 = single_point.struct.info["mace_energy"]
+        assert results_2 == pytest.approx(expected)
 
 
 def test_single_point_none():
@@ -76,7 +78,7 @@ def test_single_point_clean():
     results = single_point.run()
     for prop in ["energy", "forces"]:
         assert prop in results
-    assert "stress" not in results
+    assert "mace_stress" not in results
 
 
 def test_single_point_traj():
@@ -91,6 +93,12 @@ def test_single_point_traj():
     results = single_point.run("energy")
     assert results["energy"][0] == pytest.approx(-76.0605725422795)
     assert results["energy"][1] == pytest.approx(-74.80419118083256)
+    assert single_point.struct[0].info["mace_energy"] == pytest.approx(
+        -76.0605725422795
+    )
+    assert single_point.struct[1].info["mace_energy"] == pytest.approx(
+        -74.80419118083256
+    )
 
 
 def test_single_point_write():
@@ -104,13 +112,26 @@ def test_single_point_write():
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    assert "forces" not in single_point.struct.calc.results
+    assert "mace_forces" not in single_point.struct.arrays
 
     single_point.run(write_results=True)
-
     atoms = read_atoms(results_path)
-    assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.calc.results
+    assert "mace_forces" in atoms.arrays
+    assert atoms.info["mace_energy"] == pytest.approx(-27.035127799332745)
+    assert "mace_stress" in atoms.info
+    assert atoms.info["mace_stress"] == pytest.approx(
+        [
+            -0.004783275999053391,
+            -0.004783275999053417,
+            -0.004783275999053412,
+            -2.3858882876234007e-19,
+            -5.02032761017409e-19,
+            -2.29070171362209e-19,
+        ]
+    )
+    assert atoms.arrays["mace_forces"][0] == pytest.approx(
+        [4.11996826e-18, 1.79977561e-17, 1.80139537e-17]
+    )
 
 
 def test_single_point_write_kwargs(tmp_path):
@@ -123,12 +144,12 @@ def test_single_point_write_kwargs(tmp_path):
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    assert "forces" not in single_point.struct.calc.results
+    assert "mace_forces" not in single_point.struct.arrays
 
     single_point.run(write_results=True, write_kwargs={"filename": results_path})
     atoms = read(results_path)
-    assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.calc.results
+    assert atoms.info["mace_energy"] is not None
+    assert "mace_forces" in atoms.arrays
 
 
 def test_single_point_write_nan(tmp_path):
@@ -147,9 +168,9 @@ def test_single_point_write_nan(tmp_path):
 
     single_point.run(write_results=True, write_kwargs={"filename": results_path})
     atoms = read(results_path)
-    assert atoms.get_potential_energy() is not None
-    assert "forces" in atoms.calc.results
-    assert "stress" not in atoms.calc.results
+    assert atoms.info["mace_energy"] == pytest.approx(-14.035236305927514)
+    assert "mace_forces" in atoms.arrays
+    assert "mace_stress" not in atoms.info
 
 
 def test_invalid_prop():
