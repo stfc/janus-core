@@ -308,7 +308,7 @@ class SinglePoint(FileNameMixin):
         self,
         results: CalcResults = None,
         properties: Collection[str] = (),
-        invalidate_calc: bool = False,
+        invalidate_calc: bool = True,
     ) -> None:
         """
         Remove NaN and inf values from results and calc.results dictionaries.
@@ -322,7 +322,7 @@ class SinglePoint(FileNameMixin):
         invalidate_calc : bool
             Remove calculator results if True. When True Atoms object loses
             its property methods and true values are in info and arrays.
-            Default is False.
+            Default is True.
         """
         results = results if results else {}
 
