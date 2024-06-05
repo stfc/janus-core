@@ -259,7 +259,7 @@ class SinglePoint(FileNameMixin):
         tag = f"{self.architecture}_stress"
         if isinstance(self.struct, list):
             stresses = [struct.get_stress() for struct in self.struct]
-            for stress, struct in zip(stresses, self.struct):
+            for struct, stress in zip(self.struct, stresses):
                 struct.info[tag] = stress
             return stresses
 
