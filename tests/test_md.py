@@ -70,7 +70,6 @@ def test_npt():
 
     try:
         npt.run()
-
         restart_atoms_1 = read(restart_path_1)
         assert isinstance(restart_atoms_1, Atoms)
         restart_atoms_2 = read(restart_path_2)

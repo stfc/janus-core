@@ -15,6 +15,7 @@ from janus_core.cli.types import (
     EnsembleKwargs,
     LogPath,
     MinimizeKwargs,
+    PostProcessKwargs,
     ReadKwargs,
     StructPath,
     Summary,
@@ -170,6 +171,7 @@ def md(
     temp_time: Annotated[
         float, Option(help="Time between heating steps, in fs.")
     ] = None,
+    post_process_kwargs: PostProcessKwargs = None,
     log: LogPath = "md.log",
     seed: Annotated[
         Optional[int],
@@ -271,6 +273,8 @@ def md(
     temp_time : Optional[float]
         Time between heating steps, in fs. Default is None, which disables
         heating.
+    post_process_kwargs : Optional[PostProcessKwargs]
+        Kwargs to pass to post-processing.
     log : Optional[Path]
         Path to write logs to. Default is "md.log".
     seed : Optional[int]
@@ -284,8 +288,20 @@ def md(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, minimize_kwargs, ensemble_kwargs] = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, minimize_kwargs, ensemble_kwargs]
+    [
+        read_kwargs,
+        calc_kwargs,
+        minimize_kwargs,
+        ensemble_kwargs,
+        post_process_kwargs,
+    ] = parse_typer_dicts(
+        [
+            read_kwargs,
+            calc_kwargs,
+            minimize_kwargs,
+            ensemble_kwargs,
+            post_process_kwargs,
+        ]
     )
 
     if not ensemble in get_args(Ensembles):
@@ -338,6 +354,7 @@ def md(
         "temp_end": temp_end,
         "temp_step": temp_step,
         "temp_time": temp_time,
+        "post_process_kwargs": post_process_kwargs,
         "log_kwargs": log_kwargs,
         "seed": seed,
         "ensemble_kwargs": ensemble_kwargs,
