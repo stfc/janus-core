@@ -21,9 +21,16 @@ from ase.md.velocitydistribution import (
 )
 from ase.md.verlet import VelocityVerlet
 import numpy as np
+import yaml
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import Ensembles, PathLike, PostProcessKwargs
+from janus_core.helpers.correlator import Correlation, option_to_observable
+from janus_core.helpers.janus_types import (
+    CorrelationKwargs,
+    Ensembles,
+    PathLike,
+    PostProcessKwargs,
+)
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
 from janus_core.helpers.utils import FileNameMixin
@@ -105,6 +112,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         Time between heating steps, in fs. Default is None, which disables heating.
     post_process_kwargs : Optional[PostProcessKwargs]
         Keyword arguments to control post-processing operations.
+    correlation_kwargs : Optional[CorrelationKwargs]
+        Keyword arguments to control on-the-fly correlations.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is None.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -173,6 +182,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         temp_step: Optional[float] = None,
         temp_time: Optional[float] = None,
         post_process_kwargs: Optional[PostProcessKwargs] = None,
+        correlation_kwargs: Optional[CorrelationKwargs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
@@ -253,6 +263,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             Time between heating steps, in fs. Default is None, which disables heating.
         post_process_kwargs : Optional[PostProcessKwargs]
             Keyword arguments to control post-processing operations.
+        correlation_kwargs : Optional[CorrelationKwargs]
+            Keyword arguments to control on-the-fly correlations.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is None.
         tracker_kwargs : Optional[dict[str, Any]]
@@ -289,6 +301,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.temp_time = temp_time * units.fs if temp_time else None
         self.post_process_kwargs = (
             post_process_kwargs if post_process_kwargs is not None else {}
+        )
+        self.correlation_kwargs = (
+            correlation_kwargs if correlation_kwargs is not None else {}
         )
         self.log_kwargs = log_kwargs
         self.ensemble = ensemble
@@ -376,6 +391,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             np.random.seed(seed)
             random.seed(seed)
 
+        self._parse_correlations()
+
     def _rotate_restart_files(self) -> None:
         """Rotate restart files."""
         if len(self.restart_files) > self.restarts_to_keep:
@@ -453,6 +470,48 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         return self._build_filename(
             f"res-{step}.extxyz", f"T{self.temp}", prefix_override=self.restart_stem
         )
+
+    def _parse_correlations(self):
+        """Parse correlation arguments into Correlations."""
+        if not self.correlation_kwargs:
+            self._correlations = None
+        elif len(self.correlation_kwargs["correlations"]) > 0:
+            if len(self.correlation_kwargs["correlation_parameters"]) != len(
+                self.correlation_kwargs["correlations"]
+            ):
+                raise ValueError("Mismatching sizes of correlations and parameters")
+
+            self._correlations = []
+            for cor in range(len(self.correlation_kwargs["correlations"])):
+                obs_a, obs_b = map(
+                    option_to_observable, self.correlation_kwargs["correlations"][cor]
+                )
+                params = self.correlation_kwargs["correlation_parameters"][cor]
+                self._correlations.append(Correlation(obs_a, obs_b, *params))
+
+    def _attach_correlations(self):
+        """Attach all correlations to self.dyn."""
+        # pylint: disable=W0640
+        if self._correlations:
+            for i, _ in enumerate(self._correlations):
+                self.dyn.attach(
+                    lambda: self._correlations[i].update(self.dyn),
+                    self._correlations[i].update_frequency,
+                )
+
+    def _write_correlations(self):
+        """Write out the correlations."""
+        if self._correlations:
+            param_pref = self._parameter_prefix if self.file_prefix is None else ""
+            with open(
+                self._build_filename("cor.dat", param_pref), "w", encoding="utf-8"
+            ) as out_file:
+                data = {"correlations": []}
+                for cor in self._correlations:
+                    value, lags = cor.get()
+                    name = str(cor)
+                    data["correlations"].append({name: {"value": value, "lags": lags}})
+                yaml.dump(data, out_file, default_flow_style=True)
 
     @staticmethod
     def get_stats_header() -> str:
@@ -700,6 +759,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.dyn.attach(self._write_traj, interval=self.traj_every)
         self.dyn.attach(self._write_restart, interval=self.restart_every)
 
+        self._attach_correlations()
+
         if self.rescale_velocities:
             self.dyn.attach(self._reset_velocities, interval=self.rescale_every)
 
@@ -712,6 +773,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
         if self.post_process_kwargs:
             self._post_process()
+
+        if self.correlation_kwargs:
+            self._write_correlations()
 
     def _run_dynamics(self) -> None:
         """Run dynamics and/or temperature ramp."""

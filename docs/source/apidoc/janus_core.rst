@@ -174,6 +174,16 @@ janus\_core.helpers.post_process module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.helpers.correlator module
+---------------------------------------
+
+.. automodule:: janus_core.helpers.correlator
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.helpers.train module
 --------------------------------
 

@@ -75,6 +75,15 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_output_file: Optional[PathLike]
 
 
+class CorrelationKwargs(TypedDict, total=False):
+    """Arguments for on-the-fly correlations."""
+
+    # Pairs of indexed observables, ('s_xy', 's_xy')
+    correlations: Sequence[tuple[str, str]]
+    # Blocks, points, window, and update frequency
+    correlation_parameters: Sequence[tuple[int, int, int, int]]
+
+
 # eos_names from ase.eos
 EoSNames = Literal[
     "sj",
