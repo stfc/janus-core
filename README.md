@@ -65,6 +65,8 @@ pytest -v  # discover and run all tests
 
 ## Examples
 
+Tutorials for a variety of calculations can be found in the [janus-tutorials](https://github.com/stfc/janus-tutorials) repository.
+
 ### Single Point Calculations
 
 Perform a single point calcuation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
