@@ -251,3 +251,21 @@ def test_no_atoms_or_path():
             architecture="mace",
             calc_kwargs={"model": MODEL_PATH},
         )
+
+
+test_data_potentials = [
+    ("m3gnet", "cpu", -26.729949951171875),
+    ("chgnet", "", -29.331436157226562),
+]
+
+
+@pytest.mark.parametrize("arch, device, expected_energy", test_data_potentials)
+def test_extra_mlips(arch, device, expected_energy):
+    """Test single point energy using CHGNET and M3GNET calculators."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture=arch,
+        device=device,
+    )
+    energy = single_point.run("energy")["energy"]
+    assert energy == pytest.approx(expected_energy)
