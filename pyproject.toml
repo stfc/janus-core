@@ -42,6 +42,11 @@ spglib = "^2.3.0"
 torch-dftd = "^0.4.0"
 codecarbon = "^2.5.0"
 
+[tool.poetry.group.extra-mlips]
+optional = true
+[tool.poetry.group.extra-mlips.dependencies]
+alignn = "^2024.5.27"
+
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.4.1"}
 pgtest = "^1.3.2"

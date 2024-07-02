@@ -253,15 +253,31 @@ def test_no_atoms_or_path():
         )
 
 
-test_data_potentials = [
+test_mlips_data = [
     ("m3gnet", "cpu", -26.729949951171875),
     ("chgnet", "cpu", -29.331436157226562),
 ]
 
 
-@pytest.mark.parametrize("arch, device, expected_energy", test_data_potentials)
-def test_extra_mlips(arch, device, expected_energy):
+@pytest.mark.parametrize("arch, device, expected_energy", test_mlips_data)
+def test_mlips(arch, device, expected_energy):
     """Test single point energy using CHGNET and M3GNET calculators."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        architecture=arch,
+        device=device,
+    )
+    energy = single_point.run("energy")["energy"]
+    assert energy == pytest.approx(expected_energy)
+
+
+test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461)]
+
+
+@pytest.mark.extra_mlips
+@pytest.mark.parametrize("arch, device, expected_energy", test_extra_mlips_data)
+def test_extra_mlips(arch, device, expected_energy):
+    """Test single point energy using ALIGNN-FF calculator."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture=arch,

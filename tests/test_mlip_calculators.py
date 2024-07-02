@@ -8,26 +8,30 @@ from janus_core.helpers.mlip_calculators import choose_calculator
 
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
-test_data_mace = [
+test_mlips_data = [
     ("mace", "cpu", {"model": MODEL_PATH}),
     ("mace", "cpu", {"model_paths": MODEL_PATH}),
     ("mace_off", "cpu", {}),
     ("mace_mp", "cpu", {}),
     ("mace_mp", "cpu", {"model": MODEL_PATH}),
     ("mace_off", "cpu", {"model": "small"}),
+    ("m3gnet", "cpu", {}),
+    ("chgnet", "cpu", {}),
 ]
 
-test_data_extras = [("m3gnet", "cpu"), ("chgnet", "cpu")]
 
-
-@pytest.mark.parametrize("architecture, device, kwargs", test_data_mace)
-def test_mace(architecture, device, kwargs):
+@pytest.mark.parametrize("architecture, device, kwargs", test_mlips_data)
+def test_mlips(architecture, device, kwargs):
     """Test mace calculators can be configured."""
     calculator = choose_calculator(architecture=architecture, device=device, **kwargs)
     assert calculator.parameters["version"] is not None
 
 
-@pytest.mark.parametrize("architecture, device", test_data_extras)
+test_extra_mlips_data = [("alignn", "cpu")]
+
+
+@pytest.mark.extra_mlips
+@pytest.mark.parametrize("architecture, device", test_extra_mlips_data)
 def test_extra_mlips(architecture, device):
     """Test m3gnet and chgnet calculators can be configured."""
     calculator = choose_calculator(
