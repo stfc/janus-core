@@ -81,3 +81,11 @@ For ``tests.test_mlip_calculators``, ``architecture`` and ``device`` should be d
 For ``tests.test_single_point``, ``architecture``, ``device``, and the predicted potential energy of NaCl should be defined, ensuring that calculations can be performed::
 
     test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461)]
+
+Running these tests requires an additional flag to be passed to ``pytest``::
+
+    pytest -v --run-extra-mlips
+
+Alternatively, using ``tox``::
+
+    tox -e extra-mlips
