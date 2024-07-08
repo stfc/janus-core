@@ -173,7 +173,7 @@ class Correlator:
         return (correlation[0:lag], lags[0:lag])
 
 
-# pylint: disable=R0903
+# pylint: disable=too-few-public-methods
 class Observable:
     """An abstract observable quantity."""
 
@@ -215,7 +215,7 @@ class Observable:
         return matrix[component]
 
     @abstractmethod
-    # pylint: disable=C0103
+    # pylint: disable=invalid-name
     def get(self, md: MD) -> float:
         """
         Get an observable component from md.
@@ -298,7 +298,7 @@ class Correlation:
 
         return self._update_frequency
 
-    # pylint: disable=C0103
+    # pylint: disable=invalid-name
     def update(self, md: MD):
         """
         Update a correlation.

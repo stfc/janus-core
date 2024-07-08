@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import numpy as np
+from pytest import approx
 from typer.testing import CliRunner
 from yaml import Loader, load
 
@@ -16,10 +17,8 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 runner = CliRunner()
 
-TOLERANCE = 1e-16
 
-
-# pylint: disable=C0103
+# pylint: disable=invalid-name
 def correlate(
     x: Iterable[float], y: Iterable[float], *, fft: bool = True
 ) -> Iterable[float]:
@@ -30,7 +29,7 @@ def correlate(
     if fft:
         cor = np.correlate(x, y, "full")
         cor = cor[len(cor) // 2 :]
-        return cor / n - np.arange(n)
+        return cor / (n - np.arange(n))
     cor = np.zeros(n)
     for j in range(n):
         for i in range(n - j):
@@ -61,8 +60,8 @@ def test_correlation():
 
     assert len(correlation) == len(lags)
     assert all(lags == range(points))
-    assert np.mean(direct - correlation) < TOLERANCE
-    assert np.mean(fft - correlation) < TOLERANCE
+    assert np.mean(direct - correlation) == approx(0)
+    assert np.mean(fft - correlation) == approx(0)
 
 
 def test_md_correlations(tmp_path):
@@ -104,9 +103,9 @@ def test_md_correlations(tmp_path):
         assert len(value) == len(lags) == 10
 
         stats = Stats(stats_path)
-        pxy = stats["Pxy"][1:]
-        direct = correlate(pxy, pxy)
-        assert np.mean(direct - value) < TOLERANCE
+        pxy = stats["Pxy"][0:-1]
+        direct = correlate(pxy, pxy, fft=False)
+        assert np.mean(direct - value) == approx(0)
     finally:
         traj_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)

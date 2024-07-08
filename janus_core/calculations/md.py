@@ -491,7 +491,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
     def _attach_correlations(self):
         """Attach all correlations to self.dyn."""
-        # pylint: disable=W0640
+        # pylint: disable=cell-var-from-loop
         if self._correlations:
             for i, _ in enumerate(self._correlations):
                 self.dyn.attach(
