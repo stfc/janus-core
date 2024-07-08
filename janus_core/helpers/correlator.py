@@ -4,12 +4,9 @@ Module to correlate scalar data on-the-fly.
 
 from abc import abstractmethod
 from collections.abc import Iterable
-from typing import Union
 
 from ase import units
-from ase.md.langevin import Langevin
-from ase.md.npt import NPT as ASE_NPT
-from ase.md.verlet import VelocityVerlet
+from ase.md import md as MD
 import numpy as np
 
 
@@ -219,7 +216,7 @@ class Observable:
 
     @abstractmethod
     # pylint: disable=C0103
-    def get(self, md: Union[Langevin, VelocityVerlet, ASE_NPT]) -> float:
+    def get(self, md: MD) -> float:
         """
         Get an observable component from md.
 
@@ -302,7 +299,7 @@ class Correlation:
         return self._update_frequency
 
     # pylint: disable=C0103
-    def update(self, md: Union[Langevin, VelocityVerlet, ASE_NPT]):
+    def update(self, md: MD):
         """
         Update a correlation.
 
@@ -358,7 +355,7 @@ class Stress(Observable):
         self.component = component
         self._index = self._component_to_index(component, voigt=False)
 
-    def get(self, md: Union[Langevin, VelocityVerlet, ASE_NPT]) -> float:
+    def get(self, md: MD) -> float:
         """
         Get an observable component from md.
 
