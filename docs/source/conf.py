@@ -50,6 +50,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
     "phonopy": ("https://phonopy.github.io/phonopy/", None),
+    "codecarbon": ("https://mlco2.github.io/codecarbon/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -201,4 +202,5 @@ nitpick_ignore = [
     ("py:class", "janus_core.helpers.stats.T"),
     ("py:class", "phonopy.structure.atoms.PhonopyAtoms"),
     ("py:class", "ase.optimize.optimize.Optimizer"),
+    ("py:class", "codecarbon.emissions_tracker.OfflineEmissionsTracker"),
 ]
