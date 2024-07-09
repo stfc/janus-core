@@ -1,7 +1,11 @@
 """Configure logger with yaml-styled format."""
 
+import json
 import logging
 from typing import Literal, Optional
+
+from codecarbon import OfflineEmissionsTracker
+from codecarbon.output import LoggerOutput
 
 from janus_core.helpers.janus_types import LogLevel
 
@@ -73,15 +77,22 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         str
             Formatted log message.
         """
-        # Replace "" with '' to prevent invalid wrapping
-        record.msg = record.msg.replace('"', "'")
+        # Parse JSON dump from codecarbon
+        if len(record.msg) > 1 and (record.msg[0] == "{" and record.msg[-1] == "}"):
+            msg_dict = json.loads(record.msg)
+            record.msg = ""
+            for key, value in msg_dict.items():
+                record.msg += f"\n    {key}: {value}"
+        else:
+            # Replace "" with '' to prevent invalid wrapping
+            record.msg = record.msg.replace('"', "'")
 
-        # Convert new lines into yaml list
-        record.msg = "\n" + "\n".join(
-            f'    - "{line.strip()}"'
-            for line in record.msg.splitlines()
-            if line.strip()
-        )
+            # Convert new lines into yaml list
+            record.msg = "\n" + "\n".join(
+                f'    - "{line.strip()}"'
+                for line in record.msg.splitlines()
+                if line.strip()
+            )
         return super().format(record)
 
 
@@ -138,3 +149,51 @@ def config_logger(
     else:
         logger = None
     return logger
+
+
+def config_tracker(
+    janus_logger: Optional[logging.Logger],
+    *,
+    country_iso_code: str = "GBR",
+    save_to_file: bool = False,
+    log_level: Literal["debug", "info", "warning", "error", "critical"] = "critical",
+) -> Optional[OfflineEmissionsTracker]:
+    """
+    Configure codecarbon tracker to log outputs.
+
+    Parameters
+    ----------
+    janus_logger : Optional[logging.Logger]
+        Logger for codecarbon output.
+    country_iso_code : str
+        3 letter ISO Code of the country where the code is running. Default is "GBR".
+    save_to_file : bool
+        Whether to also output results to a csv file. Default is False.
+    log_level : Literal["debug", "info", "warning", "error", "critical"]
+        Log level of internal carbon tracker log. Default is "critical".
+
+    Returns
+    -------
+    Optional[OfflineEmissionsTracker]
+        Configured offline codecarbon tracker, if logger is specified.
+    """
+    if janus_logger:
+        carbon_logger = LoggerOutput(janus_logger)
+        tracker = OfflineEmissionsTracker(
+            country_iso_code=country_iso_code,
+            save_to_file=save_to_file,
+            save_to_logger=True,
+            logging_logger=carbon_logger,
+            project_name="janus-core",
+            log_level=log_level,
+        )
+
+        # Suppress further logging from codecarbon
+        carbon_logger = logging.getLogger("codecarbon")
+        while carbon_logger.hasHandlers():
+            carbon_logger.removeHandler(carbon_logger.handlers[0])
+
+    else:
+        tracker = None
+
+    return tracker
