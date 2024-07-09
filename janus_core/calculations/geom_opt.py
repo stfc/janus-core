@@ -14,7 +14,7 @@ from ase.optimize.optimize import Optimizer
 from numpy import linalg
 
 from janus_core.helpers.janus_types import ASEOptArgs, ASEWriteArgs
-from janus_core.helpers.log import config_logger
+from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict, spacegroup
 
 
@@ -124,6 +124,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     write_kwargs: Optional[ASEWriteArgs] = None,
     traj_kwargs: Optional[ASEWriteArgs] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
+    tracker_kwargs: Optional[dict[str, Any]] = None,
 ) -> Atoms:
     """
     Optimize geometry of input structure.
@@ -163,14 +164,16 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         Must include "filename" keyword. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
 
     Returns
     -------
     struct: Atoms
         Structure with geometry optimized.
     """
-    [opt_kwargs, write_kwargs, traj_kwargs, log_kwargs] = none_to_dict(
-        [opt_kwargs, write_kwargs, traj_kwargs, log_kwargs]
+    [opt_kwargs, write_kwargs, traj_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
+        [opt_kwargs, write_kwargs, traj_kwargs, log_kwargs, tracker_kwargs]
     )
 
     write_kwargs.setdefault(
@@ -191,6 +194,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
+    tracker = config_tracker(logger, **tracker_kwargs)
 
     s_grp = spacegroup(struct, symmetry_tolerance, angle_tolerance)
     message = f"Before optimisation spacegroup {s_grp}"
@@ -205,6 +209,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     if logger:
         logger.info("Starting geometry optimization")
+        tracker.start()
 
     converged = dyn.run(fmax=fmax, steps=steps)
 
@@ -238,6 +243,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         write(images=traj, **traj_kwargs)
 
     if logger:
+        tracker.stop()
         logger.info("Geometry optimization complete")
 
     return struct
