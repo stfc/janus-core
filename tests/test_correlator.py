@@ -3,6 +3,8 @@
 from collections.abc import Iterable
 from pathlib import Path
 
+from ase.io import read
+from ase.units import bar
 import numpy as np
 from pytest import approx
 from typer.testing import CliRunner
@@ -11,7 +13,6 @@ from yaml import Loader, load
 from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.correlator import Correlator
-from janus_core.helpers.stats import Stats
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -60,8 +61,8 @@ def test_correlation():
 
     assert len(correlation) == len(lags)
     assert all(lags == range(points))
-    assert np.mean(direct - correlation) == approx(0)
-    assert np.mean(fft - correlation) == approx(0)
+    assert direct == approx(correlation, rel=1e-10)
+    assert fft == approx(correlation, rel=1e-10)
 
 
 def test_md_correlations(tmp_path):
@@ -80,18 +81,23 @@ def test_md_correlations(tmp_path):
     nve = NVE(
         struct=single_point.struct,
         temp=300.0,
-        steps=10,
-        traj_every=2,
+        steps=100,
+        seed=1,
+        traj_every=1,
         stats_every=1,
         file_prefix=file_prefix,
         correlation_kwargs={
             "correlations": [("s_xy", "s_xy")],
-            "correlation_parameters": [(1, 10, 1, 1)],
+            "correlation_parameters": [(1, 101, 1, 1)],
         },
     )
 
     try:
         nve.run()
+        pxy = [
+            atom.get_stress(include_ideal_gas=True, voigt=False).flatten()[1] / bar
+            for atom in read(traj_path, index=":")
+        ]
         assert cor_path.exists()
         with open(cor_path, encoding="utf8") as in_file:
             cor = load(in_file, Loader=Loader)
@@ -100,12 +106,11 @@ def test_md_correlations(tmp_path):
         assert "stress_xy-stress_xy" in cor["correlations"][0]
         stress_cor = cor["correlations"][0]["stress_xy-stress_xy"]
         value, lags = stress_cor["value"], stress_cor["lags"]
-        assert len(value) == len(lags) == 10
+        assert len(value) == len(lags) == 101
 
-        stats = Stats(stats_path)
-        pxy = stats["Pxy"][0:-1]
         direct = correlate(pxy, pxy, fft=False)
-        assert np.mean(direct - value) == approx(0)
+        # input data differs due to i/o, error is expected 1e-5
+        assert direct == approx(value, rel=1e-5)
     finally:
         traj_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)

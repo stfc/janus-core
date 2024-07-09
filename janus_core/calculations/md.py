@@ -2,6 +2,7 @@
 """Run molecular dynamics simulations."""
 
 import datetime
+from functools import partial
 from itertools import combinations_with_replacement
 from math import isclose
 from pathlib import Path
@@ -491,11 +492,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
     def _attach_correlations(self):
         """Attach all correlations to self.dyn."""
-        # pylint: disable=cell-var-from-loop
         if self._correlations:
             for i, _ in enumerate(self._correlations):
                 self.dyn.attach(
-                    lambda: self._correlations[i].update(self.dyn),
+                    partial(lambda i: self._correlations[i].update(self.dyn), i),
                     self._correlations[i].update_frequency,
                 )
 
@@ -510,8 +510,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 for cor in self._correlations:
                     value, lags = cor.get()
                     name = str(cor)
-                    data["correlations"].append({name: {"value": value, "lags": lags}})
-                yaml.dump(data, out_file, default_flow_style=True)
+                    data["correlations"].append(
+                        {name: {"value": value.tolist(), "lags": lags.tolist()}}
+                    )
+                yaml.dump(data, out_file, default_flow_style=None)
 
     @staticmethod
     def get_stats_header() -> str:
