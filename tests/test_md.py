@@ -82,7 +82,7 @@ def test_npt():
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
-            assert "Target P [bar] | Target T [K]" in lines[0]
+            assert "Target P [GPa] | Target T [K]" in lines[0]
             assert len(lines) == 5
     finally:
         restart_path_1.unlink(missing_ok=True)

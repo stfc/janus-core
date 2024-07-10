@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated, Any, Optional
 
-from ase import units
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -52,7 +51,7 @@ def _set_minimize_kwargs(
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function.
     pressure : float
-        Scalar pressure when optimizing cell geometry, in bar. Passed to the filter
+        Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `vectors_only` or `fully_opt` is True.
     """
     if "opt_kwargs" in minimize_kwargs:
@@ -85,7 +84,7 @@ def _set_minimize_kwargs(
 
     # Set hydrostatic_strain and scalar pressure
     minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = vectors_only
-    minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure * units.bar
+    minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure
 
 
 @app.command(
@@ -128,7 +127,7 @@ def geomopt(
         ),
     ] = None,
     pressure: Annotated[
-        float, Option(help="Scalar pressure when optimizing cell geometry, in bar.")
+        float, Option(help="Scalar pressure when optimizing cell geometry, in GPa.")
     ] = 0.0,
     out: Annotated[
         Path,
@@ -181,7 +180,7 @@ def geomopt(
         constraints to atoms. If using --vectors only or --fully-opt, defaults to
         `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
     pressure : float
-        Scalar pressure when optimizing cell geometry, in bar. Passed to the filter
+        Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `vectors_only` or `fully_opt` is True. Default is 0.0.
     out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not

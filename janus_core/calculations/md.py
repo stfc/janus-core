@@ -454,8 +454,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         """
         log_header = (
             "# Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
-            "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [bar] | "
-            "Pxx [bar] | Pyy [bar] | Pzz [bar] | Pyz [bar] | Pxz [bar] | Pxy [bar]"
+            "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [GPa] | "
+            "Pxx [GPa] | Pyy [GPa] | Pzz [GPa] | Pyz [GPa] | Pxz [GPa] | Pxy [GPa]"
         )
 
         return log_header
@@ -495,11 +495,11 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                     self.dyn.atoms.get_stress(include_ideal_gas=True, voigt=False)
                 )
                 / 3
-                / units.bar
+                / units.GPa
             )
             pressure_tensor = (
                 -self.dyn.atoms.get_stress(include_ideal_gas=True, voigt=True)
-                / units.bar
+                / units.GPa
             )
         except ValueError:
             volume = 0.0
@@ -762,7 +762,7 @@ class NPT(MolecularDynamics):
     bulk_modulus : float
         Bulk modulus, in GPa. Default is 2.0.
     pressure : float
-        Pressure, in bar. Default is 0.0.
+        Pressure, in GPa. Default is 0.0.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "npt".
     file_prefix : Optional[PathLike]
@@ -805,7 +805,7 @@ class NPT(MolecularDynamics):
         bulk_modulus : float
             Bulk modulus, in GPa. Default is 2.0.
         pressure : float
-            Pressure, in bar. Default is 0.0.
+            Pressure, in GPa. Default is 0.0.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "npt".
         file_prefix : Optional[PathLike]
@@ -838,7 +838,7 @@ class NPT(MolecularDynamics):
             ttime=self.ttime,
             pfactor=pfactor,
             append_trajectory=self.traj_append,
-            externalstress=self.pressure * units.bar,
+            externalstress=self.pressure * units.GPa,
             **ensemble_kwargs,
         )
 
@@ -914,7 +914,7 @@ class NPT(MolecularDynamics):
             Header for molecular dynamics log.
         """
         log_header = MolecularDynamics.get_log_header()
-        return log_header + " | Target P [bar] | Target T [K]"
+        return log_header + " | Target P [GPa] | Target T [K]"
 
 
 class NVT(MolecularDynamics):
@@ -1146,7 +1146,7 @@ class NPH(NPT):
     bulk_modulus : float
         Bulk modulus, in GPa. Default is 2.0.
     pressure : float
-        Pressure, in bar. Default is 0.0.
+        Pressure, in GPa. Default is 0.0.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is "nph".
     file_prefix : Optional[PathLike]
@@ -1186,7 +1186,7 @@ class NPH(NPT):
         bulk_modulus : float
             Bulk modulus, in GPa. Default is 2.0.
         pressure : float
-            Pressure, in bar. Default is 0.0.
+            Pressure, in GPa. Default is 0.0.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is "nph".
         file_prefix : Optional[PathLike]

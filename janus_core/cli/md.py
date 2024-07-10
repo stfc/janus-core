@@ -71,7 +71,7 @@ def md(
         float, Option(help="Bulk modulus for NPT or NPH simulation, in GPa.")
     ] = 2.0,
     pressure: Annotated[
-        float, Option(help="Pressure fpr NPT or NPH simulation, in bar.")
+        float, Option(help="Pressure fpr NPT or NPH simulation, in GPa.")
     ] = 0.0,
     friction: Annotated[
         float, Option(help="Friction coefficient for NVT simulation, in fs^-1.")
@@ -206,7 +206,7 @@ def md(
     bulk_modulus : float
         Bulk modulus, in GPa. Default is 2.0.
     pressure : float
-        Pressure, in bar. Default is 0.0.
+        Pressure, in GPa. Default is 0.0.
     friction : float
         Friction coefficient in fs^-1. Default is 0.005.
     ensemble_kwargs : Optional[dict[str, Any]]
