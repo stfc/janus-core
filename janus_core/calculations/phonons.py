@@ -23,7 +23,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     struct : Atoms
         Structrure to calculate phonons for.
     struct_name : Optional[str]
-        Name of structure. Default is inferred from chemical formula if `struct`.
+        Name of structure. Default is inferred from chemical formula of `struct`.
     supercell : MaybeList[int]
         Size of supercell for calculation. Default is 2.
     displacement : float
@@ -185,6 +185,14 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
                     "name": self.logger.name,
                     "filemode": "a",
                 }
+            # If not specified otherwise, save optimized structure consistently with
+            # phonon output files
+            opt_file = self._build_filename("opt.xyz")
+            if "write_kwargs" in self.minimize_kwargs:
+                self.minimize_kwargs["write_kwargs"].setdefault("filename", opt_file)
+            else:
+                self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
+
             optimize(self.struct, **self.minimize_kwargs)
 
         if self.logger:

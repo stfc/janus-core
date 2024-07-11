@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ase.io import read
 import pytest
 from typer.testing import CliRunner
 
@@ -167,3 +168,64 @@ def test_minimising_all(tmp_path):
             "constant_volume: True",
         ],
     )
+
+
+def test_writing_structs(tmp_path):
+    """Test writing out generated structures."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "example"
+    generated_path = tmp_path / "example-generated.xyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--n-volumes",
+            4,
+            "--file-prefix",
+            file_prefix,
+            "--write-structures",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert generated_path.exists()
+    atoms = read(generated_path, index=":")
+    assert len(atoms) == 5
+
+
+def test_error_write_geomopt(tmp_path):
+    """Test an error is raised if trying to write via geomopt."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "example"
+
+    minimize_kwargs = "{'write_results': True}"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--n-volumes",
+            4,
+            "--file-prefix",
+            file_prefix,
+            "--minimize",
+            "--minimize-kwargs",
+            minimize_kwargs,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
