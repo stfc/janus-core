@@ -278,11 +278,13 @@ def test_invalid_supercell(supercell, tmp_path):
 
 
 def test_minimize_kwargs(tmp_path):
-    """Test setting optimizer function."""
+    """Test setting optimizer function and writing optimized structure."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "test"
+    opt_path = tmp_path / "test-opt.xyz"
 
-    minimize_kwargs = "{'optimizer': 'FIRE'}"
+    minimize_kwargs = "{'optimizer': 'FIRE', 'write_results': True}"
 
     result = runner.invoke(
         app,
@@ -294,7 +296,7 @@ def test_minimize_kwargs(tmp_path):
             "--minimize-kwargs",
             minimize_kwargs,
             "--file-prefix",
-            tmp_path / "NaCl",
+            file_prefix,
             "--log",
             log_path,
             "--summary",
@@ -307,3 +309,37 @@ def test_minimize_kwargs(tmp_path):
         log_path,
         includes=["Starting geometry optimization", "Using optimizer: FIRE"],
     )
+    assert opt_path.exists()
+
+
+def test_minimize_filename(tmp_path):
+    """Test minimize filename overwrites default."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "test"
+    opt_path = tmp_path / "geomopt-opt.xyz"
+
+    minimize_kwargs = (
+        "{'write_results': 'True', "
+        f"'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--minimize",
+            "--minimize-kwargs",
+            minimize_kwargs,
+            "--file-prefix",
+            file_prefix,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert opt_path.exists()
