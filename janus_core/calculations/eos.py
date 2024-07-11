@@ -17,7 +17,7 @@ from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict
 
 
-def _calc_volumes_energies(
+def _calc_volumes_energies(  # pylint: disable=too-many-locals
     struct: Atoms,
     *,
     min_volume: float = 0.95,
@@ -174,6 +174,15 @@ def calc_eos(
     file_prefix = file_prefix if file_prefix else struct_name
 
     write_kwargs.setdefault("filename", f"{file_prefix}-generated.xyz")
+
+    if (
+        (minimize or minimize_all)
+        and "write_results" in minimize_kwargs
+        and minimize_kwargs["write_results"]
+    ):
+        raise ValueError(
+            "Optimized structures can be saved by setting `write_structures`"
+        )
 
     if not struct.calc:
         raise ValueError("Please attach a calculator to `struct`.")
