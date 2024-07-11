@@ -231,7 +231,7 @@ def test_scalar_pressure(option, tmp_path):
             results_path,
             option,
             "--pressure",
-            "100",
+            "0.01",
             "--log",
             log_path,
             "--summary",
@@ -239,7 +239,7 @@ def test_scalar_pressure(option, tmp_path):
         ],
     )
     assert result.exit_code == 0
-    assert_log_contains(log_path, includes=["scalar_pressure: 6.24"])
+    assert_log_contains(log_path, includes=["scalar_pressure: 0.01 GPa"])
 
 
 def test_duplicate_traj(tmp_path):

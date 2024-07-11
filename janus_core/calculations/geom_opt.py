@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Union
 import warnings
 
-from ase import Atoms, filters
+from ase import Atoms, filters, units
 from ase.filters import FrechetCellFilter
 from ase.io import read, write
 import ase.optimize
@@ -103,7 +103,8 @@ def set_optimizer(
             if "constant_volume" in filter_kwargs:
                 logger.info("constant_volume: %s", filter_kwargs["constant_volume"])
             if "scalar_pressure" in filter_kwargs:
-                logger.info("scalar_pressure: %s", filter_kwargs["scalar_pressure"])
+                logger.info("scalar_pressure: %s GPa", filter_kwargs["scalar_pressure"])
+                filter_kwargs["scalar_pressure"] *= units.GPa
     else:
         dyn = optimizer(struct, **opt_kwargs)
 
