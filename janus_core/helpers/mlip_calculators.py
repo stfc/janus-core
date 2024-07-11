@@ -6,6 +6,8 @@ Similar in spirit to matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
+from typing import get_args
+
 from ase.calculators.calculator import Calculator
 import torch
 
@@ -46,6 +48,9 @@ def choose_calculator(
     # but the error message is clear if imports are missing.
     if "model" in kwargs and "model_paths" in kwargs:
         raise ValueError("Please specify either `model` or `model_paths`")
+
+    if not device in get_args(Devices):
+        raise ValueError(f"`device` must be one of: {get_args(Devices)}")
 
     if architecture == "mace":
         from mace import __version__
