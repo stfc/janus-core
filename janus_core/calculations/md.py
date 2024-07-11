@@ -24,7 +24,7 @@ import numpy as np
 
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import Ensembles, PathLike, PostProcessKwargs
-from janus_core.helpers.log import config_logger
+from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
 from janus_core.helpers.utils import FileNameMixin
 
@@ -103,15 +103,19 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
     post_process_kwargs : Optional[PostProcessKwargs]
         Keyword arguments to control post-processing operations.
     log_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to log config. Default is None.
+        Keyword arguments to pass to `config_logger`. Default is None.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is None.
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
 
     Attributes
     ----------
-    logger : logging.Logger
+    logger : Optional[logging.Logger]
         Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
     dyn : Dynamics
         Dynamics object to run simulation.
     n_atoms : int
@@ -164,6 +168,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         temp_time: Optional[float] = None,
         post_process_kwargs: Optional[PostProcessKwargs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
     ) -> None:
         """
@@ -240,7 +245,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         post_process_kwargs : Optional[PostProcessKwargs]
             Keyword arguments to control post-processing operations.
         log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to log config. Default is None.
+            Keyword arguments to pass to `config_logger`. Default is None.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is None.
         seed : Optional[int]
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
@@ -282,11 +289,15 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.log_kwargs = (
             log_kwargs if log_kwargs else {}
         )  # pylint: disable=duplicate-code
+        self.tracker_kwargs = (
+            tracker_kwargs if tracker_kwargs else {}
+        )  # pylint: disable=duplicate-code
         if self.log_kwargs and "filename" not in self.log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
         self.log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**self.log_kwargs)
+        self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
 
         # Warn if attempting to rescale/minimize during dynamics
         # but equil_steps is too low
@@ -719,6 +730,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
             if self.logger:
                 self.logger.info("Beginning temperature ramp at %sK", temps[0])
+                self.tracker.start_task("Temperature ramp")
             for temp in temps:
                 self.temp = temp
                 self._set_velocity_distribution()
@@ -731,11 +743,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self._write_final_state()
             if self.logger:
                 self.logger.info("Temperature ramp complete at %sK", temps[-1])
+                self.tracker.stop_task()
 
         # Run MD
         if self.steps > 0:
             if self.logger:
                 self.logger.info("Starting molecular dynamics simulation")
+                self.tracker.start_task("Molecular dynamics")
             self.temp = md_temp
             if self.ramp_temp:
                 self._set_velocity_distribution()
@@ -744,6 +758,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             self.dyn.run(self.steps)
             self._write_final_state()
             if self.logger:
+                self.tracker.stop_task()
+                self.tracker.stop()
                 self.logger.info("Molecular dynamics simulation complete")
 
 

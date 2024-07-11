@@ -10,7 +10,7 @@ from phonopy.structure.atoms import PhonopyAtoms
 
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import MaybeList, PathLike
-from janus_core.helpers.log import config_logger
+from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
@@ -56,6 +56,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         chemical formula of the structure.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
 
     Attributes
     ----------
@@ -63,8 +65,10 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         ASE Calculator attached to strucutre.
     results : dict
         Results of phonon calculations.
-    logger : logging.Logger
+    logger : Optional[logging.Logger]
         Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,disable=too-many-locals
@@ -84,6 +88,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         minimize_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise Phonons class.
@@ -126,10 +131,14 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             chemical formula of the structure.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
         """
         FileNameMixin.__init__(self, struct, struct_name, file_prefix)
 
-        [minimize_kwargs, log_kwargs] = none_to_dict([minimize_kwargs, log_kwargs])
+        [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
+            [minimize_kwargs, log_kwargs, tracker_kwargs]
+        )
 
         self.struct = struct
 
@@ -148,6 +157,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.log_kwargs = log_kwargs
         self.log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**self.log_kwargs)
+        self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         self.hdf5 = hdf5
         self.plot_to_file = plot_to_file
@@ -178,7 +188,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             optimize(self.struct, **self.minimize_kwargs)
 
         if self.logger:
-            self.logger.info("Beginning phonons calculation")
+            self.logger.info("Starting phonons calculation")
+            self.tracker.start_task("Phonon calculation")
 
         cell = self.ASE_to_PhonopyAtoms(self.struct)
 
@@ -204,6 +215,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             self.results["phonon"].symmetrize_force_constants(level=1)
 
         if self.logger:
+            self.tracker.stop_task()
+            self.tracker.flush()
             self.logger.info("Phonons calculation complete")
 
         if write_results:
@@ -308,7 +321,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             self.calc_force_constants(write_results=False)
 
         if self.logger:
-            self.logger.info("Beginning thermal properties calculation")
+            self.logger.info("Starting thermal properties calculation")
+            self.tracker.start_task("Thermal calculation")
 
         self.results["phonon"].run_mesh()
         self.results["phonon"].run_thermal_properties(
@@ -319,6 +333,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         ].get_thermal_properties_dict()
 
         if self.logger:
+            self.tracker.stop_task()
+            self.tracker.flush()
             self.logger.info("Thermal properties calculation complete")
 
         if write_results:
@@ -364,12 +380,15 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             self.calc_force_constants(write_results=False)
 
         if self.logger:
-            self.logger.info("Beginning DOS calculation")
+            self.logger.info("Starting DOS calculation")
+            self.tracker.start_task("DOS calculation")
 
         self.results["phonon"].run_mesh(mesh)
         self.results["phonon"].run_total_dos()
 
         if self.logger:
+            self.tracker.stop_task()
+            self.tracker.flush()
             self.logger.info("DOS calculation complete")
 
         if write_results:
@@ -425,7 +444,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             self.calc_force_constants(write_results=False)
 
         if self.logger:
-            self.logger.info("Beginning PDOS calculation")
+            self.logger.info("Starting PDOS calculation")
+            self.tracker.start_task("PDOS calculation")
 
         self.results["phonon"].run_mesh(
             mesh, with_eigenvectors=True, is_mesh_symmetry=False
@@ -433,6 +453,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].run_projected_dos()
 
         if self.logger:
+            self.tracker.stop_task()
+            self.tracker.flush()
             self.logger.info("PDOS calculation complete")
 
         if write_results:

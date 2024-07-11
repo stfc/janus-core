@@ -6,12 +6,13 @@ from typing import Any, Optional
 from ase import Atoms
 from ase.eos import EquationOfState
 from ase.units import kJ
+from codecarbon import OfflineEmissionsTracker
 from numpy import float64, linspace
 from numpy.typing import NDArray
 
 from janus_core.calculations.geom_opt import optimize
 from janus_core.helpers.janus_types import EoSNames, EoSResults, PathLike
-from janus_core.helpers.log import config_logger
+from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict
 
 
@@ -23,6 +24,7 @@ def _calc_volumes_energies(
     minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     logger: Optional[Logger] = None,
+    tracker: Optional[OfflineEmissionsTracker] = None,
 ) -> tuple[NDArray[float64], list[float], list[float]]:
     """
     Calculate volumes and energies for all lattice constants.
@@ -44,6 +46,8 @@ def _calc_volumes_energies(
         chemical formula of the structure.
     logger : Optional[Logger]
         Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
 
     Returns
     -------
@@ -52,6 +56,7 @@ def _calc_volumes_energies(
     """
     if logger:
         logger.info("Starting calculations for configurations")
+        tracker.start_task("Calculate configurations")
 
     cell = struct.get_cell()
 
@@ -73,6 +78,7 @@ def _calc_volumes_energies(
         energies.append(c_struct.get_potential_energy())
 
     if logger:
+        tracker.stop_task()
         logger.info("Calculations for configurations complete")
 
     return lattice_scalars, volumes, energies
@@ -92,6 +98,7 @@ def calc_eos(
     write_results: bool = True,
     file_prefix: Optional[PathLike] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
+    tracker_kwargs: Optional[dict[str, Any]] = None,
 ) -> EoSResults:
     """
     Calculate equation of state.
@@ -123,6 +130,8 @@ def calc_eos(
         chemical formula of the structure.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
 
     Returns
     -------
@@ -130,9 +139,12 @@ def calc_eos(
         Dictionary containing equation of state ASE object, and fitted minimum
         bulk_modulus, volume, and energy.
     """
-    [minimize_kwargs, log_kwargs] = none_to_dict([minimize_kwargs, log_kwargs])
+    [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
+        [minimize_kwargs, log_kwargs, tracker_kwargs]
+    )
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
+    tracker = config_tracker(logger, **tracker_kwargs)
 
     struct_name = struct_name if struct_name else struct.get_chemical_formula()
     file_prefix = file_prefix if file_prefix else struct_name
@@ -172,6 +184,7 @@ def calc_eos(
         minimize_all,
         minimize_kwargs,
         logger,
+        tracker,
     )
 
     if write_results:
@@ -184,12 +197,15 @@ def calc_eos(
 
     if logger:
         logger.info("Starting of fitting equation of state")
+        tracker.start_task("Fit EoS")
 
     v_0, e_0, bulk_modulus = eos.fit()
     # transform bulk modulus unit in GPa
     bulk_modulus *= 1.0e24 / kJ
 
     if logger:
+        tracker.stop_task()
+        tracker.stop()
         logger.info("Equation of state fitting complete")
 
     if write_results:

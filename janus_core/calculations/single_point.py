@@ -17,7 +17,7 @@ from janus_core.helpers.janus_types import (
     MaybeList,
     MaybeSequence,
 )
-from janus_core.helpers.log import config_logger
+from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
@@ -49,6 +49,8 @@ class SinglePoint(FileNameMixin):
         Keyword arguments to pass to the selected calculator. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
 
     Attributes
     ----------
@@ -62,8 +64,10 @@ class SinglePoint(FileNameMixin):
         Path of structure to simulate.
     struct_name : Optional[str]
         Name of structure.
-    logger : logging.Logger
+    logger : Optional[logging.Logger]
         Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
 
     Methods
     -------
@@ -85,6 +89,7 @@ class SinglePoint(FileNameMixin):
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -112,6 +117,8 @@ class SinglePoint(FileNameMixin):
             Keyword arguments to pass to the selected calculator. Default is {}.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
         """
         if struct and struct_path:
             raise ValueError(
@@ -125,8 +132,8 @@ class SinglePoint(FileNameMixin):
                 "or a path to the structure file (`struct_path`)"
             )
 
-        [read_kwargs, calc_kwargs, log_kwargs] = none_to_dict(
-            [read_kwargs, calc_kwargs, log_kwargs]
+        [read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
+            [read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs]
         )
 
         if log_kwargs and "filename" not in log_kwargs:
@@ -134,6 +141,7 @@ class SinglePoint(FileNameMixin):
 
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)
+        self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         self.architecture = architecture
         self.device = device
@@ -380,6 +388,7 @@ class SinglePoint(FileNameMixin):
 
         if self.logger:
             self.logger.info("Starting single point calculation")
+            self.tracker.start_task("Single point")
 
         if "energy" in properties or len(properties) == 0:
             results["energy"] = self._get_potential_energy()
@@ -392,6 +401,8 @@ class SinglePoint(FileNameMixin):
         self._clean_results(results, properties=properties)
 
         if self.logger:
+            self.tracker.stop_task()
+            self.tracker.stop()
             self.logger.info("Single point calculation complete")
 
         if write_results:

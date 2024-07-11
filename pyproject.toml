@@ -40,6 +40,7 @@ phonopy = "^2.23.1"
 seekpath = "^1.9.7"
 spglib = "^2.3.0"
 torch-dftd = "^0.4.0"
+codecarbon = "^2.5.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.4.1"}
