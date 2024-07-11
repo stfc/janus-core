@@ -25,7 +25,7 @@ import numpy as np
 import yaml
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.correlator import Correlation, option_to_observable
+from janus_core.helpers.correlator import Correlation
 from janus_core.helpers.janus_types import (
     CorrelationKwargs,
     Ensembles,
@@ -183,7 +183,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         temp_step: Optional[float] = None,
         temp_time: Optional[float] = None,
         post_process_kwargs: Optional[PostProcessKwargs] = None,
-        correlation_kwargs: Optional[CorrelationKwargs] = None,
+        correlation_kwargs: Optional[list[CorrelationKwargs]] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
@@ -264,7 +264,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             Time between heating steps, in fs. Default is None, which disables heating.
         post_process_kwargs : Optional[PostProcessKwargs]
             Keyword arguments to control post-processing operations.
-        correlation_kwargs : Optional[CorrelationKwargs]
+        correlation_kwargs : Optional[list[CorrelationKwargs]]
             Keyword arguments to control on-the-fly correlations.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is None.
@@ -473,29 +473,22 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         )
 
     def _parse_correlations(self):
-        """Parse correlation arguments into Correlations."""
+        """Parse correlation kwargs into Correlations."""
         if not self.correlation_kwargs:
             self._correlations = None
-        elif len(self.correlation_kwargs["correlations"]) > 0:
-            if len(self.correlation_kwargs["correlation_parameters"]) != len(
-                self.correlation_kwargs["correlations"]
-            ):
-                raise ValueError("Mismatching sizes of correlations and parameters")
-
+        elif len(self.correlation_kwargs) > 0:
             self._correlations = []
-            for cor in range(len(self.correlation_kwargs["correlations"])):
-                obs_a, obs_b = map(
-                    option_to_observable, self.correlation_kwargs["correlations"][cor]
-                )
-                params = self.correlation_kwargs["correlation_parameters"][cor]
-                self._correlations.append(Correlation(obs_a, obs_b, *params))
+            for cor in self.correlation_kwargs:
+                self._correlations.append(Correlation(**cor))
+        else:
+            self._correlations = None
 
     def _attach_correlations(self):
         """Attach all correlations to self.dyn."""
         if self._correlations:
             for i, _ in enumerate(self._correlations):
                 self.dyn.attach(
-                    partial(lambda i: self._correlations[i].update(self.dyn), i),
+                    partial(lambda i: self._correlations[i].update(self.dyn.atoms), i),
                     self._correlations[i].update_frequency,
                 )
 
@@ -506,13 +499,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             with open(
                 self._build_filename("cor.dat", param_pref), "w", encoding="utf-8"
             ) as out_file:
-                data = {"correlations": []}
+                data = {}
                 for cor in self._correlations:
                     value, lags = cor.get()
-                    name = str(cor)
-                    data["correlations"].append(
-                        {name: {"value": value.tolist(), "lags": lags.tolist()}}
-                    )
+                    data[str(cor)] = {"value": value.tolist(), "lags": lags.tolist()}
                 yaml.dump(data, out_file, default_flow_style=None)
 
     @staticmethod

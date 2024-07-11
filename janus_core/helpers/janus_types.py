@@ -4,7 +4,16 @@ from collections.abc import Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
-from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
+from typing import (
+    IO,
+    Literal,
+    Optional,
+    Protocol,
+    TypedDict,
+    TypeVar,
+    Union,
+    runtime_checkable,
+)
 
 from ase import Atoms
 from ase.eos import EquationOfState
@@ -75,13 +84,36 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_output_file: Optional[PathLike]
 
 
-class CorrelationKwargs(TypedDict, total=False):
+# pylint: disable=too-few-public-methods
+@runtime_checkable
+class Observable(Protocol):
+    """Signature for correlation observable getter."""
+
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> float:
+        """
+        Call the getter.
+
+        Parameters
+        ----------
+        atoms : Atoms
+            Atoms object to extract values from.
+        *args : tuple
+            Additional positional arguments passed to getter.
+        **kwargs : dict
+            Additional kwargs passed getter.
+        """
+
+
+class CorrelationKwargs(TypedDict, total=True):
     """Arguments for on-the-fly correlations."""
 
-    # Pairs of indexed observables, ('s_xy', 's_xy')
-    correlations: Sequence[tuple[str, str]]
-    # Blocks, points, window, and update frequency
-    correlation_parameters: Sequence[tuple[int, int, int, int]]
+    a: Union[Observable, tuple[Observable, Optional[tuple], Optional[dict]]]
+    b: Union[Observable, tuple[Observable, Optional[tuple], Optional[dict]]]
+    name: str
+    blocks: int
+    points: int
+    averaging: int
+    update_frequency: int
 
 
 # eos_names from ase.eos

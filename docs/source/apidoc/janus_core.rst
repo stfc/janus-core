@@ -214,7 +214,7 @@ janus\_core.helpers.janus\_types module
    :undoc-members:
    :show-inheritance:
    :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
-
+   :special-members:
 
 janus\_core.helpers.utils module
 --------------------------------
