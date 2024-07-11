@@ -5,24 +5,28 @@ from typing import Any, Optional
 
 from ase import Atoms
 from ase.eos import EquationOfState
+from ase.io import write
 from ase.units import kJ
 from codecarbon import OfflineEmissionsTracker
 from numpy import float64, linspace
 from numpy.typing import NDArray
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import EoSNames, EoSResults, PathLike
+from janus_core.helpers.janus_types import ASEWriteArgs, EoSNames, EoSResults, PathLike
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict
 
 
 def _calc_volumes_energies(
     struct: Atoms,
+    *,
     min_volume: float = 0.95,
     max_volume: float = 1.05,
     n_volumes: int = 7,
     minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
+    write_structures: bool = False,
+    write_kwargs: Optional[ASEWriteArgs] = None,
     logger: Optional[Logger] = None,
     tracker: Optional[OfflineEmissionsTracker] = None,
 ) -> tuple[NDArray[float64], list[float], list[float]]:
@@ -44,6 +48,11 @@ def _calc_volumes_energies(
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to optimize. Default is None.
         chemical formula of the structure.
+    write_structures : bool
+        True to write out all genereated structures. Default is False.
+    write_kwargs : Optional[ASEWriteArgs],
+        Keyword arguments to pass to ase.io.write to save generated structures.
+        Default is {}.
     logger : Optional[Logger]
         Logger if log file has been specified.
     tracker : Optional[OfflineEmissionsTracker]
@@ -54,6 +63,8 @@ def _calc_volumes_energies(
     tuple[NDArray[float64], list[float], list[float]]
         Tuple of lattice scalars and lists of the corresponding volumes and energies.
     """
+    [minimize_kwargs, write_kwargs] = none_to_dict([minimize_kwargs, write_kwargs])
+
     if logger:
         logger.info("Starting calculations for configurations")
         tracker.start_task("Calculate configurations")
@@ -77,6 +88,11 @@ def _calc_volumes_energies(
         volumes.append(c_struct.get_volume())
         energies.append(c_struct.get_potential_energy())
 
+        if write_structures:
+            # Always append first original structure
+            write_kwargs["append"] = True
+            write(images=c_struct, **write_kwargs)
+
     if logger:
         tracker.stop_task()
         logger.info("Calculations for configurations complete")
@@ -96,6 +112,8 @@ def calc_eos(
     minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     write_results: bool = True,
+    write_structures: bool = False,
+    write_kwargs: Optional[ASEWriteArgs] = None,
     file_prefix: Optional[PathLike] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
     tracker_kwargs: Optional[dict[str, Any]] = None,
@@ -125,6 +143,11 @@ def calc_eos(
         Keyword arguments to pass to optimize. Default is None.
     write_results : bool
         True to write out results of equation of state calculations. Default is True.
+    write_structures : bool
+        True to write out all genereated structures. Default is False.
+    write_kwargs : Optional[ASEWriteArgs],
+        Keyword arguments to pass to ase.io.write to save generated structures.
+        Default is {}.
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula of the structure.
@@ -139,15 +162,18 @@ def calc_eos(
         Dictionary containing equation of state ASE object, and fitted minimum
         bulk_modulus, volume, and energy.
     """
-    [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
-        [minimize_kwargs, log_kwargs, tracker_kwargs]
+    [minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
+        [minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs]
     )
+
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
     tracker = config_tracker(logger, **tracker_kwargs)
 
     struct_name = struct_name if struct_name else struct.get_chemical_formula()
     file_prefix = file_prefix if file_prefix else struct_name
+
+    write_kwargs.setdefault("filename", f"{file_prefix}-generated.xyz")
 
     if not struct.calc:
         raise ValueError("Please attach a calculator to `struct`.")
@@ -170,6 +196,9 @@ def calc_eos(
             }
         optimize(struct, **minimize_kwargs)
 
+    if write_structures:
+        write(images=struct, **write_kwargs)
+
     # Set constant volume for geometry optimization of generated structures
     if "filter_kwargs" in minimize_kwargs:
         minimize_kwargs["filter_kwargs"]["constant_volume"] = True
@@ -177,14 +206,16 @@ def calc_eos(
         minimize_kwargs["filter_kwargs"] = {"constant_volume": True}
 
     lattice_scalars, volumes, energies = _calc_volumes_energies(
-        struct,
-        min_volume,
-        max_volume,
-        n_volumes,
-        minimize_all,
-        minimize_kwargs,
-        logger,
-        tracker,
+        struct=struct,
+        min_volume=min_volume,
+        max_volume=max_volume,
+        n_volumes=n_volumes,
+        minimize_all=minimize_all,
+        minimize_kwargs=minimize_kwargs,
+        write_structures=write_structures,
+        write_kwargs=write_kwargs,
+        logger=logger,
+        tracker=tracker,
     )
 
     if write_results:

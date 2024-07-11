@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ase.io import read
 import pytest
 from typer.testing import CliRunner
 
@@ -167,3 +168,33 @@ def test_minimising_all(tmp_path):
             "constant_volume: True",
         ],
     )
+
+
+def test_writing_structs(tmp_path):
+    """Test writing out generated structures."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "example"
+    generated_path = tmp_path / "example-generated.xyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--n-volumes",
+            4,
+            "--file-prefix",
+            file_prefix,
+            "--write-structures",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert generated_path.exists()
+    atoms = read(generated_path, index=":")
+    assert len(atoms) == 5

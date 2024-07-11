@@ -17,6 +17,7 @@ from janus_core.cli.types import (
     ReadKwargs,
     StructPath,
     Summary,
+    WriteKwargs,
 )
 from janus_core.cli.utils import (
     check_config,
@@ -60,6 +61,11 @@ def eos(
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
+    write_structures: Annotated[
+        bool,
+        Option(help="Whether to write out all genereated structures."),
+    ] = False,
+    write_kwargs: WriteKwargs = None,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     read_kwargs: ReadKwargs = None,
@@ -107,6 +113,11 @@ def eos(
         Default is 0.1.
     minimize_kwargs : Optional[dict[str, Any]]
         Other keyword arguments to pass to geometry optimizer. Default is {}.
+    write_structures : bool
+        True to write out all genereated structures. Default is False.
+    write_kwargs : Optional[ASEWriteArgs],
+        Keyword arguments to pass to ase.io.write to save generated structures.
+        Default is {}.
     arch : Optional[str]
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
@@ -129,8 +140,8 @@ def eos(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, minimize_kwargs] = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, minimize_kwargs]
+    [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs] = parse_typer_dicts(
+        [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
     )
 
     if not eos_type in get_args(EoSNames):
@@ -165,6 +176,8 @@ def eos(
         "minimize": minimize,
         "minimize_all": minimize_all,
         "minimize_kwargs": minimize_kwargs,
+        "write_structures": write_structures,
+        "write_kwargs": write_kwargs,
         "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
     }
