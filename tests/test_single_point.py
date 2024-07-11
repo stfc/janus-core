@@ -255,7 +255,7 @@ def test_no_atoms_or_path():
 
 test_data_potentials = [
     ("m3gnet", "cpu", -26.729949951171875),
-    ("chgnet", "", -29.331436157226562),
+    ("chgnet", "cpu", -29.331436157226562),
 ]
 
 

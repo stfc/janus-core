@@ -17,7 +17,7 @@ test_data_mace = [
     ("mace_off", "cpu", {"model": "small"}),
 ]
 
-test_data_extras = [("m3gnet", "cpu"), ("chgnet", "")]
+test_data_extras = [("m3gnet", "cpu"), ("chgnet", "cpu")]
 
 
 @pytest.mark.parametrize("architecture, device, kwargs", test_data_mace)
