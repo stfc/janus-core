@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from ase.filters import FrechetCellFilter
+from ase.filters import FrechetCellFilter, UnitCellFilter
 from ase.io import read
 import pytest
 
@@ -15,21 +15,21 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 test_data = [
-    ("mace", "NaCl.cif", -27.046359959669214, {}),
-    ("mace", "NaCl.cif", -27.04636199814088, {"fmax": 0.001}),
-    ("mace", "NaCl.cif", -27.0463392211678, {"filter_func": FrechetCellFilter}),
+    ("mace", "NaCl.cif", -27.046349600581266, {}),
+    ("mace", "NaCl.cif", -27.046361983699768, {"fmax": 0.001}),
+    ("mace", "NaCl.cif", -27.04633922116779, {"filter_func": UnitCellFilter}),
     ("mace", "H2O.cif", -14.051389496520015, {"filter_func": None}),
     (
         "mace",
         "NaCl.cif",
-        -26.727162796978437,
+        -26.727162796978426,
         {
             "fmax": 0.001,
             "filter_func": FrechetCellFilter,
             "filter_kwargs": {"scalar_pressure": 5.0},
         },
     ),
-    ("mace", "NaCl.cif", -27.046353221978332, {"opt_kwargs": {"alpha": 100}}),
+    ("mace", "NaCl.cif", -27.04634943785021, {"opt_kwargs": {"alpha": 100}}),
 ]
 
 
@@ -44,7 +44,7 @@ def test_optimize(architecture, struct_path, expected, kwargs):
 
     struct = optimize(single_point.struct, **kwargs)
 
-    assert struct.get_potential_energy() == pytest.approx(expected)
+    assert struct.get_potential_energy() == pytest.approx(expected, rel=1e-8)
 
 
 def test_saving_struct(tmp_path):
