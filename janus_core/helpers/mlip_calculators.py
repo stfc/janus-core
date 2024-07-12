@@ -103,6 +103,14 @@ def choose_calculator(
         torch.set_default_dtype(torch.float32)
         calculator = CHGNetCalculator(use_device=device, **kwargs)
 
+    elif architecture == "alignn":
+        from alignn import __version__
+        from alignn.ff.ff import AlignnAtomwiseCalculator, default_path
+
+        # Set default path for config and model location
+        kwargs.setdefault("path", default_path())
+        calculator = AlignnAtomwiseCalculator(device=device, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {architecture=}. Suported architectures "
