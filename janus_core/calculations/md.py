@@ -519,12 +519,12 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             pressure_tensor = np.zeros(6)
 
         log_stats = (
-            f"{step:10d} {real_time.total_seconds():.3f} {time:13.2f} {e_pot:.3e} "
-            f"{e_kin:.3e} {current_temp:.3f} {e_pot + e_kin:.3e} {density:.3f} "
-            f"{volume:.3e} {pressure:.3e} {pressure_tensor[0]:.3e} "
-            f"{pressure_tensor[1]:.3e} {pressure_tensor[2]:.3e} "
-            f"{pressure_tensor[3]:.3e} {pressure_tensor[4]:.3e} "
-            f"{pressure_tensor[5]:.3e}"
+            f"{step:10d} {real_time.total_seconds():.3f} {time:13.2f} {e_pot:.8e} "
+            f"{e_kin:.8e} {current_temp:.3f} {e_pot + e_kin:.8e} {density:.3f} "
+            f"{volume:.8e} {pressure:.8e} {pressure_tensor[0]:.8e} "
+            f"{pressure_tensor[1]:.8e} {pressure_tensor[2]:.8e} "
+            f"{pressure_tensor[3]:.8e} {pressure_tensor[4]:.8e} "
+            f"{pressure_tensor[5]:.8e}"
         )
 
         return log_stats
