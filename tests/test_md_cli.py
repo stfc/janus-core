@@ -112,7 +112,7 @@ def test_log(tmp_path):
         assert lines[0].split(" | ")[8] == "Volume [A^3]"
         init_volume = float(lines[1].split()[8])
         final_volume = float(lines[-1].split()[8])
-        assert init_volume == 179.4
+        assert init_volume == 179.406144
         assert init_volume == pytest.approx(final_volume)
 
         # Test constant temperature
