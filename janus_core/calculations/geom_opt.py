@@ -92,6 +92,8 @@ def set_optimizer(
         logger.info("Using optimizer: %s", optimizer.__name__)
 
     if filter_func is not None:
+        if "scalar_pressure" in filter_kwargs:
+            filter_kwargs["scalar_pressure"] *= units.GPa
         filtered_struct = filter_func(struct, **filter_kwargs)
         dyn = optimizer(filtered_struct, **opt_kwargs)
         if logger:
@@ -103,8 +105,10 @@ def set_optimizer(
             if "constant_volume" in filter_kwargs:
                 logger.info("constant_volume: %s", filter_kwargs["constant_volume"])
             if "scalar_pressure" in filter_kwargs:
-                logger.info("scalar_pressure: %s GPa", filter_kwargs["scalar_pressure"])
-                filter_kwargs["scalar_pressure"] *= units.GPa
+                logger.info(
+                    "scalar_pressure: %s GPa",
+                    filter_kwargs["scalar_pressure"] / units.GPa,
+                )
     else:
         dyn = optimizer(struct, **opt_kwargs)
 
