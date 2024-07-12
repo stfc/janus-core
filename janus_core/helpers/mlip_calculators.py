@@ -6,17 +6,72 @@ Similar in spirit to matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
-from typing import get_args
+from pathlib import Path
+from typing import Any, Optional, Union, get_args
 
 from ase.calculators.calculator import Calculator
 import torch
 
-from janus_core.helpers.janus_types import Architectures, Devices
+from janus_core.helpers.janus_types import Architectures, Devices, PathLike
+
+
+def _set_model_path(
+    model_path: Optional[PathLike] = None,
+    kwargs: Optional[dict[str, Any]] = None,
+) -> Optional[Union[PathLike, torch.nn.Module]]:
+    """
+    Set `model_path`.
+
+    Parameters
+    ----------
+    model_path : Optional[PathLike]
+        Path to MLIP file.
+    kwargs : Optional[dict[str, Any]]
+        Dictionary of additional keyword arguments passed to the selected calculator.
+
+    Returns
+    -------
+    Optional[Union[PathLike, torch.nn.Module]]
+        Path to MLIP model file, loaded model, or None.
+    """
+    kwargs = kwargs if kwargs else {}
+
+    # kwargs that may be used for `model_path`` for different MLIPs
+    # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
+    # to loaded PyTorch models
+    model_path_kwargs = ("model", "model_paths", "potential", "path")
+
+    # Use model_path if specified, but check not also specified via kwargs
+    if model_path:
+        if any(kwarg in kwargs for kwarg in model_path_kwargs):
+            raise ValueError(
+                "`model_path` cannot be used in combination with 'model', "
+                "'model_paths', 'potential', or 'path'"
+            )
+    else:
+        # Check at most one suitable kwarg is specified
+        if sum(kwarg in kwargs for kwarg in model_path_kwargs) > 1:
+            raise ValueError(
+                "Only one of 'model', 'model_paths', 'potential', and 'path' can be "
+                "specified"
+            )
+
+        # Set model_path from kwargs if any are specified
+        for kwarg in model_path_kwargs:
+            if kwarg in kwargs:
+                model_path = kwargs.pop(kwarg, None)
+
+    # Convert to path if file/directory exists
+    if isinstance(model_path, (Path, str)) and Path(model_path).expanduser().exists():
+        return Path(model_path).expanduser()
+    return model_path
 
 
 def choose_calculator(
+    # pylint: disable=too-many-locals, too-many-statements
     architecture: Architectures = "mace",
     device: Devices = "cpu",
+    model_path: Optional[PathLike] = None,
     **kwargs,
 ) -> Calculator:
     """
@@ -28,6 +83,8 @@ def choose_calculator(
         MLIP architecture. Default is "mace".
     device : Devices
         Device to run calculator on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP file.
     **kwargs
         Additional keyword arguments passed to the selected calculator.
 
@@ -46,8 +103,8 @@ def choose_calculator(
     # pylint: disable=import-outside-toplevel, too-many-branches, import-error
     # Optional imports handled via `architecture`. We could catch these,
     # but the error message is clear if imports are missing.
-    if "model" in kwargs and "model_paths" in kwargs:
-        raise ValueError("Please specify either `model` or `model_paths`")
+
+    model_path = _set_model_path(model_path, kwargs)
 
     if not device in get_args(Devices):
         raise ValueError(f"`device` must be one of: {get_args(Devices)}")
@@ -56,60 +113,99 @@ def choose_calculator(
         from mace import __version__
         from mace.calculators import MACECalculator
 
-        # `model_paths` is keyword for path to model, so take from kwargs if specified
-        # Otherwise, take `model` if specified, then default to `""`, which will
-        # raise a ValueError
-        kwargs.setdefault("model_paths", kwargs.pop("model", ""))
+        # No default `model_path`
+        if model_path is None:
+            raise ValueError("Please specify `model_path`")
+        # Default to float64 precision
         kwargs.setdefault("default_dtype", "float64")
-        calculator = MACECalculator(device=device, **kwargs)
+
+        calculator = MACECalculator(model_paths=model_path, device=device, **kwargs)
 
     elif architecture == "mace_mp":
         from mace import __version__
         from mace.calculators import mace_mp
 
-        # `model` is keyword for path to model, so take from kwargs if specified
-        # Otherwise, take `model_paths` if specified, then default to "small"
-        kwargs.setdefault("model", kwargs.pop("model_paths", "small"))
+        # Default to "small" model and float64 precision
+        model = model_path if model_path else "small"
         kwargs.setdefault("default_dtype", "float64")
-        calculator = mace_mp(device=device, **kwargs)
+
+        calculator = mace_mp(model=model, device=device, **kwargs)
 
     elif architecture == "mace_off":
         from mace import __version__
         from mace.calculators import mace_off
 
-        # `model` is keyword for path to model, so take from kwargs if specified
-        # Otherwise, take `model_paths` if specified, then default to "small"
-        kwargs.setdefault("model", kwargs.pop("model_paths", "small"))
+        # Default to "small" model and float64 precision
+        model = model_path if model_path else "small"
         kwargs.setdefault("default_dtype", "float64")
-        calculator = mace_off(device=device, **kwargs)
+
+        calculator = mace_off(model=model, device=device, **kwargs)
 
     elif architecture == "m3gnet":
         from matgl import __version__, load_model
+        from matgl.apps.pes import Potential
         from matgl.ext.ase import M3GNetCalculator
 
         # Set before loading model to avoid type mismatches
         torch.set_default_dtype(torch.float32)
-
-        model = kwargs.setdefault("model", load_model("M3GNet-MP-2021.2.8-DIRECT-PES"))
         kwargs.setdefault("stress_weight", 1.0 / 160.21766208)
 
-        calculator = M3GNetCalculator(potential=model, **kwargs)
+        # Use potential (from kwargs) if specified
+        # Otherwise, load the model if given a path, else use a default model
+        if isinstance(model_path, Potential):
+            potential = model_path
+        elif isinstance(model_path, Path):
+            if model_path.is_file():
+                model_path = model_path.parent
+            potential = load_model(model_path)
+        elif isinstance(model_path, str):
+            potential = load_model(model_path)
+        else:
+            potential = load_model("M3GNet-MP-2021.2.8-DIRECT-PES")
+
+        calculator = M3GNetCalculator(potential=potential, **kwargs)
 
     elif architecture == "chgnet":
         from chgnet import __version__
         from chgnet.model.dynamics import CHGNetCalculator
+        from chgnet.model.model import CHGNet
 
-        # Set to avoid type mismatches
+        # Set before loading to avoid type mismatches
         torch.set_default_dtype(torch.float32)
-        calculator = CHGNetCalculator(use_device=device, **kwargs)
+
+        # Use loaded model (from kwargs) if specified
+        # Otherwise, load the model if given a path, else use a default model
+        if isinstance(model_path, CHGNet):
+            model = model_path
+        elif isinstance(model_path, Path):
+            model = CHGNet.from_file(model_path)
+        elif isinstance(model_path, str):
+            model = CHGNet.load(model_name=model_path, use_device=device)
+        else:
+            model = None
+
+        calculator = CHGNetCalculator(model=model, use_device=device, **kwargs)
 
     elif architecture == "alignn":
         from alignn import __version__
-        from alignn.ff.ff import AlignnAtomwiseCalculator, default_path
+        from alignn.ff.ff import (
+            AlignnAtomwiseCalculator,
+            default_path,
+            get_figshare_model_ff,
+        )
 
-        # Set default path for config and model location
-        kwargs.setdefault("path", default_path())
-        calculator = AlignnAtomwiseCalculator(device=device, **kwargs)
+        # Set default path to directory containing config and model location
+        if isinstance(model_path, Path):
+            path = model_path
+            if path.is_file():
+                path = path.parent
+        # If a string, assume referring to model_name e.g. "v5.27.2024"
+        elif isinstance(model_path, str):
+            path = get_figshare_model_ff(model_name=model_path)
+        else:
+            path = default_path()
+
+        calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
 
     else:
         raise ValueError(

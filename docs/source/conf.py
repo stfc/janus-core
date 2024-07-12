@@ -51,6 +51,7 @@ intersphinx_mapping = {
     "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
     "phonopy": ("https://phonopy.github.io/phonopy/", None),
     "codecarbon": ("https://mlco2.github.io/codecarbon/", None),
+    "torch": ("https://pytorch.org/docs/stable", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
