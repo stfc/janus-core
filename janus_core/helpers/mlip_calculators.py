@@ -6,6 +6,8 @@ Similar in spirit to matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
+from typing import get_args
+
 from ase.calculators.calculator import Calculator
 import torch
 
@@ -47,6 +49,9 @@ def choose_calculator(
     if "model" in kwargs and "model_paths" in kwargs:
         raise ValueError("Please specify either `model` or `model_paths`")
 
+    if not device in get_args(Devices):
+        raise ValueError(f"`device` must be one of: {get_args(Devices)}")
+
     if architecture == "mace":
         from mace import __version__
         from mace.calculators import MACECalculator
@@ -66,7 +71,7 @@ def choose_calculator(
         # Otherwise, take `model_paths` if specified, then default to "small"
         kwargs.setdefault("model", kwargs.pop("model_paths", "small"))
         kwargs.setdefault("default_dtype", "float64")
-        calculator = mace_mp(**kwargs)
+        calculator = mace_mp(device=device, **kwargs)
 
     elif architecture == "mace_off":
         from mace import __version__
@@ -76,7 +81,7 @@ def choose_calculator(
         # Otherwise, take `model_paths` if specified, then default to "small"
         kwargs.setdefault("model", kwargs.pop("model_paths", "small"))
         kwargs.setdefault("default_dtype", "float64")
-        calculator = mace_off(**kwargs)
+        calculator = mace_off(device=device, **kwargs)
 
     elif architecture == "m3gnet":
         from matgl import __version__, load_model

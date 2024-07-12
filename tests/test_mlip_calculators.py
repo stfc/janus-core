@@ -17,7 +17,7 @@ test_data_mace = [
     ("mace_off", "cpu", {"model": "small"}),
 ]
 
-test_data_extras = [("m3gnet", "cpu"), ("chgnet", "")]
+test_data_extras = [("m3gnet", "cpu"), ("chgnet", "cpu")]
 
 
 @pytest.mark.parametrize("architecture, device, kwargs", test_data_mace)
@@ -51,3 +51,10 @@ def test_model_model_paths():
             model=MODEL_PATH,
             model_paths=MODEL_PATH,
         )
+
+
+@pytest.mark.parametrize("architecture", ["mace_mp", "mace_off"])
+def test_invalid_device(architecture):
+    """Test error raised for invalid device is specified."""
+    with pytest.raises(ValueError):
+        choose_calculator(architecture=architecture, device="invalid")

@@ -57,7 +57,7 @@ def test_no_optimize(tmp_path):
     )
 
 
-test_data_potentials = [("m3gnet", "cpu"), ("chgnet", "")]
+test_data_potentials = [("m3gnet", "cpu"), ("chgnet", "cpu")]
 
 
 @pytest.mark.parametrize("arch, device", test_data_potentials)
