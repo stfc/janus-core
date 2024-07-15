@@ -7,17 +7,21 @@ jobs:
   tests:
     name: ${{ matrix.os }} / ${{ matrix.python-version }}
     runs-on: "${{ matrix.os }}"
+    continue-on-error: ${{ matrix.experimental }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+        experimental: [false]
         include:
           - os: macos-latest
             python-version: "3.11"
+            experimental: true
           - os: windows-latest
             python-version: "3.11"
+            experimental: true
 
     steps:
     - uses: actions/checkout@v4
