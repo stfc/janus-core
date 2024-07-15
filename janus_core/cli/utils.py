@@ -116,6 +116,7 @@ def save_struct_calc(
     s_point: SinglePoint,
     arch: Architectures,
     device: Devices,
+    model_path: str,
     read_kwargs: ASEReadArgs,
     calc_kwargs: dict[str, Any],
 ) -> None:
@@ -133,6 +134,8 @@ def save_struct_calc(
         MLIP architecture.
     device : Devices
         Device to run calculations on.
+    model_path : str
+        Path to MLIP model.
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read.
     calc_kwargs : dict[str, Any]]
@@ -159,6 +162,7 @@ def save_struct_calc(
     inputs["calc"] = {
         "arch": arch,
         "device": device,
+        "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
     }

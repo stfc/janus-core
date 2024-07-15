@@ -65,6 +65,7 @@ StructPath = Annotated[Path, Option(help="Path of structure to simulate.")]
 
 Architecture = Annotated[str, Option(help="MLIP architecture to use for calculations.")]
 Device = Annotated[str, Option(help="Device to run calculations on.")]
+ModelPath = Annotated[str, Option(help="Path to MLIP model.  [default: None]")]
 
 ReadKwargs = Annotated[
     TyperDict,

@@ -71,7 +71,7 @@ Tutorials for a variety of calculations can be found in the [janus-tutorials](ht
 
 Perform a single point calcuation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path small
 ```
 
 This will calculate the energy, stress and forces and save this in `NaCl-results.xyz`, in addition to generating a log file, `singlepoint.log`, and summary of inputs, `singlepoint_summary.yml`.
@@ -79,7 +79,7 @@ This will calculate the energy, stress and forces and save this in `NaCl-results
 Additional options may be specified. For example:
 
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif --arch mace --calc-kwargs "{'model' : '/path/to/your/ml.model'}" --properties energy --properties forces --log ./example.log --out ./example.xyz
+janus singlepoint --struct tests/data/NaCl.cif --arch mace --model-path /path/to/your/ml.model --properties energy --properties forces --log ./example.log --out ./example.xyz
 ```
 
 This calculates both forces and energies, defines the MLIP architecture and path to your locally saved model, and changes where the log and results files are saved.
@@ -101,7 +101,7 @@ For all options, run `janus singlepoint --help`.
 Perform geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 
 ```shell
-janus geomopt --struct tests/data/H2O.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+janus geomopt --struct tests/data/H2O.cif --arch mace_mp --model-path small
 ```
 
 This will optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`, and summary of inputs, `geomopt_summary.yml`.
@@ -109,7 +109,7 @@ This will optimize the atomic positions and save the resulting structure in `H2O
 Additional options may be specified. This shares most options with `singlepoint`, as well as a few additional options, such as:
 
 ```shell
-janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --vectors-only --traj 'NaCl-traj.xyz'
+janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --vectors-only --traj 'NaCl-traj.xyz'
 ```
 
 This allows the cell vectors to be optimised, allowing only hydrostatic deformation, and saves the optimization trajectory in addition to the final structure and log.
@@ -117,7 +117,7 @@ This allows the cell vectors to be optimised, allowing only hydrostatic deformat
 Further options for the optimizer and filter can be specified using the `--minimize-kwargs` option. For example:
 
 ```shell
-janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --fully-opt --minimize-kwargs "{'filter_kwargs': {'constant_volume' : True}, 'opt_kwargs': {'alpha': 100}}"
+janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --fully-opt --minimize-kwargs "{'filter_kwargs': {'constant_volume' : True}, 'opt_kwargs': {'alpha': 100}}"
 ```
 
 This allows the cell vectors and angles to be optimized, as well as the atomic positions, at constant volume, and sets the `alpha`, the initial guess for the Hessian, to 100 for the optimizer function.
@@ -130,7 +130,7 @@ For all options, run `janus geomopt --help`.
 Run an NPT molecular dynamics simulation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field) at 300K and 1 bar for 1000 steps (1 ps):
 
 ```shell
-janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}" --temp 300 --steps 1000 --pressure 1.0
+janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --temp 300 --steps 1000 --pressure 1.0
 ```
 
 This will generate several output files:
@@ -199,7 +199,7 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 0 --temp-end 3
 Fit the equation of state for a structure (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 
 ```shell
-janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --model-path small
 ```
 
 This will save the energies and volumes for nine lattice constants in `NaCl-eos-raw.dat`, and the fitted minimum energy, volume, and bulk modulus in `NaCl-eos-fit.dat`, in addition to generating a log file, `eos.log`, and summary of inputs, `eos_summary.yml`.
@@ -218,7 +218,7 @@ For all options, run `janus eos --help`.
 Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 
 ```shell
-janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --model-path small
 ```
 
 This will save the Phonopy parameters, including displacements and force constants, to `NaCl-phonopy.yml` and `NaCl-force_constants.hdf5`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
@@ -226,7 +226,7 @@ This will save the Phonopy parameters, including displacements and force constan
 Additionally, the `--band` option can be added to calculate the band structure and save the results to `NaCl-auto_bands.yml`:
 
 ```shell
-janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --calc-kwargs "{'model' : 'small'}" --band
+janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --model-path small --band
 ```
 
 If you need eigenvectors and group velocities written, add the `--write-full` option. This will generate a much larger file, but can be used to visualise phonon modes.
@@ -254,8 +254,9 @@ properties:
   - "energy"
 out: "NaCl-results.xyz"
 arch: mace_mp
+model-path: medium
 calc-kwargs:
-  model: medium
+  dispersion: True
 ```
 
 ```shell
@@ -295,7 +296,7 @@ janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
 MACE descriptors can be calculated for structures (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field):
 
 ```shell
-janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --calc-kwargs "{'model' : 'small'}"
+janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --model-path small
 ```
 
 This will calculate the mean descriptor for this structure and save this as attached information (`descriptors`) in `NaCl-descriptors.xyz`, in addition to generating a log file, `descriptors.log`, and summary of inputs, `descriptors_summary.yml`.

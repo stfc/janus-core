@@ -14,6 +14,7 @@ from janus_core.cli.types import (
     Device,
     LogPath,
     MinimizeKwargs,
+    ModelPath,
     ReadKwargs,
     StructPath,
     Summary,
@@ -111,6 +112,7 @@ def phonons(
     minimize_kwargs: MinimizeKwargs = None,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
+    model_path: ModelPath = None,
     read_kwargs: ReadKwargs = None,
     calc_kwargs: CalcKwargs = None,
     file_prefix: Annotated[
@@ -182,6 +184,8 @@ def phonons(
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
+    model_path : Optional[str]
+        Path to MLIP model. Default is `None`.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. Default is {}.
     calc_kwargs : Optional[dict[str, Any]]
@@ -210,6 +214,7 @@ def phonons(
         struct_name=struct_name,
         architecture=arch,
         device=device,
+        model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
         log_kwargs={"filename": log, "filemode": "w"},
@@ -264,7 +269,9 @@ def phonons(
     inputs["pdos"] = pdos
     inputs["thermal"] = thermal
 
-    save_struct_calc(inputs, s_point, arch, device, read_kwargs, calc_kwargs)
+    save_struct_calc(
+        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+    )
 
     # Convert all paths to strings in inputs nested dictionary
     dict_paths_to_strs(inputs)

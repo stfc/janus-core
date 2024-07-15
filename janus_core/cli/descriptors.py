@@ -12,6 +12,7 @@ from janus_core.cli.types import (
     CalcKwargs,
     Device,
     LogPath,
+    ModelPath,
     ReadKwargs,
     StructPath,
     Summary,
@@ -48,6 +49,7 @@ def descriptors(
     ] = False,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
+    model_path: ModelPath = None,
     out: Annotated[
         Path,
         Option(
@@ -81,6 +83,8 @@ def descriptors(
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
+    model_path : Optional[str]
+        Path to MLIP model. Default is `None`.
     out : Optional[Path]
         Path to save structure with calculated results. Default is inferred from name
         of the structure file.
@@ -110,6 +114,7 @@ def descriptors(
         struct_path=struct,
         architecture=arch,
         device=device,
+        model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
         log_kwargs={"filename": log, "filemode": "w"},
@@ -142,7 +147,9 @@ def descriptors(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
-    save_struct_calc(inputs, s_point, arch, device, read_kwargs, calc_kwargs)
+    save_struct_calc(
+        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+    )
 
     # Convert all paths to strings in inputs nested dictionary
     dict_paths_to_strs(inputs)

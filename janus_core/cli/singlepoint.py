@@ -12,6 +12,7 @@ from janus_core.cli.types import (
     CalcKwargs,
     Device,
     LogPath,
+    ModelPath,
     ReadKwargs,
     StructPath,
     Summary,
@@ -39,6 +40,7 @@ def singlepoint(
     struct: StructPath,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
+    model_path: ModelPath = None,
     properties: Annotated[
         list[str],
         Option(
@@ -77,6 +79,8 @@ def singlepoint(
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
+    model_path : Optional[str]
+        Path to MLIP model. Default is `None`.
     properties : Optional[str]
         Physical properties to calculate. Default is "energy".
     out : Optional[Path]
@@ -115,6 +119,7 @@ def singlepoint(
         "struct_path": struct,
         "architecture": arch,
         "device": device,
+        "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
         "log_kwargs": {"filename": log, "filemode": "w"},
@@ -128,7 +133,9 @@ def singlepoint(
     # Store only filename as filemode is not set by user
     inputs = {"log": log}
 
-    save_struct_calc(inputs, s_point, arch, device, read_kwargs, calc_kwargs)
+    save_struct_calc(
+        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+    )
 
     inputs["run"] = {
         "properties": properties,

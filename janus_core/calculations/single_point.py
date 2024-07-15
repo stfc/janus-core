@@ -16,13 +16,14 @@ from janus_core.helpers.janus_types import (
     Devices,
     MaybeList,
     MaybeSequence,
+    PathLike,
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
-class SinglePoint(FileNameMixin):
+class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     """
     Prepare and perform single point calculations.
 
@@ -42,6 +43,8 @@ class SinglePoint(FileNameMixin):
         Default is "mace_mp".
     device : Devices
         Device to run model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is ":".
@@ -60,6 +63,8 @@ class SinglePoint(FileNameMixin):
         ASE Atoms structure(s) to simulate.
     device : Devices
         Device to run MLIP model on.
+    model_path : Optional[PathLike]
+        Path to MLIP model.
     struct_path : Optional[str]
         Path of structure to simulate.
     struct_name : Optional[str]
@@ -79,13 +84,14 @@ class SinglePoint(FileNameMixin):
         Run single point calculations.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         struct: Optional[MaybeSequence[Atoms]] = None,
         struct_path: Optional[str] = None,
         struct_name: Optional[str] = None,
         architecture: Architectures = "mace_mp",
         device: Devices = "cpu",
+        model_path: Optional[PathLike] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -110,6 +116,8 @@ class SinglePoint(FileNameMixin):
             Default is "mace_mp".
         device : Devices
             Device to run MLIP model on. Default is "cpu".
+        model_path : Optional[PathLike]
+            Path to MLIP model. Default is `None`.
         read_kwargs : Optional[ASEReadArgs]
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
@@ -145,6 +153,8 @@ class SinglePoint(FileNameMixin):
 
         self.architecture = architecture
         self.device = device
+        self.model_path = model_path
+
         self.struct_path = struct_path
         self.struct_name = struct_name
 
@@ -200,6 +210,7 @@ class SinglePoint(FileNameMixin):
         calculator = choose_calculator(
             architecture=self.architecture,
             device=self.device,
+            model_path=self.model_path,
             **kwargs,
         )
         if self.struct is None:

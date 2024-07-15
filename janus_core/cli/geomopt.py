@@ -14,6 +14,7 @@ from janus_core.cli.types import (
     Device,
     LogPath,
     MinimizeKwargs,
+    ModelPath,
     ReadKwargs,
     StructPath,
     Summary,
@@ -106,6 +107,7 @@ def geomopt(
     steps: Annotated[int, Option(help="Maximum number of optimization steps.")] = 1000,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
+    model_path: ModelPath = None,
     vectors_only: Annotated[
         bool,
         Option(help="Optimize cell vectors, as well as atomic positions."),
@@ -169,6 +171,8 @@ def geomopt(
         Default is "mace_mp".
     device : Optional[str]
         Device to run model on. Default is "cpu".
+    model_path : Optional[str]
+        Path to MLIP model. Default is `None`.
     vectors_only : bool
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function. Default is False.
@@ -216,6 +220,7 @@ def geomopt(
         struct_path=struct,
         architecture=arch,
         device=device,
+        model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
         log_kwargs={"filename": log, "filemode": "w"},
@@ -264,7 +269,9 @@ def geomopt(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
-    save_struct_calc(inputs, s_point, arch, device, read_kwargs, calc_kwargs)
+    save_struct_calc(
+        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+    )
 
     # Convert all paths to strings in inputs nested dictionary
     dict_paths_to_strs(inputs)
