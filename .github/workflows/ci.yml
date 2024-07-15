@@ -19,6 +19,9 @@ jobs:
           - os: macos-latest
             python-version: "3.11"
             experimental: true
+          - os: macos-13
+            python-version: "3.11"
+            experimental: true
           - os: windows-latest
             python-version: "3.11"
             experimental: true
