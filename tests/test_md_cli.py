@@ -386,7 +386,7 @@ def test_ensemble_kwargs(tmp_path):
     file_prefix = tmp_path / "md"
     log_path = tmp_path / "md.log"
     summary_path = tmp_path / "summary.yml"
-    final_path = tmp_path / "md-T300.0-p0.0-final.xyz"
+    final_path = tmp_path / "md-final.xyz"
     stats_path = tmp_path / "md-stats.dat"
 
     ensemble_kwargs = "{'mask' : (0, 1, 0)}"
