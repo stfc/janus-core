@@ -169,14 +169,13 @@ Run an NVT heating simultation from 20K to 300K in steps of 20K, with 10fs at ea
 janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10
 ```
 
-The produced statistics and trajectory files will indicate the heating range `NaCl-nvt-T20.0-T300.0-stats.dat`, `NaCl-nvt-T20.0-T300.0-traj.xyz`. There will also be final structure files at each temperature point:
+The produced final, statistics, and trajectory files will indicate the heating range:
 
-```
-NaCl-nvt-T20.0-final.xyz
-NaCl-nvt-T40.0-final.xyz
-...
-NaCl-nvt-T300.0-final.xyz
-```
+- `NaCl-nvt-T20.0-T300.0-final.xyz`
+- `NaCl-nvt-T20.0-T300.0-stats.dat`
+- `NaCl-nvt-T20.0-T300.0-traj.xyz`
+
+The final structure file will include the final structure at each temperature point (20K, 40K, ..., 300K).
 
 MD can also be carried out after heating using the same options as described in [Molecular dynamics](#molecular-dynamics). For example:
 
@@ -186,7 +185,7 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
 
-When MD is run with heating the trajectory ```NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz``` and statistics ```NaCl-nvt-T20.0-T300.0-T300.0-stats.dat``` files will indicate the heating range and MD temperature (which may be different). With heating and MD trajectories/statistics within the same files.
+When MD is run with heating, the final, trajectory, and statistics files (`NaCl-nvt-T20.0-T300.0-T300.0-final.xyz`, `NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz`, and `NaCl-nvt-T20.0-T300.0-T300.0-stats.dat`) indicate the heating range and MD temperature, which can differ. Each file contains data from both the heating and MD parts of the simulation.
 
 Additional settings for geometry optimization, such as enabling optimization of cell vectors by setting `hydrostatic_strain = True` for the ASE filter, can be set using the `--minimize-kwargs` option:
 
