@@ -136,6 +136,17 @@ def md(
     restarts_to_keep: Annotated[
         int, Option(help="Restart files to keep if rotating.")
     ] = 4,
+    final_file: Annotated[
+        Path,
+        Option(
+            help=(
+                """
+                File to save final configuration at each temperature of similation.
+                Default inferred from `file_prefix`.
+                """
+            )
+        ),
+    ] = None,
     stats_file: Annotated[
         Path,
         Option(
@@ -249,6 +260,9 @@ def md(
         Whether to rotate restart files. Default is False.
     restarts_to_keep : int
         Restart files to keep if rotating. Default is 4.
+    final_file : Optional[PathLike]
+        File to save final configuration at each temperature of similation. Default
+        inferred from `file_prefix`.
     stats_file : Optional[PathLike]
         File to save thermodynamical statistics. Default inferred from `file_prefix`.
     stats_every : int
@@ -344,6 +358,7 @@ def md(
         "restart_every": restart_every,
         "rotate_restart": rotate_restart,
         "restarts_to_keep": restarts_to_keep,
+        "final_file": final_file,
         "stats_file": stats_file,
         "stats_every": stats_every,
         "traj_file": traj_file,
