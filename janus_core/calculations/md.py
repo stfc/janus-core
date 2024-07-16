@@ -79,6 +79,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         Whether to rotate restart files. Default is False.
     restarts_to_keep : int
         Restart files to keep if rotating. Default is 4.
+    final_file : Optional[PathLike]
+        File to save final configuration at each temperature of similation. Default
+        inferred from `file_prefix`.
     stats_file : Optional[PathLike]
         File to save thermodynamical statistics. Default inferred from `file_prefix`.
     stats_every : int
@@ -124,6 +127,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         List of files saved to restart dynamics.
     offset : int
         Number of previous steps if restarting simulation.
+    created_final : bool
+        Whether the final structure file has been created.
 
     Methods
     -------
@@ -156,6 +161,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         restart_every: int = 1000,
         rotate_restart: bool = False,
         restarts_to_keep: int = 4,
+        final_file: Optional[PathLike] = None,
         stats_file: Optional[PathLike] = None,
         stats_every: int = 100,
         traj_file: Optional[PathLike] = None,
@@ -218,6 +224,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             Whether to rotate restart files. Default is False.
         restarts_to_keep : int
             Restart files to keep if rotating. Default is 4.
+        final_file : Optional[PathLike]
+            File to save final configuration at each temperature of similation. Default
+            inferred from `file_prefix`.
         stats_file : Optional[PathLike]
             File to save thermodynamical statistics. Default inferred from
             `file_prefix`.
@@ -267,6 +276,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.restart_every = restart_every
         self.rotate_restart = rotate_restart
         self.restarts_to_keep = restarts_to_keep
+        self.final_file = final_file
         self.stats_file = stats_file
         self.stats_every = stats_every
         self.traj_file = traj_file
@@ -340,6 +350,11 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
         self.n_atoms = len(self.struct)
 
+        self.final_file = self._build_filename(
+            "final.xyz",
+            self._parameter_prefix if file_prefix is None else "",
+            filename=self.final_file,
+        )
         self.stats_file = self._build_filename(
             "stats.dat",
             self._parameter_prefix if file_prefix is None else "",
@@ -352,6 +367,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         )
 
         self.offset = 0
+        self.created_final_file = False
 
         if "masses" not in self.struct.arrays.keys():
             self.struct.set_masses()
@@ -422,21 +438,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             temperature_prefix += f"-T{self.temp}"
 
         return temperature_prefix.lstrip("-")
-
-    @property
-    def _final_file(self) -> str:
-        """
-        Final state file name.
-
-        Returns
-        -------
-        str
-           File name for final state.
-        """
-
-        return self._build_filename(
-            "final.xyz", f"T{self.temp}", prefix_override=self.restart_stem
-        )
 
     @property
     def _restart_file(self) -> str:
@@ -557,11 +558,19 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
     def _write_final_state(self) -> None:
         """Write the final system state."""
+        self.struct.info["temperature"] = self.temp
+        if isinstance(self, NPT) and not isinstance(self, NVT_NH):
+            self.struct.info["pressure"] = self.pressure
+
+        # Append if final file has been created
+        append = self.created_final_file
+
         write(
-            self._final_file,
+            self.final_file,
             self.struct,
             write_info=True,
             columns=["symbols", "positions", "momenta", "masses"],
+            append=append,
         )
 
     def _post_process(self) -> None:
@@ -731,16 +740,20 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             if self.logger:
                 self.logger.info("Beginning temperature ramp at %sK", temps[0])
                 self.tracker.start_task("Temperature ramp")
+
             for temp in temps:
                 self.temp = temp
                 self._set_velocity_distribution()
                 if isclose(temp, 0.0):
                     self._write_final_state()
+                    self.created_final_file = True
                     continue
                 if not isinstance(self, NVE):
                     self.dyn.set_temperature(temperature_K=self.temp)
                 self.dyn.run(heating_steps)
                 self._write_final_state()
+                self.created_final_file = True
+
             if self.logger:
                 self.logger.info("Temperature ramp complete at %sK", temps[-1])
                 self.tracker.stop_task()
@@ -757,6 +770,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                     self.dyn.set_temperature(temperature_K=self.temp)
             self.dyn.run(self.steps)
             self._write_final_state()
+            self.created_final_file = True
             if self.logger:
                 self.tracker.stop_task()
                 self.tracker.stop()
@@ -871,22 +885,6 @@ class NPT(MolecularDynamics):
 
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
         return f"{super()._parameter_prefix}{pressure}"
-
-    @property
-    def _final_file(self) -> str:
-        """
-        Final state file name.
-
-        Returns
-        -------
-        str
-           File name for final state, includes pressure.
-        """
-
-        pressure = f"p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        return self._build_filename(
-            "final.xyz", f"T{self.temp}", pressure, prefix_override=self.restart_stem
-        )
 
     @property
     def _restart_file(self) -> str:

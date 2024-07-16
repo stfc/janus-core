@@ -550,8 +550,7 @@ def test_heating(tmp_path):
     """Test heating with no MD."""
     # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-heating"
-    final_T0_file = tmp_path / "NaCl-heating-T0.0-final.xyz"
-    final_T20_file = tmp_path / "NaCl-heating-T20.0-final.xyz"
+    final_file = tmp_path / "NaCl-heating-final.xyz"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -582,8 +581,7 @@ def test_heating(tmp_path):
         ],
         excludes=["Starting molecular dynamics simulation"],
     )
-    assert final_T0_file.exists()
-    assert final_T20_file.exists()
+    assert final_file.exists()
 
 
 def test_noramp_heating(tmp_path):
@@ -656,13 +654,11 @@ def test_heating_files():
     """Test default heating file names."""
     traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.xyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
-    final_10_path = Path("Cl4Na4-nvt-T10-final.xyz")
-    final_20_path = Path("Cl4Na4-nvt-T20-final.xyz")
+    final_path = Path("Cl4Na4-nvt-T10-T20-final.xyz")
 
     assert not traj_heating_path.exists()
     assert not stats_heating_path.exists()
-    assert not final_10_path.exists()
-    assert not final_20_path.exists()
+    assert not final_path.exists()
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -682,10 +678,9 @@ def test_heating_files():
     )
     try:
         nvt.run()
-        final_10_atoms = read(final_10_path)
-        assert isinstance(final_10_atoms, Atoms)
-        final_20_atoms = read(final_20_path)
-        assert isinstance(final_20_atoms, Atoms)
+        final_atoms = read(final_path, index=":")
+        assert isinstance(final_atoms[0], Atoms)
+        assert len(final_atoms) == 2
 
         traj = read(traj_heating_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
@@ -700,8 +695,7 @@ def test_heating_files():
     finally:
         traj_heating_path.unlink(missing_ok=True)
         stats_heating_path.unlink(missing_ok=True)
-        final_10_path.unlink(missing_ok=True)
-        final_20_path.unlink(missing_ok=True)
+        final_path.unlink(missing_ok=True)
 
 
 def test_heating_md_files():
@@ -709,14 +703,10 @@ def test_heating_md_files():
 
     traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.xyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
-    final_10_path = Path("Cl4Na4-nvt-T10-final.xyz")
-    final_20_path = Path("Cl4Na4-nvt-T20-final.xyz")
-    final_path = Path("Cl4Na4-nvt-T25.0-final.xyz")
+    final_path = Path("Cl4Na4-nvt-T10-T20-T25.0-final.xyz")
 
     assert not traj_heating_path.exists()
     assert not stats_heating_path.exists()
-    assert not final_10_path.exists()
-    assert not final_20_path.exists()
     assert not final_path.exists()
 
     single_point = SinglePoint(
@@ -737,10 +727,9 @@ def test_heating_md_files():
     )
     try:
         nvt.run()
-        final_10_atoms = read(final_10_path)
-        assert isinstance(final_10_atoms, Atoms)
-        final_20_atoms = read(final_20_path)
-        assert isinstance(final_20_atoms, Atoms)
+        final_atoms = read(final_path, index=":")
+        assert len(final_atoms) == 3
+        assert isinstance(final_atoms[0], Atoms)
 
         traj = read(traj_heating_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
@@ -752,14 +741,9 @@ def test_heating_md_files():
         assert stats.data[2, 16] == 20
         assert stats.data[3, 16] == 25
 
-        final = read(final_path)
-        assert isinstance(final, Atoms)
-
     finally:
         traj_heating_path.unlink(missing_ok=True)
         stats_heating_path.unlink(missing_ok=True)
-        final_10_path.unlink(missing_ok=True)
-        final_20_path.unlink(missing_ok=True)
         final_path.unlink(missing_ok=True)
 
 
@@ -797,9 +781,7 @@ def test_cooling(tmp_path):
     """Test cooling with no MD."""
     # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-cooling"
-    final_T0_file = tmp_path / "NaCl-cooling-T0.0-final.xyz"
-    final_T10_file = tmp_path / "NaCl-cooling-T10.0-final.xyz"
-    final_T20_file = tmp_path / "NaCl-cooling-T20.0-final.xyz"
+    final_path = tmp_path / "NaCl-cooling-final.xyz"
     stats_cooling_path = tmp_path / "NaCl-cooling-stats.dat"
     log_file = tmp_path / "nvt.log"
 
@@ -831,9 +813,10 @@ def test_cooling(tmp_path):
         ],
         excludes=["Starting molecular dynamics simulation"],
     )
-    assert final_T0_file.exists()
-    assert final_T10_file.exists()
-    assert final_T20_file.exists()
+    assert final_path.exists()
+    final_atoms = read(final_path, index=":")
+    assert isinstance(final_atoms[0], Atoms)
+    assert len(final_atoms) == 3
 
     stats = Stats(source=stats_cooling_path)
     assert stats.rows == 2

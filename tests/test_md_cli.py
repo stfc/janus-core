@@ -346,7 +346,7 @@ def test_invalid_config():
 
 
 def test_struct_name(tmp_path):
-    """ "Test specifying the structure name."""
+    """Test specifying the structure name."""
     struct_name = "EXAMPLE"
     struct_path = tmp_path / struct_name
     stats_path = tmp_path / f"{struct_name}-nvt-T10.0-stats.dat"
@@ -386,7 +386,7 @@ def test_ensemble_kwargs(tmp_path):
     file_prefix = tmp_path / "md"
     log_path = tmp_path / "md.log"
     summary_path = tmp_path / "summary.yml"
-    final_path = tmp_path / "md-T300.0-p0.0-final.xyz"
+    final_path = tmp_path / "md-final.xyz"
     stats_path = tmp_path / "md-stats.dat"
 
     ensemble_kwargs = "{'mask' : (0, 1, 0)}"
@@ -465,3 +465,41 @@ def test_invalid_ensemble_kwargs(tmp_path):
 
     assert result.exit_code == 1
     assert isinstance(result.exception, TypeError)
+
+
+def test_final_name(tmp_path):
+    """Test specifying the final file name."""
+    file_prefix = tmp_path / "npt"
+    stats_path = tmp_path / "npt-stats.dat"
+    traj_path = tmp_path / "npt-traj.xyz"
+    final_path = tmp_path / "example.xyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--ensemble",
+            "nvt",
+            "--steps",
+            "2",
+            "--stats-every",
+            1,
+            "--traj-every",
+            1,
+            "--file-prefix",
+            file_prefix,
+            "--final-file",
+            final_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert traj_path.exists()
+    assert stats_path.exists()
+    assert final_path.exists()
