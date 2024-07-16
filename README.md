@@ -271,10 +271,6 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 
 ### Training and fine-tuning MACE models
 
-> [!NOTE]
-> This currently requires use of the [develop branch of MACE](https://github.com/ACEsuit/mace/tree/develop).
-> This can be installed by running `poetry add git+https://github.com/ACEsuit/mace.git#develop`, followed by `poetry install`.
-
 MACE models can be trained by passing a configuration file to the [MACE CLI](https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py):
 
 ```shell
