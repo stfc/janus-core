@@ -8,17 +8,17 @@ import pytest
 
 from janus_core.helpers.mlip_calculators import choose_calculator
 
-MACE_MP_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
+MODEL_PATH = Path(__file__).parent / "models"
 
-MACE_OFF_PATH = Path(__file__).parent / "models" / "MACE-OFF23_small.model"
+MACE_MP_PATH = MODEL_PATH / "mace_mp_small.model"
 
-M3GNET_DIR_PATH = Path(__file__).parent / "models" / "M3GNet-MP-2021.2.8-DIRECT-PES/"
-M3GNET_MODEL_PATH = (
-    Path(__file__).parent / "models" / "M3GNet-MP-2021.2.8-DIRECT-PES/model.pt"
-)
+MACE_OFF_PATH = MODEL_PATH / "MACE-OFF23_small.model"
+
+M3GNET_DIR_PATH = MODEL_PATH / "M3GNet-MP-2021.2.8-DIRECT-PES"
+M3GNET_MODEL_PATH = M3GNET_DIR_PATH / "model.pt"
 M3GNET_POTENTIAL = load_model(path=M3GNET_DIR_PATH)
 
-CHGNET_PATH = Path(__file__).parent / "models" / "chgnet_0.3.0_e29f68s314m37.pth.tar"
+CHGNET_PATH = MODEL_PATH / "chgnet_0.3.0_e29f68s314m37.pth.tar"
 CHGNET_MODEL = CHGNet.from_file(path=CHGNET_PATH)
 
 
@@ -102,10 +102,10 @@ def test_invalid_device(architecture):
     "architecture, device, kwargs",
     [
         ("alignn", "cpu", {}),
-        ("alignn", "cpu", {"model_path": "tests/models/v5.27.2024"}),
-        ("alignn", "cpu", {"model_path": "tests/models/v5.27.2024/best_model.pt"}),
+        ("alignn", "cpu", {"model_path": MODEL_PATH / "v5.27.2024"}),
+        ("alignn", "cpu", {"model_path": MODEL_PATH / "v5.27.2024/best_model.pt"}),
         ("alignn", "cpu", {"model": "alignnff_wt10"}),
-        ("alignn", "cpu", {"path": "tests/models/v5.27.2024"}),
+        ("alignn", "cpu", {"path": MODEL_PATH / "v5.27.2024"}),
     ],
 )
 def test_extra_mlips(architecture, device, kwargs):
@@ -123,12 +123,12 @@ def test_extra_mlips(architecture, device, kwargs):
     "kwargs",
     [
         {
-            "model_path": "tests/models/v5.27.2024/best_model.pt",
-            "model": "tests/models/v5.27.2024/best_model.pt",
+            "model_path": MODEL_PATH / "v5.27.2024/best_model.pt",
+            "model": MODEL_PATH / "v5.27.2024/best_model.pt",
         },
         {
-            "model_path": "tests/models/v5.27.2024/best_model.pt",
-            "path": "tests/models/v5.27.2024/best_model.pt",
+            "model_path": MODEL_PATH / "v5.27.2024/best_model.pt",
+            "path": MODEL_PATH / "v5.27.2024/best_model.pt",
         },
     ],
 )

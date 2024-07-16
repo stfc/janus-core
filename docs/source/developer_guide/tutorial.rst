@@ -84,7 +84,8 @@ Converting ``model_path`` into ``path`` is a minimum requirement, but we also ai
 - If ``model_path`` refers to a model label, similar to the MACE ``"small"`` models, we try loading the model using ALIGNN's ``get_figshare_model_ff``
 - If ``model_path`` is ``None``, we use the ALIGNN's ``default_path``
 
-Note: ``model_path`` will already be a ``pathlib.Path`` object, if the path exists.
+.. note::
+    ``model_path`` will already be a ``pathlib.Path`` object, if the path exists.
 
 To ensure that the calculator does not receive multiple versions of keywords, it's also necessary to set ``model_path = path``, and remove ``path`` from ``kwargs``.
 
@@ -94,7 +95,8 @@ If the keyword is used by other calculators, this should be done within the ``el
 
 In addition to setting the calculator, ``__version__`` must also imported here, providing a check on the package independent of the calculator itself.
 
-Note, unlike in other ``janus-core`` modules, any imports required should be contained within the ``elif`` branch, as these dependencies are optional.
+.. note::
+    Unlike in other ``janus-core`` modules, any imports required should be contained within the ``elif`` branch, as these dependencies are optional.
 
 
 4. Add tests
