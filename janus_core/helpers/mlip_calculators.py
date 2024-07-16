@@ -39,27 +39,23 @@ def _set_model_path(
     # kwargs that may be used for `model_path`` for different MLIPs
     # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
     # to loaded PyTorch models
-    model_path_kwargs = ("model", "model_paths", "potential", "path")
+    present = kwargs.keys() & {"model", "model_paths", "potential", "path"}
 
     # Use model_path if specified, but check not also specified via kwargs
-    if model_path:
-        if any(kwarg in kwargs for kwarg in model_path_kwargs):
-            raise ValueError(
-                "`model_path` cannot be used in combination with 'model', "
-                "'model_paths', 'potential', or 'path'"
-            )
-    else:
+    if model_path and present:
+        raise ValueError(
+            "`model_path` cannot be used in combination with 'model', "
+            "'model_paths', 'potential', or 'path'"
+        )
+    if len(present) > 1:
         # Check at most one suitable kwarg is specified
-        if sum(kwarg in kwargs for kwarg in model_path_kwargs) > 1:
-            raise ValueError(
-                "Only one of 'model', 'model_paths', 'potential', and 'path' can be "
-                "specified"
-            )
-
+        raise ValueError(
+            "Only one of 'model', 'model_paths', 'potential', and 'path' can be "
+            "specified"
+        )
+    if present:
         # Set model_path from kwargs if any are specified
-        for kwarg in model_path_kwargs:
-            if kwarg in kwargs:
-                model_path = kwargs.pop(kwarg, None)
+        model_path = kwargs.pop(present.pop())
 
     # Convert to path if file/directory exists
     if isinstance(model_path, (Path, str)) and Path(model_path).expanduser().exists():
