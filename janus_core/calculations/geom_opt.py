@@ -7,7 +7,7 @@ import warnings
 
 from ase import Atoms, filters, units
 from ase.filters import FrechetCellFilter
-from ase.io import read, write
+from ase.io import read
 import ase.optimize
 from ase.optimize import LBFGS
 from ase.optimize.optimize import Optimizer
@@ -15,7 +15,7 @@ from numpy import linalg
 
 from janus_core.helpers.janus_types import ASEOptArgs, ASEWriteArgs
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import none_to_dict, spacegroup
+from janus_core.helpers.utils import none_to_dict, output_structs, spacegroup
 
 
 def _set_functions(
@@ -239,13 +239,20 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         )
 
     # Write out optimized structure
-    if write_results:
-        write(images=struct, **write_kwargs)
+    output_structs(
+        struct,
+        write_results=write_results,
+        **write_kwargs,
+    )
 
     # Reformat trajectory file from binary
     if traj_kwargs:
         traj = read(opt_kwargs["trajectory"], index=":")
-        write(images=traj, **traj_kwargs)
+        output_structs(
+            traj,
+            write_results=True,
+            **traj_kwargs,
+        )
 
     if logger:
         tracker.stop()

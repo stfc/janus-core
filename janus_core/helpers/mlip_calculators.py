@@ -210,5 +210,6 @@ def choose_calculator(
         )
 
     calculator.parameters["version"] = __version__
+    calculator.parameters["arch"] = architecture
 
     return calculator

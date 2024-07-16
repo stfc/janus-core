@@ -12,7 +12,7 @@ from warnings import warn
 
 from ase import Atoms, units
 from ase.geometry.analysis import Analysis
-from ase.io import read, write
+from ase.io import read
 from ase.md.langevin import Langevin
 from ase.md.npt import NPT as ASE_NPT
 from ase.md.velocitydistribution import (
@@ -34,7 +34,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
-from janus_core.helpers.utils import FileNameMixin
+from janus_core.helpers.utils import FileNameMixin, output_structs
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
@@ -595,9 +595,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
-            self.dyn.atoms.write(
-                self.traj_file,
-                write_info=True,
+            output_structs(
+                images=self.struct,
+                filename=self.traj_file,
+                write_results=True,
                 columns=["symbols", "positions", "momenta", "masses"],
                 append=append,
             )
@@ -611,10 +612,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         # Append if final file has been created
         append = self.created_final_file
 
-        write(
-            self.final_file,
-            self.struct,
-            write_info=True,
+        output_structs(
+            images=self.struct,
+            filename=self.final_file,
+            write_results=True,
             columns=["symbols", "positions", "momenta", "masses"],
             append=append,
         )
@@ -708,10 +709,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
-            write(
-                self._restart_file,
-                self.struct,
-                write_info=True,
+            output_structs(
+                images=self.struct,
+                filename=self._restart_file,
+                write_results=True,
                 columns=["symbols", "positions", "momenta", "masses"],
             )
             if self.rotate_restart:

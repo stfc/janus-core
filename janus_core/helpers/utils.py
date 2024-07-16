@@ -1,13 +1,15 @@
 """Utility functions for janus_core."""
 
 from abc import ABC
+from collections.abc import Collection
 from pathlib import Path
-from typing import Optional
+from typing import Optional, get_args
 
 from ase import Atoms
+from ase.io import write
 from spglib import get_spacegroup
 
-from janus_core.helpers.janus_types import PathLike
+from janus_core.helpers.janus_types import MaybeSequence, PathLike, Properties
 
 
 class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
@@ -229,3 +231,85 @@ def dict_remove_hyphens(dictionary: dict) -> dict:
         if isinstance(value, dict):
             dictionary[key] = dict_remove_hyphens(value)
     return {k.replace("-", "_"): v for k, v in dictionary.items()}
+
+
+def results_to_info(
+    struct: Atoms,
+    *,
+    properties: Collection[Properties] = (),
+    invalidate_calc: bool = True,
+) -> None:
+    """
+    Copy or move MLIP calculated results to info.
+
+    Parameters
+    ----------
+    struct : Atoms
+        Atoms object to copy or move results to info.
+    properties : Collection[Properties]
+        Properties to copy from results to info. Default is ().
+    invalidate_calc : bool
+        Whether to remove all calculator results after copying properties to info.
+        Default is True.
+    """
+    if not properties:
+        properties = get_args(Properties)
+
+    if struct.calc:
+        # Set default architecture from calculator name
+        arch = struct.calc.parameters["arch"]
+
+        for key in properties & struct.calc.results.keys():
+            tag = f"{arch}_{key}"
+            value = struct.calc.results[key]
+            if key == "forces":
+                struct.arrays[tag] = value
+            else:
+                struct.info[tag] = value
+
+        # Remove all calculator results
+        if invalidate_calc:
+            struct.calc.results = {}
+
+
+def output_structs(
+    images: MaybeSequence[Atoms],
+    *,
+    set_info: bool = True,
+    write_results: bool = False,
+    properties: Collection[Properties] = (),
+    invalidate_calc: bool = True,
+    **kwargs,
+) -> None:
+    """
+    Copy or move MLIP calculated results to info and/or write structures to file.
+
+    Parameters
+    ----------
+    images : MaybeSequence[Atoms]
+        Atoms object or a list of Atoms objects to write.
+    set_info : bool
+        True to set structure info from calculated results. Default is True.
+    write_results : bool
+        True to write out structure with results of calculations. Default is False.
+    properties : Collection[Properties]
+        Properties to copy from results to info. Default is ().
+    invalidate_calc : bool
+        Whether to remove all calculator results after copying properties to info.
+        Default is True.
+    **kwargs
+        Keyword arguments passed to ase.io.write.
+    """
+    if isinstance(images, Atoms):
+        images = (images,)
+
+    if set_info:
+        for image in images:
+            results_to_info(
+                image, properties=properties, invalidate_calc=invalidate_calc
+            )
+
+    if write_results:
+        # By default, don't write calculator results, as duplicates info
+        kwargs.setdefault("write_results", False)
+        write(images=images, **kwargs)

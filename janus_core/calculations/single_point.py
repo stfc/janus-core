@@ -1,13 +1,13 @@
 """Prepare and perform single point calculations."""
 
-from collections.abc import Collection
+from collections.abc import Sequence
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, get_args
 
 from ase import Atoms
-from ase.io import read, write
-from numpy import isfinite, ndarray
+from ase.io import read
+from numpy import ndarray
 
 from janus_core.helpers.janus_types import (
     Architectures,
@@ -18,10 +18,11 @@ from janus_core.helpers.janus_types import (
     MaybeList,
     MaybeSequence,
     PathLike,
+    Properties,
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.mlip_calculators import choose_calculator
-from janus_core.helpers.utils import FileNameMixin, none_to_dict
+from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 
 
 class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attributes
@@ -218,7 +219,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             read_kwargs = read_kwargs if read_kwargs else {}
             self.read_structure(**read_kwargs)
 
-        if isinstance(self.struct, list):
+        if isinstance(self.struct, Sequence):
             for struct in self.struct:
                 struct.calc = deepcopy(calculator)
             # Return single Atoms object if only one image in list
@@ -236,15 +237,11 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         MaybeList[float]
             Potential energy of structure(s).
         """
-        tag = f"{self.architecture}_energy"
-        if isinstance(self.struct, list):
+        if isinstance(self.struct, Sequence):
             energies = [struct.get_potential_energy() for struct in self.struct]
-            for struct, energy in zip(self.struct, energies):
-                struct.info[tag] = energy
             return energies
 
         energy = self.struct.get_potential_energy()
-        self.struct.info[tag] = energy
         return energy
 
     def _get_forces(self) -> MaybeList[ndarray]:
@@ -256,15 +253,11 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         MaybeList[ndarray]
             Forces of structure(s).
         """
-        tag = f"{self.architecture}_forces"
-        if isinstance(self.struct, list):
+        if isinstance(self.struct, Sequence):
             forces = [struct.get_forces() for struct in self.struct]
-            for struct, force in zip(self.struct, forces):
-                struct.arrays[tag] = force
             return forces
 
         force = self.struct.get_forces()
-        self.struct.arrays[tag] = force
         return force
 
     def _get_stress(self) -> MaybeList[ndarray]:
@@ -276,91 +269,19 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         MaybeList[ndarray]
             Stress of structure(s).
         """
-        tag = f"{self.architecture}_stress"
-        if isinstance(self.struct, list):
+        if isinstance(self.struct, Sequence):
             stresses = [struct.get_stress() for struct in self.struct]
-            for struct, stress in zip(self.struct, stresses):
-                struct.info[tag] = stress
             return stresses
 
         stress = self.struct.get_stress()
-        self.struct.info[tag] = stress
         return stress
-
-    def _remove_invalid_props(
-        self,
-        struct: Atoms,
-        results: CalcResults = None,
-        properties: Collection[str] = (),
-    ) -> None:
-        """
-        Remove any invalid properties from calculated results.
-
-        Parameters
-        ----------
-        struct : Atoms
-            ASE Atoms structure with attached calculator results.
-        results : CalcResults
-            Dictionary of calculated results. Default is {}.
-        properties : Collection[str]
-            Physical properties requested to be calculated. Default is ().
-        """
-        results = results if results else {}
-
-        # Find any properties with non-finite values
-        rm_keys = [
-            prop
-            for prop in struct.calc.results
-            if not isfinite(struct.calc.results[prop]).all()
-        ]
-        # Raise error if property was explicitly requested, otherwise remove
-        for prop in rm_keys:
-            if prop in properties:
-                raise ValueError(
-                    f"'{prop}' contains non-finite values for this structure."
-                )
-            if prop in results:
-                del struct.info[f"{self.architecture}_{prop}"]
-                del struct.calc.results[prop]
-                del results[prop]
-
-    def _clean_results(
-        self,
-        results: CalcResults = None,
-        properties: Collection[str] = (),
-        invalidate_calc: bool = True,
-    ) -> None:
-        """
-        Remove NaN and inf values from results and calc.results dictionaries.
-
-        Parameters
-        ----------
-        results : CalcResults
-            Dictionary of calculated results. Default is {}.
-        properties : Collection[str]
-            Physical properties requested to be calculated. Default is ().
-        invalidate_calc : bool
-            Remove calculator results if True. When True Atoms object loses
-            its property methods and true values are in info and arrays.
-            Default is True.
-        """
-        results = results if results else {}
-
-        if isinstance(self.struct, list):
-            for image in self.struct:
-                self._remove_invalid_props(image, results, properties)
-                if invalidate_calc:
-                    image.calc.results = {}
-        else:
-            self._remove_invalid_props(self.struct, results, properties)
-            if invalidate_calc:
-                self.struct.calc.results = {}
 
     def run(
         self,
-        properties: MaybeSequence[str] = (),
+        properties: MaybeSequence[Properties] = (),
         write_results: bool = False,
         write_kwargs: Optional[ASEWriteArgs] = None,
+        invalidate_calc: bool = True,
     ) -> CalcResults:
         """
         Run single point calculations.
@@ -375,6 +296,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         write_kwargs : Optional[ASEWriteArgs],
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
+        invalidate_calc : bool
+            Whether to remove calculator results that are copied to info. Default is
+            True.
 
         Returns
         -------
@@ -386,10 +310,14 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             properties = [properties]
 
         for prop in properties:
-            if prop not in ["energy", "forces", "stress"]:
+            if prop not in get_args(Properties):
                 raise NotImplementedError(
                     f"Property '{prop}' cannot currently be calculated."
                 )
+
+        # If none specified, get all valid properties
+        if len(properties) == 0:
+            properties = get_args(Properties)
 
         write_kwargs = write_kwargs if write_kwargs else {}
 
@@ -409,15 +337,17 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         if "stress" in properties or len(properties) == 0:
             results["stress"] = self._get_stress()
 
-        # Remove meaningless values from results e.g. stress for non-periodic systems
-        self._clean_results(results, properties=properties)
-
         if self.logger:
             self.tracker.stop_task()
             self.tracker.stop()
             self.logger.info("Single point calculation complete")
 
-        if write_results:
-            write(images=self.struct, **write_kwargs)
+        output_structs(
+            self.struct,
+            write_results=write_results,
+            properties=properties,
+            invalidate_calc=invalidate_calc,
+            **write_kwargs,
+        )
 
         return results
