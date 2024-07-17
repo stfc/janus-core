@@ -134,10 +134,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
     -------
     run()
         Run molecular dynamics simulation and/or heating ramp.
-    get_log_stats()
-        Get thermodynamical statistics to be written to molecular dynamics log.
-    get_log_header()
-        Get header string for molecular dynamics log.
+    get_stats()
+        Get thermodynamical statistics to be written to file.
+    get_stats_header()
+        Get header string for molecular dynamics statistics.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
@@ -455,26 +455,26 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         )
 
     @staticmethod
-    def get_log_header() -> str:
+    def get_stats_header() -> str:
         """
-        Get header string for molecular dynamics log.
+        Get header string for molecular dynamics statistics.
 
         Returns
         -------
         str
-            Header for molecular dynamics log.
+            Header for molecular dynamics statistics.
         """
-        log_header = (
+        stats_header = (
             "# Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
             "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [GPa] | "
             "Pxx [GPa] | Pyy [GPa] | Pzz [GPa] | Pyz [GPa] | Pxz [GPa] | Pxy [GPa]"
         )
 
-        return log_header
+        return stats_header
 
-    def get_log_stats(self) -> str:
+    def get_stats(self) -> str:
         """
-        Get thermodynamical statistics to be written to molecular dynamics log.
+        Get thermodynamical statistics to be written to file.
 
         Returns
         -------
@@ -519,7 +519,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             density = 0.0
             pressure_tensor = np.zeros(6)
 
-        log_stats = (
+        stats = (
             f"{step:10d} {real_time.total_seconds():.3f} {time:13.2f} {e_pot:.8e} "
             f"{e_kin:.8e} {current_temp:.3f} {e_pot + e_kin:.8e} {density:.3f} "
             f"{volume:.8e} {pressure:.8e} {pressure_tensor[0]:.8e} "
@@ -528,18 +528,18 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             f"{pressure_tensor[5]:.8e}"
         )
 
-        return log_stats
+        return stats
 
     def _write_stats_file(self) -> None:
-        """Write molecular dynamics log."""
-        log_stats = self.get_log_stats()
+        """Write molecular dynamics statistics."""
+        stats = self.get_stats()
 
         # we do not want to print step 0 in restarts
         if self.restart and self.dyn.nsteps == 0:
             return
 
         with open(self.stats_file, "a", encoding="utf8") as stats_file:
-            print(log_stats, file=stats_file)
+            print(stats, file=stats_file)
 
     def _write_traj(self) -> None:
         """Write current structure to trajectory file."""
@@ -692,9 +692,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             if self.rescale_velocities:
                 self._reset_velocities()
 
-            log_header = self.get_log_header()
+            stats_header = self.get_stats_header()
             with open(self.stats_file, "w", encoding="utf8") as stats_file:
-                print(log_header, file=stats_file)
+                print(stats_header, file=stats_file)
 
         self.dyn.attach(self._write_stats_file, interval=self.stats_every)
         self.dyn.attach(self._write_traj, interval=self.traj_every)
@@ -905,30 +905,30 @@ class NPT(MolecularDynamics):
             prefix_override=self.restart_stem,
         )
 
-    def get_log_stats(self) -> str:
+    def get_stats(self) -> str:
         """
-        Get thermodynamical statistics to be written to molecular dynamics log.
+        Get thermodynamical statistics to be written to file.
 
         Returns
         -------
         str
             Thermodynamical statistics to be written out.
         """
-        log_stats = MolecularDynamics.get_log_stats(self)
-        return log_stats + f" {self.pressure} {self.temp}"
+        stats = MolecularDynamics.get_stats(self)
+        return stats + f" {self.pressure} {self.temp}"
 
     @staticmethod
-    def get_log_header() -> str:
+    def get_stats_header() -> str:
         """
-        Get header string for molecular dynamics log.
+        Get header string for molecular dynamics statistics.
 
         Returns
         -------
         str
-            Header for molecular dynamics log.
+            Header for molecular dynamics statistics.
         """
-        log_header = MolecularDynamics.get_log_header()
-        return log_header + " | Target P [GPa] | Target T [K]"
+        stats_header = MolecularDynamics.get_stats_header()
+        return stats_header + " | Target P [GPa] | Target T [K]"
 
 
 class NVT(MolecularDynamics):
@@ -990,30 +990,30 @@ class NVT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
-    def get_log_stats(self) -> str:
+    def get_stats(self) -> str:
         """
-        Get thermodynamical statistics to be written to molecular dynamics log.
+        Get thermodynamical statistics to be written to file.
 
         Returns
         -------
         str
             Thermodynamical statistics to be written out.
         """
-        log_stats = MolecularDynamics.get_log_stats(self)
-        return log_stats + f" {self.temp}"
+        stats = MolecularDynamics.get_stats(self)
+        return stats + f" {self.temp}"
 
     @staticmethod
-    def get_log_header() -> str:
+    def get_stats_header() -> str:
         """
-        Get header string for molecular dynamics log.
+        Get header string for molecular dynamics statistics.
 
         Returns
         -------
         str
-            Header for molecular dynamics log.
+            Header for molecular dynamics statistics.
         """
-        log_header = MolecularDynamics.get_log_header()
-        return log_header + " | Target T [K]"
+        stats_header = MolecularDynamics.get_stats_header()
+        return stats_header + " | Target T [K]"
 
 
 class NVE(MolecularDynamics):
@@ -1121,30 +1121,30 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             **kwargs,
         )
 
-    def get_log_stats(self) -> str:
+    def get_stats(self) -> str:
         """
-        Get thermodynamical statistics to be written to molecular dynamics log.
+        Get thermodynamical statistics to be written to file.
 
         Returns
         -------
         str
             Thermodynamical statistics to be written out.
         """
-        log_stats = MolecularDynamics.get_log_stats(self)
-        return log_stats + f" {self.temp}"
+        stats = MolecularDynamics.get_stats(self)
+        return stats + f" {self.temp}"
 
     @staticmethod
-    def get_log_header() -> str:
+    def get_stats_header() -> str:
         """
-        Get header string for molecular dynamics log.
+        Get header string for molecular dynamics statistics.
 
         Returns
         -------
         str
-            Header for molecular dynamics log.
+            Header for molecular dynamics statistics.
         """
-        log_header = MolecularDynamics.get_log_header()
-        return log_header + " | Target T [K]"
+        stats_header = MolecularDynamics.get_stats_header()
+        return stats_header + " | Target T [K]"
 
 
 class NPH(NPT):
