@@ -79,6 +79,7 @@ def test_properties(tmp_path):
 
     atoms = read(results_path_1)
     assert "mace_mp_energy" in atoms.info
+    assert "mace_stress" not in atoms.info
 
     result = runner.invoke(
         app,
@@ -96,9 +97,11 @@ def test_properties(tmp_path):
             summary_path,
         ],
     )
-    assert result.exit_code == 1
-    assert not results_path_2.is_file()
-    assert isinstance(result.exception, ValueError)
+    assert result.exit_code == 0
+
+    atoms = read(results_path_2)
+    assert "mace_mp_stress" in atoms.info
+    assert "mace_mp_energy" not in atoms.info
 
 
 def test_read_kwargs(tmp_path):
