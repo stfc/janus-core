@@ -152,8 +152,8 @@ def test_single_point_write_kwargs(tmp_path):
     assert "mace_forces" in atoms.arrays
 
 
-def test_single_point_write_nan(tmp_path):
-    """Test non-finite singlepoint results removed."""
+def test_single_point_molecule(tmp_path):
+    """Test singlepoint results for isolated molecule."""
     data_path = DATA_PATH / "H2O.cif"
     results_path = tmp_path / "H2O.xyz"
     single_point = SinglePoint(
@@ -163,14 +163,13 @@ def test_single_point_write_nan(tmp_path):
     )
 
     assert isfinite(single_point.run("energy")["energy"]).all()
-    with pytest.raises(ValueError):
-        single_point.run("stress")
 
     single_point.run(write_results=True, write_kwargs={"filename": results_path})
     atoms = read(results_path)
     assert atoms.info["mace_energy"] == pytest.approx(-14.035236305927514)
     assert "mace_forces" in atoms.arrays
-    assert "mace_stress" not in atoms.info
+    assert "mace_stress" in atoms.info
+    assert atoms.info["mace_stress"] == pytest.approx([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 
 def test_invalid_prop():
