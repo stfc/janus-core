@@ -173,7 +173,7 @@ def calc_eos(
     struct_name = struct_name if struct_name else struct.get_chemical_formula()
     file_prefix = file_prefix if file_prefix else struct_name
 
-    write_kwargs.setdefault("filename", f"{file_prefix}-generated.xyz")
+    write_kwargs.setdefault("filename", f"{file_prefix}-generated.extxyz")
 
     if (
         (minimize or minimize_all)

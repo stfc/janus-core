@@ -19,7 +19,7 @@ runner = CliRunner()
 def test_md_pp(tmp_path):
     """Test post-processing as part of MD cycle."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.xyz"
+    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
     rdf_path = tmp_path / "Cl4Na4-nve-T300.0-rdf.dat"
     vaf_path = tmp_path / "Cl4Na4-nve-T300.0-vaf.dat"

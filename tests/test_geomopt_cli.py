@@ -28,7 +28,7 @@ def test_help():
 
 def test_geomopt(tmp_path):
     """Test geomopt calculation."""
-    results_path = Path("./NaCl-opt.xyz").absolute()
+    results_path = Path("./NaCl-opt.extxyz").absolute()
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -54,7 +54,7 @@ def test_geomopt(tmp_path):
 
 def test_log(tmp_path):
     """Test log correctly written for geomopt."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -81,8 +81,8 @@ def test_log(tmp_path):
 
 def test_traj(tmp_path):
     """Test trajectory correctly written for geomopt."""
-    results_path = tmp_path / "NaCl-opt.xyz"
-    traj_path = f"{tmp_path}/test.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
+    traj_path = f"{tmp_path}/test.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -109,7 +109,7 @@ def test_traj(tmp_path):
 
 def test_fully_opt(tmp_path):
     """Test passing --fully-opt without --vectors-only"""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -149,7 +149,7 @@ def test_fully_opt(tmp_path):
 
 def test_fully_opt_and_vectors(tmp_path):
     """Test passing --fully-opt with --vectors-only."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -187,7 +187,7 @@ def test_fully_opt_and_vectors(tmp_path):
 
 def test_vectors_not_fully_opt(tmp_path):
     """Test passing --vectors-only without --fully-opt."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -217,7 +217,7 @@ test_data = ["--vectors-only", "--fully-opt"]
 @pytest.mark.parametrize("option", test_data)
 def test_scalar_pressure(option, tmp_path):
     """Test passing --pressure with --vectors-only."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -244,7 +244,7 @@ def test_scalar_pressure(option, tmp_path):
 
 def test_duplicate_traj(tmp_path):
     """Test trajectory file cannot be not passed via traj_kwargs."""
-    traj_path = tmp_path / "NaCl-traj.xyz"
+    traj_path = tmp_path / "NaCl-traj.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -272,7 +272,7 @@ def test_restart(tmp_path):
     """Test restarting geometry optimization."""
     data_path = DATA_PATH / "NaCl-deformed.cif"
     restart_path = tmp_path / "NaCl-res.pkl"
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -326,7 +326,7 @@ def test_restart(tmp_path):
 
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
-    results_path = tmp_path / "NaCl-results.xyz"
+    results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -363,7 +363,7 @@ def test_summary(tmp_path):
 
 def test_config(tmp_path):
     """Test passing a config file with opt_kwargs."""
-    results_path = tmp_path / "NaCl-results.xyz"
+    results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -411,7 +411,7 @@ def test_invalid_config():
 
 def test_const_volume(tmp_path):
     """Test setting constant volume with --fully-opt."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -440,7 +440,7 @@ def test_const_volume(tmp_path):
 
 def test_optimizer_str(tmp_path):
     """Test setting optimizer function."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -469,7 +469,7 @@ def test_optimizer_str(tmp_path):
 
 def test_filter_str(tmp_path):
     """Test setting filter function."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -499,7 +499,7 @@ def test_filter_str(tmp_path):
 
 def test_filter_str_error(tmp_path):
     """Test setting filter function without --fully-opt or --vectors-only."""
-    results_path = tmp_path / "NaCl-opt.xyz"
+    results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 

@@ -395,7 +395,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
 
         write_kwargs.setdefault(
             "filename",
-            self._build_filename("results.xyz").absolute(),
+            self._build_filename("results.extxyz").absolute(),
         )
 
         if self.logger:

@@ -187,7 +187,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
                 }
             # If not specified otherwise, save optimized structure consistently with
             # phonon output files
-            opt_file = self._build_filename("opt.xyz")
+            opt_file = self._build_filename("opt.extxyz")
             if "write_kwargs" in self.minimize_kwargs:
                 self.minimize_kwargs["write_kwargs"].setdefault("filename", opt_file)
             else:

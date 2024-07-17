@@ -41,10 +41,10 @@ def test_init(ensemble, expected):
 
 def test_npt():
     """Test NPT molecular dynamics."""
-    restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.xyz")
-    restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.xyz")
-    restart_final = Path("Cl4Na4-npt-T300.0-p1.0-final.xyz")
-    traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.xyz")
+    restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.extxyz")
+    restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.extxyz")
+    restart_final = Path("Cl4Na4-npt-T300.0-p1.0-final.extxyz")
+    traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.extxyz")
     stats_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
 
     assert not restart_path_1.exists()
@@ -94,9 +94,9 @@ def test_npt():
 
 def test_nvt_nh():
     """Test NVT-Nosé–Hoover  molecular dynamics."""
-    restart_path = Path("Cl4Na4-nvt-nh-T300.0-res-3.xyz")
-    restart_final_path = Path("Cl4Na4-nvt-nh-T300.0-final.xyz")
-    traj_path = Path("Cl4Na4-nvt-nh-T300.0-traj.xyz")
+    restart_path = Path("Cl4Na4-nvt-nh-T300.0-res-3.extxyz")
+    restart_final_path = Path("Cl4Na4-nvt-nh-T300.0-final.extxyz")
+    traj_path = Path("Cl4Na4-nvt-nh-T300.0-traj.extxyz")
     stats_path = Path("Cl4Na4-nvt-nh-T300.0-stats.dat")
 
     assert not restart_path.exists()
@@ -145,7 +145,7 @@ def test_nvt_nh():
 def test_nve(tmp_path):
     """Test NVE molecular dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.xyz"
+    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
 
     single_point = SinglePoint(
@@ -176,9 +176,9 @@ def test_nve(tmp_path):
 
 def test_nph():
     """Test NPH molecular dynamics."""
-    restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.xyz")
-    restart_final_path = Path("Cl4Na4-nph-T300.0-p0.0-final.xyz")
-    traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.xyz")
+    restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.extxyz")
+    restart_final_path = Path("Cl4Na4-nph-T300.0-p0.0-final.extxyz")
+    traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.extxyz")
     stats_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
 
     assert not restart_path.exists()
@@ -227,7 +227,7 @@ def test_nph():
 def test_restart(tmp_path):
     """Test restarting molecular dynamics simulation."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
     single_point = SinglePoint(
@@ -376,7 +376,7 @@ def test_remove_rot(tmp_path):
 def test_traj_start(tmp_path):
     """Test starting trajectory after n steps."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -491,9 +491,9 @@ def test_rescale_every(tmp_path):
 def test_rotate_restart(tmp_path):
     """Test setting rotate_restart."""
     file_prefix = tmp_path / "Cl4Na4-nvt"
-    restart_path_1 = tmp_path / "Cl4Na4-nvt-T300.0-res-1.xyz"
-    restart_path_2 = tmp_path / "Cl4Na4-nvt-T300.0-res-2.xyz"
-    restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.xyz"
+    restart_path_1 = tmp_path / "Cl4Na4-nvt-T300.0-res-1.extxyz"
+    restart_path_2 = tmp_path / "Cl4Na4-nvt-T300.0-res-2.extxyz"
+    restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.extxyz"
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
@@ -520,7 +520,7 @@ def test_rotate_restart(tmp_path):
 def test_atoms_struct(tmp_path):
     """Test restarting NVT molecular dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.xyz"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
     struct = read(DATA_PATH / "NaCl.cif")
@@ -550,7 +550,7 @@ def test_heating(tmp_path):
     """Test heating with no MD."""
     # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-heating"
-    final_file = tmp_path / "NaCl-heating-final.xyz"
+    final_file = tmp_path / "NaCl-heating-final.extxyz"
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -652,9 +652,9 @@ def test_heating_md(tmp_path):
 
 def test_heating_files():
     """Test default heating file names."""
-    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.xyz")
+    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.extxyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
-    final_path = Path("Cl4Na4-nvt-T10-T20-final.xyz")
+    final_path = Path("Cl4Na4-nvt-T10-T20-final.extxyz")
 
     assert not traj_heating_path.exists()
     assert not stats_heating_path.exists()
@@ -701,9 +701,9 @@ def test_heating_files():
 def test_heating_md_files():
     """Test default heating files when also running md"""
 
-    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.xyz")
+    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
-    final_path = Path("Cl4Na4-nvt-T10-T20-T25.0-final.xyz")
+    final_path = Path("Cl4Na4-nvt-T10-T20-T25.0-final.extxyz")
 
     assert not traj_heating_path.exists()
     assert not stats_heating_path.exists()
@@ -781,7 +781,7 @@ def test_cooling(tmp_path):
     """Test cooling with no MD."""
     # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-cooling"
-    final_path = tmp_path / "NaCl-cooling-final.xyz"
+    final_path = tmp_path / "NaCl-cooling-final.extxyz"
     stats_cooling_path = tmp_path / "NaCl-cooling-stats.dat"
     log_file = tmp_path / "nvt.log"
 

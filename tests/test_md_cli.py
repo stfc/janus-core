@@ -41,7 +41,7 @@ test_data = [
 def test_md(ensemble, tmp_path):
     """Test all MD simulations are able to run."""
     file_prefix = tmp_path / f"{ensemble}-T300"
-    traj_path = tmp_path / f"{ensemble}-T300-traj.xyz"
+    traj_path = tmp_path / f"{ensemble}-T300-traj.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -350,8 +350,8 @@ def test_struct_name(tmp_path):
     struct_name = "EXAMPLE"
     struct_path = tmp_path / struct_name
     stats_path = tmp_path / f"{struct_name}-nvt-T10.0-stats.dat"
-    traj_path = tmp_path / f"{struct_name}-nvt-T10.0-traj.xyz"
-    final_path = tmp_path / f"{struct_name}-nvt-T10.0-final.xyz"
+    traj_path = tmp_path / f"{struct_name}-nvt-T10.0-traj.extxyz"
+    final_path = tmp_path / f"{struct_name}-nvt-T10.0-final.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     result = runner.invoke(
@@ -386,7 +386,7 @@ def test_ensemble_kwargs(tmp_path):
     file_prefix = tmp_path / "md"
     log_path = tmp_path / "md.log"
     summary_path = tmp_path / "summary.yml"
-    final_path = tmp_path / "md-final.xyz"
+    final_path = tmp_path / "md-final.extxyz"
     stats_path = tmp_path / "md-stats.dat"
 
     ensemble_kwargs = "{'mask' : (0, 1, 0)}"
@@ -471,8 +471,8 @@ def test_final_name(tmp_path):
     """Test specifying the final file name."""
     file_prefix = tmp_path / "npt"
     stats_path = tmp_path / "npt-stats.dat"
-    traj_path = tmp_path / "npt-traj.xyz"
-    final_path = tmp_path / "example.xyz"
+    traj_path = tmp_path / "npt-traj.extxyz"
+    final_path = tmp_path / "example.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     result = runner.invoke(

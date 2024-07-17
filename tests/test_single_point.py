@@ -104,7 +104,7 @@ def test_single_point_traj():
 def test_single_point_write():
     """Test writing singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
-    results_path = Path("./NaCl-results.xyz").absolute()
+    results_path = Path("./NaCl-results.extxyz").absolute()
     assert not results_path.exists()
 
     single_point = SinglePoint(
@@ -137,7 +137,7 @@ def test_single_point_write():
 def test_single_point_write_kwargs(tmp_path):
     """Test passing write_kwargs to singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
-    results_path = tmp_path / "NaCl.xyz"
+    results_path = tmp_path / "NaCl.extxyz"
 
     single_point = SinglePoint(
         struct_path=data_path,
@@ -155,7 +155,7 @@ def test_single_point_write_kwargs(tmp_path):
 def test_single_point_molecule(tmp_path):
     """Test singlepoint results for isolated molecule."""
     data_path = DATA_PATH / "H2O.cif"
-    results_path = tmp_path / "H2O.xyz"
+    results_path = tmp_path / "H2O.extxyz"
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",

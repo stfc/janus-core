@@ -24,7 +24,7 @@ def test_descriptors(tmp_path):
     """Test calculating MLIP descriptors."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.xyz"
+    out_path = tmp_path / "NaCl-descriptors.extxyz"
     result = runner.invoke(
         app,
         [
@@ -62,7 +62,7 @@ def test_calc_per_element(tmp_path):
     """Test calculating MLIP descriptors for each element."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.xyz"
+    out_path = tmp_path / "NaCl-descriptors.extxyz"
     result = runner.invoke(
         app,
         [
@@ -101,7 +101,7 @@ def test_invariant(tmp_path):
     """Test setting invariant_only to false."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.xyz"
+    out_path = tmp_path / "NaCl-descriptors.extxyz"
     result = runner.invoke(
         app,
         [
@@ -140,7 +140,7 @@ def test_traj(tmp_path):
     """Test calculating descriptors for a trajectory."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "benzene-descriptors.xyz"
+    out_path = tmp_path / "benzene-descriptors.extxyz"
     result = runner.invoke(
         app,
         [

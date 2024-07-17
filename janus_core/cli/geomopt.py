@@ -234,7 +234,7 @@ def geomopt(
     if out:
         write_kwargs["filename"] = out
     else:
-        write_kwargs["filename"] = f"{s_point.struct_name}-opt.xyz"
+        write_kwargs["filename"] = f"{s_point.struct_name}-opt.extxyz"
 
     _set_minimize_kwargs(minimize_kwargs, traj, vectors_only, pressure)
 
