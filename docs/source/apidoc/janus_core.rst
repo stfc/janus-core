@@ -184,6 +184,17 @@ janus\_core.helpers.correlator module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.helpers.observables module
+---------------------------------------
+
+.. automodule:: janus_core.helpers.observables
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+
 janus\_core.helpers.train module
 --------------------------------
 
