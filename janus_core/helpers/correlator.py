@@ -66,10 +66,10 @@ class Correlator:
         b : float
             Newly observed value of right correland.
         """
-        self._add(a, b, 0)
+        self._propagate(a, b, 0)
 
     # pylint: disable=invalid-name
-    def _add(self, a: float, b: float, block: int):
+    def _propagate(self, a: float, b: float, block: int):
         """
         Propagate update down block hierarchy.
 
@@ -93,7 +93,7 @@ class Correlator:
         self._count_accumulated[block] += 1
 
         if self._count_accumulated[block] == self._averaging:
-            self._add(
+            self._propagate(
                 self._accumulator[block, 0] / self._averaging,
                 self._accumulator[block, 1] / self._averaging,
                 block + 1,

@@ -761,8 +761,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         if self.post_process_kwargs:
             self._post_process()
 
-        if self.correlation_kwargs:
-            self._write_correlations()
+        self._write_correlations()
 
     def _run_dynamics(self) -> None:
         """Run dynamics and/or temperature ramp."""

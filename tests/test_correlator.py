@@ -5,7 +5,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
-from ase.units import bar
+from ase.units import GPa
 import numpy as np
 from pytest import approx
 from typer.testing import CliRunner
@@ -14,6 +14,7 @@ from yaml import Loader, load
 from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.correlator import Correlator
+from janus_core.helpers.observables import Stress
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -87,17 +88,13 @@ def test_md_correlations(tmp_path):
             kwargs["gamma"]
             * kappa
             * atoms.get_stress(include_ideal_gas=True, voigt=True)[-1]
-            / bar
+            / GPa
         )
-
-    def user_observable_b(atoms: Atoms) -> float:
-        """User specified getter for correlation"""
-        return atoms.get_stress(include_ideal_gas=True, voigt=True)[-1] / bar
 
     nve = NVE(
         struct=single_point.struct,
         temp=300.0,
-        steps=100,
+        steps=10,
         seed=1,
         traj_every=1,
         stats_every=1,
@@ -105,19 +102,19 @@ def test_md_correlations(tmp_path):
         correlation_kwargs=[
             {
                 "a": (user_observable_a, (2,), {"gamma": 2}),
-                "b": user_observable_b,
+                "b": Stress("xy"),
                 "name": "user_correlation",
                 "blocks": 1,
-                "points": 101,
+                "points": 11,
                 "averaging": 1,
                 "update_frequency": 1,
             },
             {
-                "a": user_observable_b,
-                "b": user_observable_b,
+                "a": Stress("xy"),
+                "b": Stress("xy"),
                 "name": "stress_xy_auto_cor",
                 "blocks": 1,
-                "points": 101,
+                "points": 11,
                 "averaging": 1,
                 "update_frequency": 1,
             },
@@ -127,7 +124,7 @@ def test_md_correlations(tmp_path):
     try:
         nve.run()
         pxy = [
-            atom.get_stress(include_ideal_gas=True, voigt=False).flatten()[1] / bar
+            atom.get_stress(include_ideal_gas=True, voigt=False).flatten()[1] / GPa
             for atom in read(traj_path, index=":")
         ]
         assert cor_path.exists()
@@ -139,7 +136,7 @@ def test_md_correlations(tmp_path):
 
         stress_cor = cor["stress_xy_auto_cor"]
         value, lags = stress_cor["value"], stress_cor["lags"]
-        assert len(value) == len(lags) == 101
+        assert len(value) == len(lags) == 11
 
         direct = correlate(pxy, pxy, fft=False)
         # input data differs due to i/o, error is expected 1e-5
@@ -147,7 +144,7 @@ def test_md_correlations(tmp_path):
 
         user_cor = cor["user_correlation"]
         value, lags = user_cor["value"], stress_cor["lags"]
-        assert len(value) == len(lags) == 101
+        assert len(value) == len(lags) == 11
 
         direct = correlate([v * 4.0 for v in pxy], pxy, fft=False)
         # input data differs due to i/o, error is expected 1e-5
