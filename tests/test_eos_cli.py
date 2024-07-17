@@ -175,7 +175,7 @@ def test_writing_structs(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     file_prefix = tmp_path / "example"
-    generated_path = tmp_path / "example-generated.xyz"
+    generated_path = tmp_path / "example-generated.extxyz"
 
     result = runner.invoke(
         app,

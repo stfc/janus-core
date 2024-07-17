@@ -282,7 +282,7 @@ def test_minimize_kwargs(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     file_prefix = tmp_path / "test"
-    opt_path = tmp_path / "test-opt.xyz"
+    opt_path = tmp_path / "test-opt.extxyz"
 
     minimize_kwargs = "{'optimizer': 'FIRE', 'write_results': True}"
 
@@ -317,7 +317,7 @@ def test_minimize_filename(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     file_prefix = tmp_path / "test"
-    opt_path = tmp_path / "geomopt-opt.xyz"
+    opt_path = tmp_path / "geomopt-opt.extxyz"
 
     minimize_kwargs = (
         "{'write_results': 'True', "

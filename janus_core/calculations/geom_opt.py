@@ -183,7 +183,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
 
     write_kwargs.setdefault(
         "filename",
-        Path(f"./{struct.get_chemical_formula()}-opt.xyz").absolute(),
+        Path(f"./{struct.get_chemical_formula()}-opt.extxyz").absolute(),
     )
 
     if traj_kwargs and "filename" not in traj_kwargs:

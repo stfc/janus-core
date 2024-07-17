@@ -128,7 +128,7 @@ def descriptors(
     if out:
         write_kwargs["filename"] = out
     else:
-        write_kwargs["filename"] = f"{s_point.struct_name}-descriptors.xyz"
+        write_kwargs["filename"] = f"{s_point.struct_name}-descriptors.extxyz"
 
     # Dictionary of inputs for optimize function
     descriptors_kwargs = {

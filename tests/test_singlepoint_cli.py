@@ -27,7 +27,7 @@ def test_singlepoint_help():
 
 def test_singlepoint(tmp_path):
     """Test singlepoint calculation."""
-    results_path = Path("./NaCl-results.xyz").absolute()
+    results_path = Path("./NaCl-results.extxyz").absolute()
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -53,8 +53,8 @@ def test_singlepoint(tmp_path):
 
 def test_properties(tmp_path):
     """Test properties for singlepoint calculation."""
-    results_path_1 = tmp_path / "H2O-energy-results.xyz"
-    results_path_2 = tmp_path / "H2O-stress-results.xyz"
+    results_path_1 = tmp_path / "H2O-energy-results.extxyz"
+    results_path_2 = tmp_path / "H2O-stress-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -106,7 +106,7 @@ def test_properties(tmp_path):
 
 def test_read_kwargs(tmp_path):
     """Test setting read_kwargs for singlepoint calculation."""
-    results_path = tmp_path / "benzene-traj-results.xyz"
+    results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -136,7 +136,7 @@ def test_read_kwargs(tmp_path):
 
 def test_calc_kwargs(tmp_path):
     """Test setting calc_kwargs for singlepoint calculation."""
-    results_path = tmp_path / "NaCl-results.xyz"
+    results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -164,7 +164,7 @@ def test_calc_kwargs(tmp_path):
 
 def test_log(tmp_path):
     """Test log correctly written for singlepoint."""
-    results_path = tmp_path / "NaCl-results.xyz"
+    results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -191,7 +191,7 @@ def test_log(tmp_path):
 
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
-    results_path = tmp_path / "benzene-traj-results.xyz"
+    results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -232,7 +232,7 @@ def test_summary(tmp_path):
 
 def test_config(tmp_path):
     """Test passing a config file with read kwargs, and values to be overwritten."""
-    results_path = tmp_path / "benzene-traj-results.xyz"
+    results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     result = runner.invoke(

@@ -62,7 +62,7 @@ def calc_descriptors(
 
     write_kwargs.setdefault(
         "filename",
-        Path(f"./{struct_name}-descriptors.xyz").absolute(),
+        Path(f"./{struct_name}-descriptors.extxyz").absolute(),
     )
 
     if isinstance(struct, Sequence):

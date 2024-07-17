@@ -351,7 +351,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.n_atoms = len(self.struct)
 
         self.final_file = self._build_filename(
-            "final.xyz",
+            "final.extxyz",
             self._parameter_prefix if file_prefix is None else "",
             filename=self.final_file,
         )
@@ -361,7 +361,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             filename=self.stats_file,
         )
         self.traj_file = self._build_filename(
-            "traj.xyz",
+            "traj.extxyz",
             self._parameter_prefix if file_prefix is None else "",
             filename=self.traj_file,
         )
@@ -451,7 +451,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         """
         step = self.offset + self.dyn.nsteps
         return self._build_filename(
-            f"res-{step}.xyz", f"T{self.temp}", prefix_override=self.restart_stem
+            f"res-{step}.extxyz", f"T{self.temp}", prefix_override=self.restart_stem
         )
 
     @staticmethod
@@ -899,7 +899,7 @@ class NPT(MolecularDynamics):
         step = self.offset + self.dyn.nsteps
         pressure = f"p{self.pressure}" if not isinstance(self, NVT_NH) else ""
         return self._build_filename(
-            f"res-{step}.xyz",
+            f"res-{step}.extxyz",
             f"T{self.temp}",
             pressure,
             prefix_override=self.restart_stem,

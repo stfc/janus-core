@@ -1,7 +1,7 @@
 struct: "NaCl.cif"
 properties:
   - "energy"
-out: "NaCl-results.xyz"
+out: "NaCl-results.extxyz"
 calc-kwargs:
   model: "small"
 read-kwargs:

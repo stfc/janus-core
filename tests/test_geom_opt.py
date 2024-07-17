@@ -49,7 +49,7 @@ def test_optimize(architecture, struct_path, expected, kwargs):
 
 def test_saving_struct(tmp_path):
     """Test saving optimized structure."""
-    struct_path = tmp_path / "NaCl.xyz"
+    results_path = tmp_path / "NaCl.extxyz"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -62,9 +62,9 @@ def test_saving_struct(tmp_path):
     optimize(
         single_point.struct,
         write_results=True,
-        write_kwargs={"filename": struct_path, "format": "extxyz"},
+        write_kwargs={"filename": results_path, "format": "extxyz"},
     )
-    opt_struct = read(struct_path)
+    opt_struct = read(results_path)
 
     assert opt_struct.get_potential_energy() < init_energy
 
@@ -92,14 +92,14 @@ def test_traj_reformat(tmp_path):
     )
 
     traj_path_binary = tmp_path / "NaCl.traj"
-    traj_path_xyz = tmp_path / "NaCl-traj.xyz"
+    traj_path_xyz = tmp_path / "NaCl-traj.extxyz"
 
     optimize(
         single_point.struct,
         opt_kwargs={"trajectory": str(traj_path_binary)},
         traj_kwargs={"filename": traj_path_xyz},
     )
-    traj = read(tmp_path / "NaCl-traj.xyz", index=":")
+    traj = read(traj_path_xyz, index=":")
 
     assert len(traj) == 3
 
@@ -111,7 +111,7 @@ def test_missing_traj_kwarg(tmp_path):
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    traj_path = tmp_path / "NaCl-traj.xyz"
+    traj_path = tmp_path / "NaCl-traj.extxyz"
     with pytest.raises(ValueError):
         optimize(single_point.struct, traj_kwargs={"filename": traj_path})
 

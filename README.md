@@ -74,12 +74,12 @@ Perform a single point calcuation (using the [MACE-MP](https://github.com/ACEsui
 janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path small
 ```
 
-This will calculate the energy, stress and forces and save this in `NaCl-results.xyz`, in addition to generating a log file, `singlepoint.log`, and summary of inputs, `singlepoint_summary.yml`.
+This will calculate the energy, stress and forces and save this in `NaCl-results.extxyz`, in addition to generating a log file, `singlepoint.log`, and summary of inputs, `singlepoint_summary.yml`.
 
 Additional options may be specified. For example:
 
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif --arch mace --model-path /path/to/your/ml.model --properties energy --properties forces --log ./example.log --out ./example.xyz
+janus singlepoint --struct tests/data/NaCl.cif --arch mace --model-path /path/to/your/ml.model --properties energy --properties forces --log ./example.log --out ./example.extxyz
 ```
 
 This calculates both forces and energies, defines the MLIP architecture and path to your locally saved model, and changes where the log and results files are saved.
@@ -104,12 +104,12 @@ Perform geometry optimization (using the [MACE-MP](https://github.com/ACEsuit/ma
 janus geomopt --struct tests/data/H2O.cif --arch mace_mp --model-path small
 ```
 
-This will optimize the atomic positions and save the resulting structure in `H2O-opt.xyz`, in addition to generating a log file, `geomopt.log`, and summary of inputs, `geomopt_summary.yml`.
+This will optimize the atomic positions and save the resulting structure in `H2O-opt.extxyz`, in addition to generating a log file, `geomopt.log`, and summary of inputs, `geomopt_summary.yml`.
 
 Additional options may be specified. This shares most options with `singlepoint`, as well as a few additional options, such as:
 
 ```shell
-janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --vectors-only --traj 'NaCl-traj.xyz'
+janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --vectors-only --traj 'NaCl-traj.extxyz'
 ```
 
 This allows the cell vectors to be optimised, allowing only hydrostatic deformation, and saves the optimization trajectory in addition to the final structure and log.
@@ -136,9 +136,9 @@ janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --model-path
 This will generate several output files:
 
 - Thermodynamical statistics every 100 steps, written to `NaCl-npt-T300.0-p1.0-stats.dat`
-- The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0-traj.xyz`
-- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0-res-1000.xyz`
-- The final structure written to `NaCl-npt-T300.0-p1.0-final.xyz`
+- The structure trajectory every 100 steps, written to `NaCl-npt-T300.0-p1.0-traj.extxyz`
+- The structure to be able to restart the dynamics every 1000 steps, written to `NaCl-npt-T300.0-p1.0-res-1000.extxyz`
+- The final structure written to `NaCl-npt-T300.0-p1.0-final.extxyz`
 - A log of the processes carried out, written to `md.log`
 - A summary of the inputs and start/end time, written to `md_summary.yml`.
 
@@ -152,7 +152,7 @@ This performs an NVT molecular dynamics simulation at 300K for 1000 steps (0.5 p
 
 
 ```shell
-janus md --ensemble nve --struct tests/data/NaCl.cif --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.xyz" --stats-every 10 --stats-file "example-statistics.dat"
+janus md --ensemble nve --struct tests/data/NaCl.cif --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.extxyz" --stats-every 10 --stats-file "example-statistics.dat"
 ```
 
 This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps), saving the trajectory every 10 steps after the first 100, and the thermodynamical statistics every 10 steps, as well as changing the output file names for both.
@@ -171,9 +171,9 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 
 The produced final, statistics, and trajectory files will indicate the heating range:
 
-- `NaCl-nvt-T20.0-T300.0-final.xyz`
+- `NaCl-nvt-T20.0-T300.0-final.extxyz`
 - `NaCl-nvt-T20.0-T300.0-stats.dat`
-- `NaCl-nvt-T20.0-T300.0-traj.xyz`
+- `NaCl-nvt-T20.0-T300.0-traj.extxyz`
 
 The final structure file will include the final structure at each temperature point (20K, 40K, ..., 300K).
 
@@ -185,7 +185,7 @@ janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 
 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
 
-When MD is run with heating, the final, trajectory, and statistics files (`NaCl-nvt-T20.0-T300.0-T300.0-final.xyz`, `NaCl-nvt-T20.0-T300.0-T300.0-traj.xyz`, and `NaCl-nvt-T20.0-T300.0-T300.0-stats.dat`) indicate the heating range and MD temperature, which can differ. Each file contains data from both the heating and MD parts of the simulation.
+When MD is run with heating, the final, trajectory, and statistics files (`NaCl-nvt-T20.0-T300.0-T300.0-final.extxyz`, `NaCl-nvt-T20.0-T300.0-T300.0-traj.extxyz`, and `NaCl-nvt-T20.0-T300.0-T300.0-stats.dat`) indicate the heating range and MD temperature, which can differ. Each file contains data from both the heating and MD parts of the simulation.
 
 Additional settings for geometry optimization, such as enabling optimization of cell vectors by setting `hydrostatic_strain = True` for the ASE filter, can be set using the `--minimize-kwargs` option:
 
@@ -251,7 +251,7 @@ For example, with the following configuration file and command:
 struct: "NaCl.cif"
 properties:
   - "energy"
-out: "NaCl-results.xyz"
+out: "NaCl-results.extxyz"
 arch: mace_mp
 model-path: medium
 calc-kwargs:
@@ -294,7 +294,7 @@ MACE descriptors can be calculated for structures (using the [MACE-MP](https://g
 janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --model-path small
 ```
 
-This will calculate the mean descriptor for this structure and save this as attached information (`descriptors`) in `NaCl-descriptors.xyz`, in addition to generating a log file, `descriptors.log`, and summary of inputs, `descriptors_summary.yml`.
+This will calculate the mean descriptor for this structure and save this as attached information (`descriptors`) in `NaCl-descriptors.extxyz`, in addition to generating a log file, `descriptors.log`, and summary of inputs, `descriptors_summary.yml`.
 
 The mean descriptor per element can also be calculated, and all descriptors, rather than only the invariant part, can be used when calculating the means:
 
@@ -302,7 +302,7 @@ The mean descriptor per element can also be calculated, and all descriptors, rat
 janus descriptors --struct tests/data/NaCl.cif --no-invariants-only --calc-per-element
 ```
 
-This will generate the same output files, but additional labels (`Cl_descriptor` and `Na_descriptor`) will be saved in `NaCl-descriptors.xyz`.
+This will generate the same output files, but additional labels (`Cl_descriptor` and `Na_descriptor`) will be saved in `NaCl-descriptors.extxyz`.
 
 For all options, run `janus descriptors --help`.
 
