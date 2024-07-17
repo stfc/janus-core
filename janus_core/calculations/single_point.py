@@ -1,6 +1,7 @@
 """Prepare and perform single point calculations."""
 
 from collections.abc import Collection
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Optional
 
@@ -219,7 +220,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
 
         if isinstance(self.struct, list):
             for struct in self.struct:
-                struct.calc = calculator
+                struct.calc = deepcopy(calculator)
             # Return single Atoms object if only one image in list
             if len(self.struct) == 1:
                 self.struct = self.struct[0]
