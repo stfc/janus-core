@@ -474,23 +474,18 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
     def _parse_correlations(self):
         """Parse correlation kwargs into Correlations."""
-        if not self.correlation_kwargs:
-            self._correlations = None
-        elif len(self.correlation_kwargs) > 0:
-            self._correlations = []
-            for cor in self.correlation_kwargs:
-                self._correlations.append(Correlation(**cor))
+        if self.correlation_kwargs:
+            self._correlations = [Correlation(**cor) for cor in self.correlation_kwargs]
         else:
-            self._correlations = None
+            self._correlations = ()
 
     def _attach_correlations(self):
         """Attach all correlations to self.dyn."""
-        if self._correlations:
-            for i, _ in enumerate(self._correlations):
-                self.dyn.attach(
-                    partial(lambda i: self._correlations[i].update(self.dyn.atoms), i),
-                    self._correlations[i].update_frequency,
-                )
+        for i, _ in enumerate(self._correlations):
+            self.dyn.attach(
+                partial(lambda i: self._correlations[i].update(self.dyn.atoms), i),
+                self._correlations[i].update_frequency,
+            )
 
     def _write_correlations(self):
         """Write out the correlations."""

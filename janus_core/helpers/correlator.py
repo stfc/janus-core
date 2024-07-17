@@ -47,12 +47,12 @@ class Correlator:
         self._min_dist = self._points / self._averaging
 
         self._accumulator = np.zeros((self._blocks, 2))
-        self._count_accumulated = np.zeros(self._blocks).astype(int)
-        self._shift_index = np.zeros(self._blocks).astype(int)
+        self._count_accumulated = np.zeros(self._blocks, dtype=int)
+        self._shift_index = np.zeros(self._blocks, dtype=int)
         self._shift = np.zeros((self._blocks, self._points, 2))
-        self._shift_not_null = np.zeros((self._blocks, self._points)).astype(bool)
+        self._shift_not_null = np.zeros((self._blocks, self._points), dtype=bool)
         self._correlation = np.zeros((self._blocks, self._points))
-        self._count_correlated = np.zeros((self._blocks, self._points)).astype(int)
+        self._count_correlated = np.zeros((self._blocks, self._points), dtype=int)
 
     # pylint: disable=invalid-name
     def update(self, a: float, b: float):
@@ -151,8 +151,10 @@ class Correlator:
 
         Returns
         -------
-        tuple[Iterable[float], Iterable[float]]
-            The correlation and lags.
+        correlation : Iterable[float]
+            The correlation values <a(t)b(t+t')>.
+        lags : Iterable[float]]
+            The correlation lag times t'.
         """
         correlation = np.zeros(self._points * self._blocks)
         lags = np.zeros(self._points * self._blocks)
@@ -277,8 +279,10 @@ class Correlation:
 
         Returns
         -------
-        tuple[Iterable[float], Iterable[float]]
-            Correlation value and lags.
+        correlation : Iterable[float]
+            The correlation values <a(t)b(t+t')>.
+        lags : Iterable[float]]
+            The correlation lag times t'.
         """
         return self._correlator.get()
 

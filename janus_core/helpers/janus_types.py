@@ -105,14 +105,21 @@ class Observable(Protocol):
 
 
 class CorrelationKwargs(TypedDict, total=True):
-    """Arguments for on-the-fly correlations."""
+    """Arguments for on-the-fly correlations <ab>."""
 
-    a: Union[Observable, tuple[Observable, Optional[tuple], Optional[dict]]]
-    b: Union[Observable, tuple[Observable, Optional[tuple], Optional[dict]]]
+    #: observable a in <ab>, with optional args and kwargs
+    a: Union[Observable, tuple[Observable, tuple, dict]]
+    #: observable b in <ab>, with optional args and kwargs
+    b: Union[Observable, tuple[Observable, tuple, dict]]
+    #: name used for correlation in output
     name: str
+    #: blocks used in multi-tau algorithm
     blocks: int
+    #: points per block
     points: int
+    #: averaging between blocks
     averaging: int
+    #: frequency to update the correlation (steps)
     update_frequency: int
 
 
