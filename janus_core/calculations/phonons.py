@@ -8,7 +8,7 @@ import phonopy
 from phonopy.file_IO import write_force_constants_to_hdf5
 from phonopy.structure.atoms import PhonopyAtoms
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.janus_types import MaybeList, PathLike
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
@@ -193,7 +193,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             else:
                 self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
 
-            optimize(self.struct, **self.minimize_kwargs)
+            optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
+            optimizer.run()
 
         if self.logger:
             self.logger.info("Starting phonons calculation")

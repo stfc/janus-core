@@ -6,7 +6,7 @@ from typing import Annotated, Any, Optional
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
@@ -280,7 +280,8 @@ def geomopt(
     start_summary(command="geomopt", summary=summary, inputs=inputs)
 
     # Run geometry optimization and save output structure
-    optimize(**optimize_kwargs)
+    optimizer = GeomOpt(**optimize_kwargs)
+    optimizer.run()
 
     # Time after optimization has finished
     end_summary(summary)

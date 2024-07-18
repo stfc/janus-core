@@ -10,7 +10,7 @@ from codecarbon import OfflineEmissionsTracker
 from numpy import float64, linspace
 from numpy.typing import NDArray
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.janus_types import EoSNames, EoSResults, OutputKwargs, PathLike
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict, output_structs
@@ -82,7 +82,8 @@ def _calc_volumes_energies(  # pylint: disable=too-many-locals
         if minimize_all:
             if logger:
                 logger.info("Minimising lattice scalar = %s", lattice_scalar)
-            optimize(c_struct, **minimize_kwargs)
+            optimizer = GeomOpt(c_struct, **minimize_kwargs)
+            optimizer.run()
 
         volumes.append(c_struct.get_volume())
         energies.append(c_struct.get_potential_energy())
@@ -207,7 +208,8 @@ def calc_eos(
                 "name": logger.name,
                 "filemode": "a",
             }
-        optimize(struct, **minimize_kwargs)
+        optimizer = GeomOpt(struct, **minimize_kwargs)
+        optimizer.run()
 
         # Optionally write structure to file
         output_structs(
