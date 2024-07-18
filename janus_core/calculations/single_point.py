@@ -281,7 +281,6 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         properties: MaybeSequence[Properties] = (),
         write_results: bool = False,
         write_kwargs: Optional[ASEWriteArgs] = None,
-        invalidate_calc: bool = True,
     ) -> CalcResults:
         """
         Run single point calculations.
@@ -296,9 +295,6 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         write_kwargs : Optional[ASEWriteArgs],
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
-        invalidate_calc : bool
-            Whether to remove calculator results that are copied to info. Default is
-            True.
 
         Returns
         -------
@@ -346,7 +342,6 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             self.struct,
             write_results=write_results,
             properties=properties,
-            invalidate_calc=invalidate_calc,
             **write_kwargs,
         )
 

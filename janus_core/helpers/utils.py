@@ -279,6 +279,7 @@ def output_structs(
     write_results: bool = False,
     properties: Collection[Properties] = (),
     invalidate_calc: bool = True,
+    write_calc_results: bool = False,
     **kwargs,
 ) -> None:
     """
@@ -297,6 +298,8 @@ def output_structs(
     invalidate_calc : bool
         Whether to remove all calculator results after copying properties to info.
         Default is True.
+    write_calc_results : bool
+        Wether to write calculator results to file. Default is False.
     **kwargs
         Keyword arguments passed to ase.io.write.
     """
@@ -311,5 +314,4 @@ def output_structs(
 
     if write_results:
         # By default, don't write calculator results, as duplicates info
-        kwargs.setdefault("write_results", False)
-        write(images=images, **kwargs)
+        write(images=images, write_results=write_calc_results, **kwargs)

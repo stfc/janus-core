@@ -277,3 +277,28 @@ def test_invalid_config():
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_write_kwargs(tmp_path):
+    """Test setting invalidate_calc and write_results via write_kwargs."""
+    results_path = tmp_path / "NaCl-results.extxyz"
+    write_kwargs = "{'invalidate_calc': False, 'write_calc_results': True}"
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--write-kwargs",
+            write_kwargs,
+            "--out",
+            results_path,
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(results_path)
+    assert "mace_mp_energy" in atoms.info
+    assert "mace_mp_forces" in atoms.arrays
+    assert "energy" in atoms.calc.results
+    assert "forces" in atoms.calc.results
