@@ -71,7 +71,7 @@ def test_correlation():
 def test_md_correlations(tmp_path):
     """Test correlations as part of MD cycle."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.xyz"
+    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
     cor_path = tmp_path / "Cl4Na4-nve-T300.0-cor.dat"
 
