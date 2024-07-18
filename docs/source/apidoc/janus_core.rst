@@ -175,7 +175,7 @@ janus\_core.helpers.post_process module
    :show-inheritance:
 
 janus\_core.helpers.correlator module
----------------------------------------
+-------------------------------------
 
 .. automodule:: janus_core.helpers.correlator
    :members:
@@ -185,7 +185,7 @@ janus\_core.helpers.correlator module
    :show-inheritance:
 
 janus\_core.helpers.observables module
----------------------------------------
+--------------------------------------
 
 .. automodule:: janus_core.helpers.observables
    :members:
