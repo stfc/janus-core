@@ -64,7 +64,7 @@ def test_dict_remove_hyphens():
 
 @pytest.mark.parametrize("arch", ["mace_mp", "m3gnet", "chgnet"])
 @pytest.mark.parametrize("write_results", [True, False])
-@pytest.mark.parametrize("properties", [None, ["energy"]])
+@pytest.mark.parametrize("properties", [None, ["energy"], ["energy", "forces"]])
 @pytest.mark.parametrize("invalidate_calc", [True, False])
 def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_path):
     """Test output_structs copies/moves results to info."""
