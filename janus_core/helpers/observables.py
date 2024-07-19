@@ -18,7 +18,7 @@ class Stress:
         Calculate with the ideal gas contribution.
     """
 
-    def __init__(self, component: str, include_ideal_gas: bool = True):
+    def __init__(self, component: str, *, include_ideal_gas: bool = True):
         """
         Initialise the observables from a symbolic str component.
 
