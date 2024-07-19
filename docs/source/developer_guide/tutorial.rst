@@ -162,7 +162,9 @@ Built-in observables are collected within the ``janus_core.helpers.observables``
 
     Stress("xy", False)
 
-A new built-in observables can be implemented by a class with the method::
+A new built-in observables can be implemented by a class with the method:
+
+.. code-block:: python
 
    def __call__(self, atoms: Atoms, *args, **kwargs) -> float
 
