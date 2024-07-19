@@ -174,6 +174,27 @@ janus\_core.helpers.post_process module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.helpers.correlator module
+-------------------------------------
+
+.. automodule:: janus_core.helpers.correlator
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.observables module
+--------------------------------------
+
+.. automodule:: janus_core.helpers.observables
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+
 janus\_core.helpers.train module
 --------------------------------
 
@@ -204,7 +225,7 @@ janus\_core.helpers.janus\_types module
    :undoc-members:
    :show-inheritance:
    :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
-
+   :special-members:
 
 janus\_core.helpers.utils module
 --------------------------------

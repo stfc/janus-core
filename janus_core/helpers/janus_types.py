@@ -4,7 +4,16 @@ from collections.abc import Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
-from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
+from typing import (
+    IO,
+    Literal,
+    Optional,
+    Protocol,
+    TypedDict,
+    TypeVar,
+    Union,
+    runtime_checkable,
+)
 
 from ase import Atoms
 from ase.eos import EquationOfState
@@ -73,6 +82,45 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_stop: Optional[int]
     vaf_step: int
     vaf_output_file: Optional[PathLike]
+
+
+# pylint: disable=too-few-public-methods
+@runtime_checkable
+class Observable(Protocol):
+    """Signature for correlation observable getter."""
+
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> float:
+        """
+        Call the getter.
+
+        Parameters
+        ----------
+        atoms : Atoms
+            Atoms object to extract values from.
+        *args : tuple
+            Additional positional arguments passed to getter.
+        **kwargs : dict
+            Additional kwargs passed getter.
+        """
+
+
+class CorrelationKwargs(TypedDict, total=True):
+    """Arguments for on-the-fly correlations <ab>."""
+
+    #: observable a in <ab>, with optional args and kwargs
+    a: Union[Observable, tuple[Observable, tuple, dict]]
+    #: observable b in <ab>, with optional args and kwargs
+    b: Union[Observable, tuple[Observable, tuple, dict]]
+    #: name used for correlation in output
+    name: str
+    #: blocks used in multi-tau algorithm
+    blocks: int
+    #: points per block
+    points: int
+    #: averaging between blocks
+    averaging: int
+    #: frequency to update the correlation (steps)
+    update_frequency: int
 
 
 # eos_names from ase.eos
