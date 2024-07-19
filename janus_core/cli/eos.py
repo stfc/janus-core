@@ -117,7 +117,7 @@ def eos(
         Other keyword arguments to pass to geometry optimizer. Default is {}.
     write_structures : bool
         True to write out all genereated structures. Default is False.
-    write_kwargs : Optional[ASEWriteArgs],
+    write_kwargs : Optional[dict[str, Any]],
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
     arch : Optional[str]

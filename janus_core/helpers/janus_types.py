@@ -1,6 +1,6 @@
 """Module containing types used in Janus-Core."""
 
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
@@ -142,6 +142,15 @@ Architectures = Literal["mace", "mace_mp", "mace_off", "m3gnet", "chgnet", "alig
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh"]
 Properties = Literal["energy", "stress", "forces"]
+
+
+class OutputKwargs(ASEWriteArgs, total=False):
+    """Main keyword arguments for `output_structs`."""
+
+    set_info: bool
+    write_results: bool
+    properties: Collection[Properties]
+    invalidate_calc: bool
 
 
 class LogLevel(Enum):  # numpydoc ignore=PR01

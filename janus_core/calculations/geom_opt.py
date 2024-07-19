@@ -13,7 +13,7 @@ from ase.optimize import LBFGS
 from ase.optimize.optimize import Optimizer
 from numpy import linalg
 
-from janus_core.helpers.janus_types import ASEOptArgs, ASEWriteArgs
+from janus_core.helpers.janus_types import ASEOptArgs, OutputKwargs
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict, output_structs, spacegroup
 
@@ -126,8 +126,8 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     optimizer: Callable = LBFGS,
     opt_kwargs: Optional[ASEOptArgs] = None,
     write_results: bool = False,
-    write_kwargs: Optional[ASEWriteArgs] = None,
-    traj_kwargs: Optional[ASEWriteArgs] = None,
+    write_kwargs: Optional[OutputKwargs] = None,
+    traj_kwargs: Optional[OutputKwargs] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
     tracker_kwargs: Optional[dict[str, Any]] = None,
 ) -> Atoms:
@@ -161,10 +161,10 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         Keyword arguments to pass to optimizer. Default is {}.
     write_results : bool
         True to write out optimized structure. Default is False.
-    write_kwargs : Optional[ASEWriteArgs],
+    write_kwargs : Optional[OutputKwargs],
         Keyword arguments to pass to ase.io.write to save optimized structure.
         Default is {}.
-    traj_kwargs : Optional[ASEWriteArgs]
+    traj_kwargs : Optional[OutputKwargs]
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
     log_kwargs : Optional[dict[str, Any]]

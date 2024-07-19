@@ -12,11 +12,11 @@ from numpy import ndarray
 from janus_core.helpers.janus_types import (
     Architectures,
     ASEReadArgs,
-    ASEWriteArgs,
     CalcResults,
     Devices,
     MaybeList,
     MaybeSequence,
+    OutputKwargs,
     PathLike,
     Properties,
 )
@@ -280,7 +280,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         self,
         properties: MaybeSequence[Properties] = (),
         write_results: bool = False,
-        write_kwargs: Optional[ASEWriteArgs] = None,
+        write_kwargs: Optional[OutputKwargs] = None,
     ) -> CalcResults:
         """
         Run single point calculations.
@@ -292,7 +292,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             "forces", and "stress" will be returned.
         write_results : bool
             True to write out structure with results of calculations. Default is False.
-        write_kwargs : Optional[ASEWriteArgs],
+        write_kwargs : Optional[OutputKwargs],
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
 

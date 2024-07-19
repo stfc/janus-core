@@ -121,8 +121,11 @@ def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_pa
         # Check labelled info and arrays was written and can be read back in
         assert all(key in struct.info or key in struct.arrays for key in label_keys)
 
-        # Check calculator results not written
-        assert atoms.calc is None
+        # Check calculator results depend on invalidate_calc
+        if invalidate_calc:
+            assert atoms.calc is None
+        else:
+            assert all(key in atoms.calc.results for key in results_keys)
 
     else:
         assert not output_file.exists()

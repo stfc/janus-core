@@ -29,6 +29,7 @@ from janus_core.helpers.correlator import Correlation
 from janus_core.helpers.janus_types import (
     CorrelationKwargs,
     Ensembles,
+    OutputKwargs,
     PathLike,
     PostProcessKwargs,
 )
@@ -111,6 +112,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         heating.
     temp_time : Optional[float]
         Time between heating steps, in fs. Default is None, which disables heating.
+    write_kwargs : Optional[OutputKwargs],
+        Keyword arguments to pass to `output_structs` when saving trajectory and final
+        files. Default is {}.
     post_process_kwargs : Optional[PostProcessKwargs]
         Keyword arguments to control post-processing operations.
     correlation_kwargs : Optional[CorrelationKwargs]
@@ -182,6 +186,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         temp_end: Optional[float] = None,
         temp_step: Optional[float] = None,
         temp_time: Optional[float] = None,
+        write_kwargs: Optional[OutputKwargs] = None,
         post_process_kwargs: Optional[PostProcessKwargs] = None,
         correlation_kwargs: Optional[list[CorrelationKwargs]] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -262,6 +267,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             disables heating.
         temp_time : Optional[float]
             Time between heating steps, in fs. Default is None, which disables heating.
+        write_kwargs : Optional[OutputKwargs],
+            Keyword arguments to pass to `output_structs` when saving trajectory and
+            final files. Default is {}.
         post_process_kwargs : Optional[PostProcessKwargs]
             Keyword arguments to control post-processing operations.
         correlation_kwargs : Optional[list[CorrelationKwargs]]
@@ -300,6 +308,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.temp_end = temp_end
         self.temp_step = temp_step
         self.temp_time = temp_time * units.fs if temp_time else None
+        self.write_kwargs = write_kwargs if write_kwargs is not None else {}
         self.post_process_kwargs = (
             post_process_kwargs if post_process_kwargs is not None else {}
         )
@@ -311,6 +320,12 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.seed = seed
 
         FileNameMixin.__init__(self, struct, struct_name, file_prefix, ensemble)
+
+        self.write_kwargs.setdefault(
+            "columns", ["symbols", "positions", "momenta", "masses"]
+        )
+        if "append" in self.write_kwargs:
+            raise ValueError("`append` cannot be specified when writing files")
 
         self.log_kwargs = (
             log_kwargs if log_kwargs else {}
@@ -599,7 +614,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 images=self.struct,
                 filename=self.traj_file,
                 write_results=True,
-                columns=["symbols", "positions", "momenta", "masses"],
+                **self.write_kwargs,
                 append=append,
             )
 
@@ -616,7 +631,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             images=self.struct,
             filename=self.final_file,
             write_results=True,
-            columns=["symbols", "positions", "momenta", "masses"],
+            **self.write_kwargs,
             append=append,
         )
 
@@ -713,7 +728,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 images=self.struct,
                 filename=self._restart_file,
                 write_results=True,
-                columns=["symbols", "positions", "momenta", "masses"],
+                **self.write_kwargs,
             )
             if self.rotate_restart:
                 self.restart_files.append(self._restart_file)

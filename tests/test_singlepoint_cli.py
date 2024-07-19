@@ -282,7 +282,6 @@ def test_invalid_config():
 def test_write_kwargs(tmp_path):
     """Test setting invalidate_calc and write_results via write_kwargs."""
     results_path = tmp_path / "NaCl-results.extxyz"
-    write_kwargs = "{'invalidate_calc': False, 'write_calc_results': True}"
 
     result = runner.invoke(
         app,
@@ -291,7 +290,7 @@ def test_write_kwargs(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--write-kwargs",
-            write_kwargs,
+            "{'invalidate_calc': False}",
             "--out",
             results_path,
         ],

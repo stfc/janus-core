@@ -197,7 +197,7 @@ def geomopt(
         Keyword arguments to pass to the selected calculator. Default is {}.
     minimize_kwargs : Optional[dict[str, Any]]
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    write_kwargs : Optional[ASEWriteArgs]
+    write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
     log : Optional[Path]
