@@ -67,7 +67,7 @@ def test_dict_remove_hyphens():
 @pytest.mark.parametrize("properties", [None, ["energy"], ["energy", "forces"]])
 @pytest.mark.parametrize("invalidate_calc", [True, False])
 def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_path):
-    """Test output_structs copies/moves results to info."""
+    """Test output_structs copies/moves results to Atoms.info and writes files."""
     struct = read(DATA_PATH)
     struct.calc = choose_calculator(architecture=arch)
 

@@ -240,16 +240,16 @@ def results_to_info(
     invalidate_calc: bool = True,
 ) -> None:
     """
-    Copy or move MLIP calculated results to info.
+    Copy or move MLIP calculated results to Atoms.info dict.
 
     Parameters
     ----------
     struct : Atoms
-        Atoms object to copy or move results to info.
+        Atoms object to copy or move calculated results to info dict.
     properties : Collection[Properties]
-        Properties to copy from results to info. Default is ().
+        Properties to copy from results to info dict. Default is ().
     invalidate_calc : bool
-        Whether to remove all calculator results after copying properties to info.
+        Whether to remove all calculator results after copying properties to info dict.
         Default is True.
     """
     if not properties:
@@ -283,20 +283,20 @@ def output_structs(
     **kwargs,
 ) -> None:
     """
-    Copy or move MLIP calculated results to info and/or write structures to file.
+    Copy or move calculated results to Atoms.info dict and/or write structures to file.
 
     Parameters
     ----------
     images : MaybeSequence[Atoms]
-        Atoms object or a list of Atoms objects to write.
+        Atoms object or a list of Atoms objects to interact with.
     set_info : bool
-        True to set structure info from calculated results. Default is True.
+        True to set info dict from calculated results. Default is True.
     write_results : bool
         True to write out structure with results of calculations. Default is False.
     properties : Collection[Properties]
-        Properties to copy from results to info. Default is ().
+        Properties to copy from calculated results to info dict. Default is ().
     invalidate_calc : bool
-        Whether to remove all calculator results after copying properties to info.
+        Whether to remove all calculator results after copying properties to info dict.
         Default is True.
     write_calc_results : bool
         Wether to write calculator results to file. Default is False.
