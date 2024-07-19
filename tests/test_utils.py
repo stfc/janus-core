@@ -111,6 +111,7 @@ def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_pa
 
     # Check labelled keys added to info and arrays
     assert all(key in struct.info or key in struct.arrays for key in label_keys)
+    assert struct.info["arch"] == arch
 
     # Check file written correctly if write_results
     if write_results:
@@ -119,7 +120,8 @@ def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_pa
         assert isinstance(atoms, Atoms)
 
         # Check labelled info and arrays was written and can be read back in
-        assert all(key in struct.info or key in struct.arrays for key in label_keys)
+        assert all(key in atoms.info or key in atoms.arrays for key in label_keys)
+        assert atoms.info["arch"] == arch
 
         # Check calculator results depend on invalidate_calc
         if invalidate_calc:

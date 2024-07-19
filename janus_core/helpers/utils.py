@@ -237,7 +237,7 @@ def results_to_info(
     struct: Atoms,
     *,
     properties: Collection[Properties] = (),
-    invalidate_calc: bool = True,
+    invalidate_calc: bool = False,
 ) -> None:
     """
     Copy or move MLIP calculated results to Atoms.info dict.
@@ -250,7 +250,7 @@ def results_to_info(
         Properties to copy from results to info dict. Default is ().
     invalidate_calc : bool
         Whether to remove all calculator results after copying properties to info dict.
-        Default is True.
+        Default is False.
     """
     if not properties:
         properties = get_args(Properties)
@@ -258,6 +258,7 @@ def results_to_info(
     if struct.calc:
         # Set default architecture from calculator name
         arch = struct.calc.parameters["arch"]
+        struct.info["arch"] = arch
 
         for key in properties & struct.calc.results.keys():
             tag = f"{arch}_{key}"
@@ -278,7 +279,7 @@ def output_structs(
     set_info: bool = True,
     write_results: bool = False,
     properties: Collection[Properties] = (),
-    invalidate_calc: bool = True,
+    invalidate_calc: bool = False,
     **kwargs,
 ) -> None:
     """
@@ -296,7 +297,7 @@ def output_structs(
         Properties to copy from calculated results to info dict. Default is ().
     invalidate_calc : bool
         Whether to remove all calculator results after copying properties to info dict.
-        Default is True.
+        Default is False.
     **kwargs
         Keyword arguments passed to ase.io.write.
     """
@@ -308,7 +309,11 @@ def output_structs(
             results_to_info(
                 image, properties=properties, invalidate_calc=invalidate_calc
             )
+    else:
+        # Label architecture even if not copying results to info
+        for image in images:
+            if image.calc:
+                image.info["arch"] = image.calc.parameters["arch"]
 
     if write_results:
-        # By default, don't write calculator results, as duplicates info
         write(images=images, write_results=not invalidate_calc, **kwargs)
