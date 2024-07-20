@@ -49,9 +49,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
     ----------
     struct : Atoms
         Structure to simulate.
-    struct_name : str
-        Name of structure to simulate. Default is inferred from filepath or
-        chemical formula.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is None.
     steps : int
@@ -158,7 +155,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
         self,
         struct: Atoms,
-        struct_name: Optional[str] = None,
         ensemble: Optional[Ensembles] = None,
         steps: int = 0,
         timestep: float = 1.0,
@@ -201,9 +197,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         ----------
         struct : Atoms
             Structure to simulate.
-        struct_name : Optional[str]
-            Name of structure to simulate. Default is inferred from filepath or
-            chemical formula.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is None.
         steps : int
@@ -327,7 +320,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 )
             raise ValueError("`struct` must be an ASE Atoms object")
 
-        FileNameMixin.__init__(self, struct, struct_name, file_prefix, ensemble)
+        FileNameMixin.__init__(self, struct, None, file_prefix, ensemble)
 
         self.write_kwargs.setdefault(
             "columns", ["symbols", "positions", "momenta", "masses"]

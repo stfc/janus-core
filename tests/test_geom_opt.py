@@ -58,9 +58,10 @@ def test_saving_struct(tmp_path):
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
+        properties="energy",
     )
 
-    init_energy = single_point.run("energy")["energy"]
+    init_energy = single_point.run()["energy"]
 
     optimizer = GeomOpt(
         single_point.struct,
@@ -194,9 +195,10 @@ def test_restart(tmp_path):
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-deformed.cif",
         calc_kwargs={"model": MODEL_PATH},
+        properties="energy",
     )
 
-    init_energy = single_point.run("energy")["energy"]
+    init_energy = single_point.run()["energy"]
     optimizer = GeomOpt(
         single_point.struct,
         steps=2,
@@ -207,7 +209,7 @@ def test_restart(tmp_path):
     with pytest.warns(UserWarning):
         optimizer.run()
 
-    intermediate_energy = single_point.run("energy")["energy"]
+    intermediate_energy = single_point.run()["energy"]
     assert intermediate_energy < init_energy
 
     optimizer = GeomOpt(
@@ -217,7 +219,7 @@ def test_restart(tmp_path):
         fmax=0.0001,
     )
     optimizer.run()
-    final_energy = single_point.run("energy")["energy"]
+    final_energy = single_point.run()["energy"]
     assert final_energy < intermediate_energy
 
 

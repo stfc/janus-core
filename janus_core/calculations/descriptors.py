@@ -21,8 +21,6 @@ class Descriptors(FileNameMixin):
     ----------
     struct : MaybeSequence[Atoms]
         Structure(s) to calculate descriptors for.
-    struct_name : Optional[str]
-        Name of structure. Default is None.
     invariants_only : bool
         Whether only the invariant descriptors should be returned. Default is True.
     calc_per_element : bool
@@ -41,7 +39,6 @@ class Descriptors(FileNameMixin):
     def __init__(
         self,
         struct: MaybeSequence[Atoms],
-        struct_name: Optional[str] = None,
         invariants_only: bool = True,
         calc_per_element: bool = False,
         calc_per_atom: bool = False,
@@ -56,8 +53,6 @@ class Descriptors(FileNameMixin):
         ----------
         struct : MaybeSequence[Atoms]
             Structure(s) to calculate descriptors for.
-        struct_name : Optional[str]
-            Name of structure. Default is None.
         invariants_only : bool
             Whether only the invariant descriptors should be returned. Default is True.
         calc_per_element : bool
@@ -73,7 +68,6 @@ class Descriptors(FileNameMixin):
             Keyword arguments to pass to `config_logger`. Default is {}.
         """
         self.struct = struct
-        self.struct_name = struct_name
         self.invariants_only = invariants_only
         self.calc_per_element = calc_per_element
         self.calc_per_atom = calc_per_atom
@@ -91,7 +85,7 @@ class Descriptors(FileNameMixin):
         [write_kwargs, log_kwargs] = none_to_dict([write_kwargs, log_kwargs])
         self.write_kwargs = write_kwargs
 
-        FileNameMixin.__init__(self, self.struct, self.struct_name, None)
+        FileNameMixin.__init__(self, self.struct, None, None)
 
         self.write_kwargs.setdefault(
             "filename",

@@ -40,10 +40,6 @@ def phonons(
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
-    struct_name: Annotated[
-        Optional[str],
-        Option(help="Name of structure name."),
-    ] = None,
     supercell: Annotated[
         str,
         Option(help="Supercell lattice vectors in the form '1x2x3'."),
@@ -139,9 +135,6 @@ def phonons(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    struct_name : Optional[PathLike]
-        Name of structure to simulate. Default is inferred from filepath or chemical
-        formula.
     supercell : str
         Supercell lattice vectors. Must be passed in the form '1x2x3'. Default is
         2x2x2.
@@ -216,7 +209,6 @@ def phonons(
     # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct,
-        struct_name=struct_name,
         architecture=arch,
         device=device,
         model_path=model_path,
@@ -246,7 +238,6 @@ def phonons(
     # Dictionary of inputs for phonons
     phonons_kwargs = {
         "struct": s_point.struct,
-        "struct_name": s_point.struct_name,
         "supercell": supercell,
         "displacement": displacement,
         "t_min": temp_start,

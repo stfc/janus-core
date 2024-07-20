@@ -24,8 +24,6 @@ class EoS(FileNameMixin):
     ----------
     struct : Atoms
         Structure to calculate equation of state for.
-    struct_name : Optional[str]
-        Name of structure. Default is None.
     min_volume : float
         Minimum volume scale factor. Default is 0.95.
     max_volume : float
@@ -59,7 +57,6 @@ class EoS(FileNameMixin):
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         struct: Atoms,
-        struct_name: Optional[str] = None,
         min_volume: float = 0.95,
         max_volume: float = 1.05,
         n_volumes: int = 7,
@@ -81,8 +78,6 @@ class EoS(FileNameMixin):
         ----------
         struct : Atoms
             Structure.
-        struct_name : Optional[str]
-            Name of structure. Default is None.
         min_volume : float
             Minimum volume scale factor. Default is 0.95.
         max_volume : float
@@ -160,7 +155,7 @@ class EoS(FileNameMixin):
         self.logger = config_logger(**log_kwargs)
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
-        FileNameMixin.__init__(self, struct, struct_name, file_prefix)
+        FileNameMixin.__init__(self, struct, None, file_prefix)
 
         self.write_kwargs.setdefault(
             "filename",

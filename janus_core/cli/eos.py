@@ -42,10 +42,6 @@ def eos(
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
-    struct_name: Annotated[
-        Optional[str],
-        Option(help="Name of structure name."),
-    ] = None,
     min_volume: Annotated[float, Option(help="Minimum volume scale factor.")] = 0.95,
     max_volume: Annotated[float, Option(help="Maximum volume scale factor.")] = 1.05,
     n_volumes: Annotated[int, Option(help="Number of volumes.")] = 7,
@@ -96,9 +92,6 @@ def eos(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    struct_name : Optional[str]
-        Name of structure to simulate. Default is inferred from filepath or chemical
-        formula.
     min_volume : float
         Minimum volume scale factor. Default is 0.95.
     max_volume : float
@@ -159,7 +152,6 @@ def eos(
     # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct,
-        struct_name=struct_name,
         architecture=arch,
         device=device,
         model_path=model_path,
@@ -178,7 +170,6 @@ def eos(
     # Dictionary of inputs for eos
     eos_kwargs = {
         "struct": s_point.struct,
-        "struct_name": s_point.struct_name,
         "min_volume": min_volume,
         "max_volume": max_volume,
         "n_volumes": n_volumes,

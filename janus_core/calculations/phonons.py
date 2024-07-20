@@ -23,8 +23,6 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     ----------
     struct : Atoms
         Structrure to calculate phonons for.
-    struct_name : Optional[str]
-        Name of structure. Default is inferred from chemical formula of `struct`.
     supercell : MaybeList[int]
         Size of supercell for calculation. Default is 2.
     displacement : float
@@ -53,8 +51,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
     file_prefix : Optional[PathLike]
-        Prefix for output filenames. Default is inferred from structure name, or
-        chemical formula of the structure.
+        Prefix for output filenames. Default is inferred from chemical formula of the
+        structure.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -75,7 +73,6 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments,disable=too-many-locals
         self,
         struct: Atoms,
-        struct_name: Optional[str] = None,
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
         t_step: float = 50.0,
@@ -98,8 +95,6 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         ----------
         struct : Atoms
             Structrure to calculate phonons for.
-        struct_name : Optional[str]
-            Name of structure. Default is inferred from chemical formula if `struct`.
         supercell : MaybeList[int]
             Size of supercell for calculation. Default is 2.
         displacement : float
@@ -143,7 +138,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
                 )
             raise ValueError("`struct` must be an ASE Atoms object")
 
-        FileNameMixin.__init__(self, struct, struct_name, file_prefix)
+        FileNameMixin.__init__(self, struct, None, file_prefix)
 
         [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
             [minimize_kwargs, log_kwargs, tracker_kwargs]

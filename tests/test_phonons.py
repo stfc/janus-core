@@ -21,11 +21,8 @@ def test_init():
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    phonons = Phonons(
-        struct=single_point.struct,
-        struct_name=single_point.struct_name,
-    )
-    assert phonons.struct_name == "NaCl"
+    phonons = Phonons(struct=single_point.struct)
+    assert str(phonons.file_prefix) == "Cl4Na4"
 
 
 def test_calc_phonons():
