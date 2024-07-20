@@ -114,6 +114,16 @@ janus\_core.cli.utils module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.calculations.single\_point module
+---------------------------------------------
+
+.. automodule:: janus_core.calculations.single_point
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.calculations.geom\_opt module
 -----------------------------------------
 
@@ -121,6 +131,28 @@ janus\_core.calculations.geom\_opt module
    :members:
    :special-members:
    :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.calculations.md module
+----------------------------------
+
+.. automodule:: janus_core.calculations.md
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.calculations.phonons module
+---------------------------------------
+
+.. automodule:: janus_core.calculations.phonons
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
    :undoc-members:
    :show-inheritance:
 
@@ -134,10 +166,10 @@ janus\_core.calculations.eos module
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.log module
-------------------------------
+janus\_core.calculations.descriptors module
+-------------------------------------------
 
-.. automodule:: janus_core.helpers.log
+.. automodule:: janus_core.calculations.descriptors
    :members:
    :special-members:
    :private-members:
@@ -154,13 +186,55 @@ janus\_core.helpers.mlip\_calculators module
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.descriptors module
---------------------------------------
+janus\_core.helpers.log module
+------------------------------
 
-.. automodule:: janus_core.helpers.descriptors
+.. automodule:: janus_core.helpers.log
    :members:
    :special-members:
    :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.janus\_types module
+---------------------------------------
+
+.. automodule:: janus_core.helpers.janus_types
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+   :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
+   :special-members:
+
+janus\_core.helpers.utils module
+--------------------------------
+
+.. automodule:: janus_core.helpers.utils
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.train module
+--------------------------------
+
+.. automodule:: janus_core.helpers.train
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.stats
+-------------------------
+
+.. automodule:: janus_core.helpers.stats
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
    :undoc-members:
    :show-inheritance:
 
@@ -191,82 +265,5 @@ janus\_core.helpers.observables module
    :members:
    :special-members:
    :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-
-janus\_core.helpers.train module
---------------------------------
-
-.. automodule:: janus_core.helpers.train
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.calculations.single\_point module
----------------------------------------------
-
-.. automodule:: janus_core.calculations.single_point
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-
-janus\_core.helpers.janus\_types module
----------------------------------------
-
-.. automodule:: janus_core.helpers.janus_types
-   :members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-   :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
-   :special-members:
-
-janus\_core.helpers.utils module
---------------------------------
-
-.. automodule:: janus_core.helpers.utils
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-
-janus\_core.calculations.md module
-----------------------------------
-
-.. automodule:: janus_core.calculations.md
-   :members:
-   :special-members:
-   :private-members:
-   :inherited-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.calculations.phonons module
----------------------------------------
-
-.. automodule:: janus_core.calculations.phonons
-   :members:
-   :special-members:
-   :private-members:
-   :inherited-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.helpers.stats
--------------------------
-
-.. automodule:: janus_core.helpers.stats
-   :members:
-   :special-members:
-   :private-members:
-   :inherited-members:
    :undoc-members:
    :show-inheritance:
