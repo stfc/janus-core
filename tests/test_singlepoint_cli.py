@@ -28,7 +28,7 @@ def test_singlepoint_help():
 
 def test_singlepoint(tmp_path):
     """Test singlepoint calculation."""
-    results_path = Path("./Cl4Na4-results.extxyz").absolute()
+    results_path = Path("./NaCl-results.extxyz").absolute()
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 

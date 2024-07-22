@@ -134,6 +134,8 @@ def descriptors(
     # Set default filname for writing structure with descriptors if not specified
     if out:
         write_kwargs["filename"] = out
+    else:
+        write_kwargs["filename"] = f"{s_point.file_prefix}-descriptors.extxyz"
 
     # Dictionary of inputs for optimize function
     descriptors_kwargs = {

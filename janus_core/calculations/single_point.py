@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 from copy import copy
+from pathlib import Path
 from typing import Any, Optional, get_args
 
 from ase import Atoms
@@ -171,8 +172,10 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         self.read_kwargs.setdefault("index", ":")
 
         # Read structure if given as path
+        file_prefix = None
         if self.struct_path:
             self.read_structure()
+            file_prefix = Path(self.struct_path).stem
 
         # Configure logging
         log_kwargs.setdefault("name", __name__)
@@ -185,7 +188,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             self.logger.info("Single point calculator configured")
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, None, None)
+        FileNameMixin.__init__(self, self.struct, None, file_prefix)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("results.extxyz").absolute(),

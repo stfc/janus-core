@@ -29,7 +29,7 @@ def test_help():
 
 def test_geomopt(tmp_path):
     """Test geomopt calculation."""
-    results_path = Path("./Cl4Na4-opt.extxyz").absolute()
+    results_path = Path("./NaCl-opt.extxyz").absolute()
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 

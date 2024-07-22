@@ -167,6 +167,9 @@ def eos(
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
+    if not file_prefix:
+        file_prefix = s_point.file_prefix
+
     # Dictionary of inputs for eos
     eos_kwargs = {
         "struct": s_point.struct,

@@ -111,7 +111,7 @@ def test_single_point_traj():
 def test_single_point_write():
     """Test writing singlepoint results."""
     data_path = DATA_PATH / "NaCl.cif"
-    results_path = Path("./Cl4Na4-results.extxyz").absolute()
+    results_path = Path("./NaCl-results.extxyz").absolute()
     assert not results_path.exists()
 
     single_point = SinglePoint(

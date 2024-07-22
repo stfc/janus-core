@@ -235,6 +235,9 @@ def phonons(
     if len(supercell) != 3:
         raise ValueError("Please pass three lattice vectors in the form 1x2x3")
 
+    if not file_prefix:
+        file_prefix = s_point.file_prefix
+
     # Dictionary of inputs for phonons
     phonons_kwargs = {
         "struct": s_point.struct,
