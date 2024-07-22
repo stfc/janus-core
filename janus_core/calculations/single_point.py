@@ -238,7 +238,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         return self._properties
 
     @properties.setter
-    def properties(self, value) -> None:
+    def properties(self, value: MaybeSequence[Properties]) -> None:
         """
         Setter for `properties`.
 
