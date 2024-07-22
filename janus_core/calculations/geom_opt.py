@@ -130,15 +130,6 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        self.struct = struct
-        self.fmax = fmax
-        self.steps = steps
-        self.symmetry_tolerance = symmetry_tolerance
-        self.angle_tolerance = angle_tolerance
-        self.filter_func = filter_func
-        self.optimizer = optimizer
-        self.write_results = write_results
-
         [
             filter_kwargs,
             opt_kwargs,
@@ -156,11 +147,21 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
                 tracker_kwargs,
             ]
         )
+
+        self.struct = struct
+        self.fmax = fmax
+        self.steps = steps
+        self.symmetry_tolerance = symmetry_tolerance
+        self.angle_tolerance = angle_tolerance
+        self.filter_func = filter_func
         self.filter_kwargs = filter_kwargs
+        self.optimizer = optimizer
         self.opt_kwargs = opt_kwargs
+        self.write_results = write_results
         self.write_kwargs = write_kwargs
         self.traj_kwargs = traj_kwargs
 
+        # Validate parameters
         if not isinstance(struct, Atoms):
             if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
                 raise NotImplementedError(
@@ -168,17 +169,10 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
                 )
             raise ValueError("`struct` must be an ASE Atoms object")
 
-        FileNameMixin.__init__(self, self.struct, None, None)
-
-        self.write_kwargs.setdefault(
-            "filename",
-            self._build_filename("opt.extxyz").absolute(),
-        )
-
-        if traj_kwargs and "filename" not in traj_kwargs:
+        if self.traj_kwargs and "filename" not in self.traj_kwargs:
             raise ValueError("'filename' must be included in `traj_kwargs`")
 
-        if traj_kwargs and "trajectory" not in opt_kwargs:
+        if self.traj_kwargs and "trajectory" not in self.opt_kwargs:
             raise ValueError(
                 "'trajectory' must be a key in `opt_kwargs` to save the trajectory."
             )
@@ -186,10 +180,19 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         if log_kwargs and "filename" not in log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
+        # Configure logging
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
+        # Set output file
+        FileNameMixin.__init__(self, self.struct, None, None)
+        self.write_kwargs.setdefault(
+            "filename",
+            self._build_filename("opt.extxyz").absolute(),
+        )
+
+        # Configure optimizer dynamics
         self.set_optimizer()
 
     def set_optimizer(self) -> None:

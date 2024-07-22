@@ -130,6 +130,24 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
+        [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
+            [minimize_kwargs, log_kwargs, tracker_kwargs]
+        )
+
+        self.struct = struct
+        self.displacement = displacement
+        self.t_step = t_step
+        self.t_min = t_min
+        self.t_max = t_max
+        self.minimize = minimize
+        self.hdf5 = hdf5
+        self.plot_to_file = plot_to_file
+        self.symmetrize = symmetrize
+        self.write_full = write_full
+        self.minimize_kwargs = minimize_kwargs
+        self.log_kwargs = log_kwargs
+
+        # Validate parameters
         if not isinstance(struct, Atoms):
             if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
                 raise NotImplementedError(
@@ -138,38 +156,22 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
                 )
             raise ValueError("`struct` must be an ASE Atoms object")
 
-        FileNameMixin.__init__(self, struct, None, file_prefix)
-
-        [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
-            [minimize_kwargs, log_kwargs, tracker_kwargs]
-        )
-
-        self.struct = struct
+        if not self.struct.calc:
+            raise ValueError("Please attach a calculator to `struct`.")
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
         if len(self.supercell) != 3:
             raise ValueError("`supercell` must be an integer, or list of length 3")
 
-        self.displacement = displacement
-        self.t_step = t_step
-        self.t_min = t_min
-        self.t_max = t_max
-        self.minimize = minimize
-        self.minimize_kwargs = minimize_kwargs
-
-        self.log_kwargs = log_kwargs
+        # Configure logging
         self.log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**self.log_kwargs)
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
-        self.hdf5 = hdf5
-        self.plot_to_file = plot_to_file
-        self.symmetrize = symmetrize
-        self.write_full = write_full
+        # Set output file prefix
+        FileNameMixin.__init__(self, self.struct, None, file_prefix)
 
-        if not self.struct.calc:
-            raise ValueError("Please attach a calculator to `struct`.")
         self.calc = self.struct.calc
         self.results = {}
 

@@ -67,12 +67,16 @@ class Descriptors(FileNameMixin):
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         """
+        [write_kwargs, log_kwargs] = none_to_dict([write_kwargs, log_kwargs])
+
         self.struct = struct
         self.invariants_only = invariants_only
         self.calc_per_element = calc_per_element
         self.calc_per_atom = calc_per_atom
         self.write_results = write_results
+        self.write_kwargs = write_kwargs
 
+        # Validate parameters
         if isinstance(self.struct, Sequence):
             if any(not image.calc for image in struct):
                 raise ValueError(
@@ -82,24 +86,21 @@ class Descriptors(FileNameMixin):
             if not self.struct.calc:
                 raise ValueError("Please attach a calculator to `struct`.")
 
-        [write_kwargs, log_kwargs] = none_to_dict([write_kwargs, log_kwargs])
-        self.write_kwargs = write_kwargs
+        # Configure logging
+        log_kwargs.setdefault("name", __name__)
+        self.logger = config_logger(**log_kwargs)
 
-        FileNameMixin.__init__(self, self.struct, None, None)
-
+        # Set output file
+        FileNameMixin.__init__(self, struct, None, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("descriptors.extxyz").absolute(),
         )
 
-        log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
-
-        if self.logger:
-            self.logger.info("Starting descriptors calculation")
-
     def run(self) -> None:
         """Calculate."""
+        if self.logger:
+            self.logger.info("Starting descriptors calculation")
 
         if isinstance(self.struct, Sequence):
             for struct in self.struct:

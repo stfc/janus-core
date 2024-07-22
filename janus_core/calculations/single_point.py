@@ -131,17 +131,11 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        if struct and struct_path:
-            raise ValueError(
-                "You cannot specify both the ASE Atoms structure (`struct`) "
-                "and a path to the structure file (`struct_path`)"
+        [read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs] = (
+            none_to_dict(
+                [read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs]
             )
-
-        if not struct and not struct_path:
-            raise ValueError(
-                "Please specify either the ASE Atoms structure (`struct`) "
-                "or a path to the structure file (`struct_path`)"
-            )
+        )
 
         self.struct = struct
         self.struct_path = struct_path
@@ -150,16 +144,25 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         self.architecture = architecture
         self.device = device
         self.model_path = model_path
-
-        [read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs] = (
-            none_to_dict(
-                [read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs]
-            )
-        )
-
         self.read_kwargs = read_kwargs
         self.calc_kwargs = calc_kwargs
         self.write_kwargs = write_kwargs
+
+        # Validate parameters
+        if not self.struct and not self.struct_path:
+            raise ValueError(
+                "Please specify either the ASE Atoms structure (`struct`) "
+                "or a path to the structure file (`struct_path`)"
+            )
+
+        if self.struct and self.struct_path:
+            raise ValueError(
+                "You cannot specify both the ASE Atoms structure (`struct`) "
+                "and a path to the structure file (`struct_path`)"
+            )
+
+        if log_kwargs and "filename" not in log_kwargs:
+            raise ValueError("'filename' must be included in `log_kwargs`")
 
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
@@ -171,25 +174,22 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         if self.struct_path:
             self.read_structure()
 
-        # Set default output file
-        FileNameMixin.__init__(self, self.struct, None, None)
-        self.write_kwargs.setdefault(
-            "filename",
-            self._build_filename("results.extxyz").absolute(),
-        )
-
-        if log_kwargs and "filename" not in log_kwargs:
-            raise ValueError("'filename' must be included in `log_kwargs`")
-
+        # Configure logging
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         # Configure calculator
         self.set_calculator()
-
         if self.logger:
             self.logger.info("Single point calculator configured")
+
+        # Set output file
+        FileNameMixin.__init__(self, self.struct, None, None)
+        self.write_kwargs.setdefault(
+            "filename",
+            self._build_filename("results.extxyz").absolute(),
+        )
 
         self.results = {}
 
