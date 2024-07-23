@@ -314,26 +314,51 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         stress = self.struct.get_stress()
         return stress
 
-    def run(self) -> CalcResults:
+    def run(
+        self,
+        *,
+        properties: Optional[MaybeSequence[Properties]] = None,
+        write_results: Optional[bool] = None,
+        write_kwargs: Optional[OutputKwargs] = None,
+    ) -> CalcResults:
         """
         Run single point calculations.
+
+        Parameters
+        ----------
+        properties : Optional[MaybeSequence[Properties]]
+            Physical properties to calculate. Default is self.properties.
+        write_results : bool
+            True to write out structure with results of calculations. Default is
+            self.write_results.
+        write_kwargs : Optional[OutputKwargs],
+            Keyword arguments to pass to ase.io.write if saving structure with
+            results of calculations. Default is self.write_kwargs.
 
         Returns
         -------
         CalcResults
             Dictionary of calculated results, with keys from `properties`.
         """
+        # Parameters can be overwritten, otherwise default to values from instantiation
+        if properties is None:
+            properties = self.properties
+        if write_results is None:
+            write_results = self.write_results
+        if write_kwargs is None:
+            write_kwargs = self.write_kwargs
+
         self.results = {}
 
         if self.logger:
             self.logger.info("Starting single point calculation")
             self.tracker.start_task("Single point")
 
-        if "energy" in self.properties:
+        if "energy" in properties:
             self.results["energy"] = self._get_potential_energy()
-        if "forces" in self.properties:
+        if "forces" in properties:
             self.results["forces"] = self._get_forces()
-        if "stress" in self.properties:
+        if "stress" in properties:
             self.results["stress"] = self._get_stress()
 
         if self.logger:
@@ -343,9 +368,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
 
         output_structs(
             self.struct,
-            write_results=self.write_results,
-            properties=self.properties,
-            write_kwargs=self.write_kwargs,
+            write_results=write_results,
+            properties=properties,
+            write_kwargs=write_kwargs,
         )
 
         return self.results
