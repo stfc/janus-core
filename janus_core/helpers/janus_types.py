@@ -144,6 +144,7 @@ Architectures = Literal[
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh"]
 Properties = Literal["energy", "stress", "forces"]
+PhononCalcs = Literal["bands", "dos", "pdos", "thermal"]
 
 
 class OutputKwargs(ASEWriteArgs, total=False):

@@ -43,7 +43,7 @@ def test_bands(tmp_path):
             log_path,
             "--summary",
             summary_path,
-            "--band",
+            "--bands",
         ],
     )
     assert result.exit_code == 0
@@ -68,7 +68,7 @@ def test_bands_simple(tmp_path):
             log_path,
             "--summary",
             summary_path,
-            "--band",
+            "--bands",
             "--no-write-full",
         ],
     )
@@ -199,7 +199,7 @@ def test_plot(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--pdos",
             "--dos",
-            "--band",
+            "--bands",
             "--hdf5",
             "--plot-to-file",
             "--file-prefix",

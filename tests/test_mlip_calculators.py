@@ -96,7 +96,7 @@ def test_model_model_paths(kwargs):
 
 @pytest.mark.parametrize("architecture", ["mace_mp", "mace_off"])
 def test_invalid_device(architecture):
-    """Test error raised for invalid device is specified."""
+    """Test error raised if invalid device is specified."""
     with pytest.raises(ValueError):
         choose_calculator(architecture=architecture, device="invalid")
 

@@ -64,7 +64,7 @@ def phonons(
         float,
         Option(help="Temperature step for thermal properties calculations, in K."),
     ] = 50,
-    band: Annotated[
+    bands: Annotated[
         bool,
         Option(help="Whether to compute band structure."),
     ] = False,
@@ -74,7 +74,7 @@ def phonons(
     ] = True,
     plot_to_file: Annotated[
         bool,
-        Option(help="Whether to plot bandstructure and/pr dos/pdos when calculated."),
+        Option(help="Whether to plot band structure and/or dos/pdos when calculated."),
     ] = False,
     dos: Annotated[
         bool,
@@ -151,7 +151,7 @@ def phonons(
     temp_step : float
         Temperature step for thermal calculations, in K. Unused if `thermal` is False.
         Default is 50.0.
-    band : bool
+    bands : bool
         Whether to calculate and save the band structure. Default is False.
     hdf5 : bool
         Whether to save force constants in hdf5 format. Default is True.
@@ -250,7 +250,7 @@ def phonons(
         "minimize_kwargs": minimize_kwargs,
         "file_prefix": file_prefix,
         "log_kwargs": log_kwargs,
-        "hdf5": hdf5,
+        "force_consts_to_hdf5": hdf5,
         "plot_to_file": plot_to_file,
         "symmetrize": symmetrize,
         "write_full": write_full,
@@ -263,7 +263,7 @@ def phonons(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
-    inputs["band"] = band
+    inputs["band"] = bands
     inputs["dos"] = dos
     inputs["pdos"] = pdos
     inputs["thermal"] = thermal
@@ -281,22 +281,17 @@ def phonons(
     # Initialise phonons class
     phonon = Phonons(**phonons_kwargs)
 
-    # Calculate force constants
-    phonon.calc_force_constants()
-
-    # Calculate phonons
-    if band:
-        phonon.calc_bands()
-
-    # Calculate DOS and PDOS is specified
+    calcs = []
+    if bands:
+        calcs.append("bands")
     if thermal:
-        phonon.calc_thermal_props()
-
-    # Calculate DOS and PDOS is specified
+        calcs.append("thermal")
     if dos:
-        phonon.calc_dos()
+        calcs.append("dos")
     if pdos:
-        phonon.calc_pdos()
+        calcs.append("pdos")
+
+    phonon.run(calcs=calcs)
 
     # Time after calculations have finished
     end_summary(summary)
