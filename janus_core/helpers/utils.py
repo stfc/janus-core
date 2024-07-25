@@ -309,12 +309,9 @@ def output_structs(
     # Separate kwargs for output_structs from kwargs for ase.io.write
     # This assumes values passed via kwargs have priority over passed parameters
     write_kwargs = write_kwargs if write_kwargs else {}
-    if "set_info" in write_kwargs:
-        set_info = write_kwargs.pop("set_info")
-    if "properties" in write_kwargs:
-        properties = write_kwargs.pop("properties")
-    if "invalidate_calc" in write_kwargs:
-        invalidate_calc = write_kwargs.pop("invalidate_calc")
+    set_info = write_kwargs.pop("set_info", set_info)
+    properties = write_kwargs.pop("properties", properties)
+    invalidate_calc = write_kwargs.pop("invalidate_calc", invalidate_calc)
 
     if isinstance(images, Atoms):
         images = (images,)
