@@ -77,10 +77,10 @@ def test_output_structs(
     struct.calc = choose_calculator(architecture=arch)
 
     if not properties:
-        results_keys = get_args(Properties)
+        results_keys = set(get_args(Properties))
     else:
-        results_keys = properties
-    label_keys = (f"{arch}_{key}" for key in results_keys)
+        results_keys = set(properties)
+    label_keys = {f"{arch}_{key}" for key in results_keys}
 
     write_kwargs = {}
     output_file = tmp_path / "output.extxyz"
@@ -92,13 +92,13 @@ def test_output_structs(
     struct.get_stress()
 
     # Check all expected keys are in results
-    assert all(key in struct.calc.results for key in results_keys)
+    assert results_keys <= struct.calc.results.keys()
 
     # Check results and MLIP-labelled keys are not in info or arrays
-    assert len(results_keys & struct.info.keys()) == 0
-    assert len(results_keys & struct.arrays.keys()) == 0
-    assert len(label_keys & struct.info.keys()) == 0
-    assert len(label_keys & struct.arrays.keys()) == 0
+    assert not results_keys & struct.info.keys()
+    assert not results_keys & struct.arrays.keys()
+    assert not label_keys & struct.info.keys()
+    assert not label_keys & struct.arrays.keys()
 
     output_structs(
         struct,
@@ -110,13 +110,13 @@ def test_output_structs(
 
     # Check results keys depend on invalidate_calc
     if invalidate_calc:
-        assert len(results_keys & struct.calc.results.keys()) == 0
+        assert not results_keys & struct.calc.results.keys()
     else:
-        assert all(key in struct.calc.results for key in results_keys)
+        assert results_keys <= struct.calc.results.keys()
 
     # Check labelled keys added to info and arrays
     if "set_info" not in write_kwargs or write_kwargs["set_info"]:
-        assert all(key in struct.info or key in struct.arrays for key in label_keys)
+        assert label_keys <= struct.info.keys() | struct.arrays.keys()
         assert struct.info["arch"] == arch
 
     # Check file written correctly if write_results
@@ -127,14 +127,14 @@ def test_output_structs(
 
         # Check labelled info and arrays was written and can be read back in
         if "set_info" not in write_kwargs or write_kwargs["set_info"]:
-            assert all(key in atoms.info or key in atoms.arrays for key in label_keys)
+            assert label_keys <= atoms.info.keys() | atoms.arrays.keys()
             assert atoms.info["arch"] == arch
 
         # Check calculator results depend on invalidate_calc
         if invalidate_calc:
             assert atoms.calc is None
         elif "write_results" not in write_kwargs or write_kwargs["write_results"]:
-            assert all(key in atoms.calc.results for key in results_keys)
+            assert results_keys <= atoms.calc.results.keys()
 
     else:
         assert not output_file.exists()
