@@ -610,12 +610,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
+            write_kwargs = self.write_kwargs
+            write_kwargs["filename"] = self.traj_file
+            write_kwargs["append"] = append
             output_structs(
                 images=self.struct,
-                filename=self.traj_file,
                 write_results=True,
-                **self.write_kwargs,
-                append=append,
+                write_kwargs=write_kwargs,
             )
 
     def _write_final_state(self) -> None:
@@ -627,12 +628,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         # Append if final file has been created
         append = self.created_final_file
 
+        write_kwargs = self.write_kwargs
+        write_kwargs["filename"] = self.final_file
+        write_kwargs["append"] = append
         output_structs(
             images=self.struct,
-            filename=self.final_file,
             write_results=True,
-            **self.write_kwargs,
-            append=append,
+            write_kwargs=write_kwargs,
         )
 
     def _post_process(self) -> None:
@@ -724,11 +726,12 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
+            write_kwargs = self.write_kwargs
+            write_kwargs["filename"] = self._restart_file
             output_structs(
                 images=self.struct,
-                filename=self._restart_file,
                 write_results=True,
-                **self.write_kwargs,
+                write_kwargs=write_kwargs,
             )
             if self.rotate_restart:
                 self.restart_files.append(self._restart_file)

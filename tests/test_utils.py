@@ -66,7 +66,12 @@ def test_dict_remove_hyphens():
 @pytest.mark.parametrize("write_results", [True, False])
 @pytest.mark.parametrize("properties", [None, ["energy"], ["energy", "forces"]])
 @pytest.mark.parametrize("invalidate_calc", [True, False])
-def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_path):
+@pytest.mark.parametrize(
+    "write_kwargs", [{}, {"write_results": False}, {"set_info": False}]
+)
+def test_output_structs(
+    arch, write_results, properties, invalidate_calc, write_kwargs, tmp_path
+):
     """Test output_structs copies/moves results to Atoms.info and writes files."""
     struct = read(DATA_PATH)
     struct.calc = choose_calculator(architecture=arch)
@@ -100,7 +105,7 @@ def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_pa
         write_results=write_results,
         properties=properties,
         invalidate_calc=invalidate_calc,
-        **write_kwargs,
+        write_kwargs=write_kwargs,
     )
 
     # Check results keys depend on invalidate_calc
@@ -110,8 +115,9 @@ def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_pa
         assert all(key in struct.calc.results for key in results_keys)
 
     # Check labelled keys added to info and arrays
-    assert all(key in struct.info or key in struct.arrays for key in label_keys)
-    assert struct.info["arch"] == arch
+    if "set_info" not in write_kwargs or write_kwargs["set_info"]:
+        assert all(key in struct.info or key in struct.arrays for key in label_keys)
+        assert struct.info["arch"] == arch
 
     # Check file written correctly if write_results
     if write_results:
@@ -120,13 +126,14 @@ def test_output_structs(arch, write_results, properties, invalidate_calc, tmp_pa
         assert isinstance(atoms, Atoms)
 
         # Check labelled info and arrays was written and can be read back in
-        assert all(key in atoms.info or key in atoms.arrays for key in label_keys)
-        assert atoms.info["arch"] == arch
+        if "set_info" not in write_kwargs or write_kwargs["set_info"]:
+            assert all(key in atoms.info or key in atoms.arrays for key in label_keys)
+            assert atoms.info["arch"] == arch
 
         # Check calculator results depend on invalidate_calc
         if invalidate_calc:
             assert atoms.calc is None
-        else:
+        elif "write_results" not in write_kwargs or write_kwargs["write_results"]:
             assert all(key in atoms.calc.results for key in results_keys)
 
     else:

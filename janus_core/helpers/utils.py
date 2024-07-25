@@ -9,7 +9,12 @@ from ase import Atoms
 from ase.io import write
 from spglib import get_spacegroup
 
-from janus_core.helpers.janus_types import MaybeSequence, PathLike, Properties
+from janus_core.helpers.janus_types import (
+    ASEWriteArgs,
+    MaybeSequence,
+    PathLike,
+    Properties,
+)
 
 
 class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
@@ -280,7 +285,7 @@ def output_structs(
     write_results: bool = False,
     properties: Collection[Properties] = (),
     invalidate_calc: bool = False,
-    **kwargs,
+    write_kwargs: Optional[ASEWriteArgs] = None,
 ) -> None:
     """
     Copy or move calculated results to Atoms.info dict and/or write structures to file.
@@ -298,9 +303,19 @@ def output_structs(
     invalidate_calc : bool
         Whether to remove all calculator results after copying properties to info dict.
         Default is False.
-    **kwargs
-        Keyword arguments passed to ase.io.write.
+    write_kwargs : Optional[ASEWriteArgs]
+        Keyword arguments passed to ase.io.write. Default is {}.
     """
+    # Separate kwargs for output_structs from kwargs for ase.io.write
+    # This assumes values passed via kwargs have priority over passed parameters
+    write_kwargs = write_kwargs if write_kwargs else {}
+    if "set_info" in write_kwargs:
+        set_info = write_kwargs.pop("set_info")
+    if "properties" in write_kwargs:
+        properties = write_kwargs.pop("properties")
+    if "invalidate_calc" in write_kwargs:
+        invalidate_calc = write_kwargs.pop("invalidate_calc")
+
     if isinstance(images, Atoms):
         images = (images,)
 
@@ -316,4 +331,5 @@ def output_structs(
                 image.info["arch"] = image.calc.parameters["arch"]
 
     if write_results:
-        write(images=images, write_results=not invalidate_calc, **kwargs)
+        write_kwargs.setdefault("write_results", not invalidate_calc)
+        write(images=images, **write_kwargs)

@@ -342,7 +342,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             self.struct,
             write_results=write_results,
             properties=properties,
-            **write_kwargs,
+            write_kwargs=write_kwargs,
         )
 
         return results

@@ -242,7 +242,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
     output_structs(
         struct,
         write_results=write_results,
-        **write_kwargs,
+        write_kwargs=write_kwargs,
     )
 
     # Reformat trajectory file from binary
@@ -251,7 +251,7 @@ def optimize(  # pylint: disable=too-many-arguments,too-many-locals,too-many-bra
         output_structs(
             traj,
             write_results=True,
-            **traj_kwargs,
+            write_kwargs=traj_kwargs,
         )
 
     if logger:

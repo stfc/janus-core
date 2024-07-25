@@ -94,7 +94,7 @@ def _calc_volumes_energies(  # pylint: disable=too-many-locals
             images=c_struct,
             write_results=write_structures,
             set_info=False,
-            **write_kwargs,
+            write_kwargs=write_kwargs,
         )
 
     if logger:
@@ -210,7 +210,9 @@ def calc_eos(
         optimize(struct, **minimize_kwargs)
 
         # Optionally write structure to file
-        output_structs(images=struct, write_results=write_structures, **write_kwargs)
+        output_structs(
+            images=struct, write_results=write_structures, write_kwargs=write_kwargs
+        )
 
     # Set constant volume for geometry optimization of generated structures
     if "filter_kwargs" in minimize_kwargs:
