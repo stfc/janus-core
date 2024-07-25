@@ -252,6 +252,22 @@ def test_no_atoms_or_path():
         )
 
 
+def test_invalidate_calc():
+    """Test setting invalidate_calc via write_kwargs."""
+    struct_path = DATA_PATH / "NaCl.cif"
+    single_point = SinglePoint(
+        struct_path=struct_path,
+        architecture="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    single_point.run(write_kwargs={"invalidate_calc": False})
+    assert "energy" in single_point.struct.calc.results
+
+    single_point.run(write_kwargs={"invalidate_calc": True})
+    assert "energy" not in single_point.struct.calc.results
+
+
 test_mlips_data = [
     ("m3gnet", "cpu", -26.729949951171875),
     ("chgnet", "cpu", -29.331436157226562),

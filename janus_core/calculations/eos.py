@@ -5,16 +5,15 @@ from typing import Any, Optional
 
 from ase import Atoms
 from ase.eos import EquationOfState
-from ase.io import write
 from ase.units import kJ
 from codecarbon import OfflineEmissionsTracker
 from numpy import float64, linspace
 from numpy.typing import NDArray
 
 from janus_core.calculations.geom_opt import optimize
-from janus_core.helpers.janus_types import ASEWriteArgs, EoSNames, EoSResults, PathLike
+from janus_core.helpers.janus_types import EoSNames, EoSResults, OutputKwargs, PathLike
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import none_to_dict, output_structs
 
 
 def _calc_volumes_energies(  # pylint: disable=too-many-locals
@@ -26,7 +25,7 @@ def _calc_volumes_energies(  # pylint: disable=too-many-locals
     minimize_all: bool = False,
     minimize_kwargs: Optional[dict[str, Any]] = None,
     write_structures: bool = False,
-    write_kwargs: Optional[ASEWriteArgs] = None,
+    write_kwargs: Optional[OutputKwargs] = None,
     logger: Optional[Logger] = None,
     tracker: Optional[OfflineEmissionsTracker] = None,
 ) -> tuple[NDArray[float64], list[float], list[float]]:
@@ -50,7 +49,7 @@ def _calc_volumes_energies(  # pylint: disable=too-many-locals
         chemical formula of the structure.
     write_structures : bool
         True to write out all genereated structures. Default is False.
-    write_kwargs : Optional[ASEWriteArgs],
+    write_kwargs : Optional[OutputKwargs],
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
     logger : Optional[Logger]
@@ -88,10 +87,15 @@ def _calc_volumes_energies(  # pylint: disable=too-many-locals
         volumes.append(c_struct.get_volume())
         energies.append(c_struct.get_potential_energy())
 
-        if write_structures:
-            # Always append first original structure
-            write_kwargs["append"] = True
-            write(images=c_struct, **write_kwargs)
+        # Always append first original structure
+        write_kwargs["append"] = True
+        # Write structures, but no need to set info c_struct is not used elsewhere
+        output_structs(
+            images=c_struct,
+            write_results=write_structures,
+            set_info=False,
+            write_kwargs=write_kwargs,
+        )
 
     if logger:
         tracker.stop_task()
@@ -113,7 +117,7 @@ def calc_eos(
     minimize_kwargs: Optional[dict[str, Any]] = None,
     write_results: bool = True,
     write_structures: bool = False,
-    write_kwargs: Optional[ASEWriteArgs] = None,
+    write_kwargs: Optional[OutputKwargs] = None,
     file_prefix: Optional[PathLike] = None,
     log_kwargs: Optional[dict[str, Any]] = None,
     tracker_kwargs: Optional[dict[str, Any]] = None,
@@ -145,7 +149,7 @@ def calc_eos(
         True to write out results of equation of state calculations. Default is True.
     write_structures : bool
         True to write out all genereated structures. Default is False.
-    write_kwargs : Optional[ASEWriteArgs],
+    write_kwargs : Optional[OutputKwargs],
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
     file_prefix : Optional[PathLike]
@@ -205,8 +209,10 @@ def calc_eos(
             }
         optimize(struct, **minimize_kwargs)
 
-    if write_structures:
-        write(images=struct, **write_kwargs)
+        # Optionally write structure to file
+        output_structs(
+            images=struct, write_results=write_structures, write_kwargs=write_kwargs
+        )
 
     # Set constant volume for geometry optimization of generated structures
     if "filter_kwargs" in minimize_kwargs:

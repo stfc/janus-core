@@ -20,6 +20,7 @@ from janus_core.cli.types import (
     ReadKwargs,
     StructPath,
     Summary,
+    WriteKwargs,
 )
 from janus_core.cli.utils import (
     check_config,
@@ -184,6 +185,7 @@ def md(
     temp_time: Annotated[
         float, Option(help="Time between heating steps, in fs.")
     ] = None,
+    write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
     log: LogPath = "md.log",
     seed: Annotated[
@@ -291,6 +293,9 @@ def md(
     temp_time : Optional[float]
         Time between heating steps, in fs. Default is None, which disables
         heating.
+    write_kwargs : Optional[dict[str, Any]],
+        Keyword arguments to pass to `output_structs` when saving trajectory and final
+        files. Default is {}.
     post_process_kwargs : Optional[PostProcessKwargs]
         Kwargs to pass to post-processing.
     log : Optional[Path]
@@ -311,6 +316,7 @@ def md(
         calc_kwargs,
         minimize_kwargs,
         ensemble_kwargs,
+        write_kwargs,
         post_process_kwargs,
     ] = parse_typer_dicts(
         [
@@ -318,6 +324,7 @@ def md(
             calc_kwargs,
             minimize_kwargs,
             ensemble_kwargs,
+            write_kwargs,
             post_process_kwargs,
         ]
     )
@@ -374,6 +381,7 @@ def md(
         "temp_end": temp_end,
         "temp_step": temp_step,
         "temp_time": temp_time,
+        "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
         "log_kwargs": log_kwargs,
         "seed": seed,

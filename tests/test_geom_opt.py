@@ -66,7 +66,7 @@ def test_saving_struct(tmp_path):
     )
     opt_struct = read(results_path)
 
-    assert opt_struct.get_potential_energy() < init_energy
+    assert opt_struct.info["mace_energy"] < init_energy
 
 
 def test_saving_traj(tmp_path):

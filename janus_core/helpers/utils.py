@@ -1,13 +1,20 @@
 """Utility functions for janus_core."""
 
 from abc import ABC
+from collections.abc import Collection
 from pathlib import Path
-from typing import Optional
+from typing import Optional, get_args
 
 from ase import Atoms
+from ase.io import write
 from spglib import get_spacegroup
 
-from janus_core.helpers.janus_types import PathLike
+from janus_core.helpers.janus_types import (
+    ASEWriteArgs,
+    MaybeSequence,
+    PathLike,
+    Properties,
+)
 
 
 class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
@@ -229,3 +236,97 @@ def dict_remove_hyphens(dictionary: dict) -> dict:
         if isinstance(value, dict):
             dictionary[key] = dict_remove_hyphens(value)
     return {k.replace("-", "_"): v for k, v in dictionary.items()}
+
+
+def results_to_info(
+    struct: Atoms,
+    *,
+    properties: Collection[Properties] = (),
+    invalidate_calc: bool = False,
+) -> None:
+    """
+    Copy or move MLIP calculated results to Atoms.info dict.
+
+    Parameters
+    ----------
+    struct : Atoms
+        Atoms object to copy or move calculated results to info dict.
+    properties : Collection[Properties]
+        Properties to copy from results to info dict. Default is ().
+    invalidate_calc : bool
+        Whether to remove all calculator results after copying properties to info dict.
+        Default is False.
+    """
+    if not properties:
+        properties = get_args(Properties)
+
+    if struct.calc:
+        # Set default architecture from calculator name
+        arch = struct.calc.parameters["arch"]
+        struct.info["arch"] = arch
+
+        for key in properties & struct.calc.results.keys():
+            tag = f"{arch}_{key}"
+            value = struct.calc.results[key]
+            if key == "forces":
+                struct.arrays[tag] = value
+            else:
+                struct.info[tag] = value
+
+        # Remove all calculator results
+        if invalidate_calc:
+            struct.calc.results = {}
+
+
+def output_structs(
+    images: MaybeSequence[Atoms],
+    *,
+    set_info: bool = True,
+    write_results: bool = False,
+    properties: Collection[Properties] = (),
+    invalidate_calc: bool = False,
+    write_kwargs: Optional[ASEWriteArgs] = None,
+) -> None:
+    """
+    Copy or move calculated results to Atoms.info dict and/or write structures to file.
+
+    Parameters
+    ----------
+    images : MaybeSequence[Atoms]
+        Atoms object or a list of Atoms objects to interact with.
+    set_info : bool
+        True to set info dict from calculated results. Default is True.
+    write_results : bool
+        True to write out structure with results of calculations. Default is False.
+    properties : Collection[Properties]
+        Properties to copy from calculated results to info dict. Default is ().
+    invalidate_calc : bool
+        Whether to remove all calculator results after copying properties to info dict.
+        Default is False.
+    write_kwargs : Optional[ASEWriteArgs]
+        Keyword arguments passed to ase.io.write. Default is {}.
+    """
+    # Separate kwargs for output_structs from kwargs for ase.io.write
+    # This assumes values passed via kwargs have priority over passed parameters
+    write_kwargs = write_kwargs if write_kwargs else {}
+    set_info = write_kwargs.pop("set_info", set_info)
+    properties = write_kwargs.pop("properties", properties)
+    invalidate_calc = write_kwargs.pop("invalidate_calc", invalidate_calc)
+
+    if isinstance(images, Atoms):
+        images = (images,)
+
+    if set_info:
+        for image in images:
+            results_to_info(
+                image, properties=properties, invalidate_calc=invalidate_calc
+            )
+    else:
+        # Label architecture even if not copying results to info
+        for image in images:
+            if image.calc:
+                image.info["arch"] = image.calc.parameters["arch"]
+
+    if write_results:
+        write_kwargs.setdefault("write_results", not invalidate_calc)
+        write(images=images, **write_kwargs)
