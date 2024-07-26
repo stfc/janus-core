@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinxcontrib.contentui",
+    "sphinx_copybutton",
 ]
 
 numpydoc_validation_checks = {"all", "EX01", "SA01", "ES01"}
