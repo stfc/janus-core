@@ -6,7 +6,7 @@ from typing import Any, Optional
 from ase import Atoms
 from ase.eos import EquationOfState
 from ase.units import kJ
-from numpy import empty, linspace
+from numpy import cbrt, empty, linspace
 
 from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.janus_types import EoSNames, EoSResults, OutputKwargs, PathLike
@@ -164,7 +164,9 @@ class EoS(FileNameMixin):
             and self.minimize_kwargs["write_results"]
         ):
             raise ValueError(
-                "Optimized structures can be saved by setting `write_structures`"
+                "Please set the `write_structures` parameter to `True` to save "
+                "optimized structures, instead of passing `write_results` through "
+                "`minimize_kwargs`"
             )
 
         if not self.struct.calc:
@@ -263,9 +265,9 @@ class EoS(FileNameMixin):
 
         cell = self.struct.get_cell()
 
-        self.lattice_scalars = linspace(
-            self.min_volume, self.max_volume, self.n_volumes
-        ) ** (1 / 3)
+        self.lattice_scalars = cbrt(
+            linspace(self.min_volume, self.max_volume, self.n_volumes)
+        )
         for lattice_scalar in self.lattice_scalars:
             c_struct = self.struct.copy()
             c_struct.calc = deepcopy(self.struct.calc)
