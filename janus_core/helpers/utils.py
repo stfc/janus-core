@@ -1,7 +1,7 @@
 """Utility functions for janus_core."""
 
 from abc import ABC
-from collections.abc import Collection
+from collections.abc import Collection, Sequence
 from pathlib import Path
 from typing import Optional, get_args
 
@@ -23,8 +23,9 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
 
     Parameters
     ----------
-    struct : Atoms
+    struct : MaybeSequence[Atoms]
         Structure from which to derive the default name if struct_name not provided.
+        If `struct` is a sequence, the first structure will be used.
     struct_name : Optional[str]
         Struct name to use.
     file_prefix : Optional[PathLike]
@@ -44,7 +45,7 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
 
     def __init__(
         self,
-        struct: Atoms,
+        struct: MaybeSequence[Atoms],
         struct_name: Optional[str],
         file_prefix: Optional[PathLike],
         *additional,
@@ -54,8 +55,9 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
-        struct : Atoms
-            Structure from which to derive the default name if struct_name not provided.
+        struct : MaybeSequence[Atoms]
+            Structure(s) from which to derive the default name if `struct_name` is not
+            provided. If `struct` is a sequence, the first structure will be used.
         struct_name : Optional[str]
             Struct name to use.
         file_prefix : Optional[PathLike]
@@ -70,14 +72,17 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
         )
 
     @staticmethod
-    def _get_default_struct_name(struct: Atoms, struct_name: Optional[str]) -> str:
+    def _get_default_struct_name(
+        struct: MaybeSequence[Atoms], struct_name: Optional[str]
+    ) -> str:
         """
         Determine the default struct name from the structure or provided struct_name.
 
         Parameters
         ----------
-        struct : Atoms
-            Structure of system.
+        struct : MaybeSequence[Atoms]
+            Structure(s) from which to derive the default name if `struct_name` is not
+            provided. If `struct` is a sequence, the first structure will be used.
         struct_name : Optional[str]
             Name of structure.
 
@@ -89,6 +94,8 @@ class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
 
         if struct_name is not None:
             return struct_name
+        if isinstance(struct, Sequence):
+            return struct[0].get_chemical_formula()
         return struct.get_chemical_formula()
 
     @staticmethod

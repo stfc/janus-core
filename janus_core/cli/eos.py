@@ -6,7 +6,7 @@ from typing import Annotated, Optional, get_args
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.eos import calc_eos
+from janus_core.calculations.eos import EoS
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
@@ -205,7 +205,8 @@ def eos(
     start_summary(command="eos", summary=summary, inputs=inputs)
 
     # Calculate equation of state
-    calc_eos(**eos_kwargs)
+    equation_of_state = EoS(**eos_kwargs)
+    equation_of_state.run()
 
     # Time after calculations have finished
     end_summary(summary)

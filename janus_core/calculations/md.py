@@ -24,7 +24,7 @@ from ase.md.verlet import VelocityVerlet
 import numpy as np
 import yaml
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.correlator import Correlation
 from janus_core.helpers.janus_types import (
     CorrelationKwargs,
@@ -450,7 +450,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                     "filemode": "a",
                 }
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
-            optimize(self.struct, **self.minimize_kwargs)
+            optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
+            optimizer.run()
 
     @property
     def _parameter_prefix(self) -> str:

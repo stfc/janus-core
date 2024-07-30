@@ -6,7 +6,7 @@ from ase.filters import FrechetCellFilter, UnitCellFilter
 from ase.io import read
 import pytest
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
 from tests.utils import assert_log_contains
@@ -42,9 +42,12 @@ def test_optimize(architecture, struct_path, expected, kwargs):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    struct = optimize(single_point.struct, **kwargs)
+    optimizer = GeomOpt(single_point.struct, **kwargs)
+    optimizer.run()
 
-    assert struct.get_potential_energy() == pytest.approx(expected, rel=1e-8)
+    assert single_point.struct.get_potential_energy() == pytest.approx(
+        expected, rel=1e-8
+    )
 
 
 def test_saving_struct(tmp_path):
@@ -59,13 +62,14 @@ def test_saving_struct(tmp_path):
 
     init_energy = single_point.run("energy")["energy"]
 
-    optimize(
+    optimizer = GeomOpt(
         single_point.struct,
         write_results=True,
         write_kwargs={"filename": results_path, "format": "extxyz"},
     )
-    opt_struct = read(results_path)
+    optimizer.run()
 
+    opt_struct = read(results_path)
     assert opt_struct.info["mace_energy"] < init_energy
 
 
@@ -76,9 +80,10 @@ def test_saving_traj(tmp_path):
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    optimize(
+    optimizer = GeomOpt(
         single_point.struct, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")}
     )
+    optimizer.run()
     traj = read(tmp_path / "NaCl.traj", index=":")
     assert len(traj) == 3
 
@@ -94,18 +99,19 @@ def test_traj_reformat(tmp_path):
     traj_path_binary = tmp_path / "NaCl.traj"
     traj_path_xyz = tmp_path / "NaCl-traj.extxyz"
 
-    optimize(
+    optimizer = GeomOpt(
         single_point.struct,
         opt_kwargs={"trajectory": str(traj_path_binary)},
         traj_kwargs={"filename": traj_path_xyz},
     )
+    optimizer.run()
     traj = read(traj_path_xyz, index=":")
 
     assert len(traj) == 3
 
 
 def test_missing_traj_kwarg(tmp_path):
-    """Test saving optimization trajectory in different format."""
+    """Test error if saving trajectory without opt_kwargs."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
@@ -113,7 +119,7 @@ def test_missing_traj_kwarg(tmp_path):
     )
     traj_path = tmp_path / "NaCl-traj.extxyz"
     with pytest.raises(ValueError):
-        optimize(single_point.struct, traj_kwargs={"filename": traj_path})
+        GeomOpt(single_point.struct, traj_kwargs={"filename": traj_path})
 
 
 def test_hydrostatic_strain():
@@ -130,12 +136,15 @@ def test_hydrostatic_strain():
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    struct_1 = optimize(
+    optimizer_1 = GeomOpt(
         single_point_1.struct, filter_kwargs={"hydrostatic_strain": True}
     )
-    struct_2 = optimize(
+    optimizer_1.run()
+
+    optimizer_2 = GeomOpt(
         single_point_2.struct, filter_kwargs={"hydrostatic_strain": False}
     )
+    optimizer_2.run()
 
     expected_1 = [
         5.687545288920282,
@@ -153,8 +162,8 @@ def test_hydrostatic_strain():
         90.0,
         90.0,
     ]
-    assert struct_1.cell.cellpar() == pytest.approx(expected_1)
-    assert struct_2.cell.cellpar() == pytest.approx(expected_2)
+    assert single_point_1.struct.cell.cellpar() == pytest.approx(expected_1)
+    assert single_point_2.struct.cell.cellpar() == pytest.approx(expected_2)
 
 
 def test_set_calc():
@@ -163,8 +172,9 @@ def test_set_calc():
     struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
 
     init_energy = struct.get_potential_energy()
-    opt_struct = optimize(struct)
-    assert opt_struct.get_potential_energy() < init_energy
+    optimizer = GeomOpt(struct)
+    optimizer.run()
+    assert struct.get_potential_energy() < init_energy
 
 
 def test_converge_warning():
@@ -173,8 +183,10 @@ def test_converge_warning():
         struct_path=DATA_PATH / "NaCl-deformed.cif",
         calc_kwargs={"model": MODEL_PATH},
     )
+    optimizer = GeomOpt(single_point.struct, steps=1)
+
     with pytest.warns(UserWarning):
-        optimize(single_point.struct, steps=1)
+        optimizer.run()
 
 
 def test_restart(tmp_path):
@@ -185,25 +197,26 @@ def test_restart(tmp_path):
     )
 
     init_energy = single_point.run("energy")["energy"]
-
-    # Check unconverged warning
-    with pytest.warns(UserWarning):
-        optimize(
-            single_point.struct,
-            steps=2,
-            opt_kwargs={"restart": tmp_path / "NaCl.pkl"},
-            fmax=0.0001,
-        )
-
-    intermediate_energy = single_point.run("energy")["energy"]
-    assert intermediate_energy < init_energy
-
-    optimize(
+    optimizer = GeomOpt(
         single_point.struct,
         steps=2,
         opt_kwargs={"restart": tmp_path / "NaCl.pkl"},
         fmax=0.0001,
     )
+    # Check unconverged warning
+    with pytest.warns(UserWarning):
+        optimizer.run()
+
+    intermediate_energy = single_point.run("energy")["energy"]
+    assert intermediate_energy < init_energy
+
+    optimizer = GeomOpt(
+        single_point.struct,
+        steps=2,
+        opt_kwargs={"restart": tmp_path / "NaCl.pkl"},
+        fmax=0.0001,
+    )
+    optimizer.run()
     final_energy = single_point.run("energy")["energy"]
     assert final_energy < intermediate_energy
 
@@ -217,10 +230,8 @@ def test_space_group():
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    optimize(
-        single_point.struct,
-        fmax=0.001,
-    )
+    optimizer = GeomOpt(single_point.struct, fmax=0.001)
+    optimizer.run()
 
     assert single_point.struct.info["initial_spacegroup"] == "I4/mmm (139)"
     assert single_point.struct.info["final_spacegroup"] == "Fm-3m (225)"
@@ -236,12 +247,13 @@ def test_str_optimizer(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    optimize(
+    optimizer = GeomOpt(
         single_point.struct,
         fmax=0.001,
         optimizer="FIRE",
         log_kwargs={"filename": log_file},
     )
+    optimizer.run()
 
     assert_log_contains(
         log_file, includes=["Starting geometry optimization", "Using optimizer: FIRE"]
@@ -257,7 +269,7 @@ def test_invalid_str_optimizer():
     )
 
     with pytest.raises(AttributeError):
-        optimize(
+        GeomOpt(
             single_point.struct,
             fmax=0.001,
             optimizer="test",
@@ -274,12 +286,13 @@ def test_str_filter(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    optimize(
+    optimizer = GeomOpt(
         single_point.struct,
         fmax=0.001,
         filter_func="UnitCellFilter",
         log_kwargs={"filename": log_file},
     )
+    optimizer.run()
 
     assert_log_contains(
         log_file,
@@ -296,8 +309,4 @@ def test_invalid_str_filter():
     )
 
     with pytest.raises(AttributeError):
-        optimize(
-            single_point.struct,
-            fmax=0.001,
-            filter_func="test",
-        )
+        GeomOpt(single_point.struct, fmax=0.001, filter_func="test")
