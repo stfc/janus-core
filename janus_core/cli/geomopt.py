@@ -88,9 +88,7 @@ def _set_minimize_kwargs(
     minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure
 
 
-@app.command(
-    help="Perform geometry optimization and save optimized structure to file.",
-)
+@app.command()
 @use_config(yaml_converter_callback)
 def geomopt(
     # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
