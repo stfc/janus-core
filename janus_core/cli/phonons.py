@@ -32,7 +32,7 @@ from janus_core.helpers.utils import dict_paths_to_strs
 app = Typer()
 
 
-@app.command(help="Calculate phonons and save results.")
+@app.command()
 @use_config(yaml_converter_callback)
 def phonons(
     # pylint: disable=too-many-arguments,too-many-locals,duplicate-code

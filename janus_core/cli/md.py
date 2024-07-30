@@ -36,9 +36,7 @@ from janus_core.helpers.utils import dict_paths_to_strs
 app = Typer()
 
 
-@app.command(
-    help="Run molecular dynamics simulation, and save trajectory and statistics.",
-)
+@app.command()
 @use_config(yaml_converter_callback)
 def md(
     # pylint: disable=too-many-arguments,too-many-locals,invalid-name,duplicate-code

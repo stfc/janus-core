@@ -34,7 +34,7 @@ from janus_core.helpers.utils import dict_paths_to_strs
 app = Typer()
 
 
-@app.command(help="Calculate equation of state.")
+@app.command()
 @use_config(yaml_converter_callback)
 def eos(
     # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
