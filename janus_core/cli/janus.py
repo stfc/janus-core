@@ -11,6 +11,7 @@ from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
 from janus_core.cli.phonons import phonons
 from janus_core.cli.singlepoint import singlepoint
+from janus_core.cli.train import train
 
 app = Typer(name="janus", no_args_is_help=True)
 app.command()(singlepoint)
@@ -19,14 +20,7 @@ app.command()(md)
 app.command()(phonons)
 app.command()(eos)
 app.command()(descriptors)
-
-# Train not imlpemented in older versions of MACE
-try:
-    from janus_core.cli.train import train
-
-    app.command()(train)
-except NotImplementedError:
-    pass
+app.command()(train)
 
 
 @app.callback(invoke_without_command=True, help="")
