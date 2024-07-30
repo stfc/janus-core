@@ -28,6 +28,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     ----------
     struct : Atoms
         Structrure to calculate phonons for.
+    calcs : Optional[MaybeSequence[PhononCalcs]]
+        Phonon calculations to run. Default calculates force constants only.
     supercell : MaybeList[int]
         Size of supercell for calculation. Default is 2.
     displacement : float
@@ -80,6 +82,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments,disable=too-many-locals
         self,
         struct: Atoms,
+        calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
         t_step: float = 50.0,
@@ -103,6 +106,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         ----------
         struct : Atoms
             Structrure to calculate phonons for.
+        calcs : Optional[MaybeSequence[PhononCalcs]]
+            Phonon calculations to run. Default calculates force constants only.
         supercell : MaybeList[int]
             Size of supercell for calculation. Default is 2.
         displacement : float
@@ -145,6 +150,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         )
 
         self.struct = struct
+        self.calcs = calcs
         self.displacement = displacement
         self.t_step = t_step
         self.t_min = t_min
@@ -199,6 +205,43 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
 
         self.calc = self.struct.calc
         self.results = {}
+
+    @property
+    def calcs(self) -> Sequence[PhononCalcs]:
+        """
+        Phonon calculations to be run.
+
+        Returns
+        -------
+        Sequence[PhononCalcs]
+            Phonon calculations.
+        """
+        return self._calcs
+
+    @calcs.setter
+    def calcs(self, value: MaybeSequence[PhononCalcs]) -> None:
+        """
+        Setter for `calcs`.
+
+        Parameters
+        ----------
+        value : MaybeSequence[PhononCalcs]
+            Phonon calculations to be run.
+        """
+        self._calcs = value
+
+        if isinstance(self._calcs, str):
+            self._calcs = (self._calcs,)
+
+            for calc in self._calcs:
+                if calc not in get_args(PhononCalcs):
+                    raise NotImplementedError(
+                        f"Calculations '{calc}' cannot currently be performed."
+                    )
+
+        # If none specified, only force constants will be calculated
+        if not self._calcs:
+            self._cals = ()
 
     def calc_force_constants(
         self, write_force_consts: Optional[bool] = None, **kwargs
@@ -686,7 +729,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
     def run(
         self,
         *,
-        calcs: Optional[MaybeSequence[PhononCalcs]] = (),
+        calcs: Optional[MaybeSequence[PhononCalcs]] = None,
         write_results: Optional[bool] = (None),
     ) -> None:
         """
@@ -695,25 +738,14 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         Parameters
         ----------
         calcs : Optional[MaybeSequence[PhononCalcs]]
-            Phonon calculations to run. Default calculates force constants only.
+            Phonon calculations to run. Default is self.calcs.
         write_results : bool
             True to write out structure with results of calculations. Default is
             self.write_results.
         """
-        if isinstance(calcs, str):
-            calcs = (calcs,)
-
-        if calcs is None:
-            calcs = ()
-
-        for calc in calcs:
-            if calc not in get_args(PhononCalcs):
-                raise NotImplementedError(
-                    f"Calculation '{calc}' cannot currently be performed."
-                )
-
-        if write_results is None:
-            write_results = self.write_results
+        # Parameters can be overwritten, otherwise default to values from instantiation
+        calcs = calcs if calcs else self.calcs
+        write_results = write_results if write_results else self.write_results
 
         # Calculate force constants
         self.calc_force_constants()

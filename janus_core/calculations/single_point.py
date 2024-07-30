@@ -253,7 +253,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         self._properties = value
 
         if isinstance(self._properties, str):
-            self._properties = [self._properties]
+            self._properties = (self._properties,)
 
         if isinstance(self._properties, Sequence):
             for prop in self._properties:
@@ -341,12 +341,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             Dictionary of calculated results, with keys from `properties`.
         """
         # Parameters can be overwritten, otherwise default to values from instantiation
-        if properties is None:
-            properties = self.properties
-        if write_results is None:
-            write_results = self.write_results
-        if write_kwargs is None:
-            write_kwargs = self.write_kwargs
+        properties = self.properties
+        write_results = write_results if write_results else self.write_results
+        write_kwargs = write_kwargs if write_kwargs else self.write_kwargs
 
         self.results = {}
 

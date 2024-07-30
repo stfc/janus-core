@@ -238,9 +238,20 @@ def phonons(
     if not file_prefix:
         file_prefix = s_point.file_prefix
 
+    calcs = []
+    if bands:
+        calcs.append("bands")
+    if thermal:
+        calcs.append("thermal")
+    if dos:
+        calcs.append("dos")
+    if pdos:
+        calcs.append("pdos")
+
     # Dictionary of inputs for phonons
     phonons_kwargs = {
         "struct": s_point.struct,
+        "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
         "t_min": temp_start,
@@ -263,11 +274,6 @@ def phonons(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
-    inputs["band"] = bands
-    inputs["dos"] = dos
-    inputs["pdos"] = pdos
-    inputs["thermal"] = thermal
-
     save_struct_calc(
         inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
     )
@@ -278,20 +284,9 @@ def phonons(
     # Save summary information before calculations begin
     start_summary(command="phonons", summary=summary, inputs=inputs)
 
-    # Initialise phonons class
+    # Initialise phonons class and run calculations
     phonon = Phonons(**phonons_kwargs)
-
-    calcs = []
-    if bands:
-        calcs.append("bands")
-    if thermal:
-        calcs.append("thermal")
-    if dos:
-        calcs.append("dos")
-    if pdos:
-        calcs.append("pdos")
-
-    phonon.run(calcs=calcs)
+    phonon.run()
 
     # Time after calculations have finished
     end_summary(summary)
