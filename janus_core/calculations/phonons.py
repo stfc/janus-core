@@ -145,8 +145,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
-            [minimize_kwargs, log_kwargs, tracker_kwargs]
+        (minimize_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
+            (minimize_kwargs, log_kwargs, tracker_kwargs)
         )
 
         self.struct = struct

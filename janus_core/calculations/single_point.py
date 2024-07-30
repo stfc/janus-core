@@ -132,9 +132,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        [read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs] = (
+        (read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = (
             none_to_dict(
-                [read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs]
+                (read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs)
             )
         )
 

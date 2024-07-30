@@ -67,7 +67,7 @@ class Descriptors(FileNameMixin):
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         """
-        [write_kwargs, log_kwargs] = none_to_dict([write_kwargs, log_kwargs])
+        (write_kwargs, log_kwargs) = none_to_dict((write_kwargs, log_kwargs))
 
         self.struct = struct
         self.invariants_only = invariants_only

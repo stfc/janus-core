@@ -1,7 +1,7 @@
 """Utility functions for janus_core."""
 
 from abc import ABC
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Generator, Sequence
 from io import StringIO
 from pathlib import Path
 from typing import Any, Literal, Optional, TextIO, get_args
@@ -192,23 +192,21 @@ def spacegroup(
     )
 
 
-def none_to_dict(dictionaries: list[Optional[dict]]) -> list[dict]:
+def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict]:
     """
     Ensure dictionaries that may be None are dictionaires.
 
     Parameters
     ----------
-    dictionaries : list[dict]
-        List of dictionaries that be be None.
+    dictionaries : Sequence[dict]
+        Sequence of dictionaries that be be None.
 
     Returns
     -------
-    list[dict]
-        Dictionaries set to {} if previously None.
+    Generator[dict]
+        Generator of dictionaries set to {} if previously None.
     """
-    for i, dictionary in enumerate(dictionaries):
-        dictionaries[i] = dictionary if dictionary else {}
-    return dictionaries
+    return (dictionary if dictionary else {} for dictionary in dictionaries)
 
 
 def dict_paths_to_strs(dictionary: dict) -> None:

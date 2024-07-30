@@ -276,22 +276,22 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
         """
-        [
+        (
             minimize_kwargs,
             write_kwargs,
             post_process_kwargs,
             correlation_kwargs,
             log_kwargs,
             tracker_kwargs,
-        ] = none_to_dict(
-            [
+        ) = none_to_dict(
+            (
                 minimize_kwargs,
                 write_kwargs,
                 post_process_kwargs,
                 correlation_kwargs,
                 log_kwargs,
                 tracker_kwargs,
-            ]
+            )
         )
 
         self.struct = struct

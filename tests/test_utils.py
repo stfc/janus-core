@@ -12,6 +12,7 @@ from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.utils import (
     dict_paths_to_strs,
     dict_remove_hyphens,
+    none_to_dict,
     output_structs,
 )
 
@@ -138,3 +139,24 @@ def test_output_structs(
 
     else:
         assert not output_file.exists()
+
+
+@pytest.mark.parametrize(
+    "dicts",
+    [
+        [None, {"a": 1}, {}, {"b": 2, "a": 11}, None],
+        (None, {"a": 1}, {}, {"b": 2, "a": 11}, None),
+    ],
+)
+def test_none_to_dict(dicts):
+    """Test none_to_dict removes Nones from sequence, and preserves dictionaries."""
+    dicts = list(none_to_dict(dicts))
+    for dictionary in dicts:
+        assert dictionary is not None
+
+    assert dicts[0] == {}
+    assert dicts[1]["a"] == 1
+    assert dicts[2] == {}
+    assert dicts[3]["b"] == 2
+    assert dicts[3]["a"] == 11
+    assert dicts[4] == {}

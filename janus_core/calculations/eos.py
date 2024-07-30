@@ -125,8 +125,8 @@ class EoS(FileNameMixin):
         lattice_scalars : NDArray[float64]
             Lattice scalars of generated structures.
         """
-        [minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
-            [minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs]
+        (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
+            (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs)
         )
 
         self.struct = struct

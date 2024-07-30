@@ -130,22 +130,22 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        [
+        (
             filter_kwargs,
             opt_kwargs,
             write_kwargs,
             traj_kwargs,
             log_kwargs,
             tracker_kwargs,
-        ] = none_to_dict(
-            [
+        ) = none_to_dict(
+            (
                 filter_kwargs,
                 opt_kwargs,
                 write_kwargs,
                 traj_kwargs,
                 log_kwargs,
                 tracker_kwargs,
-            ]
+            )
         )
 
         self.struct = struct
