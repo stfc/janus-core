@@ -19,6 +19,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: setup env on machine
+      run: source /home/ubuntu/.bashrc
+
     - name: Install python dependencies
       run: |
         poetry env use ${{ matrix.python-version }}
