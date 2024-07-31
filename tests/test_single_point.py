@@ -293,12 +293,12 @@ test_extra_mlips_data = [
     ("alignn", "cpu", -11.148092269897461, {}),
     ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
     ("sevennet", "cpu", -27.061979293823242, {}),
-    ("sevennet", "cpu", -27.061979293823242, {'SevenNet-0_11July2024'}),
+    ("sevennet", "cpu", -27.061979293823242, {"model": "SevenNet-0_11July2024"}),
 ]
 
 
 @pytest.mark.extra_mlips
-@pytest.mark.parametrize("arch, device, expected_energy, kwargs", test_extra_mlips_data)
+@pytest.mark.parametrize("arch, device, expectEd_energy, kwargs", test_extra_mlips_data)
 def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
     """Test single point energy using extra mlips calculators."""
     single_point = SinglePoint(
