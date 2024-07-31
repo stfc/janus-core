@@ -155,7 +155,7 @@ def test_extra_mlips(architecture, device, kwargs):
         },
     ],
 )
-def test_alignff_invalid(kwargs):
+def test_extra_mlips_invalid(kwargs):
     """Test error raised if multiple model paths defined for extra MLIPs."""
     with pytest.raises(ValueError):
         choose_calculator(**kwargs)
