@@ -503,3 +503,57 @@ def test_final_name(tmp_path):
     assert traj_path.exists()
     assert stats_path.exists()
     assert final_path.exists()
+
+
+def test_write_kwargs(tmp_path):
+    """Test passing write-kwargs."""
+    struct_path = DATA_PATH / "NaCl.cif"
+    file_prefix = tmp_path / "md"
+    log_path = tmp_path / "md.log"
+    summary_path = tmp_path / "summary.yml"
+    final_path = tmp_path / "md-final.extxyz"
+    traj_path = tmp_path / "md-traj.extxyz"
+    write_kwargs = (
+        "{'invalidate_calc': False, 'columns': ['symbols', 'positions', 'masses']}"
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "npt",
+            "--struct",
+            struct_path,
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--write-kwargs",
+            write_kwargs,
+            "--traj-every",
+            1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert final_path.exists()
+    assert traj_path.exists()
+    final_atoms = read(final_path)
+    traj = read(traj_path, index=":")
+
+    # Check columns has been set
+    assert not final_atoms.has("momenta")
+    assert not traj[0].has("momenta")
+
+    # Check calculated results have been saved
+    assert "energy" in final_atoms.calc.results
+    assert "energy" in traj[0].calc.results
+
+    # Check labelled info has been set
+    assert "mace_mp_energy" in final_atoms.info
+    assert "mace_mp_energy" in traj[0].info

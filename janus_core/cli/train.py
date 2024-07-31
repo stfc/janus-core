@@ -11,7 +11,7 @@ from janus_core.helpers.train import train as run_train
 app = Typer()
 
 
-@app.command(help="Running training for an MLIP.")
+@app.command()
 def train(
     mlip_config: Annotated[
         Path, Option(help="Configuration file to pass to MLIP CLI.")

@@ -1,8 +1,22 @@
 """Test utility functions."""
 
 from pathlib import Path
+from typing import get_args
 
-from janus_core.helpers.utils import dict_paths_to_strs, dict_remove_hyphens
+from ase import Atoms
+from ase.io import read
+import pytest
+
+from janus_core.helpers.janus_types import Properties
+from janus_core.helpers.mlip_calculators import choose_calculator
+from janus_core.helpers.utils import (
+    dict_paths_to_strs,
+    dict_remove_hyphens,
+    output_structs,
+)
+
+DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
+MODEL_PATH = Path(__file__).parent / "models/mace_mp_small.model"
 
 
 def test_dict_paths_to_strs():
@@ -46,3 +60,81 @@ def test_dict_remove_hyphens():
     assert dictionary["key_2"]["key_4"] == 4
     assert dictionary["key_2"]["key_5"] == 5.0
     assert dictionary["key_2"]["key6"]["key_7"] == "value7"
+
+
+@pytest.mark.parametrize("arch", ["mace_mp", "m3gnet", "chgnet"])
+@pytest.mark.parametrize("write_results", [True, False])
+@pytest.mark.parametrize("properties", [None, ["energy"], ["energy", "forces"]])
+@pytest.mark.parametrize("invalidate_calc", [True, False])
+@pytest.mark.parametrize(
+    "write_kwargs", [{}, {"write_results": False}, {"set_info": False}]
+)
+def test_output_structs(
+    arch, write_results, properties, invalidate_calc, write_kwargs, tmp_path
+):
+    """Test output_structs copies/moves results to Atoms.info and writes files."""
+    struct = read(DATA_PATH)
+    struct.calc = choose_calculator(architecture=arch)
+
+    if not properties:
+        results_keys = set(get_args(Properties))
+    else:
+        results_keys = set(properties)
+    label_keys = {f"{arch}_{key}" for key in results_keys}
+
+    write_kwargs = {}
+    output_file = tmp_path / "output.extxyz"
+    if write_results:
+        write_kwargs["filename"] = output_file
+
+    # Use calculator
+    struct.get_potential_energy()
+    struct.get_stress()
+
+    # Check all expected keys are in results
+    assert results_keys <= struct.calc.results.keys()
+
+    # Check results and MLIP-labelled keys are not in info or arrays
+    assert not results_keys & struct.info.keys()
+    assert not results_keys & struct.arrays.keys()
+    assert not label_keys & struct.info.keys()
+    assert not label_keys & struct.arrays.keys()
+
+    output_structs(
+        struct,
+        write_results=write_results,
+        properties=properties,
+        invalidate_calc=invalidate_calc,
+        write_kwargs=write_kwargs,
+    )
+
+    # Check results keys depend on invalidate_calc
+    if invalidate_calc:
+        assert not results_keys & struct.calc.results.keys()
+    else:
+        assert results_keys <= struct.calc.results.keys()
+
+    # Check labelled keys added to info and arrays
+    if "set_info" not in write_kwargs or write_kwargs["set_info"]:
+        assert label_keys <= struct.info.keys() | struct.arrays.keys()
+        assert struct.info["arch"] == arch
+
+    # Check file written correctly if write_results
+    if write_results:
+        assert output_file.exists()
+        atoms = read(output_file)
+        assert isinstance(atoms, Atoms)
+
+        # Check labelled info and arrays was written and can be read back in
+        if "set_info" not in write_kwargs or write_kwargs["set_info"]:
+            assert label_keys <= atoms.info.keys() | atoms.arrays.keys()
+            assert atoms.info["arch"] == arch
+
+        # Check calculator results depend on invalidate_calc
+        if invalidate_calc:
+            assert atoms.calc is None
+        elif "write_results" not in write_kwargs or write_kwargs["write_results"]:
+            assert results_keys <= atoms.calc.results.keys()
+
+    else:
+        assert not output_file.exists()

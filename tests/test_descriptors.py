@@ -6,8 +6,8 @@ from ase import Atoms
 from ase.io import read
 import pytest
 
+from janus_core.calculations.descriptors import Descriptors
 from janus_core.calculations.single_point import SinglePoint
-from janus_core.helpers.descriptors import calc_descriptors
 from janus_core.helpers.mlip_calculators import choose_calculator
 from tests.utils import assert_log_contains
 
@@ -21,10 +21,12 @@ def test_calc_descriptors(tmp_path):
     log_file = tmp_path / "descriptors.log"
     struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
 
-    atoms = calc_descriptors(
+    descriptors = Descriptors(
         struct,
         log_kwargs={"filename": log_file},
     )
+    descriptors.run()
+    atoms = descriptors.struct
     assert isinstance(atoms, Atoms)
     assert "descriptor" in atoms.info
     assert "Na_descriptor" not in atoms.info
@@ -46,11 +48,14 @@ def test_calc_per_element(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    atoms = calc_descriptors(
+    descriptors = Descriptors(
         single_point.struct,
         calc_per_element=True,
         log_kwargs={"filename": log_file},
     )
+    descriptors.run()
+    atoms = descriptors.struct
+
     assert isinstance(atoms, Atoms)
     assert "descriptor" in atoms.info
     assert "Na_descriptor" in atoms.info

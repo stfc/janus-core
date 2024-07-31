@@ -6,7 +6,7 @@ from typing import Annotated, Any, Optional
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
@@ -88,9 +88,7 @@ def _set_minimize_kwargs(
     minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure
 
 
-@app.command(
-    help="Perform geometry optimization and save optimized structure to file.",
-)
+@app.command()
 @use_config(yaml_converter_callback)
 def geomopt(
     # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
@@ -197,7 +195,7 @@ def geomopt(
         Keyword arguments to pass to the selected calculator. Default is {}.
     minimize_kwargs : Optional[dict[str, Any]]
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    write_kwargs : Optional[ASEWriteArgs]
+    write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
     log : Optional[Path]
@@ -280,7 +278,8 @@ def geomopt(
     start_summary(command="geomopt", summary=summary, inputs=inputs)
 
     # Run geometry optimization and save output structure
-    optimize(**optimize_kwargs)
+    optimizer = GeomOpt(**optimize_kwargs)
+    optimizer.run()
 
     # Time after optimization has finished
     end_summary(summary)

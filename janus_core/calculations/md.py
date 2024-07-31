@@ -12,7 +12,7 @@ from warnings import warn
 
 from ase import Atoms, units
 from ase.geometry.analysis import Analysis
-from ase.io import read, write
+from ase.io import read
 from ase.md.langevin import Langevin
 from ase.md.npt import NPT as ASE_NPT
 from ase.md.velocitydistribution import (
@@ -24,17 +24,18 @@ from ase.md.verlet import VelocityVerlet
 import numpy as np
 import yaml
 
-from janus_core.calculations.geom_opt import optimize
+from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.correlator import Correlation
 from janus_core.helpers.janus_types import (
     CorrelationKwargs,
     Ensembles,
+    OutputKwargs,
     PathLike,
     PostProcessKwargs,
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
-from janus_core.helpers.utils import FileNameMixin
+from janus_core.helpers.utils import FileNameMixin, output_structs
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
@@ -111,6 +112,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         heating.
     temp_time : Optional[float]
         Time between heating steps, in fs. Default is None, which disables heating.
+    write_kwargs : Optional[OutputKwargs],
+        Keyword arguments to pass to `output_structs` when saving trajectory and final
+        files. Default is {}.
     post_process_kwargs : Optional[PostProcessKwargs]
         Keyword arguments to control post-processing operations.
     correlation_kwargs : Optional[CorrelationKwargs]
@@ -182,6 +186,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         temp_end: Optional[float] = None,
         temp_step: Optional[float] = None,
         temp_time: Optional[float] = None,
+        write_kwargs: Optional[OutputKwargs] = None,
         post_process_kwargs: Optional[PostProcessKwargs] = None,
         correlation_kwargs: Optional[list[CorrelationKwargs]] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -262,6 +267,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             disables heating.
         temp_time : Optional[float]
             Time between heating steps, in fs. Default is None, which disables heating.
+        write_kwargs : Optional[OutputKwargs],
+            Keyword arguments to pass to `output_structs` when saving trajectory and
+            final files. Default is {}.
         post_process_kwargs : Optional[PostProcessKwargs]
             Keyword arguments to control post-processing operations.
         correlation_kwargs : Optional[list[CorrelationKwargs]]
@@ -300,6 +308,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.temp_end = temp_end
         self.temp_step = temp_step
         self.temp_time = temp_time * units.fs if temp_time else None
+        self.write_kwargs = write_kwargs if write_kwargs is not None else {}
         self.post_process_kwargs = (
             post_process_kwargs if post_process_kwargs is not None else {}
         )
@@ -311,6 +320,12 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.seed = seed
 
         FileNameMixin.__init__(self, struct, struct_name, file_prefix, ensemble)
+
+        self.write_kwargs.setdefault(
+            "columns", ["symbols", "positions", "momenta", "masses"]
+        )
+        if "append" in self.write_kwargs:
+            raise ValueError("`append` cannot be specified when writing files")
 
         self.log_kwargs = (
             log_kwargs if log_kwargs else {}
@@ -435,7 +450,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                     "filemode": "a",
                 }
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
-            optimize(self.struct, **self.minimize_kwargs)
+            optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
+            optimizer.run()
 
     @property
     def _parameter_prefix(self) -> str:
@@ -595,11 +611,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
-            self.dyn.atoms.write(
-                self.traj_file,
-                write_info=True,
-                columns=["symbols", "positions", "momenta", "masses"],
-                append=append,
+            write_kwargs = self.write_kwargs
+            write_kwargs["filename"] = self.traj_file
+            write_kwargs["append"] = append
+            output_structs(
+                images=self.struct,
+                write_results=True,
+                write_kwargs=write_kwargs,
             )
 
     def _write_final_state(self) -> None:
@@ -611,12 +629,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         # Append if final file has been created
         append = self.created_final_file
 
-        write(
-            self.final_file,
-            self.struct,
-            write_info=True,
-            columns=["symbols", "positions", "momenta", "masses"],
-            append=append,
+        write_kwargs = self.write_kwargs
+        write_kwargs["filename"] = self.final_file
+        write_kwargs["append"] = append
+        output_structs(
+            images=self.struct,
+            write_results=True,
+            write_kwargs=write_kwargs,
         )
 
     def _post_process(self) -> None:
@@ -708,11 +727,12 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         """Write restart file and (optionally) rotate files saved."""
         step = self.offset + self.dyn.nsteps
         if step > 0:
-            write(
-                self._restart_file,
-                self.struct,
-                write_info=True,
-                columns=["symbols", "positions", "momenta", "masses"],
+            write_kwargs = self.write_kwargs
+            write_kwargs["filename"] = self._restart_file
+            output_structs(
+                images=self.struct,
+                write_results=True,
+                write_kwargs=write_kwargs,
             )
             if self.rotate_restart:
                 self.restart_files.append(self._restart_file)

@@ -11,22 +11,20 @@ from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
 from janus_core.cli.phonons import phonons
 from janus_core.cli.singlepoint import singlepoint
+from janus_core.cli.train import train
 
 app = Typer(name="janus", no_args_is_help=True)
-app.command()(singlepoint)
-app.command()(geomopt)
-app.command()(md)
-app.command()(phonons)
-app.command()(eos)
-app.command()(descriptors)
-
-# Train not imlpemented in older versions of MACE
-try:
-    from janus_core.cli.train import train
-
-    app.command()(train)
-except NotImplementedError:
-    pass
+app.command(help="Perform single point calculations and save to file.")(singlepoint)
+app.command(help="Perform geometry optimization and save optimized structure to file.")(
+    geomopt
+)
+app.command(
+    help="Run molecular dynamics simulation, and save trajectory and statistics."
+)(md)
+app.command(help="Calculate phonons and save results.")(phonons)
+app.command(help="Calculate equation of state.")(eos)
+app.command(help="Calculate MLIP descriptors.")(descriptors)
+app.command(help="Running training for an MLIP.")(train)
 
 
 @app.callback(invoke_without_command=True, help="")

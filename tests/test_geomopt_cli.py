@@ -104,7 +104,7 @@ def test_traj(tmp_path):
     )
     assert result.exit_code == 0
     atoms = read(traj_path)
-    assert "forces" in atoms.calc.results
+    assert "mace_mp_forces" in atoms.arrays
 
 
 def test_fully_opt(tmp_path):
@@ -298,7 +298,7 @@ def test_restart(tmp_path):
     )
     assert result.exit_code == 0
     atoms = read(results_path)
-    intermediate_energy = atoms.get_potential_energy()
+    intermediate_energy = atoms.info["mace_mp_energy"]
 
     result = runner.invoke(
         app,
@@ -320,7 +320,7 @@ def test_restart(tmp_path):
     )
     assert result.exit_code == 0
     atoms = read(results_path)
-    final_energy = atoms.get_potential_energy()
+    final_energy = atoms.info["mace_mp_energy"]
     assert final_energy < intermediate_energy
 
 

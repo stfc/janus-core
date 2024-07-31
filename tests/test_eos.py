@@ -6,7 +6,7 @@ from ase.eos import EquationOfState
 from ase.io import read
 import pytest
 
-from janus_core.calculations.eos import calc_eos
+from janus_core.calculations.eos import EoS
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
 from tests.utils import assert_log_contains
@@ -21,11 +21,12 @@ def test_calc_eos(tmp_path):
     log_file = tmp_path / "eos.log"
     struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
 
-    results = calc_eos(
+    eos = EoS(
         struct,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
     )
+    results = eos.run()
     assert all(key in results for key in ("eos", "bulk_modulus", "e_0", "v_0"))
 
     # Check geometry optimization run by default
@@ -43,12 +44,13 @@ def test_no_optimize(tmp_path):
         architecture="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    calc_eos(
+    eos = EoS(
         single_point.struct,
         minimize=False,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
     )
+    eos.run()
 
     # Check geometry optimization turned off
     assert_log_contains(
@@ -72,12 +74,13 @@ def test_extra_potentials(arch, device, tmp_path):
         device=device,
     )
 
-    results = calc_eos(
+    eos = EoS(
         single_point.struct,
         minimize=False,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
     )
+    results = eos.run()
 
     assert isinstance(results["eos"], EquationOfState)
 

@@ -6,6 +6,7 @@ from typing import Annotated
 from typer import Context, Option, Typer
 from typer_config import use_config
 
+from janus_core.calculations.descriptors import Descriptors
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
@@ -26,13 +27,12 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
-from janus_core.helpers.descriptors import calc_descriptors
 from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
 
-@app.command(help="Calculate MLIP descriptors.")
+@app.command()
 @use_config(yaml_converter_callback)
 def descriptors(
     # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
@@ -158,7 +158,8 @@ def descriptors(
     start_summary(command="descriptors", summary=summary, inputs=inputs)
 
     # Run geometry optimization and save output structure
-    calc_descriptors(**descriptors_kwargs)
+    descript = Descriptors(**descriptors_kwargs)
+    descript.run()
 
     # Time after optimization has finished
     end_summary(summary)

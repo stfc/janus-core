@@ -6,7 +6,7 @@ from typing import Annotated, Optional, get_args
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.eos import calc_eos
+from janus_core.calculations.eos import EoS
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
@@ -34,7 +34,7 @@ from janus_core.helpers.utils import dict_paths_to_strs
 app = Typer()
 
 
-@app.command(help="Calculate equation of state.")
+@app.command()
 @use_config(yaml_converter_callback)
 def eos(
     # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
@@ -117,7 +117,7 @@ def eos(
         Other keyword arguments to pass to geometry optimizer. Default is {}.
     write_structures : bool
         True to write out all genereated structures. Default is False.
-    write_kwargs : Optional[ASEWriteArgs],
+    write_kwargs : Optional[dict[str, Any]],
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
     arch : Optional[str]
@@ -205,7 +205,8 @@ def eos(
     start_summary(command="eos", summary=summary, inputs=inputs)
 
     # Calculate equation of state
-    calc_eos(**eos_kwargs)
+    equation_of_state = EoS(**eos_kwargs)
+    equation_of_state.run()
 
     # Time after calculations have finished
     end_summary(summary)

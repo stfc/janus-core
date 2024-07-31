@@ -72,7 +72,6 @@ def test_md_correlations(tmp_path):
     """Test correlations as part of MD cycle."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
     traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
-    stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
     cor_path = tmp_path / "Cl4Na4-nve-T300.0-cor.dat"
 
     single_point = SinglePoint(
@@ -119,38 +118,34 @@ def test_md_correlations(tmp_path):
                 "update_frequency": 1,
             },
         ],
+        write_kwargs={"invalidate_calc": False},
     )
+    nve.run()
 
-    try:
-        nve.run()
-        pxy = [
-            atom.get_stress(include_ideal_gas=True, voigt=False).flatten()[1] / GPa
-            for atom in read(traj_path, index=":")
-        ]
-        assert cor_path.exists()
-        with open(cor_path, encoding="utf8") as in_file:
-            cor = load(in_file, Loader=Loader)
-        assert len(cor) == 2
-        assert "user_correlation" in cor
-        assert "stress_xy_auto_cor" in cor
+    pxy = [
+        atom.get_stress(include_ideal_gas=True, voigt=False).flatten()[1] / GPa
+        for atom in read(traj_path, index=":")
+    ]
 
-        stress_cor = cor["stress_xy_auto_cor"]
-        value, lags = stress_cor["value"], stress_cor["lags"]
-        assert len(value) == len(lags) == 11
+    assert cor_path.exists()
+    with open(cor_path, encoding="utf8") as in_file:
+        cor = load(in_file, Loader=Loader)
+    assert len(cor) == 2
+    assert "user_correlation" in cor
+    assert "stress_xy_auto_cor" in cor
 
-        direct = correlate(pxy, pxy, fft=False)
-        # input data differs due to i/o, error is expected 1e-5
-        assert direct == approx(value, rel=1e-5)
+    stress_cor = cor["stress_xy_auto_cor"]
+    value, lags = stress_cor["value"], stress_cor["lags"]
+    assert len(value) == len(lags) == 11
 
-        user_cor = cor["user_correlation"]
-        value, lags = user_cor["value"], stress_cor["lags"]
-        assert len(value) == len(lags) == 11
+    direct = correlate(pxy, pxy, fft=False)
+    # input data differs due to i/o, error is expected 1e-5
+    assert direct == approx(value, rel=1e-5)
 
-        direct = correlate([v * 4.0 for v in pxy], pxy, fft=False)
-        # input data differs due to i/o, error is expected 1e-5
-        assert direct == approx(value, rel=1e-5)
+    user_cor = cor["user_correlation"]
+    value, lags = user_cor["value"], stress_cor["lags"]
+    assert len(value) == len(lags) == 11
 
-    finally:
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
-        cor_path.unlink(missing_ok=True)
+    direct = correlate([v * 4.0 for v in pxy], pxy, fft=False)
+    # input data differs due to i/o, error is expected 1e-5
+    assert direct == approx(value, rel=1e-5)
