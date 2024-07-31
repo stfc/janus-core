@@ -114,7 +114,7 @@ def test_invalid_device(architecture):
         ("sevennet", "cpu", {"path": SEVENNET_PATH}),
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
-        ("sevennet", "cpu", {"sevennet-0"}),
+        ("sevennet", "cpu", {"model": "sevennet-0"}),
     ],
 )
 def test_extra_mlips(architecture, device, kwargs):
