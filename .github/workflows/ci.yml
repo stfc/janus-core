@@ -46,6 +46,7 @@ jobs:
       env:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
+        PYTORCH_MPS_HIGH_WATERMARK_RATIO: "0.0"
       run: poetry run pytest --cov janus_core --cov-append .
 
     - name: Report coverage to Coveralls
