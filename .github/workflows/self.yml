@@ -16,13 +16,15 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install python dependencies
+      env: 
+        PATH: /root/.local/bin
       run: |
         python3 -m pip install pipx
-        python3 -m pipx install poetry 
+        pipx install poetry
         poetry env use ${{ matrix.python-version }}
         poetry install --with dev
 
-    - name: Run test suite
+    - name: Run test suite  
       env:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
