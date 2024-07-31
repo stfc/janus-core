@@ -292,13 +292,14 @@ def test_mlips(arch, device, expected_energy):
 test_extra_mlips_data = [
     ("alignn", "cpu", -11.148092269897461, {}),
     ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
+    ("sevennet", "cpu", -27.061979293823242, {}),
 ]
 
 
 @pytest.mark.extra_mlips
 @pytest.mark.parametrize("arch, device, expected_energy, kwargs", test_extra_mlips_data)
 def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
-    """Test single point energy using ALIGNN-FF calculator."""
+    """Test single point energy using extra mlips calculators."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture=arch,

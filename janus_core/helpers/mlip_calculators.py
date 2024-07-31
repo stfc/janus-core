@@ -211,17 +211,13 @@ def choose_calculator(
 
         __version__ = "0.0.0"
 
-        if model_path is None or model_path.name == "":
-            raise ValueError(
-                "Please specify `model_path` there is no "
-                f"default model for {architecture}"
-            )
+
         if isinstance(model_path, Path):
             model = str(model_path)
         elif isinstance(model_path, str):
             model = model_path
         else:
-            model = None
+            model = "SevenNet-0_11July2024"
 
         kwargs.setdefault("file_type", "checkpoint")
         kwargs.setdefault("sevennet_config", None)
