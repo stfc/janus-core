@@ -298,7 +298,7 @@ test_extra_mlips_data = [
 
 
 @pytest.mark.extra_mlips
-@pytest.mark.parametrize("arch, device, expectEd_energy, kwargs", test_extra_mlips_data)
+@pytest.mark.parametrize("arch, device, expected_energy, kwargs", test_extra_mlips_data)
 def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
     """Test single point energy using extra mlips calculators."""
     single_point = SinglePoint(
