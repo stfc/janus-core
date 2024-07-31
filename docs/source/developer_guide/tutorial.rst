@@ -86,6 +86,7 @@ Converting ``model_path`` into ``path`` is a minimum requirement, but we also ai
 
 .. note::
     ``model_path`` will already be a ``pathlib.Path`` object, if the path exists.
+    Some MLIPs do not support this, so you may be required to cast it back to a string (``str(model_path)``).
 
 To ensure that the calculator does not receive multiple versions of keywords, it's also necessary to set ``model_path = path``, and remove ``path`` from ``kwargs``.
 
@@ -104,7 +105,12 @@ In addition to setting the calculator, ``__version__`` must also imported here, 
 
 Tests must be added to ensure that, at a minimum, the new calculator allows an MLIP to be loaded correctly, and that an energy can be calculated.
 
-This can be done by adding the appropriate data as tuples to the ``pytest.mark.parametrize`` lists in the ``tests.test_mlip_calculators`` and ``tests.test_single_point`` modules.
+This can be done by adding the appropriate data as tuples to the ``pytest.mark.parametrize`` lists in the ``tests.test_mlip_calculators`` and ``tests.test_single_point`` modules
+that reside in files ``tests/test_mlip_calculators.py``` and ``tests/test_single_point.py``, respectively.
+
+
+Load models - success
+^^^^^^^^^^^^^^^^^^^^^
 
 For ``tests.test_mlip_calculators``, ``architecture``, ``device`` and accepted forms of ``model_path`` should be tested, ensuring that the calculator and its version are correctly set::
 
@@ -121,17 +127,27 @@ For ``tests.test_mlip_calculators``, ``architecture``, ``device`` and accepted f
     )
     def test_extra_mlips(architecture, device, kwargs):
 
-It is also useful to test that ``model_path``, and ``model`` or and the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously::
+.. note::
+    Not all models support an empty (default) model path, so the equivalent test to``("alignn", "cpu", {})`` may need to be removed, or moved to the tests described in `Load models - failure`_.
+
+Load models - failure
+^^^^^^^^^^^^^^^^^^^^^
+
+It is also useful to test that ``model_path``, and ``model`` or and the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously
+
+.. code-block:: python
 
     @pytest.mark.extra_mlips
     @pytest.mark.parametrize(
         "kwargs",
         [
             {
-                "model_path": "tests/models/v5.27.2024/best_model.pt",
-                "model": "tests/models/v5.27.2024/best_model.pt",
+                "architecture": "alignn",
+                "model_path": MODEL_PATH / "v5.27.2024" / "best_model.pt",
+                "model": MODEL_PATH / "v5.27.2024" / "best_model.pt",
             },
             {
+                "architecture": "alignn",
                 "model_path": "tests/models/v5.27.2024/best_model.pt",
                 "path": "tests/models/v5.27.2024/best_model.pt",
             },
@@ -139,9 +155,13 @@ It is also useful to test that ``model_path``, and ``model`` or and the "standar
     )
     def test_extra_mlips_invalid(kwargs):
 
+Test correctness
+^^^^^^^^^^^^^^^^
+
 For ``tests.test_single_point``, ``architecture``, ``device``, and the potential energy of NaCl predicted by the MLIP should be defined, ensuring that calculations can be performed::
 
-    test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461)]
+    test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461, {})]
+
 
 Running these tests requires an additional flag to be passed to ``pytest``::
 

@@ -21,6 +21,10 @@ M3GNET_POTENTIAL = load_model(path=M3GNET_DIR_PATH)
 CHGNET_PATH = MODEL_PATH / "chgnet_0.3.0_e29f68s314m37.pth.tar"
 CHGNET_MODEL = CHGNet.from_file(path=CHGNET_PATH)
 
+SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+
+ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
+
 
 @pytest.mark.parametrize(
     "architecture, device, kwargs",
@@ -102,10 +106,15 @@ def test_invalid_device(architecture):
     "architecture, device, kwargs",
     [
         ("alignn", "cpu", {}),
-        ("alignn", "cpu", {"model_path": MODEL_PATH / "v5.27.2024"}),
-        ("alignn", "cpu", {"model_path": MODEL_PATH / "v5.27.2024/best_model.pt"}),
+        ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
+        ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
         ("alignn", "cpu", {"model": "alignnff_wt10"}),
-        ("alignn", "cpu", {"path": MODEL_PATH / "v5.27.2024"}),
+        ("alignn", "cpu", {"path": ALIGNN_PATH}),
+        ("sevennet", "cpu", {"model": SEVENNET_PATH}),
+        ("sevennet", "cpu", {"path": SEVENNET_PATH}),
+        ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
+        ("sevennet", "cpu", {}),
+        ("sevennet", "cpu", {"model": "sevennet-0"}),
     ],
 )
 def test_extra_mlips(architecture, device, kwargs):
@@ -123,16 +132,28 @@ def test_extra_mlips(architecture, device, kwargs):
     "kwargs",
     [
         {
-            "model_path": MODEL_PATH / "v5.27.2024/best_model.pt",
-            "model": MODEL_PATH / "v5.27.2024/best_model.pt",
+            "architecture": "alignn",
+            "model_path": ALIGNN_PATH / "best_model.pt",
+            "model": ALIGNN_PATH / "best_model.pt",
         },
         {
-            "model_path": MODEL_PATH / "v5.27.2024/best_model.pt",
-            "path": MODEL_PATH / "v5.27.2024/best_model.pt",
+            "architecture": "alignn",
+            "model_path": ALIGNN_PATH / "best_model.pt",
+            "path": ALIGNN_PATH / "best_model.pt",
+        },
+        {
+            "architecture": "sevennet",
+            "model_path": SEVENNET_PATH,
+            "path": SEVENNET_PATH,
+        },
+        {
+            "architecture": "sevennet",
+            "model_path": SEVENNET_PATH,
+            "model": SEVENNET_PATH,
         },
     ],
 )
 def test_extra_mlips_invalid(kwargs):
     """Test error raised if multiple model paths defined for extra MLIPs."""
     with pytest.raises(ValueError):
-        choose_calculator(architecture="alignn", **kwargs)
+        choose_calculator(**kwargs)

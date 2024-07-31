@@ -111,7 +111,10 @@ def choose_calculator(
 
         # No default `model_path`
         if model_path is None:
-            raise ValueError("Please specify `model_path`")
+            raise ValueError(
+                "Please specify `model_path`, as there is no "
+                f"default model for {architecture}"
+            )
         # Default to float64 precision
         kwargs.setdefault("default_dtype", "float64")
 
@@ -202,6 +205,22 @@ def choose_calculator(
             path = default_path()
 
         calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
+
+    elif architecture == "sevennet":
+        from sevenn.sevennet_calculator import SevenNetCalculator
+
+        __version__ = "0.0.0"
+
+        if isinstance(model_path, Path):
+            model = str(model_path)
+        elif isinstance(model_path, str):
+            model = model_path
+        else:
+            model = "SevenNet-0_11July2024"
+
+        kwargs.setdefault("file_type", "checkpoint")
+        kwargs.setdefault("sevennet_config", None)
+        calculator = SevenNetCalculator(model=model, device=device, **kwargs)
 
     else:
         raise ValueError(

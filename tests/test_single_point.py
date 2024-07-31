@@ -10,7 +10,10 @@ from janus_core.calculations.single_point import SinglePoint
 from tests.utils import read_atoms
 
 DATA_PATH = Path(__file__).parent / "data"
-MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
+MODEL_PATH = Path(__file__).parent / "models"
+
+MACE_PATH = MODEL_PATH / "mace_mp_small.model"
+SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
 test_data = [
     (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -34,7 +37,7 @@ def test_potential_energy(
     struct_path, expected, properties, prop_key, calc_kwargs, idx
 ):
     """Test single point energy using MACE calculators."""
-    calc_kwargs["model"] = MODEL_PATH
+    calc_kwargs["model"] = MACE_PATH
     single_point = SinglePoint(
         struct_path=struct_path, architecture="mace", calc_kwargs=calc_kwargs
     )
@@ -59,7 +62,7 @@ def test_single_point_none():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
 
     results = single_point.run()
@@ -72,7 +75,7 @@ def test_single_point_clean():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
 
     results = single_point.run()
@@ -86,7 +89,7 @@ def test_single_point_traj():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
 
     assert len(single_point.struct) == 2
@@ -110,7 +113,7 @@ def test_single_point_write():
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     assert "mace_forces" not in single_point.struct.arrays
 
@@ -142,7 +145,7 @@ def test_single_point_write_kwargs(tmp_path):
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     assert "mace_forces" not in single_point.struct.arrays
 
@@ -159,7 +162,7 @@ def test_single_point_molecule(tmp_path):
     single_point = SinglePoint(
         struct_path=data_path,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
 
     assert isfinite(single_point.run("energy")["energy"]).all()
@@ -177,7 +180,7 @@ def test_invalid_prop():
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     with pytest.raises(NotImplementedError):
         single_point.run("invalid")
@@ -190,7 +193,7 @@ def test_atoms():
         struct=struct,
         struct_name="NaCl",
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     assert single_point.struct_name == "NaCl"
     assert single_point.run("energy")["energy"] < 0
@@ -202,7 +205,7 @@ def test_default_atoms_name():
     single_point = SinglePoint(
         struct=struct,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     assert single_point.struct_name == "Cl4Na4"
 
@@ -213,7 +216,7 @@ def test_default_path_name():
     single_point = SinglePoint(
         struct_path=struct_path,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     assert single_point.struct_name == "NaCl"
 
@@ -225,7 +228,7 @@ def test_path_specify_name():
         struct_path=struct_path,
         struct_name="example_name",
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
     assert single_point.struct_name == "example_name"
 
@@ -239,7 +242,7 @@ def test_atoms_and_path():
             struct=struct,
             struct_path=struct_path,
             architecture="mace",
-            calc_kwargs={"model": MODEL_PATH},
+            calc_kwargs={"model": MACE_PATH},
         )
 
 
@@ -248,7 +251,7 @@ def test_no_atoms_or_path():
     with pytest.raises(ValueError):
         SinglePoint(
             architecture="mace",
-            calc_kwargs={"model": MODEL_PATH},
+            calc_kwargs={"model": MACE_PATH},
         )
 
 
@@ -258,7 +261,7 @@ def test_invalidate_calc():
     single_point = SinglePoint(
         struct_path=struct_path,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
 
     single_point.run(write_kwargs={"invalidate_calc": False})
@@ -286,17 +289,23 @@ def test_mlips(arch, device, expected_energy):
     assert energy == pytest.approx(expected_energy)
 
 
-test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461)]
+test_extra_mlips_data = [
+    ("alignn", "cpu", -11.148092269897461, {}),
+    ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
+    ("sevennet", "cpu", -27.061979293823242, {}),
+    ("sevennet", "cpu", -27.061979293823242, {"model": "SevenNet-0_11July2024"}),
+]
 
 
 @pytest.mark.extra_mlips
-@pytest.mark.parametrize("arch, device, expected_energy", test_extra_mlips_data)
-def test_extra_mlips(arch, device, expected_energy):
-    """Test single point energy using ALIGNN-FF calculator."""
+@pytest.mark.parametrize("arch, device, expected_energy, kwargs", test_extra_mlips_data)
+def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
+    """Test single point energy using extra mlips calculators."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         architecture=arch,
         device=device,
+        **kwargs,
     )
     energy = single_point.run("energy")["energy"]
     assert energy == pytest.approx(expected_energy)
