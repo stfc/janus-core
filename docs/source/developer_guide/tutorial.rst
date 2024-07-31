@@ -160,7 +160,7 @@ Test correctness
 
 For ``tests.test_single_point``, ``architecture``, ``device``, and the potential energy of NaCl predicted by the MLIP should be defined, ensuring that calculations can be performed::
 
-    test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461)]
+    test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461, {})]
 
 
 Running these tests requires an additional flag to be passed to ``pytest``::
