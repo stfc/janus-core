@@ -143,8 +143,8 @@ It is also useful to test that ``model_path``, and ``model`` or and the "standar
         [
             {
                 "architecture": "alignn",
-                "model_path": "tests/models/v5.27.2024/best_model.pt",
-                "model": "tests/models/v5.27.2024/best_model.pt",
+                "model_path": MODEL_PATH / "v5.27.2024" / "best_model.pt",
+                "model": MODEL_PATH / "v5.27.2024" / "best_model.pt",
             },
             {
                 "architecture": "alignn",
