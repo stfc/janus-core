@@ -112,7 +112,7 @@ def choose_calculator(
         # No default `model_path`
         if model_path is None:
             raise ValueError(
-                "Please specify `model_path` there is no "
+                "Please specify `model_path`, as there is no "
                 f"default model for {architecture}"
             )
         # Default to float64 precision
