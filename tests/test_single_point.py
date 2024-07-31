@@ -261,7 +261,7 @@ def test_invalidate_calc():
     single_point = SinglePoint(
         struct_path=struct_path,
         architecture="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        calc_kwargs={"model": MACE_PATH},
     )
 
     single_point.run(write_kwargs={"invalidate_calc": False})
