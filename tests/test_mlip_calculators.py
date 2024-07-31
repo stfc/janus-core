@@ -109,7 +109,7 @@ def test_invalid_device(architecture):
         ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
         ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
         ("alignn", "cpu", {"model": "alignnff_wt10"}),
-        ("alignn", "cpu", {"path": ALIGNN_PATH} ),
+        ("alignn", "cpu", {"path": ALIGNN_PATH}),
         ("sevennet", "cpu", {"model": SEVENNET_PATH}),
         ("sevennet", "cpu", {"path": SEVENNET_PATH}),
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),

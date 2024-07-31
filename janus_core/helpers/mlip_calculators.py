@@ -211,7 +211,6 @@ def choose_calculator(
 
         __version__ = "0.0.0"
 
-
         if isinstance(model_path, Path):
             model = str(model_path)
         elif isinstance(model_path, str):
