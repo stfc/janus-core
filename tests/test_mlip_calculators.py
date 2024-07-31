@@ -23,6 +23,8 @@ CHGNET_MODEL = CHGNet.from_file(path=CHGNET_PATH)
 
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
+ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
+
 
 @pytest.mark.parametrize(
     "architecture, device, kwargs",
@@ -104,10 +106,10 @@ def test_invalid_device(architecture):
     "architecture, device, kwargs",
     [
         ("alignn", "cpu", {}),
-        ("alignn", "cpu", {"model_path": MODEL_PATH / "v5.27.2024"}),
-        ("alignn", "cpu", {"model_path": MODEL_PATH / "v5.27.2024" / "best_model.pt"}),
+        ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
+        ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
         ("alignn", "cpu", {"model": "alignnff_wt10"}),
-        ("alignn", "cpu", {"path": MODEL_PATH / "v5.27.2024"}),
+        ("alignn", "cpu", {"path": ALIGNN_PATH} ),
         ("sevennet", "cpu", {"model": SEVENNET_PATH}),
         ("sevennet", "cpu", {"path": SEVENNET_PATH}),
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
@@ -129,13 +131,13 @@ def test_extra_mlips(architecture, device, kwargs):
     [
         {
             "architecture": "alignn",
-            "model_path": MODEL_PATH / "v5.27.2024" / "best_model.pt",
-            "model": MODEL_PATH / "v5.27.2024" / "best_model.pt",
+            "model_path": ALIGNN_PATH / "best_model.pt",
+            "model": ALIGNN_PATH / "best_model.pt",
         },
         {
             "architecture": "alignn",
-            "model_path": MODEL_PATH / "v5.27.2024" / "best_model.pt",
-            "path": MODEL_PATH / "v5.27.2024" / "best_model.pt",
+            "model_path": ALIGNN_PATH / "best_model.pt",
+            "path": ALIGNN_PATH / "best_model.pt",
         },
         {
             "architecture": "sevennet",
