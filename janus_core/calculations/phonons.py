@@ -727,42 +727,21 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         atoms = self._Phonopy_to_ASEAtoms(struct)
         return atoms.get_forces()
 
-    def run(
-        self,
-        *,
-        calcs: Optional[MaybeSequence[PhononCalcs]] = None,
-        write_results: Optional[bool] = (None),
-    ) -> None:
-        """
-        Run phonon calculations.
-
-        Parameters
-        ----------
-        calcs : Optional[MaybeSequence[PhononCalcs]]
-            Phonon calculations to run. Default is self.calcs.
-        write_results : bool
-            True to write out structure with results of calculations. Default is
-            self.write_results.
-        """
-        # Parameters can be overwritten, otherwise default to values from instantiation
-        if calcs is None:
-            calcs = self.calcs
-        if write_results is None:
-            write_results = self.write_results
-
+    def run(self) -> None:
+        """Run phonon calculations."""
         # Calculate force constants
         self.calc_force_constants()
 
         # Calculate band structure
-        if "bands" in calcs:
+        if "bands" in self.calcs:
             self.calc_bands()
 
         # Calculate thermal properties if specified
-        if "thermal" in calcs:
+        if "thermal" in self.calcs:
             self.calc_thermal_props()
 
         # Calculate DOS and PDOS if specified
-        if "dos" in calcs:
-            self.calc_dos(plot_bands="bands" in calcs)
-        if "pdos" in calcs:
+        if "dos" in self.calcs:
+            self.calc_dos(plot_bands="bands" in self.calcs)
+        if "pdos" in self.calcs:
             self.calc_pdos()
