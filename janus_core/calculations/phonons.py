@@ -187,7 +187,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         # Set output file prefix
-        FileNameMixin.__init__(self, self.struct, None, file_prefix)
+        FileNameMixin.__init__(self, self.struct, file_prefix)
+
         if self.minimize:
             if self.logger:
                 self.minimize_kwargs["log_kwargs"] = {

@@ -91,7 +91,7 @@ class Descriptors(FileNameMixin):
         self.logger = config_logger(**log_kwargs)
 
         # Set output file
-        FileNameMixin.__init__(self, struct, None, None)
+        FileNameMixin.__init__(self, struct, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("descriptors.extxyz").absolute(),

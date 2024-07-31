@@ -389,7 +389,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         # Set output file names
-        FileNameMixin.__init__(self, self.struct, None, file_prefix, self.ensemble)
+        FileNameMixin.__init__(self, self.struct, file_prefix, self.ensemble)
         self.final_file = self._build_filename(
             "final.extxyz",
             self._parameter_prefix if file_prefix is None else "",

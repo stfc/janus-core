@@ -168,14 +168,12 @@ def save_struct_calc(
         inputs["struct"] = {
             "n_atoms": len(s_point.struct),
             "struct_path": s_point.struct_path,
-            "struct_name": s_point.struct_name,
             "formula": s_point.struct.get_chemical_formula(),
         }
     elif isinstance(s_point.struct, Sequence):
         inputs["traj"] = {
             "length": len(s_point.struct),
             "struct_path": s_point.struct_path,
-            "struct_name": s_point.struct_name,
             "struct": {
                 "n_atoms": len(s_point.struct[0]),
                 "formula": s_point.struct[0].get_chemical_formula(),

@@ -188,7 +188,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             self.logger.info("Single point calculator configured")
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, None, file_prefix)
+        FileNameMixin.__init__(self, self.struct, file_prefix)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("results.extxyz").absolute(),

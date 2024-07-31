@@ -179,7 +179,7 @@ class EoS(FileNameMixin):
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, None, file_prefix)
+        FileNameMixin.__init__(self, self.struct, file_prefix)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("generated.extxyz").absolute(),

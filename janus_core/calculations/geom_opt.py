@@ -186,7 +186,7 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, None, None)
+        FileNameMixin.__init__(self, self.struct, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("opt.extxyz").absolute(),
