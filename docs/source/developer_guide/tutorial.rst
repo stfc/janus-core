@@ -86,7 +86,7 @@ Converting ``model_path`` into ``path`` is a minimum requirement, but we also ai
 
 .. note::
     ``model_path`` will already be a ``pathlib.Path`` object, if the path exists. you may want to cast it back to a string
-     ```str(model_path)``` if a string is needed
+     ``str(model_path)`` if a string is needed
 
 To ensure that the calculator does not receive multiple versions of keywords, it's also necessary to set ``model_path = path``, and remove ``path`` from ``kwargs``.
 
