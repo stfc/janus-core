@@ -28,7 +28,9 @@ jobs:
       env:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
-      run: poetry run pytest --cov janus_core --cov-append .
+      run: |
+        poetry run python -c "import matgl; matgl.clear_cache()"
+        poetry run pytest --cov janus_core --cov-append .
 
     - name: Report coverage to Coveralls
       uses: coverallsapp/github-action@v2
