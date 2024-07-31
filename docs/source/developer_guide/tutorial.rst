@@ -85,8 +85,8 @@ Converting ``model_path`` into ``path`` is a minimum requirement, but we also ai
 - If ``model_path`` is ``None``, we use the ALIGNN's ``default_path``
 
 .. note::
-    ``model_path`` will already be a ``pathlib.Path`` object, if the path exists. you may want to cast it back to a string
-     ``str(model_path)`` if a string is needed
+    ``model_path`` will already be a ``pathlib.Path`` object, if the path exists.
+    Some MLIPs do not support this, so you may be required to cast it back to a string (``str(model_path)``).
 
 To ensure that the calculator does not receive multiple versions of keywords, it's also necessary to set ``model_path = path``, and remove ``path`` from ``kwargs``.
 
@@ -127,12 +127,15 @@ For ``tests.test_mlip_calculators``, ``architecture``, ``device`` and accepted f
     )
     def test_extra_mlips(architecture, device, kwargs):
 
-not all models may support empty paths, so for some you may want to remove the ``("alignn", "cpu", {})`` test.
+.. note::
+    Not all models support an empty (default) model path, so the equivalent test to``("alignn", "cpu", {})`` may need to be removed, or moved to the tests described in `Load models - failure`_.
 
 Load models - failure
 ^^^^^^^^^^^^^^^^^^^^^
 
-It is also useful to test that ``model_path``, and ``model`` or and the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously::
+It is also useful to test that ``model_path``, and ``model`` or and the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously
+
+.. code-block:: python
 
     @pytest.mark.extra_mlips
     @pytest.mark.parametrize(
