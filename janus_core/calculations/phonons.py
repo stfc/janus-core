@@ -744,8 +744,10 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             self.write_results.
         """
         # Parameters can be overwritten, otherwise default to values from instantiation
-        calcs = calcs if calcs else self.calcs
-        write_results = write_results if write_results else self.write_results
+        if calcs is None:
+            calcs = self.calcs
+        if write_results is None:
+            write_results = self.write_results
 
         # Calculate force constants
         self.calc_force_constants()
