@@ -29,7 +29,7 @@ janus = "janus_core.cli.janus:app"
 python = "^3.9"
 ase = "^3.23"
 chgnet = "0.3.8"
-dgl = "2.1.0"
+dgl = "2.1.0" # Pin due to matgl installation issues
 mace-torch = "0.3.6"
 matgl = "1.1.2"
 numpy = "^1.26.4"
@@ -39,6 +39,7 @@ typer-config = "^1.4.0"
 phonopy = "^2.23.1"
 seekpath = "^1.9.7"
 spglib = "^2.3.0"
+torchdata = "0.7.1" # Pin due to dgl issue
 torch-dftd = "0.4.0"
 codecarbon = "^2.5.0"
 alignn = { version = "2024.5.27", optional = true }
