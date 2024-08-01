@@ -1,7 +1,7 @@
 """Utility functions for janus_core."""
 
 from abc import ABC
-from collections.abc import Collection, Generator, Sequence
+from collections.abc import Collection, Generator, Iterable, Sequence
 from io import StringIO
 from pathlib import Path
 from typing import Any, Literal, Optional, TextIO, get_args
@@ -331,6 +331,8 @@ def write_table(
     file: Optional[TextIO] = None,
     units: Optional[dict[str, str]] = None,
     formats: Optional[dict[str, str]] = None,
+    *,
+    print_header: bool = True,
     **columns,
 ) -> Optional[StringIO]:
     """
@@ -368,6 +370,8 @@ def write_table(
             To align with those in `columns`.
         format
             Python magic format string to use.
+    print_header : bool
+        Whether to print the header or just append formatted data.
     **columns : dict[str, Any]
         Dictionary of columns names to data with optional
         "<header>_units"/"<header>_format" to define units/format.
@@ -405,6 +409,13 @@ def write_table(
     a,b
     3.000,11.0
     5.000,12.0
+    >>> data = write_table(fmt="ascii", single=(1, 2, 3),
+    ...                    double=(2,4,6), double_units="THz",
+    ...                    print_header=False)
+    >>> print(*data, sep="", end="")
+    1 2
+    2 4
+    3 6
     """
     units = units if units else {}
     units.update(
@@ -424,12 +435,19 @@ def write_table(
         }
     )
 
-    columns = {key: val for key, val in columns.items() if not key.endswith("_units")}
+    columns = {
+        key: val if isinstance(val, Iterable) else (val,)
+        for key, val in columns.items()
+        if not key.endswith("_units")
+    }
 
-    header = [
-        f"{datum}" + (f" [{units.get(datum)}]" if datum in units else "")
-        for datum in columns
-    ]
+    if print_header:
+        header = [
+            f"{datum}" + (f" [{unit}]" if (unit := units.get(datum, "")) else "")
+            for datum in columns
+        ]
+    else:
+        header = ()
 
     dump_loc = file if file is not None else StringIO()
 
@@ -471,7 +489,8 @@ def _dump_ascii(
     --------
     write_table : Main entry function.
     """
-    print(f"# {' | '.join(header)}", file=file)
+    if header:
+        print(f"# {' | '.join(header)}", file=file)
 
     for cols in zip(*columns.values()):
         print(*map(format, cols, formats), file=file)
@@ -502,7 +521,8 @@ def _dump_csv(
     --------
     write_table : Main entry function.
     """
-    print(",".join(header), file=file)
+    if header:
+        print(",".join(header), file=file)
 
     for cols in zip(*columns.values()):
         print(",".join(map(format, cols, formats)), file=file)

@@ -1,7 +1,6 @@
 """Phonon calculations."""
 
 from collections.abc import Sequence
-from collections import defaultdict
 from typing import Any, Optional, get_args
 
 from ase import Atoms
@@ -495,7 +494,7 @@ class Phonons(FileNameMixin):
         thermal_file = self._build_filename("thermal.dat", filename=thermal_file)
 
         data = {
-            "temperaure": self.results["thermal_properties"]["temperatures"],
+            "temperature": self.results["thermal_properties"]["temperatures"],
             "Cv": self.results["thermal_properties"]["heat_capacity"],
             "H": self.results["thermal_properties"]["free_energy"],
             "S": self.results["thermal_properties"]["entropy"],
@@ -507,7 +506,7 @@ class Phonons(FileNameMixin):
                 file=out,
                 **data,
                 units={"temperature": "K", "Cv": "J/mol/K", "H": "eV", "S": "eV"},
-                formats={key: ".8f" for key in data},
+                formats=dict.fromkeys(data, ".8f"),
             )
 
     def calc_dos(
