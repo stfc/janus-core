@@ -1,5 +1,5 @@
 """Phonon calculations."""
-from collections import defaultdict
+
 from typing import Any, Optional
 
 from ase import Atoms
@@ -362,17 +362,20 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         filename = self._build_filename("thermal.dat", filename=filename)
 
         data = {
-            'temperaure': self.results["thermal_properties"]["temperatures"],
-            'Cv': self.results["thermal_properties"]["heat_capacity"],
-            'H': self.results["thermal_properties"]["free_energy"],
-            'S': self.results["thermal_properties"]["entropy"],
+            "temperaure": self.results["thermal_properties"]["temperatures"],
+            "Cv": self.results["thermal_properties"]["heat_capacity"],
+            "H": self.results["thermal_properties"]["free_energy"],
+            "S": self.results["thermal_properties"]["entropy"],
         }
 
         with open(filename, "w", encoding="utf8") as out:
-            write_table(fmt="ascii", file=out, **data,
-                        units={'temperature': 'K', 'Cv': 'J/mol/K',
-                               'H': 'eV', 'S': 'eV'},
-                        formats={key: ".8f" for key in data})
+            write_table(
+                fmt="ascii",
+                file=out,
+                **data,
+                units={"temperature": "K", "Cv": "J/mol/K", "H": "eV", "S": "eV"},
+                formats={key: ".8f" for key in data},
+            )
 
     def calc_dos(
         self, mesh: MaybeList[float] = (10, 10, 10), write_results=True
