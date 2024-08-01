@@ -293,7 +293,7 @@ test_extra_mlips_data = [
     ("alignn", "cpu", -11.148092269897461, {}),
     ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
     ("sevennet", "cpu", -27.061979293823242, {}),
-    ("sevennet", "cpu", -27.061979293823242, {"model": "SevenNet-0_11July2024"}),
+    ("sevennet", "cpu", -27.061979293823242, {"model_path": "SevenNet-0_11July2024"}),
 ]
 
 
