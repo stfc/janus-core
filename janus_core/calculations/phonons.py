@@ -495,17 +495,20 @@ class Phonons(FileNameMixin):
         thermal_file = self._build_filename("thermal.dat", filename=thermal_file)
 
         data = {
-            'temperaure': self.results["thermal_properties"]["temperatures"],
-            'Cv': self.results["thermal_properties"]["heat_capacity"],
-            'H': self.results["thermal_properties"]["free_energy"],
-            'S': self.results["thermal_properties"]["entropy"],
+            "temperaure": self.results["thermal_properties"]["temperatures"],
+            "Cv": self.results["thermal_properties"]["heat_capacity"],
+            "H": self.results["thermal_properties"]["free_energy"],
+            "S": self.results["thermal_properties"]["entropy"],
         }
 
         with open(thermal_file, "w", encoding="utf8") as out:
-            write_table(fmt="ascii", file=out, **data,
-                        units={'temperature': 'K', 'Cv': 'J/mol/K',
-                               'H': 'eV', 'S': 'eV'},
-                        formats={key: ".8f" for key in data})
+            write_table(
+                fmt="ascii",
+                file=out,
+                **data,
+                units={"temperature": "K", "Cv": "J/mol/K", "H": "eV", "S": "eV"},
+                formats={key: ".8f" for key in data},
+            )
 
     def calc_dos(
         self,

@@ -600,13 +600,13 @@ class MolecularDynamics(FileNameMixin):
             pressure_tensor = np.zeros(6)
 
         stats = {
-            'Step': step,
-            'Real_Time': real_time.total_seconds(),
-            'Time': time,
-            'Epot/N': e_pot,
-            'EKin/N': e_kin,
-            'T': current_temp,
-            'ETot/N': e_pot + e_kin,
+            "Step": step,
+            "Real_Time": real_time.total_seconds(),
+            "Time": time,
+            "Epot/N": e_pot,
+            "EKin/N": e_kin,
+            "T": current_temp,
+            "ETot/N": e_pot + e_kin,
             "Density": density,
             "Volume": volume,
             "P": pressure,
@@ -619,41 +619,41 @@ class MolecularDynamics(FileNameMixin):
         }
 
         units = {
-            'Step': None,
-            'Real_Time': 's',
-            'Time': 'fs',
-            'Epot/N': 'eV',
-            'EKin/N': 'eV',
-            'T': 'K',
-            'ETot/N': 'eV',
-            "Density": 'g/cm^3',
-            "Volume": 'A^3',
-            "P": 'GPa',
-            "Pxx": 'GPa',
-            "Pyy": 'GPa',
-            "Pzz": 'GPa',
-            "Pyz": 'GPa',
-            "Pxz": 'GPa',
-            "Pxy": 'GPa',
+            "Step": None,
+            "Real_Time": "s",
+            "Time": "fs",
+            "Epot/N": "eV",
+            "EKin/N": "eV",
+            "T": "K",
+            "ETot/N": "eV",
+            "Density": "g/cm^3",
+            "Volume": "A^3",
+            "P": "GPa",
+            "Pxx": "GPa",
+            "Pyy": "GPa",
+            "Pzz": "GPa",
+            "Pyz": "GPa",
+            "Pxz": "GPa",
+            "Pxy": "GPa",
         }
 
         default_formats = {
-            'Step': '10d',
-            'Real_Time': '.3f',
-            'Time': '13.2f',
-            'Epot/N': '.8e',
-            'EKin/N': '.8e',
-            'T': '.3f',
-            'ETot/N': '.8e',
-            "Density": '.3f',
-            "Volume": '.8e',
-            "P": '.8e',
-            "Pxx": '.8e',
-            "Pyy": '.8e',
-            "Pzz": '.8e',
-            "Pyz": '.8e',
-            "Pxz": '.8e',
-            "Pxy": '.8e',
+            "Step": "10d",
+            "Real_Time": ".3f",
+            "Time": "13.2f",
+            "Epot/N": ".8e",
+            "EKin/N": ".8e",
+            "T": ".3f",
+            "ETot/N": ".8e",
+            "Density": ".3f",
+            "Volume": ".8e",
+            "P": ".8e",
+            "Pxx": ".8e",
+            "Pyy": ".8e",
+            "Pzz": ".8e",
+            "Pyz": ".8e",
+            "Pxz": ".8e",
+            "Pxy": ".8e",
         }
 
         return stats, units, default_formats
@@ -1048,9 +1048,9 @@ class NPT(MolecularDynamics):
             Thermodynamical statistics to be written out.
         """
         stats, units, formats = MolecularDynamics.get_stats(self)
-        stats |= {'target_p': self.pressure, 'target_t': self.temp}
-        units |= {'target_p': 'GPa', 'target_t': 'K'}
-        formats |= {'target_p': '.5f', 'target_t': '.5f'}
+        stats |= {"target_p": self.pressure, "target_t": self.temp}
+        units |= {"target_p": "GPa", "target_t": "K"}
+        formats |= {"target_p": ".5f", "target_t": ".5f"}
         return stats, units, formats
 
 
@@ -1127,9 +1127,9 @@ class NVT(MolecularDynamics):
             Print formats associated with each component.
         """
         stats, units, formats = MolecularDynamics.get_stats(self)
-        stats |= {'target_t': self.temp}
-        units |= {'target_t': 'K'}
-        formats |= {'target_t': '.5f'}
+        stats |= {"target_t": self.temp}
+        units |= {"target_t": "K"}
+        formats |= {"target_t": ".5f"}
         return stats, units, formats
 
 
@@ -1252,9 +1252,9 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
             Print formats associated with each component.
         """
         stats, units, formats = MolecularDynamics.get_stats(self)
-        stats |= {'target_t': self.temp}
-        units |= {'target_t': 'K'}
-        formats |= {'target_t': '.5f'}
+        stats |= {"target_t": self.temp}
+        units |= {"target_t": "K"}
+        formats |= {"target_t": ".5f"}
         return stats, units, formats
 
 
