@@ -350,8 +350,13 @@ def write_table(
     """
     Dump a table in a standard format.
 
-    Table columns are passed as kwargs with an optional
-    "kwarg_units" to define units for the kwarg.
+    Table columns are passed as kwargs, with the column header being
+    the keyword name and data the value.
+
+    Each header also supports an optional "<header>_units" or
+    "<header>_format" kwarg to define units and format for the column.
+    These can also be passed explicitly through the respective
+    dictionaries where the key is the "header".
 
     Parameters
     ----------
@@ -378,8 +383,8 @@ def write_table(
         format
             Python magic format string to use.
     **columns : dict[str, Any]
-        Dictionary of columns to columns with optional
-        "kwarg_units" to define units in column header.
+        Dictionary of columns names to data with optional
+        "<header>_units"/"<header>_format" to define units/format.
 
         See: Examples.
 
@@ -387,6 +392,11 @@ def write_table(
     -------
     Optional[StringIO]
         If no file given write columns to StringIO.
+
+    Notes
+    -----
+    Passing "kwarg_units" or "kwarg_format" takes priority over
+    those passed in the `units`/`formats` dicts.
 
     Examples
     --------
@@ -411,8 +421,6 @@ def write_table(
     5.000,12.0
     """
     units = units if units else {}
-    formats = formats if formats else {}
-
     units.update(
         {
             key.removesuffix("_units"): val
@@ -420,6 +428,16 @@ def write_table(
             if key.endswith("_units")
         }
     )
+
+    formats = formats if formats else {}
+    formats.update(
+        {
+            key.removesuffix("_format"): val
+            for key, val in columns.items()
+            if key.endswith("_format")
+        }
+    )
+
     columns = {key: val for key, val in columns.items() if not key.endswith("_units")}
 
     header = [
