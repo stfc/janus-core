@@ -2,8 +2,9 @@
 
 from abc import ABC
 from collections.abc import Collection, Sequence
+from io import StringIO
 from pathlib import Path
-from typing import Optional, get_args
+from typing import Any, Literal, Optional, TextIO, get_args
 
 from ase import Atoms
 from ase.io import write
@@ -337,3 +338,186 @@ def output_structs(
     if write_results:
         write_kwargs.setdefault("write_results", not invalidate_calc)
         write(images=images, **write_kwargs)
+
+
+def write_table(
+    fmt: Literal["ascii", "csv"],
+    file: Optional[TextIO] = None,
+    units: Optional[dict[str, str]] = None,
+    formats: Optional[dict[str, str]] = None,
+    **columns,
+) -> Optional[StringIO]:
+    """
+    Dump a table in a standard format.
+
+    Table columns are passed as kwargs, with the column header being
+    the keyword name and data the value.
+
+    Each header also supports an optional "<header>_units" or
+    "<header>_format" kwarg to define units and format for the column.
+    These can also be passed explicitly through the respective
+    dictionaries where the key is the "header".
+
+    Parameters
+    ----------
+    fmt : {'ascii', 'csv'}
+        Format to write table in.
+    file : TextIO
+        File to dump to. If unspecified function returns
+        io.StringIO object simulating file.
+    units : dict[str, str]
+        Units as ``{key: unit}``:
+
+        key
+            To align with those in `columns`.
+        unit
+            String defining unit.
+
+        Units which do not match any columns in `columns` are
+        ignored.
+    formats : dict[str, str]
+        Output formats as ``{key: format}``:
+
+        key
+            To align with those in `columns`.
+        format
+            Python magic format string to use.
+    **columns : dict[str, Any]
+        Dictionary of columns names to data with optional
+        "<header>_units"/"<header>_format" to define units/format.
+
+        See: Examples.
+
+    Returns
+    -------
+    Optional[StringIO]
+        If no file given write columns to StringIO.
+
+    Notes
+    -----
+    Passing "kwarg_units" or "kwarg_format" takes priority over
+    those passed in the `units`/`formats` dicts.
+
+    Examples
+    --------
+    >>> data = write_table(fmt="ascii", single=(1, 2, 3),
+    ...                    double=(2,4,6), double_units="THz")
+    >>> print(*data, sep="", end="")
+    # single | double [THz]
+    1 2
+    2 4
+    3 6
+    >>> data = write_table(fmt="csv", a=(3., 5.), b=(11., 12.),
+    ...                    units={'a': 'eV', 'b': 'Ha'})
+    >>> print(*data, sep="", end="")
+    a [eV],b [Ha]
+    3.0,11.0
+    5.0,12.0
+    >>> data = write_table(fmt="csv", a=(3., 5.), b=(11., 12.),
+    ...                    formats={"a": ".3f"})
+    >>> print(*data, sep="", end="")
+    a,b
+    3.000,11.0
+    5.000,12.0
+    """
+    units = units if units else {}
+    units.update(
+        {
+            key.removesuffix("_units"): val
+            for key, val in columns.items()
+            if key.endswith("_units")
+        }
+    )
+
+    formats = formats if formats else {}
+    formats.update(
+        {
+            key.removesuffix("_format"): val
+            for key, val in columns.items()
+            if key.endswith("_format")
+        }
+    )
+
+    columns = {key: val for key, val in columns.items() if not key.endswith("_units")}
+
+    header = [
+        f"{datum}" + (f" [{units.get(datum)}]" if datum in units else "")
+        for datum in columns
+    ]
+
+    dump_loc = file if file is not None else StringIO()
+
+    write_fmt = [formats.get(key, "") for key in columns]
+
+    if fmt == "ascii":
+        _dump_ascii(dump_loc, header, columns, write_fmt)
+    elif fmt == "csv":
+        _dump_csv(dump_loc, header, columns, write_fmt)
+
+    if file is None:
+        dump_loc.seek(0)
+        return dump_loc
+    return None
+
+
+def _dump_ascii(
+    file: TextIO,
+    header: list[str],
+    columns: dict[str, Sequence[Any]],
+    formats: Sequence[str],
+):
+    """
+    Dump data as an ASCII style table.
+
+    Parameters
+    ----------
+    file : TextIO
+        File to dump to.
+    header : list[str]
+        Column name information.
+    columns : dict[str, Sequence[Any]]
+        Column data by key (ordered with header info).
+    formats : Sequence[str]
+        Python magic string formats to apply
+        (must align with header info).
+
+    See Also
+    --------
+    write_table : Main entry function.
+    """
+
+    print(f"# {' | '.join(header)}", file=file)
+
+    for cols in zip(*columns.values()):
+        print(*map(format, cols, formats), file=file)
+
+
+def _dump_csv(
+    file: TextIO,
+    header: list[str],
+    columns: dict[str, Sequence[Any]],
+    formats: Sequence[str],
+):
+    """
+    Dump data as a csv style table.
+
+    Parameters
+    ----------
+    file : TextIO
+        File to dump to.
+    header : list[str]
+        Column name information.
+    columns : dict[str, Sequence[Any]]
+        Column data by key (ordered with header info).
+    formats : Sequence[str]
+        Python magic string formats to apply
+        (must align with header info).
+
+    See Also
+    --------
+    write_table : Main entry function.
+    """
+    print(",".join(header), file=file)
+
+    for cols in zip(*columns.values()):
+        print(",".join(map(format, cols, formats)), file=file)

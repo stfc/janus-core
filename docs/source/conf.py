@@ -204,4 +204,5 @@ nitpick_ignore = [
     ("py:class", "phonopy.structure.atoms.PhonopyAtoms"),
     ("py:class", "ase.optimize.optimize.Optimizer"),
     ("py:class", "codecarbon.emissions_tracker.OfflineEmissionsTracker"),
+    ("py:class", "_io.StringIO"),
 ]
