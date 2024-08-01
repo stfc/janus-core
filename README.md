@@ -29,31 +29,21 @@ All required and optional dependencies can be found in [pyproject.toml](pyprojec
 > [!NOTE]
 > Where possible, we expect to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
-> [!NOTE]
-> Manually updating ASE to include the latest commits is strongly recommended, as tags may not regularly be published. For example:
-> ```shell
-> pip install git+https://gitlab.com/ase/ase.git@master
-> ```
->
-> When using poetry, [pyproject.toml](pyproject.toml) can be changed to prevent ASE being downgraded when installing in future by running:
->
-> ```shell
-> poetry add git+https://gitlab.com:ase/ase.git#master
-> ```
 
 ### Installation
 
-The latest release of `janus-core`, including its dependencies, can be installed from PyPI by running:
+The latest stable release of `janus-core`, including its dependencies, can be installed from PyPI by running:
 
 ```
-pip install janus-core
+python3 -m pip install janus-core
 ```
 
-To download the latest changes, `janus-core` can also be installed from source:
+To get all the latest changes, `janus-core` can also be installed from GitHub:
 
 ```
-pip install git+https://github.com/stfc/janus-core.git
+python3 -m pip install git+https://github.com/stfc/janus-core.git
 ```
+
 
 ## Features
 
@@ -63,9 +53,10 @@ Current and planned features include:
 
 - [x] Support for multiple MLIPs
   - MACE
-  - M3GNET
-  - CHGNET
+  - M3GNet
+  - CHGNet
   - ALIGNN (experimental)
+  - SevenNet (experimental)
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
