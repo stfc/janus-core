@@ -520,12 +520,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
         Returns
         -------
-        stats : dict[str, float]
+        dict[str, float]
             Thermodynamical statistics to be written out.
-        units : dict[str, Optional[str]]
-            Units of each component. None implies unitless.
-        default_formats : dict[str, str]
-            Print formats associated with each component.
         """
         e_pot = self.dyn.atoms.get_potential_energy() / self.n_atoms
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
@@ -584,7 +580,19 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             "Pxy": pressure_tensor[5],
         }
 
-        units = {
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return {
             "Step": None,
             "Real_Time": "s",
             "Time": "fs",
@@ -603,7 +611,17 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             "Pxy": "GPa",
         }
 
-        default_formats = {
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return {
             "Step": "10d",
             "Real_Time": ".3f",
             "Time": "13.2f",
@@ -622,18 +640,37 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             "Pxy": ".8e",
         }
 
-        return stats, units, default_formats
+        return stats, unit_info, default_formats
+
+    def _write_header(self) -> None:
+        """Write header for stats file."""
+
+        with open(self.stats_file, "a", encoding="utf-8") as stats_file:
+            write_table(
+                "ascii",
+                file=stats_file,
+                units=self.unit_info,
+                **{key: () for key in self.unit_info}
+            )
+
 
     def _write_stats_file(self) -> None:
         """Write molecular dynamics statistics."""
-        stats, units, formats = self.get_stats()
+        stats = self.get_stats()
 
         # we do not want to print step 0 in restarts
         if self.restart and self.dyn.nsteps == 0:
             return
 
         with open(self.stats_file, "a", encoding="utf8") as stats_file:
-            write_table("ascii", file=stats_file, units=units, formats=formats, **stats)
+            write_table(
+                "ascii",
+                file=stats_file,
+                units=self.unit_info,
+                formats=self.default_formats,
+                print_header=False,
+                **stats
+            )
 
     def _write_traj(self) -> None:
         """Write current structure to trajectory file."""
@@ -789,6 +826,9 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self._optimize_structure()
             if self.rescale_velocities:
                 self._reset_velocities()
+
+        if self.offset == 0:
+            self._write_header()
 
         self.dyn.attach(self._write_stats_file, interval=self.stats_every)
         self.dyn.attach(self._write_traj, interval=self.traj_every)
@@ -1003,20 +1043,42 @@ class NPT(MolecularDynamics):
             prefix_override=self.restart_stem,
         )
 
-    def get_stats(self) -> str:
+    def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
 
         Returns
         -------
-        str
+        dict[str, float]
             Thermodynamical statistics to be written out.
         """
-        stats, units, formats = MolecularDynamics.get_stats(self)
-        stats |= {"target_p": self.pressure, "target_t": self.temp}
-        units |= {"target_p": "GPa", "target_t": "K"}
-        formats |= {"target_p": ".5f", "target_t": ".5f"}
-        return stats, units, formats
+        stats = MolecularDynamics.get_stats(self)
+        stats |= {"Target_P": self.pressure, "Target_T": self.temp}
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return super().unit_info | {"Target_P": "GPa", "Target_T": "K"}
+
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return super().default_formats | {"Target_P": ".5f", "Target_T": ".5f"}
 
 
 class NVT(MolecularDynamics):
@@ -1078,24 +1140,42 @@ class NVT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
-    def get_stats(self) -> tuple[dict, dict, dict]:
+    def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
 
         Returns
         -------
-        stats : dict[str, float]
+        dict[str, float]
             Thermodynamical statistics to be written out.
-        units : dict[str, Optional[str]]
-            Units of each component. None implies unitless.
-        default_formats : dict[str, str]
-            Print formats associated with each component.
         """
-        stats, units, formats = MolecularDynamics.get_stats(self)
-        stats |= {"target_t": self.temp}
-        units |= {"target_t": "K"}
-        formats |= {"target_t": ".5f"}
-        return stats, units, formats
+        stats = MolecularDynamics.get_stats(self)
+        stats |= {"Target_T": self.temp}
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return super().unit_info | {"Target_T": "K"}
+
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return super().default_formats | {"Target_T": ".5f"}
 
 
 class NVE(MolecularDynamics):
@@ -1203,24 +1283,42 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
             **kwargs,
         )
 
-    def get_stats(self) -> tuple[dict, dict, dict]:
+    def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
 
         Returns
         -------
-        stats : dict[str, float]
+        dict[str, float]
             Thermodynamical statistics to be written out.
-        units : dict[str, Optional[str]]
-            Units of each component. None implies unitless.
-        default_formats : dict[str, str]
-            Print formats associated with each component.
         """
-        stats, units, formats = MolecularDynamics.get_stats(self)
-        stats |= {"target_t": self.temp}
-        units |= {"target_t": "K"}
-        formats |= {"target_t": ".5f"}
-        return stats, units, formats
+        stats = MolecularDynamics.get_stats(self)
+        stats |= {"Target_T": self.temp}
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return super().unit_info | {"Target_T": "K"}
+
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return super().default_formats | {"Target_T": ".5f"}
 
 
 class NPH(NPT):
