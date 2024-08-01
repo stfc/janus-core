@@ -18,31 +18,18 @@ All required and optional dependencies can be found in `pyproject.toml <https://
 .. note::
     Where possible, we expect to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
-.. note::
-    Manually updating ASE to include the latest commits is strongly recommended, as tags may not regularly be published. For example:
-
-    .. code-block:: bash
-
-        pip install git+https://gitlab.com/ase/ase.git@master
-
-    When using poetry, ``pyproject.toml`` can be modified to prevent ASE being downgraded when installing in future by running:
-
-    .. code-block:: bash
-
-        poetry add git+https://gitlab.com:ase/ase.git#master
-
 
 Installation
 ------------
 
-The latest release of ``janus-core``, including its dependencies, can be installed from PyPI by running:
+The latest stable release of ``janus-core``, including its dependencies, can be installed from PyPI by running:
 
 .. code-block:: bash
 
-    pip install janus-core
+    python3 -m pip install janus-core
 
-To download the latest changes, ``janus-core`` can also be installed from source:
+To get all the latest changes, ``janus-core`` can also be installed from GitHub:
 
 .. code-block:: bash
 
-    pip install git+https://github.com/stfc/janus-core.git
+    python3 -m pip install git+https://github.com/stfc/janus-core.git
