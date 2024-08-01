@@ -229,20 +229,21 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         value : MaybeSequence[PhononCalcs]
             Phonon calculations to be run.
         """
-        self._calcs = value
 
-        if isinstance(self._calcs, str):
-            self._calcs = (self._calcs,)
+        if isinstance(value, str):
+            value = (value,)
 
-            for calc in self._calcs:
+            for calc in value:
                 if calc not in get_args(PhononCalcs):
                     raise NotImplementedError(
                         f"Calculations '{calc}' cannot currently be performed."
                     )
 
         # If none specified, only force constants will be calculated
-        if not self._calcs:
-            self._cals = ()
+        if not value:
+            value = ()
+
+        self._calcs = value
 
     def calc_force_constants(
         self, write_force_consts: Optional[bool] = None, **kwargs

@@ -250,21 +250,22 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         value : MaybeSequence[Properties]
             Physical properties to be calculated.
         """
-        self._properties = value
 
-        if isinstance(self._properties, str):
-            self._properties = (self._properties,)
+        if isinstance(value, str):
+            value = (value,)
 
-        if isinstance(self._properties, Sequence):
-            for prop in self._properties:
+        if isinstance(value, Sequence):
+            for prop in value:
                 if prop not in get_args(Properties):
                     raise NotImplementedError(
                         f"Property '{prop}' cannot currently be calculated."
                     )
 
         # If none specified, get all valid properties
-        if not self._properties:
-            self._properties = get_args(Properties)
+        if not value:
+            value = get_args(Properties)
+
+        self._properties = value
 
     def _get_potential_energy(self) -> MaybeList[float]:
         """
