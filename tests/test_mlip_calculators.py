@@ -52,11 +52,7 @@ ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
     ],
 )
 def test_mlips(architecture, device, kwargs):
-    """Test mace calculators can be configured."""
-    
-    import matgl
-    matgl.clear_cache()
-    
+    """Test mace calculators can be configured."""   
     calculator = choose_calculator(architecture=architecture, device=device, **kwargs)
     assert calculator.parameters["version"] is not None
 
