@@ -46,9 +46,9 @@ In this case, we choose the label ``"alignn"``::
 
 Next, we need to allow the ASE calculator corresponding to the MLIP label to be set.
 
-This is done within the ``janus_core.helpers.mlip_calculators`` module, if ``architecture`` matches the label defined above::
+This is done within the ``janus_core.helpers.mlip_calculators`` module, if ``arch`` matches the label defined above::
 
-    elif architecture == "alignn":
+    elif arch == "alignn":
         from alignn import __version__
         from alignn.ff.ff import (
             AlignnAtomwiseCalculator,
@@ -112,11 +112,11 @@ that reside in files ``tests/test_mlip_calculators.py``` and ``tests/test_single
 Load models - success
 ^^^^^^^^^^^^^^^^^^^^^
 
-For ``tests.test_mlip_calculators``, ``architecture``, ``device`` and accepted forms of ``model_path`` should be tested, ensuring that the calculator and its version are correctly set::
+For ``tests.test_mlip_calculators``, ``arch``, ``device`` and accepted forms of ``model_path`` should be tested, ensuring that the calculator and its version are correctly set::
 
     @pytest.mark.extra_mlips
     @pytest.mark.parametrize(
-        "architecture, device, kwargs",
+        "arch, device, kwargs",
         [
             ("alignn", "cpu", {}),
             ("alignn", "cpu", {"model_path": "tests/models/v5.27.2024"}),
@@ -125,7 +125,7 @@ For ``tests.test_mlip_calculators``, ``architecture``, ``device`` and accepted f
             ("alignn", "cpu", {"path": "tests/models/v5.27.2024"}),
         ],
     )
-    def test_extra_mlips(architecture, device, kwargs):
+    def test_extra_mlips(arch, device, kwargs):
 
 .. note::
     Not all models support an empty (default) model path, so the equivalent test to``("alignn", "cpu", {})`` may need to be removed, or moved to the tests described in `Load models - failure`_.
@@ -142,12 +142,12 @@ It is also useful to test that ``model_path``, and ``model`` or and the "standar
         "kwargs",
         [
             {
-                "architecture": "alignn",
+                "arch": "alignn",
                 "model_path": MODEL_PATH / "v5.27.2024" / "best_model.pt",
                 "model": MODEL_PATH / "v5.27.2024" / "best_model.pt",
             },
             {
-                "architecture": "alignn",
+                "arch": "alignn",
                 "model_path": "tests/models/v5.27.2024/best_model.pt",
                 "path": "tests/models/v5.27.2024/best_model.pt",
             },
@@ -158,7 +158,7 @@ It is also useful to test that ``model_path``, and ``model`` or and the "standar
 Test correctness
 ^^^^^^^^^^^^^^^^
 
-For ``tests.test_single_point``, ``architecture``, ``device``, and the potential energy of NaCl predicted by the MLIP should be defined, ensuring that calculations can be performed::
+For ``tests.test_single_point``, ``arch``, ``device``, and the potential energy of NaCl predicted by the MLIP should be defined, ensuring that calculations can be performed::
 
     test_extra_mlips_data = [("alignn", "cpu", -11.148092269897461, {})]
 
