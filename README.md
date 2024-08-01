@@ -17,6 +17,8 @@ Tools for machine learnt interatomic potentials
   - MACE
   - M3GNET
   - CHGNET
+  - ALIGNN
+  - SEVENNET
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
@@ -36,6 +38,20 @@ Tools for machine learnt interatomic potentials
 
 The code relies heavily on ASE, unless something else is mentioned.
 
+## Installation
+
+### latest stable
+
+```shell
+   python3 -m pip install janus-core
+```
+
+### latest from git
+
+```shell
+  python3 -m pip install git+https://github.com/stfc/janus-core.git
+```
+
 ## Development
 
 1. Install [poetry](https://python-poetry.org/docs/#installation)
@@ -50,18 +66,6 @@ poetry install --with pre-commit,dev,docs  # install extra dependencies
 pre-commit install  # install pre-commit hooks
 pytest -v  # discover and run all tests
 ```
-
-> [!NOTE]
-> Manually updating ASE via https://gitlab.com/ase/ase is strongly recommended, as tags may not regularly be published. For example:
-> ```shell
-> pip install git+https://gitlab.com/ase/ase.git@master
-> ```
->
-> To prevent poetry downgrading ASE when installing in future, add the repository to pyproject.toml:
->
-> ```shell
-> poetry add git+https://gitlab.com:ase/ase.git#master
-> ```
 
 ## Examples
 
