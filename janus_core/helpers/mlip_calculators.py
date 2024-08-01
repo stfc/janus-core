@@ -207,9 +207,8 @@ def choose_calculator(
         calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
 
     elif architecture == "sevennet":
+        from sevenn._const import SEVENN_VERSION as __version__
         from sevenn.sevennet_calculator import SevenNetCalculator
-
-        __version__ = "0.0.0"
 
         if isinstance(model_path, Path):
             model = str(model_path)
