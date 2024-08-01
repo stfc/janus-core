@@ -1,6 +1,7 @@
 """Phonon calculations."""
 
 from collections.abc import Sequence
+from collections import defaultdict
 from typing import Any, Optional, get_args
 
 from ase import Atoms
@@ -17,7 +18,7 @@ from janus_core.helpers.janus_types import (
     PhononCalcs,
 )
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import FileNameMixin, none_to_dict
+from janus_core.helpers.utils import FileNameMixin, none_to_dict, write_table
 
 
 class Phonons(FileNameMixin):
@@ -493,21 +494,18 @@ class Phonons(FileNameMixin):
         """
         thermal_file = self._build_filename("thermal.dat", filename=thermal_file)
 
-        if "thermal_properties" not in self.results:
-            raise ValueError(
-                "Thermal properties have not been calculated yet. "
-                "Please run `calc_thermal_props` first"
-            )
+        data = {
+            'temperaure': self.results["thermal_properties"]["temperatures"],
+            'Cv': self.results["thermal_properties"]["heat_capacity"],
+            'H': self.results["thermal_properties"]["free_energy"],
+            'S': self.results["thermal_properties"]["entropy"],
+        }
 
         with open(thermal_file, "w", encoding="utf8") as out:
-            temps = self.results["thermal_properties"]["temperatures"]
-            c_vs = self.results["thermal_properties"]["heat_capacity"]
-            entropies = self.results["thermal_properties"]["entropy"]
-            free_energies = self.results["thermal_properties"]["free_energy"]
-
-            print("#Temperature [K] | Cv | H | S ", file=out)
-            for properties in zip(temps, c_vs, free_energies, entropies):
-                print(*properties, file=out)
+            write_table(fmt="ascii", file=out, **data,
+                        units={'temperature': 'K', 'Cv': 'J/mol/K',
+                               'H': 'eV', 'S': 'eV'},
+                        formats={key: ".8f" for key in data})
 
     def calc_dos(
         self,

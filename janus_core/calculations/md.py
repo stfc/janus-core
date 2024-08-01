@@ -35,7 +35,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
-from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
+from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs, write_table
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
@@ -147,8 +147,6 @@ class MolecularDynamics(FileNameMixin):
         Run molecular dynamics simulation and/or heating ramp.
     get_stats()
         Get thermodynamical statistics to be written to file.
-    get_stats_header()
-        Get header string for molecular dynamics statistics.
     """
 
     def __init__(
@@ -550,30 +548,18 @@ class MolecularDynamics(FileNameMixin):
                     data[str(cor)] = {"value": value.tolist(), "lags": lags.tolist()}
                 yaml.dump(data, out_file, default_flow_style=None)
 
-    @staticmethod
-    def get_stats_header() -> str:
-        """
-        Get header string for molecular dynamics statistics.
-
-        Returns
-        -------
-        str
-            Header for molecular dynamics statistics.
-        """
-        return (
-            "# Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
-            "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [GPa] | "
-            "Pxx [GPa] | Pyy [GPa] | Pzz [GPa] | Pyz [GPa] | Pxz [GPa] | Pxy [GPa]"
-        )
-
-    def get_stats(self) -> str:
+    def get_stats(self) -> tuple[dict, dict, dict]:
         """
         Get thermodynamical statistics to be written to file.
 
         Returns
         -------
-        str
+        stats : dict[str, float]
             Thermodynamical statistics to be written out.
+        units : dict[str, Optional[str]]
+            Units of each component. None implies unitless.
+        default_formats : dict[str, str]
+            Print formats associated with each component.
         """
         e_pot = self.dyn.atoms.get_potential_energy() / self.n_atoms
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
@@ -613,25 +599,75 @@ class MolecularDynamics(FileNameMixin):
             density = 0.0
             pressure_tensor = np.zeros(6)
 
-        return (
-            f"{step:10d} {real_time.total_seconds():.3f} {time:13.2f} {e_pot:.8e} "
-            f"{e_kin:.8e} {current_temp:.3f} {e_pot + e_kin:.8e} {density:.3f} "
-            f"{volume:.8e} {pressure:.8e} {pressure_tensor[0]:.8e} "
-            f"{pressure_tensor[1]:.8e} {pressure_tensor[2]:.8e} "
-            f"{pressure_tensor[3]:.8e} {pressure_tensor[4]:.8e} "
-            f"{pressure_tensor[5]:.8e}"
-        )
+        stats = {
+            'Step': step,
+            'Real_Time': real_time.total_seconds(),
+            'Time': time,
+            'Epot/N': e_pot,
+            'EKin/N': e_kin,
+            'T': current_temp,
+            'ETot/N': e_pot + e_kin,
+            "Density": density,
+            "Volume": volume,
+            "P": pressure,
+            "Pxx": pressure_tensor[0],
+            "Pyy": pressure_tensor[1],
+            "Pzz": pressure_tensor[2],
+            "Pyz": pressure_tensor[3],
+            "Pxz": pressure_tensor[4],
+            "Pxy": pressure_tensor[5],
+        }
+
+        units = {
+            'Step': None,
+            'Real_Time': 's',
+            'Time': 'fs',
+            'Epot/N': 'eV',
+            'EKin/N': 'eV',
+            'T': 'K',
+            'ETot/N': 'eV',
+            "Density": 'g/cm^3',
+            "Volume": 'A^3',
+            "P": 'GPa',
+            "Pxx": 'GPa',
+            "Pyy": 'GPa',
+            "Pzz": 'GPa',
+            "Pyz": 'GPa',
+            "Pxz": 'GPa',
+            "Pxy": 'GPa',
+        }
+
+        default_formats = {
+            'Step': '10d',
+            'Real_Time': '.3f',
+            'Time': '13.2f',
+            'Epot/N': '.8e',
+            'EKin/N': '.8e',
+            'T': '.3f',
+            'ETot/N': '.8e',
+            "Density": '.3f',
+            "Volume": '.8e',
+            "P": '.8e',
+            "Pxx": '.8e',
+            "Pyy": '.8e',
+            "Pzz": '.8e',
+            "Pyz": '.8e',
+            "Pxz": '.8e',
+            "Pxy": '.8e',
+        }
+
+        return stats, units, default_formats
 
     def _write_stats_file(self) -> None:
         """Write molecular dynamics statistics."""
-        stats = self.get_stats()
+        stats, units, formats = self.get_stats()
 
         # we do not want to print step 0 in restarts
         if self.restart and self.dyn.nsteps == 0:
             return
 
         with open(self.stats_file, "a", encoding="utf8") as stats_file:
-            print(stats, file=stats_file)
+            write_table("ascii", file=stats_file, units=units, formats=formats, **stats)
 
     def _write_traj(self) -> None:
         """Write current structure to trajectory file."""
@@ -787,10 +823,6 @@ class MolecularDynamics(FileNameMixin):
                 self._optimize_structure()
             if self.rescale_velocities:
                 self._reset_velocities()
-
-            stats_header = self.get_stats_header()
-            with open(self.stats_file, "w", encoding="utf8") as stats_file:
-                print(stats_header, file=stats_file)
 
         self.dyn.attach(self._write_stats_file, interval=self.stats_every)
         self.dyn.attach(self._write_traj, interval=self.traj_every)
@@ -1015,21 +1047,11 @@ class NPT(MolecularDynamics):
         str
             Thermodynamical statistics to be written out.
         """
-        stats = MolecularDynamics.get_stats(self)
-        return stats + f" {self.pressure} {self.temp}"
-
-    @staticmethod
-    def get_stats_header() -> str:
-        """
-        Get header string for molecular dynamics statistics.
-
-        Returns
-        -------
-        str
-            Header for molecular dynamics statistics.
-        """
-        stats_header = MolecularDynamics.get_stats_header()
-        return stats_header + " | Target P [GPa] | Target T [K]"
+        stats, units, formats = MolecularDynamics.get_stats(self)
+        stats |= {'target_p': self.pressure, 'target_t': self.temp}
+        units |= {'target_p': 'GPa', 'target_t': 'K'}
+        formats |= {'target_p': '.5f', 'target_t': '.5f'}
+        return stats, units, formats
 
 
 class NVT(MolecularDynamics):
@@ -1091,30 +1113,24 @@ class NVT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
-    def get_stats(self) -> str:
+    def get_stats(self) -> tuple[dict, dict, dict]:
         """
         Get thermodynamical statistics to be written to file.
 
         Returns
         -------
-        str
+        stats : dict[str, float]
             Thermodynamical statistics to be written out.
+        units : dict[str, Optional[str]]
+            Units of each component. None implies unitless.
+        default_formats : dict[str, str]
+            Print formats associated with each component.
         """
-        stats = MolecularDynamics.get_stats(self)
-        return stats + f" {self.temp}"
-
-    @staticmethod
-    def get_stats_header() -> str:
-        """
-        Get header string for molecular dynamics statistics.
-
-        Returns
-        -------
-        str
-            Header for molecular dynamics statistics.
-        """
-        stats_header = MolecularDynamics.get_stats_header()
-        return stats_header + " | Target T [K]"
+        stats, units, formats = MolecularDynamics.get_stats(self)
+        stats |= {'target_t': self.temp}
+        units |= {'target_t': 'K'}
+        formats |= {'target_t': '.5f'}
+        return stats, units, formats
 
 
 class NVE(MolecularDynamics):
@@ -1222,30 +1238,24 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
             **kwargs,
         )
 
-    def get_stats(self) -> str:
+    def get_stats(self) -> tuple[dict, dict, dict]:
         """
         Get thermodynamical statistics to be written to file.
 
         Returns
         -------
-        str
+        stats : dict[str, float]
             Thermodynamical statistics to be written out.
+        units : dict[str, Optional[str]]
+            Units of each component. None implies unitless.
+        default_formats : dict[str, str]
+            Print formats associated with each component.
         """
-        stats = MolecularDynamics.get_stats(self)
-        return stats + f" {self.temp}"
-
-    @staticmethod
-    def get_stats_header() -> str:
-        """
-        Get header string for molecular dynamics statistics.
-
-        Returns
-        -------
-        str
-            Header for molecular dynamics statistics.
-        """
-        stats_header = MolecularDynamics.get_stats_header()
-        return stats_header + " | Target T [K]"
+        stats, units, formats = MolecularDynamics.get_stats(self)
+        stats |= {'target_t': self.temp}
+        units |= {'target_t': 'K'}
+        formats |= {'target_t': '.5f'}
+        return stats, units, formats
 
 
 class NPH(NPT):
