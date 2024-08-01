@@ -201,7 +201,7 @@ We recommend installing poetry for dependency management when developing for `ja
 ```shell
 git clone https://github.com/stfc/janus-core
 cd janus-core
-pip install --upgrade pip
+python3 -m pip install --upgrade pip
 poetry install --with pre-commit,dev,docs  # install extra dependencies
 pre-commit install  # install pre-commit hooks
 pytest -v  # discover and run all tests
