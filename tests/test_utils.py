@@ -75,7 +75,7 @@ def test_output_structs(
 ):
     """Test output_structs copies/moves results to Atoms.info and writes files."""
     struct = read(DATA_PATH)
-    struct.calc = choose_calculator(architecture=arch)
+    struct.calc = choose_calculator(arch=arch)
 
     if not properties:
         results_keys = set(get_args(Properties))

@@ -152,7 +152,7 @@ def eos(
     # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct,
-        architecture=arch,
+        arch=arch,
         device=device,
         model_path=model_path,
         read_kwargs=read_kwargs,

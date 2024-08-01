@@ -19,7 +19,7 @@ def test_calc_eos(tmp_path):
     """Test calculating equation of state from ASE atoms object."""
     struct = read(DATA_PATH / "NaCl.cif")
     log_file = tmp_path / "eos.log"
-    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     eos = EoS(
         struct,
@@ -41,7 +41,7 @@ def test_no_optimize(tmp_path):
     log_file = tmp_path / "eos.log"
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     eos = EoS(
@@ -70,7 +70,7 @@ def test_extra_potentials(arch, device, tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture=arch,
+        arch=arch,
         device=device,
     )
 
@@ -96,7 +96,7 @@ def test_invalid_struct():
     """Test setting invalid structure."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 

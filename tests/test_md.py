@@ -30,7 +30,7 @@ def test_init(ensemble, expected):
     """Test initialising ensembles."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     dyn = ensemble(
@@ -55,7 +55,7 @@ def test_npt():
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     npt = NPT(
@@ -106,7 +106,7 @@ def test_nvt_nh():
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt_nh = NVT_NH(
@@ -150,7 +150,7 @@ def test_nve(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nve = NVE(
@@ -188,7 +188,7 @@ def test_nph():
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nph = NPH(
@@ -232,7 +232,7 @@ def test_restart(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt = NVT(
@@ -279,7 +279,7 @@ def test_minimize(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     init_energy = single_point.struct.get_potential_energy()
@@ -305,7 +305,7 @@ def test_reset_velocities(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     # Give structure arbitrary velocities
@@ -337,7 +337,7 @@ def test_remove_rot(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     # Give structure arbitrary angular velocities
@@ -380,7 +380,7 @@ def test_traj_start(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt = NVT(
@@ -422,7 +422,7 @@ def test_minimize_every(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -453,7 +453,7 @@ def test_rescale_every(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -496,7 +496,7 @@ def test_rotate_restart(tmp_path):
     restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.extxyz"
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt = NVT(
@@ -524,7 +524,7 @@ def test_atoms_struct(tmp_path):
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     nvt = NVT(
         struct=struct,
@@ -555,7 +555,7 @@ def test_heating(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -590,7 +590,7 @@ def test_noramp_heating(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -612,7 +612,7 @@ def test_heating_md(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt = NVT(
@@ -662,7 +662,7 @@ def test_heating_files():
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt = NVT(
@@ -711,7 +711,7 @@ def test_heating_md_files():
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     nvt = NVT(
@@ -753,7 +753,7 @@ def test_ramp_negative(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -787,7 +787,7 @@ def test_cooling(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -830,7 +830,7 @@ def test_ensemble_kwargs(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -848,7 +848,7 @@ def test_invalid_struct():
     """Test setting invalid structure."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 

@@ -76,7 +76,7 @@ def test_md_correlations(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 

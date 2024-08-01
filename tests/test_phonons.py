@@ -18,7 +18,7 @@ def test_init():
     """Test initialising Phonons."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     phonons = Phonons(struct=single_point.struct)
@@ -28,7 +28,7 @@ def test_init():
 def test_calc_phonons():
     """Test calculating phonons from ASE atoms object."""
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     phonons = Phonons(
         struct=struct,
@@ -43,7 +43,7 @@ def test_optimize(tmp_path):
     log_file = tmp_path / "phonons.log"
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     phonons = Phonons(
@@ -63,7 +63,7 @@ def test_invalid_struct():
     """Test setting invalid structure."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 

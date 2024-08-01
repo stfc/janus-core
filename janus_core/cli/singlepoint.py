@@ -121,7 +121,7 @@ def singlepoint(
         "properties": properties,
         "write_kwargs": write_kwargs,
         "write_results": True,
-        "architecture": arch,
+        "arch": arch,
         "device": device,
         "model_path": model_path,
         "read_kwargs": read_kwargs,

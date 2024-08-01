@@ -42,7 +42,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         "forces", and "stress" will be returned.
     write_results : bool
         True to write out structure with results of calculations. Default is False.
-    architecture : Literal[architectures]
+    arch : Architectures
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
     device : Devices
@@ -87,7 +87,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         struct_path: Optional[PathLike] = None,
         properties: MaybeSequence[Properties] = (),
         write_results: bool = False,
-        architecture: Architectures = "mace_mp",
+        arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: Optional[PathLike] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
@@ -112,7 +112,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             "forces", and "stress" will be returned.
         write_results : bool
             True to write out structure with results of calculations. Default is False.
-        architecture : Architectures
+        arch : Architectures
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
         device : Devices
@@ -142,7 +142,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         self.struct_path = struct_path
         self.properties = properties
         self.write_results = write_results
-        self.architecture = architecture
+        self.arch = arch
         self.device = device
         self.model_path = model_path
         self.read_kwargs = read_kwargs
@@ -211,7 +211,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
     def set_calculator(self) -> None:
         """Configure calculator and attach to structure."""
         calculator = choose_calculator(
-            architecture=self.architecture,
+            arch=self.arch,
             device=self.device,
             model_path=self.model_path,
             **self.calc_kwargs,

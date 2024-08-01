@@ -40,7 +40,7 @@ def test_potential_energy(
     calc_kwargs["model"] = MACE_PATH
     single_point = SinglePoint(
         struct_path=struct_path,
-        architecture="mace",
+        arch="mace",
         calc_kwargs=calc_kwargs,
         properties=properties,
     )
@@ -64,7 +64,7 @@ def test_single_point_none():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
     )
 
@@ -77,7 +77,7 @@ def test_single_point_clean():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "H2O.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
     )
 
@@ -91,7 +91,7 @@ def test_single_point_traj():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
         properties="energy",
     )
@@ -116,7 +116,7 @@ def test_single_point_write():
 
     single_point = SinglePoint(
         struct_path=data_path,
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
         write_results=True,
     )
@@ -149,7 +149,7 @@ def test_single_point_write_kwargs(tmp_path):
 
     single_point = SinglePoint(
         struct_path=data_path,
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
         write_results=True,
         write_kwargs={"filename": results_path},
@@ -168,7 +168,7 @@ def test_single_point_molecule(tmp_path):
     results_path = tmp_path / "H2O.extxyz"
     single_point = SinglePoint(
         struct_path=data_path,
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
         properties="energy",
     )
@@ -192,7 +192,7 @@ def test_invalid_prop():
     with pytest.raises(NotImplementedError):
         SinglePoint(
             struct_path=DATA_PATH / "H2O.cif",
-            architecture="mace",
+            arch="mace",
             calc_kwargs={"model": MACE_PATH},
             properties="invalid",
         )
@@ -203,7 +203,7 @@ def test_atoms():
     struct = read(DATA_PATH / "NaCl.cif")
     single_point = SinglePoint(
         struct=struct,
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
         properties="energy",
     )
@@ -218,7 +218,7 @@ def test_atoms_and_path():
         SinglePoint(
             struct=struct,
             struct_path=struct_path,
-            architecture="mace",
+            arch="mace",
             calc_kwargs={"model": MACE_PATH},
         )
 
@@ -227,7 +227,7 @@ def test_no_atoms_or_path():
     """Test passing neither ASE Atoms structure nor structure path."""
     with pytest.raises(ValueError):
         SinglePoint(
-            architecture="mace",
+            arch="mace",
             calc_kwargs={"model": MACE_PATH},
         )
 
@@ -237,7 +237,7 @@ def test_invalidate_calc():
     struct_path = DATA_PATH / "NaCl.cif"
     single_point = SinglePoint(
         struct_path=struct_path,
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MACE_PATH},
         write_kwargs={"invalidate_calc": False},
     )
@@ -261,7 +261,7 @@ def test_mlips(arch, device, expected_energy):
     """Test single point energy using CHGNET and M3GNET calculators."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture=arch,
+        arch=arch,
         device=device,
         properties="energy",
     )
@@ -283,7 +283,7 @@ def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
     """Test single point energy using extra mlips calculators."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture=arch,
+        arch=arch,
         device=device,
         properties="energy",
         **kwargs,
