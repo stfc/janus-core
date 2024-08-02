@@ -53,7 +53,7 @@ def _set_minimize_kwargs(
         `hydrostatic_strain` in the filter function.
     pressure : float
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
-        function if either `opt_cell_lengths` or `fully_opt` is True.
+        function if either `opt_cell_lengths` or `opt_cell_fully` is True.
     """
     if "opt_kwargs" in minimize_kwargs:
         # Check trajectory path not duplicated
@@ -111,7 +111,7 @@ def geomopt(
         bool,
         Option(help="Optimize cell vectors, as well as atomic positions."),
     ] = False,
-    fully_opt: Annotated[
+    opt_cell_fully: Annotated[
         bool,
         Option(
             help="Fully optimize the cell vectors, angles, and atomic positions.",
@@ -122,8 +122,8 @@ def geomopt(
         Option(
             help=(
                 "Name of ASE filter/constraint function to use. If using "
-                "--opt-cell-lengths or --fully-opt, defaults to `FrechetCellFilter` "
-                "if available, otherwise `ExpCellFilter`."
+                "--opt-cell-lengths or --opt-cell-fully, defaults to "
+                "`FrechetCellFilter` if available, otherwise `ExpCellFilter`."
             )
         ),
     ] = None,
@@ -175,16 +175,17 @@ def geomopt(
     opt_cell_lengths : bool
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function. Default is False.
-    fully_opt : bool
+    opt_cell_fully : bool
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
     filter_func : Optional[str]
         Name of filter function from ase.filters or ase.constraints, to apply
-        constraints to atoms. If using --vectors only or --fully-opt, defaults to
+        constraints to atoms. If using --vectors only or --opt-cell-fully, defaults to
         `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
     pressure : float
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
-        function if either `opt_cell_lengths` or `fully_opt` is True. Default is 0.0.
+        function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
+        0.0.
     out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
@@ -237,17 +238,17 @@ def geomopt(
 
     _set_minimize_kwargs(minimize_kwargs, traj, opt_cell_lengths, pressure)
 
-    if fully_opt or opt_cell_lengths:
+    if opt_cell_fully or opt_cell_lengths:
         # Use default filter unless filter function explicitly passed
-        fully_opt_dict = {"filter_func": filter_func} if filter_func else {}
+        opt_cell_fully_dict = {"filter_func": filter_func} if filter_func else {}
     else:
         if filter_func:
             raise ValueError(
-                "--opt-cell-lengths or --fully-opt must be set to use a filter "
+                "--opt-cell-lengths or --opt-cell-fully must be set to use a filter "
                 "function"
             )
         # Override default filter function with None
-        fully_opt_dict = {"filter_func": None}
+        opt_cell_fully_dict = {"filter_func": None}
 
     # Dictionary of inputs for optimize function
     optimize_kwargs = {
@@ -255,7 +256,7 @@ def geomopt(
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
-        **fully_opt_dict,
+        **opt_cell_fully_dict,
         **minimize_kwargs,
         "write_results": True,
         "write_kwargs": write_kwargs,

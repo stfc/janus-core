@@ -107,8 +107,8 @@ def test_traj(tmp_path):
     assert "mace_mp_forces" in atoms.arrays
 
 
-def test_fully_opt(tmp_path):
-    """Test passing --fully-opt without --opt-cell-lengths"""
+def test_opt_fully(tmp_path):
+    """Test passing --opt-cell-fully without --opt-cell-lengths"""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -121,7 +121,7 @@ def test_fully_opt(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--out",
             results_path,
-            "--fully-opt",
+            "--opt-cell-fully",
             "--log",
             log_path,
             "--summary",
@@ -147,8 +147,8 @@ def test_fully_opt(tmp_path):
     assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
-def test_fully_opt_and_vectors(tmp_path):
-    """Test passing --fully-opt with --opt-cell-lengths."""
+def test_opt_fully_and_vectors(tmp_path):
+    """Test passing --opt-cell-fully with --opt-cell-lengths."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -159,7 +159,7 @@ def test_fully_opt_and_vectors(tmp_path):
             "geomopt",
             "--struct",
             DATA_PATH / "NaCl-deformed.cif",
-            "--fully-opt",
+            "--opt-cell-fully",
             "--opt-cell-lengths",
             "--out",
             results_path,
@@ -185,8 +185,8 @@ def test_fully_opt_and_vectors(tmp_path):
     assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
-def test_vectors_not_fully_opt(tmp_path):
-    """Test passing --opt-cell-lengths without --fully-opt."""
+def test_vectors_not_opt_fully(tmp_path):
+    """Test passing --opt-cell-lengths without --opt-cell-fully."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -211,7 +211,7 @@ def test_vectors_not_fully_opt(tmp_path):
     assert_log_contains(log_path, includes=["Using filter", "hydrostatic_strain: True"])
 
 
-test_data = ["--opt-cell-lengths", "--fully-opt"]
+test_data = ["--opt-cell-lengths", "--opt-cell-fully"]
 
 
 @pytest.mark.parametrize("option", test_data)
@@ -410,7 +410,7 @@ def test_invalid_config():
 
 
 def test_const_volume(tmp_path):
-    """Test setting constant volume with --fully-opt."""
+    """Test setting constant volume with --opt-cell-fully."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -425,7 +425,7 @@ def test_const_volume(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--out",
             results_path,
-            "--fully-opt",
+            "--opt-cell-fully",
             "--minimize-kwargs",
             minimize_kwargs,
             "--log",
@@ -481,7 +481,7 @@ def test_filter_str(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--out",
             results_path,
-            "--fully-opt",
+            "--opt-cell-fully",
             "--filter-func",
             "UnitCellFilter",
             "--log",
@@ -498,7 +498,7 @@ def test_filter_str(tmp_path):
 
 
 def test_filter_str_error(tmp_path):
-    """Test setting filter function without --fully-opt or --opt-cell-lengths."""
+    """Test setting filter function without --opt-cell-fully or --opt-cell-lengths."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
