@@ -17,7 +17,7 @@ from janus_core.cli.types import (
     MinimizeKwargs,
     ModelPath,
     PostProcessKwargs,
-    ReadKwargs,
+    ReadKwargsFirst,
     StructPath,
     Summary,
     WriteKwargs,
@@ -27,6 +27,7 @@ from janus_core.cli.utils import (
     end_summary,
     parse_typer_dicts,
     save_struct_calc,
+    set_read_kwargs_index,
     start_summary,
     yaml_converter_callback,
 )
@@ -80,7 +81,7 @@ def md(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargs = None,
+    read_kwargs: ReadKwargsFirst = None,
     calc_kwargs: CalcKwargs = None,
     equil_steps: Annotated[
         int,
@@ -232,7 +233,8 @@ def md(
     model_path : Optional[str]
         Path to MLIP model. Default is `None`.
     read_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to ase.io.read. Default is {}.
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is 0.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     equil_steps : int
@@ -329,6 +331,9 @@ def md(
 
     if not ensemble in get_args(Ensembles):
         raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
+
+    # Read only first structure by default and ensure only one image is read
+    set_read_kwargs_index(read_kwargs)
 
     # Set up single point calculator
     s_point = SinglePoint(

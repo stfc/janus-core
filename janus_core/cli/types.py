@@ -67,14 +67,28 @@ Architecture = Annotated[str, Option(help="MLIP architecture to use for calculat
 Device = Annotated[str, Option(help="Device to run calculations on.")]
 ModelPath = Annotated[str, Option(help="Path to MLIP model.  [default: None]")]
 
-ReadKwargs = Annotated[
+ReadKwargsAll = Annotated[
     TyperDict,
     Option(
         parser=parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".  [default: "{}"]
+            wrapped in quotes, e.g. "{'key' : value}".  [default: "{'index': ':'}"]
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+ReadKwargsFirst = Annotated[
+    TyperDict,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key' : value}".  [default: "{'index': 0}"]
             """
         ),
         metavar="DICT",
