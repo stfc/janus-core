@@ -557,3 +557,66 @@ def test_write_kwargs(tmp_path):
     # Check labelled info has been set
     assert "mace_mp_energy" in final_atoms.info
     assert "mace_mp_energy" in traj[0].info
+
+
+@pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
+def test_valid_traj_input(read_kwargs, tmp_path):
+    """Test valid trajectory input structure handled."""
+    file_prefix = tmp_path / "traj"
+    final_path = tmp_path / "traj-final.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "benzene-traj.xyz",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--read-kwargs",
+            read_kwargs,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(final_path)
+    assert isinstance(atoms, Atoms)
+
+
+def test_invalid_traj_input(tmp_path):
+    """Test invalid trajectory input structure handled."""
+    file_prefix = tmp_path / "traj"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "benzene-traj.xyz",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--read-kwargs",
+            "{'index': ':'}",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)

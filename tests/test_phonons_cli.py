@@ -13,6 +13,10 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
+# Many pylint now warnings raised due to similar log/summary flags
+# These depend on tmp_path, so not easily refactorisable
+# pylint: disable=duplicate-code
+
 
 def test_help():
     """Test calling `janus phonons --help`."""
@@ -343,3 +347,55 @@ def test_minimize_filename(tmp_path):
     )
     assert result.exit_code == 0
     assert opt_path.exists()
+
+
+@pytest.mark.parametrize("read_kwargs", ["{'index': 0}", "{}"])
+def test_valid_traj_input(read_kwargs, tmp_path):
+    """Test valid trajectory input structure handled."""
+    phonon_results = tmp_path / "traj-phonopy.yml"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl-traj.xyz",
+            "--read-kwargs",
+            read_kwargs,
+            "--file-prefix",
+            tmp_path / "traj",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert phonon_results.exists()
+
+
+def test_invalid_traj_input(tmp_path):
+    """Test invalid trajectory input structure handled."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl-traj.xyz",
+            "--read-kwargs",
+            "{'index': ':'}",
+            "--file-prefix",
+            tmp_path / "traj",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
