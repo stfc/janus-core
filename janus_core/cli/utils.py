@@ -141,6 +141,9 @@ def save_struct_calc(
     calc_kwargs : dict[str, Any]]
         Keyword arguments to pass to the calculator.
     """
+    # Remove duplicate struct if already in inputs:
+    inputs.pop("struct", None)
+
     if isinstance(s_point.struct, Atoms):
         inputs["struct"] = {
             "n_atoms": len(s_point.struct),
