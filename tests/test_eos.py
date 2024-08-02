@@ -90,3 +90,21 @@ def test_extra_potentials(arch, device, tmp_path):
 
     assert len(lines) == 2
     assert len(lines[1].split()) == 3
+
+
+def test_invalid_struct():
+    """Test setting invalid structure."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "benzene-traj.xyz",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(NotImplementedError):
+        EoS(
+            single_point.struct,
+        )
+    with pytest.raises(ValueError):
+        EoS(
+            "structure",
+        )
