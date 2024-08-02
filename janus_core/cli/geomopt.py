@@ -180,8 +180,8 @@ def geomopt(
         Default is False.
     filter_func : Optional[str]
         Name of filter function from ase.filters or ase.constraints, to apply
-        constraints to atoms. If using --opt-cell-lengths or --opt-cell-fully, defaults to
-        `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
+        constraints to atoms. If using --opt-cell-lengths or --opt-cell-fully, defaults
+        to `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
     pressure : float
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
