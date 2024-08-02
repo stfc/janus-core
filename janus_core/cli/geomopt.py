@@ -36,7 +36,7 @@ app = Typer()
 def _set_minimize_kwargs(
     minimize_kwargs: dict[str, Any],
     traj: Optional[str],
-    vectors_only: bool,
+    opt_cell_lengths: bool,
     pressure: float,
 ) -> None:
     """
@@ -48,12 +48,12 @@ def _set_minimize_kwargs(
         Other keyword arguments to pass to geometry optimizer.
     traj : Optional[str]
         Path if saving optimization frames.
-    vectors_only : bool
+    opt_cell_lengths : bool
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function.
     pressure : float
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
-        function if either `vectors_only` or `fully_opt` is True.
+        function if either `opt_cell_lengths` or `fully_opt` is True.
     """
     if "opt_kwargs" in minimize_kwargs:
         # Check trajectory path not duplicated
@@ -74,7 +74,8 @@ def _set_minimize_kwargs(
     if "filter_kwargs" in minimize_kwargs:
         if "hydrostatic_strain" in minimize_kwargs["filter_kwargs"]:
             raise ValueError(
-                "'hydrostatic_strain' must be passed through the --vectors-only option"
+                "'hydrostatic_strain' must be passed through the --opt-cell-lengths "
+                "option"
             )
         if "scalar_pressure" in minimize_kwargs["filter_kwargs"]:
             raise ValueError(
@@ -84,7 +85,7 @@ def _set_minimize_kwargs(
         minimize_kwargs["filter_kwargs"] = {}
 
     # Set hydrostatic_strain and scalar pressure
-    minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = vectors_only
+    minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = opt_cell_lengths
     minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure
 
 
@@ -106,7 +107,7 @@ def geomopt(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    vectors_only: Annotated[
+    opt_cell_lengths: Annotated[
         bool,
         Option(help="Optimize cell vectors, as well as atomic positions."),
     ] = False,
@@ -121,8 +122,8 @@ def geomopt(
         Option(
             help=(
                 "Name of ASE filter/constraint function to use. If using "
-                "--vectors-only or --fully-opt, defaults to `FrechetCellFilter` if "
-                "available, otherwise `ExpCellFilter`."
+                "--opt-cell-lengths or --fully-opt, defaults to `FrechetCellFilter` "
+                "if available, otherwise `ExpCellFilter`."
             )
         ),
     ] = None,
@@ -171,7 +172,7 @@ def geomopt(
         Device to run model on. Default is "cpu".
     model_path : Optional[str]
         Path to MLIP model. Default is `None`.
-    vectors_only : bool
+    opt_cell_lengths : bool
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function. Default is False.
     fully_opt : bool
@@ -183,7 +184,7 @@ def geomopt(
         `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
     pressure : float
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
-        function if either `vectors_only` or `fully_opt` is True. Default is 0.0.
+        function if either `opt_cell_lengths` or `fully_opt` is True. Default is 0.0.
     out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
@@ -234,15 +235,16 @@ def geomopt(
     else:
         write_kwargs["filename"] = f"{s_point.struct_name}-opt.extxyz"
 
-    _set_minimize_kwargs(minimize_kwargs, traj, vectors_only, pressure)
+    _set_minimize_kwargs(minimize_kwargs, traj, opt_cell_lengths, pressure)
 
-    if fully_opt or vectors_only:
+    if fully_opt or opt_cell_lengths:
         # Use default filter unless filter function explicitly passed
         fully_opt_dict = {"filter_func": filter_func} if filter_func else {}
     else:
         if filter_func:
             raise ValueError(
-                "--vectors-only or --fully-opt must be set to use a filter function"
+                "--opt-cell-lengths or --fully-opt must be set to use a filter "
+                "function"
             )
         # Override default filter function with None
         fully_opt_dict = {"filter_func": None}
