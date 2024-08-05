@@ -1,6 +1,6 @@
 """Equation of State."""
 
-from copy import deepcopy
+from copy import copy
 from typing import Any, Optional
 
 from ase import Atoms
@@ -270,7 +270,7 @@ class EoS(FileNameMixin):
         )
         for lattice_scalar in self.lattice_scalars:
             c_struct = self.struct.copy()
-            c_struct.calc = deepcopy(self.struct.calc)
+            c_struct.calc = copy(self.struct.calc)
             c_struct.set_cell(cell * lattice_scalar, scale_atoms=True)
 
             # Minimize new structure
