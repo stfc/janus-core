@@ -28,7 +28,6 @@ jobs:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
       run: |
-        poetry run python -c "import matgl; matgl.clear_cache()"
         poetry run pytest --cov janus_core --cov-append .
 
     - name: Report coverage to Coveralls
@@ -41,7 +40,7 @@ jobs:
 
   coverage:
     needs: tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Close parallel build
         uses: coverallsapp/github-action@v2
