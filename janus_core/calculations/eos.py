@@ -2,7 +2,6 @@
 
 from collections.abc import Sequence
 from copy import copy
-
 from typing import Any, Optional
 
 from ase import Atoms
