@@ -27,7 +27,7 @@ jobs:
         poetry env use ${{ matrix.python-version }}
         poetry install --with dev
 
-    - name: Run test suite  
+    - name: Run test suite
       env:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
@@ -51,4 +51,4 @@ jobs:
         with:
           parallel-finished: true
 
- 
+
