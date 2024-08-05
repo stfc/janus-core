@@ -44,10 +44,10 @@ def test_descriptors(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" not in atoms.info
-    assert "Cl_descriptor" not in atoms.info
-    assert "descriptors" not in atoms.arrays
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" not in atoms.info
+    assert "mace_mp_Cl_descriptor" not in atoms.info
+    assert "mace_mp_descriptors" not in atoms.arrays
 
     # Check only initial structure is minimized
     assert_log_contains(
@@ -84,9 +84,8 @@ def test_calc_per_element(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" in atoms.info
-    assert "Cl_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" in atoms.info
+    assert "mace_mp_Cl_descriptor" in atoms.info
 
     # Check only initial structure is minimized
     assert_log_contains(
@@ -123,9 +122,9 @@ def test_invariant(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" not in atoms.info
-    assert "Cl_descriptor" not in atoms.info
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" not in atoms.info
+    assert "mace_mp_Cl_descriptor" not in atoms.info
 
     # Check only initial structure is minimized
     assert_log_contains(
@@ -164,8 +163,8 @@ def test_traj(tmp_path):
 
     atoms = read(out_path, index=":")
     assert len(atoms) == 2
-    assert "descriptor" in atoms[0].info
-    assert "descriptor" in atoms[1].info
+    assert "mace_mp_descriptor" in atoms[0].info
+    assert "mace_mp_descriptor" in atoms[1].info
 
 
 def test_per_atom(tmp_path):
@@ -192,7 +191,7 @@ def test_per_atom(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "descriptors" in atoms.arrays
-    assert len(atoms.arrays["descriptors"]) == 8
-    assert atoms.arrays["descriptors"][0] == pytest.approx(-0.00203750)
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_descriptors" in atoms.arrays
+    assert len(atoms.arrays["mace_mp_descriptors"]) == 8
+    assert atoms.arrays["mace_mp_descriptors"][0] == pytest.approx(-0.00203750)

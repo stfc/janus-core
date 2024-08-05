@@ -133,18 +133,22 @@ class Descriptors(FileNameMixin):
             self.logger.info("calc_per_element: %s", self.calc_per_element)
             self.logger.info("calc_per_atom: %s", self.calc_per_atom)
 
+        arch = struct.calc.parameters["arch"]
+
         # Calculate mean descriptor and save mean
         descriptors = struct.calc.get_descriptors(
             struct, invariants_only=self.invariants_only
         )
         descriptor = np.mean(descriptors)
-        struct.info["descriptor"] = descriptor
+        struct.info[f"{arch}_descriptor"] = descriptor
 
         if self.calc_per_element:
             elements = set(struct.get_chemical_symbols())
             for element in elements:
                 pattern = [atom.index for atom in struct if atom.symbol == element]
-                struct.info[f"{element}_descriptor"] = np.mean(descriptors[pattern, :])
+                struct.info[f"{arch}_{element}_descriptor"] = np.mean(
+                    descriptors[pattern, :]
+                )
 
         if self.calc_per_atom:
-            struct.arrays["descriptors"] = np.mean(descriptors, axis=1)
+            struct.arrays[f"{arch}_descriptors"] = np.mean(descriptors, axis=1)

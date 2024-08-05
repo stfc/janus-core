@@ -28,9 +28,9 @@ def test_calc_descriptors(tmp_path):
     descriptors.run()
     atoms = descriptors.struct
     assert isinstance(atoms, Atoms)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" not in atoms.info
-    assert "Cl_descriptor" not in atoms.info
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" not in atoms.info
+    assert "mace_mp_Cl_descriptor" not in atoms.info
 
     # Check logging
     assert_log_contains(
@@ -57,10 +57,10 @@ def test_calc_per_element(tmp_path):
     atoms = descriptors.struct
 
     assert isinstance(atoms, Atoms)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" in atoms.info
-    assert "Cl_descriptor" in atoms.info
+    assert "mace_descriptor" in atoms.info
+    assert "mace_Na_descriptor" in atoms.info
+    assert "mace_Cl_descriptor" in atoms.info
 
-    assert atoms.info["descriptor"] == pytest.approx(-0.005626419559511429)
-    assert atoms.info["Cl_descriptor"] == pytest.approx(-0.009215340539869301)
-    assert atoms.info["Na_descriptor"] == pytest.approx(-0.0020374985791535563)
+    assert atoms.info["mace_descriptor"] == pytest.approx(-0.005626419559511429)
+    assert atoms.info["mace_Cl_descriptor"] == pytest.approx(-0.009215340539869301)
+    assert atoms.info["mace_Na_descriptor"] == pytest.approx(-0.0020374985791535563)
