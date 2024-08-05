@@ -21,9 +21,7 @@ jobs:
 
     - name: Install python dependencies
       run: |
-        echo "/github/home/.local/bin" >> $GITHUB_PATH
-        python3 -m pip install pipx
-        pipx install poetry
+        curl -sSL https://install.python-poetry.org | python3 -
         poetry env use ${{ matrix.python-version }}
         poetry install --with dev
 
