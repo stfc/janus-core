@@ -18,6 +18,8 @@ jobs:
     - name: set path
       run: |
           echo "/github/home/.local/bin" >> $GITHUB_PATH
+          rm -rf /github/home/.local
+          rm -rf /github/home/.cache
 
     - name: Install python dependencies
       run: |
