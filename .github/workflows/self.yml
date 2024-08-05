@@ -20,7 +20,7 @@ jobs:
 
     - name: Install python dependencies
       run: |
-        echo "/root/.local/bin" >> $GITHUB_PATH
+        echo "/github/home/.local/bin" >> $GITHUB_PATH
         python3 -m pip install pipx
         pipx install poetry
         poetry env use ${{ matrix.python-version }}
