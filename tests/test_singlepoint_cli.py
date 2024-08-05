@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from ase import Atoms
 from ase.io import read
 from typer.testing import CliRunner
 import yaml
@@ -301,3 +302,24 @@ def test_write_kwargs(tmp_path):
     assert "mace_mp_forces" in atoms.arrays
     assert "energy" in atoms.calc.results
     assert "forces" in atoms.calc.results
+
+
+def test_write_cif(tmp_path):
+    """Test writing out a cif file."""
+    results_path = tmp_path / "NaCl-results.cif"
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--write-kwargs",
+            "{'invalidate_calc': False, 'write_results': True}",
+            "--out",
+            results_path,
+        ],
+    )
+    assert result.exit_code == 0
+    atoms = read(results_path)
+    assert isinstance(atoms, Atoms)
