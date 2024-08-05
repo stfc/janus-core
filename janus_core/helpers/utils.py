@@ -8,6 +8,7 @@ from typing import Any, Literal, Optional, TextIO, get_args
 
 from ase import Atoms
 from ase.io import write
+from ase.io.formats import filetype
 from spglib import get_spacegroup
 
 from janus_core.helpers.janus_types import (
@@ -336,7 +337,22 @@ def output_structs(
                 image.info["arch"] = image.calc.parameters["arch"]
 
     if write_results:
-        write_kwargs.setdefault("write_results", not invalidate_calc)
+        # Check required filename is specified
+        if "filename" not in write_kwargs:
+            raise ValueError(
+                "`filename` must be specified in `write_kwargs` to write results"
+            )
+
+        # Get format of file to be written
+        write_format = write_kwargs.get(
+            "format", filetype(write_kwargs["filename"], read=False)
+        )
+
+        # write_results is only a valid kwarg for extxyz
+        if write_format in ("xyz", "extxyz"):
+            write_kwargs.setdefault("write_results", not invalidate_calc)
+        else:
+            write_kwargs.pop("write_results", None)
         write(images=images, **write_kwargs)
 
 
