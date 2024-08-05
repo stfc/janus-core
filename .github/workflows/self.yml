@@ -15,6 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: ip
+        run: curl https://api.ipify.org
+
     - name: Install python dependencies
       run: |
         echo "/root/.local/bin" >> $GITHUB_PATH
