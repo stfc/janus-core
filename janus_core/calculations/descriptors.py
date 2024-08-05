@@ -12,7 +12,8 @@ from janus_core.helpers.log import config_logger
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
-class Descriptors(FileNameMixin):  # pylint: disable=too-few-public-methods
+class Descriptors(FileNameMixin):
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """
     Prepare and calculate MLIP descriptors for structures.
 
@@ -26,6 +27,8 @@ class Descriptors(FileNameMixin):  # pylint: disable=too-few-public-methods
         Whether only the invariant descriptors should be returned. Default is True.
     calc_per_element : bool
         Whether to calculate mean descriptors for each element. Default is False.
+    calc_per_atom : bool
+        Whether to calculate descriptors for each atom. Default is False.
     write_results : bool
         True to write out structure with results of calculations. Default is False.
     write_kwargs : Optional[ASEWriteArgs],
@@ -41,6 +44,7 @@ class Descriptors(FileNameMixin):  # pylint: disable=too-few-public-methods
         struct_name: Optional[str] = None,
         invariants_only: bool = True,
         calc_per_element: bool = False,
+        calc_per_atom: bool = False,
         write_results: bool = False,
         write_kwargs: Optional[ASEWriteArgs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -58,6 +62,8 @@ class Descriptors(FileNameMixin):  # pylint: disable=too-few-public-methods
             Whether only the invariant descriptors should be returned. Default is True.
         calc_per_element : bool
             Whether to calculate mean descriptors for each element. Default is False.
+        calc_per_atom : bool
+            Whether to calculate descriptors for each atom. Default is False.
         write_results : bool
             True to write out structure with results of calculations. Default is False.
         write_kwargs : Optional[ASEWriteArgs],
@@ -70,6 +76,7 @@ class Descriptors(FileNameMixin):  # pylint: disable=too-few-public-methods
         self.struct_name = struct_name
         self.invariants_only = invariants_only
         self.calc_per_element = calc_per_element
+        self.calc_per_atom = calc_per_atom
         self.write_results = write_results
 
         if isinstance(self.struct, Sequence):
@@ -124,16 +131,24 @@ class Descriptors(FileNameMixin):  # pylint: disable=too-few-public-methods
         if self.logger:
             self.logger.info("invariants_only: %s", self.invariants_only)
             self.logger.info("calc_per_element: %s", self.calc_per_element)
+            self.logger.info("calc_per_atom: %s", self.calc_per_atom)
+
+        arch = struct.calc.parameters["arch"]
 
         # Calculate mean descriptor and save mean
         descriptors = struct.calc.get_descriptors(
             struct, invariants_only=self.invariants_only
         )
         descriptor = np.mean(descriptors)
-        struct.info["descriptor"] = descriptor
+        struct.info[f"{arch}_descriptor"] = descriptor
 
         if self.calc_per_element:
             elements = set(struct.get_chemical_symbols())
             for element in elements:
                 pattern = [atom.index for atom in struct if atom.symbol == element]
-                struct.info[f"{element}_descriptor"] = np.mean(descriptors[pattern, :])
+                struct.info[f"{arch}_{element}_descriptor"] = np.mean(
+                    descriptors[pattern, :]
+                )
+
+        if self.calc_per_atom:
+            struct.arrays[f"{arch}_descriptors"] = np.mean(descriptors, axis=1)

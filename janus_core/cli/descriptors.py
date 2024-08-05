@@ -47,6 +47,10 @@ def descriptors(
         bool,
         Option(help="Calculate mean descriptors for each element."),
     ] = False,
+    calc_per_atom: Annotated[
+        bool,
+        Option(help="Calculate descriptors for each atom."),
+    ] = False,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
@@ -78,6 +82,8 @@ def descriptors(
         Whether only the invariant descriptors should be returned. Default is True.
     calc_per_element : bool
         Whether to calculate mean descriptors for each element. Default is False.
+    calc_per_atom : bool
+        Whether to calculate descriptors for each atom. Default is False.
     arch : Optional[str]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -135,6 +141,7 @@ def descriptors(
         "struct": s_point.struct,
         "invariants_only": invariants_only,
         "calc_per_element": calc_per_element,
+        "calc_per_atom": calc_per_atom,
         "write_results": True,
         "write_kwargs": write_kwargs,
         "log_kwargs": {"filename": log, "filemode": "a"},

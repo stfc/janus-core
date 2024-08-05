@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from ase.io import read
+import pytest
 from typer.testing import CliRunner
 
 from janus_core.cli.janus import app
@@ -43,9 +44,10 @@ def test_descriptors(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" not in atoms.info
-    assert "Cl_descriptor" not in atoms.info
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" not in atoms.info
+    assert "mace_mp_Cl_descriptor" not in atoms.info
+    assert "mace_mp_descriptors" not in atoms.arrays
 
     # Check only initial structure is minimized
     assert_log_contains(
@@ -82,9 +84,8 @@ def test_calc_per_element(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" in atoms.info
-    assert "Cl_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" in atoms.info
+    assert "mace_mp_Cl_descriptor" in atoms.info
 
     # Check only initial structure is minimized
     assert_log_contains(
@@ -121,9 +122,9 @@ def test_invariant(tmp_path):
     assert out_path.exists()
 
     atoms = read(out_path)
-    assert "descriptor" in atoms.info
-    assert "Na_descriptor" not in atoms.info
-    assert "Cl_descriptor" not in atoms.info
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_Na_descriptor" not in atoms.info
+    assert "mace_mp_Cl_descriptor" not in atoms.info
 
     # Check only initial structure is minimized
     assert_log_contains(
@@ -162,5 +163,35 @@ def test_traj(tmp_path):
 
     atoms = read(out_path, index=":")
     assert len(atoms) == 2
-    assert "descriptor" in atoms[0].info
-    assert "descriptor" in atoms[1].info
+    assert "mace_mp_descriptor" in atoms[0].info
+    assert "mace_mp_descriptor" in atoms[1].info
+
+
+def test_per_atom(tmp_path):
+    """Test calculating descriptors for each atom."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+    out_path = tmp_path / "NaCl-descriptors.extxyz"
+    result = runner.invoke(
+        app,
+        [
+            "descriptors",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            out_path,
+            "--calc-per-atom",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert out_path.exists()
+
+    atoms = read(out_path)
+    assert "mace_mp_descriptor" in atoms.info
+    assert "mace_mp_descriptors" in atoms.arrays
+    assert len(atoms.arrays["mace_mp_descriptors"]) == 8
+    assert atoms.arrays["mace_mp_descriptors"][0] == pytest.approx(-0.00203750)
