@@ -164,7 +164,7 @@ def spacegroup(
     )
 
 
-def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict]:
+def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None, None]:
     """
     Ensure dictionaries that may be None are dictionaires.
 
