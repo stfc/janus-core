@@ -19,12 +19,16 @@ from janus_core.helpers.utils import dict_remove_hyphens
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
     """
-    Set default read_kwargs["index"] and check validity.
+    Set default read_kwargs["index"] and check its value is an integer.
+
+    To ensure only a single Atoms object is read, slices such as ":" are forbidden.
 
     Parameters
     ----------
     read_kwargs : dict[str, Any]
-        Keyword arguments to be passed to ase.io.read.
+        Keyword arguments to be passed to ase.io.read. If specified,
+        read_kwargs["index"] must be an integer, and if not, a default value
+        of 0 is set.
     """
     read_kwargs.setdefault("index", 0)
     try:
