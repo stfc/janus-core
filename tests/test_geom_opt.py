@@ -310,3 +310,25 @@ def test_invalid_str_filter():
 
     with pytest.raises(AttributeError):
         GeomOpt(single_point.struct, fmax=0.001, filter_func="test")
+
+
+def test_invalid_struct():
+    """Test setting invalid structure."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "benzene-traj.xyz",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(NotImplementedError):
+        GeomOpt(
+            single_point.struct,
+            fmax=0.001,
+            optimizer="test",
+        )
+    with pytest.raises(ValueError):
+        GeomOpt(
+            "structure",
+            fmax=0.001,
+            optimizer="test",
+        )

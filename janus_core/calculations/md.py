@@ -1,6 +1,7 @@
 # pylint: disable=too-many-lines
 """Run molecular dynamics simulations."""
 
+from collections.abc import Sequence
 import datetime
 from functools import partial
 from itertools import combinations_with_replacement
@@ -318,6 +319,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.log_kwargs = log_kwargs
         self.ensemble = ensemble
         self.seed = seed
+
+        if not isinstance(struct, Atoms):
+            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
+                raise NotImplementedError(
+                    "MD can only be run for one Atoms object at a time currently"
+                )
+            raise ValueError("`struct` must be an ASE Atoms object")
 
         FileNameMixin.__init__(self, struct, struct_name, file_prefix, ensemble)
 

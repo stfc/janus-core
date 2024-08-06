@@ -15,7 +15,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     ModelPath,
-    ReadKwargs,
+    ReadKwargsFirst,
     StructPath,
     Summary,
     WriteKwargs,
@@ -25,6 +25,7 @@ from janus_core.cli.utils import (
     end_summary,
     parse_typer_dicts,
     save_struct_calc,
+    set_read_kwargs_index,
     start_summary,
     yaml_converter_callback,
 )
@@ -143,7 +144,7 @@ def geomopt(
         str,
         Option(help="Path if saving optimization frames.  [default: None]"),
     ] = None,
-    read_kwargs: ReadKwargs = None,
+    read_kwargs: ReadKwargsFirst = None,
     calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
     write_kwargs: WriteKwargs = None,
@@ -192,7 +193,8 @@ def geomopt(
     traj : Optional[str]
         Path if saving optimization frames. Default is None.
     read_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to ase.io.read. Default is {}.
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is 0.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     minimize_kwargs : Optional[dict[str, Any]]
@@ -214,6 +216,9 @@ def geomopt(
     [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
     )
+
+    # Read only first structure by default and ensure only one image is read
+    set_read_kwargs_index(read_kwargs)
 
     # Set up single point calculator
     s_point = SinglePoint(

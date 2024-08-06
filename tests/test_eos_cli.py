@@ -229,3 +229,57 @@ def test_error_write_geomopt(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+@pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
+def test_valid_traj_input(read_kwargs, tmp_path):
+    """Test valid trajectory input structure handled."""
+    eos_raw_path = tmp_path / "traj-eos-raw.dat"
+    eos_fit_path = tmp_path / "traj-eos-fit.dat"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl-traj.xyz",
+            "--read-kwargs",
+            read_kwargs,
+            "--file-prefix",
+            tmp_path / "traj",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert eos_raw_path.exists()
+    assert eos_fit_path.exists()
+
+
+def test_invalid_traj_input(tmp_path):
+    """Test invalid trajectory input structure handled."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl-traj.xyz",
+            "--read-kwargs",
+            "{'index': ':'}",
+            "--file-prefix",
+            tmp_path / "traj",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)

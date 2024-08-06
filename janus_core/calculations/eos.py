@@ -1,5 +1,6 @@
 """Equation of State."""
 
+from collections.abc import Sequence
 from copy import copy
 from typing import Any, Optional
 
@@ -22,7 +23,7 @@ class EoS(FileNameMixin):
     Parameters
     ----------
     struct : Atoms
-        Structure.
+        Structure to calculate equation of state for.
     struct_name : Optional[str]
         Name of structure. Default is None.
     min_volume : float
@@ -146,6 +147,14 @@ class EoS(FileNameMixin):
         self.minimize_kwargs = minimize_kwargs
         self.write_kwargs = write_kwargs
         self.log_kwargs = log_kwargs
+
+        if not isinstance(struct, Atoms):
+            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
+                raise NotImplementedError(
+                    "The equation of state can only be calculated for one Atoms "
+                    "object at a time currently"
+                )
+            raise ValueError("`struct` must be an ASE Atoms object")
 
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)

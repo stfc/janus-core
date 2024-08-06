@@ -14,7 +14,7 @@ from janus_core.cli.types import (
     Device,
     LogPath,
     ModelPath,
-    ReadKwargs,
+    ReadKwargsAll,
     StructPath,
     Summary,
     WriteKwargs,
@@ -63,7 +63,7 @@ def descriptors(
             ),
         ),
     ] = None,
-    read_kwargs: ReadKwargs = None,
+    read_kwargs: ReadKwargsAll = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
     log: LogPath = "descriptors.log",
@@ -95,7 +95,8 @@ def descriptors(
         Path to save structure with calculated results. Default is inferred from name
         of the structure file.
     read_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to ase.io.read. Default is {}.
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is ":".
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs : Optional[dict[str, Any]]

@@ -842,3 +842,21 @@ def test_ensemble_kwargs(tmp_path):
 
     expected_mask = [[False, False, False], [False, True, False], [False, False, False]]
     assert np.array_equal(npt.dyn.mask, expected_mask)
+
+
+def test_invalid_struct():
+    """Test setting invalid structure."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "benzene-traj.xyz",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(NotImplementedError):
+        NPT(
+            single_point.struct,
+        )
+    with pytest.raises(ValueError):
+        NPT(
+            "structure",
+        )

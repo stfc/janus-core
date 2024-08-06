@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from ase.io import read
+import pytest
 
 from janus_core.calculations.phonons import Phonons
 from janus_core.calculations.single_point import SinglePoint
@@ -59,3 +60,21 @@ def test_optimize(tmp_path):
         log_file,
         includes=["Using filter", "Using optimizer", "Starting geometry optimization"],
     )
+
+
+def test_invalid_struct():
+    """Test setting invalid structure."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "benzene-traj.xyz",
+        architecture="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(NotImplementedError):
+        Phonons(
+            single_point.struct,
+        )
+    with pytest.raises(ValueError):
+        Phonons(
+            "structure",
+        )

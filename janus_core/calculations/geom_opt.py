@@ -1,5 +1,6 @@
 """Geometry optimization."""
 
+from collections.abc import Sequence
 from typing import Any, Callable, Optional, Union
 import warnings
 
@@ -159,6 +160,13 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.opt_kwargs = opt_kwargs
         self.write_kwargs = write_kwargs
         self.traj_kwargs = traj_kwargs
+
+        if not isinstance(struct, Atoms):
+            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
+                raise NotImplementedError(
+                    "Only one Atoms object at a time can currently be optimized"
+                )
+            raise ValueError("`struct` must be an ASE Atoms object")
 
         FileNameMixin.__init__(self, self.struct, None, None)
 

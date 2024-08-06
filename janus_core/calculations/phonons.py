@@ -1,5 +1,6 @@
 """Phonon calculations."""
 
+from collections.abc import Sequence
 from typing import Any, Optional
 
 from ase import Atoms
@@ -134,6 +135,14 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
+        if not isinstance(struct, Atoms):
+            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
+                raise NotImplementedError(
+                    "Phonons can only be calculated for one Atoms object at a time "
+                    "currently"
+                )
+            raise ValueError("`struct` must be an ASE Atoms object")
+
         FileNameMixin.__init__(self, struct, struct_name, file_prefix)
 
         [minimize_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(

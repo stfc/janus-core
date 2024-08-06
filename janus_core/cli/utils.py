@@ -17,6 +17,26 @@ from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices
 from janus_core.helpers.utils import dict_remove_hyphens
 
 
+def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
+    """
+    Set default read_kwargs["index"] and check its value is an integer.
+
+    To ensure only a single Atoms object is read, slices such as ":" are forbidden.
+
+    Parameters
+    ----------
+    read_kwargs : dict[str, Any]
+        Keyword arguments to be passed to ase.io.read. If specified,
+        read_kwargs["index"] must be an integer, and if not, a default value
+        of 0 is set.
+    """
+    read_kwargs.setdefault("index", 0)
+    try:
+        int(read_kwargs["index"])
+    except ValueError as e:
+        raise ValueError("`read_kwargs['index']` must be an integer") from e
+
+
 def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     """
     Convert list of TyperDict objects to list of dictionaries.
