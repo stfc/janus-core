@@ -48,6 +48,16 @@ The reviewer/s have the following responsibilities,
 - Only accepting a merge if all tests have passed
 - Using the comments system to request changes for the submittor to make
 
+### Enforcing style
+
+github actions will automatically run precommit and enforce the style.
+To reduce the number of failures in CI please run pre-commit locally before
+you push to the repo
+
+```sh
+   pre-commit run --all-files
+```
+
 ## Using the git for development
 
 The Github instance hosts an *upstream* repository, which we will refer to
@@ -164,6 +174,7 @@ $ git rebase -i upstream/main
 # push to your fork
 $ git push
 ```
+
 
 ### Advanced git
 
