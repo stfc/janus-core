@@ -7,11 +7,17 @@
 *.xml
 *.cif
 *.xyz
+*.extxyz
 *.yml
 *.yaml
 *.pdf
 *.hdf5
 *.traj
+*.ipynb
+*.jpg
+*.jpeg
+*.dot
+*.png
 ~*
 *~
 .project
