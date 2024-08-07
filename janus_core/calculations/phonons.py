@@ -300,6 +300,52 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         if write_force_consts:
             self.write_force_constants(**kwargs)
 
+    def write_force_constants(
+        self,
+        *,
+        phonopy_file: Optional[PathLike] = None,
+        force_consts_to_hdf5: Optional[bool] = None,
+        force_consts_file: Optional[PathLike] = None,
+    ) -> None:
+        """
+        Write results of force constants calculations.
+
+        Parameters
+        ----------
+        phonopy_file : Optional[PathLike]
+            Name of yaml file to save params of phonopy and optionally force constants.
+            Default is inferred from `file_prefix`.
+        force_consts_to_hdf5 : Optional[bool]
+            Whether to save the force constants separately to an hdf5 file. Default is
+            self.force_consts_to_hdf5.
+        force_consts_file : Optional[PathLike]
+            Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
+            is False. Default is inferred from `file_prefix`.
+        """
+        if "phonon" not in self.results:
+            raise ValueError(
+                "Force constants have not been calculated yet. "
+                "Please run `calc_force_constants` first"
+            )
+
+        if force_consts_to_hdf5 is None:
+            force_consts_to_hdf5 = self.force_consts_to_hdf5
+
+        phonopy_file = self._build_filename("phonopy.yml", filename=phonopy_file)
+        force_consts_file = self._build_filename(
+            "force_constants.hdf5", filename=force_consts_file
+        )
+
+        phonon = self.results["phonon"]
+
+        save_force_consts = not force_consts_to_hdf5
+        phonon.save(phonopy_file, settings={"force_constants": save_force_consts})
+
+        if force_consts_to_hdf5:
+            write_force_constants_to_hdf5(
+                phonon.force_constants, filename=force_consts_file
+            )
+
     def calc_bands(self, write_bands: Optional[bool] = None, **kwargs) -> None:
         """
         Calculate band structure and optionally write and plot results.
@@ -364,52 +410,6 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         if save_plots:
             plot_file = self._build_filename("auto_bands.svg", filename=plot_file)
             bplt.savefig(plot_file)
-
-    def write_force_constants(
-        self,
-        *,
-        phonopy_file: Optional[PathLike] = None,
-        force_consts_to_hdf5: Optional[bool] = None,
-        force_consts_file: Optional[PathLike] = None,
-    ) -> None:
-        """
-        Write results of force constants calculations.
-
-        Parameters
-        ----------
-        phonopy_file : Optional[PathLike]
-            Name of yaml file to save params of phonopy and optionally force constants.
-            Default is inferred from `file_prefix`.
-        force_consts_to_hdf5 : Optional[bool]
-            Whether to save the force constants separately to an hdf5 file. Default is
-            self.force_consts_to_hdf5.
-        force_consts_file : Optional[PathLike]
-            Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
-            is False. Default is inferred from `file_prefix`.
-        """
-        if "phonon" not in self.results:
-            raise ValueError(
-                "Force constants have not been calculated yet. "
-                "Please run `calc_force_constants` first"
-            )
-
-        if force_consts_to_hdf5 is None:
-            force_consts_to_hdf5 = self.force_consts_to_hdf5
-
-        phonopy_file = self._build_filename("phonopy.yml", filename=phonopy_file)
-        force_consts_file = self._build_filename(
-            "force_constants.hdf5", filename=force_consts_file
-        )
-
-        phonon = self.results["phonon"]
-
-        save_force_consts = not force_consts_to_hdf5
-        phonon.save(phonopy_file, settings={"force_constants": save_force_consts})
-
-        if force_consts_to_hdf5:
-            write_force_constants_to_hdf5(
-                phonon.force_constants, filename=force_consts_file
-            )
 
     def calc_thermal_props(
         self, write_thermal: Optional[bool] = None, **kwargs
