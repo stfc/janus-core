@@ -9,40 +9,15 @@ repos:
     - id: trailing-whitespace
     - id: check-json
 
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.15.0
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.5.6
   hooks:
-  - id: pyupgrade
-    args: ["--py39-plus"]
-
-- repo: https://github.com/PyCQA/isort
-  rev: 5.13.2
-  hooks:
-    - id: isort
-      args: ["--profile=black"]
-
-- repo: https://github.com/psf/black
-  rev: 24.1.1
-  hooks:
-    - id: black
-      args: [--line-length=88]
-
-- repo: local
-  hooks:
-  - id: pylint
-    language: system
-    types: [file, python]
-    name: pylint
-    description: "This hook runs the pylint static code analyzer"
-    exclude: &exclude_files >
-      (?x)^(
-          docs/.*|
-      )$
-    entry: pylint
-    args:
-      [
-        "--good-names=e,i,j,k"
-      ]
+    # Run the linter.
+    - id: ruff
+      args: [ --fix ]
+    # Run the formatter.
+    - id: ruff-format
 
 - repo: https://github.com/numpy/numpydoc
   rev: v1.6.0

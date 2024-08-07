@@ -45,6 +45,7 @@ codecarbon = "^2.5.0"
 alignn = { version = "2024.5.27", optional = true }
 sevenn = { version = "0.9.3", optional = true }
 torch_geometric = { version = "^2.5.3", optional = true }
+ruff = "^0.5.6"
 
 [tool.poetry.extras]
 alignnff = ["alignn"]
@@ -61,9 +62,8 @@ wheel = "^0.42"
 [tool.poetry.group.pre-commit]
 optional = true
 [tool.poetry.group.pre-commit.dependencies]
-black = "^24.1.1"
 pre-commit = "^3.6.0"
-pylint = "^2.15.10"
+ruff = "^0.5.6"
 
 [tool.poetry.group.docs]
 optional = true
@@ -80,15 +80,6 @@ sphinx-copybutton = "^0.5.2"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 88
-
-[tool.pylint.format]
-max-line-length = 88
-max-args = 10
-good-names = ["e", "i", "j", "k"]
-min-similarity-lines=9
-
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)
 python_files = "test_*.py"
@@ -100,11 +91,41 @@ pythonpath = ["."]
 # reporting which lines of your plugin are covered by tests
 source=["janus_core"]
 
-[tool.isort]
-# Configuration of [isort](https://isort.readthedocs.io)
-line_length = 88
-force_sort_within_sections = true
-sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER']
+[tool.ruff]
+exclude = ["conf.py"]
+target-version = "py39"
+
+[tool.ruff.lint]
+# Ignore complexity
+ignore = ["C901"]
+select = [
+    # pylint
+    "C", "R",
+    # pydocstyle
+    "D",
+    # pycodestyle
+    "E", "W",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "I",
+    # pep8-naming
+    "N",
+    # isort
+    "UP",
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pylint]
+max-args = 10
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = false
 
 [tool.numpydoc_validation]
 # report on all checks, except the below
