@@ -173,12 +173,12 @@ def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None
     dictionaries : Sequence[dict]
         Sequence of dictionaries that be be None.
 
-    Returns
-    -------
-    Generator[dict]
-        Generator of dictionaries set to {} if previously None.
+    Yields
+    ------
+    dict
+        Input dictionaries or ``{}`` if empty or `None`.
     """
-    return (dictionary if dictionary else {} for dictionary in dictionaries)
+    yield from (dictionary if dictionary else {} for dictionary in dictionaries)
 
 
 def dict_paths_to_strs(dictionary: dict) -> None:
