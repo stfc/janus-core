@@ -8,7 +8,7 @@ from ase.io import write
 import numpy as np
 
 from janus_core.helpers.janus_types import ASEWriteArgs, MaybeSequence
-from janus_core.helpers.log import config_logger
+from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
@@ -34,6 +34,15 @@ class Descriptors(FileNameMixin):
         results of calculations. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
+
+    Attributes
+    ----------
+    logger : Optional[logging.Logger]
+        Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
     """
 
     def __init__(
@@ -45,6 +54,7 @@ class Descriptors(FileNameMixin):
         write_results: bool = False,
         write_kwargs: Optional[ASEWriteArgs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise class.
@@ -66,8 +76,12 @@ class Descriptors(FileNameMixin):
             results of calculations. Default is {}.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+                Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        (write_kwargs, log_kwargs) = none_to_dict((write_kwargs, log_kwargs))
+        (write_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
+            (write_kwargs, log_kwargs, tracker_kwargs)
+        )
 
         self.struct = struct
         self.invariants_only = invariants_only
@@ -89,6 +103,7 @@ class Descriptors(FileNameMixin):
         # Configure logging
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)
+        self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
         # Set output file
         FileNameMixin.__init__(self, struct, None)
@@ -101,6 +116,7 @@ class Descriptors(FileNameMixin):
         """Calculate."""
         if self.logger:
             self.logger.info("Starting descriptors calculation")
+            self.tracker.start()
 
         if isinstance(self.struct, Sequence):
             for struct in self.struct:
@@ -109,6 +125,7 @@ class Descriptors(FileNameMixin):
             self._calc_descriptors(self.struct)
 
         if self.logger:
+            self.tracker.stop()
             self.logger.info("Descriptors calculation complete")
 
         if self.write_results:
