@@ -142,21 +142,20 @@ def test_output_structs(
 
 
 @pytest.mark.parametrize(
-    "dicts",
+    "dicts_in",
     [
         [None, {"a": 1}, {}, {"b": 2, "a": 11}, None],
         (None, {"a": 1}, {}, {"b": 2, "a": 11}, None),
     ],
 )
-def test_none_to_dict(dicts):
+def test_none_to_dict(dicts_in):
     """Test none_to_dict removes Nones from sequence, and preserves dictionaries."""
-    dicts = list(none_to_dict(dicts))
+    dicts = list(none_to_dict(dicts_in))
     for dictionary in dicts:
         assert dictionary is not None
 
     assert dicts[0] == {}
-    assert dicts[1]["a"] == 1
-    assert dicts[2] == {}
-    assert dicts[3]["b"] == 2
-    assert dicts[3]["a"] == 11
+    assert dicts[1] == dicts_in[1]
+    assert dicts[2] == dicts_in[2]
+    assert dicts[3] == dicts_in[3]
     assert dicts[4] == {}
