@@ -15,6 +15,7 @@ Welcome to janus-core's documentation!
    :caption: Contents:
 
    user_guide/index
+   getting_started/index
    developer_guide/index
    API documentation <apidoc/janus_core>
 
