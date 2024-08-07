@@ -109,7 +109,7 @@ def test_md_pp_cli(tmp_path):
 
 
 def test_rdf():
-    """Test computation of RDF"""
+    """Test computation of RDF."""
     data = read(DATA_PATH / "benzene.xyz")
     rdf = post_process.compute_rdf(data, index=0, rmax=5.0, nbins=100)
 
@@ -135,7 +135,7 @@ def test_rdf():
 
 
 def test_rdf_by_elements():
-    """Test the by_elements method of compute rdf"""
+    """Test the by_elements method of compute rdf."""
     data = read(DATA_PATH / "benzene.xyz")
 
     rdfs = post_process.compute_rdf(
@@ -173,7 +173,7 @@ def test_rdf_by_elements():
 
 
 def test_vaf():
-    """Test vaf will run"""
+    """Test vaf will run."""
     data = read(DATA_PATH / "lj-traj.xyz", index=":")
     vaf = post_process.compute_vaf(data)
 

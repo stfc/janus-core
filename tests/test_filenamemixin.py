@@ -11,13 +11,11 @@ DATA_PATH = Path(__file__).parent / "data"
 STRUCT = read(DATA_PATH / "benzene.xyz")
 
 
-class DummyFileHandler(FileNameMixin):  # pylint: disable=too-few-public-methods
+class DummyFileHandler(FileNameMixin):
     """Used for testing FileNameMixin methods."""
 
     def build_filename(self, *args, **kwargs):
-        """
-        Expose _build_filename publicly.
-        """
+        """Expose _build_filename publicly."""
         return self._build_filename(*args, **kwargs)
 
 

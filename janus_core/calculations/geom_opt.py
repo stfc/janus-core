@@ -21,7 +21,7 @@ from janus_core.helpers.utils import (
 )
 
 
-class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
+class GeomOpt(FileNameMixin):
     """
     Prepare and run geometry optimization.
 
@@ -78,7 +78,7 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         Run geometry optimization.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         struct: Atoms,
         fmax: float = 0.1,
@@ -204,7 +204,6 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
 
     def set_optimizer(self) -> None:
         """Set optimizer for geometry optimization."""
-
         self._set_functions()
         if self.logger:
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)

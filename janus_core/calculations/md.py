@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 """Run molecular dynamics simulations."""
 
 from collections.abc import Sequence
@@ -41,7 +40,7 @@ from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
 
-class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-attributes
+class MolecularDynamics(FileNameMixin):
     """
     Configure shared molecular dynamics simulation options.
 
@@ -152,7 +151,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         Get header string for molecular dynamics statistics.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
+    def __init__(
         self,
         struct: Atoms,
         ensemble: Optional[Ensembles] = None,
@@ -413,7 +412,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.offset = 0
         self.created_final_file = False
 
-        if "masses" not in self.struct.arrays.keys():
+        if "masses" not in self.struct.arrays:
             self.struct.set_masses()
 
         if self.seed:
@@ -476,7 +475,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         str
            Formatted temperature range if heating and target temp if running md.
         """
-
         temperature_prefix = ""
         if self.temp_start is not None and self.temp_end is not None:
             temperature_prefix += f"-T{self.temp_start}-T{self.temp_end}"
@@ -539,13 +537,11 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         str
             Header for molecular dynamics statistics.
         """
-        stats_header = (
+        return (
             "# Step | Real Time [s] | Time [fs] | Epot/N [eV] | Ekin/N [eV] | "
             "T [K] | Etot/N [eV] | Density [g/cm^3] | Volume [A^3] | P [GPa] | "
             "Pxx [GPa] | Pyy [GPa] | Pzz [GPa] | Pyz [GPa] | Pxz [GPa] | Pxy [GPa]"
         )
-
-        return stats_header
 
     def get_stats(self) -> str:
         """
@@ -594,7 +590,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             density = 0.0
             pressure_tensor = np.zeros(6)
 
-        stats = (
+        return (
             f"{step:10d} {real_time.total_seconds():.3f} {time:13.2f} {e_pot:.8e} "
             f"{e_kin:.8e} {current_temp:.3f} {e_pot + e_kin:.8e} {density:.3f} "
             f"{volume:.8e} {pressure:.8e} {pressure_tensor[0]:.8e} "
@@ -602,8 +598,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             f"{pressure_tensor[3]:.8e} {pressure_tensor[4]:.8e} "
             f"{pressure_tensor[5]:.8e}"
         )
-
-        return stats
 
     def _write_stats_file(self) -> None:
         """Write molecular dynamics statistics."""
@@ -715,7 +709,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             compute_rdf(data, ana, filename=out_paths, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
-
             file_name = self.post_process_kwargs.get("vaf_output_file", None)
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
             fft = self.post_process_kwargs.get("vaf_fft", False)
@@ -930,7 +923,7 @@ class NPT(MolecularDynamics):
             Additional keyword arguments.
         """
         self.pressure = pressure
-        super().__init__(ensemble=ensemble, file_prefix=file_prefix, *args, **kwargs)
+        super().__init__(*args, ensemble=ensemble, file_prefix=file_prefix, **kwargs)
 
         ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         self.ttime = thermostat_time * units.fs
@@ -965,7 +958,6 @@ class NPT(MolecularDynamics):
         str
            Formatted temperature range if heating and target temp if running md.
         """
-
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
         return f"{super()._parameter_prefix}{pressure}"
 
@@ -1061,7 +1053,7 @@ class NVT(MolecularDynamics):
         **kwargs
             Additional keyword arguments.
         """
-        super().__init__(ensemble=ensemble, *args, **kwargs)
+        super().__init__(*args, ensemble=ensemble, **kwargs)
 
         ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         self.dyn = Langevin(
@@ -1141,7 +1133,7 @@ class NVE(MolecularDynamics):
         **kwargs
             Additional keyword arguments.
         """
-        super().__init__(ensemble=ensemble, *args, **kwargs)
+        super().__init__(*args, ensemble=ensemble, **kwargs)
         ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
 
         self.dyn = VelocityVerlet(
@@ -1152,7 +1144,7 @@ class NVE(MolecularDynamics):
         )
 
 
-class NVT_NH(NPT):  # pylint: disable=invalid-name
+class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
     """
     Configure NVT Nosé-Hoover simulation.
 
@@ -1196,11 +1188,11 @@ class NVT_NH(NPT):  # pylint: disable=invalid-name
         """
         ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
         super().__init__(
+            *args,
             ensemble=ensemble,
             thermostat_time=thermostat_time,
             barostat_time=None,
             ensemble_kwargs=ensemble_kwargs,
-            *args,
             **kwargs,
         )
 

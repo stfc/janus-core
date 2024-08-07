@@ -20,7 +20,7 @@ from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
-class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
+class Phonons(FileNameMixin):
     """
     Configure, perform phonon calculations and write out results.
 
@@ -104,7 +104,7 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         Run phonon calculations.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,disable=too-many-locals
+    def __init__(
         self,
         struct: Atoms,
         calcs: MaybeSequence[PhononCalcs] = (),
@@ -254,7 +254,6 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         value : MaybeSequence[PhononCalcs]
             Phonon calculations to be run.
         """
-
         if isinstance(value, str):
             value = (value,)
 
@@ -690,8 +689,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             bplt.savefig(plot_file)
 
     # No magnetic moments considered
-    def _Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:
-        # pylint: disable=invalid-name
+    # Disable invalid-function-name
+    def _Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:  # noqa: N802
         """
         Convert Phonopy Atoms structure to ASE Atoms structure.
 
@@ -714,8 +713,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             calculator=self.calc,
         )
 
-    def _ASE_to_PhonopyAtoms(self, struct: Atoms) -> PhonopyAtoms:
-        # pylint: disable=invalid-name
+    # Disable invalid-function-name
+    def _ASE_to_PhonopyAtoms(self, struct: Atoms) -> PhonopyAtoms:  # noqa: N802
         """
         Convert ASE Atoms structure to Phonopy Atoms structure.
 

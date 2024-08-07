@@ -28,7 +28,7 @@ def parse_dict_class(value: Union[str, ASEReadArgs]):
     return TyperDict(ast.literal_eval(value))
 
 
-class TyperDict:  #  pylint: disable=too-few-public-methods
+class TyperDict:
     """
     Custom dictionary for typer.
 
@@ -51,7 +51,7 @@ class TyperDict:  #  pylint: disable=too-few-public-methods
 
     def __str__(self):
         """
-        String representation of class.
+        Return string representation of class.
 
         Returns
         -------

@@ -84,7 +84,6 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_output_file: Optional[PathLike]
 
 
-# pylint: disable=too-few-public-methods
 @runtime_checkable
 class Observable(Protocol):
     """Signature for correlation observable getter."""

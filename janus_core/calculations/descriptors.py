@@ -13,7 +13,6 @@ from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
 class Descriptors(FileNameMixin):
-    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """
     Prepare and calculate MLIP descriptors for structures.
 

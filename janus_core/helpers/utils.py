@@ -19,7 +19,7 @@ from janus_core.helpers.janus_types import (
 )
 
 
-class FileNameMixin(ABC):  # pylint: disable=too-few-public-methods
+class FileNameMixin(ABC):
     """
     Provide mixin functions for standard filename handling.
 
@@ -471,7 +471,6 @@ def _dump_ascii(
     --------
     write_table : Main entry function.
     """
-
     print(f"# {' | '.join(header)}", file=file)
 
     for cols in zip(*columns.values()):
