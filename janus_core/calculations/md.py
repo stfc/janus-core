@@ -501,14 +501,14 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             f"res-{step}.extxyz", f"T{self.temp}", prefix_override=self.restart_stem
         )
 
-    def _parse_correlations(self):
+    def _parse_correlations(self) -> None:
         """Parse correlation kwargs into Correlations."""
         if self.correlation_kwargs:
             self._correlations = [Correlation(**cor) for cor in self.correlation_kwargs]
         else:
             self._correlations = ()
 
-    def _attach_correlations(self):
+    def _attach_correlations(self) -> None:
         """Attach all correlations to self.dyn."""
         for i, _ in enumerate(self._correlations):
             self.dyn.attach(
@@ -516,7 +516,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self._correlations[i].update_frequency,
             )
 
-    def _write_correlations(self):
+    def _write_correlations(self) -> None:
         """Write out the correlations."""
         if self._correlations:
             param_pref = self._parameter_prefix if self.file_prefix is None else ""

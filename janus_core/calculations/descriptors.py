@@ -43,6 +43,11 @@ class Descriptors(FileNameMixin):
         Logger if log file has been specified.
     tracker : Optional[OfflineEmissionsTracker]
         Tracker if logging is enabled.
+
+    Methods
+    -------
+    run()
+        Calculate descriptors for structure(s)
     """
 
     def __init__(
@@ -113,7 +118,7 @@ class Descriptors(FileNameMixin):
         )
 
     def run(self) -> None:
-        """Calculate."""
+        """Calculate descriptors for structure(s)."""
         if self.logger:
             self.logger.info("Starting descriptors calculation")
             self.tracker.start()
@@ -133,7 +138,7 @@ class Descriptors(FileNameMixin):
 
     def _calc_descriptors(self, struct: Atoms) -> None:
         """
-        Calculate MLIP descriptors for the given structure(s).
+        Calculate MLIP descriptors a given structure.
 
         Parameters
         ----------

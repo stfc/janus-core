@@ -52,6 +52,27 @@ class EoS(FileNameMixin):
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
+
+    Attributes
+    ----------
+    logger : Optional[logging.Logger]
+        Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
+    results : EoSResults
+        Dictionary containing equation of state ASE object, and the fitted minimum
+        bulk modulus, volume, and energy.
+    volumes : list[float]
+        List of volumes of generated structures.
+    energies : list[float]
+        List of energies of generated structures.
+    lattice_scalars : NDArray[float64]
+        Lattice scalars of generated structures.
+
+    Methods
+    -------
+    run()
+        Calculate equation of state.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
@@ -108,22 +129,6 @@ class EoS(FileNameMixin):
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
-
-        Attributes
-        ----------
-        logger : Optional[logging.Logger]
-            Logger if log file has been specified.
-        tracker : Optional[OfflineEmissionsTracker]
-            Tracker if logging is enabled.
-        results : EoSResults
-            Dictionary containing equation of state ASE object, and the fitted minimum
-            bulk modulus, volume, and energy.
-        volumes : list[float]
-            List of volumes of generated structures.
-        energies : list[float]
-            List of energies of generated structures.
-        lattice_scalars : NDArray[float64]
-            Lattice scalars of generated structures.
         """
         (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
             (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs)

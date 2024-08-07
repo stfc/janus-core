@@ -69,6 +69,13 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         Logger if log file has been specified.
     tracker : Optional[OfflineEmissionsTracker]
         Tracker if logging is enabled.
+
+    Methods
+    -------
+    set_optimizer()
+        Set optimizer for geometry optimization.
+    run()
+        Run geometry optimization.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -226,7 +233,7 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         else:
             self.dyn = self.optimizer(self.struct, **self.opt_kwargs)
 
-    def _set_functions(self):
+    def _set_functions(self) -> None:
         """Set optimizer and filter functions."""
         if isinstance(self.optimizer, str):
             try:
@@ -240,7 +247,7 @@ class GeomOpt(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             except AttributeError as e:
                 raise AttributeError(f"No such filter: {self.filter_func}") from e
 
-    def run(self):
+    def run(self) -> None:
         """Run geometry optimization."""
         s_grp = spacegroup(self.struct, self.symmetry_tolerance, self.angle_tolerance)
         self.struct.info["initial_spacegroup"] = s_grp
