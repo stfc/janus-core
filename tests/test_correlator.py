@@ -11,7 +11,7 @@ from ase.units import GPa
 import numpy as np
 from pytest import approx
 from typer.testing import CliRunner
-from yaml import Loader, load
+from yaml import Loader, load, safe_load
 
 from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
@@ -66,6 +66,74 @@ def test_correlation():
     assert fft == approx(correlation, rel=1e-10)
 
 
+def test_vaf(tmp_path):
+    """Test the correlator against post-process."""
+    file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
+    cor_path = tmp_path / "Cl4Na4-nve-T300.0-cor.dat"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    na = []
+    cl = []
+    for i, atom in enumerate(single_point.struct):
+        if atom.symbol == "Na":
+            na.append(i)
+        else:
+            cl.append(i)
+
+    nve = NVE(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=10,
+        seed=1,
+        traj_every=1,
+        stats_every=1,
+        file_prefix=file_prefix,
+        correlation_kwargs=[
+            {
+                "a": Velocity(["x", "y", "z"], na),
+                "b": Velocity(["x", "y", "z"], na),
+                "name": "vaf_Na",
+                "blocks": 1,
+                "points": 11,
+                "averaging": 1,
+                "update_frequency": 1,
+            },
+            {
+                "a": Velocity(["x", "y", "z"], cl),
+                "b": Velocity(["x", "y", "z"], cl),
+                "name": "vaf_Cl",
+                "blocks": 1,
+                "points": 11,
+                "averaging": 1,
+                "update_frequency": 1,
+            },
+        ],
+        write_kwargs={"invalidate_calc": False},
+    )
+
+    nve.run()
+
+    assert cor_path.exists()
+    assert traj_path.exists()
+
+    traj = read(traj_path, index=":")
+    vaf_post = post_process.compute_vaf(
+        traj, use_velocities=True, filter_atoms=(na, cl)
+    )
+    with open(cor_path) as cor:
+        vaf = safe_load(cor)
+    vaf_na = np.array(vaf["vaf_Na"]["value"])
+    vaf_cl = np.array(vaf["vaf_Cl"]["value"])
+    assert vaf_na == approx(vaf_post[0], rel=1e-5)
+    assert vaf_cl == approx(vaf_post[1], rel=1e-5)
+
+
 def test_md_correlations(tmp_path):
     """Test correlations as part of MD cycle."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
@@ -78,10 +146,10 @@ def test_md_correlations(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    def user_observable_a(atoms: Atoms, kappa, **kwargs) -> float:
+    def user_observable_a(atoms: Atoms, kappa, *, gamma) -> float:
         """User specified getter for correlation."""
         return (
-            kwargs["gamma"]
+            gamma
             * kappa
             * atoms.get_stress(include_ideal_gas=True, voigt=True)[-1]
             / GPa
@@ -97,8 +165,8 @@ def test_md_correlations(tmp_path):
         file_prefix=file_prefix,
         correlation_kwargs=[
             {
-                "a": (user_observable_a, (2,), {"gamma": 2}),
-                "b": Stress("xy"),
+                "a": (Observable(1, getter=user_observable_a), (2,), {"gamma": 2}),
+                "b": Stress([("xy")]),
                 "name": "user_correlation",
                 "blocks": 1,
                 "points": 11,
@@ -106,8 +174,8 @@ def test_md_correlations(tmp_path):
                 "update_frequency": 1,
             },
             {
-                "a": Stress("xy"),
-                "b": Stress("xy"),
+                "a": Stress([("xy")]),
+                "b": Stress([("xy")]),
                 "name": "stress_xy_auto_cor",
                 "blocks": 1,
                 "points": 11,
