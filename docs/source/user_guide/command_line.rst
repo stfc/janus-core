@@ -35,6 +35,9 @@ This should return something similar to:
       singlepoint  Perform single point calculations and save to file.
       train        Running training for an MLIP.
 
+.. tip::
+
+   Auto completion for your shell can be set up by running ``janus --install-completion``
 
 A description of each subcommand, as well as valid options, can be listed b adding the ``--help`` option after the subcommand. For example,
 
