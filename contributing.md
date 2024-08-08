@@ -115,7 +115,7 @@ changed and prepare a commit.
 
 ``` sh
 # stage changes
-$ git add <filename|folder> to add the new things
+$ git add <filename|folder>   # to add the new things
 # commit the changes with a clear and brief message
 $ git commit -m "<commit message>"
 # push the commit to origin
@@ -124,18 +124,18 @@ $ git push
 
 #### Step 3a: Merge your branch into upstream
 
-Follow the provided link in after the push and continue the web interface
+Follow the provided link after the push and continue to the web interface.
 Add any relevant labels or milestones and
 assign a reviewer. Compare the code and if you are happy click to submit your pull request.
 
-After the pull request has been submitted tests will be run and your
+After the pull request has been submitted, tests will be run and your
 reviewer will be notified.
 
 #### Step 3b: Finalising the merge
 
 If all is OK with the commit your reviewer may set the request to be
 merged once all tests pass. Otherwise the reviewer may open discussions
-using the Github comment system to point out issues that may need to be
+using the GitHub comment system to point out issues that may need to be
 addressed before the commit can be merged.
 
 If changes need to be made you may make more commits onto your branch.
@@ -145,7 +145,7 @@ to indicate when and how they have been addressed.
 
 If your branch has become out of sync with *upstream* then conflicts may
 arise. Sometimes these cannot be automatically resolved and you will
-need to resolve them by hand. Github provides instructions for this, or
+need to resolve them by hand. GitHub provides instructions for this, or
 you can follow this routine,
 
 ``` sh
@@ -161,7 +161,7 @@ $ git push
 ```
 
 Alternatively you may use rebase which will replay the changes you made
-in your branch on top of *upstream/main* however be sure you understand
+in your branch on top of *upstream/main*. However, be sure you understand
 the differences between merge and rebase
 
 ``` sh
@@ -183,8 +183,8 @@ $ git push
 
 By adding two remotes, one for *upstream* and one for your *fork* it is
 possible to keep your *fork* in sync with *upstream*. This will greatly
-simplify merge requests. Github also offers a sync functionality in their
-web ui that achieves the same.
+simplify merge requests. GitHub also offers a sync functionality in their
+web UI that achieves the same.
 
 ``` sh
 # clone your fork
@@ -273,5 +273,5 @@ $ git push -d origin remoteBranch
 
 ## Code Coverage
 
-Ensure that any code you add does not reduce the code coverage in a meaningful way. Reviwers may insist on new test to be added,
+Ensure that any code you add does not reduce the code coverage in a meaningful way. Reviewers may insist on new test to be added,
 please cooperate.
