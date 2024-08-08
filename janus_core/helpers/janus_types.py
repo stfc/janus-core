@@ -4,21 +4,14 @@ from collections.abc import Collection, Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
-from typing import (
-    IO,
-    Literal,
-    Optional,
-    Protocol,
-    TypedDict,
-    TypeVar,
-    Union,
-    runtime_checkable,
-)
+from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
 
 from ase import Atoms
 from ase.eos import EquationOfState
 import numpy as np
 from numpy.typing import NDArray
+
+from janus_core.helpers.observables import Observable
 
 # General
 
@@ -82,25 +75,6 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_stop: Optional[int]
     vaf_step: int
     vaf_output_file: Optional[PathLike]
-
-
-@runtime_checkable
-class Observable(Protocol):
-    """Signature for correlation observable getter."""
-
-    def __call__(self, atoms: Atoms, *args, **kwargs) -> float:
-        """
-        Call the getter.
-
-        Parameters
-        ----------
-        atoms : Atoms
-            Atoms object to extract values from.
-        *args : tuple
-            Additional positional arguments passed to getter.
-        **kwargs : dict
-            Additional kwargs passed getter.
-        """
 
 
 class CorrelationKwargs(TypedDict, total=True):
