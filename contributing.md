@@ -7,7 +7,7 @@ will help keep merges clean and avoid many headaches.
 
 ## Golden rules
 
-In brief the rules for contribution are as follows,
+In brief the rules for contribution are as follows:
 
 -   Follow the branch, fix, merge model, from your own fork or fork/branch model.
 -   An issue must be created for every piece of work (bug, feature,
@@ -31,9 +31,7 @@ In brief the rules for contribution are as follows,
 Labels may be assigned to issues to help classify them. Examples
 include,
 
--   Testing: as in testing the water. This label shall be attached to
-    things one may think to make one day.
--   Development: this is what I am working now on.
+-   Testing: as in testing the water. This label shall be attached to things one may think to make one day
 -   Bug: anything in this is critical and shall be fixed asap.
 -   Design: queries or suggestions about the structure of the program.
 -   Enhancement: for issues relating to new features.
