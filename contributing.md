@@ -35,12 +35,14 @@ include,
 -   Bug: anything in this is critical and shall be fixed asap.
 -   Design: queries or suggestions about the structure of the program.
 -   Enhancement: for issues relating to new features.
+- Documentation: adding or enhancing documentation
 
 ## Review
 
 All merge requests will be reviewed to ensure the integrity of the code.
 
-The reviewer/s have the following responsibilities,
+The reviewer(s) have the following responsibilities:
+
 - Ensuring all contribution rules have been followed
 - Ensuring the [coding style](./coding_style.md) is adhered to
 - Only accepting a merge if all tests have passed
@@ -48,15 +50,15 @@ The reviewer/s have the following responsibilities,
 
 ### Enforcing style
 
-github actions will automatically run precommit and enforce the style.
-To reduce the number of failures in CI please run pre-commit locally before
-you push to the repo
+GitHub Actions will automatically run a pre-commit and enforce the coding style.
+To reduce the number of CI failures, please run the pre-commit locally before
+you push to your repository.
 
 ```sh
    pre-commit run --all-files
 ```
 
-## Using the git for development
+## Using git for development
 
 The Github instance hosts an *upstream* repository, which we will refer to
 as *upstream*. Contributors will work on their own personal copies of the
