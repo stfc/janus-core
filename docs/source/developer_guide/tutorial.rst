@@ -14,21 +14,29 @@ The following steps can then be taken, using `ALIGNN-FF <https://github.com/usni
 
 Dependencies for ``janus-core`` are specified through a ``pyproject.toml`` file, with syntax defined by `poetry's dependency specification <https://python-poetry.org/docs/dependency-specification/>`_.
 
-Required dependencies are listed under ``[tool.poetry.dependencies]``, but new MLIPs should initially be added as optional dependencies under ``[tool.poetry.group.extra-mlips.dependencies]``::
+New MLIPs should initially be added as optional dependencies under ``[tool.poetry.dependencies]``, and added as an ``extra`` under ``[tool.poetry.extras]``::
 
-    [tool.poetry.group.extra-mlips]
-    optional = true
-    [tool.poetry.group.extra-mlips.dependencies]
-    alignn = "^2024.5.27"
+    [tool.poetry.dependencies]
+    alignn = { version = "2024.5.27", optional = true }
+    sevenn = { version = "0.9.3", optional = true }
+    torch_geometric = { version = "^2.5.3", optional = true }
+
+    [tool.poetry.extras]
+    alignnff = ["alignn"]
+    sevennet = ["sevenn", "torch_geometric"]
 
 Poetry will automatically resolve dependencies of the MLIP, if present, to ensure consistency with existing dependencies.
 
-These dependencies can then be installed by running:
+.. note::
+    In the case of ``sevennet``, it was necessary to add ``torch_geometric`` as an additional dependency, but in most cases this should not be required
+
+Extra dependencies can then be installed by running:
 
 .. code-block:: bash
 
     poetry lock
-    poetry install --extras "alignn sevennet"
+    poetry install --extras "alignnff sevennet"
+
 
 
 2. Register MLIP architecture
