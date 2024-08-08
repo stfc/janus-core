@@ -152,7 +152,7 @@ you can follow this routine,
 $ git remote add upstream git@github.com:stfc/janus-core.git
 # get the changes to upstream since you started working on your issue
 $ git fetch upstream
-# merge these changes into your branch (assuming you want to merge into the main branch on devel)
+# merge these changes into your branch (assuming you want to merge into the main branch on upstream)
 $ git merge upstream/main
 # resolve any conflicts
 # push to your fork
@@ -167,8 +167,8 @@ the differences between merge and rebase
 # add upstream as a remote if you have not already
 $ git remote add upstream git@github.com:stfc/janus-core.git
 # get the changes to upstream since you started working on your issue
-$ git fetch devel
-# merge these changes into your branch (assuming you want to merge into the main branch on devel)
+$ git fetch upstream
+# merge these changes into your branch (assuming you want to merge into the main branch on upstream)
 $ git rebase -i upstream/main
 # resolve any conflicts
 # push to your fork
@@ -180,9 +180,10 @@ $ git push
 
 #### Keeping your fork in sync with project
 
-By adding two remotes, one for *devel* and one for your *fork* it is
-possible to keep your *fork* in sync with *devel*. This will greatly
-simplify merge requests.
+By adding two remotes, one for *upstream* and one for your *fork* it is
+possible to keep your *fork* in sync with *upstream*. This will greatly
+simplify merge requests. Github also offers a sync functionality in their
+web ui that achieves the same.
 
 ``` sh
 # clone your fork
@@ -199,11 +200,11 @@ the origin and project fetch and push links
 $ git remote -v
 origin  git@github.com:username/janus-core.git (fetch)
 origin  git@github.com:username/janus-core.git (push)
-devel git@github.com:stfc/janus-core.git (fetch)
-devel git@github.com:stfc/janus-core.git (push)
+upstream git@github.com:stfc/janus-core.git (fetch)
+upstream git@github.com:stfc/janus-core.git (push)
 ```
 
-When you need to sync your *fork* with *devel*, do the following,
+When you need to sync your *fork* with *upstream*, do the following,
 
 ``` sh
 # get the latest commits from upstream
@@ -223,7 +224,7 @@ available projects.
 
 When working on an issue you may use multiple commits. When you are
 ready to create a merge request, you should squash your changes into one
-commit in order to keep *devel* clean. This is most easily achieved with
+commit in order to keep *upstream* clean. This is most easily achieved with
 an interactive rebase.
 
 Assuming you have made five commits,
