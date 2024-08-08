@@ -247,7 +247,8 @@ class EoS(FileNameMixin):
         bulk_modulus *= 1.0e24 / kJ
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.tracker.stop()
             self.logger.info("Equation of state fitting complete")
 
@@ -302,5 +303,6 @@ class EoS(FileNameMixin):
             )
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.logger.info("Calculations for configurations complete")

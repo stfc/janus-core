@@ -255,7 +255,7 @@ class GeomOpt(FileNameMixin):
 
         if self.logger:
             self.logger.info("Starting geometry optimization")
-            self.tracker.start()
+            self.tracker.start_task("Geometry optimization")
 
         converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
 
@@ -296,5 +296,7 @@ class GeomOpt(FileNameMixin):
             )
 
         if self.logger:
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.tracker.stop()
             self.logger.info("Geometry optimization complete")
