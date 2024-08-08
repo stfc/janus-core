@@ -32,9 +32,9 @@ Labels may be assigned to issues to help classify them. Examples
 include,
 
 -   Testing: as in testing the water. This label shall be attached to things one may think to make one day
--   Bug: anything in this is critical and shall be fixed asap.
--   Design: queries or suggestions about the structure of the program.
--   Enhancement: for issues relating to new features.
+-   Bug: something is not working as expected. We typically aim to fix these ASAP
+-   Design: queries or suggestions about the structure of the program
+-   Enhancement: adding or improving on features
 - Documentation: adding or enhancing documentation
 
 ## Review
@@ -152,7 +152,7 @@ you can follow this routine,
 $ git remote add upstream git@github.com:stfc/janus-core.git
 # get the changes to upstream since you started working on your issue
 $ git fetch upstream
-# merge these changes into your branch (assuming you want to merge into the master branch on devel)
+# merge these changes into your branch (assuming you want to merge into the main branch on devel)
 $ git merge upstream/main
 # resolve any conflicts
 # push to your fork
@@ -208,7 +208,7 @@ When you need to sync your *fork* with *devel*, do the following,
 ``` sh
 # get the latest commits from upstream
 $ git fetch upstream
-# ensure you are in the master branch of your fork
+# ensure you are in the main branch of your fork
 $ git checkout main
 # merge your main branch into the main branch of upstream
 $ git merge upstream/main
