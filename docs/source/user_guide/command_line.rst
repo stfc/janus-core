@@ -232,17 +232,19 @@ This will run a singlepoint energy calculation on ``KCl.cif`` using the `MACE-MP
     ``properties`` must be passed as a Yaml list, as above, not as a string.
 
 
-Training and fine-tuning MACE models
-------------------------------------
+Training and fine-tuning MLIPs
+------------------------------
 
-MACE models can be trained by passing a configuration file to the `MACE CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_:
+.. note::
+    Currently only MACE models are supported. See the `MACE CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_ for further configuration details
+
+Models can be trained by passing a configuration file to the MLIP's command line interface:
 
 .. code-block:: bash
 
     janus train --mlip-config /path/to/training/config.yml
 
-
-This will create ``logs``, ``checkpoints`` and ``results`` folders, as well as saving the trained model, and a compiled version of the model.
+For MACE, this will create ``logs``, ``checkpoints`` and ``results`` directories, as well as saving the trained model, and a compiled version of the model.
 
 Foundational models can also be fine-tuned, by including the ``foundation_model`` option in your configuration file, and using ``--fine-tune`` option:
 
@@ -251,26 +253,28 @@ Foundational models can also be fine-tuned, by including the ``foundation_model`
     janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
 
 
-
 Calculate descriptors
---------------------------
+---------------------
 
-MACE descriptors can be calculated for structures (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field):
+.. note::
+    Currently only MACE models are supported for this calculation
+
+Descriptors of a structure can be calculated (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field):
 
 .. code-block:: bash
 
     janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --model-path small
 
 
-This will calculate the mean descriptor for this structure and save this as attached information (``descriptors``) in ``NaCl-descriptors.extxyz``, in addition to generating a log file, ``descriptors.log``, and summary of inputs, ``descriptors_summary.yml``.
+This will calculate the mean descriptor for this structure and save this as attached information (``mace_mp_descriptors``) in ``NaCl-descriptors.extxyz``, in addition to generating a log file, ``descriptors.log``, and summary of inputs, ``descriptors_summary.yml``.
 
 The mean descriptor per element can also be calculated, and all descriptors, rather than only the invariant part, can be used when calculating the means:
 
 .. code-block:: bash
 
-    janusdescriptors --struct tests/data/NaCl.cif --no-invariants-only --calc-per-element
+    janus descriptors --struct tests/data/NaCl.cif --no-invariants-only --calc-per-element
 
 
-This will generate the same output files, but additional labels (``Cl_descriptor`` and ``Na_descriptor``) will be saved in ``NaCl-descriptors.extxyz``.
+This will generate the same output files, but additional labels (``mace_mp_Cl_descriptor`` and ``mace_mp_Na_descriptor``) will be saved in ``NaCl-descriptors.extxyz``.
 
 For all options, run ``janus descriptors --help``.
