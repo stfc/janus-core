@@ -168,7 +168,7 @@ the differences between merge and rebase
 $ git remote add upstream git@github.com:stfc/janus-core.git
 # get the changes to upstream since you started working on your issue
 $ git fetch devel
-# merge these changes into your branch (assuming you want to merge into the master branch on devel)
+# merge these changes into your branch (assuming you want to merge into the main branch on devel)
 $ git rebase -i upstream/main
 # resolve any conflicts
 # push to your fork
