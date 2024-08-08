@@ -318,7 +318,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
             self.results["phonon"].symmetrize_force_constants(level=1)
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.tracker.flush()
             self.logger.info("Phonons calculation complete")
 
@@ -471,7 +472,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         ].get_thermal_properties_dict()
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.tracker.flush()
             self.logger.info("Thermal properties calculation complete")
 
@@ -541,7 +543,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].run_total_dos()
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.tracker.flush()
             self.logger.info("DOS calculation complete")
 
@@ -644,7 +647,8 @@ class Phonons(FileNameMixin):  # pylint: disable=too-many-instance-attributes
         self.results["phonon"].run_projected_dos()
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
             self.tracker.flush()
             self.logger.info("PDOS calculation complete")
 
