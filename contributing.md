@@ -31,7 +31,7 @@ In brief the rules for contribution are as follows:
 Labels may be assigned to issues to help classify them. Examples
 include,
 
--   Testing: as in testing the water. This label shall be attached to things one may think to make one day
+-   Testing: as in testing the water. This label should be attached to experimental developments.
 -   Bug: something is not working as expected. We typically aim to fix these ASAP
 -   Design: queries or suggestions about the structure of the program
 -   Enhancement: adding or improving on features
