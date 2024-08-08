@@ -173,9 +173,10 @@ janus singlepoint --struct KCl.cif --out KCl-results.cif --config config.yml
 
 This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "medium" force-field, saving the results to `KCl-results.cif`.
 
-
 > [!NOTE]
 > `properties` must be passed as a Yaml list, as above, not as a string.
+
+Example configurations for all commands can be found in [janus-tutorials](https://github.com/stfc/janus-tutorials/tree/main/configs)
 
 
 ## Python interface
