@@ -4,6 +4,14 @@ Getting started
 
 We recommend `installing poetry <https://python-poetry.org/docs/#installation>`_ for dependency management when developing for ``janus-core``.
 
+This provides a number of useful features, including:
+
+- Dependency management (``poetry [add,update,remove]`` etc.) and organization (groups)
+- Storing the versions of all installations in a ``poetry.lock`` file, for reproducible builds
+- Improved dependency resolution
+- Virtual environment management (optional)
+- Building and publishing tools
+
 Dependencies useful for development can then be installed by running::
 
     poetry install --with pre-commit,dev,docs
