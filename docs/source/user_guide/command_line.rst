@@ -217,7 +217,7 @@ For example, with the following configuration file and command:
     arch: mace_mp
     model-path: medium
     calc-kwargs:
-    dispersion: True
+      dispersion: True
 
 
 .. code-block:: bash
@@ -252,7 +252,7 @@ Foundational models can also be fine-tuned, by including the ``foundation_model`
 
 
 
-Calculate MACE descriptors
+Calculate descriptors
 --------------------------
 
 MACE descriptors can be calculated for structures (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field):
