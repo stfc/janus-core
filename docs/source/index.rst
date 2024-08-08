@@ -14,6 +14,7 @@ Welcome to janus-core's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   getting_started/getting_started
    user_guide/index
    developer_guide/index
    API documentation <apidoc/janus_core>
