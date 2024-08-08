@@ -23,6 +23,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import (
+    carbon_summary,
     check_config,
     end_summary,
     parse_typer_dicts,
@@ -424,6 +425,8 @@ def md(
 
     # Run molecular dynamics
     dyn.run()
+
+    carbon_summary(summary=summary, log=log)
 
     # Save time after simulation has finished
     end_summary(summary=summary)

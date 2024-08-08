@@ -21,6 +21,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import (
+    carbon_summary,
     check_config,
     end_summary,
     parse_typer_dicts,
@@ -287,6 +288,8 @@ def geomopt(
     # Run geometry optimization and save output structure
     optimizer = GeomOpt(**optimize_kwargs)
     optimizer.run()
+
+    carbon_summary(summary=summary, log=log)
 
     # Time after optimization has finished
     end_summary(summary)

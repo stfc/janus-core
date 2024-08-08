@@ -113,6 +113,30 @@ def start_summary(*, command: str, summary: Path, inputs: dict) -> None:
         yaml.dump(save_info, outfile, default_flow_style=False)
 
 
+def carbon_summary(*, summary: Path, log: Path) -> None:
+    """
+    Calculate and write carbon tracking summary.
+
+    Parameters
+    ----------
+    summary : Path
+        Path to summary file being saved.
+    log : Path
+        Path to log file with carbon emissions saved.
+    """
+    with open(log, encoding="utf8") as file:
+        logs = yaml.safe_load(file)
+
+    emissions = sum(
+        lg["message"]["emissions"]
+        for lg in logs
+        if isinstance(lg["message"], dict) and "emissions" in lg["message"]
+    )
+
+    with open(summary, "a", encoding="utf8") as outfile:
+        yaml.dump({"emissions": emissions}, outfile, default_flow_style=False)
+
+
 def end_summary(summary: Path) -> None:
     """
     Write final time to summary and close.
