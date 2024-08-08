@@ -28,7 +28,7 @@ These dependencies can then be installed by running:
 .. code-block:: bash
 
     poetry lock
-    poetry install --with extra-mlips
+    poetry install --extras "alignn sevennet"
 
 
 2. Register MLIP architecture
