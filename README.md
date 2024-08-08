@@ -147,7 +147,7 @@ Options:
   --help               Show this message and exit.
 ```
 
-Please see the [user guide](https://stfc.github.io/janus-core/user_guide) for additional examples of each subcommand.
+Please see the [user guide](https://stfc.github.io/janus-core/user_guide/command_line.html) for examples of each subcommand.
 
 
 ### Using configuration files
