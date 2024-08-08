@@ -23,6 +23,8 @@ Tools for machine learnt interatomic potentials
 - chgnet = 0.3.8
 - mace-torch = 0.3.6
 - matgl = 1.1.2
+- sevenn = 0.9.3 (optional)
+- alignn = 2024.5.27 (optional)
 
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
@@ -43,6 +45,14 @@ To get all the latest changes, `janus-core` can also be installed from GitHub:
 ```
 python3 -m pip install git+https://github.com/stfc/janus-core.git
 ```
+
+
+### Further help
+
+Please see [Getting Started](https://stfc.github.io/janus-core/getting_started/getting_started.html),
+as well as guides for janus-core's [Python](https://stfc.github.io/janus-core/user_guide/python.html)
+and [command line](https://stfc.github.io/janus-core/user_guide/command_line.html) interfaces,
+for additional information, or [open an issue](https://github.com/stfc/janus-core/issues/new) if something doesn't seem right.
 
 
 ## Features
