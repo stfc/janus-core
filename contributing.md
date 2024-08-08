@@ -23,7 +23,7 @@ In brief the rules for contribution are as follows:
 -   Open an issue for each piece of work done.
 -   Open issues for design discussions. The answers may be important for
     newer members.
--   New features, *e.g.* add new MLIP, the comments shall be used to
+-   New features, *e.g.* add new MLIP, comments should be used to
     provide succint reports on progress.
 
 ### Labels
