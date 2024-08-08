@@ -19,7 +19,7 @@ def test_calc_descriptors(tmp_path):
     """Test calculating equation of state from ASE atoms object."""
     struct = read(DATA_PATH / "NaCl.cif")
     log_file = tmp_path / "descriptors.log"
-    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     descriptors = Descriptors(
         struct,
@@ -44,7 +44,7 @@ def test_calc_per_element(tmp_path):
     log_file = tmp_path / "descriptors.log"
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 

@@ -43,7 +43,7 @@ def test_bands(tmp_path):
             log_path,
             "--summary",
             summary_path,
-            "--band",
+            "--bands",
         ],
     )
     assert result.exit_code == 0
@@ -68,15 +68,27 @@ def test_bands_simple(tmp_path):
             log_path,
             "--summary",
             summary_path,
-            "--band",
+            "--bands",
             "--no-write-full",
         ],
     )
     assert result.exit_code == 0
+
     assert autoband_results.exists()
     with open(autoband_results, encoding="utf8") as file:
         bands = yaml.safe_load(file)
-        assert "eigenvector" not in bands["phonon"][0]["band"][0].keys()
+    assert "eigenvector" not in bands["phonon"][0]["band"][0].keys()
+
+    # Read phonons summary file
+    assert summary_path.exists()
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+
+    assert "command" in phonon_summary
+    assert "janus phonons" in phonon_summary["command"]
+    assert "inputs" in phonon_summary
+    assert "calcs" in phonon_summary["inputs"]
+    assert phonon_summary["inputs"]["calcs"][0] == "bands"
 
 
 def test_hdf5(tmp_path):
@@ -199,7 +211,7 @@ def test_plot(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--pdos",
             "--dos",
-            "--band",
+            "--bands",
             "--hdf5",
             "--plot-to-file",
             "--file-prefix",
@@ -214,13 +226,22 @@ def test_plot(tmp_path):
     assert pdos_results.exists()
     assert dos_results.exists()
     assert hdf5_results.exists()
-    assert autoband_results.exists()
     for svg in svgs:
         assert svg.exists()
+
+    assert autoband_results.exists()
     with open(autoband_results, encoding="utf8") as file:
         bands = yaml.safe_load(file)
-        assert "eigenvector" in bands["phonon"][0]["band"][0].keys()
-        assert "group_velocity" in bands["phonon"][0]["band"][0].keys()
+    assert "eigenvector" in bands["phonon"][0]["band"][0].keys()
+    assert "group_velocity" in bands["phonon"][0]["band"][0].keys()
+
+    # Read phonons summary file
+    assert summary_path.exists()
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+    assert phonon_summary["inputs"]["calcs"][0] == "bands"
+    assert phonon_summary["inputs"]["calcs"][1] == "dos"
+    assert phonon_summary["inputs"]["calcs"][2] == "pdos"
 
 
 def test_supercell(tmp_path):

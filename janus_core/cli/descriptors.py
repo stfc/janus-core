@@ -119,7 +119,7 @@ def descriptors(
     # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct,
-        architecture=arch,
+        arch=arch,
         device=device,
         model_path=model_path,
         read_kwargs=read_kwargs,
@@ -135,7 +135,7 @@ def descriptors(
     if out:
         write_kwargs["filename"] = out
     else:
-        write_kwargs["filename"] = f"{s_point.struct_name}-descriptors.extxyz"
+        write_kwargs["filename"] = f"{s_point.file_prefix}-descriptors.extxyz"
 
     # Dictionary of inputs for optimize function
     descriptors_kwargs = {

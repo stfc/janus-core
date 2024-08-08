@@ -33,12 +33,12 @@ test_data = [
 ]
 
 
-@pytest.mark.parametrize("architecture, struct_path, expected, kwargs", test_data)
-def test_optimize(architecture, struct_path, expected, kwargs):
+@pytest.mark.parametrize("arch, struct_path, expected, kwargs", test_data)
+def test_optimize(arch, struct_path, expected, kwargs):
     """Test optimizing geometry using MACE."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / struct_path,
-        architecture=architecture,
+        arch=arch,
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -56,11 +56,12 @@ def test_saving_struct(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
+        properties="energy",
     )
 
-    init_energy = single_point.run("energy")["energy"]
+    init_energy = single_point.run()["energy"]
 
     optimizer = GeomOpt(
         single_point.struct,
@@ -77,7 +78,7 @@ def test_saving_traj(tmp_path):
     """Test saving optimization trajectory output."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     optimizer = GeomOpt(
@@ -92,7 +93,7 @@ def test_traj_reformat(tmp_path):
     """Test saving optimization trajectory in different format."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -114,7 +115,7 @@ def test_missing_traj_kwarg(tmp_path):
     """Test error if saving trajectory without opt_kwargs."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
     traj_path = tmp_path / "NaCl-traj.extxyz"
@@ -126,13 +127,13 @@ def test_hydrostatic_strain():
     """Test setting hydrostatic strain for filter."""
     single_point_1 = SinglePoint(
         struct_path=DATA_PATH / "NaCl-deformed.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
     single_point_2 = SinglePoint(
         struct_path=DATA_PATH / "NaCl-deformed.cif",
-        architecture="mace",
+        arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -169,7 +170,7 @@ def test_hydrostatic_strain():
 def test_set_calc():
     """Test setting the calculator without SinglePoint."""
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(architecture="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     init_energy = struct.get_potential_energy()
     optimizer = GeomOpt(struct)
@@ -194,9 +195,10 @@ def test_restart(tmp_path):
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-deformed.cif",
         calc_kwargs={"model": MODEL_PATH},
+        properties="energy",
     )
 
-    init_energy = single_point.run("energy")["energy"]
+    init_energy = single_point.run()["energy"]
     optimizer = GeomOpt(
         single_point.struct,
         steps=2,
@@ -207,7 +209,7 @@ def test_restart(tmp_path):
     with pytest.warns(UserWarning):
         optimizer.run()
 
-    intermediate_energy = single_point.run("energy")["energy"]
+    intermediate_energy = single_point.run()["energy"]
     assert intermediate_energy < init_energy
 
     optimizer = GeomOpt(
@@ -217,7 +219,7 @@ def test_restart(tmp_path):
         fmax=0.0001,
     )
     optimizer.run()
-    final_energy = single_point.run("energy")["energy"]
+    final_energy = single_point.run()["energy"]
     assert final_energy < intermediate_energy
 
 
@@ -226,7 +228,7 @@ def test_space_group():
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-sg.cif",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -243,7 +245,7 @@ def test_str_optimizer(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-sg.cif",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -264,7 +266,7 @@ def test_invalid_str_optimizer():
     """Test setting invalid optimizer function with string."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-sg.cif",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -282,7 +284,7 @@ def test_str_filter(tmp_path):
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-sg.cif",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -304,7 +306,7 @@ def test_invalid_str_filter():
     """Test setting invalid filter function with string."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-sg.cif",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 
@@ -316,7 +318,7 @@ def test_invalid_struct():
     """Test setting invalid structure."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "benzene-traj.xyz",
-        architecture="mace_mp",
+        arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
 

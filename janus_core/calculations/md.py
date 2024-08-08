@@ -36,7 +36,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
-from janus_core.helpers.utils import FileNameMixin, output_structs
+from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
@@ -49,9 +49,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
     ----------
     struct : Atoms
         Structure to simulate.
-    struct_name : str
-        Name of structure to simulate. Default is inferred from filepath or
-        chemical formula.
     ensemble : Ensembles
         Name for thermodynamic ensemble. Default is None.
     steps : int
@@ -158,7 +155,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
         self,
         struct: Atoms,
-        struct_name: Optional[str] = None,
         ensemble: Optional[Ensembles] = None,
         steps: int = 0,
         timestep: float = 1.0,
@@ -201,9 +197,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         ----------
         struct : Atoms
             Structure to simulate.
-        struct_name : Optional[str]
-            Name of structure to simulate. Default is inferred from filepath or
-            chemical formula.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is None.
         steps : int
@@ -283,13 +276,33 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
         """
+        (
+            minimize_kwargs,
+            write_kwargs,
+            post_process_kwargs,
+            correlation_kwargs,
+            log_kwargs,
+            tracker_kwargs,
+        ) = none_to_dict(
+            (
+                minimize_kwargs,
+                write_kwargs,
+                post_process_kwargs,
+                correlation_kwargs,
+                log_kwargs,
+                tracker_kwargs,
+            )
+        )
+
         self.struct = struct
-        self.timestep = timestep * units.fs
+        self.ensemble = ensemble
         self.steps = steps
+        self.timestep = timestep * units.fs
         self.temp = temp
         self.equil_steps = equil_steps
         self.minimize = minimize
         self.minimize_every = minimize_every
+        self.minimize_kwargs = minimize_kwargs
         self.rescale_velocities = rescale_velocities
         self.remove_rot = remove_rot
         self.rescale_every = rescale_every
@@ -309,17 +322,13 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         self.temp_end = temp_end
         self.temp_step = temp_step
         self.temp_time = temp_time * units.fs if temp_time else None
-        self.write_kwargs = write_kwargs if write_kwargs is not None else {}
-        self.post_process_kwargs = (
-            post_process_kwargs if post_process_kwargs is not None else {}
-        )
-        self.correlation_kwargs = (
-            correlation_kwargs if correlation_kwargs is not None else {}
-        )
+        self.write_kwargs = write_kwargs
+        self.post_process_kwargs = post_process_kwargs
+        self.correlation_kwargs = correlation_kwargs
         self.log_kwargs = log_kwargs
-        self.ensemble = ensemble
         self.seed = seed
 
+        # Validate parameters
         if not isinstance(struct, Atoms):
             if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
                 raise NotImplementedError(
@@ -327,26 +336,15 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 )
             raise ValueError("`struct` must be an ASE Atoms object")
 
-        FileNameMixin.__init__(self, struct, struct_name, file_prefix, ensemble)
-
-        self.write_kwargs.setdefault(
-            "columns", ["symbols", "positions", "momenta", "masses"]
-        )
         if "append" in self.write_kwargs:
             raise ValueError("`append` cannot be specified when writing files")
 
-        self.log_kwargs = (
-            log_kwargs if log_kwargs else {}
-        )  # pylint: disable=duplicate-code
-        self.tracker_kwargs = (
-            tracker_kwargs if tracker_kwargs else {}
-        )  # pylint: disable=duplicate-code
         if self.log_kwargs and "filename" not in self.log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
-        self.log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**self.log_kwargs)
-        self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
+        # Check temperatures for heating differ
+        if self.temp_start is not None and self.temp_start == self.temp_end:
+            raise ValueError("Start and end temperatures must be different")
 
         # Warn if attempting to rescale/minimize during dynamics
         # but equil_steps is too low
@@ -358,10 +356,6 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
         # Warn if attempting to remove rotation without resetting velocities
         if remove_rot and not rescale_velocities:
             warn("Rotation will not be removed unless `rescale_velocities` is True")
-
-        # Check temperatures for heating differ
-        if self.temp_start is not None and self.temp_start == self.temp_end:
-            raise ValueError("Start and end temperatures must be different")
 
         # Warn if mix of None and not None
         self.ramp_temp = (
@@ -381,14 +375,21 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 "heating to run"
             )
 
+        # Check validate start and end temperatures
         if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
             raise ValueError("Start and end temperatures must be positive")
 
-        self.minimize_kwargs = minimize_kwargs if minimize_kwargs else {}
-        self.restart_files = []
-        self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
-        self.n_atoms = len(self.struct)
+        self.write_kwargs.setdefault(
+            "columns", ["symbols", "positions", "momenta", "masses"]
+        )
 
+        # Configure logging
+        self.log_kwargs.setdefault("name", __name__)
+        self.logger = config_logger(**self.log_kwargs)
+        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+
+        # Set output file names
+        FileNameMixin.__init__(self, self.struct, file_prefix, self.ensemble)
         self.final_file = self._build_filename(
             "final.extxyz",
             self._parameter_prefix if file_prefix is None else "",
@@ -404,6 +405,10 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             self._parameter_prefix if file_prefix is None else "",
             filename=self.traj_file,
         )
+
+        self.restart_files = []
+        self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
+        self.n_atoms = len(self.struct)
 
         self.offset = 0
         self.created_final_file = False
@@ -496,14 +501,14 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             f"res-{step}.extxyz", f"T{self.temp}", prefix_override=self.restart_stem
         )
 
-    def _parse_correlations(self):
+    def _parse_correlations(self) -> None:
         """Parse correlation kwargs into Correlations."""
         if self.correlation_kwargs:
             self._correlations = [Correlation(**cor) for cor in self.correlation_kwargs]
         else:
             self._correlations = ()
 
-    def _attach_correlations(self):
+    def _attach_correlations(self) -> None:
         """Attach all correlations to self.dyn."""
         for i, _ in enumerate(self._correlations):
             self.dyn.attach(
@@ -511,7 +516,7 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
                 self._correlations[i].update_frequency,
             )
 
-    def _write_correlations(self):
+    def _write_correlations(self) -> None:
         """Write out the correlations."""
         if self._correlations:
             param_pref = self._parameter_prefix if self.file_prefix is None else ""

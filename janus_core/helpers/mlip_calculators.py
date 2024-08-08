@@ -65,7 +65,7 @@ def _set_model_path(
 
 def choose_calculator(
     # pylint: disable=too-many-locals, too-many-statements
-    architecture: Architectures = "mace",
+    arch: Architectures = "mace",
     device: Devices = "cpu",
     model_path: Optional[PathLike] = None,
     **kwargs,
@@ -75,7 +75,7 @@ def choose_calculator(
 
     Parameters
     ----------
-    architecture : Architectures, optional
+    arch : Architectures
         MLIP architecture. Default is "mace".
     device : Devices
         Device to run calculator on. Default is "cpu".
@@ -97,7 +97,7 @@ def choose_calculator(
         Invalid architecture specified.
     """
     # pylint: disable=import-outside-toplevel, too-many-branches, import-error
-    # Optional imports handled via `architecture`. We could catch these,
+    # Optional imports handled via `arch`. We could catch these,
     # but the error message is clear if imports are missing.
 
     model_path = _set_model_path(model_path, kwargs)
@@ -105,7 +105,7 @@ def choose_calculator(
     if not device in get_args(Devices):
         raise ValueError(f"`device` must be one of: {get_args(Devices)}")
 
-    if architecture == "mace":
+    if arch == "mace":
         from mace import __version__
         from mace.calculators import MACECalculator
 
@@ -113,14 +113,14 @@ def choose_calculator(
         if model_path is None:
             raise ValueError(
                 "Please specify `model_path`, as there is no "
-                f"default model for {architecture}"
+                f"default model for {arch}"
             )
         # Default to float64 precision
         kwargs.setdefault("default_dtype", "float64")
 
         calculator = MACECalculator(model_paths=model_path, device=device, **kwargs)
 
-    elif architecture == "mace_mp":
+    elif arch == "mace_mp":
         from mace import __version__
         from mace.calculators import mace_mp
 
@@ -130,7 +130,7 @@ def choose_calculator(
 
         calculator = mace_mp(model=model, device=device, **kwargs)
 
-    elif architecture == "mace_off":
+    elif arch == "mace_off":
         from mace import __version__
         from mace.calculators import mace_off
 
@@ -140,7 +140,7 @@ def choose_calculator(
 
         calculator = mace_off(model=model, device=device, **kwargs)
 
-    elif architecture == "m3gnet":
+    elif arch == "m3gnet":
         from matgl import __version__, load_model
         from matgl.apps.pes import Potential
         from matgl.ext.ase import M3GNetCalculator
@@ -164,7 +164,7 @@ def choose_calculator(
 
         calculator = M3GNetCalculator(potential=potential, **kwargs)
 
-    elif architecture == "chgnet":
+    elif arch == "chgnet":
         from chgnet import __version__
         from chgnet.model.dynamics import CHGNetCalculator
         from chgnet.model.model import CHGNet
@@ -185,7 +185,7 @@ def choose_calculator(
 
         calculator = CHGNetCalculator(model=model, use_device=device, **kwargs)
 
-    elif architecture == "alignn":
+    elif arch == "alignn":
         from alignn import __version__
         from alignn.ff.ff import (
             AlignnAtomwiseCalculator,
@@ -206,7 +206,7 @@ def choose_calculator(
 
         calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
 
-    elif architecture == "sevennet":
+    elif arch == "sevennet":
         from sevenn._const import SEVENN_VERSION as __version__
         from sevenn.sevennet_calculator import SevenNetCalculator
 
@@ -223,11 +223,11 @@ def choose_calculator(
 
     else:
         raise ValueError(
-            f"Unrecognized {architecture=}. Suported architectures "
+            f"Unrecognized {arch=}. Suported architectures "
             f"are {', '.join(Architectures.__args__)}"
         )
 
     calculator.parameters["version"] = __version__
-    calculator.parameters["arch"] = architecture
+    calculator.parameters["arch"] = arch
 
     return calculator

@@ -22,82 +22,68 @@ class DummyFileHandler(FileNameMixin):  # pylint: disable=too-few-public-methods
 
 
 @pytest.mark.parametrize(
-    "params,struct_name,file_prefix",
+    "params,file_prefix",
     (
         # Defaults to structure atoms from ASE
-        ((STRUCT, None, None), "C6H6", "C6H6"),
-        # Passing structure name sets file_prefix
-        ((STRUCT, "benzene", None), "benzene", "benzene"),
+        ((STRUCT, None), "C6H6"),
         # file_prefix just sets itself
-        ((STRUCT, None, "benzene"), "C6H6", "benzene"),
-        ((STRUCT, "benzene", "cake"), "benzene", "cake"),
+        ((STRUCT, "benzene"), "benzene"),
         # file_prefix ignores additional
-        ((STRUCT, "benzene", "benzene", "wowzers"), "benzene", "benzene"),
+        ((STRUCT, "benzene", "wowzers"), "benzene"),
         # Additional only applies where no file_prefix
-        ((STRUCT, "benzene", None, "wowzers"), "benzene", "benzene-wowzers"),
-        ((STRUCT, None, None, "wowzers"), "C6H6", "C6H6-wowzers"),
+        ((STRUCT, None, "wowzers"), "C6H6-wowzers"),
     ),
 )
-def test_file_name_mixin_init(params, struct_name, file_prefix):
+def test_file_name_mixin_init(params, file_prefix):
     """Test various options for initializing the mixin."""
     file_mix = DummyFileHandler(*params)
 
-    assert file_mix.struct_name == struct_name
     assert file_mix.file_prefix == Path(file_prefix)
 
 
 @pytest.mark.parametrize(
     "mixin_params,file_args,file_kwargs,file_name",
     (
-        ((STRUCT, None, None), ("data.xyz",), {}, "C6H6-data.xyz"),
-        ((STRUCT, "benzene", None), ("data.xyz",), {}, "benzene-data.xyz"),
-        ((STRUCT, None, "benzene"), ("data.xyz",), {}, "benzene-data.xyz"),
-        ((STRUCT, "benzene", "benzene"), ("data.xyz",), {}, "benzene-data.xyz"),
-        ((STRUCT, "benzene", "benzene"), ("data.xyz",), {}, "benzene-data.xyz"),
-        (
-            (STRUCT, "benzene", "benzene", "wowzers"),
-            ("data.xyz",),
-            {},
-            "benzene-data.xyz",
-        ),
-        ((STRUCT, None, "benzene", "wowzers"), ("data.xyz",), {}, "benzene-data.xyz"),
-        ((STRUCT, None, None, "wowzers"), ("data.xyz",), {}, "C6H6-wowzers-data.xyz"),
+        ((STRUCT, None), ("data.xyz",), {}, "C6H6-data.xyz"),
+        ((STRUCT, "benzene"), ("data.xyz",), {}, "benzene-data.xyz"),
+        ((STRUCT, "benzene", "wowzers"), ("data.xyz",), {}, "benzene-data.xyz"),
+        ((STRUCT, None, "wowzers"), ("data.xyz",), {}, "C6H6-wowzers-data.xyz"),
         # Additional stacks with base
         (
-            (STRUCT, None, None, "wowzers"),
+            (STRUCT, None, "wowzers"),
             ("data.xyz", "beef"),
             {},
             "C6H6-wowzers-beef-data.xyz",
         ),
         # Prefix override ignores class options
         (
-            (STRUCT, None, None, "wowzers"),
+            (STRUCT, None, "wowzers"),
             ("data.xyz",),
             {"prefix_override": "beef"},
             "beef-data.xyz",
         ),
         # But not additional
         (
-            (STRUCT, None, None, "wowzers"),
+            (STRUCT, None, "wowzers"),
             ("data.xyz", "tasty"),
             {"prefix_override": "beef"},
             "beef-tasty-data.xyz",
         ),
         # Filename overrides everything
         (
-            (STRUCT, None, None, "wowzers"),
+            (STRUCT, None, "wowzers"),
             ("data.xyz",),
             {"filename": "hello.xyz"},
             "hello.xyz",
         ),
         (
-            (STRUCT, None, None, "wowzers"),
+            (STRUCT, None, "wowzers"),
             ("data.xyz",),
             {"prefix_override": "beef", "filename": "hello.xyz"},
             "hello.xyz",
         ),
         (
-            (STRUCT, None, None, "wowzers"),
+            (STRUCT, None, "wowzers"),
             ("data.xyz", "tasty"),
             {"prefix_override": "beef", "filename": "hello.xyz"},
             "hello.xyz",

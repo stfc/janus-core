@@ -24,8 +24,6 @@ class EoS(FileNameMixin):
     ----------
     struct : Atoms
         Structure to calculate equation of state for.
-    struct_name : Optional[str]
-        Name of structure. Default is None.
     min_volume : float
         Minimum volume scale factor. Default is 0.95.
     max_volume : float
@@ -54,12 +52,32 @@ class EoS(FileNameMixin):
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
+
+    Attributes
+    ----------
+    logger : Optional[logging.Logger]
+        Logger if log file has been specified.
+    tracker : Optional[OfflineEmissionsTracker]
+        Tracker if logging is enabled.
+    results : EoSResults
+        Dictionary containing equation of state ASE object, and the fitted minimum
+        bulk modulus, volume, and energy.
+    volumes : list[float]
+        List of volumes of generated structures.
+    energies : list[float]
+        List of energies of generated structures.
+    lattice_scalars : NDArray[float64]
+        Lattice scalars of generated structures.
+
+    Methods
+    -------
+    run()
+        Calculate equation of state.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         struct: Atoms,
-        struct_name: Optional[str] = None,
         min_volume: float = 0.95,
         max_volume: float = 1.05,
         n_volumes: int = 7,
@@ -81,8 +99,6 @@ class EoS(FileNameMixin):
         ----------
         struct : Atoms
             Structure.
-        struct_name : Optional[str]
-            Name of structure. Default is None.
         min_volume : float
             Minimum volume scale factor. Default is 0.95.
         max_volume : float
@@ -113,23 +129,11 @@ class EoS(FileNameMixin):
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
-
-        Attributes
-        ----------
-        logger : Optional[logging.Logger]
-            Logger if log file has been specified.
-        tracker : Optional[OfflineEmissionsTracker]
-            Tracker if logging is enabled.
-        results : EoSResults
-            Dictionary containing equation of state ASE object, and the fitted minimum
-            bulk modulus, volume, and energy.
-        volumes : list[float]
-            List of volumes of generated structures.
-        energies : list[float]
-            List of energies of generated structures.
-        lattice_scalars : NDArray[float64]
-            Lattice scalars of generated structures.
         """
+        (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
+            (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs)
+        )
+
         self.struct = struct
         self.min_volume = min_volume
         self.max_volume = max_volume
@@ -137,17 +141,13 @@ class EoS(FileNameMixin):
         self.eos_type = eos_type
         self.minimize = minimize
         self.minimize_all = minimize_all
+        self.minimize_kwargs = minimize_kwargs
         self.write_results = write_results
         self.write_structures = write_structures
-        self.file_prefix = file_prefix
-
-        [minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
-            [minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs]
-        )
-        self.minimize_kwargs = minimize_kwargs
         self.write_kwargs = write_kwargs
         self.log_kwargs = log_kwargs
 
+        # Validate parameters
         if not isinstance(struct, Atoms):
             if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
                 raise NotImplementedError(
@@ -155,17 +155,6 @@ class EoS(FileNameMixin):
                     "object at a time currently"
                 )
             raise ValueError("`struct` must be an ASE Atoms object")
-
-        log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
-
-        FileNameMixin.__init__(self, struct, struct_name, file_prefix)
-
-        self.write_kwargs.setdefault(
-            "filename",
-            self._build_filename("generated.extxyz").absolute(),
-        )
 
         if (
             (self.minimize or self.minimize_all)
@@ -188,6 +177,18 @@ class EoS(FileNameMixin):
             raise ValueError("`min_volume` must be between 0 and 1.")
         if self.max_volume <= 1:
             raise ValueError("`max_volume` must be greater than 1.")
+
+        # Configure logging
+        log_kwargs.setdefault("name", __name__)
+        self.logger = config_logger(**log_kwargs)
+        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+
+        # Set output file
+        FileNameMixin.__init__(self, self.struct, file_prefix)
+        self.write_kwargs.setdefault(
+            "filename",
+            self._build_filename("generated.extxyz").absolute(),
+        )
 
         self.results = {}
         self.volumes = []

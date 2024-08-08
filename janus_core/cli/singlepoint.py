@@ -118,7 +118,10 @@ def singlepoint(
 
     singlepoint_kwargs = {
         "struct_path": struct,
-        "architecture": arch,
+        "properties": properties,
+        "write_kwargs": write_kwargs,
+        "write_results": True,
+        "arch": arch,
         "device": device,
         "model_path": model_path,
         "read_kwargs": read_kwargs,
@@ -150,7 +153,7 @@ def singlepoint(
     start_summary(command="singlepoint", summary=summary, inputs=inputs)
 
     # Run singlepoint calculation
-    s_point.run(properties=properties, write_results=True, write_kwargs=write_kwargs)
+    s_point.run()
 
     # Save time after simulation has finished
     end_summary(summary)

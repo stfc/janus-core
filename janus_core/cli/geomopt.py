@@ -223,7 +223,7 @@ def geomopt(
     # Set up single point calculator
     s_point = SinglePoint(
         struct_path=struct,
-        architecture=arch,
+        arch=arch,
         device=device,
         model_path=model_path,
         read_kwargs=read_kwargs,
@@ -239,7 +239,7 @@ def geomopt(
     if out:
         write_kwargs["filename"] = out
     else:
-        write_kwargs["filename"] = f"{s_point.struct_name}-opt.extxyz"
+        write_kwargs["filename"] = f"{s_point.file_prefix}-opt.extxyz"
 
     _set_minimize_kwargs(minimize_kwargs, traj, opt_cell_lengths, pressure)
 

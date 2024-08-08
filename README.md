@@ -222,10 +222,10 @@ janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch m
 
 This will save the Phonopy parameters, including displacements and force constants, to `NaCl-phonopy.yml` and `NaCl-force_constants.hdf5`, in addition to generating a log file, `phonons.log`, and summary of inputs, `phonons_summary.yml`.
 
-Additionally, the `--band` option can be added to calculate the band structure and save the results to `NaCl-auto_bands.yml`:
+Additionally, the `--bands` option can be added to calculate the band structure and save the results to `NaCl-auto_bands.yml`:
 
 ```shell
-janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --model-path small --band
+janus phonons --struct tests/data/NaCl.cif --supercell 2x2x2 --minimize --arch mace_mp --model-path small --bands
 ```
 
 If you need eigenvectors and group velocities written, add the `--write-full` option. This will generate a much larger file, but can be used to visualise phonon modes.

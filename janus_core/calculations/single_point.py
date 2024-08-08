@@ -34,13 +34,15 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
     struct : Optional[MaybeSequence[Atoms]]
         ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
         Default is None.
-    struct_path : Optional[str]
+    struct_path : Optional[PathLike]
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
-    struct_name : Optional[str]
-        Name of structure. Default is inferred from chemical formula if `struct`
-        is specified, else inferred from `struct_path`.
-    architecture : Literal[architectures]
+    properties : MaybeSequence[Properties]
+        Physical properties to calculate. If not specified, "energy",
+        "forces", and "stress" will be returned.
+    write_results : bool
+        True to write out structure with results of calculations. Default is False.
+    arch : Architectures
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
     device : Devices
@@ -52,6 +54,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         read_kwargs["index"] is ":".
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    write_kwargs : Optional[OutputKwargs]
+        Keyword arguments to pass to ase.io.write if saving structure with results of
+        calculations. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -59,18 +64,8 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
 
     Attributes
     ----------
-    architecture : Architectures
-        MLIP architecture to use for single point calculations.
-    struct : MaybeSequence[Atoms]
-        ASE Atoms structure(s) to simulate.
-    device : Devices
-        Device to run MLIP model on.
-    model_path : Optional[PathLike]
-        Path to MLIP model.
-    struct_path : Optional[str]
-        Path of structure to simulate.
-    struct_name : Optional[str]
-        Name of structure.
+    results : CalcResults
+        Dictionary of calculated results, with keys from `properties`.
     logger : Optional[logging.Logger]
         Logger if log file has been specified.
     tracker : Optional[OfflineEmissionsTracker]
@@ -78,24 +73,26 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
 
     Methods
     -------
-    read_structure(**kwargs)
+    read_structure()
         Read structure and structure name.
-    set_calculator(**kwargs)
+    set_calculator()
         Configure calculator and attach to structure.
-    run(properties=None)
+    run()
         Run single point calculations.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         struct: Optional[MaybeSequence[Atoms]] = None,
-        struct_path: Optional[str] = None,
-        struct_name: Optional[str] = None,
-        architecture: Architectures = "mace_mp",
+        struct_path: Optional[PathLike] = None,
+        properties: MaybeSequence[Properties] = (),
+        write_results: bool = False,
+        arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: Optional[PathLike] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
+        write_kwargs: Optional[OutputKwargs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
@@ -107,13 +104,15 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         struct : Optional[MaybeSequence[Atoms]]
             ASE Atoms structure(s) to simulate. Required if `struct_path`
             is None. Default is None.
-        struct_path : Optional[str]
+        struct_path : Optional[PathLike]
             Path of structure to simulate. Required if `struct` is None.
             Default is None.
-        struct_name : Optional[str]
-            Name of structure. Default is inferred from chemical formula if `struct`
-            is specified, else inferred from `struct_path`.
-        architecture : Architectures
+        properties : MaybeSequence[Properties]
+            Physical properties to calculate. If not specified, "energy",
+            "forces", and "stress" will be returned.
+        write_results : bool
+            True to write out structure with results of calculations. Default is False.
+        arch : Architectures
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
         device : Devices
@@ -125,99 +124,100 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             read_kwargs["index"] is ":".
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
+        write_kwargs : Optional[OutputKwargs],
+            Keyword arguments to pass to ase.io.write if saving structure with results
+            of calculations. Default is {}.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        if struct and struct_path:
-            raise ValueError(
-                "You cannot specify both the ASE Atoms structure (`struct`) "
-                "and a path to the structure file (`struct_path`)"
+        (read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = (
+            none_to_dict(
+                (read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs)
             )
+        )
 
-        if not struct and not struct_path:
+        self.struct = struct
+        self.struct_path = struct_path
+        self.properties = properties
+        self.write_results = write_results
+        self.arch = arch
+        self.device = device
+        self.model_path = model_path
+        self.read_kwargs = read_kwargs
+        self.calc_kwargs = calc_kwargs
+        self.write_kwargs = write_kwargs
+
+        # Validate parameters
+        if not self.struct and not self.struct_path:
             raise ValueError(
                 "Please specify either the ASE Atoms structure (`struct`) "
                 "or a path to the structure file (`struct_path`)"
             )
 
-        [read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs] = none_to_dict(
-            [read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs]
-        )
+        if self.struct and self.struct_path:
+            raise ValueError(
+                "You cannot specify both the ASE Atoms structure (`struct`) "
+                "and a path to the structure file (`struct_path`)"
+            )
 
         if log_kwargs and "filename" not in log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
+        if not self.model_path and "model_path" in self.calc_kwargs:
+            raise ValueError("`model_path` must be passed explicitly")
+
+        # Read full trajectory by default
+        self.read_kwargs.setdefault("index", ":")
+
+        # Read structure if given as path
+        file_prefix = None
+        if self.struct_path:
+            self.read_structure()
+            file_prefix = Path(self.struct_path).stem
+
+        # Configure logging
         log_kwargs.setdefault("name", __name__)
         self.logger = config_logger(**log_kwargs)
         self.tracker = config_tracker(self.logger, **tracker_kwargs)
 
-        self.architecture = architecture
-        self.device = device
-        self.model_path = model_path
-
-        self.struct_path = struct_path
-        self.struct_name = struct_name
-
-        # Read full trajectory by default
-        read_kwargs.setdefault("index", ":")
-
-        # Read structure if given as path
-        if self.struct_path:
-            self.read_structure(**read_kwargs)
-        else:
-            self.struct = struct
-
-        FileNameMixin.__init__(self, self.struct, self.struct_name, None)
-
         # Configure calculator
-        self.set_calculator(**calc_kwargs)
-
+        self.set_calculator()
         if self.logger:
             self.logger.info("Single point calculator configured")
 
-    def read_structure(self, **kwargs) -> None:
+        # Set output file
+        FileNameMixin.__init__(self, self.struct, file_prefix)
+        self.write_kwargs.setdefault(
+            "filename",
+            self._build_filename("results.extxyz").absolute(),
+        )
+
+        self.results = {}
+
+    def read_structure(self) -> None:
         """
         Read structure and structure name.
 
         If the file contains multiple structures, only the last configuration
         will be read by default.
-
-        Parameters
-        ----------
-        **kwargs
-            Keyword arguments passed to ase.io.read.
         """
         if not self.struct_path:
             raise ValueError("`struct_path` must be defined")
 
-        self.struct = read(self.struct_path, **kwargs)
-        if not self.struct_name:
-            self.struct_name = Path(self.struct_path).stem
+        self.struct = read(self.struct_path, **self.read_kwargs)
 
-    def set_calculator(
-        self, read_kwargs: Optional[ASEReadArgs] = None, **kwargs
-    ) -> None:
-        """
-        Configure calculator and attach to structure.
-
-        Parameters
-        ----------
-        read_kwargs : Optional[ASEReadArgs]
-            Keyword arguments to pass to ase.io.read. Default is {}.
-        **kwargs
-            Additional keyword arguments passed to the selected calculator.
-        """
+    def set_calculator(self) -> None:
+        """Configure calculator and attach to structure."""
         calculator = choose_calculator(
-            architecture=self.architecture,
+            arch=self.arch,
             device=self.device,
             model_path=self.model_path,
-            **kwargs,
+            **self.calc_kwargs,
         )
         if self.struct is None:
-            read_kwargs = read_kwargs if read_kwargs else {}
-            self.read_structure(**read_kwargs)
+            self.read_structure(**self.read_kwargs)
 
         if isinstance(self.struct, Sequence):
             for struct in self.struct:
@@ -227,6 +227,45 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
                 self.struct = self.struct[0]
         else:
             self.struct.calc = calculator
+
+    @property
+    def properties(self) -> Sequence[Properties]:
+        """
+        Physical properties to be calculated.
+
+        Returns
+        -------
+        Sequence[Properties]
+            Physical properties.
+        """
+        return self._properties
+
+    @properties.setter
+    def properties(self, value: MaybeSequence[Properties]) -> None:
+        """
+        Setter for `properties`.
+
+        Parameters
+        ----------
+        value : MaybeSequence[Properties]
+            Physical properties to be calculated.
+        """
+
+        if isinstance(value, str):
+            value = (value,)
+
+        if isinstance(value, Sequence):
+            for prop in value:
+                if prop not in get_args(Properties):
+                    raise NotImplementedError(
+                        f"Property '{prop}' cannot currently be calculated."
+                    )
+
+        # If none specified, get all valid properties
+        if not value:
+            value = get_args(Properties)
+
+        self._properties = value
 
     def _get_potential_energy(self) -> MaybeList[float]:
         """
@@ -276,62 +315,27 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         stress = self.struct.get_stress()
         return stress
 
-    def run(
-        self,
-        properties: MaybeSequence[Properties] = (),
-        write_results: bool = False,
-        write_kwargs: Optional[OutputKwargs] = None,
-    ) -> CalcResults:
+    def run(self) -> CalcResults:
         """
         Run single point calculations.
-
-        Parameters
-        ----------
-        properties : MaybeSequence[str]
-            Physical properties to calculate. If not specified, "energy",
-            "forces", and "stress" will be returned.
-        write_results : bool
-            True to write out structure with results of calculations. Default is False.
-        write_kwargs : Optional[OutputKwargs],
-            Keyword arguments to pass to ase.io.write if saving structure with
-            results of calculations. Default is {}.
 
         Returns
         -------
         CalcResults
-            Dictionary of calculated results.
+            Dictionary of calculated results, with keys from `properties`.
         """
-        results: CalcResults = {}
-        if isinstance(properties, str):
-            properties = [properties]
-
-        for prop in properties:
-            if prop not in get_args(Properties):
-                raise NotImplementedError(
-                    f"Property '{prop}' cannot currently be calculated."
-                )
-
-        # If none specified, get all valid properties
-        if len(properties) == 0:
-            properties = get_args(Properties)
-
-        write_kwargs = write_kwargs if write_kwargs else {}
-
-        write_kwargs.setdefault(
-            "filename",
-            self._build_filename("results.extxyz").absolute(),
-        )
+        self.results = {}
 
         if self.logger:
             self.logger.info("Starting single point calculation")
             self.tracker.start_task("Single point")
 
-        if "energy" in properties or len(properties) == 0:
-            results["energy"] = self._get_potential_energy()
-        if "forces" in properties or len(properties) == 0:
-            results["forces"] = self._get_forces()
-        if "stress" in properties or len(properties) == 0:
-            results["stress"] = self._get_stress()
+        if "energy" in self.properties:
+            self.results["energy"] = self._get_potential_energy()
+        if "forces" in self.properties:
+            self.results["forces"] = self._get_forces()
+        if "stress" in self.properties:
+            self.results["stress"] = self._get_stress()
 
         if self.logger:
             self.tracker.stop_task()
@@ -340,9 +344,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
 
         output_structs(
             self.struct,
-            write_results=write_results,
-            properties=properties,
-            write_kwargs=write_kwargs,
+            write_results=self.write_results,
+            properties=self.properties,
+            write_kwargs=self.write_kwargs,
         )
 
-        return results
+        return self.results

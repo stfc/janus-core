@@ -27,7 +27,7 @@ ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 
 
 @pytest.mark.parametrize(
-    "architecture, device, kwargs",
+    "arch, device, kwargs",
     [
         ("mace", "cpu", {"model": MACE_MP_PATH}),
         ("mace", "cpu", {"model_paths": MACE_MP_PATH}),
@@ -51,20 +51,20 @@ ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
     ],
 )
-def test_mlips(architecture, device, kwargs):
+def test_mlips(arch, device, kwargs):
     """Test mace calculators can be configured."""
-    calculator = choose_calculator(architecture=architecture, device=device, **kwargs)
+    calculator = choose_calculator(arch=arch, device=device, **kwargs)
     assert calculator.parameters["version"] is not None
 
 
 def test_invalid_arch():
     """Test error raised for invalid architecture."""
     with pytest.raises(ValueError):
-        choose_calculator(architecture="invalid")
+        choose_calculator(arch="invalid")
 
 
 @pytest.mark.parametrize(
-    "architecture, model_path",
+    "arch, model_path",
     [
         ("mace", "/invalid/path"),
         ("mace_off", "/invalid/path"),
@@ -73,10 +73,10 @@ def test_invalid_arch():
         ("chgnet", "/invalid/path"),
     ],
 )
-def test_invalid_model_path(architecture, model_path):
+def test_invalid_model_path(arch, model_path):
     """Test error raised for invalid model_path."""
     with pytest.raises((ValueError, RuntimeError)):
-        choose_calculator(architecture=architecture, model_path=model_path)
+        choose_calculator(arch=arch, model_path=model_path)
 
 
 @pytest.mark.parametrize(
@@ -91,19 +91,19 @@ def test_invalid_model_path(architecture, model_path):
 def test_model_model_paths(kwargs):
     """Test error raised if model path is specified in multiple ways."""
     with pytest.raises(ValueError):
-        choose_calculator(architecture="mace", **kwargs)
+        choose_calculator(arch="mace", **kwargs)
 
 
-@pytest.mark.parametrize("architecture", ["mace_mp", "mace_off"])
-def test_invalid_device(architecture):
-    """Test error raised for invalid device is specified."""
+@pytest.mark.parametrize("arch", ["mace_mp", "mace_off"])
+def test_invalid_device(arch):
+    """Test error raised if invalid device is specified."""
     with pytest.raises(ValueError):
-        choose_calculator(architecture=architecture, device="invalid")
+        choose_calculator(arch=arch, device="invalid")
 
 
 @pytest.mark.extra_mlips
 @pytest.mark.parametrize(
-    "architecture, device, kwargs",
+    "arch, device, kwargs",
     [
         ("alignn", "cpu", {}),
         ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
@@ -117,10 +117,10 @@ def test_invalid_device(architecture):
         ("sevennet", "cpu", {"model": "sevennet-0"}),
     ],
 )
-def test_extra_mlips(architecture, device, kwargs):
+def test_extra_mlips(arch, device, kwargs):
     """Test extra MLIPs (alignn) can be configured."""
     calculator = choose_calculator(
-        architecture=architecture,
+        arch=arch,
         device=device,
         **kwargs,
     )
@@ -132,22 +132,22 @@ def test_extra_mlips(architecture, device, kwargs):
     "kwargs",
     [
         {
-            "architecture": "alignn",
+            "arch": "alignn",
             "model_path": ALIGNN_PATH / "best_model.pt",
             "model": ALIGNN_PATH / "best_model.pt",
         },
         {
-            "architecture": "alignn",
+            "arch": "alignn",
             "model_path": ALIGNN_PATH / "best_model.pt",
             "path": ALIGNN_PATH / "best_model.pt",
         },
         {
-            "architecture": "sevennet",
+            "arch": "sevennet",
             "model_path": SEVENNET_PATH,
             "path": SEVENNET_PATH,
         },
         {
-            "architecture": "sevennet",
+            "arch": "sevennet",
             "model_path": SEVENNET_PATH,
             "model": SEVENNET_PATH,
         },
