@@ -30,7 +30,7 @@ Packages in the ``dev`` dependency group allow tests to be run locally using ``p
 
 Alternatively, tests can be run in separate virtual environments using ``tox``::
 
-    tox run -e all
+    tox run -e ALL
 
 This will run all unit tests for multiple versions of Python, in addition to testing that the pre-commit passes, and that documentation builds, mirroring the automated tests on GitHub.
 
