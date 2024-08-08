@@ -46,7 +46,7 @@ The reviewer(s) have the following responsibilities:
 - Ensuring all contribution rules have been followed
 - Ensuring the [coding style](./coding_style.md) is adhered to
 - Only accepting a merge if all tests have passed
-- Using the comments system to request changes for the submittor to make
+- Using the comments system to request changes for the submitter to make
 
 ### Enforcing style
 
@@ -60,13 +60,14 @@ you push to your repository.
 
 ## Using git for development
 
-The Github instance hosts an *upstream* repository, which we will refer to
+The GitHub instance hosts an *upstream* repository, which we will refer to
 as *upstream*. Contributors will work on their own personal copies of the
 repository by creating *forks*. This allows us to keep *upstream* clean
-(one commit per merge request, if possible, all commits passing tests)
+(one commit per merge request, if possible, otherwise commits 
+should be squashed before merging. All commits should pass tests.)
 while users may work on their own *fork*, creating commits and changing
-the code as they see fit. Only in exceptional circumstances branches are allowed in *upstream*,
-chat in zulip channel about them before you push any.
+the code as they see fit. Only in exceptional circumstances are branches allowed in *upstream*.
+Please discuss in the zulip channel before you push any.
 
 The *upstream* repository may be cloned as follows,
 
@@ -109,7 +110,7 @@ $ git push -u origin issueXYZ
 
 #### Step 2: Fix the issue and commit your changes
 
-Fix whatever is wrong. Use git status to see which files you have
+Fix whatever is wrong. Use `git status` to see which files you have
 changed and prepare a commit.
 
 ``` sh
