@@ -839,7 +839,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
 
             if self.logger:
                 self.logger.info("Temperature ramp complete at %sK", temps[-1])
-                self.tracker.stop_task()
+                emissions = self.tracker.stop_task().emissions
+                self.struct.info["emissions"] = emissions
 
         # Run MD
         if self.steps > 0:
@@ -855,7 +856,8 @@ class MolecularDynamics(FileNameMixin):  # pylint: disable=too-many-instance-att
             self._write_final_state()
             self.created_final_file = True
             if self.logger:
-                self.tracker.stop_task()
+                emissions = self.tracker.stop_task().emissions
+                self.struct.info["emissions"] = emissions
                 self.tracker.stop()
                 self.logger.info("Molecular dynamics simulation complete")
 
