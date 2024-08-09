@@ -63,7 +63,7 @@ you push to your repository.
 The GitHub instance hosts an *upstream* repository, which we will refer to
 as *upstream*. Contributors will work on their own personal copies of the
 repository by creating *forks*. This allows us to keep *upstream* clean
-(one commit per merge request, if possible, otherwise commits 
+(one commit per merge request, if possible, otherwise commits
 should be squashed before merging. All commits should pass tests.)
 while users may work on their own *fork*, creating commits and changing
 the code as they see fit. Only in exceptional circumstances are branches allowed in *upstream*.
