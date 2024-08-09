@@ -5,12 +5,52 @@ import shutil
 
 from mace.cli.run_train import run as run_train  # pylint: disable=unused-import
 from typer.testing import CliRunner
+import yaml
 
 from janus_core.cli.janus import app
 
 DATA_PATH = Path(__file__).parent / "data"
+MODEL_PATH = Path(__file__).parent / "models"
 
 runner = CliRunner()
+
+
+def write_tmp_config(config_path: Path, tmp_path: Path) -> Path:
+    """
+    Fix paths in config files and write corrected config to tmp_path.
+
+    Parameters
+    ----------
+    config_path : Path
+        Path to yaml config file to be fixed.
+    tmp_path : Path
+        Temporary path from pytest in which to write corrected config.
+
+    Returns
+    -------
+    Path
+        Temporary path to corrected config file.
+    """
+    # Load config from tests/data
+    with open(config_path, encoding="utf8") as file:
+        config = yaml.safe_load(file)
+
+    # Use DATA_PATH to set paths relative to this test file
+    for file in ("train_file", "test_file", "valid_file"):
+        if file in config and (DATA_PATH / Path(config[file]).name).exists():
+            config[file] = str(DATA_PATH / Path(config[file]).name)
+
+    # Use MODEL_PATH to set paths relative to this test file
+    for file in ("foundation_model",):
+        if file in config and (MODEL_PATH / Path(config[file]).name).exists():
+            config[file] = str(MODEL_PATH / Path(config[file]).name)
+
+    # Write out temporary config with corrected paths
+    tmp_config = tmp_path / "config.yml"
+    with open(tmp_config, "w", encoding="utf8") as file:
+        yaml.dump(config, file)
+
+    return tmp_config
 
 
 def test_help():
@@ -20,7 +60,7 @@ def test_help():
     assert "Usage: janus train [OPTIONS]" in result.stdout
 
 
-def test_train():
+def test_train(tmp_path):
     """Test MLIP training."""
     model = "test.model"
     compiled_model = "test_compiled.model"
@@ -34,7 +74,7 @@ def test_train():
     assert not Path(results_path).exists()
     assert not Path(checkpoints_path).exists()
 
-    config = DATA_PATH / "mlip_train.yml"
+    config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
 
     result = runner.invoke(
         app,
@@ -63,9 +103,9 @@ def test_train():
         assert result.exit_code == 0
 
 
-def test_train_with_foundation():
+def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
-    config = DATA_PATH / "mlip_train_invalid.yml"
+    config = write_tmp_config(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
 
     result = runner.invoke(
         app,
@@ -79,7 +119,7 @@ def test_train_with_foundation():
     assert isinstance(result.exception, ValueError)
 
 
-def test_fine_tune():
+def test_fine_tune(tmp_path):
     """Test MLIP fine-tuning."""
     model = "test-finetuned.model"
     compiled_model = "test-finetuned_compiled.model"
@@ -93,7 +133,7 @@ def test_fine_tune():
     assert not Path(results_path).exists()
     assert not Path(checkpoints_path).exists()
 
-    config = DATA_PATH / "mlip_fine_tune.yml"
+    config = write_tmp_config(DATA_PATH / "mlip_fine_tune.yml", tmp_path)
 
     result = runner.invoke(
         app,
