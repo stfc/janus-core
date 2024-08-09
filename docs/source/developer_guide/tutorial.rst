@@ -14,7 +14,7 @@ The following steps can then be taken, using `ALIGNN-FF <https://github.com/usni
 
 Dependencies for ``janus-core`` are specified through a ``pyproject.toml`` file, with syntax defined by `poetry's dependency specification <https://python-poetry.org/docs/dependency-specification/>`_.
 
-New MLIPs should initially be added as optional dependencies under ``[tool.poetry.dependencies]``, and added as an ``extra`` under ``[tool.poetry.extras]``::
+New MLIPs should be added as optional dependencies under ``[tool.poetry.dependencies]``, and added as an ``extra`` under ``[tool.poetry.extras]``::
 
     [tool.poetry.dependencies]
     alignn = { version = "2024.5.27", optional = true }
@@ -37,6 +37,11 @@ Extra dependencies can then be installed by running:
     poetry lock
     poetry install --extras "alignnff sevennet"
 
+or, for all extras:
+
+.. code-block:: bash
+
+    poetry install --extras all
 
 
 2. Register MLIP architecture

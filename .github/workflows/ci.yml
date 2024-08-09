@@ -25,7 +25,7 @@ jobs:
     - name: Install python dependencies
       run: |
         poetry env use ${{ matrix.python-version }}
-        poetry install --with dev --extras "all"
+        poetry install --with dev --extras all
 
     - name: Run test suite
       env:
