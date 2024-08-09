@@ -25,13 +25,13 @@ jobs:
     - name: Install python dependencies
       run: |
         poetry env use ${{ matrix.python-version }}
-        poetry install --with dev --extras "chgnet m3gnet"
+        poetry install --with dev --extras "all"
 
     - name: Run test suite
       env:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
-      run: poetry run pytest --cov janus_core --cov-append .
+      run: poetry run pytest --run-extra-mlips --cov janus_core --cov-append .
 
     - name: Report coverage to Coveralls
       uses: coverallsapp/github-action@v2
