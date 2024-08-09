@@ -19,7 +19,7 @@ from janus_core.helpers.janus_types import (
 )
 
 
-class FileNameMixin(ABC):
+class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
     """
     Provide mixin functions for standard filename handling.
 

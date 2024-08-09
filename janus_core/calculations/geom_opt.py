@@ -275,7 +275,8 @@ class GeomOpt(FileNameMixin):
         if not converged:
             warnings.warn(
                 f"Optimization has not converged after {self.steps} steps. "
-                f"Current max force {max_force} > target force {self.fmax}"
+                f"Current max force {max_force} > target force {self.fmax}",
+                stacklevel=2,
             )
 
         # Write out optimized structure

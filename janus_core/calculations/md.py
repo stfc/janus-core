@@ -348,13 +348,19 @@ class MolecularDynamics(FileNameMixin):
         # Warn if attempting to rescale/minimize during dynamics
         # but equil_steps is too low
         if rescale_velocities and equil_steps < rescale_every:
-            warn("Velocities and angular momentum will not be reset during dynamics")
+            warn(
+                "Velocities and angular momentum will not be reset during dynamics",
+                stacklevel=2,
+            )
         if minimize and equil_steps < minimize_every:
-            warn("Geometry will not be minimized during dynamics")
+            warn("Geometry will not be minimized during dynamics", stacklevel=2)
 
         # Warn if attempting to remove rotation without resetting velocities
         if remove_rot and not rescale_velocities:
-            warn("Rotation will not be removed unless `rescale_velocities` is True")
+            warn(
+                "Rotation will not be removed unless `rescale_velocities` is True",
+                stacklevel=2,
+            )
 
         # Warn if mix of None and not None
         self.ramp_temp = (
@@ -371,7 +377,8 @@ class MolecularDynamics(FileNameMixin):
         ) and not self.ramp_temp:
             warn(
                 "`temp_start`, `temp_end` and `temp_step` must all be specified for "
-                "heating to run"
+                "heating to run",
+                stacklevel=2,
             )
 
         # Check validate start and end temperatures
@@ -655,7 +662,8 @@ class MolecularDynamics(FileNameMixin):
             warn(
                 "Post-processing arguments present, but no computation requested. "
                 "Please set either 'rdf_compute' or 'vaf_compute' "
-                "to do post-processing."
+                "to do post-processing.",
+                stacklevel=2,
             )
 
         data = read(self.traj_file, index=":")
