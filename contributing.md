@@ -23,19 +23,17 @@ In brief the rules for contribution are as follows:
 -   Open an issue for each piece of work done.
 -   Open issues for design discussions. The answers may be important for
     newer members.
--   New features, *e.g.* add new MLIP, comments should be used to
-    provide succint reports on progress.
+-   When adding features, *e.g.* a new MLIP, use comments to provide succinct reports on progress.
 
 ### Labels
 
-Labels may be assigned to issues to help classify them. Examples
-include,
+Labels may be assigned to issues to help classify them. Examples include:
 
--   Testing: as in testing the water. This label should be attached to experimental developments.
 -   Bug: something is not working as expected. We typically aim to fix these ASAP
--   Design: queries or suggestions about the structure of the program
 -   Enhancement: adding or improving on features
-- Documentation: adding or enhancing documentation
+-   Testing: adding or enhancing unit testing or CI
+-   Documentation: adding or enhancing documentation
+-   Question: Something is unclear
 
 ## Review
 
