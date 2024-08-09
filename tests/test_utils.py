@@ -77,10 +77,7 @@ def test_output_structs(
     struct = read(DATA_PATH)
     struct.calc = choose_calculator(arch=arch)
 
-    if not properties:
-        results_keys = set(get_args(Properties))
-    else:
-        results_keys = set(properties)
+    results_keys = set(get_args(Properties)) if not properties else set(properties)
     label_keys = {f"{arch}_{key}" for key in results_keys}
 
     write_kwargs = {}

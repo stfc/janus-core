@@ -1,6 +1,4 @@
-"""
-Module to correlate scalar data on-the-fly.
-"""
+"""Module to correlate scalar data on-the-fly."""
 
 from collections.abc import Iterable
 from typing import Union
@@ -24,8 +22,6 @@ class Correlator:
     averaging : int
         Averaging window per block level.
     """
-
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, *, blocks: int, points: int, averaging: int):
         """
@@ -54,7 +50,6 @@ class Correlator:
         self._correlation = np.zeros((self._blocks, self._points))
         self._count_correlated = np.zeros((self._blocks, self._points), dtype=int)
 
-    # pylint: disable=invalid-name
     def update(self, a: float, b: float):
         """
         Update the correlation, <ab>, with new values a and b.
@@ -68,7 +63,6 @@ class Correlator:
         """
         self._propagate(a, b, 0)
 
-    # pylint: disable=invalid-name
     def _propagate(self, a: float, b: float, block: int):
         """
         Propagate update down block hierarchy.
@@ -127,7 +121,7 @@ class Correlator:
 
     def _shifts_valid(self, block: int, p_i: int, p_j: int) -> bool:
         """
-        True if the shift registers have data.
+        Return True if the shift registers have data.
 
         Parameters
         ----------
@@ -200,7 +194,6 @@ class Correlation:
         Frequency to update the correlation, md steps.
     """
 
-    # pylint: disable=invalid-name, too-many-instance-attributes
     def __init__(
         self,
         a: Union[Observable, tuple[Observable, tuple, dict]],
@@ -288,7 +281,7 @@ class Correlation:
 
     def __str__(self) -> str:
         """
-        String representation of correlation.
+        Return string representation of correlation.
 
         Returns
         -------

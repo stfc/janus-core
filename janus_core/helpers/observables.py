@@ -1,11 +1,8 @@
-"""
-Module for built-in correlation observables.
-"""
+"""Module for built-in correlation observables."""
 
 from ase import Atoms, units
 
 
-# pylint: disable=too-few-public-methods
 class Stress:
     """
     Observable for stress components.

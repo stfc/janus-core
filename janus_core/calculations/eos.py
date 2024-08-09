@@ -16,7 +16,6 @@ from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 
 
 class EoS(FileNameMixin):
-    # pylint: disable=too-many-instance-attributes,too-few-public-methods
     """
     Prepare and calculate equation of state of a structure.
 
@@ -75,7 +74,7 @@ class EoS(FileNameMixin):
         Calculate equation of state.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
+    def __init__(
         self,
         struct: Atoms,
         min_volume: float = 0.95,
@@ -268,7 +267,6 @@ class EoS(FileNameMixin):
 
     def _calc_volumes_energies(self) -> None:
         """Calculate volumes and energies for all lattice constants."""
-
         if self.logger:
             self.logger.info("Starting calculations for configurations")
             self.tracker.start_task("Calculate configurations")

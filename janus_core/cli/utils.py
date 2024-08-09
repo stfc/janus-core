@@ -145,7 +145,6 @@ def save_struct_calc(
 
     Parameters
     ----------
-
     inputs : dict
         Inputs dictionary to add information to.
     s_point : SinglePoint

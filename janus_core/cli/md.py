@@ -40,7 +40,6 @@ app = Typer()
 @app.command()
 @use_config(yaml_converter_callback)
 def md(
-    # pylint: disable=too-many-arguments,too-many-locals,invalid-name,duplicate-code
     # numpydoc ignore=PR02
     ctx: Context,
     ensemble: Annotated[str, Option(help="Name of thermodynamic ensemble.")],
@@ -315,7 +314,7 @@ def md(
         ]
     )
 
-    if not ensemble in get_args(Ensembles):
+    if ensemble not in get_args(Ensembles):
         raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
 
     # Read only first structure by default and ensure only one image is read

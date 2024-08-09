@@ -1,6 +1,4 @@
-"""
-Module that reads the md stats output timeseries.
-"""
+"""Module that reads the md stats output timeseries."""
 
 from collections.abc import Iterator
 from functools import singledispatchmethod
@@ -30,8 +28,6 @@ class Stats:
         File that contains the stats of a molecular dynamics simulation.
     """
 
-    # pylint: disable=too-many-instance-attributes
-
     def __init__(self, source: PathLike) -> None:
         """
         Initialise MD stats reader.
@@ -41,7 +37,6 @@ class Stats:
         source : PathLike
             File that contains the stats of a molecular dynamics simulation.
         """
-
         self._data = zeros((0, 0))
         self._labels = ()
         self._units = ()
@@ -211,9 +206,7 @@ class Stats:
         return zip(self.labels, self.units)
 
     def read(self) -> None:
-        """
-        Read MD stats and store them in `data`.
-        """
+        """Read MD stats and store them in `data`."""
         self._data = genfromtxt(self.source, skip_header=1)
         with open(self.source, "r+", encoding="utf-8") as file:
             head = file.readline().split("|")
@@ -231,7 +224,6 @@ class Stats:
         str
            Summary of the `data`.
         """
-
         header = f"contains {self.columns} timeseries, each with {self.rows} elements"
         header += "\nindex label units"
         for index, (label, unit) in enumerate(self.data_tags):

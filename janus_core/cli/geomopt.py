@@ -93,7 +93,6 @@ def _set_minimize_kwargs(
 @app.command()
 @use_config(yaml_converter_callback)
 def geomopt(
-    # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,

@@ -266,7 +266,7 @@ def test_restart(tmp_path):
         assert " | Target T [K]" in lines[0]
         # Includes step 0, and step 4 from restart
         assert len(lines) == 10
-        assert 8 == int(lines[-1].split()[0])
+        assert int(lines[-1].split()[0]) == 8
 
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
@@ -548,7 +548,6 @@ def test_atoms_struct(tmp_path):
 
 def test_heating(tmp_path):
     """Test heating with no MD."""
-    # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
     log_file = tmp_path / "nvt.log"
@@ -699,8 +698,7 @@ def test_heating_files():
 
 
 def test_heating_md_files():
-    """Test default heating files when also running md"""
-
+    """Test default heating files when also running md."""
     traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz")
     stats_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
     final_path = Path("Cl4Na4-nvt-T10-T20-T25.0-final.extxyz")
@@ -779,7 +777,6 @@ def test_ramp_negative(tmp_path):
 
 def test_cooling(tmp_path):
     """Test cooling with no MD."""
-    # pylint: disable=invalid-name
     file_prefix = tmp_path / "NaCl-cooling"
     final_path = tmp_path / "NaCl-cooling-final.extxyz"
     stats_cooling_path = tmp_path / "NaCl-cooling-stats.dat"

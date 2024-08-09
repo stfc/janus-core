@@ -38,7 +38,6 @@ app = Typer()
 @app.command()
 @use_config(yaml_converter_callback)
 def eos(
-    # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
@@ -143,7 +142,7 @@ def eos(
         [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
     )
 
-    if not eos_type in get_args(EoSNames):
+    if eos_type not in get_args(EoSNames):
         raise ValueError(f"Fit type must be one of: {get_args(EoSNames)}")
 
     # Read only first structure by default and ensure only one image is read

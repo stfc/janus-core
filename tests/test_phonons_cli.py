@@ -13,10 +13,6 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
-# Many pylint now warnings raised due to similar log/summary flags
-# These depend on tmp_path, so not easily refactorisable
-# pylint: disable=duplicate-code
-
 
 def test_help():
     """Test calling `janus phonons --help`."""
@@ -77,7 +73,7 @@ def test_bands_simple(tmp_path):
     assert autoband_results.exists()
     with open(autoband_results, encoding="utf8") as file:
         bands = yaml.safe_load(file)
-    assert "eigenvector" not in bands["phonon"][0]["band"][0].keys()
+    assert "eigenvector" not in bands["phonon"][0]["band"][0]
 
     # Read phonons summary file
     assert summary_path.exists()
@@ -190,7 +186,7 @@ def test_pdos(tmp_path):
 
 
 def test_plot(tmp_path):
-    """Test for ploting routines"""
+    """Test for ploting routines."""
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     pdos_results = tmp_path / "NaCl-pdos.dat"
@@ -232,8 +228,8 @@ def test_plot(tmp_path):
     assert autoband_results.exists()
     with open(autoband_results, encoding="utf8") as file:
         bands = yaml.safe_load(file)
-    assert "eigenvector" in bands["phonon"][0]["band"][0].keys()
-    assert "group_velocity" in bands["phonon"][0]["band"][0].keys()
+    assert "eigenvector" in bands["phonon"][0]["band"][0]
+    assert "group_velocity" in bands["phonon"][0]["band"][0]
 
     # Read phonons summary file
     assert summary_path.exists()
