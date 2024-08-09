@@ -45,7 +45,7 @@ codecarbon = "^2.5.0"
 alignn = { version = "2024.5.27", optional = true }
 sevenn = { version = "0.9.3", optional = true }
 torch_geometric = { version = "^2.5.3", optional = true }
-ruff = "^0.5.6"
+ruff = "^0.5.7"
 
 [tool.poetry.extras]
 alignnff = ["alignn"]
