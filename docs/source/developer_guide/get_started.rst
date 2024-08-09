@@ -20,6 +20,10 @@ Extras, such as optional MLIPs, can also be installed by running::
 
     poetry install --with pre-commit,dev,docs --extras "alignnff sevennet"
 
+or to install all supported MLIPs::
+
+    poetry install --with pre-commit,dev,docs --extras all
+
 
 Running unit tests
 ++++++++++++++++++
