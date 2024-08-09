@@ -62,6 +62,8 @@ def test_help():
 
 def test_train(tmp_path):
     """Test MLIP training."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     model = "test.model"
     compiled_model = "test_compiled.model"
     logs_path = "logs"
@@ -82,6 +84,10 @@ def test_train(tmp_path):
             "train",
             "--mlip-config",
             config,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     try:
@@ -105,6 +111,8 @@ def test_train(tmp_path):
 
 def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     config = write_tmp_config(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
 
     result = runner.invoke(
@@ -113,6 +121,10 @@ def test_train_with_foundation(tmp_path):
             "train",
             "--mlip-config",
             config,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     assert result.exit_code == 1
@@ -121,6 +133,9 @@ def test_train_with_foundation(tmp_path):
 
 def test_fine_tune(tmp_path):
     """Test MLIP fine-tuning."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
     model = "test-finetuned.model"
     compiled_model = "test-finetuned_compiled.model"
     logs_path = "logs"
@@ -137,7 +152,16 @@ def test_fine_tune(tmp_path):
 
     result = runner.invoke(
         app,
-        ["train", "--mlip-config", config, "--fine-tune"],
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--fine-tune",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
     )
     try:
         assert Path(model).exists()
@@ -158,25 +182,48 @@ def test_fine_tune(tmp_path):
         assert result.exit_code == 0
 
 
-def test_fine_tune_no_foundation():
+def test_fine_tune_no_foundation(tmp_path):
     """Test MLIP fine-tuning raises errors without foundation_model."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
     config = DATA_PATH / "mlip_fine_tune_no_foundation.yml"
 
     result = runner.invoke(
         app,
-        ["train", "--mlip-config", config, "--fine-tune"],
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--fine-tune",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
 
 
-def test_fine_tune_invalid_foundation():
+def test_fine_tune_invalid_foundation(tmp_path):
     """Test MLIP fine-tuning raises errors with invalid foundation_model."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     config = DATA_PATH / "mlip_fine_tune_invalid_foundation.yml"
 
     result = runner.invoke(
         app,
-        ["train", "--mlip-config", config, "--fine-tune"],
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--fine-tune",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
