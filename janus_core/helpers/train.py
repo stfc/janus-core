@@ -72,13 +72,13 @@ def train(
         options = yaml.safe_load(file)
     check_files_exist(options, req_file_keys)
 
-    if "foundation_model" in options:
-        print(f"Fine tuning model: {options['foundation_model']}")
-
     # Configure logging
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
     tracker = config_tracker(logger, **tracker_kwargs)
+
+    if logger and "foundation_model" in options:
+        logger.info("Fine tuning model: %s", options["foundation_model"])
 
     # Path must be passed as a string
     mlip_args = mace_parser().parse_args(["--config", str(mlip_config)])
