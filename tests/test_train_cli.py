@@ -1,5 +1,6 @@
 """Test train commandline interface."""
 
+import logging
 from pathlib import Path
 import shutil
 
@@ -124,6 +125,12 @@ def test_train(tmp_path):
     assert "emissions" in train_summary
     assert train_summary["emissions"] > 0
 
+    # Clean up logger
+    logger = logging.getLogger()
+    logger.handlers = [
+        h for h in logger.handlers if not isinstance(h, logging.FileHandler)
+    ]
+
 
 def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
@@ -194,6 +201,12 @@ def test_fine_tune(tmp_path):
         shutil.rmtree(logs_path, ignore_errors=True)
         shutil.rmtree(results_path, ignore_errors=True)
         shutil.rmtree(checkpoints_path, ignore_errors=True)
+
+        # Clean up logger
+        logger = logging.getLogger()
+        logger.handlers = [
+            h for h in logger.handlers if not isinstance(h, logging.FileHandler)
+        ]
 
         assert result.exit_code == 0
 
