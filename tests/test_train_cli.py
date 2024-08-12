@@ -108,6 +108,19 @@ def test_train(tmp_path):
 
         assert result.exit_code == 0
 
+    # Read train summary file and check contents
+    with open(summary_path, encoding="utf8") as file:
+        train_summary = yaml.safe_load(file)
+
+    assert "command" in train_summary
+    assert "janus train" in train_summary["command"]
+    assert "start_time" in train_summary
+    assert "inputs" in train_summary
+    assert "end_time" in train_summary
+
+    assert "emissions" in train_summary
+    assert train_summary["emissions"] > 0
+
 
 def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
