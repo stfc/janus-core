@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import strip_ansi_codes
+from tests.utils import assert_log_contains, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -108,7 +108,10 @@ def test_train(tmp_path):
 
         assert result.exit_code == 0
 
+    assert_log_contains(log_path, includes=["Starting training", "Training complete"])
+
     # Read train summary file and check contents
+    assert summary_path.exists()
     with open(summary_path, encoding="utf8") as file:
         train_summary = yaml.safe_load(file)
 
