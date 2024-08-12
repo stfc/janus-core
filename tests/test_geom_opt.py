@@ -93,8 +93,8 @@ def test_traj_reformat(tmp_path):
     """Test saving optimization trajectory in different format."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH, "dispersion": True},
     )
 
     traj_path_binary = tmp_path / "NaCl.traj"
