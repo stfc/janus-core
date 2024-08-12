@@ -108,3 +108,27 @@ def test_invalid_struct():
         EoS(
             "structure",
         )
+
+
+def test_logging(tmp_path):
+    """Test attaching logger to EoS and emissions are saved to info."""
+    log_file = tmp_path / "eos.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    eos = EoS(
+        single_point.struct,
+        file_prefix=tmp_path / "NaCl",
+        log_kwargs={"filename": log_file},
+    )
+
+    assert "emissions" not in single_point.struct.info
+
+    eos.run()
+
+    assert log_file.exists()
+    assert single_point.struct.info["emissions"] > 0

@@ -857,3 +857,30 @@ def test_invalid_struct():
         NPT(
             "structure",
         )
+
+
+def test_logging(tmp_path):
+    """Test attaching logger to NVT and emissions are saved to info."""
+    log_file = tmp_path / "md.log"
+    file_prefix = tmp_path / "md"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    assert "emissions" not in single_point.struct.info
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=10,
+        log_kwargs={"filename": log_file},
+        file_prefix=file_prefix,
+    )
+    nvt.run()
+
+    assert log_file.exists()
+    assert "emissions" in single_point.struct.info
+    assert single_point.struct.info["emissions"] > 0

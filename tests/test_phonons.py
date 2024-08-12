@@ -75,3 +75,27 @@ def test_invalid_struct():
         Phonons(
             "structure",
         )
+
+
+def test_logging(tmp_path):
+    """Test attaching logger to Phonons and emissions are saved to info."""
+    log_file = tmp_path / "phonons.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    phonons = Phonons(
+        struct=single_point.struct,
+        log_kwargs={"filename": log_file},
+        write_results=False,
+    )
+
+    assert "emissions" not in single_point.struct.info
+
+    phonons.run()
+
+    assert log_file.exists()
+    assert single_point.struct.info["emissions"] > 0

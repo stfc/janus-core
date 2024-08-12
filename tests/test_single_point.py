@@ -290,3 +290,24 @@ def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
     )
     energy = single_point.run()["energy"]
     assert energy == pytest.approx(expected_energy)
+
+
+def test_logging(tmp_path):
+    """Test attaching logger to SinglePoint and emissions are saved to info."""
+    log_file = tmp_path / "sp.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MACE_PATH},
+        properties="energy",
+        log_kwargs={"filename": log_file},
+    )
+
+    assert "emissions" not in single_point.struct.info
+
+    single_point.run()
+
+    assert log_file.exists()
+    assert "emissions" in single_point.struct.info
+    assert single_point.struct.info["emissions"] > 0
