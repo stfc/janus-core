@@ -226,6 +226,9 @@ def test_summary(tmp_path):
     assert "struct" in sp_summary["inputs"]["traj"]
     assert "n_atoms" in sp_summary["inputs"]["traj"]["struct"]
 
+    assert "emissions" in sp_summary
+    assert sp_summary["emissions"] > 0
+
 
 def test_config(tmp_path):
     """Test passing a config file with read kwargs, and values to be overwritten."""

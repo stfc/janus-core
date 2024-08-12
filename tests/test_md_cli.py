@@ -238,6 +238,9 @@ def test_summary(tmp_path):
     assert "struct" in summary["inputs"]
     assert "n_atoms" in summary["inputs"]["struct"]
 
+    assert "emissions" in summary
+    assert summary["emissions"] > 0
+
 
 def test_config(tmp_path):
     """Test passing a config file with ."""

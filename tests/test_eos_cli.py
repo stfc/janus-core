@@ -5,6 +5,7 @@ from pathlib import Path
 from ase.io import read
 import pytest
 from typer.testing import CliRunner
+import yaml
 
 from janus_core.cli.janus import app
 from tests.utils import assert_log_contains, strip_ansi_codes
@@ -71,6 +72,20 @@ def test_eos(tmp_path):
         includes=["Minimising initial structure"],
         excludes=["Minimising lattice scalar = 1.0"],
     )
+
+    # Read eos summary file
+    assert summary_path.exists()
+    with open(summary_path, encoding="utf8") as file:
+        eos_summary = yaml.safe_load(file)
+
+    assert "command" in eos_summary
+    assert "janus eos" in eos_summary["command"]
+    assert "start_time" in eos_summary
+    assert "inputs" in eos_summary
+    assert "end_time" in eos_summary
+
+    assert "emissions" in eos_summary
+    assert eos_summary["emissions"] > 0
 
 
 def test_setting_lattice(tmp_path):

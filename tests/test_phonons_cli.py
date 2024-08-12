@@ -46,6 +46,20 @@ def test_bands(tmp_path):
     assert phonon_results.exists()
     assert autoband_results.exists()
 
+    # Read phonons summary file
+    assert summary_path.exists()
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+
+    assert "command" in phonon_summary
+    assert "janus phonons" in phonon_summary["command"]
+    assert "start_time" in phonon_summary
+    assert "inputs" in phonon_summary
+    assert "end_time" in phonon_summary
+
+    assert "emissions" in phonon_summary
+    assert phonon_summary["emissions"] > 0
+
 
 def test_bands_simple(tmp_path):
     """Test calculating force constants and reduced bands information."""

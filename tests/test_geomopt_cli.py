@@ -357,6 +357,9 @@ def test_summary(tmp_path):
     assert "struct" in geomopt_summary["inputs"]
     assert "n_atoms" in geomopt_summary["inputs"]["struct"]
 
+    assert "emissions" in geomopt_summary
+    assert geomopt_summary["emissions"] > 0
+
 
 def test_config(tmp_path):
     """Test passing a config file with opt_kwargs."""

@@ -5,6 +5,7 @@ from pathlib import Path
 from ase.io import read
 import pytest
 from typer.testing import CliRunner
+import yaml
 
 from janus_core.cli.janus import app
 from tests.utils import assert_log_contains, strip_ansi_codes
@@ -58,6 +59,20 @@ def test_descriptors(tmp_path):
             "calc_per_element: False",
         ],
     )
+
+    # Read descriptors summary file
+    assert summary_path.exists()
+    with open(summary_path, encoding="utf8") as file:
+        descriptors_summary = yaml.safe_load(file)
+
+    assert "command" in descriptors_summary
+    assert "janus descriptors" in descriptors_summary["command"]
+    assert "start_time" in descriptors_summary
+    assert "inputs" in descriptors_summary
+    assert "end_time" in descriptors_summary
+
+    assert "emissions" in descriptors_summary
+    assert descriptors_summary["emissions"] > 0
 
 
 def test_calc_per_element(tmp_path):
