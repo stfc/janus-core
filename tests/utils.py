@@ -72,6 +72,9 @@ def decode_ansi(output: str) -> str:
     """
     Decode output, which may include rich formatting with ANSI sequences to be removed.
 
+    Based on:
+    https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python/14693789#14693789
+
     Parameters
     ----------
     output : str
