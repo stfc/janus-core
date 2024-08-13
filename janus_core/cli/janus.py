@@ -4,7 +4,6 @@ from typing import Annotated
 
 from typer import Exit, Option, Typer
 
-from janus_core import __version__
 from janus_core.cli.descriptors import descriptors
 from janus_core.cli.eos import eos
 from janus_core.cli.geomopt import geomopt
@@ -41,6 +40,8 @@ def print_version(
     version : bool
         Whether to print the current janus-core version.
     """
+    from janus_core import __version__
+
     if version:
         print(f"janus-core version: {__version__}")
         raise Exit()

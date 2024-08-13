@@ -6,10 +6,10 @@ from typing import Annotated, Union
 
 from typer import Option
 
-from janus_core.helpers.janus_types import ASEReadArgs
+#type: from janus_core.helpers.janus_types import ASEReadArgs
 
 
-def parse_dict_class(value: Union[str, ASEReadArgs]):
+def parse_dict_class(value: Union[str, "ASEReadArgs"]):
     """
     Convert string input into a dictionary.
 

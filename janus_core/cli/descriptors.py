@@ -6,8 +6,6 @@ from typing import Annotated
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.descriptors import Descriptors
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -28,7 +26,6 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -109,6 +106,18 @@ def descriptors(
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
+    from janus_core.calculations.descriptors import Descriptors
+    from janus_core.calculations.single_point import SinglePoint
+    from janus_core.helpers.utils import dict_paths_to_strs
+
+    from janus_core.cli.utils import (
+        check_config,
+        end_summary,
+        parse_typer_dicts,
+        save_struct_calc,
+        start_summary,
+    )
+
     # Check options from configuration file are all valid
     check_config(ctx)
 

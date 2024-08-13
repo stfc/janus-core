@@ -6,9 +6,6 @@ from io import StringIO
 from pathlib import Path
 from typing import Any, Literal, Optional, TextIO, get_args
 
-from ase import Atoms
-from ase.io import write
-from ase.io.formats import filetype
 from spglib import get_spacegroup
 
 from janus_core.helpers.janus_types import (
@@ -44,7 +41,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
     def __init__(
         self,
-        struct: MaybeSequence[Atoms],
+        struct: MaybeSequence["ase.Atoms"],
         file_prefix: Optional[PathLike],
         *additional,
     ):
@@ -67,7 +64,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
     @staticmethod
     def _get_default_prefix(
-        file_prefix: Optional[PathLike], struct: MaybeSequence[Atoms], *additional
+        file_prefix: Optional[PathLike], struct: MaybeSequence["ase.Atoms"], *additional
     ) -> str:
         """
         Determine the default prefix from the structure  or provided file_prefix.
@@ -132,7 +129,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
 
 def spacegroup(
-    struct: Atoms, sym_tolerance: float = 0.001, angle_tolerance: float = -1.0
+    struct: "ase.Atoms", sym_tolerance: float = 0.001, angle_tolerance: float = -1.0
 ) -> str:
     """
     Determine the spacegroup for a structure.
@@ -218,7 +215,7 @@ def dict_remove_hyphens(dictionary: dict) -> dict:
 
 
 def results_to_info(
-    struct: Atoms,
+    struct: "ase.Atoms",
     *,
     properties: Collection[Properties] = (),
     invalidate_calc: bool = False,
@@ -258,7 +255,7 @@ def results_to_info(
 
 
 def output_structs(
-    images: MaybeSequence[Atoms],
+    images: MaybeSequence["ase.Atoms"],
     *,
     set_info: bool = True,
     write_results: bool = False,
@@ -285,6 +282,10 @@ def output_structs(
     write_kwargs : Optional[ASEWriteArgs]
         Keyword arguments passed to ase.io.write. Default is {}.
     """
+    from ase import Atoms
+    from ase.io import write
+    from ase.io.formats import filetype
+
     # Separate kwargs for output_structs from kwargs for ase.io.write
     # This assumes values passed via kwargs have priority over passed parameters
     write_kwargs = write_kwargs if write_kwargs else {}

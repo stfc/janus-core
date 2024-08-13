@@ -6,7 +6,6 @@ from typing import Annotated
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -27,7 +26,6 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -101,6 +99,8 @@ def singlepoint(
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
+    from janus_core.helpers.utils import dict_paths_to_strs
+
     # Check options from configuration file are all valid
     check_config(ctx)
 
@@ -130,6 +130,7 @@ def singlepoint(
     }
 
     # Initialise singlepoint structure and calculator
+    from janus_core.calculations.single_point import SinglePoint
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary

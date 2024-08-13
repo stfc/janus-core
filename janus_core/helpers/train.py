@@ -3,11 +3,6 @@
 from pathlib import Path
 from typing import Any, Optional
 
-try:
-    from mace.cli.run_train import run as run_train
-except ImportError as e:
-    raise NotImplementedError("Please update MACE to use this module.") from e
-from mace.tools import build_default_arg_parser as mace_parser
 import yaml
 
 from janus_core.helpers.janus_types import PathLike
@@ -62,6 +57,12 @@ def train(
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
+    from mace.tools import build_default_arg_parser as mace_parser
+    try:
+        from mace.cli.run_train import run as run_train
+    except ImportError as e:
+        raise NotImplementedError("Please update MACE to use this module.") from e
+
     (log_kwargs, tracker_kwargs) = none_to_dict((log_kwargs, tracker_kwargs))
 
     if req_file_keys is None:

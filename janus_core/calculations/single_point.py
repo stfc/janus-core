@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Optional, get_args
 
 from ase import Atoms
-from ase.io import read
 from numpy import ndarray
 
 from janus_core.helpers.janus_types import (
@@ -203,6 +202,8 @@ class SinglePoint(FileNameMixin):
         If the file contains multiple structures, only the last configuration
         will be read by default.
         """
+        from ase.io import read
+
         if not self.struct_path:
             raise ValueError("`struct_path` must be defined")
 

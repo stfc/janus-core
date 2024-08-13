@@ -15,10 +15,9 @@ from typing import (
     runtime_checkable,
 )
 
-from ase import Atoms
-from ase.eos import EquationOfState
-import numpy as np
-from numpy.typing import NDArray
+#type: from ase import Atoms
+#type: import numpy as np
+#type: from numpy.typing import NDArray
 
 # General
 
@@ -46,7 +45,7 @@ class ASEWriteArgs(TypedDict, total=False):
     """Main arguments for ase.io.write."""
 
     filename: Union[str, PurePath, IO]
-    images: MaybeSequence[Atoms]
+    images: MaybeSequence["Atoms"]
     format: Optional[str]
     parallel: bool
     append: bool
@@ -88,7 +87,7 @@ class PostProcessKwargs(TypedDict, total=False):
 class Observable(Protocol):
     """Signature for correlation observable getter."""
 
-    def __call__(self, atoms: Atoms, *args, **kwargs) -> float:
+    def __call__(self, atoms: "ase.Atoms", *args, **kwargs) -> float:
         """
         Call the getter.
 
@@ -168,12 +167,13 @@ class CalcResults(TypedDict, total=False):
     """Return type from calculations."""
 
     energy: MaybeList[float]
-    forces: MaybeList[NDArray[np.float64]]
-    stress: MaybeList[NDArray[np.float64]]
+    forces: MaybeList["NDArray[np.float64]"]
+    stress: MaybeList["NDArray[np.float64]"]
 
 
 class EoSResults(TypedDict, total=False):
     """Return type from calculations."""
+    from ase.eos import EquationOfState
 
     eos: EquationOfState
     bulk_modulus: float

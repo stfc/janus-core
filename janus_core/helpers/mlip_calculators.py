@@ -9,16 +9,13 @@ Similar in spirit to matcalc and quacc approaches
 from pathlib import Path
 from typing import Any, Optional, Union, get_args
 
-from ase.calculators.calculator import Calculator
-import torch
-
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 
 
 def _set_model_path(
     model_path: Optional[PathLike] = None,
     kwargs: Optional[dict[str, Any]] = None,
-) -> Optional[Union[PathLike, torch.nn.Module]]:
+) -> Optional[Union[PathLike, "torch.nn.Module"]]:
     """
     Set `model_path`.
 
@@ -68,7 +65,7 @@ def choose_calculator(
     device: Devices = "cpu",
     model_path: Optional[PathLike] = None,
     **kwargs,
-) -> Calculator:
+) -> "ase.calculators.Calculator":
     """
     Choose MLIP calculator to configure.
 
@@ -136,6 +133,8 @@ def choose_calculator(
         calculator = mace_off(model=model, device=device, **kwargs)
 
     elif arch == "m3gnet":
+        import torch
+
         from matgl import __version__, load_model
         from matgl.apps.pes import Potential
         from matgl.ext.ase import M3GNetCalculator

@@ -6,15 +6,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ase import Atoms
 from typer import Context
-from typer_config import conf_callback_factory, yaml_loader
-import yaml
+from typer_config import conf_callback_factory
 
-from janus_core.calculations.single_point import SinglePoint
-from janus_core.cli.types import TyperDict
-from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices
-from janus_core.helpers.utils import dict_remove_hyphens
+#type: from janus_core.cli.types import TyperDict
+#type: from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
@@ -37,7 +33,7 @@ def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
         raise ValueError("`read_kwargs['index']` must be an integer") from e
 
 
-def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
+def parse_typer_dicts(typer_dicts: list["TyperDict"]) -> list[dict]:
     """
     Convert list of TyperDict objects to list of dictionaries.
 
@@ -80,6 +76,11 @@ def yaml_converter_loader(config_file: str) -> dict[str, Any]:
     dict[str, Any]
         Dictionary with loaded configuration.
     """
+    from typer_config import yaml_loader
+
+    from janus_core.helpers.utils import dict_remove_hyphens
+
+
     if not config_file:
         return {}
 
@@ -104,6 +105,8 @@ def start_summary(*, command: str, summary: Path, inputs: dict) -> None:
     inputs : dict
         Inputs to CLI command to save.
     """
+    import yaml
+
     save_info = {
         "command": f"janus {command}",
         "start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
@@ -157,11 +160,11 @@ def end_summary(summary: Path) -> None:
 
 def save_struct_calc(
     inputs: dict,
-    s_point: SinglePoint,
-    arch: Architectures,
-    device: Devices,
+    s_point: "janus_core.calculations.single_point.SinglePoint",
+    arch: "Architectures",
+    device: "Devices",
     model_path: str,
-    read_kwargs: ASEReadArgs,
+    read_kwargs: "ASEReadArgs",
     calc_kwargs: dict[str, Any],
 ) -> None:
     """
@@ -184,6 +187,8 @@ def save_struct_calc(
     calc_kwargs : dict[str, Any]]
         Keyword arguments to pass to the calculator.
     """
+    from ase import Atoms
+
     # Remove duplicate struct if already in inputs:
     inputs.pop("struct", None)
 
