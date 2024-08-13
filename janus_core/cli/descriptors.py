@@ -20,6 +20,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import (
+    carbon_summary,
     check_config,
     end_summary,
     parse_typer_dicts,
@@ -167,6 +168,8 @@ def descriptors(
     # Run geometry optimization and save output structure
     descript = Descriptors(**descriptors_kwargs)
     descript.run()
+
+    carbon_summary(summary=summary, log=log)
 
     # Time after optimization has finished
     end_summary(summary)

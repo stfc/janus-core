@@ -64,3 +64,27 @@ def test_calc_per_element(tmp_path):
     assert atoms.info["mace_descriptor"] == pytest.approx(-0.005626419559511429)
     assert atoms.info["mace_Cl_descriptor"] == pytest.approx(-0.009215340539869301)
     assert atoms.info["mace_Na_descriptor"] == pytest.approx(-0.0020374985791535563)
+
+
+def test_logging(tmp_path):
+    """Test attaching logger to Descriptors and emissions are saved to info."""
+    log_file = tmp_path / "descriptors.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    descriptors = Descriptors(
+        single_point.struct,
+        calc_per_element=True,
+        log_kwargs={"filename": log_file},
+    )
+
+    assert "emissions" not in single_point.struct.info
+
+    descriptors.run()
+
+    assert log_file.exists()
+    assert single_point.struct.info["emissions"] > 0

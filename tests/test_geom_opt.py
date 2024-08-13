@@ -333,3 +333,25 @@ def test_invalid_struct():
             fmax=0.001,
             optimizer="test",
         )
+
+
+def test_logging(tmp_path):
+    """Test attaching logger to GeomOpt and emissions are saved to info."""
+    log_file = tmp_path / "geomopt.log"
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    assert "emissions" not in single_point.struct.info
+
+    optimizer = GeomOpt(
+        single_point.struct,
+        log_kwargs={"filename": log_file},
+    )
+    optimizer.run()
+
+    assert log_file.exists()
+    assert "emissions" in single_point.struct.info
+    assert single_point.struct.info["emissions"] > 0

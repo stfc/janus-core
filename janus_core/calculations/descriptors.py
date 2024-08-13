@@ -120,7 +120,7 @@ class Descriptors(FileNameMixin):
         """Calculate descriptors for structure(s)."""
         if self.logger:
             self.logger.info("Starting descriptors calculation")
-            self.tracker.start()
+            self.tracker.start_task("Descriptors")
 
         if isinstance(self.struct, Sequence):
             for struct in self.struct:
@@ -129,6 +129,12 @@ class Descriptors(FileNameMixin):
             self._calc_descriptors(self.struct)
 
         if self.logger:
+            emissions = self.tracker.stop_task().emissions
+            if isinstance(self.struct, Sequence):
+                for image in self.struct:
+                    image.info["emissions"] = emissions
+            else:
+                self.struct.info["emissions"] = emissions
             self.tracker.stop()
             self.logger.info("Descriptors calculation complete")
 

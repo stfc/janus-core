@@ -331,7 +331,12 @@ class SinglePoint(FileNameMixin):
             self.results["stress"] = self._get_stress()
 
         if self.logger:
-            self.tracker.stop_task()
+            emissions = self.tracker.stop_task().emissions
+            if isinstance(self.struct, Sequence):
+                for image in self.struct:
+                    image.info["emissions"] = emissions
+            else:
+                self.struct.info["emissions"] = emissions
             self.tracker.stop()
             self.logger.info("Single point calculation complete")
 
