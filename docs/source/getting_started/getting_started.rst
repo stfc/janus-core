@@ -49,3 +49,12 @@ or to install all supported MLIPs:
 .. code-block:: python
 
     python3 -m pip install janus-core[all]
+
+Currently supported extras are:
+
+- ``alignn``: `ALIGNN <https://github.com/usnistgov/alignn>`_
+- ``chgnet``: `CHGNet <https://github.com/CederGroupHub/chgnet/>`_
+- ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
+- ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
+
+``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[tool.poetry.extras]``.

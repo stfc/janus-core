@@ -60,6 +60,8 @@ or to install all supported MLIPs:
 python3 -m pip install janus-core[all]
 ```
 
+Individual `extras` are listed in [Getting Started](https://stfc.github.io/janus-core/getting_started/getting_started.html#installation), as well as in [pyproject.toml](pyproject.toml) under `[tool.poetry.extras]`.
+
 
 ### Further help
 
