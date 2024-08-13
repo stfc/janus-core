@@ -7,6 +7,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
+from tests.utils import strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -56,7 +57,7 @@ def test_help():
     """Test calling `janus train --help`."""
     result = runner.invoke(app, ["train", "--help"])
     assert result.exit_code == 0
-    assert "Usage: janus train [OPTIONS]" in result.stdout
+    assert "Usage: janus train [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
 def test_train(tmp_path):

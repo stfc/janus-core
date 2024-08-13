@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, read_atoms
+from tests.utils import assert_log_contains, read_atoms, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -19,7 +19,7 @@ def test_singlepoint_help():
     """Test calling `janus singlepoint --help`."""
     result = runner.invoke(app, ["singlepoint", "--help"])
     assert result.exit_code == 0
-    assert "Usage: janus singlepoint [OPTIONS]" in result.stdout
+    assert "Usage: janus singlepoint [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
 def test_singlepoint(tmp_path):

@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains
+from tests.utils import assert_log_contains, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -18,7 +18,7 @@ def test_help():
     """Test calling `janus phonons --help`."""
     result = runner.invoke(app, ["phonons", "--help"])
     assert result.exit_code == 0
-    assert "Usage: janus phonons [OPTIONS]" in result.stdout
+    assert "Usage: janus phonons [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
 def test_bands(tmp_path):

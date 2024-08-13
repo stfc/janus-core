@@ -7,7 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains
+from tests.utils import assert_log_contains, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -18,7 +18,7 @@ def test_help():
     """Test calling `janus eos --help`."""
     result = runner.invoke(app, ["eos", "--help"])
     assert result.exit_code == 0
-    assert "Usage: janus eos [OPTIONS]" in result.stdout
+    assert "Usage: janus eos [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
 def test_eos(tmp_path):

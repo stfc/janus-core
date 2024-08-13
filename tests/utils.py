@@ -1,6 +1,7 @@
 """Utility functions for tests."""
 
 from pathlib import Path
+import re
 from typing import Union
 
 from ase import Atoms
@@ -65,3 +66,38 @@ def assert_log_contains(
 
     assert all(inc in messages for inc in includes)
     assert all(exc not in messages for exc in excludes)
+
+
+def strip_ansi_codes(output: str) -> str:
+    """
+    Remove any ANSI sequences from output string.
+
+    Based on:
+    https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python/14693789#14693789
+
+    Parameters
+    ----------
+    output : str
+        Output that may contain ANSI sequences to be removed.
+
+    Returns
+    -------
+    str
+        Output with ANSI sequences removed.
+    """
+    # 7-bit C1 ANSI sequences
+    ansi_escape = re.compile(
+        r"""
+        \x1B  # ESC
+        (?:   # 7-bit C1 Fe (except CSI)
+            [@-Z\\-_]
+        |     # or [ for CSI, followed by a control sequence
+            \[
+            [0-?]*  # Parameter bytes
+            [ -/]*  # Intermediate bytes
+            [@-~]   # Final byte
+        )
+    """,
+        re.VERBOSE,
+    )
+    return ansi_escape.sub("", output)
