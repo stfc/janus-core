@@ -18,7 +18,7 @@ Dependencies useful for development can then be installed by running::
 
 Extras, such as optional MLIPs, can also be installed by running::
 
-    poetry install --with pre-commit,dev,docs --extras "alignnff sevennet"
+    poetry install --with pre-commit,dev,docs --extras "alignn sevennet"
 
 or to install all supported MLIPs::
 

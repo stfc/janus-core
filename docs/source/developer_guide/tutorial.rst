@@ -22,7 +22,7 @@ New MLIPs should be added as optional dependencies under ``[tool.poetry.dependen
     torch_geometric = { version = "^2.5.3", optional = true }
 
     [tool.poetry.extras]
-    alignnff = ["alignn"]
+    alignn = ["alignn"]
     sevennet = ["sevenn", "torch_geometric"]
 
 Poetry will automatically resolve dependencies of the MLIP, if present, to ensure consistency with existing dependencies.
@@ -35,7 +35,7 @@ Extra dependencies can then be installed by running:
 .. code-block:: bash
 
     poetry lock
-    poetry install --extras "alignnff sevennet"
+    poetry install --extras "alignn sevennet"
 
 or, for all extras:
 

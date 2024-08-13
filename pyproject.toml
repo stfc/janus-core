@@ -51,7 +51,7 @@ ruff = "^0.5.7"
 
 [tool.poetry.extras]
 all = ["alignn", "chgnet", "matgl", "dgl", "torchdata", "sevenn", "torch_geometric"]
-alignnff = ["alignn"]
+alignn = ["alignn"]
 chgnet = ["chgnet"]
 m3gnet = ["matgl", "dgl", "torchdata"]
 sevennet = ["sevenn", "torch_geometric"]
