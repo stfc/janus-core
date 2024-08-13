@@ -15,10 +15,6 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
-# Many pylint now warnings raised due to similar log/summary flags
-# These depend on tmp_path, so not easily refactorisable
-# pylint: disable=duplicate-code
-
 
 def test_help():
     """Test calling `janus geomopt --help`."""
@@ -109,7 +105,7 @@ def test_traj(tmp_path):
 
 
 def test_opt_fully(tmp_path):
-    """Test passing --opt-cell-fully without --opt-cell-lengths"""
+    """Test passing --opt-cell-fully without --opt-cell-lengths."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"

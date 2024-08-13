@@ -32,7 +32,6 @@ def _process_index(index: SliceLike) -> StartStopStep:
     StartStopStep
         Standardized `SliceLike` as `start`, `stop`, `step` triplet.
     """
-
     if isinstance(index, int):
         if index == -1:
             return (index, None, 1)
@@ -44,7 +43,7 @@ def _process_index(index: SliceLike) -> StartStopStep:
     return index
 
 
-def compute_rdf(  # pylint: disable=too-many-locals,too-many-branches
+def compute_rdf(
     data: MaybeSequence[Atoms],
     ana: Optional[Analysis] = None,
     /,
@@ -219,7 +218,6 @@ def compute_vaf(
     MaybeSequence[NDArray[float64]]
         Computed VAF(s).
     """
-
     # Ensure if passed scalars they are turned into correct dimensionality
     if not isinstance(filter_atoms, Sequence):
         filter_atoms = (filter_atoms,)

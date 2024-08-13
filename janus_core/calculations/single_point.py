@@ -25,7 +25,7 @@ from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 
 
-class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attributes
+class SinglePoint(FileNameMixin):
     """
     Prepare and perform single point calculations.
 
@@ -81,7 +81,7 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         Run single point calculations.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         struct: Optional[MaybeSequence[Atoms]] = None,
         struct_path: Optional[PathLike] = None,
@@ -250,7 +250,6 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
         value : MaybeSequence[Properties]
             Physical properties to be calculated.
         """
-
         if isinstance(value, str):
             value = (value,)
 
@@ -277,11 +276,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             Potential energy of structure(s).
         """
         if isinstance(self.struct, Sequence):
-            energies = [struct.get_potential_energy() for struct in self.struct]
-            return energies
+            return [struct.get_potential_energy() for struct in self.struct]
 
-        energy = self.struct.get_potential_energy()
-        return energy
+        return self.struct.get_potential_energy()
 
     def _get_forces(self) -> MaybeList[ndarray]:
         """
@@ -293,11 +290,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             Forces of structure(s).
         """
         if isinstance(self.struct, Sequence):
-            forces = [struct.get_forces() for struct in self.struct]
-            return forces
+            return [struct.get_forces() for struct in self.struct]
 
-        force = self.struct.get_forces()
-        return force
+        return self.struct.get_forces()
 
     def _get_stress(self) -> MaybeList[ndarray]:
         """
@@ -309,11 +304,9 @@ class SinglePoint(FileNameMixin):  # pylint: disable=too-many-instance-attribute
             Stress of structure(s).
         """
         if isinstance(self.struct, Sequence):
-            stresses = [struct.get_stress() for struct in self.struct]
-            return stresses
+            return [struct.get_stress() for struct in self.struct]
 
-        stress = self.struct.get_stress()
-        return stress
+        return self.struct.get_stress()
 
     def run(self) -> CalcResults:
         """

@@ -3,7 +3,6 @@
 from pathlib import Path
 import shutil
 
-from mace.cli.run_train import run as run_train  # pylint: disable=unused-import
 from typer.testing import CliRunner
 import yaml
 

@@ -34,7 +34,6 @@ app = Typer()
 @app.command()
 @use_config(yaml_converter_callback)
 def singlepoint(
-    # pylint: disable=too-many-arguments,too-many-locals,duplicate-code
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,

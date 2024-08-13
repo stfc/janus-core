@@ -16,10 +16,6 @@ DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
 
-# Many pylint now warnings raised due to similar log/summary flags
-# These depend on tmp_path, so not easily refactorisable
-# pylint: disable=duplicate-code
-
 
 def test_md_help():
     """Test calling `janus md --help`."""

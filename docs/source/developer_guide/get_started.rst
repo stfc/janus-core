@@ -44,11 +44,23 @@ See the `tox documentation <https://tox.wiki/>`_ for further options.
 Automatic coding style check
 ++++++++++++++++++++++++++++
 
-Packages in the ``pre-commit`` dependency group allow automatic code formatting checks on every commit. To set this up, run::
+Packages in the ``pre-commit`` dependency group allow automatic code formatting and linting on every commit.
+
+To set this up, run::
 
     pre-commit install
 
-After this, `black <https://black.readthedocs.io>`_ (code formatter), `pylint <https://www.pylint.org/>`_ (linter), the `pyupgrade <https://github.com/asottile/pyupgrade>`_ (syntax upgrader), `isort <https://pycqa.github.io/isort/>`_ (import sorter), and `numpydoc <https://numpydoc.readthedocs.io/en/latest/format.html>`_ (docstring style validator), will run before every commit.
+After this, the `ruff linter <https://docs.astral.sh/ruff/linter/>`_, `ruff formatter <https://docs.astral.sh/ruff/formatter/>`_, and `numpydoc <https://numpydoc.readthedocs.io/en/latest/format.html>`_ (docstring style validator), will run before every commit.
+
+Rules enforced by ruff are currently set up to be comparable to:
+
+- `black <https://black.readthedocs.io>`_ (code formatter)
+- `pylint <https://www.pylint.org/>`_ (linter)
+- `pyupgrade <https://github.com/asottile/pyupgrade>`_ (syntax upgrader)
+- `isort <https://pycqa.github.io/isort/>`_ (import sorter)
+- `flake8-bugbear <https://pypi.org/project/flake8-bugbear/>`_ (bug finder)
+
+The full set of `ruff rules <https://docs.astral.sh/ruff/rules/>`_ are specified by the ``[tool.ruff]]`` sections of `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`
 
 
 Building the documentation

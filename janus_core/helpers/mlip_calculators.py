@@ -64,7 +64,6 @@ def _set_model_path(
 
 
 def choose_calculator(
-    # pylint: disable=too-many-locals, too-many-statements
     arch: Architectures = "mace",
     device: Devices = "cpu",
     model_path: Optional[PathLike] = None,
@@ -96,13 +95,9 @@ def choose_calculator(
     ValueError
         Invalid architecture specified.
     """
-    # pylint: disable=import-outside-toplevel, too-many-branches, import-error
-    # Optional imports handled via `arch`. We could catch these,
-    # but the error message is clear if imports are missing.
-
     model_path = _set_model_path(model_path, kwargs)
 
-    if not device in get_args(Devices):
+    if device not in get_args(Devices):
         raise ValueError(f"`device` must be one of: {get_args(Devices)}")
 
     if arch == "mace":
@@ -207,7 +202,8 @@ def choose_calculator(
         calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
 
     elif arch == "sevennet":
-        from sevenn._const import SEVENN_VERSION as __version__
+        # Disable constant-imported-as-non-constant
+        from sevenn._const import SEVENN_VERSION as __version__  # noqa: N811
         from sevenn.sevennet_calculator import SevenNetCalculator
 
         if isinstance(model_path, Path):
