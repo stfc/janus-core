@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, decode_ansi, read_atoms
+from tests.utils import assert_log_contains, read_atoms, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -20,7 +20,7 @@ def test_help():
     """Test calling `janus geomopt --help`."""
     result = runner.invoke(app, ["geomopt", "--help"])
     assert result.exit_code == 0
-    assert "Usage: janus geomopt [OPTIONS]" in decode_ansi(result.stdout)
+    assert "Usage: janus geomopt [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
 def test_geomopt(tmp_path):

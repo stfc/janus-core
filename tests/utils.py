@@ -68,9 +68,9 @@ def assert_log_contains(
     assert all(exc not in messages for exc in excludes)
 
 
-def decode_ansi(output: str) -> str:
+def strip_ansi_codes(output: str) -> str:
     """
-    Decode output, which may include rich formatting with ANSI sequences to be removed.
+    Remove any ANSI sequences from output string.
 
     Based on:
     https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python/14693789#14693789
@@ -78,7 +78,7 @@ def decode_ansi(output: str) -> str:
     Parameters
     ----------
     output : str
-        Output to be decoded.
+        Output that may contain ANSI sequences to be removed.
 
     Returns
     -------

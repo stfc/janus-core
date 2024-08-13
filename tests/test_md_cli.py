@@ -10,7 +10,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, decode_ansi
+from tests.utils import assert_log_contains, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -21,7 +21,7 @@ def test_md_help():
     """Test calling `janus md --help`."""
     result = runner.invoke(app, ["md", "--help"])
     assert result.exit_code == 0
-    assert "Usage: janus md [OPTIONS]" in decode_ansi(result.stdout)
+    assert "Usage: janus md [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
 test_data = [
