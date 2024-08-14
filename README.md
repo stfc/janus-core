@@ -156,9 +156,11 @@ Options:
   --write-kwargs DICT  Keyword arguments to pass to ase.io.write when saving
                        results. Must be passed as a dictionary wrapped in
                        quotes, e.g. "{'key' : value}".  [default: "{}"]
-  --log PATH           Path to save logs to.  [default: singlepoint.log]
-  --summary PATH       Path to save summary of inputs and start/end time.
-                       [default: singlepoint_summary.yml]
+  --log PATH           Path to save logs to. Default is inferred from the name
+                       of the structure file.
+  --summary PATH       Path to save summary of inputs, start/end time, and
+                       carbon emissions. Default is inferred from the name of
+                       the structure file.
   --config TEXT        Configuration file.
   --help               Show this message and exit.
 ```
