@@ -226,6 +226,8 @@ class Phonons(FileNameMixin):
             opt_file = self._build_filename("opt.extxyz")
             if "write_kwargs" in self.minimize_kwargs:
                 self.minimize_kwargs["write_kwargs"].setdefault("filename", opt_file)
+                # Assume if write_kwargs are specified that results should be written
+                self.minimize_kwargs.setdefault("write_results", True)
             else:
                 self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
 

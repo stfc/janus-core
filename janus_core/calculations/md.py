@@ -412,6 +412,27 @@ class MolecularDynamics(FileNameMixin):
             filename=self.traj_file,
         )
 
+        # If not specified otherwise, save optimized structure consistently with others
+        opt_file = self._build_filename(
+            "opt.extxyz",
+            self._parameter_prefix if file_prefix is None else "",
+            filename=None,
+        )
+        if "write_kwargs" in self.minimize_kwargs:
+            self.minimize_kwargs["write_kwargs"].setdefault("filename", opt_file)
+            # Assume if write_kwargs are specified that results should be written
+            self.minimize_kwargs.setdefault("write_results", True)
+        else:
+            self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
+
+        # Use MD logger for geometry optimization
+        if self.logger:
+            self.minimize_kwargs["log_kwargs"] = {
+                "filename": self.log_kwargs["filename"],
+                "name": self.logger.name,
+                "filemode": "a",
+            }
+
         self.restart_files = []
         self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
         self.n_atoms = len(self.struct)
@@ -463,11 +484,6 @@ class MolecularDynamics(FileNameMixin):
         """Perform geometry optimization."""
         if self.dyn.nsteps == 0 or self.dyn.nsteps < self.equil_steps:
             if self.logger:
-                self.minimize_kwargs["log_kwargs"] = {
-                    "filename": self.log_kwargs["filename"],
-                    "name": self.logger.name,
-                    "filemode": "a",
-                }
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
             optimizer.run()

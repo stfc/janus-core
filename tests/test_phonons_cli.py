@@ -354,10 +354,8 @@ def test_minimize_filename(tmp_path):
     file_prefix = tmp_path / "test"
     opt_path = tmp_path / "geomopt-opt.extxyz"
 
-    minimize_kwargs = (
-        "{'write_results': 'True', "
-        f"'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"
-    )
+    # write_results should be set automatically
+    minimize_kwargs = f"{{'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"
 
     result = runner.invoke(
         app,
