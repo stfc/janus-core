@@ -48,7 +48,7 @@ def compute_rdf(
     ana: Optional[Analysis] = None,
     /,
     *,
-    filename: Optional[MaybeSequence[PathLike]] = None,
+    filenames: Optional[MaybeSequence[PathLike]] = None,
     by_elements: bool = False,
     rmax: float = 2.5,
     nbins: int = 50,
@@ -65,8 +65,8 @@ def compute_rdf(
         Dataset to compute RDF of.
     ana : Optional[Analysis]
         ASE Analysis object for data reuse.
-    filename : Optional[MaybeSequence[PathLike]]
-        Filename(s) to output data to. Must match number of RDFs computed.
+    filenames : Optional[MaybeSequence[PathLike]]
+        Filenames to output data to. Must match number of RDFs computed.
     by_elements : bool
         Split RDF into pairwise by elements group. Default is False.
         N.B. mixed RDFs (e.g. C-H) include all self-RDFs (e.g. C-C),
@@ -134,19 +134,19 @@ def compute_rdf(
             for element, rdf in rdf.items()
         }
 
-        if filename is not None:
-            if not isinstance(filename, Sequence):
-                filename = (filename,)
+        if filenames is not None:
+            if isinstance(filenames, str) or not isinstance(filenames, Sequence):
+                filenames = (filenames,)
 
-            assert isinstance(filename, Sequence)
+            assert isinstance(filenames, Sequence)
 
-            if len(filename) != len(rdf):
+            if len(filenames) != len(rdf):
                 raise ValueError(
-                    f"Different number of file names ({len(filename)}) "
+                    f"Different number of file names ({len(filenames)}) "
                     f"to number of samples ({len(rdf)})"
                 )
 
-            for (dists, rdfs), out_path in zip(rdf.values(), filename):
+            for (dists, rdfs), out_path in zip(rdf.values(), filenames):
                 with open(out_path, "w", encoding="utf-8") as out_file:
                     for dist, rdf_i in zip(dists, rdfs):
                         print(dist, rdf_i, file=out_file)
@@ -166,16 +166,16 @@ def compute_rdf(
         # Compute RDF average
         rdf = rdf[0][1], np.average([rdf_i[0] for rdf_i in rdf], axis=0)
 
-        if filename is not None:
-            if isinstance(filename, Sequence):
-                if len(filename) != 1:
+        if filenames is not None:
+            if isinstance(filenames, Sequence):
+                if len(filenames) != 1:
                     raise ValueError(
-                        f"Different number of file names ({len(filename)}) "
+                        f"Different number of file names ({len(filenames)}) "
                         "to number of samples (1)"
                     )
-                filename = filename[0]
+                filenames = filenames[0]
 
-            with open(filename, "w", encoding="utf-8") as out_file:
+            with open(filenames, "w", encoding="utf-8") as out_file:
                 for dist, rdf_i in zip(*rdf):
                     print(dist, rdf_i, file=out_file)
 

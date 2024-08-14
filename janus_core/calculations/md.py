@@ -714,7 +714,7 @@ class MolecularDynamics(FileNameMixin):
                     )
                 ]
 
-            compute_rdf(data, ana, filename=out_paths, **rdf_args)
+            compute_rdf(data, ana, filenames=out_paths, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
             file_name = self.post_process_kwargs.get("vaf_output_file", None)
