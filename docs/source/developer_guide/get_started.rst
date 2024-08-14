@@ -18,7 +18,11 @@ Dependencies useful for development can then be installed by running::
 
 Extras, such as optional MLIPs, can also be installed by running::
 
-    poetry install --with pre-commit,dev,docs --extras "alignnff sevennet"
+    poetry install --with pre-commit,dev,docs --extras "alignn sevennet"
+
+or to install all supported MLIPs::
+
+    poetry install --with pre-commit,dev,docs --extras all
 
 
 Running unit tests
@@ -30,7 +34,7 @@ Packages in the ``dev`` dependency group allow tests to be run locally using ``p
 
 Alternatively, tests can be run in separate virtual environments using ``tox``::
 
-    tox run -e all
+    tox run -e ALL
 
 This will run all unit tests for multiple versions of Python, in addition to testing that the pre-commit passes, and that documentation builds, mirroring the automated tests on GitHub.
 
