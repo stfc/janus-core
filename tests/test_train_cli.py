@@ -1,5 +1,6 @@
 """Test train commandline interface."""
 
+import logging
 from pathlib import Path
 import shutil
 
@@ -7,7 +8,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import strip_ansi_codes
+from tests.utils import assert_log_contains, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -62,6 +63,8 @@ def test_help():
 
 def test_train(tmp_path):
     """Test MLIP training."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     model = "test.model"
     compiled_model = "test_compiled.model"
     logs_path = "logs"
@@ -82,6 +85,10 @@ def test_train(tmp_path):
             "train",
             "--mlip-config",
             config,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     try:
@@ -102,9 +109,33 @@ def test_train(tmp_path):
 
         assert result.exit_code == 0
 
+    assert_log_contains(log_path, includes=["Starting training", "Training complete"])
+
+    # Read train summary file and check contents
+    assert summary_path.exists()
+    with open(summary_path, encoding="utf8") as file:
+        train_summary = yaml.safe_load(file)
+
+    assert "command" in train_summary
+    assert "janus train" in train_summary["command"]
+    assert "start_time" in train_summary
+    assert "inputs" in train_summary
+    assert "end_time" in train_summary
+
+    assert "emissions" in train_summary
+    assert train_summary["emissions"] > 0
+
+    # Clean up logger
+    logger = logging.getLogger()
+    logger.handlers = [
+        h for h in logger.handlers if not isinstance(h, logging.FileHandler)
+    ]
+
 
 def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     config = write_tmp_config(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
 
     result = runner.invoke(
@@ -113,6 +144,10 @@ def test_train_with_foundation(tmp_path):
             "train",
             "--mlip-config",
             config,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     assert result.exit_code == 1
@@ -121,6 +156,9 @@ def test_train_with_foundation(tmp_path):
 
 def test_fine_tune(tmp_path):
     """Test MLIP fine-tuning."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
     model = "test-finetuned.model"
     compiled_model = "test-finetuned_compiled.model"
     logs_path = "logs"
@@ -137,7 +175,16 @@ def test_fine_tune(tmp_path):
 
     result = runner.invoke(
         app,
-        ["train", "--mlip-config", config, "--fine-tune"],
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--fine-tune",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
     )
     try:
         assert Path(model).exists()
@@ -155,28 +202,57 @@ def test_fine_tune(tmp_path):
         shutil.rmtree(results_path, ignore_errors=True)
         shutil.rmtree(checkpoints_path, ignore_errors=True)
 
+        # Clean up logger
+        logger = logging.getLogger()
+        logger.handlers = [
+            h for h in logger.handlers if not isinstance(h, logging.FileHandler)
+        ]
+
         assert result.exit_code == 0
 
 
-def test_fine_tune_no_foundation():
+def test_fine_tune_no_foundation(tmp_path):
     """Test MLIP fine-tuning raises errors without foundation_model."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
     config = DATA_PATH / "mlip_fine_tune_no_foundation.yml"
 
     result = runner.invoke(
         app,
-        ["train", "--mlip-config", config, "--fine-tune"],
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--fine-tune",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
 
 
-def test_fine_tune_invalid_foundation():
+def test_fine_tune_invalid_foundation(tmp_path):
     """Test MLIP fine-tuning raises errors with invalid foundation_model."""
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
     config = DATA_PATH / "mlip_fine_tune_invalid_foundation.yml"
 
     result = runner.invoke(
         app,
-        ["train", "--mlip-config", config, "--fine-tune"],
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--fine-tune",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)

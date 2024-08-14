@@ -282,6 +282,8 @@ def test_invalid_config():
 def test_write_kwargs(tmp_path):
     """Test setting invalidate_calc and write_results via write_kwargs."""
     results_path = tmp_path / "NaCl-results.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -293,6 +295,10 @@ def test_write_kwargs(tmp_path):
             "{'invalidate_calc': False}",
             "--out",
             results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -306,6 +312,8 @@ def test_write_kwargs(tmp_path):
 def test_write_cif(tmp_path):
     """Test writing out a cif file."""
     results_path = tmp_path / "NaCl-results.cif"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -317,6 +325,10 @@ def test_write_cif(tmp_path):
             "{'invalidate_calc': False, 'write_results': True}",
             "--out",
             results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     assert result.exit_code == 0

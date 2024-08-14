@@ -1,7 +1,7 @@
 """Train MLIP."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 try:
     from mace.cli.run_train import run as run_train
@@ -11,6 +11,8 @@ from mace.tools import build_default_arg_parser as mace_parser
 import yaml
 
 from janus_core.helpers.janus_types import PathLike
+from janus_core.helpers.log import config_logger, config_tracker
+from janus_core.helpers.utils import none_to_dict
 
 
 def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
@@ -37,7 +39,10 @@ def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
 
 
 def train(
-    mlip_config: PathLike, req_file_keys: Optional[list[PathLike]] = None
+    mlip_config: PathLike,
+    req_file_keys: Optional[list[PathLike]] = None,
+    log_kwargs: Optional[dict[str, Any]] = None,
+    tracker_kwargs: Optional[dict[str, Any]] = None,
 ) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
@@ -52,7 +57,13 @@ def train(
     req_file_keys : Optional[list[PathLike]]
         List of files that must exist if defined in the configuration file.
         Default is ["train_file", "test_file", "valid_file", "statistics_file"].
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
     """
+    (log_kwargs, tracker_kwargs) = none_to_dict((log_kwargs, tracker_kwargs))
+
     if req_file_keys is None:
         req_file_keys = ["train_file", "test_file", "valid_file", "statistics_file"]
 
@@ -61,9 +72,21 @@ def train(
         options = yaml.safe_load(file)
     check_files_exist(options, req_file_keys)
 
-    if "foundation_model" in options:
-        print(f"Fine tuning model: {options['foundation_model']}")
+    # Configure logging
+    log_kwargs.setdefault("name", __name__)
+    logger = config_logger(**log_kwargs)
+    tracker = config_tracker(logger, **tracker_kwargs)
+
+    if logger and "foundation_model" in options:
+        logger.info("Fine tuning model: %s", options["foundation_model"])
 
     # Path must be passed as a string
     mlip_args = mace_parser().parse_args(["--config", str(mlip_config)])
+    if logger:
+        logger.info("Starting training")
+        tracker.start_task("Training")
     run_train(mlip_args)
+    if logger:
+        logger.info("Training complete")
+        tracker.stop_task()
+        tracker.stop()
