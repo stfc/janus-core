@@ -584,3 +584,95 @@ def test_invalid_traj_input(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_minimize_kwargs_filename(tmp_path):
+    """Test passing filename via minimize kwargs to MD."""
+    file_prefix = tmp_path / "md"
+    opt_path = tmp_path / "test.extxyz"
+    traj_path = tmp_path / "md-traj.extxyz"
+    stats_path = tmp_path / "md-stats.dat"
+    final_path = tmp_path / "md-final.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--traj-every",
+            1,
+            "--stats-every",
+            1,
+            "--minimize",
+            "--minimize-kwargs",
+            f"{{'write_kwargs': {{'filename': '{opt_path}'}}}}",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert opt_path.exists()
+    assert traj_path.exists()
+    assert stats_path.exists()
+    assert final_path.exists()
+
+    atoms = read(opt_path)
+    assert isinstance(atoms, Atoms)
+
+
+def test_minimize_kwargs_write_results(tmp_path):
+    """Test passing write_results via minimize kwargs to MD."""
+    file_prefix = tmp_path / "md"
+    opt_path = tmp_path / "md-opt.extxyz"
+    traj_path = tmp_path / "md-traj.extxyz"
+    stats_path = tmp_path / "md-stats.dat"
+    final_path = tmp_path / "md-final.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--traj-every",
+            1,
+            "--stats-every",
+            1,
+            "--minimize",
+            "--minimize-kwargs",
+            "{'write_results': True}",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert opt_path.exists()
+    assert traj_path.exists()
+    assert stats_path.exists()
+    assert final_path.exists()
+
+    atoms = read(opt_path)
+    assert isinstance(atoms, Atoms)
