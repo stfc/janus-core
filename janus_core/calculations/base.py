@@ -43,6 +43,8 @@ class BaseCalculation(FileNameMixin):
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc : Optional[bool]
         Whether to set (new) calculators for structures. Default is None.
+    attach_logger : bool
+        Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -51,6 +53,8 @@ class BaseCalculation(FileNameMixin):
         Prefix for output filenames. Default is None.
     additional_prefix : Optional[str]
         Component to add to default file_prefix (joined by hyphens). Default is None.
+    param_prefix : Optional[str]
+        Additional parameters to add to default file_prefix. Default is None.
 
     Attributes
     ----------
@@ -73,10 +77,12 @@ class BaseCalculation(FileNameMixin):
         sequence_allowed: bool = True,
         calc_kwargs: Optional[dict[str, Any]] = None,
         set_calc: Optional[bool] = None,
+        attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
         additional_prefix: Optional[str] = None,
+        param_prefix: Optional[str] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -105,6 +111,8 @@ class BaseCalculation(FileNameMixin):
             Keyword arguments to pass to the selected calculator. Default is {}.
         set_calc : Optional[bool]
             Whether to set (new) calculators for structures. Default is None.
+        attach_logger : bool
+            Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
@@ -114,6 +122,8 @@ class BaseCalculation(FileNameMixin):
         additional_prefix : Optional[str]
             Component to add to default file_prefix (joined by hyphens). Default is
             None.
+        param_prefix : Optional[str]
+            Additional parameters to add to default file_prefix. Default is None.
         """
         (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
             (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs)
@@ -132,14 +142,8 @@ class BaseCalculation(FileNameMixin):
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
 
-        if log_kwargs and "filename" not in log_kwargs:
-            raise ValueError("'filename' must be included in `log_kwargs`")
-
-        # Configure logging
-        log_kwargs.setdefault("name", calc_name)
-        self.logger = config_logger(**self.log_kwargs)
-        self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
-
+        # Read structures and/or attach calculators
+        # Note: logger not set up so yet so not passed here
         self.struct = input_structs(
             struct=self.struct,
             struct_path=self.struct_path,
@@ -150,7 +154,6 @@ class BaseCalculation(FileNameMixin):
             model_path=self.model_path,
             calc_kwargs=self.calc_kwargs,
             set_calc=set_calc,
-            logger=self.logger,
         )
 
         FileNameMixin.__init__(
@@ -160,3 +163,15 @@ class BaseCalculation(FileNameMixin):
             file_prefix,
             additional_prefix,
         )
+
+        # Configure logging
+        if attach_logger:
+            self.log_kwargs.setdefault(
+                "filename",
+                self._build_filename(
+                    "log.yml", param_prefix if file_prefix is None else ""
+                ).absolute(),
+            )
+        self.log_kwargs.setdefault("name", calc_name)
+        self.logger = config_logger(**self.log_kwargs)
+        self.tracker = config_tracker(self.logger, **self.tracker_kwargs)

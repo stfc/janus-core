@@ -173,12 +173,12 @@ def md(
     ] = None,
     write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
-    log: LogPath = "md.log",
     seed: Annotated[
         Optional[int],
         Option(help="Random seed for numpy.random and random functions."),
     ] = None,
-    summary: Summary = "md_summary.yml",
+    log: LogPath = None,
+    summary: Summary = None,
 ):
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -282,13 +282,14 @@ def md(
         files. Default is {}.
     post_process_kwargs : Optional[PostProcessKwargs]
         Kwargs to pass to post-processing.
-    log : Optional[Path]
-        Path to write logs to. Default is "md.log".
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
+    log : Optional[Path]
+        Path to write logs to. Default is inferred from the name of the structure file.
     summary : Path
-        Path to save summary of inputs and start/end time. Default is md_summary.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is inferred from the name of the structure file.
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -319,6 +320,10 @@ def md(
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
 
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
+
     dyn_kwargs = {
         "struct_path": struct,
         "arch": arch,
@@ -326,7 +331,9 @@ def md(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
+        "attach_logger": True,
+        "log_kwargs": log_kwargs,
+        "ensemble_kwargs": ensemble_kwargs,
         "timestep": timestep,
         "steps": steps,
         "temp": temp,
@@ -362,7 +369,6 @@ def md(
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
         "seed": seed,
-        "ensemble_kwargs": ensemble_kwargs,
     }
 
     # Instantiate MD ensemble
@@ -393,6 +399,12 @@ def md(
         dyn = NVT_NH(**dyn_kwargs)
     else:
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
+
+    # Set summary and log files
+    summary = dyn._build_filename(
+        "summary.yml", dyn.param_prefix, filename=summary
+    ).absolute()
+    log = dyn.log_kwargs["filename"]
 
     # Store inputs for yaml summary
     inputs = dyn_kwargs | {"ensemble": ensemble}

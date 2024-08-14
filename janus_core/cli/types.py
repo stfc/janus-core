@@ -181,8 +181,22 @@ PostProcessKwargs = Annotated[
     ),
 ]
 
-LogPath = Annotated[Path, Option(help="Path to save logs to.")]
+LogPath = Annotated[
+    Path,
+    Option(
+        help=(
+            "Path to save logs to. Default is inferred from the name of the structure "
+            "file."
+        )
+    ),
+]
 
 Summary = Annotated[
-    Path, Option(help="Path to save summary of inputs and start/end time.")
+    Path,
+    Option(
+        help=(
+            "Path to save summary of inputs, start/end time, and carbon emissions. "
+            "Default is inferred from the name of the structure file."
+        )
+    ),
 ]
