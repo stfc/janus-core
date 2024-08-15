@@ -14,6 +14,7 @@ MODEL_PATH = Path(__file__).parent / "models"
 
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 
 test_data = [
     (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -270,7 +271,12 @@ def test_mlips(arch, device, expected_energy):
 
 
 test_extra_mlips_data = [
-    ("alignn", "cpu", -11.148092269897461, {}),
+    (
+        "alignn",
+        "cpu",
+        -11.148092269897461,
+        {"model_path": ALIGNN_PATH / "best_model.pt"},
+    ),
     ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
     ("sevennet", "cpu", -27.061979293823242, {}),
     ("sevennet", "cpu", -27.061979293823242, {"model_path": "SevenNet-0_11July2024"}),
