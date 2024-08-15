@@ -162,10 +162,10 @@ Run an NPT molecular dynamics simulation (using the `MACE-MP <https://github.com
 
 This will generate several output files:
 
-- Thermodynamical statistics every 100 steps, written to ``NaCl-npt-T300.0-p1.0-stats.dat``
-- The structure trajectory every 100 steps, written to ``NaCl-npt-T300.0-p1.0-traj.extxyz``
-- The structure to be able to restart the dynamics every 1000 steps, written to ``NaCl-npt-T300.0-p1.0-res-1000.extxyz``
-- The final structure written to ``NaCl-npt-T300.0-p1.0-final.extxyz``
+- Thermodynamical statistics every 100 steps, written to ``Cl4Na4-npt-T300.0-p1.0-stats.dat``
+- The structure trajectory every 100 steps, written to ``Cl4Na4-npt-T300.0-p1.0-traj.extxyz``
+- The structure to be able to restart the dynamics every 1000 steps, written to ``Cl4Na4-npt-T300.0-p1.0-res-1000.extxyz``
+- The final structure written to ``Cl4Na4-npt-T300.0-p1.0-final.extxyz``
 - A log of the processes carried out, written to ``md.log``
 - A summary of the inputs and start/end time, written to ``md_summary.yml``.
 
@@ -202,9 +202,9 @@ Run an NVT heating simultation from 20K to 300K in steps of 20K, with 10fs at ea
 
 The produced final, statistics, and trajectory files will indicate the heating range:
 
-- ``NaCl-nvt-T20.0-T300.0-final.extxyz``
-- ``NaCl-nvt-T20.0-T300.0-stats.dat``
-- ``NaCl-nvt-T20.0-T300.0-traj.extxyz``
+- ``Cl4Na4-nvt-T20.0-T300.0-final.extxyz``
+- ``Cl4Na4-nvt-T20.0-T300.0-stats.dat``
+- ``Cl4Na4-nvt-T20.0-T300.0-traj.extxyz``
 
 The final structure file will include the final structure at each temperature point (20K, 40K, ..., 300K).
 
@@ -217,7 +217,7 @@ MD can also be carried out after heating using the same options as described in 
 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
 
-When MD is run with heating, the final, trajectory, and statistics files (``NaCl-nvt-T20.0-T300.0-T300.0-final.extxyz``, ``NaCl-nvt-T20.0-T300.0-T300.0-traj.extxyz``, and ``NaCl-nvt-T20.0-T300.0-T300.0-stats.dat``) indicate the heating range and MD temperature, which can differ. Each file contains data from both the heating and MD parts of the simulation.
+When MD is run with heating, the final, trajectory, and statistics files (``Cl4Na4-nvt-T20.0-T300.0-T300.0-final.extxyz``, ``Cl4Na4-nvt-T20.0-T300.0-T300.0-traj.extxyz``, and ``Cl4Na4-nvt-T20.0-T300.0-T300.0-stats.dat``) indicate the heating range and MD temperature, which can differ. Each file contains data from both the heating and MD parts of the simulation.
 
 Additional settings for geometry optimization, such as enabling optimization of cell vectors by setting ``hydrostatic_strain = True`` for the ASE filter, can be set using the ``--minimize-kwargs`` option:
 

@@ -334,9 +334,6 @@ def md(
 
     log_kwargs = {"filename": log, "filemode": "a"}
 
-    if not file_prefix:
-        file_prefix = s_point.file_prefix
-
     dyn_kwargs = {
         "struct": s_point.struct,
         "timestep": timestep,
