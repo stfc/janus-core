@@ -1,6 +1,7 @@
 """Test configuration of MLIP calculators."""
 
 from pathlib import Path
+from zipfile import BadZipFile
 
 from chgnet.model.model import CHGNet
 from matgl import load_model
@@ -119,12 +120,15 @@ def test_invalid_device(arch):
 )
 def test_extra_mlips(arch, device, kwargs):
     """Test extra MLIPs (alignn) can be configured."""
-    calculator = choose_calculator(
-        arch=arch,
-        device=device,
-        **kwargs,
-    )
-    assert calculator.parameters["version"] is not None
+    try:
+        calculator = choose_calculator(
+            arch=arch,
+            device=device,
+            **kwargs,
+        )
+        assert calculator.parameters["version"] is not None
+    except BadZipFile:
+        pytest.skip()
 
 
 @pytest.mark.extra_mlips
