@@ -14,7 +14,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     ModelPath,
-    ReadKwargsFirst,
+    ReadKwargsLast,
     StructPath,
     Summary,
     WriteKwargs,
@@ -143,7 +143,7 @@ def geomopt(
         str,
         Option(help="Path if saving optimization frames.  [default: None]"),
     ] = None,
-    read_kwargs: ReadKwargsFirst = None,
+    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
     write_kwargs: WriteKwargs = None,
@@ -247,6 +247,7 @@ def geomopt(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log, "filemode": "w"},
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
@@ -254,8 +255,10 @@ def geomopt(
         **minimize_kwargs,
         "write_results": True,
         "write_kwargs": write_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
     }
+
+    # Set up geometry optimization
+    optimizer = GeomOpt(**optimize_kwargs)
 
     # Store inputs for yaml summary
     inputs = optimize_kwargs.copy()
@@ -263,9 +266,6 @@ def geomopt(
     # Store only filename as filemode is not set by user
     del inputs["log_kwargs"]
     inputs["log"] = log
-
-    # Set up geometry optimization
-    optimizer = GeomOpt(**optimize_kwargs)
 
     # Add structure and MLIP information to inputs
     save_struct_calc(

@@ -110,13 +110,15 @@ class BaseCalculation(FileNameMixin):
         self.model_path = model_path
         self.read_kwargs = read_kwargs
         self.calc_kwargs = calc_kwargs
+        self.log_kwargs = log_kwargs
+        self.tracker_kwargs = tracker_kwargs
 
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
 
         # Configure logging
-        self.logger = config_logger(**log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+        self.logger = config_logger(**self.log_kwargs)
+        self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
 
         self.struct = input_structs(
             struct=self.struct,

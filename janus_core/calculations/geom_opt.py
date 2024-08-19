@@ -31,7 +31,7 @@ class GeomOpt(BaseCalculation):
 
     Parameters
     ----------
-    struct : Optional[[Atoms]
+    struct : Optional[Atoms]
         ASE Atoms structure(s) to optimize geometry for. Required if `struct_path` is
         None. Default is None.
     struct_path : Optional[PathLike]
@@ -48,7 +48,7 @@ class GeomOpt(BaseCalculation):
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc : Optional[bool]
-        Whether to set (new) calculators for structures. Default is Nonw.
+        Whether to set (new) calculators for structures. Default is None.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -119,7 +119,7 @@ class GeomOpt(BaseCalculation):
 
         Parameters
         ----------
-        struct : Optional[[Atoms]
+        struct : Optional[Atoms]
             ASE Atoms structure(s) to optimize geometry for. Required if `struct_path`
             is None. Default is None.
         struct_path : Optional[PathLike]
@@ -220,7 +220,7 @@ class GeomOpt(BaseCalculation):
         # Read last image by default
         read_kwargs.setdefault("index", -1)
 
-        # Configure logging
+        # Set log name
         log_kwargs.setdefault("name", __name__)
 
         # Initialise structures and logging
