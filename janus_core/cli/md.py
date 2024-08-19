@@ -7,7 +7,6 @@ from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -17,7 +16,7 @@ from janus_core.cli.types import (
     MinimizeKwargs,
     ModelPath,
     PostProcessKwargs,
-    ReadKwargsFirst,
+    ReadKwargsLast,
     StructPath,
     Summary,
     WriteKwargs,
@@ -70,7 +69,7 @@ def md(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargsFirst = None,
+    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     equil_steps: Annotated[
         int,
@@ -220,7 +219,7 @@ def md(
         Path to MLIP model. Default is `None`.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is 0.
+            read_kwargs["index"] is -1.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     equil_steps : int
@@ -321,24 +320,14 @@ def md(
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
 
-    # Set up single point calculator
-    s_point = SinglePoint(
-        struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log, "filemode": "w"},
-    )
-
-    log_kwargs = {"filename": log, "filemode": "a"}
-
-    if not file_prefix:
-        file_prefix = s_point.file_prefix
-
     dyn_kwargs = {
-        "struct": s_point.struct,
+        "struct_path": struct,
+        "arch": arch,
+        "device": device,
+        "model_path": model_path,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log, "filemode": "w"},
         "timestep": timestep,
         "steps": steps,
         "temp": temp,
@@ -373,7 +362,6 @@ def md(
         "temp_time": temp_time,
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
-        "log_kwargs": log_kwargs,
         "seed": seed,
         "ensemble_kwargs": ensemble_kwargs,
     }
@@ -406,6 +394,7 @@ def md(
         dyn = NVT_NH(**dyn_kwargs)
     else:
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
+
     # Store inputs for yaml summary
     inputs = dyn_kwargs | {"ensemble": ensemble}
 
@@ -413,8 +402,16 @@ def md(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    # Add structure and MLIP information to inputs
     save_struct_calc(
-        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+        inputs=inputs,
+        struct=dyn.struct,
+        struct_path=struct,
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        read_kwargs=read_kwargs,
+        calc_kwargs=calc_kwargs,
     )
 
     # Convert all paths to strings in inputs nested dictionary
@@ -426,6 +423,7 @@ def md(
     # Run molecular dynamics
     dyn.run()
 
+    # Save carbon summary
     carbon_summary(summary=summary, log=log)
 
     # Save time after simulation has finished

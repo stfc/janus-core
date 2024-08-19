@@ -30,7 +30,7 @@ class GeomOpt(BaseCalculation):
     Parameters
     ----------
     struct : Optional[Atoms]
-        ASE Atoms structure(s) to optimize geometry for. Required if `struct_path` is
+        ASE Atoms structure to optimize geometry for. Required if `struct_path` is
         None. Default is None.
     struct_path : Optional[PathLike]
         Path of structure to optimize. Required if `struct` is None. Default is None.
@@ -118,8 +118,8 @@ class GeomOpt(BaseCalculation):
         Parameters
         ----------
         struct : Optional[Atoms]
-            ASE Atoms structure(s) to optimize geometry for. Required if `struct_path`
-            is None. Default is None.
+            ASE Atoms structure to optimize geometry for. Required if `struct_path` is
+            None. Default is None.
         struct_path : Optional[PathLike]
             Path of structure to optimize. Required if `struct` is None. Default is
             None.

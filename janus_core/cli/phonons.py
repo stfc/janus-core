@@ -7,7 +7,6 @@ from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.phonons import Phonons
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -15,7 +14,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     ModelPath,
-    ReadKwargsFirst,
+    ReadKwargsLast,
     StructPath,
     Summary,
 )
@@ -110,7 +109,7 @@ def phonons(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargsFirst = None,
+    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     file_prefix: Annotated[
         Optional[Path],
@@ -206,19 +205,6 @@ def phonons(
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
 
-    # Set up single point calculator
-    s_point = SinglePoint(
-        struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log, "filemode": "w"},
-    )
-
-    log_kwargs = {"filename": log, "filemode": "a"}
-
     # Check fmax option not duplicated
     if "fmax" in minimize_kwargs:
         raise ValueError("'fmax' must be passed through the --fmax option")
@@ -235,9 +221,6 @@ def phonons(
     if len(supercell) != 3:
         raise ValueError("Please pass three lattice vectors in the form 1x2x3")
 
-    if not file_prefix:
-        file_prefix = s_point.file_prefix
-
     calcs = []
     if bands:
         calcs.append("bands")
@@ -248,9 +231,15 @@ def phonons(
     if pdos:
         calcs.append("pdos")
 
-    # Dictionary of inputs for phonons
+    # Dictionary of inputs for Phonons class
     phonons_kwargs = {
-        "struct": s_point.struct,
+        "struct_path": struct,
+        "arch": arch,
+        "device": device,
+        "model_path": model_path,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log, "filemode": "w"},
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
@@ -260,12 +249,14 @@ def phonons(
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
         "file_prefix": file_prefix,
-        "log_kwargs": log_kwargs,
         "force_consts_to_hdf5": hdf5,
         "plot_to_file": plot_to_file,
         "symmetrize": symmetrize,
         "write_full": write_full,
     }
+
+    # Initialise phonons
+    phonon = Phonons(**phonons_kwargs)
 
     # Store inputs for yaml summary
     inputs = phonons_kwargs.copy()
@@ -274,8 +265,16 @@ def phonons(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    # Add structure and MLIP information to inputs
     save_struct_calc(
-        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+        inputs=inputs,
+        struct=phonon.struct,
+        struct_path=struct,
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        read_kwargs=read_kwargs,
+        calc_kwargs=calc_kwargs,
     )
 
     # Convert all paths to strings in inputs nested dictionary
@@ -284,10 +283,10 @@ def phonons(
     # Save summary information before calculations begin
     start_summary(command="phonons", summary=summary, inputs=inputs)
 
-    # Initialise phonons class and run calculations
-    phonon = Phonons(**phonons_kwargs)
+    # Run phonon calculations
     phonon.run()
 
+    # Save carbon summary
     carbon_summary(summary=summary, log=log)
 
     # Time after calculations have finished

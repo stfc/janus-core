@@ -1,6 +1,5 @@
 """Equation of State."""
 
-from collections.abc import Sequence
 from copy import copy
 from typing import Any, Optional
 
@@ -9,20 +8,49 @@ from ase.eos import EquationOfState
 from ase.units import kJ
 from numpy import cbrt, empty, linspace
 
+from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
-from janus_core.helpers.janus_types import EoSNames, EoSResults, OutputKwargs, PathLike
-from janus_core.helpers.log import config_logger, config_tracker
+from janus_core.helpers.janus_types import (
+    Architectures,
+    ASEReadArgs,
+    Devices,
+    EoSNames,
+    EoSResults,
+    OutputKwargs,
+    PathLike,
+)
 from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 
 
-class EoS(FileNameMixin):
+class EoS(BaseCalculation):
     """
     Prepare and calculate equation of state of a structure.
 
     Parameters
     ----------
-    struct : Atoms
-        Structure to calculate equation of state for.
+    struct : Optional[Atoms]
+        ASE Atoms structure to calculate equation of state for. Required if
+        `struct_path` is None. Default is None.
+    struct_path : Optional[PathLike]
+        Path of structure to calculate equation of state for. Required if `struct` is
+        None. Default is None.
+    arch : Architectures
+        MLIP architecture to use for calculations. Default is "mace_mp".
+    device : Devices
+        Device to run MLIP model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
+    read_kwargs : Optional[ASEReadArgs]
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is -1.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is None.
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
     min_volume : float
         Minimum volume scale factor. Default is 0.95.
     max_volume : float
@@ -47,17 +75,9 @@ class EoS(FileNameMixin):
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula of the structure.
-    log_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_logger`. Default is {}.
-    tracker_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_tracker`. Default is {}.
 
     Attributes
     ----------
-    logger : Optional[logging.Logger]
-        Logger if log file has been specified.
-    tracker : Optional[OfflineEmissionsTracker]
-        Tracker if logging is enabled.
     results : EoSResults
         Dictionary containing equation of state ASE object, and the fitted minimum
         bulk modulus, volume, and energy.
@@ -76,7 +96,16 @@ class EoS(FileNameMixin):
 
     def __init__(
         self,
-        struct: Atoms,
+        struct: Optional[Atoms] = None,
+        struct_path: Optional[PathLike] = None,
+        arch: Architectures = "mace_mp",
+        device: Devices = "cpu",
+        model_path: Optional[PathLike] = None,
+        read_kwargs: Optional[ASEReadArgs] = None,
+        calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
+        log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
         min_volume: float = 0.95,
         max_volume: float = 1.05,
         n_volumes: int = 7,
@@ -88,16 +117,35 @@ class EoS(FileNameMixin):
         write_structures: bool = False,
         write_kwargs: Optional[OutputKwargs] = None,
         file_prefix: Optional[PathLike] = None,
-        log_kwargs: Optional[dict[str, Any]] = None,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise class.
 
         Parameters
         ----------
-        struct : Atoms
-            Structure.
+        struct : Optional[Atoms]
+            ASE Atoms structure to optimize geometry for. Required if `struct_path` is
+            None. Default is None.
+        struct_path : Optional[PathLike]
+            Path of structure to optimize. Required if `struct` is None. Default is
+            None.
+        arch : Architectures
+            MLIP architecture to use for optimization. Default is "mace_mp".
+        device : Devices
+            Device to run MLIP model on. Default is "cpu".
+        model_path : Optional[PathLike]
+            Path to MLIP model. Default is `None`.
+        read_kwargs : Optional[ASEReadArgs]
+            Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is -1.
+        calc_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
+        log_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
         min_volume : float
             Minimum volume scale factor. Default is 0.95.
         max_volume : float
@@ -124,16 +172,25 @@ class EoS(FileNameMixin):
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
-        log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_logger`. Default is {}.
-        tracker_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
-            (minimize_kwargs, write_kwargs, log_kwargs, tracker_kwargs)
+        (
+            read_kwargs,
+            calc_kwargs,
+            log_kwargs,
+            tracker_kwargs,
+            minimize_kwargs,
+            write_kwargs,
+        ) = none_to_dict(
+            (
+                read_kwargs,
+                calc_kwargs,
+                log_kwargs,
+                tracker_kwargs,
+                minimize_kwargs,
+                write_kwargs,
+            )
         )
 
-        self.struct = struct
         self.min_volume = min_volume
         self.max_volume = max_volume
         self.n_volumes = n_volumes
@@ -144,16 +201,6 @@ class EoS(FileNameMixin):
         self.write_results = write_results
         self.write_structures = write_structures
         self.write_kwargs = write_kwargs
-        self.log_kwargs = log_kwargs
-
-        # Validate parameters
-        if not isinstance(struct, Atoms):
-            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
-                raise NotImplementedError(
-                    "The equation of state can only be calculated for one Atoms "
-                    "object at a time currently"
-                )
-            raise ValueError("`struct` must be an ASE Atoms object")
 
         if (
             (self.minimize or self.minimize_all)
@@ -166,9 +213,6 @@ class EoS(FileNameMixin):
                 "`minimize_kwargs`"
             )
 
-        if not self.struct.calc:
-            raise ValueError("Please attach a calculator to `struct`.")
-
         # Ensure lattice constants span correct range
         if self.n_volumes <= 1:
             raise ValueError("`n_volumes` must be greater than 1.")
@@ -177,13 +221,32 @@ class EoS(FileNameMixin):
         if self.max_volume <= 1:
             raise ValueError("`max_volume` must be greater than 1.")
 
-        # Configure logging
+        # Read last image by default
+        read_kwargs.setdefault("index", -1)
+
+        # Set log name
         log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+
+        # Initialise structures and logging
+        super().__init__(
+            struct=struct,
+            struct_path=struct_path,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            read_kwargs=read_kwargs,
+            sequence_allowed=False,
+            calc_kwargs=calc_kwargs,
+            set_calc=set_calc,
+            log_kwargs=log_kwargs,
+            tracker_kwargs=tracker_kwargs,
+        )
+
+        if not self.struct.calc:
+            raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, file_prefix)
+        FileNameMixin.__init__(self, self.struct, self.struct_path, file_prefix)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("generated.extxyz").absolute(),

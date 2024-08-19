@@ -1,6 +1,5 @@
 """Run molecular dynamics simulations."""
 
-from collections.abc import Sequence
 import datetime
 from functools import partial
 from itertools import combinations_with_replacement
@@ -24,6 +23,7 @@ from ase.md.verlet import VelocityVerlet
 import numpy as np
 import yaml
 
+from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.correlator import Correlation
 from janus_core.helpers.janus_types import (
@@ -33,9 +33,11 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PostProcessKwargs,
 )
-from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.post_process import compute_rdf, compute_vaf
 from janus_core.helpers.utils import (
+    Architectures,
+    ASEReadArgs,
+    Devices,
     FileNameMixin,
     none_to_dict,
     output_structs,
@@ -45,12 +47,34 @@ from janus_core.helpers.utils import (
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
 
-class MolecularDynamics(FileNameMixin):
+class MolecularDynamics(BaseCalculation):
     """
     Configure shared molecular dynamics simulation options.
 
     Parameters
     ----------
+    struct : Optional[Atoms]
+        ASE Atoms structure to simulate. Required if `struct_path` is None. Default is
+        None.
+    struct_path : Optional[PathLike]
+        Path of structure to simulate. Required if `struct` is None. Default is None.
+    arch : Architectures
+        MLIP architecture to use for simulation. Default is "mace_mp".
+    device : Devices
+        Device to run MLIP model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
+    read_kwargs : Optional[ASEReadArgs]
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is -1.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is None.
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
     struct : Atoms
         Structure to simulate.
     ensemble : Ensembles
@@ -121,20 +145,12 @@ class MolecularDynamics(FileNameMixin):
         Keyword arguments to control post-processing operations.
     correlation_kwargs : Optional[CorrelationKwargs]
         Keyword arguments to control on-the-fly correlations.
-    log_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_logger`. Default is None.
-    tracker_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_tracker`. Default is None.
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
 
     Attributes
     ----------
-    logger : Optional[logging.Logger]
-        Logger if log file has been specified.
-    tracker : Optional[OfflineEmissionsTracker]
-        Tracker if logging is enabled.
     dyn : Dynamics
         Dynamics object to run simulation.
     n_atoms : int
@@ -156,7 +172,16 @@ class MolecularDynamics(FileNameMixin):
 
     def __init__(
         self,
-        struct: Atoms,
+        struct: Optional[Atoms] = None,
+        struct_path: Optional[PathLike] = None,
+        arch: Architectures = "mace_mp",
+        device: Devices = "cpu",
+        model_path: Optional[PathLike] = None,
+        read_kwargs: Optional[ASEReadArgs] = None,
+        calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
+        log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
         ensemble: Optional[Ensembles] = None,
         steps: int = 0,
         timestep: float = 1.0,
@@ -188,8 +213,6 @@ class MolecularDynamics(FileNameMixin):
         write_kwargs: Optional[OutputKwargs] = None,
         post_process_kwargs: Optional[PostProcessKwargs] = None,
         correlation_kwargs: Optional[list[CorrelationKwargs]] = None,
-        log_kwargs: Optional[dict[str, Any]] = None,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
         seed: Optional[int] = None,
     ) -> None:
         """
@@ -197,8 +220,29 @@ class MolecularDynamics(FileNameMixin):
 
         Parameters
         ----------
-        struct : Atoms
-            Structure to simulate.
+        struct : Optional[Atoms]
+            ASE Atoms structure to simulate. Required if `struct_path` is None. Default
+            is None.
+        struct_path : Optional[PathLike]
+            Path of structure to simulate. Required if `struct` is None. Default is
+            None.
+        arch : Architectures
+            MLIP architecture to use for simulation. Default is "mace_mp".
+        device : Devices
+            Device to run MLIP model on. Default is "cpu".
+        model_path : Optional[PathLike]
+            Path to MLIP model. Default is `None`.
+        read_kwargs : Optional[ASEReadArgs]
+            Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is -1.
+        calc_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
+        log_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
         ensemble : Ensembles
             Name for thermodynamic ensemble. Default is None.
         steps : int
@@ -279,24 +323,27 @@ class MolecularDynamics(FileNameMixin):
             Default is None.
         """
         (
+            read_kwargs,
+            calc_kwargs,
+            log_kwargs,
+            tracker_kwargs,
             minimize_kwargs,
             write_kwargs,
             post_process_kwargs,
             correlation_kwargs,
-            log_kwargs,
-            tracker_kwargs,
         ) = none_to_dict(
             (
+                read_kwargs,
+                calc_kwargs,
+                log_kwargs,
+                tracker_kwargs,
                 minimize_kwargs,
                 write_kwargs,
                 post_process_kwargs,
                 correlation_kwargs,
-                log_kwargs,
-                tracker_kwargs,
             )
         )
 
-        self.struct = struct
         self.ensemble = ensemble
         self.steps = steps
         self.timestep = timestep * units.fs
@@ -327,21 +374,12 @@ class MolecularDynamics(FileNameMixin):
         self.write_kwargs = write_kwargs
         self.post_process_kwargs = post_process_kwargs
         self.correlation_kwargs = correlation_kwargs
-        self.log_kwargs = log_kwargs
         self.seed = seed
-
-        # Validate parameters
-        if not isinstance(struct, Atoms):
-            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
-                raise NotImplementedError(
-                    "MD can only be run for one Atoms object at a time currently"
-                )
-            raise ValueError("`struct` must be an ASE Atoms object")
 
         if "append" in self.write_kwargs:
             raise ValueError("`append` cannot be specified when writing files")
 
-        if self.log_kwargs and "filename" not in self.log_kwargs:
+        if log_kwargs and "filename" not in log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
         # Check temperatures for heating differ
@@ -392,13 +430,34 @@ class MolecularDynamics(FileNameMixin):
             "columns", ["symbols", "positions", "momenta", "masses"]
         )
 
-        # Configure logging
-        self.log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**self.log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+        # Read last image by default
+        read_kwargs.setdefault("index", -1)
+
+        # Set log name
+        log_kwargs.setdefault("name", __name__)
+
+        # Initialise structures and logging
+        super().__init__(
+            struct=struct,
+            struct_path=struct_path,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            read_kwargs=read_kwargs,
+            sequence_allowed=False,
+            calc_kwargs=calc_kwargs,
+            set_calc=set_calc,
+            log_kwargs=log_kwargs,
+            tracker_kwargs=tracker_kwargs,
+        )
+
+        if not self.struct.calc:
+            raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file names
-        FileNameMixin.__init__(self, self.struct, file_prefix, self.ensemble)
+        FileNameMixin.__init__(
+            self, self.struct, self.struct_path, file_prefix, self.ensemble
+        )
         self.final_file = self._build_filename(
             "final.extxyz",
             self._parameter_prefix if file_prefix is None else "",
