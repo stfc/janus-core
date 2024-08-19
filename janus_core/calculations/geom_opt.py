@@ -47,6 +47,8 @@ class GeomOpt(BaseCalculation):
         read_kwargs["index"] is -1.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is Nonw.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -97,6 +99,7 @@ class GeomOpt(BaseCalculation):
         model_path: Optional[PathLike] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         fmax: float = 0.1,
@@ -133,6 +136,8 @@ class GeomOpt(BaseCalculation):
             read_kwargs["index"] is -1.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
@@ -228,6 +233,7 @@ class GeomOpt(BaseCalculation):
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
+            set_calc=set_calc,
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
         )

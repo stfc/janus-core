@@ -46,6 +46,8 @@ class SinglePoint(BaseCalculation):
         read_kwargs["index"] is ":".
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is None.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -84,6 +86,7 @@ class SinglePoint(BaseCalculation):
         model_path: Optional[PathLike] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         properties: MaybeSequence[Properties] = (),
@@ -113,6 +116,8 @@ class SinglePoint(BaseCalculation):
             read_kwargs["index"] is ":".
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
@@ -158,6 +163,7 @@ class SinglePoint(BaseCalculation):
             read_kwargs=read_kwargs,
             sequence_allowed=True,
             calc_kwargs=calc_kwargs,
+            set_calc=set_calc,
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
         )

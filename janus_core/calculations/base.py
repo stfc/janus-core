@@ -39,6 +39,8 @@ class BaseCalculation(FileNameMixin):
         Whether a sequence of Atoms objects is allowed. Default is True.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is None.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -63,6 +65,7 @@ class BaseCalculation(FileNameMixin):
         read_kwargs: Optional[ASEReadArgs] = None,
         sequence_allowed: bool = True,
         calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
@@ -89,6 +92,8 @@ class BaseCalculation(FileNameMixin):
             Whether a sequence of Atoms objects is allowed. Default is True.
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
@@ -122,5 +127,6 @@ class BaseCalculation(FileNameMixin):
             device=self.device,
             model_path=self.model_path,
             calc_kwargs=self.calc_kwargs,
+            set_calc=set_calc,
             logger=self.logger,
         )

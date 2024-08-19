@@ -263,7 +263,7 @@ def results_to_info(
             struct.calc.results = {}
 
 
-def set_calculator(
+def attach_calculator(
     struct: MaybeSequence[Atoms],
     *,
     arch: Architectures = "mace_mp",
@@ -313,6 +313,7 @@ def input_structs(
     device: Devices = "cpu",
     model_path: Optional[PathLike] = None,
     calc_kwargs: Optional[dict[str, Any]] = None,
+    set_calc: Optional[bool] = None,
     logger: Optional[logging.Logger] = None,
 ) -> MaybeSequence[Atoms]:
     """
@@ -337,6 +338,10 @@ def input_structs(
         Path to MLIP model. Default is `None`.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures.  Default is True if
+        `struct_path` is specified or `struct` is missing calculators, else default is
+        False.
     logger : Optional[logging.Logger]
         Logger if log file has been specified. Default is None.
 
@@ -382,17 +387,29 @@ def input_structs(
             "Only one Atoms object at a time can be used for this calculation"
         )
 
-    if logger:
-        logger.info("Attaching calculator to structure.")
-    set_calculator(
-        struct=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        calc_kwargs=calc_kwargs,
-    )
-    if logger:
-        logger.info("Calculator attached to structure.")
+    # If set_calc not specified, set to True if reading file or calculators not attached
+    if set_calc is None:
+        if struct_path:
+            set_calc = True
+
+        if isinstance(struct, Atoms):
+            set_calc = True if struct.calc is None else False
+
+        if isinstance(struct, Sequence):
+            set_calc = True if any(image.calc is None for image in struct) else False
+
+    if set_calc:
+        if logger:
+            logger.info("Attaching calculator to structure.")
+        attach_calculator(
+            struct=struct,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            calc_kwargs=calc_kwargs,
+        )
+        if logger:
+            logger.info("Calculator attached to structure.")
 
     return struct
 
