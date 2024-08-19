@@ -34,6 +34,8 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     struct : MaybeSequence[Atoms]
         Structure from which to derive the default name. If `struct` is a sequence,
         the first structure will be used.
+    struct_path : Optional[PathLike]
+        Path to file containing structures.
     file_prefix : Optional[PathLike]
         Default prefix to use.
     *additional
@@ -51,6 +53,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     def __init__(
         self,
         struct: MaybeSequence[Atoms],
+        struct_path: Optional[PathLike],
         file_prefix: Optional[PathLike],
         *additional,
     ):
@@ -62,29 +65,36 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         struct : MaybeSequence[Atoms]
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
+        struct_path : Optional[PathLike]
+            Path to file structures were read from. Used as default prefix is not None.
         file_prefix : Optional[PathLike]
             Default prefix to use.
         *additional
             Components to add to file_prefix (joined by hyphens).
         """
         self.file_prefix = Path(
-            self._get_default_prefix(file_prefix, struct, *additional)
+            self._get_default_prefix(file_prefix, struct, struct_path, *additional)
         )
 
     @staticmethod
     def _get_default_prefix(
-        file_prefix: Optional[PathLike], struct: MaybeSequence[Atoms], *additional
+        file_prefix: Optional[PathLike],
+        struct: MaybeSequence[Atoms],
+        struct_path: Optional[PathLike],
+        *additional,
     ) -> str:
         """
         Determine the default prefix from the structure  or provided file_prefix.
 
         Parameters
         ----------
-        file_prefix : str
+        file_prefix : Optional[PathLike]
             Given file_prefix.
         struct : MaybeSequence[Atoms]
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
+        struct_path : Optional[PathLike]
+            Path to file containing structures.
         *additional
             Components to add to file_prefix (joined by hyphens).
 
@@ -96,12 +106,15 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         if file_prefix is not None:
             return str(file_prefix)
 
-        if isinstance(struct, Sequence):
-            formula = struct[0].get_chemical_formula()
+        # Prefer file stem, otherwise use formula
+        if struct_path is not None:
+            struct_name = Path(struct_path).stem
+        elif isinstance(struct, Sequence):
+            struct_name = struct[0].get_chemical_formula()
         else:
-            formula = struct.get_chemical_formula()
+            struct_name = struct.get_chemical_formula()
 
-        return "-".join((formula, *additional))
+        return "-".join((struct_name, *additional))
 
     def _build_filename(
         self,

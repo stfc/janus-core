@@ -193,7 +193,7 @@ def geomopt(
         Path if saving optimization frames. Default is None.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is 0.
+            read_kwargs["index"] is -1.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     minimize_kwargs : Optional[dict[str, Any]]

@@ -1,7 +1,6 @@
 """Prepare and perform single point calculations."""
 
 from collections.abc import Sequence
-from pathlib import Path
 from typing import Any, Optional, get_args
 
 from ase import Atoms
@@ -168,13 +167,8 @@ class SinglePoint(BaseCalculation):
             tracker_kwargs=tracker_kwargs,
         )
 
-        # If structure given as path, set file_prefix
-        file_prefix = None
-        if self.struct_path:
-            file_prefix = Path(self.struct_path).stem
-
         # Set output file
-        FileNameMixin.__init__(self, self.struct, file_prefix)
+        FileNameMixin.__init__(self, self.struct, self.struct_path, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("results.extxyz").absolute(),

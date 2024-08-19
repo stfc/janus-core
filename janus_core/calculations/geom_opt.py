@@ -1,7 +1,5 @@
 """Prepare and run geometry optimization."""
 
-from collections.abc import Sequence
-from pathlib import Path
 from typing import Any, Callable, Optional, Union
 import warnings
 
@@ -238,20 +236,11 @@ class GeomOpt(BaseCalculation):
             tracker_kwargs=tracker_kwargs,
         )
 
-        if not isinstance(self.struct, Atoms):
-            if isinstance(self.struct, Sequence) and isinstance(self.struct[0], Atoms):
-                raise NotImplementedError(
-                    "Only one Atoms object at a time can currently be optimized"
-                )
-            raise ValueError("`struct` must be an ASE Atoms object")
-
-        # If structure given as path, set file_prefix
-        file_prefix = None
-        if self.struct_path:
-            file_prefix = Path(self.struct_path).stem
+        if not self.struct.calc:
+            raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, file_prefix)
+        FileNameMixin.__init__(self, self.struct, self.struct_path, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("opt.extxyz").absolute(),
