@@ -1,14 +1,13 @@
 """Prepare and perform single point calculations."""
 
 from collections.abc import Sequence
-from copy import copy
 from pathlib import Path
 from typing import Any, Optional, get_args
 
 from ase import Atoms
-from ase.io import read
 from numpy import ndarray
 
+from janus_core.calculations.base import BaseCalculation
 from janus_core.helpers.janus_types import (
     Architectures,
     ASEReadArgs,
@@ -20,12 +19,10 @@ from janus_core.helpers.janus_types import (
     PathLike,
     Properties,
 )
-from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
 
 
-class SinglePoint(FileNameMixin):
+class SinglePoint(BaseCalculation):
     """
     Prepare and perform single point calculations.
 
@@ -37,11 +34,6 @@ class SinglePoint(FileNameMixin):
     struct_path : Optional[PathLike]
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
-    properties : MaybeSequence[Properties]
-        Physical properties to calculate. If not specified, "energy",
-        "forces", and "stress" will be returned.
-    write_results : bool
-        True to write out structure with results of calculations. Default is False.
     arch : Architectures
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
@@ -54,13 +46,18 @@ class SinglePoint(FileNameMixin):
         read_kwargs["index"] is ":".
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
-    write_kwargs : Optional[OutputKwargs]
-        Keyword arguments to pass to ase.io.write if saving structure with results of
-        calculations. Default is {}.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
+    properties : MaybeSequence[Properties]
+        Physical properties to calculate. If not specified, "energy",
+        "forces", and "stress" will be returned.
+    write_results : bool
+        True to write out structure with results of calculations. Default is False.
+    write_kwargs : Optional[OutputKwargs]
+        Keyword arguments to pass to ase.io.write if saving structure with results of
+        calculations. Default is {}.
 
     Attributes
     ----------
@@ -73,28 +70,25 @@ class SinglePoint(FileNameMixin):
 
     Methods
     -------
-    read_structure()
-        Read structure and structure name.
-    set_calculator()
-        Configure calculator and attach to structure.
     run()
         Run single point calculations.
     """
 
     def __init__(
         self,
+        *,
         struct: Optional[MaybeSequence[Atoms]] = None,
         struct_path: Optional[PathLike] = None,
-        properties: MaybeSequence[Properties] = (),
-        write_results: bool = False,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: Optional[PathLike] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
-        write_kwargs: Optional[OutputKwargs] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
+        properties: MaybeSequence[Properties] = (),
+        write_results: bool = False,
+        write_kwargs: Optional[OutputKwargs] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -107,11 +101,6 @@ class SinglePoint(FileNameMixin):
         struct_path : Optional[PathLike]
             Path of structure to simulate. Required if `struct` is None.
             Default is None.
-        properties : MaybeSequence[Properties]
-            Physical properties to calculate. If not specified, "energy",
-            "forces", and "stress" will be returned.
-        write_results : bool
-            True to write out structure with results of calculations. Default is False.
         arch : Architectures
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
@@ -124,68 +113,59 @@ class SinglePoint(FileNameMixin):
             read_kwargs["index"] is ":".
         calc_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to the selected calculator. Default is {}.
-        write_kwargs : Optional[OutputKwargs],
-            Keyword arguments to pass to ase.io.write if saving structure with results
-            of calculations. Default is {}.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
+        properties : MaybeSequence[Properties]
+            Physical properties to calculate. If not specified, "energy",
+            "forces", and "stress" will be returned.
+        write_results : bool
+            True to write out structure with results of calculations. Default is False.
+        write_kwargs : Optional[OutputKwargs],
+            Keyword arguments to pass to ase.io.write if saving structure with results
+            of calculations. Default is {}.
         """
-        (read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs) = (
+        (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs, write_kwargs) = (
             none_to_dict(
-                (read_kwargs, calc_kwargs, write_kwargs, log_kwargs, tracker_kwargs)
+                (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs, write_kwargs)
             )
         )
 
-        self.struct = struct
-        self.struct_path = struct_path
         self.properties = properties
         self.write_results = write_results
-        self.arch = arch
-        self.device = device
-        self.model_path = model_path
-        self.read_kwargs = read_kwargs
-        self.calc_kwargs = calc_kwargs
         self.write_kwargs = write_kwargs
-
-        # Validate parameters
-        if not self.struct and not self.struct_path:
-            raise ValueError(
-                "Please specify either the ASE Atoms structure (`struct`) "
-                "or a path to the structure file (`struct_path`)"
-            )
-
-        if self.struct and self.struct_path:
-            raise ValueError(
-                "You cannot specify both the ASE Atoms structure (`struct`) "
-                "and a path to the structure file (`struct_path`)"
-            )
 
         if log_kwargs and "filename" not in log_kwargs:
             raise ValueError("'filename' must be included in `log_kwargs`")
 
-        if not self.model_path and "model_path" in self.calc_kwargs:
+        if not model_path and "model_path" in calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
 
         # Read full trajectory by default
-        self.read_kwargs.setdefault("index", ":")
+        read_kwargs.setdefault("index", ":")
 
-        # Read structure if given as path
+        # Set log name
+        log_kwargs.setdefault("name", __name__)
+
+        # Initialise structures and logging
+        super().__init__(
+            struct=struct,
+            struct_path=struct_path,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            read_kwargs=read_kwargs,
+            sequence_allowed=True,
+            calc_kwargs=calc_kwargs,
+            log_kwargs=log_kwargs,
+            tracker_kwargs=tracker_kwargs,
+        )
+
+        # If structure given as path, set file_prefix
         file_prefix = None
         if self.struct_path:
-            self.read_structure()
             file_prefix = Path(self.struct_path).stem
-
-        # Configure logging
-        log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
-
-        # Configure calculator
-        self.set_calculator()
-        if self.logger:
-            self.logger.info("Single point calculator configured")
 
         # Set output file
         FileNameMixin.__init__(self, self.struct, file_prefix)
@@ -195,38 +175,6 @@ class SinglePoint(FileNameMixin):
         )
 
         self.results = {}
-
-    def read_structure(self) -> None:
-        """
-        Read structure and structure name.
-
-        If the file contains multiple structures, only the last configuration
-        will be read by default.
-        """
-        if not self.struct_path:
-            raise ValueError("`struct_path` must be defined")
-
-        self.struct = read(self.struct_path, **self.read_kwargs)
-
-    def set_calculator(self) -> None:
-        """Configure calculator and attach to structure."""
-        calculator = choose_calculator(
-            arch=self.arch,
-            device=self.device,
-            model_path=self.model_path,
-            **self.calc_kwargs,
-        )
-        if self.struct is None:
-            self.read_structure(**self.read_kwargs)
-
-        if isinstance(self.struct, Sequence):
-            for struct in self.struct:
-                struct.calc = copy(calculator)
-            # Return single Atoms object if only one image in list
-            if len(self.struct) == 1:
-                self.struct = self.struct[0]
-        else:
-            self.struct.calc = calculator
 
     @property
     def properties(self) -> Sequence[Properties]:
