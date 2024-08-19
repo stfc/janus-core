@@ -82,7 +82,7 @@ def test_npt():
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
-            assert "Target P [GPa] | Target T [K]" in lines[0]
+            assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
             assert len(lines) == 5
     finally:
         restart_path_1.unlink(missing_ok=True)
@@ -263,7 +263,7 @@ def test_restart(tmp_path):
 
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
-        assert " | Target T [K]" in lines[0]
+        assert " | Target_T [K]" in lines[0]
         # Includes step 0, and step 4 from restart
         assert len(lines) == 10
         assert int(lines[-1].split()[0]) == 8
@@ -646,7 +646,7 @@ def test_heating_md(tmp_path):
     assert stat_data.labels[0] == "# Step"
     assert stat_data.units[0] == ""
     assert stat_data.units[16] == "K"
-    assert stat_data.labels[16] == "Target T"
+    assert stat_data.labels[16] == "Target_T"
 
 
 def test_heating_files():
