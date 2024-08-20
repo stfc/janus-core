@@ -18,7 +18,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     Properties,
 )
-from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
+from janus_core.helpers.utils import none_to_dict, output_structs
 
 
 class SinglePoint(BaseCalculation):
@@ -64,10 +64,6 @@ class SinglePoint(BaseCalculation):
     ----------
     results : CalcResults
         Dictionary of calculated results, with keys from `properties`.
-    logger : Optional[logging.Logger]
-        Logger if log file has been specified.
-    tracker : Optional[OfflineEmissionsTracker]
-        Tracker if logging is enabled.
 
     Methods
     -------
@@ -156,7 +152,6 @@ class SinglePoint(BaseCalculation):
         )
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, self.struct_path, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("results.extxyz").absolute(),

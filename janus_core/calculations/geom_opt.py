@@ -16,7 +16,6 @@ from janus_core.helpers.utils import (
     Architectures,
     ASEReadArgs,
     Devices,
-    FileNameMixin,
     none_to_dict,
     output_structs,
     spacegroup,
@@ -218,8 +217,6 @@ class GeomOpt(BaseCalculation):
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
-        # Set output file
-        FileNameMixin.__init__(self, self.struct, self.struct_path, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("opt.extxyz").absolute(),

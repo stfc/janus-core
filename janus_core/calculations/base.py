@@ -47,6 +47,10 @@ class BaseCalculation(FileNameMixin):
             Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
+    file_prefix : Optional[PathLike]
+        Prefix for output filenames. Default is None.
+    additional_prefix : Optional[str]
+        Component to add to default file_prefix (joined by hyphens). Default is None.
 
     Attributes
     ----------
@@ -71,6 +75,8 @@ class BaseCalculation(FileNameMixin):
         set_calc: Optional[bool] = None,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
+        file_prefix: Optional[PathLike] = None,
+        additional_prefix: Optional[str] = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.
@@ -103,6 +109,11 @@ class BaseCalculation(FileNameMixin):
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames. Default is None.
+        additional_prefix : Optional[str]
+            Component to add to default file_prefix (joined by hyphens). Default is
+            None.
         """
         (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
             (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs)
@@ -140,4 +151,12 @@ class BaseCalculation(FileNameMixin):
             calc_kwargs=self.calc_kwargs,
             set_calc=set_calc,
             logger=self.logger,
+        )
+
+        FileNameMixin.__init__(
+            self,
+            self.struct,
+            self.struct_path,
+            file_prefix,
+            additional_prefix,
         )

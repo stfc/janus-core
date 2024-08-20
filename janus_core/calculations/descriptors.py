@@ -16,7 +16,7 @@ from janus_core.helpers.janus_types import (
     MaybeSequence,
     PathLike,
 )
-from janus_core.helpers.utils import FileNameMixin, none_to_dict
+from janus_core.helpers.utils import none_to_dict
 
 
 class Descriptors(BaseCalculation):
@@ -159,7 +159,6 @@ class Descriptors(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, self.struct_path, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("descriptors.extxyz").absolute(),

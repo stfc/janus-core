@@ -19,7 +19,7 @@ from janus_core.helpers.janus_types import (
     OutputKwargs,
     PathLike,
 )
-from janus_core.helpers.utils import FileNameMixin, none_to_dict, output_structs
+from janus_core.helpers.utils import none_to_dict, output_structs
 
 
 class EoS(BaseCalculation):
@@ -224,13 +224,13 @@ class EoS(BaseCalculation):
             set_calc=set_calc,
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
+            file_prefix=file_prefix,
         )
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        FileNameMixin.__init__(self, self.struct, self.struct_path, file_prefix)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("generated.extxyz").absolute(),

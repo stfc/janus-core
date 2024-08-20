@@ -38,7 +38,6 @@ from janus_core.helpers.utils import (
     Architectures,
     ASEReadArgs,
     Devices,
-    FileNameMixin,
     none_to_dict,
     output_structs,
     write_table,
@@ -434,15 +433,14 @@ class MolecularDynamics(BaseCalculation):
             set_calc=set_calc,
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
+            file_prefix=file_prefix,
+            additional_prefix=self.ensemble,
         )
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file names
-        FileNameMixin.__init__(
-            self, self.struct, self.struct_path, file_prefix, self.ensemble
-        )
         self.final_file = self._build_filename(
             "final.extxyz",
             self._parameter_prefix if file_prefix is None else "",

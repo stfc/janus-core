@@ -20,7 +20,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
-from janus_core.helpers.utils import FileNameMixin, none_to_dict, write_table
+from janus_core.helpers.utils import none_to_dict, write_table
 
 
 class Phonons(BaseCalculation):
@@ -90,7 +90,7 @@ class Phonons(BaseCalculation):
     Attributes
     ----------
     calc : ase.calculators.calculator.Calculator
-        ASE Calculator attached to strucutre.
+        ASE Calculator attached to structure.
     results : dict
         Results of phonon calculations.
 
@@ -247,13 +247,11 @@ class Phonons(BaseCalculation):
             set_calc=set_calc,
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
+            file_prefix=file_prefix,
         )
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
-
-        # Set output file prefix
-        FileNameMixin.__init__(self, self.struct, self.struct_path, file_prefix)
 
         if self.minimize:
             if self.logger:

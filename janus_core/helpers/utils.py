@@ -39,7 +39,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     file_prefix : Optional[PathLike]
         Default prefix to use.
     *additional
-        Components to add to file_prefix (joined by hyphens).
+        Components to add to default file_prefix (joined by hyphens).
 
     Methods
     -------
@@ -70,7 +70,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         file_prefix : Optional[PathLike]
             Default prefix to use.
         *additional
-            Components to add to file_prefix (joined by hyphens).
+            Components to add to default file_prefix (joined by hyphens).
         """
         self.file_prefix = Path(
             self._get_default_prefix(file_prefix, struct, struct_path, *additional)
@@ -96,7 +96,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         struct_path : Optional[PathLike]
             Path to file containing structures.
         *additional
-            Components to add to file_prefix (joined by hyphens).
+            Components to add to default file_prefix (joined by hyphens).
 
         Returns
         -------
@@ -114,7 +114,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         else:
             struct_name = struct.get_chemical_formula()
 
-        return "-".join((struct_name, *additional))
+        return "-".join((struct_name, *filter(None, additional)))
 
     def _build_filename(
         self,
