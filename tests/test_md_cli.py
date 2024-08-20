@@ -34,39 +34,80 @@ test_data = [
 
 
 @pytest.mark.parametrize("ensemble", test_data)
-def test_md(ensemble, tmp_path):
+def test_md(ensemble):
     """Test all MD simulations are able to run."""
-    file_prefix = tmp_path / f"{ensemble}-T300"
-    traj_path = tmp_path / f"{ensemble}-T300-traj.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    # Expected default file prefix for each ensemble
+    if ensemble == "nvt":
+        file_prefix = "NaCl-nvt-T300.0-"
+    elif ensemble == "nve":
+        file_prefix = "NaCl-nve-T300.0-"
+    elif ensemble == "npt":
+        file_prefix = "NaCl-npt-T300.0-p0.0-"
+    elif ensemble == "nvt-nh":
+        file_prefix = "NaCl-nvt-nh-T300.0-"
+    elif ensemble == "nph":
+        file_prefix = "NaCl-nph-T300.0-p0.0-"
+    else:
+        raise NotImplementedError("Ensemble not currently supported")
 
-    result = runner.invoke(
-        app,
-        [
-            "md",
-            "--ensemble",
-            ensemble,
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--file-prefix",
-            file_prefix,
-            "--steps",
-            2,
-            "--traj-every",
-            1,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
+    final_path = Path(f"{file_prefix}final.extxyz").absolute()
+    restart_path = Path(f"{file_prefix}res-2.extxyz").absolute()
+    stats_path = Path(f"{file_prefix}stats.dat").absolute()
+    traj_path = Path(f"{file_prefix}traj.extxyz").absolute()
+    log_path = Path("./log.yml").absolute()
+    summary_path = Path("./summary.yml").absolute()
 
-    assert result.exit_code == 0
+    assert not final_path.exists()
+    assert not restart_path.exists()
+    assert not stats_path.exists()
+    assert not traj_path.exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
 
-    # Check at least one image has been saved in trajectory
-    atoms = read(traj_path)
-    assert isinstance(atoms, Atoms)
+    try:
+        result = runner.invoke(
+            app,
+            [
+                "md",
+                "--ensemble",
+                ensemble,
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--steps",
+                2,
+                "--traj-every",
+                2,
+                "--stats-every",
+                2,
+                "--restart-every",
+                2,
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        assert final_path.exists()
+        assert restart_path.exists()
+        assert stats_path.exists()
+        assert traj_path.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+
+        # Check at least one image has been saved in trajectory
+        atoms = read(traj_path)
+        assert isinstance(atoms, Atoms)
+
+    finally:
+        final_path.unlink(missing_ok=True)
+        restart_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
+        traj_path.unlink(missing_ok=True)
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
 
 
 def test_log(tmp_path):
