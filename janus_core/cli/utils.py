@@ -1,16 +1,20 @@
 """Utility functions for CLI."""
 
+from __future__ import annotations
+
 from collections.abc import Sequence
 import datetime
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from typer import Context
 from typer_config import conf_callback_factory
 
-#type: from janus_core.cli.types import TyperDict
-#type: from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices
+
+if TYPE_CHECKING:
+    from janus_core.cli.types import TyperDict
+    from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices, SinglePoint
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
@@ -149,6 +153,8 @@ def end_summary(summary: Path) -> None:
     summary : Path
         Path to summary file being saved.
     """
+    import yaml
+
     with open(summary, "a", encoding="utf8") as outfile:
         yaml.dump(
             {"end_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")},
@@ -160,11 +166,11 @@ def end_summary(summary: Path) -> None:
 
 def save_struct_calc(
     inputs: dict,
-    s_point: "janus_core.calculations.single_point.SinglePoint",
-    arch: "Architectures",
-    device: "Devices",
+    s_point: SinglePoint,
+    arch: Architectures,
+    device: Devices,
     model_path: str,
-    read_kwargs: "ASEReadArgs",
+    read_kwargs: ASEReadArgs,
     calc_kwargs: dict[str, Any],
 ) -> None:
     """

@@ -9,8 +9,7 @@ import yaml
 from janus_core.cli.utils import carbon_summary, end_summary, start_summary
 from janus_core.helpers.train import train as run_train
 
-if TYPE_CHECKING:
-    from janus_core.cli.types import LogPath, Summary
+from janus_core.cli.types import LogPath, Summary
 
 app = Typer()
 
@@ -23,8 +22,8 @@ def train(
     fine_tune: Annotated[
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
-    log: LogPath = "train.log",
-    summary: Summary = "train_summary.yml",
+    log: "LogPath" = "train.log",
+    summary: "Summary" = "train_summary.yml",
 ):
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
