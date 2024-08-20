@@ -131,6 +131,8 @@ def carbon_summary(*, summary: Path, log: Path) -> None:
     log : Path
         Path to log file with carbon emissions saved.
     """
+    import yaml
+
     with open(log, encoding="utf8") as file:
         logs = yaml.safe_load(file)
 

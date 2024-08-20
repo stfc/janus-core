@@ -6,16 +6,22 @@ Similar in spirit to matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Optional, Union, get_args
+from typing import Any, Optional, Union, get_args, TYPE_CHECKING
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
+
+if TYPE_CHECKING:
+    from ase.calculators import Calculator
+    import torch.nn
 
 
 def _set_model_path(
     model_path: Optional[PathLike] = None,
     kwargs: Optional[dict[str, Any]] = None,
-) -> Optional[Union[PathLike, "torch.nn.Module"]]:
+) -> Optional[Union[PathLike, torch.nn.Module]]:
     """
     Set `model_path`.
 
@@ -65,7 +71,7 @@ def choose_calculator(
     device: Devices = "cpu",
     model_path: Optional[PathLike] = None,
     **kwargs,
-) -> "ase.calculators.Calculator":
+) -> Calculator:
     """
     Choose MLIP calculator to configure.
 
@@ -133,11 +139,10 @@ def choose_calculator(
         calculator = mace_off(model=model, device=device, **kwargs)
 
     elif arch == "m3gnet":
-        import torch
-
         from matgl import __version__, load_model
         from matgl.apps.pes import Potential
         from matgl.ext.ase import M3GNetCalculator
+        import torch
 
         # Set before loading model to avoid type mismatches
         torch.set_default_dtype(torch.float32)
@@ -162,6 +167,7 @@ def choose_calculator(
         from chgnet import __version__
         from chgnet.model.dynamics import CHGNetCalculator
         from chgnet.model.model import CHGNet
+        import torch
 
         # Set before loading to avoid type mismatches
         torch.set_default_dtype(torch.float32)
