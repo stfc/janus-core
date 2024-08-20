@@ -1,19 +1,24 @@
 """Utility functions for janus_core."""
 
+from __future__ import annotations
+
 from abc import ABC
 from collections.abc import Collection, Generator, Iterable, Sequence
 from io import StringIO
 from pathlib import Path
-from typing import Any, Literal, Optional, TextIO, get_args
+from typing import Any, get_args, Literal, Optional, TextIO, TYPE_CHECKING
 
 from spglib import get_spacegroup
 
-from janus_core.helpers.janus_types import (
-    ASEWriteArgs,
-    MaybeSequence,
-    PathLike,
-    Properties,
-)
+if TYPE_CHECKING:
+    from ase import Atoms
+
+    from janus_core.helpers.janus_types import (
+        ASEWriteArgs,
+        MaybeSequence,
+        PathLike,
+        Properties,
+    )
 
 
 class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
@@ -41,7 +46,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
     def __init__(
         self,
-        struct: MaybeSequence["ase.Atoms"],
+        struct: MaybeSequence[Atoms],
         file_prefix: Optional[PathLike],
         *additional,
     ):
@@ -64,7 +69,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
     @staticmethod
     def _get_default_prefix(
-        file_prefix: Optional[PathLike], struct: MaybeSequence["ase.Atoms"], *additional
+        file_prefix: Optional[PathLike], struct: MaybeSequence[Atoms], *additional
     ) -> str:
         """
         Determine the default prefix from the structure  or provided file_prefix.
@@ -129,7 +134,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
 
 def spacegroup(
-    struct: "ase.Atoms", sym_tolerance: float = 0.001, angle_tolerance: float = -1.0
+    struct: Atoms, sym_tolerance: float = 0.001, angle_tolerance: float = -1.0
 ) -> str:
     """
     Determine the spacegroup for a structure.
@@ -215,7 +220,7 @@ def dict_remove_hyphens(dictionary: dict) -> dict:
 
 
 def results_to_info(
-    struct: "ase.Atoms",
+    struct: Atoms,
     *,
     properties: Collection[Properties] = (),
     invalidate_calc: bool = False,
@@ -233,6 +238,8 @@ def results_to_info(
         Whether to remove all calculator results after copying properties to info dict.
         Default is False.
     """
+    from janus_core.helpers.janus_types import Properties
+
     if not properties:
         properties = get_args(Properties)
 
@@ -255,7 +262,7 @@ def results_to_info(
 
 
 def output_structs(
-    images: MaybeSequence["ase.Atoms"],
+    images: MaybeSequence[Atoms],
     *,
     set_info: bool = True,
     write_results: bool = False,

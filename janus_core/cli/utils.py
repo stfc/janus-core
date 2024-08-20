@@ -5,16 +5,22 @@ from __future__ import annotations
 from collections.abc import Sequence
 import datetime
 import logging
-from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
-from typer import Context
 from typer_config import conf_callback_factory
 
 
 if TYPE_CHECKING:
+    from pathlib import Path
+    from typer import Context
+
     from janus_core.cli.types import TyperDict
-    from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices, SinglePoint
+    from janus_core.helpers.janus_types import (
+        Architectures,
+        ASEReadArgs,
+        Devices,
+        SinglePoint
+    )
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:

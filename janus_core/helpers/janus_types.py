@@ -50,7 +50,7 @@ class ASEWriteArgs(TypedDict, total=False):
     """Main arguments for ase.io.write."""
 
     filename: Union[str, PurePath, IO]
-    images: MaybeSequence["Atoms"]
+    images: MaybeSequence[Atoms]
     format: Optional[str]
     parallel: bool
     append: bool
@@ -92,7 +92,7 @@ class PostProcessKwargs(TypedDict, total=False):
 class Observable(Protocol):
     """Signature for correlation observable getter."""
 
-    def __call__(self, atoms: "ase.Atoms", *args, **kwargs) -> float:
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> float:
         """
         Call the getter.
 
