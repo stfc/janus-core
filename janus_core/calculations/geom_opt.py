@@ -169,25 +169,9 @@ class GeomOpt(BaseCalculation):
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
             Must include "filename" keyword. Default is {}.
         """
-        (
-            read_kwargs,
-            calc_kwargs,
-            log_kwargs,
-            tracker_kwargs,
-            filter_kwargs,
-            opt_kwargs,
-            write_kwargs,
-            traj_kwargs,
-        ) = none_to_dict(
-            (
-                read_kwargs,
-                calc_kwargs,
-                log_kwargs,
-                tracker_kwargs,
-                filter_kwargs,
-                opt_kwargs,
-                write_kwargs,
-                traj_kwargs,
+        (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs) = (
+            none_to_dict(
+                (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs)
             )
         )
 
@@ -212,17 +196,12 @@ class GeomOpt(BaseCalculation):
                 "'trajectory' must be a key in `opt_kwargs` to save the trajectory."
             )
 
-        if log_kwargs and "filename" not in log_kwargs:
-            raise ValueError("'filename' must be included in `log_kwargs`")
-
         # Read last image by default
         read_kwargs.setdefault("index", -1)
 
-        # Set log name
-        log_kwargs.setdefault("name", __name__)
-
         # Initialise structures and logging
         super().__init__(
+            calc_name=__name__,
             struct=struct,
             struct_path=struct_path,
             arch=arch,

@@ -130,30 +130,18 @@ class SinglePoint(BaseCalculation):
             Keyword arguments to pass to ase.io.write if saving structure with results
             of calculations. Default is {}.
         """
-        (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs, write_kwargs) = (
-            none_to_dict(
-                (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs, write_kwargs)
-            )
-        )
+        (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
 
         self.properties = properties
         self.write_results = write_results
         self.write_kwargs = write_kwargs
 
-        if log_kwargs and "filename" not in log_kwargs:
-            raise ValueError("'filename' must be included in `log_kwargs`")
-
-        if not model_path and "model_path" in calc_kwargs:
-            raise ValueError("`model_path` must be passed explicitly")
-
         # Read full trajectory by default
         read_kwargs.setdefault("index", ":")
 
-        # Set log name
-        log_kwargs.setdefault("name", __name__)
-
         # Initialise structures and logging
         super().__init__(
+            calc_name=__name__,
             struct=struct,
             struct_path=struct_path,
             arch=arch,

@@ -124,21 +124,7 @@ class Descriptors(BaseCalculation):
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
         """
-        (
-            read_kwargs,
-            calc_kwargs,
-            log_kwargs,
-            tracker_kwargs,
-            write_kwargs,
-        ) = none_to_dict(
-            (
-                read_kwargs,
-                calc_kwargs,
-                log_kwargs,
-                tracker_kwargs,
-                write_kwargs,
-            )
-        )
+        (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
 
         self.invariants_only = invariants_only
         self.calc_per_element = calc_per_element
@@ -149,11 +135,9 @@ class Descriptors(BaseCalculation):
         # Read last image by default
         read_kwargs.setdefault("index", ":")
 
-        # Set log name
-        log_kwargs.setdefault("name", __name__)
-
         # Initialise structures and logging
         super().__init__(
+            calc_name=__name__,
             struct=struct,
             struct_path=struct_path,
             arch=arch,

@@ -209,26 +209,8 @@ class Phonons(BaseCalculation):
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
-        log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_logger`. Default is {}.
-        tracker_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        (
-            read_kwargs,
-            calc_kwargs,
-            log_kwargs,
-            tracker_kwargs,
-            minimize_kwargs,
-        ) = none_to_dict(
-            (
-                read_kwargs,
-                calc_kwargs,
-                log_kwargs,
-                tracker_kwargs,
-                minimize_kwargs,
-            )
-        )
+        (read_kwargs, minimize_kwargs) = none_to_dict((read_kwargs, minimize_kwargs))
 
         self.calcs = calcs
         self.displacement = displacement
@@ -251,11 +233,9 @@ class Phonons(BaseCalculation):
         # Read last image by default
         read_kwargs.setdefault("index", -1)
 
-        # Set log name
-        log_kwargs.setdefault("name", __name__)
-
         # Initialise structures and logging
         super().__init__(
+            calc_name=__name__,
             struct=struct,
             struct_path=struct_path,
             arch=arch,

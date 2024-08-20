@@ -314,19 +314,12 @@ class MolecularDynamics(BaseCalculation):
             Keyword arguments to control post-processing operations.
         correlation_kwargs : Optional[list[CorrelationKwargs]]
             Keyword arguments to control on-the-fly correlations.
-        log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_logger`. Default is None.
-        tracker_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_tracker`. Default is None.
         seed : Optional[int]
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
         """
         (
             read_kwargs,
-            calc_kwargs,
-            log_kwargs,
-            tracker_kwargs,
             minimize_kwargs,
             write_kwargs,
             post_process_kwargs,
@@ -334,9 +327,6 @@ class MolecularDynamics(BaseCalculation):
         ) = none_to_dict(
             (
                 read_kwargs,
-                calc_kwargs,
-                log_kwargs,
-                tracker_kwargs,
                 minimize_kwargs,
                 write_kwargs,
                 post_process_kwargs,
@@ -378,9 +368,6 @@ class MolecularDynamics(BaseCalculation):
 
         if "append" in self.write_kwargs:
             raise ValueError("`append` cannot be specified when writing files")
-
-        if log_kwargs and "filename" not in log_kwargs:
-            raise ValueError("'filename' must be included in `log_kwargs`")
 
         # Check temperatures for heating differ
         if self.temp_start is not None and self.temp_start == self.temp_end:
@@ -433,11 +420,9 @@ class MolecularDynamics(BaseCalculation):
         # Read last image by default
         read_kwargs.setdefault("index", -1)
 
-        # Set log name
-        log_kwargs.setdefault("name", __name__)
-
         # Initialise structures and logging
         super().__init__(
+            calc_name=__name__,
             struct=struct,
             struct_path=struct_path,
             arch=arch,

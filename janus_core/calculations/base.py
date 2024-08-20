@@ -21,6 +21,8 @@ class BaseCalculation(FileNameMixin):
 
     Parameters
     ----------
+    calc_name : str
+        Name of calculation being run, used for name of logger. Default is "base".
     struct : Optional[MaybeSequence[Atoms]]
         ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
         Default is None.
@@ -57,6 +59,7 @@ class BaseCalculation(FileNameMixin):
     def __init__(
         self,
         *,
+        calc_name: str = "base",
         struct: Optional[MaybeSequence[Atoms]] = None,
         struct_path: Optional[PathLike] = None,
         arch: Architectures = "mace_mp",
@@ -74,6 +77,8 @@ class BaseCalculation(FileNameMixin):
 
         Parameters
         ----------
+        calc_name : str
+            Name of calculation being run, used for name of logger. Default is "base".
         struct : Optional[MaybeSequence[Atoms]]
             ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
             Default is None.
@@ -116,7 +121,11 @@ class BaseCalculation(FileNameMixin):
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
 
+        if log_kwargs and "filename" not in log_kwargs:
+            raise ValueError("'filename' must be included in `log_kwargs`")
+
         # Configure logging
+        log_kwargs.setdefault("name", calc_name)
         self.logger = config_logger(**self.log_kwargs)
         self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
 
