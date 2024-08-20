@@ -1,7 +1,7 @@
 """Set up MLIP training commandline interface."""
 
 from pathlib import Path
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated
 
 from typer import Option, Typer
 import yaml
@@ -22,8 +22,8 @@ def train(
     fine_tune: Annotated[
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
-    log: "LogPath" = "train.log",
-    summary: "Summary" = "train_summary.yml",
+    log: LogPath = "train.log",
+    summary: Summary = "train_summary.yml",
 ):
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
