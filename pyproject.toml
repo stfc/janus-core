@@ -48,6 +48,7 @@ sevenn = { version = "0.9.3", optional = true }
 torchdata = {version = "0.7.1", optional = true} # Pin due to dgl issue
 torch_geometric = { version = "^2.5.3", optional = true }
 ruff = "^0.5.7"
+nequip = {version = "^0.6.1", optional = true }
 
 [tool.poetry.extras]
 all = ["alignn", "chgnet", "matgl", "dgl", "torchdata", "sevenn", "torch_geometric"]
@@ -55,6 +56,7 @@ alignn = ["alignn"]
 chgnet = ["chgnet"]
 m3gnet = ["matgl", "dgl", "torchdata"]
 sevennet = ["sevenn", "torch_geometric"]
+nequip = ["nequip"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.4.1"}
