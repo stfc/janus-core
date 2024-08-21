@@ -19,8 +19,8 @@ if TYPE_CHECKING:
         Architectures,
         ASEReadArgs,
         Devices,
-        SinglePoint
     )
+    from janus_core.calculations.single_point import SinglePoint
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:

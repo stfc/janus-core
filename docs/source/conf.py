@@ -26,6 +26,7 @@ import janus_core
 extensions = [
     "numpydoc",
     "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
