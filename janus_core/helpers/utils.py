@@ -1,22 +1,24 @@
 """Utility functions for janus_core."""
 
+from __future__ import annotations
+
 from abc import ABC
 from collections.abc import Collection, Generator, Iterable, Sequence
 from io import StringIO
 from pathlib import Path
-from typing import Any, Literal, Optional, TextIO, get_args
+from typing import TYPE_CHECKING, Any, Literal, Optional, TextIO, get_args
 
-from ase import Atoms
-from ase.io import write
-from ase.io.formats import filetype
 from spglib import get_spacegroup
 
-from janus_core.helpers.janus_types import (
-    ASEWriteArgs,
-    MaybeSequence,
-    PathLike,
-    Properties,
-)
+if TYPE_CHECKING:
+    from ase import Atoms
+
+    from janus_core.helpers.janus_types import (
+        ASEWriteArgs,
+        MaybeSequence,
+        PathLike,
+        Properties,
+    )
 
 
 class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
@@ -236,6 +238,8 @@ def results_to_info(
         Whether to remove all calculator results after copying properties to info dict.
         Default is False.
     """
+    from janus_core.helpers.janus_types import Properties
+
     if not properties:
         properties = get_args(Properties)
 
@@ -285,6 +289,10 @@ def output_structs(
     write_kwargs : Optional[ASEWriteArgs]
         Keyword arguments passed to ase.io.write. Default is {}.
     """
+    from ase import Atoms
+    from ase.io import write
+    from ase.io.formats import filetype
+
     # Separate kwargs for output_structs from kwargs for ase.io.write
     # This assumes values passed via kwargs have priority over passed parameters
     write_kwargs = write_kwargs if write_kwargs else {}

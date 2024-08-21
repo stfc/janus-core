@@ -1,11 +1,14 @@
 """Module containing types used in Janus-Core."""
 
+from __future__ import annotations
+
 from collections.abc import Collection, Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
 from typing import (
     IO,
+    TYPE_CHECKING,
     Literal,
     Optional,
     Protocol,
@@ -15,10 +18,10 @@ from typing import (
     runtime_checkable,
 )
 
-from ase import Atoms
-from ase.eos import EquationOfState
-import numpy as np
-from numpy.typing import NDArray
+if TYPE_CHECKING:
+    from ase import Atoms
+    from numpy import float64 as np_float64
+    from numpy.typing import NDArray
 
 # General
 
@@ -168,12 +171,14 @@ class CalcResults(TypedDict, total=False):
     """Return type from calculations."""
 
     energy: MaybeList[float]
-    forces: MaybeList[NDArray[np.float64]]
-    stress: MaybeList[NDArray[np.float64]]
+    forces: MaybeList[NDArray[np_float64]]
+    stress: MaybeList[NDArray[np_float64]]
 
 
 class EoSResults(TypedDict, total=False):
     """Return type from calculations."""
+
+    from ase.eos import EquationOfState
 
     eos: EquationOfState
     bulk_modulus: float

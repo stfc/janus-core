@@ -6,8 +6,6 @@ from typing import Annotated, Optional, get_args
 from typer import Context, Option, Typer
 from typer_config import use_config
 
-from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -32,8 +30,6 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
-from janus_core.helpers.janus_types import Ensembles
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -294,6 +290,11 @@ def md(
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
+    from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH
+    from janus_core.calculations.single_point import SinglePoint
+    from janus_core.helpers.janus_types import Ensembles
+    from janus_core.helpers.utils import dict_paths_to_strs
+
     # Check options from configuration file are all valid
     check_config(ctx)
 

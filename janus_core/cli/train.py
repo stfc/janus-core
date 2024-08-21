@@ -8,7 +8,6 @@ import yaml
 
 from janus_core.cli.types import LogPath, Summary
 from janus_core.cli.utils import carbon_summary, end_summary, start_summary
-from janus_core.helpers.train import train as run_train
 
 app = Typer()
 
@@ -39,6 +38,8 @@ def train(
         Path to save summary of inputs and start/end time. Default is
         train_summary.yml.
     """
+    from janus_core.helpers.train import train as run_train
+
     with open(mlip_config, encoding="utf8") as config_file:
         config = yaml.safe_load(config_file)
 

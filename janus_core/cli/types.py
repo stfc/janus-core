@@ -2,14 +2,15 @@
 
 import ast
 from pathlib import Path
-from typing import Annotated, Union
+from typing import TYPE_CHECKING, Annotated, Union
 
 from typer import Option
 
-from janus_core.helpers.janus_types import ASEReadArgs
+if TYPE_CHECKING:
+    from janus_core.helpers.janus_types import ASEReadArgs
 
 
-def parse_dict_class(value: Union[str, ASEReadArgs]):
+def parse_dict_class(value: Union[str, "ASEReadArgs"]):
     """
     Convert string input into a dictionary.
 
