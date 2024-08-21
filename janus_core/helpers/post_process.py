@@ -189,7 +189,7 @@ def compute_vaf(
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[None | int]] = ((None),),
+    filter_atoms: MaybeSequence[MaybeSequence[Optional[int]]] = ((None),),
 ) -> NDArray[float64]:
     """
     Compute the velocity autocorrelation function (VAF) of `data`.
@@ -209,7 +209,7 @@ def compute_vaf(
     index : SliceLike
         Images to analyze as `start`, `stop`, `step`.
         Default is all images.
-    filter_atoms : MaybeSequence[MaybeSequence[int]]
+    filter_atoms : MaybeSequence[MaybeSequence[Optional[int]]]
         Compute the VAF averaged over subsets of the system.
         Default is all atoms.
 
