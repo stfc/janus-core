@@ -406,10 +406,10 @@ def input_structs(
             set_calc = True
 
         if isinstance(struct, Atoms):
-            set_calc = True if struct.calc is None else False
+            set_calc = struct.calc is None
 
         if isinstance(struct, Sequence):
-            set_calc = True if any(image.calc is None for image in struct) else False
+            set_calc = any(image.calc is None for image in struct)
 
     if set_calc:
         if logger:

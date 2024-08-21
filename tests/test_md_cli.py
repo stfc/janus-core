@@ -37,23 +37,18 @@ test_data = [
 def test_md(ensemble):
     """Test all MD simulations are able to run."""
     # Expected default file prefix for each ensemble
-    if ensemble == "nvt":
-        file_prefix = "NaCl-nvt-T300.0-"
-    elif ensemble == "nve":
-        file_prefix = "NaCl-nve-T300.0-"
-    elif ensemble == "npt":
-        file_prefix = "NaCl-npt-T300.0-p0.0-"
-    elif ensemble == "nvt-nh":
-        file_prefix = "NaCl-nvt-nh-T300.0-"
-    elif ensemble == "nph":
-        file_prefix = "NaCl-nph-T300.0-p0.0-"
-    else:
-        raise NotImplementedError("Ensemble not currently supported")
+    file_prefix = {
+        "nvt": "NaCl-nvt-T300.0-",
+        "nve": "NaCl-nve-T300.0-",
+        "npt": "NaCl-npt-T300.0-p0.0-",
+        "nvt-nh": "NaCl-nvt-nh-T300.0-",
+        "nph": "NaCl-nph-T300.0-p0.0-",
+    }
 
-    final_path = Path(f"{file_prefix}final.extxyz").absolute()
-    restart_path = Path(f"{file_prefix}res-2.extxyz").absolute()
-    stats_path = Path(f"{file_prefix}stats.dat").absolute()
-    traj_path = Path(f"{file_prefix}traj.extxyz").absolute()
+    final_path = Path(f"{file_prefix[ensemble]}final.extxyz").absolute()
+    restart_path = Path(f"{file_prefix[ensemble]}res-2.extxyz").absolute()
+    stats_path = Path(f"{file_prefix[ensemble]}stats.dat").absolute()
+    traj_path = Path(f"{file_prefix[ensemble]}traj.extxyz").absolute()
     log_path = Path("./log.yml").absolute()
     summary_path = Path("./summary.yml").absolute()
 
