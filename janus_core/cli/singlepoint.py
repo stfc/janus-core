@@ -131,6 +131,7 @@ def singlepoint(
 
     # Initialise singlepoint structure and calculator
     from janus_core.calculations.single_point import SinglePoint
+
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary

@@ -58,6 +58,7 @@ def train(
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
     from mace.tools import build_default_arg_parser as mace_parser
+
     try:
         from mace.cli.run_train import run as run_train
     except ImportError as e:

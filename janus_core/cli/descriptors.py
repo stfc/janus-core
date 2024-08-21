@@ -110,7 +110,6 @@ def descriptors(
     from janus_core.calculations.single_point import SinglePoint
     from janus_core.helpers.utils import dict_paths_to_strs
 
-
     # Check options from configuration file are all valid
     check_config(ctx)
 

@@ -90,7 +90,6 @@ def yaml_converter_loader(config_file: str) -> dict[str, Any]:
 
     from janus_core.helpers.utils import dict_remove_hyphens
 
-
     if not config_file:
         return {}
 
