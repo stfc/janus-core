@@ -6,7 +6,7 @@ from abc import ABC
 from collections.abc import Collection, Generator, Iterable, Sequence
 from io import StringIO
 from pathlib import Path
-from typing import Any, get_args, Literal, Optional, TextIO, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal, Optional, TextIO, get_args
 
 from spglib import get_spacegroup
 

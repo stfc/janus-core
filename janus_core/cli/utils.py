@@ -5,22 +5,22 @@ from __future__ import annotations
 from collections.abc import Sequence
 import datetime
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from typer_config import conf_callback_factory
 
-
 if TYPE_CHECKING:
     from pathlib import Path
+
     from typer import Context
 
+    from janus_core.calculations.single_point import SinglePoint
     from janus_core.cli.types import TyperDict
     from janus_core.helpers.janus_types import (
         Architectures,
         ASEReadArgs,
         Devices,
     )
-    from janus_core.calculations.single_point import SinglePoint
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
@@ -43,7 +43,7 @@ def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
         raise ValueError("`read_kwargs['index']` must be an integer") from e
 
 
-def parse_typer_dicts(typer_dicts: list["TyperDict"]) -> list[dict]:
+def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
     """
     Convert list of TyperDict objects to list of dictionaries.
 

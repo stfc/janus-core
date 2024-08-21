@@ -9,13 +9,13 @@ Similar in spirit to matcalc and quacc approaches
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional, Union, get_args, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, Union, get_args
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 
 if TYPE_CHECKING:
-    import torch.nn
     from ase.calculators.calculator import Calculator
+    import torch.nn
 
 def _set_model_path(
     model_path: Optional[PathLike] = None,

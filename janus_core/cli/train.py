@@ -6,10 +6,8 @@ from typing import Annotated
 from typer import Option, Typer
 import yaml
 
-from janus_core.cli.utils import carbon_summary, end_summary, start_summary
-from janus_core.helpers.train import train as run_train
-
 from janus_core.cli.types import LogPath, Summary
+from janus_core.cli.utils import carbon_summary, end_summary, start_summary
 
 app = Typer()
 

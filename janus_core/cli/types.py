@@ -2,10 +2,9 @@
 
 import ast
 from pathlib import Path
-from typing import Annotated, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Annotated, Union
 
 from typer import Option
-
 
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import ASEReadArgs

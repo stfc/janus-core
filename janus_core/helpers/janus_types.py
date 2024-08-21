@@ -8,16 +8,15 @@ import logging
 from pathlib import Path, PurePath
 from typing import (
     IO,
+    TYPE_CHECKING,
     Literal,
     Optional,
     Protocol,
-    TYPE_CHECKING,
     TypedDict,
     TypeVar,
     Union,
     runtime_checkable,
 )
-
 
 if TYPE_CHECKING:
     from ase import Atoms
@@ -178,6 +177,7 @@ class CalcResults(TypedDict, total=False):
 
 class EoSResults(TypedDict, total=False):
     """Return type from calculations."""
+
     from ase.eos import EquationOfState
 
     eos: EquationOfState
