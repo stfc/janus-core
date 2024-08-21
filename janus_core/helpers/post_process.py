@@ -189,7 +189,7 @@ def compute_vaf(
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[int]] = ((None),),
+    filter_atoms: MaybeSequence[MaybeSequence[None | int]] = ((None),),
 ) -> NDArray[float64]:
     """
     Compute the velocity autocorrelation function (VAF) of `data`.
