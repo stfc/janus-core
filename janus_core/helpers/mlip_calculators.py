@@ -14,9 +14,8 @@ from typing import Any, Optional, Union, get_args, TYPE_CHECKING
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 
 if TYPE_CHECKING:
-    from ase.calculators import Calculator
     import torch.nn
-
+    from ase.calculators.calculator import Calculator
 
 def _set_model_path(
     model_path: Optional[PathLike] = None,
