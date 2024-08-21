@@ -7,7 +7,6 @@ from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.descriptors import Descriptors
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -116,37 +115,32 @@ def descriptors(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
 
-    # Set up single point calculator
-    s_point = SinglePoint(
-        struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log, "filemode": "w"},
-    )
-
-    # Check optimized structure path not duplicated
+    # Check structure path not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
 
     # Set default filname for writing structure with descriptors if not specified
     if out:
         write_kwargs["filename"] = out
-    else:
-        write_kwargs["filename"] = f"{s_point.file_prefix}-descriptors.extxyz"
 
-    # Dictionary of inputs for optimize function
+    # Dictionary of inputs for Descriptors class
     descriptors_kwargs = {
-        "struct": s_point.struct,
+        "struct_path": struct,
+        "arch": arch,
+        "device": device,
+        "model_path": model_path,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log, "filemode": "w"},
         "invariants_only": invariants_only,
         "calc_per_element": calc_per_element,
         "calc_per_atom": calc_per_atom,
         "write_results": True,
         "write_kwargs": write_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "a"},
     }
+
+    # Initialise descriptors
+    descript = Descriptors(**descriptors_kwargs)
 
     # Store inputs for yaml summary
     inputs = descriptors_kwargs.copy()
@@ -155,21 +149,29 @@ def descriptors(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    # Add structure and MLIP information to inputs
     save_struct_calc(
-        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+        inputs=inputs,
+        struct=descript.struct,
+        struct_path=struct,
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        read_kwargs=read_kwargs,
+        calc_kwargs=calc_kwargs,
     )
 
     # Convert all paths to strings in inputs nested dictionary
     dict_paths_to_strs(inputs)
 
-    # Save summary information before optimization begins
+    # Save summary information before calculation begins
     start_summary(command="descriptors", summary=summary, inputs=inputs)
 
-    # Run geometry optimization and save output structure
-    descript = Descriptors(**descriptors_kwargs)
+    # Calculate descriptors
     descript.run()
 
+    # Save carbon summary
     carbon_summary(summary=summary, log=log)
 
-    # Time after optimization has finished
+    # Time after calculation has finished
     end_summary(summary)

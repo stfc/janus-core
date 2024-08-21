@@ -81,14 +81,14 @@ ReadKwargsAll = Annotated[
     ),
 ]
 
-ReadKwargsFirst = Annotated[
+ReadKwargsLast = Annotated[
     TyperDict,
     Option(
         parser=parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".  [default: "{'index': 0}"]
+            wrapped in quotes, e.g. "{'key' : value}".  [default: "{'index': -1}"]
             """
         ),
         metavar="DICT",

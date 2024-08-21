@@ -1,6 +1,5 @@
-"""Geometry optimization."""
+"""Prepare and run geometry optimization."""
 
-from collections.abc import Sequence
 from typing import Any, Callable, Optional, Union
 import warnings
 
@@ -11,27 +10,48 @@ import ase.optimize
 from ase.optimize import LBFGS
 from numpy import linalg
 
-from janus_core.helpers.janus_types import ASEOptArgs, OutputKwargs
-from janus_core.helpers.log import config_logger, config_tracker
+from janus_core.calculations.base import BaseCalculation
+from janus_core.helpers.janus_types import ASEOptArgs, OutputKwargs, PathLike
 from janus_core.helpers.utils import (
-    FileNameMixin,
+    Architectures,
+    ASEReadArgs,
+    Devices,
     none_to_dict,
     output_structs,
     spacegroup,
 )
 
 
-class GeomOpt(FileNameMixin):
+class GeomOpt(BaseCalculation):
     """
     Prepare and run geometry optimization.
 
     Parameters
     ----------
-    struct : Atoms
-        Atoms object to optimize geometry for.
+    struct : Optional[Atoms]
+        ASE Atoms structure to optimize geometry for. Required if `struct_path` is
+        None. Default is None.
+    struct_path : Optional[PathLike]
+        Path of structure to optimize. Required if `struct` is None. Default is None.
+    arch : Architectures
+        MLIP architecture to use for optimization. Default is "mace_mp".
+    device : Devices
+        Device to run MLIP model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
+    read_kwargs : Optional[ASEReadArgs]
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is -1.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is None.
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
     fmax : float
-        Set force convergence criteria for optimizer in units eV/Å.
-        Default is 0.1.
+        Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
     steps : int
         Set maximum number of optimization steps to run. Default is 1000.
     symmetry_tolerance : float
@@ -58,17 +78,6 @@ class GeomOpt(FileNameMixin):
     traj_kwargs : Optional[OutputKwargs]
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
-    log_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_logger`. Default is {}.
-    tracker_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_tracker`. Default is {}.
-
-    Attributes
-    ----------
-    logger : Optional[logging.Logger]
-        Logger if log file has been specified.
-    tracker : Optional[OfflineEmissionsTracker]
-        Tracker if logging is enabled.
 
     Methods
     -------
@@ -80,7 +89,16 @@ class GeomOpt(FileNameMixin):
 
     def __init__(
         self,
-        struct: Atoms,
+        struct: Optional[Atoms] = None,
+        struct_path: Optional[PathLike] = None,
+        arch: Architectures = "mace_mp",
+        device: Devices = "cpu",
+        model_path: Optional[PathLike] = None,
+        read_kwargs: Optional[ASEReadArgs] = None,
+        calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
+        log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
         fmax: float = 0.1,
         steps: int = 1000,
         symmetry_tolerance: float = 0.001,
@@ -92,19 +110,37 @@ class GeomOpt(FileNameMixin):
         write_results: bool = False,
         write_kwargs: Optional[OutputKwargs] = None,
         traj_kwargs: Optional[OutputKwargs] = None,
-        log_kwargs: Optional[dict[str, Any]] = None,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise GeomOpt class.
 
         Parameters
         ----------
-        struct : Atoms
-            Atoms object to optimize geometry for.
+        struct : Optional[Atoms]
+            ASE Atoms structure to optimize geometry for. Required if `struct_path` is
+            None. Default is None.
+        struct_path : Optional[PathLike]
+            Path of structure to optimize. Required if `struct` is None. Default is
+            None.
+        arch : Architectures
+            MLIP architecture to use for optimization. Default is "mace_mp".
+        device : Devices
+            Device to run MLIP model on. Default is "cpu".
+        model_path : Optional[PathLike]
+            Path to MLIP model. Default is `None`.
+        read_kwargs : Optional[ASEReadArgs]
+            Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is -1.
+        calc_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
+        log_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
         fmax : float
-            Set force convergence criteria for optimizer in units eV/Å.
-            Default is 0.1.
+            Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
         steps : int
             Set maximum number of optimization steps to run. Default is 1000.
         symmetry_tolerance : float
@@ -112,8 +148,7 @@ class GeomOpt(FileNameMixin):
             Default is 0.001.
         angle_tolerance : float
             Angle precision for spglib symmetry determination, in degrees. Default is
-            -1.0, which means an internally optimized routine is used to judge
-            symmetry.
+            -1.0, which means an internally optimized routine is used to judge symmetry.
         filter_func : Optional[Union[Callable, str]]
             Filter function, or name of function from ase.filters to apply constraints
             to atoms. Default is `FrechetCellFilter`.
@@ -132,30 +167,13 @@ class GeomOpt(FileNameMixin):
         traj_kwargs : Optional[OutputKwargs]
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
             Must include "filename" keyword. Default is {}.
-        log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_logger`. Default is {}.
-        tracker_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        (
-            filter_kwargs,
-            opt_kwargs,
-            write_kwargs,
-            traj_kwargs,
-            log_kwargs,
-            tracker_kwargs,
-        ) = none_to_dict(
-            (
-                filter_kwargs,
-                opt_kwargs,
-                write_kwargs,
-                traj_kwargs,
-                log_kwargs,
-                tracker_kwargs,
+        (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs) = (
+            none_to_dict(
+                (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs)
             )
         )
 
-        self.struct = struct
         self.fmax = fmax
         self.steps = steps
         self.symmetry_tolerance = symmetry_tolerance
@@ -169,13 +187,6 @@ class GeomOpt(FileNameMixin):
         self.traj_kwargs = traj_kwargs
 
         # Validate parameters
-        if not isinstance(struct, Atoms):
-            if isinstance(struct, Sequence) and isinstance(struct[0], Atoms):
-                raise NotImplementedError(
-                    "Only one Atoms object at a time can currently be optimized"
-                )
-            raise ValueError("`struct` must be an ASE Atoms object")
-
         if self.traj_kwargs and "filename" not in self.traj_kwargs:
             raise ValueError("'filename' must be included in `traj_kwargs`")
 
@@ -184,16 +195,28 @@ class GeomOpt(FileNameMixin):
                 "'trajectory' must be a key in `opt_kwargs` to save the trajectory."
             )
 
-        if log_kwargs and "filename" not in log_kwargs:
-            raise ValueError("'filename' must be included in `log_kwargs`")
+        # Read last image by default
+        read_kwargs.setdefault("index", -1)
 
-        # Configure logging
-        log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+        # Initialise structures and logging
+        super().__init__(
+            calc_name=__name__,
+            struct=struct,
+            struct_path=struct_path,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            read_kwargs=read_kwargs,
+            sequence_allowed=False,
+            calc_kwargs=calc_kwargs,
+            set_calc=set_calc,
+            log_kwargs=log_kwargs,
+            tracker_kwargs=tracker_kwargs,
+        )
 
-        # Set output file
-        FileNameMixin.__init__(self, self.struct, None)
+        if not self.struct.calc:
+            raise ValueError("Please attach a calculator to `struct`.")
+
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("opt.extxyz").absolute(),

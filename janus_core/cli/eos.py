@@ -7,7 +7,6 @@ from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.eos import EoS
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -15,7 +14,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     ModelPath,
-    ReadKwargsFirst,
+    ReadKwargsLast,
     StructPath,
     Summary,
     WriteKwargs,
@@ -67,7 +66,7 @@ def eos(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargsFirst = None,
+    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     file_prefix: Annotated[
         Optional[Path],
@@ -123,7 +122,7 @@ def eos(
         Path to MLIP model. Default is `None`.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is 0.
+            read_kwargs["index"] is -1.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix : Optional[PathLike]
@@ -149,30 +148,20 @@ def eos(
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
 
-    # Set up single point calculator
-    s_point = SinglePoint(
-        struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log, "filemode": "w"},
-    )
-
-    log_kwargs = {"filename": log, "filemode": "a"}
-
     # Check fmax option not duplicated
     if "fmax" in minimize_kwargs:
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
-    if not file_prefix:
-        file_prefix = s_point.file_prefix
-
-    # Dictionary of inputs for eos
+    # Dictionary of inputs for EoS class
     eos_kwargs = {
-        "struct": s_point.struct,
+        "struct_path": struct,
+        "arch": arch,
+        "device": device,
+        "model_path": model_path,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log, "filemode": "w"},
         "min_volume": min_volume,
         "max_volume": max_volume,
         "n_volumes": n_volumes,
@@ -183,8 +172,10 @@ def eos(
         "write_structures": write_structures,
         "write_kwargs": write_kwargs,
         "file_prefix": file_prefix,
-        "log_kwargs": log_kwargs,
     }
+
+    # Initialise EoS
+    equation_of_state = EoS(**eos_kwargs)
 
     # Store inputs for yaml summary
     inputs = eos_kwargs.copy()
@@ -193,8 +184,16 @@ def eos(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    # Add structure and MLIP information to inputs
     save_struct_calc(
-        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+        inputs=inputs,
+        struct=equation_of_state.struct,
+        struct_path=struct,
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        read_kwargs=read_kwargs,
+        calc_kwargs=calc_kwargs,
     )
 
     # Convert all paths to strings in inputs nested dictionary
@@ -203,10 +202,10 @@ def eos(
     # Save summary information before calculations begin
     start_summary(command="eos", summary=summary, inputs=inputs)
 
-    # Calculate equation of state
-    equation_of_state = EoS(**eos_kwargs)
+    # Run equation of state calculations
     equation_of_state.run()
 
+    # Save carbon summary
     carbon_summary(summary=summary, log=log)
 
     # Time after calculations have finished

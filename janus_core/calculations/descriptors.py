@@ -7,19 +7,47 @@ from ase import Atoms
 from ase.io import write
 import numpy as np
 
-from janus_core.helpers.janus_types import ASEWriteArgs, MaybeSequence
-from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import FileNameMixin, none_to_dict
+from janus_core.calculations.base import BaseCalculation
+from janus_core.helpers.janus_types import (
+    Architectures,
+    ASEReadArgs,
+    ASEWriteArgs,
+    Devices,
+    MaybeSequence,
+    PathLike,
+)
+from janus_core.helpers.utils import none_to_dict
 
 
-class Descriptors(FileNameMixin):
+class Descriptors(BaseCalculation):
     """
     Prepare and calculate MLIP descriptors for structures.
 
     Parameters
     ----------
-    struct : MaybeSequence[Atoms]
-        Structure(s) to calculate descriptors for.
+    struct : Optional[MaybeSequence[Atoms]]
+        ASE Atoms structure(s) to calculate descriptors for. Required if `struct_path`
+        is None. Default is None.
+    struct_path : Optional[PathLike]
+        Path of structure to calculate descriptors for. Required if `struct` is None.
+        Default is None.
+    arch : Architectures
+        MLIP architecture to use for calculations. Default is "mace_mp".
+    device : Devices
+        Device to run MLIP model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
+    read_kwargs : Optional[ASEReadArgs]
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is -1.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures. Default is None.
+    log_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_logger`. Default is {}.
+    tracker_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to `config_tracker`. Default is {}.
     invariants_only : bool
         Whether only the invariant descriptors should be returned. Default is True.
     calc_per_element : bool
@@ -31,17 +59,6 @@ class Descriptors(FileNameMixin):
     write_kwargs : Optional[ASEWriteArgs],
         Keyword arguments to pass to ase.io.write if saving structure with
         results of calculations. Default is {}.
-    log_kwargs : Optional[dict[str, Any]]
-        Keyword arguments to pass to `config_logger`. Default is {}.
-    tracker_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_tracker`. Default is {}.
-
-    Attributes
-    ----------
-    logger : Optional[logging.Logger]
-        Logger if log file has been specified.
-    tracker : Optional[OfflineEmissionsTracker]
-        Tracker if logging is enabled.
 
     Methods
     -------
@@ -51,22 +68,50 @@ class Descriptors(FileNameMixin):
 
     def __init__(
         self,
-        struct: MaybeSequence[Atoms],
+        struct: Optional[MaybeSequence[Atoms]] = None,
+        struct_path: Optional[PathLike] = None,
+        arch: Architectures = "mace_mp",
+        device: Devices = "cpu",
+        model_path: Optional[PathLike] = None,
+        read_kwargs: Optional[ASEReadArgs] = None,
+        calc_kwargs: Optional[dict[str, Any]] = None,
+        set_calc: Optional[bool] = None,
+        log_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: Optional[dict[str, Any]] = None,
         invariants_only: bool = True,
         calc_per_element: bool = False,
         calc_per_atom: bool = False,
         write_results: bool = False,
         write_kwargs: Optional[ASEWriteArgs] = None,
-        log_kwargs: Optional[dict[str, Any]] = None,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialise class.
 
         Parameters
         ----------
-        struct : MaybeSequence[Atoms]
-            Structure(s) to calculate descriptors for.
+        struct : Optional[MaybeSequence[Atoms]]
+            ASE Atoms structure(s) to calculate descriptors for. Required if
+            `struct_path` is None. Default is None.
+        struct_path : Optional[PathLike]
+            Path of structure to calculate descriptors for. Required if `struct` is
+            None. Default is None.
+        arch : Architectures
+            MLIP architecture to use for calculations. Default is "mace_mp".
+        device : Devices
+            Device to run MLIP model on. Default is "cpu".
+        model_path : Optional[PathLike]
+            Path to MLIP model. Default is `None`.
+        read_kwargs : Optional[ASEReadArgs]
+            Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is -1.
+        calc_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to the selected calculator. Default is {}.
+        set_calc : Optional[bool]
+            Whether to set (new) calculators for structures. Default is None.
+        log_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_logger`. Default is {}.
+        tracker_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to `config_tracker`. Default is {}.
         invariants_only : bool
             Whether only the invariant descriptors should be returned. Default is True.
         calc_per_element : bool
@@ -78,39 +123,42 @@ class Descriptors(FileNameMixin):
         write_kwargs : Optional[ASEWriteArgs],
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
-        log_kwargs : Optional[dict[str, Any]]
-            Keyword arguments to pass to `config_logger`. Default is {}.
-        tracker_kwargs : Optional[dict[str, Any]]
-                Keyword arguments to pass to `config_tracker`. Default is {}.
         """
-        (write_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
-            (write_kwargs, log_kwargs, tracker_kwargs)
-        )
+        (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
 
-        self.struct = struct
         self.invariants_only = invariants_only
         self.calc_per_element = calc_per_element
         self.calc_per_atom = calc_per_atom
         self.write_results = write_results
         self.write_kwargs = write_kwargs
 
-        # Validate parameters
-        if isinstance(self.struct, Sequence):
-            if any(not image.calc for image in struct):
-                raise ValueError(
-                    "Please attach a calculator to all images in `struct`."
-                )
-        else:
-            if not self.struct.calc:
-                raise ValueError("Please attach a calculator to `struct`.")
+        # Read last image by default
+        read_kwargs.setdefault("index", ":")
 
-        # Configure logging
-        log_kwargs.setdefault("name", __name__)
-        self.logger = config_logger(**log_kwargs)
-        self.tracker = config_tracker(self.logger, **tracker_kwargs)
+        # Initialise structures and logging
+        super().__init__(
+            calc_name=__name__,
+            struct=struct,
+            struct_path=struct_path,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            read_kwargs=read_kwargs,
+            sequence_allowed=True,
+            calc_kwargs=calc_kwargs,
+            set_calc=set_calc,
+            log_kwargs=log_kwargs,
+            tracker_kwargs=tracker_kwargs,
+        )
+
+        if isinstance(self.struct, Atoms) and not self.struct.calc:
+            raise ValueError("Please attach a calculator to `struct`.")
+        if isinstance(self.struct, Sequence) and not any(
+            image.calc for image in self.struct
+        ):
+            raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        FileNameMixin.__init__(self, struct, None)
         self.write_kwargs.setdefault(
             "filename",
             self._build_filename("descriptors.extxyz").absolute(),

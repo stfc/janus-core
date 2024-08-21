@@ -2,21 +2,27 @@
 
 from abc import ABC
 from collections.abc import Collection, Generator, Iterable, Sequence
+from copy import copy
 from io import StringIO
+import logging
 from pathlib import Path
 from typing import Any, Literal, Optional, TextIO, get_args
 
 from ase import Atoms
-from ase.io import write
+from ase.io import read, write
 from ase.io.formats import filetype
 from spglib import get_spacegroup
 
 from janus_core.helpers.janus_types import (
+    Architectures,
+    ASEReadArgs,
     ASEWriteArgs,
+    Devices,
     MaybeSequence,
     PathLike,
     Properties,
 )
+from janus_core.helpers.mlip_calculators import choose_calculator
 
 
 class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
@@ -28,10 +34,12 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     struct : MaybeSequence[Atoms]
         Structure from which to derive the default name. If `struct` is a sequence,
         the first structure will be used.
+    struct_path : Optional[PathLike]
+        Path to file containing structures.
     file_prefix : Optional[PathLike]
         Default prefix to use.
     *additional
-        Components to add to file_prefix (joined by hyphens).
+        Components to add to default file_prefix (joined by hyphens).
 
     Methods
     -------
@@ -45,6 +53,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     def __init__(
         self,
         struct: MaybeSequence[Atoms],
+        struct_path: Optional[PathLike],
         file_prefix: Optional[PathLike],
         *additional,
     ):
@@ -56,31 +65,38 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         struct : MaybeSequence[Atoms]
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
+        struct_path : Optional[PathLike]
+            Path to file structures were read from. Used as default prefix is not None.
         file_prefix : Optional[PathLike]
             Default prefix to use.
         *additional
-            Components to add to file_prefix (joined by hyphens).
+            Components to add to default file_prefix (joined by hyphens).
         """
         self.file_prefix = Path(
-            self._get_default_prefix(file_prefix, struct, *additional)
+            self._get_default_prefix(file_prefix, struct, struct_path, *additional)
         )
 
     @staticmethod
     def _get_default_prefix(
-        file_prefix: Optional[PathLike], struct: MaybeSequence[Atoms], *additional
+        file_prefix: Optional[PathLike],
+        struct: MaybeSequence[Atoms],
+        struct_path: Optional[PathLike],
+        *additional,
     ) -> str:
         """
         Determine the default prefix from the structure  or provided file_prefix.
 
         Parameters
         ----------
-        file_prefix : str
+        file_prefix : Optional[PathLike]
             Given file_prefix.
         struct : MaybeSequence[Atoms]
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
+        struct_path : Optional[PathLike]
+            Path to file containing structures.
         *additional
-            Components to add to file_prefix (joined by hyphens).
+            Components to add to default file_prefix (joined by hyphens).
 
         Returns
         -------
@@ -90,12 +106,15 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         if file_prefix is not None:
             return str(file_prefix)
 
-        if isinstance(struct, Sequence):
-            formula = struct[0].get_chemical_formula()
+        # Prefer file stem, otherwise use formula
+        if struct_path is not None:
+            struct_name = Path(struct_path).stem
+        elif isinstance(struct, Sequence):
+            struct_name = struct[0].get_chemical_formula()
         else:
-            formula = struct.get_chemical_formula()
+            struct_name = struct.get_chemical_formula()
 
-        return "-".join((formula, *additional))
+        return "-".join((struct_name, *filter(None, additional)))
 
     def _build_filename(
         self,
@@ -255,6 +274,157 @@ def results_to_info(
         # Remove all calculator results
         if invalidate_calc:
             struct.calc.results = {}
+
+
+def attach_calculator(
+    struct: MaybeSequence[Atoms],
+    *,
+    arch: Architectures = "mace_mp",
+    device: Devices = "cpu",
+    model_path: Optional[PathLike] = None,
+    calc_kwargs: Optional[dict[str, Any]] = None,
+) -> None:
+    """
+    Configure calculator and attach to structure(s).
+
+    Parameters
+    ----------
+    struct : Optional[MaybeSequence[Atoms]]
+        ASE Atoms structure(s) to attach calculators to.
+    arch : Architectures
+        MLIP architecture to use for calculations. Default is "mace_mp".
+    device : Devices
+        Device to run model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    """
+    calc_kwargs = calc_kwargs if calc_kwargs else {}
+
+    calculator = choose_calculator(
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        **calc_kwargs,
+    )
+
+    if isinstance(struct, Sequence):
+        for image in struct:
+            image.calc = copy(calculator)
+    else:
+        struct.calc = calculator
+
+
+def input_structs(
+    struct: Optional[MaybeSequence[Atoms]] = None,
+    *,
+    struct_path: Optional[PathLike] = None,
+    read_kwargs: Optional[ASEReadArgs] = None,
+    sequence_allowed: bool = True,
+    arch: Architectures = "mace_mp",
+    device: Devices = "cpu",
+    model_path: Optional[PathLike] = None,
+    calc_kwargs: Optional[dict[str, Any]] = None,
+    set_calc: Optional[bool] = None,
+    logger: Optional[logging.Logger] = None,
+) -> MaybeSequence[Atoms]:
+    """
+    Read input structures and/or attach MLIP calculators.
+
+    Parameters
+    ----------
+    struct : Optional[MaybeSequence[Atoms]]
+        ASE Atoms structure(s) to simulate. Required if `struct_path` is None. Default
+        is None.
+    struct_path : Optional[PathLike]
+        Path of structure to simulate. Required if `struct` is None. Default is None.
+    read_kwargs : ASEReadArgs
+        Keyword arguments to pass to ase.io.read. Default is {}.
+    sequence_allowed : bool
+        Whether a sequence of Atoms objects is allowed. Default is True.
+    arch : Architectures
+        MLIP architecture to use for calculations. Default is "mace_mp".
+    device : Devices
+        Device to run model on. Default is "cpu".
+    model_path : Optional[PathLike]
+        Path to MLIP model. Default is `None`.
+    calc_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    set_calc : Optional[bool]
+        Whether to set (new) calculators for structures.  Default is True if
+        `struct_path` is specified or `struct` is missing calculators, else default is
+        False.
+    logger : Optional[logging.Logger]
+        Logger if log file has been specified. Default is None.
+
+    Returns
+    -------
+    MaybeSequence[Atoms]
+        Structure(s) with attached MLIP calculators.
+    """
+    read_kwargs = read_kwargs if read_kwargs else {}
+
+    # Validate parameters
+    if not struct and not struct_path:
+        raise ValueError(
+            "Please specify either the ASE Atoms structure (`struct`) "
+            "or a path to the structure file (`struct_path`)"
+        )
+
+    if struct and struct_path:
+        raise ValueError(
+            "You cannot specify both the ASE Atoms structure (`struct`) "
+            "and a path to the structure file (`struct_path`)"
+        )
+
+    # Read from file
+    if struct_path:
+        if logger:
+            logger.info("Reading structures from file.")
+        struct = read(struct_path, **read_kwargs)
+        if logger:
+            logger.info("Structures read from file.")
+
+        # Return single Atoms object if reading only one image
+        if len(struct) == 1:
+            struct = struct[0]
+
+    # Check struct is valid type
+    if not isinstance(struct, (Atoms, Sequence)) or isinstance(struct, str):
+        raise ValueError("`struct` must be an ASE Atoms object or sequence of Atoms")
+
+    # Check struct is valid length
+    if not sequence_allowed and isinstance(struct, Sequence):
+        raise NotImplementedError(
+            "Only one Atoms object at a time can be used for this calculation"
+        )
+
+    # If set_calc not specified, set to True if reading file or calculators not attached
+    if set_calc is None:
+        if struct_path:
+            set_calc = True
+
+        if isinstance(struct, Atoms):
+            set_calc = struct.calc is None
+
+        if isinstance(struct, Sequence):
+            set_calc = any(image.calc is None for image in struct)
+
+    if set_calc:
+        if logger:
+            logger.info("Attaching calculator to structure.")
+        attach_calculator(
+            struct=struct,
+            arch=arch,
+            device=device,
+            model_path=model_path,
+            calc_kwargs=calc_kwargs,
+        )
+        if logger:
+            logger.info("Calculator attached to structure.")
+
+    return struct
 
 
 def output_structs(

@@ -11,15 +11,19 @@ from typer import Context
 from typer_config import conf_callback_factory, yaml_loader
 import yaml
 
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import TyperDict
-from janus_core.helpers.janus_types import Architectures, ASEReadArgs, Devices
+from janus_core.helpers.janus_types import (
+    Architectures,
+    ASEReadArgs,
+    Devices,
+    MaybeSequence,
+)
 from janus_core.helpers.utils import dict_remove_hyphens
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
     """
-    Set default read_kwargs["index"] and check its value is an integer.
+    Set default read_kwargs["index"] to final image and check its value is an integer.
 
     To ensure only a single Atoms object is read, slices such as ":" are forbidden.
 
@@ -28,9 +32,9 @@ def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
     read_kwargs : dict[str, Any]
         Keyword arguments to be passed to ase.io.read. If specified,
         read_kwargs["index"] must be an integer, and if not, a default value
-        of 0 is set.
+        of -1 is set.
     """
-    read_kwargs.setdefault("index", 0)
+    read_kwargs.setdefault("index", -1)
     try:
         int(read_kwargs["index"])
     except ValueError as e:
@@ -156,8 +160,10 @@ def end_summary(summary: Path) -> None:
 
 
 def save_struct_calc(
+    *,
     inputs: dict,
-    s_point: SinglePoint,
+    struct: MaybeSequence[Atoms],
+    struct_path: Path,
     arch: Architectures,
     device: Devices,
     model_path: str,
@@ -171,8 +177,10 @@ def save_struct_calc(
     ----------
     inputs : dict
         Inputs dictionary to add information to.
-    s_point : SinglePoint
-        SinglePoint object storing structure with attached calculator.
+    struct : MaybeSequence[Atoms]
+        Structure to be simulated.
+    struct_path : Path
+        Path of structure file.
     arch : Architectures
         MLIP architecture.
     device : Devices
@@ -187,19 +195,19 @@ def save_struct_calc(
     # Remove duplicate struct if already in inputs:
     inputs.pop("struct", None)
 
-    if isinstance(s_point.struct, Atoms):
+    if isinstance(struct, Atoms):
         inputs["struct"] = {
-            "n_atoms": len(s_point.struct),
-            "struct_path": s_point.struct_path,
-            "formula": s_point.struct.get_chemical_formula(),
+            "n_atoms": len(struct),
+            "struct_path": struct_path,
+            "formula": struct.get_chemical_formula(),
         }
-    elif isinstance(s_point.struct, Sequence):
+    elif isinstance(struct, Sequence):
         inputs["traj"] = {
-            "length": len(s_point.struct),
-            "struct_path": s_point.struct_path,
+            "length": len(struct),
+            "struct_path": struct_path,
             "struct": {
-                "n_atoms": len(s_point.struct[0]),
-                "formula": s_point.struct[0].get_chemical_formula(),
+                "n_atoms": len(struct[0]),
+                "formula": struct[0].get_chemical_formula(),
             },
         }
 

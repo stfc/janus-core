@@ -114,6 +114,16 @@ janus\_core.cli.utils module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.calculations.base module
+------------------------------------
+
+.. automodule:: janus_core.calculations.base
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.calculations.single\_point module
 ---------------------------------------------
 

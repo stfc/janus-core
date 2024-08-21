@@ -7,7 +7,6 @@ from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.calculations.geom_opt import GeomOpt
-from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
@@ -15,7 +14,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     ModelPath,
-    ReadKwargsFirst,
+    ReadKwargsLast,
     StructPath,
     Summary,
     WriteKwargs,
@@ -144,7 +143,7 @@ def geomopt(
         str,
         Option(help="Path if saving optimization frames.  [default: None]"),
     ] = None,
-    read_kwargs: ReadKwargsFirst = None,
+    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
     write_kwargs: WriteKwargs = None,
@@ -194,7 +193,7 @@ def geomopt(
         Path if saving optimization frames. Default is None.
     read_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is 0.
+            read_kwargs["index"] is -1.
     calc_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     minimize_kwargs : Optional[dict[str, Any]]
@@ -220,26 +219,11 @@ def geomopt(
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
 
-    # Set up single point calculator
-    s_point = SinglePoint(
-        struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log_kwargs={"filename": log, "filemode": "w"},
-    )
-
-    # Check optimized structure path not duplicated
+    # Check optimized structure path not duplicated and set from out, if specified
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
-
-    # Set default filname for writing optimized structure if not specified
     if out:
         write_kwargs["filename"] = out
-    else:
-        write_kwargs["filename"] = f"{s_point.file_prefix}-opt.extxyz"
 
     _set_minimize_kwargs(minimize_kwargs, traj, opt_cell_lengths, pressure)
 
@@ -257,7 +241,13 @@ def geomopt(
 
     # Dictionary of inputs for optimize function
     optimize_kwargs = {
-        "struct": s_point.struct,
+        "struct_path": struct,
+        "arch": arch,
+        "device": device,
+        "model_path": model_path,
+        "read_kwargs": read_kwargs,
+        "calc_kwargs": calc_kwargs,
+        "log_kwargs": {"filename": log, "filemode": "w"},
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
@@ -265,8 +255,10 @@ def geomopt(
         **minimize_kwargs,
         "write_results": True,
         "write_kwargs": write_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "a"},
     }
+
+    # Set up geometry optimization
+    optimizer = GeomOpt(**optimize_kwargs)
 
     # Store inputs for yaml summary
     inputs = optimize_kwargs.copy()
@@ -275,8 +267,16 @@ def geomopt(
     del inputs["log_kwargs"]
     inputs["log"] = log
 
+    # Add structure and MLIP information to inputs
     save_struct_calc(
-        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+        inputs=inputs,
+        struct=optimizer.struct,
+        struct_path=struct,
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        read_kwargs=read_kwargs,
+        calc_kwargs=calc_kwargs,
     )
 
     # Convert all paths to strings in inputs nested dictionary
@@ -286,9 +286,9 @@ def geomopt(
     start_summary(command="geomopt", summary=summary, inputs=inputs)
 
     # Run geometry optimization and save output structure
-    optimizer = GeomOpt(**optimize_kwargs)
     optimizer.run()
 
+    # Save carbon summary
     carbon_summary(summary=summary, log=log)
 
     # Time after optimization has finished

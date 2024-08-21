@@ -132,13 +132,19 @@ def singlepoint(
     # Initialise singlepoint structure and calculator
     s_point = SinglePoint(**singlepoint_kwargs)
 
-    # Store inputs for yaml summary
-
     # Store only filename as filemode is not set by user
     inputs = {"log": log}
 
+    # Add structure and MLIP information to inputs
     save_struct_calc(
-        inputs, s_point, arch, device, model_path, read_kwargs, calc_kwargs
+        inputs=inputs,
+        struct=s_point.struct,
+        struct_path=struct,
+        arch=arch,
+        device=device,
+        model_path=model_path,
+        read_kwargs=read_kwargs,
+        calc_kwargs=calc_kwargs,
     )
 
     inputs["run"] = {
@@ -155,6 +161,7 @@ def singlepoint(
     # Run singlepoint calculation
     s_point.run()
 
+    # Save carbon summary
     carbon_summary(summary=summary, log=log)
 
     # Save time after simulation has finished
