@@ -49,6 +49,8 @@ def test_md(ensemble):
     restart_path = Path(f"{file_prefix[ensemble]}res-2.extxyz").absolute()
     stats_path = Path(f"{file_prefix[ensemble]}stats.dat").absolute()
     traj_path = Path(f"{file_prefix[ensemble]}traj.extxyz").absolute()
+    rdf_path = Path(f"{file_prefix[ensemble]}rdf.dat").absolute()
+    vaf_path = Path(f"{file_prefix[ensemble]}vaf.dat").absolute()
     log_path = Path("./log.yml").absolute()
     summary_path = Path("./summary.yml").absolute()
 
@@ -56,6 +58,8 @@ def test_md(ensemble):
     assert not restart_path.exists()
     assert not stats_path.exists()
     assert not traj_path.exists()
+    assert not rdf_path.exists()
+    assert not vaf_path.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
 
@@ -76,6 +80,8 @@ def test_md(ensemble):
                 2,
                 "--restart-every",
                 2,
+                "--post-process-kwargs",
+                "{'rdf_compute': True, 'vaf_compute': True}",
                 "--log",
                 log_path,
                 "--summary",
@@ -89,6 +95,8 @@ def test_md(ensemble):
         assert restart_path.exists()
         assert stats_path.exists()
         assert traj_path.exists()
+        assert rdf_path.exists()
+        assert vaf_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
 
@@ -101,6 +109,8 @@ def test_md(ensemble):
         restart_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
+        rdf_path.unlink(missing_ok=True)
+        vaf_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
 
