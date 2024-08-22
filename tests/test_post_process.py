@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ase.io import read
 import numpy as np
+from pytest import approx
 from typer.testing import CliRunner
 
 from janus_core.calculations.md import NVE
@@ -172,14 +173,19 @@ def test_rdf_by_elements():
         assert (np.isclose(expected_peaks[element], rdf[0][peaks])).all()
 
 
-def test_vaf():
+def test_vaf(tmp_path):
     """Test vaf will run."""
+    vaf_names = ("vaf-lj-3-4.dat", "vaf-lj-1-2-3.dat")
+    vaf_filter = ((3, 4), (1, 2, 3))
+
     data = read(DATA_PATH / "lj-traj.xyz", index=":")
     vaf = post_process.compute_vaf(data)
+    expected = np.loadtxt(DATA_PATH / "vaf-lj.dat")
 
     assert isinstance(vaf, list)
     assert len(vaf) == 1
     assert isinstance(vaf[0], np.ndarray)
+    assert vaf[0] == approx(expected, rel=1e-9)
 
     vaf = post_process.compute_vaf(data, fft=True)
 
@@ -187,8 +193,17 @@ def test_vaf():
     assert len(vaf) == 1
     assert isinstance(vaf[0], np.ndarray)
 
-    vaf = post_process.compute_vaf(data, filter_atoms=((3, 4), (1, 2, 3)))
+    vaf = post_process.compute_vaf(
+        data, filter_atoms=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
+    )
 
     assert isinstance(vaf, list)
     assert len(vaf) == 2
     assert isinstance(vaf[0], np.ndarray)
+
+    for i, name in enumerate(vaf_names):
+        assert (tmp_path / name).exists()
+        expected = np.loadtxt(DATA_PATH / name)
+        written = np.loadtxt(tmp_path / name)
+        assert vaf[i] == approx(expected, rel=1e-9)
+        assert vaf[i] == approx(written, rel=1e-9)
