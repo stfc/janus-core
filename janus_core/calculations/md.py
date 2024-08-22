@@ -440,29 +440,22 @@ class MolecularDynamics(BaseCalculation):
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
+        self.param_prefix = self._set_param_prefix(file_prefix)
+
         # Set output file names
         self.final_file = self._build_filename(
-            "final.extxyz",
-            self._parameter_prefix if file_prefix is None else "",
-            filename=self.final_file,
+            "final.extxyz", self.param_prefix, filename=self.final_file
         )
         self.stats_file = self._build_filename(
-            "stats.dat",
-            self._parameter_prefix if file_prefix is None else "",
-            filename=self.stats_file,
+            "stats.dat", self.param_prefix, filename=self.stats_file
         )
         self.traj_file = self._build_filename(
-            "traj.extxyz",
-            self._parameter_prefix if file_prefix is None else "",
-            filename=self.traj_file,
+            "traj.extxyz", self.param_prefix, filename=self.traj_file
         )
 
         # If not specified otherwise, save optimized structure consistently with others
-        opt_file = self._build_filename(
-            "opt.extxyz",
-            self._parameter_prefix if file_prefix is None else "",
-            filename=None,
-        )
+        opt_file = self._build_filename("opt.extxyz", self.param_prefix, filename=None)
+
         if "write_kwargs" in self.minimize_kwargs:
             self.minimize_kwargs["write_kwargs"].setdefault("filename", opt_file)
             # Assume if write_kwargs are specified that results should be written
@@ -533,16 +526,23 @@ class MolecularDynamics(BaseCalculation):
             optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
             optimizer.run()
 
-    @property
-    def _parameter_prefix(self) -> str:
+    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None):
         """
-        Ensemble parameters for output files.
+        Set ensemble parameters for output files.
+
+        Parameters
+        ----------
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames on class init. If not None, param_prefix = "".
 
         Returns
         -------
         str
-           Formatted temperature range if heating and target temp if running md.
+           Formatted ensemble parameters, including temp ramp range and/or and MD temp.
         """
+        if file_prefix is not None:
+            return ""
+
         temperature_prefix = ""
         if self.temp_start is not None and self.temp_end is not None:
             temperature_prefix += f"-T{self.temp_start}-T{self.temp_end}"
@@ -585,9 +585,10 @@ class MolecularDynamics(BaseCalculation):
     def _write_correlations(self) -> None:
         """Write out the correlations."""
         if self._correlations:
-            param_pref = self._parameter_prefix if self.file_prefix is None else ""
             with open(
-                self._build_filename("cor.dat", param_pref), "w", encoding="utf-8"
+                self._build_filename("cor.dat", self.param_prefix),
+                "w",
+                encoding="utf-8",
             ) as out_file:
                 data = {}
                 for cor in self._correlations:
@@ -800,8 +801,6 @@ class MolecularDynamics(BaseCalculation):
 
         ana = Analysis(data)
 
-        param_pref = self._parameter_prefix if self.file_prefix is None else ""
-
         if self.post_process_kwargs.get("rdf_compute", False):
             base_name = self.post_process_kwargs.get("rdf_output_file", None)
             rdf_args = {
@@ -830,7 +829,7 @@ class MolecularDynamics(BaseCalculation):
                 out_paths = [
                     self._build_filename(
                         "rdf.dat",
-                        param_pref,
+                        self.param_prefix,
                         "_".join(element),
                         prefix_override=base_name,
                     )
@@ -840,7 +839,7 @@ class MolecularDynamics(BaseCalculation):
             else:
                 out_paths = [
                     self._build_filename(
-                        "rdf.dat", param_pref, prefix_override=base_name
+                        "rdf.dat", self.param_prefix, prefix_override=base_name
                     )
                 ]
 
@@ -851,7 +850,9 @@ class MolecularDynamics(BaseCalculation):
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
             fft = self.post_process_kwargs.get("vaf_fft", False)
 
-            out_path = self._build_filename("vaf.dat", param_pref, filename=file_name)
+            out_path = self._build_filename(
+                "vaf.dat", self.param_prefix, filename=file_name
+            )
             slice_ = (
                 self.post_process_kwargs.get("vaf_start", 0),
                 self.post_process_kwargs.get("vaf_stop", None),
@@ -1087,18 +1088,25 @@ class NPT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
-    @property
-    def _parameter_prefix(self) -> str:
+    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None):
         """
-        Ensemble parameters for output files.
+        Set ensemble parameters for output files.
+
+        Parameters
+        ----------
+        file_prefix : Optional[PathLike]
+            Prefix for output filenames on class init. If not None, param_prefix = "".
 
         Returns
         -------
         str
-           Formatted temperature range if heating and target temp if running md.
+           Formatted ensemble parameters, including pressure and temperature(s).
         """
+        if file_prefix is not None:
+            return ""
+
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        return f"{super()._parameter_prefix}{pressure}"
+        return f"{super()._set_param_prefix(file_prefix)}{pressure}"
 
     @property
     def _restart_file(self) -> str:
