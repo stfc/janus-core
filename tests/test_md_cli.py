@@ -650,3 +650,90 @@ def test_minimize_kwargs_write_results(tmp_path):
 
     atoms = read(opt_path)
     assert isinstance(atoms, Atoms)
+
+
+def test_auto_restart(tmp_path):
+    """Test auto restart with file_prefix."""
+    file_prefix = tmp_path / "md"
+    traj_path = tmp_path / "md-traj.extxyz"
+    stats_path = tmp_path / "md-stats.dat"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    # Predicted path
+    restart_path = tmp_path / "md-res-4.extxyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--steps",
+            4,
+            "--traj-every",
+            1,
+            "--stats-every",
+            3,
+            "--restart-every",
+            4,
+            "--file-prefix",
+            file_prefix,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert traj_path.exists()
+    assert stats_path.exists()
+    assert restart_path.exists()
+
+    traj = read(traj_path, index=":")
+    assert len(traj) == 5
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+    # Includes header and steps 0, 3
+    assert len(lines) == 3
+    assert int(lines[-1].split()[0]) == 3
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--steps",
+            3,
+            "--traj-every",
+            1,
+            "--stats-every",
+            1,
+            "--file-prefix",
+            file_prefix,
+            "--restart",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(log_path, includes="Auto restart successful")
+
+    traj = read(traj_path, index=":")
+    assert len(traj) == 8
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+    # Includes header and steps 0, 3, and steps 5, 6, 7
+    assert len(lines) == 6
+    assert int(lines[-1].split()[0]) == 7
