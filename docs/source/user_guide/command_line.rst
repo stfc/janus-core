@@ -190,6 +190,18 @@ both before beginning dynamics and at steps 100 and 200 of the simulation.
 This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps), saving the trajectory every 10 steps after the first 100, and the thermodynamical statistics every 10 steps,
 as well as changing the output file names for both.
 
+To restart a simulation, the restart file can be entered explicitly (e.g. ``--struct NaCl-npt-T300.0-p1.0-res-1000.extxyz``) in combination with the ``--restart`` option,
+but by default the ``--restart-auto`` option allows the same original structure to be used to infer the most recent restart file created.
+For example:
+
+.. code-block:: bash
+
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1000 --stats-every 1 --restart-every 100
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1000 --stats-every 1 --restart
+
+will create, then restart from, ``NaCl-npt-T300.0-p1.0-res-1000.extxyz``,
+running an additional 1000 steps, and appending the statistics and trajectory files created by the first command.
+
 
 For all options, run ``janus md --help``.
 
