@@ -30,7 +30,6 @@ from janus_core.cli.utils import (
     yaml_converter_callback,
 )
 from janus_core.helpers.janus_types import EoSNames
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -180,11 +179,7 @@ def eos(
     # Store inputs for yaml summary
     inputs = eos_kwargs.copy()
 
-    # Store only filename as filemode is not set by user
-    del inputs["log_kwargs"]
-    inputs["log"] = log
-
-    # Add structure and MLIP information to inputs
+    # Add structure, MLIP information, and log to inputs
     save_struct_calc(
         inputs=inputs,
         struct=equation_of_state.struct,
@@ -194,10 +189,8 @@ def eos(
         model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
+        log=log,
     )
-
-    # Convert all paths to strings in inputs nested dictionary
-    dict_paths_to_strs(inputs)
 
     # Save summary information before calculations begin
     start_summary(command="eos", summary=summary, inputs=inputs)

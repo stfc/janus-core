@@ -28,7 +28,6 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -261,11 +260,7 @@ def phonons(
     # Store inputs for yaml summary
     inputs = phonons_kwargs.copy()
 
-    # Store only filename as filemode is not set by user
-    del inputs["log_kwargs"]
-    inputs["log"] = log
-
-    # Add structure and MLIP information to inputs
+    # Add structure, MLIP information, and log to inputs
     save_struct_calc(
         inputs=inputs,
         struct=phonon.struct,
@@ -275,10 +270,8 @@ def phonons(
         model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
+        log=log,
     )
-
-    # Convert all paths to strings in inputs nested dictionary
-    dict_paths_to_strs(inputs)
 
     # Save summary information before calculations begin
     start_summary(command="phonons", summary=summary, inputs=inputs)

@@ -32,7 +32,6 @@ from janus_core.cli.utils import (
     yaml_converter_callback,
 )
 from janus_core.helpers.janus_types import Ensembles
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -398,11 +397,7 @@ def md(
     # Store inputs for yaml summary
     inputs = dyn_kwargs | {"ensemble": ensemble}
 
-    # Store only filename as filemode is not set by user
-    del inputs["log_kwargs"]
-    inputs["log"] = log
-
-    # Add structure and MLIP information to inputs
+    # Add structure, MLIP information, and log to inputs
     save_struct_calc(
         inputs=inputs,
         struct=dyn.struct,
@@ -412,10 +407,8 @@ def md(
         model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
+        log=log,
     )
-
-    # Convert all paths to strings in inputs nested dictionary
-    dict_paths_to_strs(inputs)
 
     # Save summary information before simulation begins
     start_summary(command="md", summary=summary, inputs=inputs)

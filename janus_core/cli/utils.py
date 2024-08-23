@@ -18,7 +18,42 @@ from janus_core.helpers.janus_types import (
     Devices,
     MaybeSequence,
 )
-from janus_core.helpers.utils import dict_remove_hyphens
+
+
+def dict_paths_to_strs(dictionary: dict) -> None:
+    """
+    Recursively iterate over dictionary, converting Path values to strings.
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary to be converted.
+    """
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            dict_paths_to_strs(value)
+        elif isinstance(value, Path):
+            dictionary[key] = str(value)
+
+
+def dict_remove_hyphens(dictionary: dict) -> dict:
+    """
+    Recursively iterate over dictionary, replacing hyphens with underscores in keys.
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary to be converted.
+
+    Returns
+    -------
+    dict
+        Dictionary with hyphens in keys replaced with underscores.
+    """
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            dictionary[key] = dict_remove_hyphens(value)
+    return {k.replace("-", "_"): v for k, v in dictionary.items()}
 
 
 def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
@@ -169,6 +204,7 @@ def save_struct_calc(
     model_path: str,
     read_kwargs: ASEReadArgs,
     calc_kwargs: dict[str, Any],
+    log: Path,
 ) -> None:
     """
     Add structure and calculator input information to a dictionary.
@@ -191,9 +227,21 @@ def save_struct_calc(
         Keyword arguments to pass to ase.io.read.
     calc_kwargs : dict[str, Any]]
         Keyword arguments to pass to the calculator.
+    log : Path
+        Path to log file.
     """
-    # Remove duplicate struct if already in inputs:
-    inputs.pop("struct", None)
+    # Clean up duplicate parameters
+    for key in (
+        "struct",
+        "struct_path",
+        "arch",
+        "device",
+        "model_path",
+        "read_kwargs",
+        "calc_kwargs",
+        "log_kwargs",
+    ):
+        inputs.pop(key, None)
 
     if isinstance(struct, Atoms):
         inputs["struct"] = {
@@ -218,6 +266,11 @@ def save_struct_calc(
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
     }
+
+    inputs["log"] = log
+
+    # Convert all paths to strings in inputs nested dictionary
+    dict_paths_to_strs(inputs)
 
 
 def check_config(ctx: Context) -> None:

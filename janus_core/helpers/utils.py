@@ -200,42 +200,6 @@ def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None
     yield from (dictionary if dictionary else {} for dictionary in dictionaries)
 
 
-def dict_paths_to_strs(dictionary: dict) -> None:
-    """
-    Recursively iterate over dictionary, converting Path values to strings.
-
-    Parameters
-    ----------
-    dictionary : dict
-        Dictionary to be converted.
-    """
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            dict_paths_to_strs(value)
-        elif isinstance(value, Path):
-            dictionary[key] = str(value)
-
-
-def dict_remove_hyphens(dictionary: dict) -> dict:
-    """
-    Recursively iterate over dictionary, replacing hyphens with underscores in keys.
-
-    Parameters
-    ----------
-    dictionary : dict
-        Dictionary to be converted.
-
-    Returns
-    -------
-    dict
-        Dictionary with hyphens in keys replaced with underscores.
-    """
-    for key, value in dictionary.items():
-        if isinstance(value, dict):
-            dictionary[key] = dict_remove_hyphens(value)
-    return {k.replace("-", "_"): v for k, v in dictionary.items()}
-
-
 def results_to_info(
     struct: Atoms,
     *,
