@@ -524,8 +524,12 @@ class MolecularDynamics(BaseCalculation):
 
         if self.restart_auto:
             # Attempt to infer restart file
+            # param_prefix is added to prefix_override, so only use if no restart_stem
+            param_prefix = (
+                f"{self.param_prefix}-res" if self.restart_stem is None else ""
+            )
             restart_stem = self._build_filename(
-                "res", self.param_prefix, prefix_override=self.restart_stem
+                "", param_prefix, prefix_override=self.restart_stem
             )
             # Use restart_stem.name otherwise T300.0 etc. counts as extension
             poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
@@ -549,9 +553,10 @@ class MolecularDynamics(BaseCalculation):
                 last_stem = last_restart.stem
                 try:
                     # Use restart_stem.name otherwise T300.0 etc. counts as extension
-                    self.offset = int("".join(last_stem.split(f"{restart_stem.name}-")))
+                    self.offset = int("".join(last_stem.split(f"{restart_stem.name}")))
 
                 except ValueError as e:
+                    print(restart_stem)
                     raise ValueError(
                         f"Unable to infer final dynamics step from {last_restart}"
                     ) from e
@@ -649,8 +654,10 @@ class MolecularDynamics(BaseCalculation):
            File name for restart files.
         """
         step = self.offset + self.dyn.nsteps
+        # param_prefix is added to prefix_override, so only use if no restart_stem
+        param_prefix = f"{self.param_prefix}-res" if self.restart_stem is None else ""
         return self._build_filename(
-            f"res-{step}.extxyz", self.param_prefix, prefix_override=self.restart_stem
+            f"{step}.extxyz", param_prefix, prefix_override=self.restart_stem
         )
 
     def _parse_correlations(self) -> None:

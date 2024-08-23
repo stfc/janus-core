@@ -146,7 +146,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             built_filename = Path(filename)
         else:
             prefix = (
-                prefix_override
+                str(prefix_override)
                 if prefix_override is not None
                 else str(self.file_prefix)
             )
