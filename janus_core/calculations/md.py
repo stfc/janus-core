@@ -549,12 +549,7 @@ class MolecularDynamics(BaseCalculation):
                 last_stem = last_restart.stem
                 try:
                     # Use restart_stem.name otherwise T300.0 etc. counts as extension
-                    offset = int("".join(last_stem.split(f"{restart_stem.name}-")))
-
-                    assert (
-                        offset >= self.offset
-                    ), "Statistics file and restart file steps are inconsistent"
-                    self.offset = offset
+                    self.offset = int("".join(last_stem.split(f"{restart_stem.name}-")))
 
                 except ValueError as e:
                     raise ValueError(
