@@ -527,7 +527,7 @@ class MolecularDynamics(BaseCalculation):
             restart_stem = self._build_filename(
                 "res", self.param_prefix, prefix_override=self.restart_stem
             )
-            possible_restarts = Path(".").glob(f"{restart_stem.stem}*.extxyz")
+            possible_restarts = restart_stem.parent.glob(f"{restart_stem.stem}*.extxyz")
             try:
                 last_restart = sorted(possible_restarts, key=getmtime)[-1]
 
@@ -547,7 +547,7 @@ class MolecularDynamics(BaseCalculation):
                 # Infer last dynamics step
                 last_stem = last_restart.stem
                 try:
-                    last_offset = int("".join(last_stem.split(f"{restart_stem}-")))
+                    last_offset = int("".join(last_stem.split(f"{restart_stem.stem}-")))
 
                     assert (
                         last_offset >= self.offset
@@ -555,14 +555,19 @@ class MolecularDynamics(BaseCalculation):
                     self.offset = last_offset
 
                 except ValueError as e:
-                    raise ValueError("Unable to infer final dynamics step") from e
+                    raise ValueError(
+                        f"Unable to infer final dynamics step from {last_restart}"
+                    ) from e
 
                 if self.logger:
                     self.logger.info("Auto restart successful")
 
             except IndexError:
                 if self.logger:
-                    self.logger.info("Auto restart failed. Using `struct`")
+                    self.logger.info(
+                        "Auto restart failed with stem: %s. Using `struct`",
+                        restart_stem,
+                    )
 
         # Check files exist to append
         if not self.stats_file.exists() or not self.traj_file.exists():
@@ -818,7 +823,7 @@ class MolecularDynamics(BaseCalculation):
         """Write molecular dynamics statistics."""
         stats = self.get_stats()
 
-        # we do not want to print step 0 in restarts
+        # Do not print step 0 for restarts
         if self.restart and self.dyn.nsteps == 0:
             return
 
@@ -834,6 +839,10 @@ class MolecularDynamics(BaseCalculation):
 
     def _write_traj(self) -> None:
         """Write current structure to trajectory file."""
+        # Do not save step 0 for restarts
+        if self.restart and self.dyn.nsteps == 0:
+            return
+
         if self.dyn.nsteps >= self.traj_start:
             # Append if restarting or already started writing
             append = self.restart or (
