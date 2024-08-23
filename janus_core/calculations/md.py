@@ -527,9 +527,10 @@ class MolecularDynamics(BaseCalculation):
             restart_stem = self._build_filename(
                 "res", self.param_prefix, prefix_override=self.restart_stem
             )
-            possible_restarts = restart_stem.parent.glob(f"{restart_stem.stem}*.extxyz")
+            # Use restart_stem.name otherwise T300.0 etc. counts as extension
+            poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
             try:
-                last_restart = sorted(possible_restarts, key=getmtime)[-1]
+                last_restart = sorted(poss_restarts, key=getmtime)[-1]
 
                 # Read in last structure
                 self.struct = input_structs(
@@ -547,12 +548,13 @@ class MolecularDynamics(BaseCalculation):
                 # Infer last dynamics step
                 last_stem = last_restart.stem
                 try:
-                    last_offset = int("".join(last_stem.split(f"{restart_stem.stem}-")))
+                    # Use restart_stem.name otherwise T300.0 etc. counts as extension
+                    offset = int("".join(last_stem.split(f"{restart_stem.name}-")))
 
                     assert (
-                        last_offset >= self.offset
+                        offset >= self.offset
                     ), "Statistics file and restart file steps are inconsistent"
-                    self.offset = last_offset
+                    self.offset = offset
 
                 except ValueError as e:
                     raise ValueError(
