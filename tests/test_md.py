@@ -887,7 +887,7 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_auto_restart_no_prefix(tmp_path):
+def test_auto_restart(tmp_path):
     """Test auto restarting simulation."""
     # tmp_path for all files other than restart
     # Include T300.0 to test Path.stem vs Path.name
@@ -978,15 +978,16 @@ def test_auto_restart_no_prefix(tmp_path):
         restart_path.unlink(missing_ok=True)
 
 
-def test_auto_restart_file_prefix(tmp_path):
-    """Test auto restarting simulation with file prefix defined."""
+def test_auto_restart_restart_stem(tmp_path):
+    """Test auto restarting simulation with restart stem defined."""
     file_prefix = tmp_path / "npt"
     traj_path = tmp_path / "npt-traj.extxyz"
     stats_path = tmp_path / "npt-stats.dat"
     log_file = tmp_path / "md.log"
 
-    # Predicted restart file, from file_prefix
-    restart_path = tmp_path / "npt-res-4.extxyz"
+    # Set restart stem and predict restart file
+    restart_stem = tmp_path / "npt-test"
+    restart_path = tmp_path / "npt-test-4.extxyz"
 
     npt = NPT(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -997,6 +998,7 @@ def test_auto_restart_file_prefix(tmp_path):
         stats_every=3,
         traj_every=1,
         file_prefix=file_prefix,
+        restart_stem=str(restart_stem),
         restart_every=4,
         timestep=10,
     )
@@ -1025,6 +1027,7 @@ def test_auto_restart_file_prefix(tmp_path):
         temp=300.0,
         steps=3,
         stats_every=1,
+        restart_stem=restart_stem,
         restart=True,
         restart_auto=True,
         file_prefix=file_prefix,
