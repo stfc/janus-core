@@ -189,7 +189,7 @@ def compute_vaf(
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[int]] = ((),),
+    filter_atoms: MaybeSequence[MaybeSequence[Optional[int]]] = ((None),),
 ) -> NDArray[float64]:
     """
     Compute the velocity autocorrelation function (VAF) of `data`.
@@ -209,7 +209,7 @@ def compute_vaf(
     index : SliceLike
         Images to analyze as `start`, `stop`, `step`.
         Default is all images.
-    filter_atoms : MaybeSequence[MaybeSequence[int]]
+    filter_atoms : MaybeSequence[MaybeSequence[Optional[int]]]
         Compute the VAF averaged over subsets of the system.
         Default is all atoms.
 
@@ -238,9 +238,7 @@ def compute_vaf(
     data = data[slice(*index)]
 
     if use_velocities:
-        momenta = np.asarray(
-            [datum.get_momenta() / datum.get_masses() for datum in data]
-        )
+        momenta = np.asarray([datum.get_velocities() for datum in data])
     else:
         momenta = np.asarray([datum.get_momenta() for datum in data])
 
@@ -249,7 +247,7 @@ def compute_vaf(
 
     # If filter_atoms not specified use all atoms
     filter_atoms = [
-        atom if atom and atom[0] else range(n_atoms) for atom in filter_atoms
+        atom if atom[0] is not None else range(n_atoms) for atom in filter_atoms
     ]
 
     used_atoms = {atom for atoms in filter_atoms for atom in atoms}
@@ -259,7 +257,9 @@ def compute_vaf(
         np.asarray(
             [
                 [
-                    np.correlate(momenta[:, j, i], momenta[:, j, i], "same")
+                    np.correlate(momenta[:, j, i], momenta[:, j, i], "full")[
+                        n_steps - 1 :
+                    ]
                     for i in range(3)
                 ]
                 for j in used_atoms
