@@ -369,10 +369,10 @@ def input_structs(
         if struct_path:
             set_calc = True
 
-        if isinstance(struct, Atoms):
+        elif isinstance(struct, Atoms):
             set_calc = struct.calc is None
 
-        if isinstance(struct, Sequence):
+        elif isinstance(struct, Sequence):
             set_calc = any(image.calc is None for image in struct)
 
     if set_calc:
