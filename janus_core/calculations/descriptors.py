@@ -168,6 +168,9 @@ class Descriptors(BaseCalculation):
         """Calculate descriptors for structure(s)."""
         if self.logger:
             self.logger.info("Starting descriptors calculation")
+            self.logger.info("invariants_only: %s", self.invariants_only)
+            self.logger.info("calc_per_element: %s", self.calc_per_element)
+            self.logger.info("calc_per_atom: %s", self.calc_per_atom)
             self.tracker.start_task("Descriptors")
 
         if isinstance(self.struct, Sequence):
@@ -198,11 +201,6 @@ class Descriptors(BaseCalculation):
         struct : Atoms
             Structure to calculate descriptors for.
         """
-        if self.logger:
-            self.logger.info("invariants_only: %s", self.invariants_only)
-            self.logger.info("calc_per_element: %s", self.calc_per_element)
-            self.logger.info("calc_per_atom: %s", self.calc_per_atom)
-
         arch = struct.calc.parameters["arch"]
 
         # Calculate mean descriptor and save mean

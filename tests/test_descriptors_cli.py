@@ -57,6 +57,7 @@ def test_descriptors(tmp_path):
             "Starting descriptors calculation",
             "invariants_only: True",
             "calc_per_element: False",
+            "calc_per_atom: False",
         ],
     )
 
@@ -109,6 +110,7 @@ def test_calc_per_element(tmp_path):
             "Starting descriptors calculation",
             "invariants_only: True",
             "calc_per_element: True",
+            "calc_per_atom: False",
         ],
     )
 
@@ -210,3 +212,14 @@ def test_per_atom(tmp_path):
     assert "mace_mp_descriptors" in atoms.arrays
     assert len(atoms.arrays["mace_mp_descriptors"]) == 8
     assert atoms.arrays["mace_mp_descriptors"][0] == pytest.approx(-0.00203750)
+
+    # Check only initial structure is minimized
+    assert_log_contains(
+        log_path,
+        includes=[
+            "Starting descriptors calculation",
+            "invariants_only: True",
+            "calc_per_element: False",
+            "calc_per_atom: True",
+        ],
+    )
