@@ -524,13 +524,8 @@ class MolecularDynamics(BaseCalculation):
 
         if self.restart_auto:
             # Attempt to infer restart file
-            # param_prefix is added to prefix_override, so only use if no restart_stem
-            param_prefix = (
-                f"{self.param_prefix}-res" if self.restart_stem is None else ""
-            )
-            restart_stem = self._build_filename(
-                "", param_prefix, prefix_override=self.restart_stem
-            )
+            restart_stem = self._restart_stem
+
             # Use restart_stem.name otherwise T300.0 etc. counts as extension
             poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
             try:
@@ -552,11 +547,14 @@ class MolecularDynamics(BaseCalculation):
                 # Infer last dynamics step
                 last_stem = last_restart.stem
                 try:
+                    # Remove restart_stem from filename
                     # Use restart_stem.name otherwise T300.0 etc. counts as extension
-                    self.offset = int("".join(last_stem.split(f"{restart_stem.name}")))
+                    self.offset = int("".join(last_stem.split(f"{restart_stem.name}-")))
 
-                except ValueError as e:
-                    print(restart_stem)
+                    # Check "-"" not inlcuded in offset
+                    assert self.offset > 0
+
+                except (ValueError, AssertionError) as e:
                     raise ValueError(
                         f"Unable to infer final dynamics step from {last_restart}"
                     ) from e
@@ -644,6 +642,27 @@ class MolecularDynamics(BaseCalculation):
         return temperature_prefix.lstrip("-")
 
     @property
+    def _restart_stem(self) -> str:
+        """
+        Stem for restart files.
+
+        Restart files will be named {restart_stem}-{step}.extxyz. If file_prefix is
+        specified, restart_stem will be of the form {file_prefix}-{param_prefix}-res.
+
+        Returns
+        -------
+        str
+           Stem for restart files.
+        """
+        if self.restart_stem is not None:
+            return Path(self.restart_stem)
+
+        # param_prefix is empty if file_prefix was None on init
+        return Path(
+            "-".join(filter(None, (str(self.file_prefix), self.param_prefix, "res")))
+        )
+
+    @property
     def _restart_file(self) -> str:
         """
         Restart file name.
@@ -654,10 +673,8 @@ class MolecularDynamics(BaseCalculation):
            File name for restart files.
         """
         step = self.offset + self.dyn.nsteps
-        # param_prefix is added to prefix_override, so only use if no restart_stem
-        param_prefix = f"{self.param_prefix}-res" if self.restart_stem is None else ""
         return self._build_filename(
-            f"{step}.extxyz", param_prefix, prefix_override=self.restart_stem
+            f"{step}.extxyz", prefix_override=self._restart_stem
         )
 
     def _parse_correlations(self) -> None:
