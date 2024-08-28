@@ -7,14 +7,10 @@ from ase import Atoms
 from ase.io import read
 import pytest
 
+from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
 from janus_core.helpers.janus_types import Properties
 from janus_core.helpers.mlip_calculators import choose_calculator
-from janus_core.helpers.utils import (
-    dict_paths_to_strs,
-    dict_remove_hyphens,
-    none_to_dict,
-    output_structs,
-)
+from janus_core.helpers.utils import none_to_dict, output_structs
 
 DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
 MODEL_PATH = Path(__file__).parent / "models/mace_mp_small.model"

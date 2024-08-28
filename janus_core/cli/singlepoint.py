@@ -27,7 +27,6 @@ from janus_core.cli.utils import (
     start_summary,
     yaml_converter_callback,
 )
-from janus_core.helpers.utils import dict_paths_to_strs
 
 app = Typer()
 
@@ -132,10 +131,10 @@ def singlepoint(
     # Initialise singlepoint structure and calculator
     s_point = SinglePoint(**singlepoint_kwargs)
 
-    # Store only filename as filemode is not set by user
-    inputs = {"log": log}
+    # Store inputs for yaml summary
+    inputs = singlepoint_kwargs.copy()
 
-    # Add structure and MLIP information to inputs
+    # Add structure, MLIP information, and log to inputs
     save_struct_calc(
         inputs=inputs,
         struct=s_point.struct,
@@ -145,15 +144,8 @@ def singlepoint(
         model_path=model_path,
         read_kwargs=read_kwargs,
         calc_kwargs=calc_kwargs,
+        log=log,
     )
-
-    inputs["run"] = {
-        "properties": properties,
-        "write_kwargs": write_kwargs,
-    }
-
-    # Convert all paths to strings in inputs nested dictionary
-    dict_paths_to_strs(inputs)
 
     # Save summary information before singlepoint calculation begins
     start_summary(command="singlepoint", summary=summary, inputs=inputs)
