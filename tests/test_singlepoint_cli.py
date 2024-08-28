@@ -22,30 +22,44 @@ def test_singlepoint_help():
     assert "Usage: janus singlepoint [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_singlepoint(tmp_path):
+def test_singlepoint():
     """Test singlepoint calculation."""
     results_path = Path("./NaCl-results.extxyz").absolute()
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    log_path = Path("./NaCl-log.yml").absolute()
+    summary_path = Path("./NaCl-summary.yml").absolute()
 
-    result = runner.invoke(
-        app,
-        [
-            "singlepoint",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
+    assert not results_path.exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
 
-    # Check atoms can read read, then delete file
-    atoms = read_atoms(results_path)
-    assert result.exit_code == 0
-    assert "mace_mp_energy" in atoms.info
-    assert "mace_mp_forces" in atoms.arrays
+    try:
+        result = runner.invoke(
+            app,
+            [
+                "singlepoint",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert results_path.exists()
+        assert log_path.exists()
+        assert summary_path.exists
+
+    finally:
+        # Ensure files deleted if command fails
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+
+        # Check atoms can read read, then delete file
+        atoms = read_atoms(results_path)
+        assert "mace_mp_energy" in atoms.info
+        assert "mace_mp_forces" in atoms.arrays
 
 
 def test_properties(tmp_path):
@@ -235,6 +249,7 @@ def test_config(tmp_path):
     results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
+
     result = runner.invoke(
         app,
         [

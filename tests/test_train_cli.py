@@ -63,19 +63,22 @@ def test_help():
 
 def test_train(tmp_path):
     """Test MLIP training."""
-    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     model = "test.model"
     compiled_model = "test_compiled.model"
-    logs_path = "logs"
     results_path = "results"
     checkpoints_path = "checkpoints"
+    logs_path = "logs"
+    log_path = Path("./train-log.yml").absolute()
+    summary_path = Path("./train-summary.yml").absolute()
 
     assert not Path(model).exists()
     assert not Path(compiled_model).exists()
     assert not Path(logs_path).exists()
     assert not Path(results_path).exists()
     assert not Path(checkpoints_path).exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
 
     config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
 
@@ -85,18 +88,38 @@ def test_train(tmp_path):
             "train",
             "--mlip-config",
             config,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     try:
+        assert result.exit_code == 0
+
         assert Path(model).exists()
         assert Path(compiled_model).exists()
         assert Path(logs_path).is_dir()
         assert Path(results_path).is_dir()
         assert Path(checkpoints_path).is_dir()
+
+        assert log_path.exists()
+        assert summary_path.exists()
+
+        assert_log_contains(
+            log_path, includes=["Starting training", "Training complete"]
+        )
+
+        # Read train summary file and check contents
+        assert summary_path.exists()
+        with open(summary_path, encoding="utf8") as file:
+            train_summary = yaml.safe_load(file)
+
+        assert "command" in train_summary
+        assert "janus train" in train_summary["command"]
+        assert "start_time" in train_summary
+        assert "inputs" in train_summary
+        assert "end_time" in train_summary
+
+        assert "emissions" in train_summary
+        assert train_summary["emissions"] > 0
+
     finally:
         # Tidy up models
         Path(model).unlink(missing_ok=True)
@@ -107,29 +130,14 @@ def test_train(tmp_path):
         shutil.rmtree(results_path, ignore_errors=True)
         shutil.rmtree(checkpoints_path, ignore_errors=True)
 
-        assert result.exit_code == 0
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
 
-    assert_log_contains(log_path, includes=["Starting training", "Training complete"])
-
-    # Read train summary file and check contents
-    assert summary_path.exists()
-    with open(summary_path, encoding="utf8") as file:
-        train_summary = yaml.safe_load(file)
-
-    assert "command" in train_summary
-    assert "janus train" in train_summary["command"]
-    assert "start_time" in train_summary
-    assert "inputs" in train_summary
-    assert "end_time" in train_summary
-
-    assert "emissions" in train_summary
-    assert train_summary["emissions"] > 0
-
-    # Clean up logger
-    logger = logging.getLogger()
-    logger.handlers = [
-        h for h in logger.handlers if not isinstance(h, logging.FileHandler)
-    ]
+        # Clean up logger
+        logger = logging.getLogger()
+        logger.handlers = [
+            h for h in logger.handlers if not isinstance(h, logging.FileHandler)
+        ]
 
 
 def test_train_with_foundation(tmp_path):

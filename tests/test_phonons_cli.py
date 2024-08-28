@@ -21,65 +21,72 @@ def test_help():
     assert "Usage: janus phonons [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_bands(tmp_path):
-    """Test calculating force constants and bands."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
-    phonon_results = tmp_path / "NaCl-phonopy.yml"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml"
-    result = runner.invoke(
-        app,
-        [
-            "phonons",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--file-prefix",
-            tmp_path / "NaCl",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-            "--bands",
-        ],
-    )
-    assert result.exit_code == 0
-    assert phonon_results.exists()
-    assert autoband_results.exists()
+def test_phonons():
+    """Test calculating force constants and band structure."""
+    phonopy_path = Path("./NaCl-phonopy.yml").absolute()
+    bands_path = Path("./NaCl-auto_bands.yml").absolute()
+    log_path = Path("./NaCl-log.yml").absolute()
+    summary_path = Path("./NaCl-summary.yml").absolute()
 
-    # Read phonons summary file
-    assert summary_path.exists()
-    with open(summary_path, encoding="utf8") as file:
-        phonon_summary = yaml.safe_load(file)
+    assert not phonopy_path.exists()
+    assert not bands_path.exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
 
-    assert "command" in phonon_summary
-    assert "janus phonons" in phonon_summary["command"]
-    assert "start_time" in phonon_summary
-    assert "inputs" in phonon_summary
-    assert "end_time" in phonon_summary
+    try:
+        result = runner.invoke(
+            app,
+            [
+                "phonons",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--no-hdf5",
+                "--bands",
+            ],
+        )
+        assert result.exit_code == 0
 
-    assert "emissions" in phonon_summary
-    assert phonon_summary["emissions"] > 0
+        assert phonopy_path.exists()
+        assert bands_path.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+
+        # Read phonons summary file
+        with open(summary_path, encoding="utf8") as file:
+            phonon_summary = yaml.safe_load(file)
+
+        assert "command" in phonon_summary
+        assert "janus phonons" in phonon_summary["command"]
+        assert "start_time" in phonon_summary
+        assert "inputs" in phonon_summary
+        assert "end_time" in phonon_summary
+
+        assert "emissions" in phonon_summary
+        assert phonon_summary["emissions"] > 0
+
+    finally:
+        phonopy_path.unlink(missing_ok=True)
+        bands_path.unlink(missing_ok=True)
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
 
 
 def test_bands_simple(tmp_path):
     """Test calculating force constants and reduced bands information."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "NaCl"
     autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    summary_path = tmp_path / "NaCl-summary.yml"
+
     result = runner.invoke(
         app,
         [
             "phonons",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--file-prefix",
-            tmp_path / "NaCl",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
             "--bands",
             "--no-write-full",
+            "--file-prefix",
+            file_prefix,
         ],
     )
     assert result.exit_code == 0
@@ -106,8 +113,6 @@ def test_hdf5(tmp_path):
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
     hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -118,10 +123,6 @@ def test_hdf5(tmp_path):
             "--file-prefix",
             file_prefix,
             "--hdf5",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -133,8 +134,6 @@ def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
     file_prefix = tmp_path / "test" / "NaCl"
     thermal_results = tmp_path / "test" / "NaCl-thermal.dat"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -145,10 +144,6 @@ def test_thermal_props(tmp_path):
             "--thermal",
             "--file-prefix",
             file_prefix,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -159,8 +154,7 @@ def test_dos(tmp_path):
     """Test calculating the DOS."""
     file_prefix = tmp_path / "test" / "NaCl"
     dos_results = tmp_path / "test" / "NaCl-dos.dat"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+
     result = runner.invoke(
         app,
         [
@@ -170,10 +164,6 @@ def test_dos(tmp_path):
             "--dos",
             "--file-prefix",
             file_prefix,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -184,8 +174,6 @@ def test_pdos(tmp_path):
     """Test calculating the PDOS."""
     file_prefix = tmp_path / "test" / "NaCl"
     pdos_results = tmp_path / "test" / "NaCl-pdos.dat"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -196,10 +184,6 @@ def test_pdos(tmp_path):
             "--pdos",
             "--file-prefix",
             file_prefix,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -208,8 +192,8 @@ def test_pdos(tmp_path):
 
 def test_plot(tmp_path):
     """Test for ploting routines."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "NaCl"
+    summary_path = tmp_path / "NaCl-summary.yml"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
     hdf5_results = tmp_path / "NaCl-force_constants.hdf5"
@@ -220,6 +204,7 @@ def test_plot(tmp_path):
         tmp_path / "NaCl-bs-dos.svg",
         tmp_path / "NaCl-auto_bands.svg",
     ]
+
     result = runner.invoke(
         app,
         [
@@ -232,11 +217,7 @@ def test_plot(tmp_path):
             "--hdf5",
             "--plot-to-file",
             "--file-prefix",
-            tmp_path / "NaCl",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
+            file_prefix,
         ],
     )
     assert result.exit_code == 0
@@ -263,9 +244,9 @@ def test_plot(tmp_path):
 
 def test_supercell(tmp_path):
     """Test setting the supercell."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "NaCl"
     param_file = tmp_path / "NaCl-phonopy.yml"
+
     result = runner.invoke(
         app,
         [
@@ -275,11 +256,7 @@ def test_supercell(tmp_path):
             "--supercell",
             "1x2x3",
             "--file-prefix",
-            tmp_path / "NaCl",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
+            file_prefix,
         ],
     )
     assert result.exit_code == 0
@@ -299,8 +276,8 @@ test_data = ["2", "2.1x2.1x2.1", "2x2xa"]
 @pytest.mark.parametrize("supercell", test_data)
 def test_invalid_supercell(supercell, tmp_path):
     """Test errors are raise for invalid supercells."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "test"
+
     result = runner.invoke(
         app,
         [
@@ -309,10 +286,8 @@ def test_invalid_supercell(supercell, tmp_path):
             DATA_PATH / "NaCl.cif",
             "--supercell",
             supercell,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
+            "--file-prefix",
+            file_prefix,
         ],
     )
     assert result.exit_code == 1
@@ -321,9 +296,8 @@ def test_invalid_supercell(supercell, tmp_path):
 
 def test_minimize_kwargs(tmp_path):
     """Test setting optimizer function and writing optimized structure."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
     file_prefix = tmp_path / "test"
+    log_path = tmp_path / "test-log.yml"
     opt_path = tmp_path / "test-opt.extxyz"
 
     minimize_kwargs = "{'optimizer': 'FIRE', 'write_results': True}"
@@ -339,10 +313,6 @@ def test_minimize_kwargs(tmp_path):
             minimize_kwargs,
             "--file-prefix",
             file_prefix,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -358,8 +328,6 @@ def test_minimize_filename(tmp_path):
     """Test minimize filename overwrites default."""
     file_prefix = tmp_path / "test" / "test"
     opt_path = tmp_path / "test" / "geomopt-opt.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     # write_results should be set automatically
     minimize_kwargs = f"{{'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"
@@ -375,10 +343,6 @@ def test_minimize_filename(tmp_path):
             minimize_kwargs,
             "--file-prefix",
             file_prefix,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -388,9 +352,8 @@ def test_minimize_filename(tmp_path):
 @pytest.mark.parametrize("read_kwargs", ["{'index': 0}", "{}"])
 def test_valid_traj_input(read_kwargs, tmp_path):
     """Test valid trajectory input structure handled."""
+    file_prefix = tmp_path / "traj"
     phonon_results = tmp_path / "traj-phonopy.yml"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -401,11 +364,7 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             "--read-kwargs",
             read_kwargs,
             "--file-prefix",
-            tmp_path / "traj",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
+            file_prefix,
         ],
     )
     assert result.exit_code == 0
@@ -414,8 +373,7 @@ def test_valid_traj_input(read_kwargs, tmp_path):
 
 def test_invalid_traj_input(tmp_path):
     """Test invalid trajectory input structure handled."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "NaCl"
 
     result = runner.invoke(
         app,
@@ -426,11 +384,7 @@ def test_invalid_traj_input(tmp_path):
             "--read-kwargs",
             "{'index': ':'}",
             "--file-prefix",
-            tmp_path / "traj",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
+            file_prefix,
         ],
     )
     assert result.exit_code == 1
