@@ -9,7 +9,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, read_atoms, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    clear_log_handlers,
+    read_atoms,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -52,9 +57,10 @@ def test_geomopt():
 
     finally:
         # Ensure files deleted if command fails
+        read_atoms(results_path)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
-        read_atoms(results_path)
+        clear_log_handlers()
 
 
 def test_log(tmp_path):

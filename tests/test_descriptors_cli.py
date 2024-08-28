@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, strip_ansi_codes
+from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -82,6 +82,7 @@ def test_descriptors():
         out_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
+        clear_log_handlers()
 
 
 def test_calc_per_element(tmp_path):

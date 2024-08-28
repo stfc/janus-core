@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, strip_ansi_codes
+from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -133,11 +133,7 @@ def test_train(tmp_path):
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
 
-        # Clean up logger
-        logger = logging.getLogger()
-        logger.handlers = [
-            h for h in logger.handlers if not isinstance(h, logging.FileHandler)
-        ]
+        clear_log_handlers()
 
 
 def test_train_with_foundation(tmp_path):

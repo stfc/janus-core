@@ -8,7 +8,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, read_atoms, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    clear_log_handlers,
+    read_atoms,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -52,14 +57,15 @@ def test_singlepoint():
         assert summary_path.exists
 
     finally:
-        # Ensure files deleted if command fails
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
-
         # Check atoms can read read, then delete file
         atoms = read_atoms(results_path)
         assert "mace_mp_energy" in atoms.info
         assert "mace_mp_forces" in atoms.arrays
+
+        # Ensure files deleted if command fails
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+        clear_log_handlers()
 
 
 def test_properties(tmp_path):
