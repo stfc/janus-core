@@ -575,3 +575,54 @@ def test_invalid_traj_input(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_reuse_output(tmp_path):
+    """Test using geomopt output as new input."""
+    results_path_1 = tmp_path / "NaCl-opt-1.extxyz"
+    results_path_2 = tmp_path / "NaCl-opt-2.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--fmax",
+            0.1,
+            "--out",
+            results_path_1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+            "--config",
+            DATA_PATH / "geomopt_config.yml",
+        ],
+    )
+    assert result.exit_code == 0
+    results_1 = read(results_path_1)
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            results_path_1,
+            "--fmax",
+            0.01,
+            "--out",
+            results_path_2,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+            "--config",
+            DATA_PATH / "geomopt_config.yml",
+        ],
+    )
+    assert result.exit_code == 0
+    results_2 = read(results_path_2)
+    assert results_1.positions != pytest.approx(results_2.positions)
