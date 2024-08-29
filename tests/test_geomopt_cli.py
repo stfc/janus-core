@@ -579,8 +579,8 @@ def test_invalid_traj_input(tmp_path):
 
 def test_reuse_output(tmp_path):
     """Test using geomopt output as new input."""
-    results_path_1 = tmp_path / "NaCl-opt-1.extxyz"
-    results_path_2 = tmp_path / "NaCl-opt-2.extxyz"
+    results_path_1 = tmp_path / "test" / "NaCl-opt-1.extxyz"
+    results_path_2 = tmp_path / "test" / "NaCl-opt-2.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 

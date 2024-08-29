@@ -187,10 +187,10 @@ def test_minimising_all(tmp_path):
 
 def test_writing_structs(tmp_path):
     """Test writing out generated structures."""
+    file_prefix = tmp_path / "test" / "example"
+    generated_path = tmp_path / "test" / "example-generated.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    file_prefix = tmp_path / "example"
-    generated_path = tmp_path / "example-generated.extxyz"
 
     result = runner.invoke(
         app,

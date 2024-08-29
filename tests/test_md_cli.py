@@ -393,11 +393,11 @@ def test_invalid_config():
 def test_ensemble_kwargs(tmp_path):
     """Test passing ensemble-kwargs to NPT."""
     struct_path = DATA_PATH / "NaCl.cif"
-    file_prefix = tmp_path / "md"
-    log_path = tmp_path / "md.log"
+    file_prefix = tmp_path / "test" / "md"
+    final_path = tmp_path / "test" / "md-final.extxyz"
+    stats_path = tmp_path / "test" / "md-stats.dat"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    final_path = tmp_path / "md-final.extxyz"
-    stats_path = tmp_path / "md-stats.dat"
 
     ensemble_kwargs = "{'mask' : (0, 1, 0)}"
 
@@ -444,7 +444,7 @@ def test_ensemble_kwargs(tmp_path):
 def test_invalid_ensemble_kwargs(tmp_path):
     """Test passing invalid key to ensemble-kwargs."""
     file_prefix = tmp_path / "npt-T300"
-    log_path = tmp_path / "md.log"
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
     # Not an option for NVT
@@ -519,10 +519,11 @@ def test_write_kwargs(tmp_path):
     """Test passing write-kwargs."""
     struct_path = DATA_PATH / "NaCl.cif"
     file_prefix = tmp_path / "md"
-    log_path = tmp_path / "md.log"
-    summary_path = tmp_path / "summary.yml"
     final_path = tmp_path / "md-final.extxyz"
     traj_path = tmp_path / "md-traj.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
     write_kwargs = (
         "{'invalidate_calc': False, 'columns': ['symbols', 'positions', 'masses']}"
     )
@@ -634,11 +635,11 @@ def test_invalid_traj_input(tmp_path):
 
 def test_minimize_kwargs_filename(tmp_path):
     """Test passing filename via minimize kwargs to MD."""
-    file_prefix = tmp_path / "md"
-    opt_path = tmp_path / "test.extxyz"
-    traj_path = tmp_path / "md-traj.extxyz"
-    stats_path = tmp_path / "md-stats.dat"
-    final_path = tmp_path / "md-final.extxyz"
+    file_prefix = tmp_path / "test" / "md"
+    opt_path = tmp_path / "test" / "test.extxyz"
+    traj_path = tmp_path / "test" / "md-traj.extxyz"
+    stats_path = tmp_path / "test" / "md-stats.dat"
+    final_path = tmp_path / "test" / "md-final.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -680,11 +681,11 @@ def test_minimize_kwargs_filename(tmp_path):
 
 def test_minimize_kwargs_write_results(tmp_path):
     """Test passing write_results via minimize kwargs to MD."""
-    file_prefix = tmp_path / "md"
-    opt_path = tmp_path / "md-opt.extxyz"
-    traj_path = tmp_path / "md-traj.extxyz"
-    stats_path = tmp_path / "md-stats.dat"
-    final_path = tmp_path / "md-final.extxyz"
+    file_prefix = tmp_path / "test" / "md"
+    opt_path = tmp_path / "test" / "md-opt.extxyz"
+    traj_path = tmp_path / "test" / "md-traj.extxyz"
+    stats_path = tmp_path / "test" / "md-stats.dat"
+    final_path = tmp_path / "test" / "md-final.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
