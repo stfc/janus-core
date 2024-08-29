@@ -53,6 +53,9 @@ def test_descriptors():
         assert "mace_mp_Cl_descriptor" not in atoms.info
         assert "mace_mp_descriptors" not in atoms.arrays
 
+        assert "system_name" in atoms.info
+        assert atoms.info["system_name"] == "NaCl"
+
         # Check only initial structure is minimized
         assert_log_contains(
             log_path,

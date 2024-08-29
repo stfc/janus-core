@@ -205,6 +205,8 @@ def test_writing_structs(tmp_path):
     assert generated_path.exists()
     atoms = read(generated_path, index=":")
     assert len(atoms) == 5
+    assert "system_name" in atoms[0].info
+    assert atoms[0].info["system_name"] == "NaCl"
 
 
 def test_error_write_geomopt(tmp_path):

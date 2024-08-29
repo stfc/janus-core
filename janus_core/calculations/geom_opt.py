@@ -312,6 +312,7 @@ class GeomOpt(BaseCalculation):
         # Write out optimized structure
         output_structs(
             self.struct,
+            struct_path=self.struct_path,
             write_results=self.write_results,
             write_kwargs=self.write_kwargs,
         )
@@ -321,6 +322,7 @@ class GeomOpt(BaseCalculation):
             traj = read(self.opt_kwargs["trajectory"], index=":")
             output_structs(
                 traj,
+                struct_path=self.struct_path,
                 write_results=True,
                 write_kwargs=self.traj_kwargs,
             )

@@ -401,6 +401,7 @@ def input_structs(
 def output_structs(
     images: MaybeSequence[Atoms],
     *,
+    struct_path: Optional[PathLike] = None,
     set_info: bool = True,
     write_results: bool = False,
     properties: Collection[Properties] = (),
@@ -414,6 +415,9 @@ def output_structs(
     ----------
     images : MaybeSequence[Atoms]
         Atoms object or a list of Atoms objects to interact with.
+    struct_path : Optional[PathLike]
+        Path of structure being simulated. If specified, the file stem is added to the
+        info dict under "system_name". Default is None.
     set_info : bool
         True to set info dict from calculated results. Default is True.
     write_results : bool
@@ -446,6 +450,11 @@ def output_structs(
         for image in images:
             if image.calc:
                 image.info["arch"] = image.calc.parameters["arch"]
+
+    # Add label for system
+    for image in images:
+        if struct_path:
+            image.info["system_name"] = Path(struct_path).stem
 
     if write_results:
         # Check required filename is specified

@@ -515,6 +515,11 @@ def test_write_kwargs(tmp_path):
     assert "mace_mp_energy" in final_atoms.info
     assert "mace_mp_energy" in traj[0].info
 
+    assert "system_name" in final_atoms.info
+    assert final_atoms.info["system_name"] == "NaCl"
+    assert "system_name" in traj[0].info
+    assert traj[0].info["system_name"] == "NaCl"
+
 
 @pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
 def test_valid_traj_input(read_kwargs, tmp_path):

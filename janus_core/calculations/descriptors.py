@@ -4,7 +4,6 @@ from collections.abc import Sequence
 from typing import Any, Optional
 
 from ase import Atoms
-from ase.io import write
 import numpy as np
 
 from janus_core.calculations.base import BaseCalculation
@@ -16,7 +15,7 @@ from janus_core.helpers.janus_types import (
     MaybeSequence,
     PathLike,
 )
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import none_to_dict, output_structs
 
 
 class Descriptors(BaseCalculation):
@@ -195,8 +194,12 @@ class Descriptors(BaseCalculation):
             self.tracker.stop()
             self.logger.info("Descriptors calculation complete")
 
-        if self.write_results:
-            write(images=self.struct, **self.write_kwargs, write_info=True)
+        output_structs(
+            self.struct,
+            struct_path=self.struct_path,
+            write_results=self.write_results,
+            write_kwargs=self.write_kwargs,
+        )
 
     def _calc_descriptors(self, struct: Atoms) -> None:
         """

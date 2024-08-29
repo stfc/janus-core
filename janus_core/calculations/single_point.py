@@ -280,6 +280,7 @@ class SinglePoint(BaseCalculation):
 
         output_structs(
             self.struct,
+            struct_path=self.struct_path,
             write_results=self.write_results,
             properties=self.properties,
             write_kwargs=self.write_kwargs,

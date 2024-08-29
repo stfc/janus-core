@@ -116,6 +116,8 @@ def test_traj(tmp_path):
     assert result.exit_code == 0
     atoms = read(traj_path)
     assert "mace_mp_forces" in atoms.arrays
+    assert "system_name" in atoms.info
+    assert atoms.info["system_name"] == "NaCl"
 
 
 def test_opt_fully(tmp_path):
@@ -156,6 +158,8 @@ def test_opt_fully(tmp_path):
         90.0,
     ]
     assert atoms.cell.cellpar() == pytest.approx(expected)
+    assert "system_name" in atoms.info
+    assert atoms.info["system_name"] == "NaCl-deformed"
 
 
 def test_opt_fully_and_vectors(tmp_path):
