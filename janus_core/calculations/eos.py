@@ -231,10 +231,10 @@ class EoS(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        self.write_kwargs.setdefault(
-            "filename",
-            self._build_filename("generated.extxyz").absolute(),
-        )
+        self.write_kwargs.setdefault("filename", None)
+        self.write_kwargs["filename"] = self._build_filename(
+            "generated.extxyz", filename=self.write_kwargs["filename"]
+        ).absolute()
 
         self.results = {}
         self.volumes = []

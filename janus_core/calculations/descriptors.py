@@ -159,10 +159,10 @@ class Descriptors(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output file
-        self.write_kwargs.setdefault(
-            "filename",
-            self._build_filename("descriptors.extxyz").absolute(),
-        )
+        self.write_kwargs.setdefault("filename", None)
+        self.write_kwargs["filename"] = self._build_filename(
+            "descriptors.extxyz", filename=self.write_kwargs["filename"]
+        ).absolute()
 
     def run(self) -> None:
         """Calculate descriptors for structure(s)."""

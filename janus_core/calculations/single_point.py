@@ -152,10 +152,10 @@ class SinglePoint(BaseCalculation):
         )
 
         # Set output file
-        self.write_kwargs.setdefault(
-            "filename",
-            self._build_filename("results.extxyz").absolute(),
-        )
+        self.write_kwargs.setdefault("filename", None)
+        self.write_kwargs["filename"] = self._build_filename(
+            "results.extxyz", filename=self.write_kwargs["filename"]
+        ).absolute()
 
         self.results = {}
 

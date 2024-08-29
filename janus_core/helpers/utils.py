@@ -143,11 +143,18 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             Filename specified, or default filename.
         """
         if filename:
-            return Path(filename)
-        prefix = (
-            prefix_override if prefix_override is not None else str(self.file_prefix)
-        )
-        return Path("-".join((prefix, *filter(None, additional), suffix)))
+            built_filename = Path(filename)
+        else:
+            prefix = (
+                prefix_override
+                if prefix_override is not None
+                else str(self.file_prefix)
+            )
+            built_filename = Path("-".join((prefix, *filter(None, additional), suffix)))
+
+        # Make directory if it does not exist
+        built_filename.parent.mkdir(parents=True, exist_ok=True)
+        return built_filename
 
 
 def spacegroup(

@@ -261,10 +261,16 @@ class Phonons(BaseCalculation):
                     "filemode": "a",
                 }
             # If not specified otherwise, save optimized structure consistently with
-            # phonon output files
+            # other phonon output files
             opt_file = self._build_filename("opt.extxyz")
+
             if "write_kwargs" in self.minimize_kwargs:
-                self.minimize_kwargs["write_kwargs"].setdefault("filename", opt_file)
+                # Use _build_filename even if given filename to ensure directory exists
+                self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
+                self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
+                    "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
+                ).absolute()
+
                 # Assume if write_kwargs are specified that results should be written
                 self.minimize_kwargs.setdefault("write_results", True)
             else:
