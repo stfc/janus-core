@@ -41,7 +41,7 @@ def train(
         Whether to fine-tune a foundational model. Default is False.
     log : Optional[Path]
         Path to write logs to. Default is Path("train-log.yml").
-    summary : Path
+    summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is Path("train-summary.yml").
     """

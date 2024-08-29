@@ -2,7 +2,7 @@
 
 import ast
 from pathlib import Path
-from typing import Annotated, Union
+from typing import Annotated, Optional, Union
 
 from typer import Option
 
@@ -63,18 +63,21 @@ class TyperDict:
 
 StructPath = Annotated[Path, Option(help="Path of structure to simulate.")]
 
-Architecture = Annotated[str, Option(help="MLIP architecture to use for calculations.")]
-Device = Annotated[str, Option(help="Device to run calculations on.")]
-ModelPath = Annotated[str, Option(help="Path to MLIP model.  [default: None]")]
+Architecture = Annotated[
+    Optional[str], Option(help="MLIP architecture to use for calculations.")
+]
+Device = Annotated[Optional[str], Option(help="Device to run calculations on.")]
+ModelPath = Annotated[Optional[str], Option(help="Path to MLIP model.")]
 
 ReadKwargsAll = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".  [default: "{'index': ':'}"]
+            wrapped in quotes, e.g. "{'key' : value}". By default,
+            read_kwargs['index'] = ':', so all structures are read.
             """
         ),
         metavar="DICT",
@@ -82,13 +85,14 @@ ReadKwargsAll = Annotated[
 ]
 
 ReadKwargsLast = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".  [default: "{'index': -1}"]
+            wrapped in quotes, e.g. "{'key' : value}". By default,
+            read_kwargs['index'] = -1, so only the last structure is read.
             """
         ),
         metavar="DICT",
@@ -96,7 +100,7 @@ ReadKwargsLast = Annotated[
 ]
 
 CalcKwargs = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
@@ -111,14 +115,13 @@ CalcKwargs = Annotated[
 ]
 
 WriteKwargs = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
             """
             Keyword arguments to pass to ase.io.write when saving results. Must be
             passed as a dictionary wrapped in quotes, e.g. "{'key' : value}".
-             [default: "{}"]
             """
         ),
         metavar="DICT",
@@ -126,13 +129,13 @@ WriteKwargs = Annotated[
 ]
 
 OptKwargs = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
             """
             Keyword arguments to pass to optimizer. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".  [default: "{}"]
+            wrapped in quotes, e.g. "{'key' : value}".
             """
         ),
         metavar="DICT",
@@ -140,7 +143,7 @@ OptKwargs = Annotated[
 ]
 
 MinimizeKwargs = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
@@ -154,7 +157,7 @@ MinimizeKwargs = Annotated[
 ]
 
 EnsembleKwargs = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
@@ -168,7 +171,7 @@ EnsembleKwargs = Annotated[
 ]
 
 PostProcessKwargs = Annotated[
-    TyperDict,
+    Optional[TyperDict],
     Option(
         parser=parse_dict_class,
         help=(
@@ -182,7 +185,7 @@ PostProcessKwargs = Annotated[
 ]
 
 LogPath = Annotated[
-    Path,
+    Optional[Path],
     Option(
         help=(
             "Path to save logs to. Default is inferred from the name of the structure "
@@ -192,7 +195,7 @@ LogPath = Annotated[
 ]
 
 Summary = Annotated[
-    Path,
+    Optional[Path],
     Option(
         help=(
             "Path to save summary of inputs, start/end time, and carbon emissions. "
