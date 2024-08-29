@@ -78,9 +78,10 @@ def test_descriptors(tmp_path):
 
 def test_calc_per_element(tmp_path):
     """Test calculating MLIP descriptors for each element."""
+    out_path = tmp_path / "test" / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.extxyz"
+
     result = runner.invoke(
         app,
         [

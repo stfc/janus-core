@@ -102,11 +102,13 @@ def test_bands_simple(tmp_path):
 
 
 def test_hdf5(tmp_path):
-    """Test calculating phonons."""
+    """Test saving force constants to HDF5 in new directory."""
+    file_prefix = tmp_path / "test" / "NaCl"
+    phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
+    hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    phonon_results = tmp_path / "NaCl-phonopy.yml"
-    hdf5_results = tmp_path / "NaCl-force_constants.hdf5"
+
     result = runner.invoke(
         app,
         [
@@ -114,7 +116,7 @@ def test_hdf5(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--file-prefix",
-            tmp_path / "NaCl",
+            file_prefix,
             "--hdf5",
             "--log",
             log_path,
@@ -129,9 +131,11 @@ def test_hdf5(tmp_path):
 
 def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
+    file_prefix = tmp_path / "test" / "NaCl"
+    thermal_results = tmp_path / "test" / "NaCl-thermal.dat"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    thermal_results = tmp_path / "NaCl-thermal.dat"
+
     result = runner.invoke(
         app,
         [
@@ -140,7 +144,7 @@ def test_thermal_props(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--thermal",
             "--file-prefix",
-            tmp_path / "NaCl",
+            file_prefix,
             "--log",
             log_path,
             "--summary",
@@ -153,9 +157,10 @@ def test_thermal_props(tmp_path):
 
 def test_dos(tmp_path):
     """Test calculating the DOS."""
+    file_prefix = tmp_path / "test" / "NaCl"
+    dos_results = tmp_path / "test" / "NaCl-dos.dat"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    dos_results = tmp_path / "NaCl-dos.dat"
     result = runner.invoke(
         app,
         [
@@ -164,7 +169,7 @@ def test_dos(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--dos",
             "--file-prefix",
-            tmp_path / "NaCl",
+            file_prefix,
             "--log",
             log_path,
             "--summary",
@@ -177,9 +182,11 @@ def test_dos(tmp_path):
 
 def test_pdos(tmp_path):
     """Test calculating the PDOS."""
+    file_prefix = tmp_path / "test" / "NaCl"
+    pdos_results = tmp_path / "test" / "NaCl-pdos.dat"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    pdos_results = tmp_path / "NaCl-pdos.dat"
+
     result = runner.invoke(
         app,
         [
@@ -188,7 +195,7 @@ def test_pdos(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--pdos",
             "--file-prefix",
-            tmp_path / "NaCl",
+            file_prefix,
             "--log",
             log_path,
             "--summary",
@@ -349,10 +356,10 @@ def test_minimize_kwargs(tmp_path):
 
 def test_minimize_filename(tmp_path):
     """Test minimize filename overwrites default."""
+    file_prefix = tmp_path / "test" / "test"
+    opt_path = tmp_path / "test" / "geomopt-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    file_prefix = tmp_path / "test"
-    opt_path = tmp_path / "geomopt-opt.extxyz"
 
     # write_results should be set automatically
     minimize_kwargs = f"{{'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"

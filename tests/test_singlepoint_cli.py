@@ -49,9 +49,9 @@ def test_singlepoint(tmp_path):
 
 
 def test_properties(tmp_path):
-    """Test properties for singlepoint calculation."""
-    results_path_1 = tmp_path / "H2O-energy-results.extxyz"
-    results_path_2 = tmp_path / "H2O-stress-results.extxyz"
+    """Test properties for singlepoint calculation in a new directory."""
+    results_path_1 = tmp_path / "test" / "H2O-energy-results.extxyz"
+    results_path_2 = tmp_path / "test" / "H2O-stress-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
