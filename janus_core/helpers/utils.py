@@ -448,7 +448,7 @@ def output_structs(
     else:
         # Label architecture even if not copying results to info
         for image in images:
-            if image.calc:
+            if image.calc and "arch" in image.calc.parameters:
                 image.info["arch"] = image.calc.parameters["arch"]
 
     # Add label for system

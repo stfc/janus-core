@@ -210,14 +210,18 @@ class Descriptors(BaseCalculation):
         struct : Atoms
             Structure to calculate descriptors for.
         """
-        arch = struct.calc.parameters["arch"]
+        if "arch" in struct.calc.parameters:
+            arch = struct.calc.parameters["arch"]
+            label = f"{arch}_"
+        else:
+            label = ""
 
         # Calculate mean descriptor and save mean
         descriptors = struct.calc.get_descriptors(
             struct, invariants_only=self.invariants_only
         )
         descriptor = np.mean(descriptors)
-        struct.info[f"{arch}_descriptor"] = descriptor
+        struct.info[f"{label}descriptor"] = descriptor
 
         if self.calc_per_element:
             elements = set(struct.get_chemical_symbols())
