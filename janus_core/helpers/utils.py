@@ -453,7 +453,7 @@ def output_structs(
 
     # Add label for system
     for image in images:
-        if struct_path:
+        if struct_path and "system_name" not in image.info:
             image.info["system_name"] = Path(struct_path).stem
 
     if write_results:
