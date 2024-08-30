@@ -773,6 +773,7 @@ class MolecularDynamics(BaseCalculation):
             write_kwargs["append"] = append
             output_structs(
                 images=self.struct,
+                struct_path=self.struct_path,
                 write_results=True,
                 write_kwargs=write_kwargs,
             )
@@ -791,6 +792,7 @@ class MolecularDynamics(BaseCalculation):
         write_kwargs["append"] = append
         output_structs(
             images=self.struct,
+            struct_path=self.struct_path,
             write_results=True,
             write_kwargs=write_kwargs,
         )
@@ -888,6 +890,7 @@ class MolecularDynamics(BaseCalculation):
             write_kwargs["filename"] = self._restart_file
             output_structs(
                 images=self.struct,
+                struct_path=self.struct_path,
                 write_results=True,
                 write_kwargs=write_kwargs,
             )

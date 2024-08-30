@@ -273,6 +273,7 @@ class EoS(BaseCalculation):
             # Optionally write structure to file
             output_structs(
                 images=self.struct,
+                struct_path=self.struct_path,
                 write_results=self.write_structures,
                 write_kwargs=self.write_kwargs,
             )
@@ -352,6 +353,7 @@ class EoS(BaseCalculation):
             # Write structures, but no need to set info c_struct is not used elsewhere
             output_structs(
                 images=c_struct,
+                struct_path=self.struct_path,
                 write_results=self.write_structures,
                 set_info=False,
                 write_kwargs=self.write_kwargs,
