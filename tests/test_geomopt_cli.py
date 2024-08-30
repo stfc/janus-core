@@ -9,7 +9,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, read_atoms, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    clear_log_handlers,
+    read_atoms,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -23,30 +28,39 @@ def test_help():
     assert "Usage: janus geomopt [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_geomopt(tmp_path):
+def test_geomopt():
     """Test geomopt calculation."""
     results_path = Path("./NaCl-opt.extxyz").absolute()
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    log_path = Path("./NaCl-geomopt-log.yml").absolute()
+    summary_path = Path("./NaCl-geomopt-summary.yml").absolute()
 
     assert not results_path.exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
 
-    result = runner.invoke(
-        app,
-        [
-            "geomopt",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--fmax",
-            "0.2",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
-    read_atoms(results_path)
-    assert result.exit_code == 0
+    try:
+        result = runner.invoke(
+            app,
+            [
+                "geomopt",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--fmax",
+                "0.2",
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert results_path.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+
+    finally:
+        # Ensure files deleted if command fails
+        read_atoms(results_path)
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+        clear_log_handlers()
 
 
 def test_log(tmp_path):

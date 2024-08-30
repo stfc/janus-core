@@ -1,5 +1,6 @@
 """Utility functions for tests."""
 
+import logging
 from pathlib import Path
 import re
 from typing import Union
@@ -101,3 +102,11 @@ def strip_ansi_codes(output: str) -> str:
         re.VERBOSE,
     )
     return ansi_escape.sub("", output)
+
+
+def clear_log_handlers():
+    """Clear all log handlers."""
+    logger = logging.getLogger()
+    logger.handlers = [
+        h for h in logger.handlers if not isinstance(h, logging.FileHandler)
+    ]

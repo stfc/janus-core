@@ -6,7 +6,6 @@ from typing import Annotated
 from typer import Option, Typer
 import yaml
 
-from janus_core.cli.types import LogPath, Summary
 from janus_core.cli.utils import carbon_summary, end_summary, start_summary
 from janus_core.helpers.train import train as run_train
 
@@ -21,8 +20,15 @@ def train(
     fine_tune: Annotated[
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
-    log: LogPath = "train.log",
-    summary: Summary = "train_summary.yml",
+    log: Annotated[Path, Option(help="Path to save logs to.")] = Path("train-log.yml"),
+    summary: Annotated[
+        Path,
+        Option(
+            help=(
+                "Path to save summary of inputs, start/end time, and carbon emissions."
+            )
+        ),
+    ] = Path("train-summary.yml"),
 ):
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
@@ -34,10 +40,10 @@ def train(
     fine_tune : bool
         Whether to fine-tune a foundational model. Default is False.
     log : Optional[Path]
-        Path to write logs to. Default is "train.log".
+        Path to write logs to. Default is Path("train-log.yml").
     summary : Path
-        Path to save summary of inputs and start/end time. Default is
-        train_summary.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is Path("train-summary.yml").
     """
     with open(mlip_config, encoding="utf8") as config_file:
         config = yaml.safe_load(config_file)
@@ -67,7 +73,9 @@ def train(
     start_summary(command="train", summary=summary, inputs=inputs)
 
     # Run training
-    run_train(mlip_config, log_kwargs={"filename": log, "filemode": "w"})
+    run_train(
+        mlip_config, attach_logger=True, log_kwargs={"filename": log, "filemode": "w"}
+    )
 
     carbon_summary(summary=summary, log=log)
 

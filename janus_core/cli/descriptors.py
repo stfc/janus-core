@@ -64,8 +64,8 @@ def descriptors(
     read_kwargs: ReadKwargsAll = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
-    log: LogPath = "descriptors.log",
-    summary: Summary = "descriptors_summary.yml",
+    log: LogPath = None,
+    summary: Summary = None,
 ):
     """
     Calculate MLIP descriptors for the given structure(s).
@@ -100,10 +100,10 @@ def descriptors(
     write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log : Optional[Path]
-        Path to write logs to. Default is "descriptors.log".
+        Path to write logs to. Default is inferred from the name of the structure file.
     summary : Path
-        Path to save summary of inputs and start/end time. Default is
-        descriptors_summary.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is inferred from the name of the structure file.
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -114,13 +114,17 @@ def descriptors(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
 
-    # Check structure path not duplicated
+    # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
 
     # Set default filname for writing structure with descriptors if not specified
     if out:
         write_kwargs["filename"] = out
+
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
 
     # Dictionary of inputs for Descriptors class
     descriptors_kwargs = {
@@ -130,7 +134,8 @@ def descriptors(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
+        "attach_logger": True,
+        "log_kwargs": log_kwargs,
         "invariants_only": invariants_only,
         "calc_per_element": calc_per_element,
         "calc_per_atom": calc_per_atom,
@@ -140,6 +145,12 @@ def descriptors(
 
     # Initialise descriptors
     descript = Descriptors(**descriptors_kwargs)
+
+    # Set summary and log files
+    summary = descript._build_filename(
+        "descriptors-summary.yml", filename=summary
+    ).absolute()
+    log = descript.log_kwargs["filename"]
 
     # Store inputs for yaml summary
     inputs = descriptors_kwargs.copy()

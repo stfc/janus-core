@@ -146,8 +146,8 @@ def geomopt(
     calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
     write_kwargs: WriteKwargs = None,
-    log: LogPath = "geomopt.log",
-    summary: Summary = "geomopt_summary.yml",
+    log: LogPath = None,
+    summary: Summary = None,
 ):
     """
     Perform geometry optimization and save optimized structure to file.
@@ -201,10 +201,10 @@ def geomopt(
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
     log : Optional[Path]
-        Path to write logs to. Default is "geomopt.log".
+        Path to write logs to. Default is inferred from the name of the structure file.
     summary : Path
-        Path to save summary of inputs and start/end time. Default is
-        geomopt_summary.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is inferred from the name of the structure file.
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -218,7 +218,7 @@ def geomopt(
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
 
-    # Check optimized structure path not duplicated and set from out, if specified
+    # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
     if out:
@@ -238,6 +238,10 @@ def geomopt(
         # Override default filter function with None
         opt_cell_fully_dict = {"filter_func": None}
 
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
+
     # Dictionary of inputs for optimize function
     optimize_kwargs = {
         "struct_path": struct,
@@ -246,7 +250,8 @@ def geomopt(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
+        "attach_logger": True,
+        "log_kwargs": log_kwargs,
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
@@ -258,6 +263,12 @@ def geomopt(
 
     # Set up geometry optimization
     optimizer = GeomOpt(**optimize_kwargs)
+
+    # Set summary and log files
+    summary = optimizer._build_filename(
+        "geomopt-summary.yml", filename=summary
+    ).absolute()
+    log = optimizer.log_kwargs["filename"]
 
     # Store inputs for yaml summary
     inputs = optimize_kwargs.copy()

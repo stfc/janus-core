@@ -48,6 +48,8 @@ class Phonons(BaseCalculation):
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc : Optional[bool]
         Whether to set (new) calculators for structures. Default is None.
+    attach_logger : bool
+        Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -130,6 +132,7 @@ class Phonons(BaseCalculation):
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
         set_calc: Optional[bool] = None,
+        attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         calcs: MaybeSequence[PhononCalcs] = (),
@@ -171,6 +174,8 @@ class Phonons(BaseCalculation):
             Keyword arguments to pass to the selected calculator. Default is {}.
         set_calc : Optional[bool]
             Whether to set (new) calculators for structures. Default is None.
+        attach_logger : bool
+            Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
         tracker_kwargs : Optional[dict[str, Any]]
@@ -245,6 +250,7 @@ class Phonons(BaseCalculation):
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
             set_calc=set_calc,
+            attach_logger=attach_logger,
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
             file_prefix=file_prefix,

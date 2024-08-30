@@ -61,8 +61,8 @@ def singlepoint(
     read_kwargs: ReadKwargsAll = None,
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
-    log: LogPath = "singlepoint.log",
-    summary: Summary = "singlepoint_summary.yml",
+    log: LogPath = None,
+    summary: Summary = None,
 ):
     """
     Perform single point calculations and save to file.
@@ -93,10 +93,10 @@ def singlepoint(
     write_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log : Optional[Path]
-        Path to write logs to. Default is "singlepoint.log".
+        Path to write logs to. Default is inferred from the name of the structure file.
     summary : Path
-        Path to save summary of inputs and start/end time. Default is
-        singlepoint_summary.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is inferred from the name of the structure file.
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -110,10 +110,12 @@ def singlepoint(
     # Check filename for results not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
-
-    # Default filname for saving results determined in SinglePoint if not specified
     if out:
         write_kwargs["filename"] = out
+
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
 
     singlepoint_kwargs = {
         "struct_path": struct,
@@ -125,14 +127,21 @@ def singlepoint(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
+        "attach_logger": True,
+        "log_kwargs": log_kwargs,
     }
 
     # Initialise singlepoint structure and calculator
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary
-    inputs = singlepoint_kwargs.copy()
+    summary = s_point._build_filename(
+        "singlepoint-summary.yml", filename=summary
+    ).absolute()
+    log = s_point.log_kwargs["filename"]
+
+    # Store only filename as filemode is not set by user
+    inputs = {"log": log}
 
     # Add structure, MLIP information, and log to inputs
     save_struct_calc(

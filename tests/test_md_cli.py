@@ -10,7 +10,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, strip_ansi_codes
+from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -51,8 +51,8 @@ def test_md(ensemble):
     traj_path = Path(f"{file_prefix[ensemble]}traj.extxyz").absolute()
     rdf_path = Path(f"{file_prefix[ensemble]}rdf.dat").absolute()
     vaf_path = Path(f"{file_prefix[ensemble]}vaf.dat").absolute()
-    log_path = Path("./log.yml").absolute()
-    summary_path = Path("./summary.yml").absolute()
+    log_path = Path(f"{file_prefix[ensemble]}md-log.yml").absolute()
+    summary_path = Path(f"{file_prefix[ensemble]}md-summary.yml").absolute()
 
     assert not final_path.exists()
     assert not restart_path.exists()
@@ -82,10 +82,6 @@ def test_md(ensemble):
                 2,
                 "--post-process-kwargs",
                 "{'rdf_compute': True, 'vaf_compute': True}",
-                "--log",
-                log_path,
-                "--summary",
-                summary_path,
             ],
         )
 
@@ -113,13 +109,14 @@ def test_md(ensemble):
         vaf_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
+        clear_log_handlers()
 
 
 def test_log(tmp_path):
     """Test log correctly written for MD."""
-    file_prefix = tmp_path / "nvt-T300"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "NaCl"
+    stats_path = tmp_path / "NaCl-stats.dat"
+    log_path = tmp_path / "NaCl-md-log.yml"
 
     result = runner.invoke(
         app,
@@ -129,24 +126,21 @@ def test_log(tmp_path):
             "nvt",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            "--file-prefix",
-            file_prefix,
             "--steps",
             20,
             "--stats-every",
             1,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
+            "--file-prefix",
+            file_prefix,
         ],
     )
     assert result.exit_code == 0
 
     assert_log_contains(log_path, includes=["Starting molecular dynamics simulation"])
 
-    with open(tmp_path / "nvt-T300-stats.dat", encoding="utf8") as stats_file:
+    with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
+
         # Includes step 0
         assert len(lines) == 22
 
@@ -169,8 +163,6 @@ def test_seed(tmp_path):
     """Test seed enables reproducable results for NVT."""
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result_1 = runner.invoke(
         app,
@@ -188,10 +180,6 @@ def test_seed(tmp_path):
             20,
             "--seed",
             42,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result_1.exit_code == 0
@@ -221,10 +209,6 @@ def test_seed(tmp_path):
             20,
             "--seed",
             42,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result_2.exit_code == 0
@@ -243,9 +227,8 @@ def test_seed(tmp_path):
 
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
-    file_prefix = tmp_path / "nvt-T300"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "nvt"
+    summary_path = tmp_path / "nvt-md-summary.yml"
 
     result = runner.invoke(
         app,
@@ -261,10 +244,6 @@ def test_summary(tmp_path):
             2,
             "--traj-every",
             1,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
 
@@ -290,9 +269,9 @@ def test_summary(tmp_path):
 
 def test_config(tmp_path):
     """Test passing a config file with ."""
-    file_prefix = tmp_path / "nvt-T300"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    file_prefix = tmp_path / "nvt"
+    log_path = tmp_path / "nvt-md-log.yml"
+    summary_path = tmp_path / "nvt-md-summary.yml"
 
     result = runner.invoke(
         app,
@@ -307,10 +286,6 @@ def test_config(tmp_path):
             "--steps",
             2,
             "--minimize",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
             "--config",
             DATA_PATH / "md_config.yml",
         ],
@@ -338,8 +313,6 @@ def test_config(tmp_path):
 def test_heating(tmp_path):
     """Test heating before MD."""
     file_prefix = tmp_path / "nvt-T300"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -363,10 +336,6 @@ def test_heating(tmp_path):
             50,
             "--temp-time",
             0.05,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -396,8 +365,6 @@ def test_ensemble_kwargs(tmp_path):
     file_prefix = tmp_path / "test" / "md"
     final_path = tmp_path / "test" / "md-final.extxyz"
     stats_path = tmp_path / "test" / "md-stats.dat"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     ensemble_kwargs = "{'mask' : (0, 1, 0)}"
 
@@ -417,10 +384,6 @@ def test_ensemble_kwargs(tmp_path):
             ensemble_kwargs,
             "--stats-every",
             1,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
 
@@ -444,8 +407,6 @@ def test_ensemble_kwargs(tmp_path):
 def test_invalid_ensemble_kwargs(tmp_path):
     """Test passing invalid key to ensemble-kwargs."""
     file_prefix = tmp_path / "npt-T300"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     # Not an option for NVT
     ensemble_kwargs = "{'mask': (0, 1, 0)}"
@@ -466,10 +427,6 @@ def test_invalid_ensemble_kwargs(tmp_path):
             ensemble_kwargs,
             "--traj-every",
             1,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
 
@@ -483,8 +440,7 @@ def test_final_name(tmp_path):
     stats_path = tmp_path / "npt-stats.dat"
     traj_path = tmp_path / "npt-traj.extxyz"
     final_path = tmp_path / "example.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+
     result = runner.invoke(
         app,
         [
@@ -503,10 +459,6 @@ def test_final_name(tmp_path):
             file_prefix,
             "--final-file",
             final_path,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -521,8 +473,6 @@ def test_write_kwargs(tmp_path):
     file_prefix = tmp_path / "md"
     final_path = tmp_path / "md-final.extxyz"
     traj_path = tmp_path / "md-traj.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     write_kwargs = (
         "{'invalidate_calc': False, 'columns': ['symbols', 'positions', 'masses']}"
@@ -544,10 +494,6 @@ def test_write_kwargs(tmp_path):
             write_kwargs,
             "--traj-every",
             1,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
 
@@ -575,8 +521,6 @@ def test_valid_traj_input(read_kwargs, tmp_path):
     """Test valid trajectory input structure handled."""
     file_prefix = tmp_path / "traj"
     final_path = tmp_path / "traj-final.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -592,10 +536,6 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             2,
             "--read-kwargs",
             read_kwargs,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -606,8 +546,6 @@ def test_valid_traj_input(read_kwargs, tmp_path):
 def test_invalid_traj_input(tmp_path):
     """Test invalid trajectory input structure handled."""
     file_prefix = tmp_path / "traj"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -623,10 +561,6 @@ def test_invalid_traj_input(tmp_path):
             2,
             "--read-kwargs",
             "{'index': ':'}",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 1
@@ -640,8 +574,6 @@ def test_minimize_kwargs_filename(tmp_path):
     traj_path = tmp_path / "test" / "md-traj.extxyz"
     stats_path = tmp_path / "test" / "md-stats.dat"
     final_path = tmp_path / "test" / "md-final.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -662,10 +594,6 @@ def test_minimize_kwargs_filename(tmp_path):
             "--minimize",
             "--minimize-kwargs",
             f"{{'write_kwargs': {{'filename': '{opt_path}'}}}}",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0
@@ -686,8 +614,6 @@ def test_minimize_kwargs_write_results(tmp_path):
     traj_path = tmp_path / "test" / "md-traj.extxyz"
     stats_path = tmp_path / "test" / "md-stats.dat"
     final_path = tmp_path / "test" / "md-final.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
 
     result = runner.invoke(
         app,
@@ -708,10 +634,6 @@ def test_minimize_kwargs_write_results(tmp_path):
             "--minimize",
             "--minimize-kwargs",
             "{'write_results': True}",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
         ],
     )
     assert result.exit_code == 0

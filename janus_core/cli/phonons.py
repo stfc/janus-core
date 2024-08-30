@@ -121,8 +121,8 @@ def phonons(
             ),
         ),
     ] = None,
-    log: LogPath = "phonons.log",
-    summary: Summary = "phonons_summary.yml",
+    log: LogPath = None,
+    summary: Summary = None,
 ):
     """
     Perform phonon calculations and write out results.
@@ -187,10 +187,10 @@ def phonons(
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula.
     log : Optional[Path]
-        Path to write logs to. Default is "phonons.log".
+        Path to write logs to. Default is inferred from the name of the structure file.
     summary : Path
-        Path to save summary of inputs and start/end time. Default is
-        phonons.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is inferred from the name of the structure file.
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -230,6 +230,10 @@ def phonons(
     if pdos:
         calcs.append("pdos")
 
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
+
     # Dictionary of inputs for Phonons class
     phonons_kwargs = {
         "struct_path": struct,
@@ -238,24 +242,30 @@ def phonons(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
+        "attach_logger": True,
+        "log_kwargs": log_kwargs,
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
+        "t_step": temp_step,
         "t_min": temp_start,
         "t_max": temp_end,
-        "t_step": temp_step,
+        "symmetrize": symmetrize,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
-        "file_prefix": file_prefix,
         "force_consts_to_hdf5": hdf5,
         "plot_to_file": plot_to_file,
-        "symmetrize": symmetrize,
+        "write_results": True,
         "write_full": write_full,
+        "file_prefix": file_prefix,
     }
 
     # Initialise phonons
     phonon = Phonons(**phonons_kwargs)
+
+    # Set summary and log files
+    summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
+    log = phonon.log_kwargs["filename"]
 
     # Store inputs for yaml summary
     inputs = phonons_kwargs.copy()

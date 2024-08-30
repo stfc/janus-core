@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, strip_ansi_codes
+from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -22,58 +22,67 @@ def test_help():
     assert "Usage: janus descriptors [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_descriptors(tmp_path):
+def test_descriptors():
     """Test calculating MLIP descriptors."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.extxyz"
-    result = runner.invoke(
-        app,
-        [
-            "descriptors",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--out",
-            out_path,
-            "--log",
+    out_path = Path("./NaCl-descriptors.extxyz").absolute()
+    log_path = Path("./NaCl-descriptors-log.yml").absolute()
+    summary_path = Path("./NaCl-descriptors-summary.yml").absolute()
+
+    assert not out_path.exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
+
+    try:
+        result = runner.invoke(
+            app,
+            [
+                "descriptors",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert out_path.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+
+        atoms = read(out_path)
+        assert "mace_mp_descriptor" in atoms.info
+        assert "mace_mp_Na_descriptor" not in atoms.info
+        assert "mace_mp_Cl_descriptor" not in atoms.info
+        assert "mace_mp_descriptors" not in atoms.arrays
+
+        # Check only initial structure is minimized
+        assert_log_contains(
             log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
-    assert result.exit_code == 0
-    assert out_path.exists()
+            includes=[
+                "Starting descriptors calculation",
+                "invariants_only: True",
+                "calc_per_element: False",
+                "calc_per_atom: False",
+            ],
+        )
 
-    atoms = read(out_path)
-    assert "mace_mp_descriptor" in atoms.info
-    assert "mace_mp_Na_descriptor" not in atoms.info
-    assert "mace_mp_Cl_descriptor" not in atoms.info
-    assert "mace_mp_descriptors" not in atoms.arrays
+        # Read descriptors summary file
+        assert summary_path.exists()
+        with open(summary_path, encoding="utf8") as file:
+            descriptors_summary = yaml.safe_load(file)
 
-    # Check only initial structure is minimized
-    assert_log_contains(
-        log_path,
-        includes=[
-            "Starting descriptors calculation",
-            "invariants_only: True",
-            "calc_per_element: False",
-            "calc_per_atom: False",
-        ],
-    )
+        assert "command" in descriptors_summary
+        assert "janus descriptors" in descriptors_summary["command"]
+        assert "start_time" in descriptors_summary
+        assert "inputs" in descriptors_summary
+        assert "end_time" in descriptors_summary
 
-    # Read descriptors summary file
-    assert summary_path.exists()
-    with open(summary_path, encoding="utf8") as file:
-        descriptors_summary = yaml.safe_load(file)
+        assert "emissions" in descriptors_summary
+        assert descriptors_summary["emissions"] > 0
 
-    assert "command" in descriptors_summary
-    assert "janus descriptors" in descriptors_summary["command"]
-    assert "start_time" in descriptors_summary
-    assert "inputs" in descriptors_summary
-    assert "end_time" in descriptors_summary
-
-    assert "emissions" in descriptors_summary
-    assert descriptors_summary["emissions"] > 0
+    finally:
+        out_path.unlink(missing_ok=True)
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+        clear_log_handlers()
 
 
 def test_calc_per_element(tmp_path):
@@ -118,9 +127,10 @@ def test_calc_per_element(tmp_path):
 
 def test_invariant(tmp_path):
     """Test setting invariant_only to false."""
+    out_path = tmp_path / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.extxyz"
+
     result = runner.invoke(
         app,
         [
@@ -157,9 +167,10 @@ def test_invariant(tmp_path):
 
 def test_traj(tmp_path):
     """Test calculating descriptors for a trajectory."""
+    out_path = tmp_path / "benzene-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "benzene-descriptors.extxyz"
+
     result = runner.invoke(
         app,
         [
@@ -187,9 +198,10 @@ def test_traj(tmp_path):
 
 def test_per_atom(tmp_path):
     """Test calculating descriptors for each atom."""
+    out_path = tmp_path / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    out_path = tmp_path / "NaCl-descriptors.extxyz"
+
     result = runner.invoke(
         app,
         [

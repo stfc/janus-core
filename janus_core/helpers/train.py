@@ -41,6 +41,7 @@ def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
 def train(
     mlip_config: PathLike,
     req_file_keys: Optional[list[PathLike]] = None,
+    attach_logger: bool = False,
     log_kwargs: Optional[dict[str, Any]] = None,
     tracker_kwargs: Optional[dict[str, Any]] = None,
 ) -> None:
@@ -57,6 +58,8 @@ def train(
     req_file_keys : Optional[list[PathLike]]
         List of files that must exist if defined in the configuration file.
         Default is ["train_file", "test_file", "valid_file", "statistics_file"].
+    attach_logger : bool
+        Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
     tracker_kwargs : Optional[dict[str, Any]]
@@ -73,6 +76,8 @@ def train(
     check_files_exist(options, req_file_keys)
 
     # Configure logging
+    if attach_logger:
+        log_kwargs.setdefault("filename", "train-log.yml")
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
     tracker = config_tracker(logger, **tracker_kwargs)

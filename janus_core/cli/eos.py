@@ -78,8 +78,8 @@ def eos(
             ),
         ),
     ] = None,
-    log: LogPath = "eos.log",
-    summary: Summary = "eos_summary.yml",
+    log: LogPath = None,
+    summary: Summary = None,
 ):
     """
     Calculate equation of state and write out results.
@@ -128,9 +128,10 @@ def eos(
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula.
     log : Optional[Path]
-        Path to write logs to. Default is "eos.log".
+        Path to write logs to. Default is inferred from the name of the structure file.
     summary : Path
-        Path to save summary of inputs and start/end time. Default is eos.yml.
+        Path to save summary of inputs, start/end time, and carbon emissions. Default
+        is inferred from the name of the structure file.
     config : Path
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -152,6 +153,10 @@ def eos(
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
+
     # Dictionary of inputs for EoS class
     eos_kwargs = {
         "struct_path": struct,
@@ -160,7 +165,8 @@ def eos(
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
-        "log_kwargs": {"filename": log, "filemode": "w"},
+        "attach_logger": True,
+        "log_kwargs": log_kwargs,
         "min_volume": min_volume,
         "max_volume": max_volume,
         "n_volumes": n_volumes,
@@ -175,6 +181,12 @@ def eos(
 
     # Initialise EoS
     equation_of_state = EoS(**eos_kwargs)
+
+    # Set summary and log files
+    summary = equation_of_state._build_filename(
+        "eos-summary.yml", filename=summary
+    ).absolute()
+    log = equation_of_state.log_kwargs["filename"]
 
     # Store inputs for yaml summary
     inputs = eos_kwargs.copy()
