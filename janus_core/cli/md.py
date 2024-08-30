@@ -402,7 +402,7 @@ def md(
 
     # Set summary and log files
     summary = dyn._build_filename(
-        "summary.yml", dyn.param_prefix, filename=summary
+        "md-summary.yml", dyn.param_prefix, filename=summary
     ).absolute()
     log = dyn.log_kwargs["filename"]
 

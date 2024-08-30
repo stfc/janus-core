@@ -184,7 +184,7 @@ def eos(
 
     # Set summary and log files
     summary = equation_of_state._build_filename(
-        "summary.yml", filename=summary
+        "eos-summary.yml", filename=summary
     ).absolute()
     log = equation_of_state.log_kwargs["filename"]
 

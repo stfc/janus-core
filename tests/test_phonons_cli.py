@@ -25,8 +25,8 @@ def test_phonons():
     """Test calculating force constants and band structure."""
     phonopy_path = Path("./NaCl-phonopy.yml").absolute()
     bands_path = Path("./NaCl-auto_bands.yml").absolute()
-    log_path = Path("./NaCl-log.yml").absolute()
-    summary_path = Path("./NaCl-summary.yml").absolute()
+    log_path = Path("./NaCl-phonons-log.yml").absolute()
+    summary_path = Path("./NaCl-phonons-summary.yml").absolute()
 
     assert not phonopy_path.exists()
     assert not bands_path.exists()
@@ -76,7 +76,7 @@ def test_bands_simple(tmp_path):
     """Test calculating force constants and reduced bands information."""
     file_prefix = tmp_path / "NaCl"
     autoband_results = tmp_path / "NaCl-auto_bands.yml"
-    summary_path = tmp_path / "NaCl-summary.yml"
+    summary_path = tmp_path / "NaCl-phonons-summary.yml"
 
     result = runner.invoke(
         app,
@@ -194,11 +194,11 @@ def test_pdos(tmp_path):
 def test_plot(tmp_path):
     """Test for ploting routines."""
     file_prefix = tmp_path / "NaCl"
-    summary_path = tmp_path / "NaCl-summary.yml"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
     hdf5_results = tmp_path / "NaCl-force_constants.hdf5"
     autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    summary_path = tmp_path / "NaCl-phonons-summary.yml"
     svgs = [
         tmp_path / "NaCl-dos.svg",
         tmp_path / "NaCl-pdos.svg",
@@ -298,8 +298,8 @@ def test_invalid_supercell(supercell, tmp_path):
 def test_minimize_kwargs(tmp_path):
     """Test setting optimizer function and writing optimized structure."""
     file_prefix = tmp_path / "test"
-    log_path = tmp_path / "test-log.yml"
     opt_path = tmp_path / "test-opt.extxyz"
+    log_path = tmp_path / "test-phonons-log.yml"
 
     minimize_kwargs = "{'optimizer': 'FIRE', 'write_results': True}"
 

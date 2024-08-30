@@ -264,7 +264,7 @@ def phonons(
     phonon = Phonons(**phonons_kwargs)
 
     # Set summary and log files
-    summary = phonon._build_filename("summary.yml", filename=summary).absolute()
+    summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
     log = phonon.log_kwargs["filename"]
 
     # Store inputs for yaml summary

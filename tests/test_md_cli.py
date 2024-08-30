@@ -51,8 +51,8 @@ def test_md(ensemble):
     traj_path = Path(f"{file_prefix[ensemble]}traj.extxyz").absolute()
     rdf_path = Path(f"{file_prefix[ensemble]}rdf.dat").absolute()
     vaf_path = Path(f"{file_prefix[ensemble]}vaf.dat").absolute()
-    log_path = Path(f"{file_prefix[ensemble]}log.yml").absolute()
-    summary_path = Path(f"{file_prefix[ensemble]}summary.yml").absolute()
+    log_path = Path(f"{file_prefix[ensemble]}md-log.yml").absolute()
+    summary_path = Path(f"{file_prefix[ensemble]}md-summary.yml").absolute()
 
     assert not final_path.exists()
     assert not restart_path.exists()
@@ -116,7 +116,7 @@ def test_log(tmp_path):
     """Test log correctly written for MD."""
     file_prefix = tmp_path / "NaCl"
     stats_path = tmp_path / "NaCl-stats.dat"
-    log_path = tmp_path / "NaCl-log.yml"
+    log_path = tmp_path / "NaCl-md-log.yml"
 
     result = runner.invoke(
         app,
@@ -227,8 +227,8 @@ def test_seed(tmp_path):
 
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
-    file_prefix = tmp_path / "nvt-T300"
-    summary_path = tmp_path / "nvt-T300-summary.yml"
+    file_prefix = tmp_path / "nvt"
+    summary_path = tmp_path / "nvt-md-summary.yml"
 
     result = runner.invoke(
         app,
@@ -269,9 +269,9 @@ def test_summary(tmp_path):
 
 def test_config(tmp_path):
     """Test passing a config file with ."""
-    file_prefix = tmp_path / "nvt-T300"
-    log_path = tmp_path / "nvt-T300-log.yml"
-    summary_path = tmp_path / "nvt-T300-summary.yml"
+    file_prefix = tmp_path / "nvt"
+    log_path = tmp_path / "nvt-md-log.yml"
+    summary_path = tmp_path / "nvt-md-summary.yml"
 
     result = runner.invoke(
         app,

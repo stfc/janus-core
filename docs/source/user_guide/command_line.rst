@@ -94,7 +94,7 @@ Perform a single point calcuation (using the `MACE-MP <https://github.com/ACEsui
     janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path small
 
 
-This will calculate the energy, stress and forces and save this in ``NaCl-results.extxyz``, in addition to generating a log file, ``NaCl-log.yml``, and summary of inputs, ``NaCl-summary.yml``.
+This will calculate the energy, stress and forces and save this in ``NaCl-results.extxyz``, in addition to generating a log file, ``NaCl-singlepoint-log.yml``, and summary of inputs, ``NaCl-singlepoint-summary.yml``.
 
 Additional options may be specified. For example:
 
@@ -129,7 +129,7 @@ Perform geometry optimization (using the `MACE-MP <https://github.com/ACEsuit/ma
     janus geomopt --struct tests/data/H2O.cif --arch mace_mp --model-path small
 
 
-This will optimize the atomic positions and save the resulting structure in ``H2O-opt.extxyz``, in addition to generating a log file, ``H20-log.yml``, and summary of inputs, ``H20-summary.yml``.
+This will optimize the atomic positions and save the resulting structure in ``H2O-opt.extxyz``, in addition to generating a log file, ``H20-geomopt-log.yml``, and summary of inputs, ``H20-geomopt-summary.yml``.
 
 Additional options may be specified. This shares most options with ``singlepoint``, as well as a few additional options, such as:
 
@@ -168,8 +168,8 @@ This will generate several output files:
 - The structure trajectory every 100 steps, written to ``NaCl-npt-T300.0-p1.0-traj.extxyz``
 - The structure to be able to restart the dynamics every 1000 steps, written to ``NaCl-npt-T300.0-p1.0-res-1000.extxyz``
 - The final structure written to ``NaCl-npt-T300.0-p1.0-final.extxyz``
-- A log of the processes carried out, written to ``NaCl-npt-T300.0-p1.0-log.yml``
-- A summary of the inputs and start/end time, written to ``NaCl-npt-T300.0-p1.0-summary.yml``.
+- A log of the processes carried out, written to ``NaCl-npt-T300.0-p1.0-md-log.yml``
+- A summary of the inputs and start/end time, written to ``NaCl-npt-T300.0-p1.0-md-summary.yml``.
 
 Additional options may be specified. For example:
 
@@ -242,7 +242,7 @@ Fit the equation of state for a structure (using the `MACE-MP <https://github.co
 
 
 This will save the energies and volumes for nine lattice constants in ``NaCl-eos-raw.dat``, and the fitted minimum energy, volume, and bulk modulus in ``NaCl-eos-fit.dat``,
-in addition to generating a log file, ``NaCl-log.yml``, and summary of inputs, ``NaCl-summary.yml``.
+in addition to generating a log file, ``NaCl-eos-log.yml``, and summary of inputs, ``NaCl-eos-summary.yml``.
 
 By default, geometry optimization will be performed on the initial structure, before calculations are performed for the range of lattice constants consistent with minimum and maximum volumes supplied.
 Optimization at constant volume for all generated structures can also be performed (sharing the same maximum force convergence):
@@ -266,7 +266,7 @@ Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the
 
 
 This will save the Phonopy parameters, including displacements and force constants, to ``NaCl-phonopy.yml`` and ``NaCl-force_constants.hdf5``,
-in addition to generating a log file, ``NaCl-log.yml``, and summary of inputs, ``NaCl-summary.yml``.
+in addition to generating a log file, ``NaCl-phonons-log.yml``, and summary of inputs, ``NaCl-phonons-summary.yml``.
 
 Additionally, the ``--bands`` option can be added to calculate the band structure and save the results to ``NaCl-auto_bands.yml``:
 
@@ -360,7 +360,7 @@ Descriptors of a structure can be calculated (using the `MACE-MP <https://github
 
 
 This will calculate the mean descriptor for this structure and save this as attached information (``mace_mp_descriptors``) in ``NaCl-descriptors.extxyz``,
-in addition to generating a log file, ``NaCl-log.yml``, and summary of inputs, ``NaCl-summary.yml``.
+in addition to generating a log file, ``NaCl-descriptors-log.yml``, and summary of inputs, ``NaCl-descriptors-summary.yml``.
 
 The mean descriptor per element can also be calculated, and all descriptors, rather than only the invariant part, can be used when calculating the means:
 

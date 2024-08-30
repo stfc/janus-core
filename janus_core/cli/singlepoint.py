@@ -135,7 +135,9 @@ def singlepoint(
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary
-    summary = s_point._build_filename("summary.yml", filename=summary).absolute()
+    summary = s_point._build_filename(
+        "singlepoint-summary.yml", filename=summary
+    ).absolute()
     log = s_point.log_kwargs["filename"]
 
     # Store only filename as filemode is not set by user

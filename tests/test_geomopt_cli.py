@@ -31,8 +31,8 @@ def test_help():
 def test_geomopt():
     """Test geomopt calculation."""
     results_path = Path("./NaCl-opt.extxyz").absolute()
-    log_path = Path("./NaCl-log.yml").absolute()
-    summary_path = Path("./NaCl-summary.yml").absolute()
+    log_path = Path("./NaCl-geomopt-log.yml").absolute()
+    summary_path = Path("./NaCl-geomopt-summary.yml").absolute()
 
     assert not results_path.exists()
     assert not log_path.exists()

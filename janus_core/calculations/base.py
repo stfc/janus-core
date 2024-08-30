@@ -165,11 +165,14 @@ class BaseCalculation(FileNameMixin):
         )
 
         # Configure logging
+        # Extract command from module
+        # e.g janus_core.calculations.single_point -> singlepoint
+        log_suffix = f"{calc_name.split('.')[-1].replace('_', '')}-log.yml"
         if attach_logger:
             self.log_kwargs.setdefault(
                 "filename",
                 self._build_filename(
-                    "log.yml", param_prefix if file_prefix is None else ""
+                    log_suffix, param_prefix if file_prefix is None else ""
                 ).absolute(),
             )
         self.log_kwargs.setdefault("name", calc_name)

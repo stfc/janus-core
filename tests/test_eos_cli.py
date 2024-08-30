@@ -26,8 +26,8 @@ def test_eos():
     """Test calculating the equation of state."""
     eos_raw_path = Path("./NaCl-eos-raw.dat").absolute()
     eos_fit_path = Path("./NaCl-eos-fit.dat").absolute()
-    log_path = Path("./NaCl-log.yml").absolute()
-    summary_path = Path("./NaCl-summary.yml").absolute()
+    log_path = Path("./NaCl-eos-log.yml").absolute()
+    summary_path = Path("./NaCl-eos-summary.yml").absolute()
 
     assert not eos_raw_path.exists()
     assert not eos_fit_path.exists()
@@ -157,7 +157,7 @@ def test_invalid_lattice(option, value, tmp_path):
 def test_minimising_all(tmp_path):
     """Test minimising structures with different lattice constants."""
     file_prefix = tmp_path / "NaCl"
-    log_path = tmp_path / "NaCl-log.yml"
+    log_path = tmp_path / "NaCl-eos-log.yml"
 
     result = runner.invoke(
         app,
