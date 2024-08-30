@@ -870,6 +870,11 @@ class MolecularDynamics(BaseCalculation):
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
+            time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
+            step = self.offset + self.dyn.nsteps
+            self.dyn.atoms.info["time_fs"] = time
+            self.dyn.atoms.info["step"] = step
+
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self.traj_file
             write_kwargs["append"] = append

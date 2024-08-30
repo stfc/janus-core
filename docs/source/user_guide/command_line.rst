@@ -196,11 +196,17 @@ For example:
 
 .. code-block:: bash
 
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1000 --stats-every 1 --restart-every 100
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1000 --stats-every 1 --restart
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1200 --stats-every 10 --traj-every 100 --restart-every 1000
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1200 --stats-every 10 --traj-every 100 --restart
 
 will create, then restart from, ``NaCl-npt-T300.0-p1.0-res-1000.extxyz``,
 running an additional 1000 steps, and appending the statistics and trajectory files created by the first command.
+
+
+.. note::
+    Depending on the frequency of statistics, trajectory, and restart file outputs, it is likely that outputs for some steps may be repeated.
+    These can be identified using the ``Step`` column in the statistics file, and the ``step`` info label for each trajectory image.
+    For example, in the above example, outputs between steps 1000 and 1200 would be repeated.
 
 
 For all options, run ``janus md --help``.
