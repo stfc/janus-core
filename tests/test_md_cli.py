@@ -695,6 +695,8 @@ def test_auto_restart(tmp_path):
 
     traj = read(traj_path, index=":")
     assert len(traj) == 5
+    for i, struct in enumerate(traj):
+        assert struct.info["step"] == i
 
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
@@ -731,6 +733,8 @@ def test_auto_restart(tmp_path):
 
     traj = read(traj_path, index=":")
     assert len(traj) == 8
+    for i, struct in enumerate(traj):
+        assert struct.info["step"] == i
 
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
