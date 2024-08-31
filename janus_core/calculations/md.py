@@ -509,6 +509,13 @@ class MolecularDynamics(BaseCalculation):
 
         self._parse_correlations()
 
+    def _set_time_step(self):
+        """Set time in fs and current dynamics step to info."""
+        time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
+        step = self.offset + self.dyn.nsteps
+        self.dyn.atoms.info["time_fs"] = time
+        self.dyn.atoms.info["step"] = step
+
     def _prepare_restart(self) -> None:
         """Prepare restart files, structure and offset."""
         # Check offset can be read from steps
@@ -719,10 +726,7 @@ class MolecularDynamics(BaseCalculation):
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
         current_temp = e_kin / (1.5 * units.kB)
 
-        time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
-        step = self.offset + self.dyn.nsteps
-        self.dyn.atoms.info["time_fs"] = time
-        self.dyn.atoms.info["step"] = step
+        self._set_time_step()
 
         time_now = datetime.datetime.now()
         real_time = time_now - self.dyn.atoms.info["real_time"]
@@ -754,9 +758,9 @@ class MolecularDynamics(BaseCalculation):
             pressure_tensor = np.zeros(6)
 
         return {
-            "Step": step,
+            "Step": self.dyn.atoms.info["step"],
             "Real_Time": real_time.total_seconds(),
-            "Time": time,
+            "Time": self.dyn.atoms.info["time_fs"],
             "Epot/N": e_pot,
             "EKin/N": e_kin,
             "T": current_temp,
@@ -870,14 +874,11 @@ class MolecularDynamics(BaseCalculation):
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
-            time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
-            step = self.offset + self.dyn.nsteps
-            self.dyn.atoms.info["time_fs"] = time
-            self.dyn.atoms.info["step"] = step
-
+            self._set_time_step()
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self.traj_file
             write_kwargs["append"] = append
+
             output_structs(
                 images=self.struct,
                 struct_path=self.struct_path,
@@ -894,9 +895,11 @@ class MolecularDynamics(BaseCalculation):
         # Append if final file has been created
         append = self.created_final_file
 
+        self._set_time_step()
         write_kwargs = self.write_kwargs
         write_kwargs["filename"] = self.final_file
         write_kwargs["append"] = append
+
         output_structs(
             images=self.struct,
             struct_path=self.struct_path,
@@ -995,6 +998,8 @@ class MolecularDynamics(BaseCalculation):
         if step > 0:
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self._restart_file
+            self._set_time_step()
+
             output_structs(
                 images=self.struct,
                 struct_path=self.struct_path,
