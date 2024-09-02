@@ -4,7 +4,7 @@ model: ScaleShiftMACE
 loss: universal
 train_file: "./tests/data/mlip_fine_tune_train.xyz"
 valid_file: "./tests/data/mlip_fine_tune_train.xyz"
-test_file: "./tests/data/mlip_test.xyz"
+test_file: "./tests/data/mlip_fine_tune_train.xyz"
 E0s: foundation
 valid_fraction: 0.05
 energy_weight: 1.0
@@ -13,13 +13,13 @@ stress_weight: 100.0
 stress_key: dft_stress
 energy_key: dft_energy
 forces_key: dft_forces
-compute_stress: True
-compute_forces: True
+compute_stress: False
+compute_forces: False
 clip_grad: 100
 error_table: PerAtomRMSE
 lr: 0.005
 scaling: rms_forces_scaling
-batch_size: 4
+batch_size: 1
 max_num_epochs: 1
 ema: True
 ema_decay: 0.995

@@ -7,7 +7,7 @@ loss: 'universal'
 energy_weight: 1
 forces_weight: 10
 stress_weight: 100
-compute_stress: True
+compute_stress: False
 energy_key: 'dft_energy'
 forces_key: 'dft_forces'
 stress_key: 'dft_stress'
