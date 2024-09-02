@@ -536,7 +536,7 @@ class MolecularDynamics(BaseCalculation):
             # Use restart_stem.name otherwise T300.0 etc. counts as extension
             poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
             try:
-                last_restart = sorted(poss_restarts, key=getmtime)[-1]
+                last_restart = max(poss_restarts, key=getmtime)
 
                 # Read in last structure
                 self.struct = input_structs(
@@ -556,9 +556,9 @@ class MolecularDynamics(BaseCalculation):
                 try:
                     # Remove restart_stem from filename
                     # Use restart_stem.name otherwise T300.0 etc. counts as extension
-                    self.offset = int("".join(last_stem.split(f"{restart_stem.name}-")))
+                    self.offset = int(last_stem.split("-")[-1])
 
-                    # Check "-"" not inlcuded in offset
+                    # Check "-" not inlcuded in offset
                     assert self.offset > 0
 
                 except (ValueError, AssertionError) as e:
