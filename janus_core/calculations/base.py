@@ -169,12 +169,14 @@ class BaseCalculation(FileNameMixin):
         # e.g janus_core.calculations.single_point -> singlepoint
         log_suffix = f"{calc_name.split('.')[-1].replace('_', '')}-log.yml"
         if attach_logger:
-            self.log_kwargs.setdefault(
-                "filename",
-                self._build_filename(
-                    log_suffix, param_prefix if file_prefix is None else ""
-                ).absolute(),
-            )
+            # Use _build_filename even if given filename to ensure directory exists
+            self.log_kwargs.setdefault("filename", None)
+            self.log_kwargs["filename"] = self._build_filename(
+                log_suffix,
+                param_prefix if file_prefix is None else "",
+                filename=self.log_kwargs["filename"],
+            ).absolute()
+
         self.log_kwargs.setdefault("name", calc_name)
         self.logger = config_logger(**self.log_kwargs)
         self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
