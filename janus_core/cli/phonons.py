@@ -46,33 +46,9 @@ def phonons(
         float,
         Option(help="Displacement for force constants calculation, in A."),
     ] = 0.01,
-    thermal: Annotated[
-        bool,
-        Option(help="Whether to calculate thermal properties."),
-    ] = False,
-    temp_start: Annotated[
-        float,
-        Option(help="Start temperature for thermal properties calculations, in K."),
-    ] = 0.0,
-    temp_end: Annotated[
-        float,
-        Option(help="End temperature for thermal properties calculations, in K."),
-    ] = 1000.0,
-    temp_step: Annotated[
-        float,
-        Option(help="Temperature step for thermal properties calculations, in K."),
-    ] = 50,
     bands: Annotated[
         bool,
         Option(help="Whether to compute band structure."),
-    ] = False,
-    hdf5: Annotated[
-        bool,
-        Option(help="Whether to save force constants in hdf5."),
-    ] = True,
-    plot_to_file: Annotated[
-        bool,
-        Option(help="Whether to plot band structure and/or dos/pdos when calculated."),
     ] = False,
     dos: Annotated[
         bool,
@@ -84,14 +60,42 @@ def phonons(
             help="Whether to calculate the PDOS.",
         ),
     ] = False,
+    thermal: Annotated[
+        bool,
+        Option(help="Whether to calculate thermal properties."),
+    ] = False,
+    temp_min: Annotated[
+        float,
+        Option(help="Start temperature for thermal properties calculations, in K."),
+    ] = 0.0,
+    temp_max: Annotated[
+        float,
+        Option(help="End temperature for thermal properties calculations, in K."),
+    ] = 1000.0,
+    temp_step: Annotated[
+        float,
+        Option(help="Temperature step for thermal properties calculations, in K."),
+    ] = 50,
+    symmetrize: Annotated[
+        bool, Option(help="Whether to symmetrize force constants.")
+    ] = False,
     minimize: Annotated[
         bool,
         Option(
             help="Whether to minimize structure before calculations.",
         ),
     ] = False,
-    symmetrize: Annotated[
-        bool, Option(help="Whether to symmetrize force constants.")
+    fmax: Annotated[
+        float, Option(help="Maximum force for optimization convergence.")
+    ] = 0.1,
+    minimize_kwargs: MinimizeKwargs = None,
+    hdf5: Annotated[
+        bool,
+        Option(help="Whether to save force constants in hdf5."),
+    ] = True,
+    plot_to_file: Annotated[
+        bool,
+        Option(help="Whether to plot band structure and/or dos/pdos when calculated."),
     ] = False,
     write_full: Annotated[
         bool,
@@ -101,10 +105,6 @@ def phonons(
             ),
         ),
     ] = True,
-    fmax: Annotated[
-        float, Option(help="Maximum force for optimization convergence.")
-    ] = 0.1,
-    minimize_kwargs: MinimizeKwargs = None,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
@@ -138,39 +138,39 @@ def phonons(
         2x2x2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    bands : bool
+        Whether to calculate and save the band structure. Default is False.
+    dos : bool
+        Whether to calculate and save the DOS. Default is False.
+    pdos : bool
+        Whether to calculate and save the PDOS. Default is False.
     thermal : bool
         Whether to calculate thermal properties. Default is False.
-    temp_start : float
+    temp_min : float
         Start temperature for thermal calculations, in K. Unused if `thermal` is False.
         Default is 0.0.
-    temp_end : float
+    temp_max : float
         End temperature for thermal calculations, in K. Unused if `thermal` is False.
         Default is 1000.0.
     temp_step : float
         Temperature step for thermal calculations, in K. Unused if `thermal` is False.
         Default is 50.0.
-    bands : bool
-        Whether to calculate and save the band structure. Default is False.
-    hdf5 : bool
-        Whether to save force constants in hdf5 format. Default is True.
-    plot_to_file : bool
-        Whether to plot. Default is False.
-    dos : bool
-        Whether to calculate and save the DOS. Default is False.
-    pdos : bool
-        Whether to calculate and save the PDOS. Default is False.
-    minimize : bool
-        Whether to minimize structure before calculations. Default is False.
     symmetrize : bool
         Whether to symmetrize force constants. Default is False.
-    write_full : bool
-        Whether to maximize information written in various output files.
-        Default is True.
+    minimize : bool
+        Whether to minimize structure before calculations. Default is False.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
     minimize_kwargs : Optional[dict[str, Any]]
         Other keyword arguments to pass to geometry optimizer. Default is {}.
+    hdf5 : bool
+        Whether to save force constants in hdf5 format. Default is True.
+    plot_to_file : bool
+        Whether to plot. Default is False.
+    write_full : bool
+        Whether to maximize information written in various output files.
+        Default is True.
     arch : Optional[str]
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
@@ -247,12 +247,12 @@ def phonons(
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
-        "t_step": temp_step,
-        "t_min": temp_start,
-        "t_max": temp_end,
         "symmetrize": symmetrize,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
+        "temp_min": temp_min,
+        "temp_max": temp_max,
+        "temp_step": temp_step,
         "force_consts_to_hdf5": hdf5,
         "plot_to_file": plot_to_file,
         "write_results": True,

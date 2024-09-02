@@ -84,6 +84,40 @@ prints the following:
       --help               Show this message and exit.
 
 
+Using configuration files
+-------------------------
+
+Default values for all command line options may be specifed through a Yaml 1.1 formatted configuration file by adding the ``--config`` option.
+If an option is present in both the command line and configuration file, the command line value takes precedence.
+
+For example, with the following configuration file and command:
+
+.. code-block:: yaml
+
+    struct: "NaCl.cif"
+    properties:
+    - "energy"
+    out: "NaCl-results.extxyz"
+    arch: mace_mp
+    model-path: medium
+    calc-kwargs:
+      dispersion: True
+
+
+.. code-block:: bash
+
+    janus singlepoint --struct KCl.cif --out KCl-results.cif --config config.yml
+
+
+This will run a singlepoint energy calculation on ``KCl.cif`` using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "medium" force-field, saving the results to ``KCl-results.cif``.
+
+
+.. note::
+    ``properties`` must be passed as a Yaml list, as above, not as a string.
+
+Example configurations for all commands can be found in `janus-tutorials <https://github.com/stfc/janus-tutorials/tree/main/configs>`_
+
+
 Single point calculations
 -------------------------
 
@@ -288,40 +322,6 @@ This will create additional output files: ``NaCl-thermal.dat`` for the thermal p
 between 0K and 300K, ``NaCl-dos.dat`` for the DOS, and ``NaCl-pdos.dat`` for the PDOS.
 
 For all options, run ``janus phonons --help``.
-
-
-Using configuration files
--------------------------
-
-Default values for all command line options may be specifed through a Yaml 1.1 formatted configuration file by adding the ``--config`` option.
-If an option is present in both the command line and configuration file, the command line value takes precedence.
-
-For example, with the following configuration file and command:
-
-.. code-block:: yaml
-
-    struct: "NaCl.cif"
-    properties:
-    - "energy"
-    out: "NaCl-results.extxyz"
-    arch: mace_mp
-    model-path: medium
-    calc-kwargs:
-      dispersion: True
-
-
-.. code-block:: bash
-
-    janus singlepoint --struct KCl.cif --out KCl-results.cif --config config.yml
-
-
-This will run a singlepoint energy calculation on ``KCl.cif`` using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "medium" force-field, saving the results to ``KCl-results.cif``.
-
-
-.. note::
-    ``properties`` must be passed as a Yaml list, as above, not as a string.
-
-Example configurations for all commands can be found in `janus-tutorials <https://github.com/stfc/janus-tutorials/tree/main/configs>`_
 
 
 Training and fine-tuning MLIPs
