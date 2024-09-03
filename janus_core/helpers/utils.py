@@ -145,10 +145,8 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         if filename:
             built_filename = Path(filename)
         else:
-            prefix = (
-                prefix_override
-                if prefix_override is not None
-                else str(self.file_prefix)
+            prefix = str(
+                prefix_override if prefix_override is not None else self.file_prefix
             )
             built_filename = Path("-".join((prefix, *filter(None, additional), suffix)))
 

@@ -4,6 +4,7 @@ import datetime
 from functools import partial
 from itertools import combinations_with_replacement
 from math import isclose
+from os.path import getmtime
 from pathlib import Path
 import random
 from typing import Any, Optional, Union
@@ -38,6 +39,7 @@ from janus_core.helpers.utils import (
     Architectures,
     ASEReadArgs,
     Devices,
+    input_structs,
     none_to_dict,
     output_structs,
     write_table,
@@ -107,6 +109,8 @@ class MolecularDynamics(BaseCalculation):
         and temperature.
     restart : bool
         Whether restarting dynamics. Default is False.
+    restart_auto : bool
+        Whether to infer restart file name if restarting dynamics. Default is True.
     restart_stem : str
         Stem for restart file name. Default inferred from `file_prefix`.
     restart_every : int
@@ -197,6 +201,7 @@ class MolecularDynamics(BaseCalculation):
         rescale_every: int = 10,
         file_prefix: Optional[PathLike] = None,
         restart: bool = False,
+        restart_auto: bool = True,
         restart_stem: Optional[PathLike] = None,
         restart_every: int = 1000,
         rotate_restart: bool = False,
@@ -276,6 +281,8 @@ class MolecularDynamics(BaseCalculation):
             and temperature.
         restart : bool
             Whether restarting dynamics. Default is False.
+        restart_auto : bool
+            Whether to infer restart file name if restarting dynamics. Default is True.
         restart_stem : str
             Stem for restart file name. Default inferred from `file_prefix`.
         restart_every : int
@@ -350,6 +357,7 @@ class MolecularDynamics(BaseCalculation):
         self.remove_rot = remove_rot
         self.rescale_every = rescale_every
         self.restart = restart
+        self.restart_auto = restart_auto
         self.restart_stem = restart_stem
         self.restart_every = restart_every
         self.rotate_restart = rotate_restart
@@ -483,11 +491,13 @@ class MolecularDynamics(BaseCalculation):
                 "filemode": "a",
             }
 
-        self.restart_files = []
         self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
         self.n_atoms = len(self.struct)
 
         self.offset = 0
+        if self.restart:
+            self._prepare_restart()
+        self.restart_files = []
         self.created_final_file = False
 
         if "masses" not in self.struct.arrays:
@@ -498,6 +508,80 @@ class MolecularDynamics(BaseCalculation):
             random.seed(seed)
 
         self._parse_correlations()
+
+    def _set_time_step(self):
+        """Set time in fs and current dynamics step to info."""
+        time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
+        step = self.offset + self.dyn.nsteps
+        self.dyn.atoms.info["time_fs"] = time
+        self.dyn.atoms.info["step"] = step
+
+    def _prepare_restart(self) -> None:
+        """Prepare restart files, structure and offset."""
+        # Check offset can be read from steps
+        try:
+            with open(self.stats_file, encoding="utf8") as stats_file:
+                last_line = stats_file.readlines()[-1].split()
+            try:
+                self.offset = int(last_line[0])
+            except (IndexError, ValueError) as e:
+                raise ValueError("Unable to read restart file") from e
+        except FileNotFoundError as e:
+            raise FileNotFoundError("Unable to read restart file") from e
+
+        if self.restart_auto:
+            # Attempt to infer restart file
+            restart_stem = self._restart_stem
+
+            # Use restart_stem.name otherwise T300.0 etc. counts as extension
+            poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
+            try:
+                last_restart = max(poss_restarts, key=getmtime)
+
+                # Read in last structure
+                self.struct = input_structs(
+                    struct_path=last_restart,
+                    read_kwargs=self.read_kwargs,
+                    sequence_allowed=False,
+                    arch=self.arch,
+                    device=self.device,
+                    model_path=self.model_path,
+                    calc_kwargs=self.calc_kwargs,
+                    set_calc=True,
+                    logger=self.logger,
+                )
+
+                # Infer last dynamics step
+                last_stem = last_restart.stem
+                try:
+                    # Remove restart_stem from filename
+                    # Use restart_stem.name otherwise T300.0 etc. counts as extension
+                    self.offset = int(last_stem.split("-")[-1])
+
+                    # Check "-" not inlcuded in offset
+                    assert self.offset > 0
+
+                except (ValueError, AssertionError) as e:
+                    raise ValueError(
+                        f"Unable to infer final dynamics step from {last_restart}"
+                    ) from e
+
+                if self.logger:
+                    self.logger.info("Auto restart successful")
+
+            except IndexError:
+                if self.logger:
+                    self.logger.info(
+                        "Auto restart failed with stem: %s. Using `struct`",
+                        restart_stem,
+                    )
+
+        # Check files exist to append
+        if not self.stats_file.exists() or not self.traj_file.exists():
+            raise ValueError(
+                "Statistics and trajectory files must already exist to restart "
+                "simulation"
+            )
 
     def _rotate_restart_files(self) -> None:
         """Rotate restart files."""
@@ -565,6 +649,27 @@ class MolecularDynamics(BaseCalculation):
         return temperature_prefix.lstrip("-")
 
     @property
+    def _restart_stem(self) -> str:
+        """
+        Stem for restart files.
+
+        Restart files will be named {restart_stem}-{step}.extxyz. If file_prefix is
+        specified, restart_stem will be of the form {file_prefix}-{param_prefix}-res.
+
+        Returns
+        -------
+        str
+           Stem for restart files.
+        """
+        if self.restart_stem is not None:
+            return Path(self.restart_stem)
+
+        # param_prefix is empty if file_prefix was None on init
+        return Path(
+            "-".join(filter(None, (str(self.file_prefix), self.param_prefix, "res")))
+        )
+
+    @property
     def _restart_file(self) -> str:
         """
         Restart file name.
@@ -576,7 +681,7 @@ class MolecularDynamics(BaseCalculation):
         """
         step = self.offset + self.dyn.nsteps
         return self._build_filename(
-            f"res-{step}.extxyz", f"T{self.temp}", prefix_override=self.restart_stem
+            f"{step}.extxyz", prefix_override=self._restart_stem
         )
 
     def _parse_correlations(self) -> None:
@@ -621,10 +726,7 @@ class MolecularDynamics(BaseCalculation):
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
         current_temp = e_kin / (1.5 * units.kB)
 
-        time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
-        step = self.offset + self.dyn.nsteps
-        self.dyn.atoms.info["time_fs"] = time
-        self.dyn.atoms.info["step"] = step
+        self._set_time_step()
 
         time_now = datetime.datetime.now()
         real_time = time_now - self.dyn.atoms.info["real_time"]
@@ -656,9 +758,9 @@ class MolecularDynamics(BaseCalculation):
             pressure_tensor = np.zeros(6)
 
         return {
-            "Step": step,
+            "Step": self.dyn.atoms.info["step"],
             "Real_Time": real_time.total_seconds(),
-            "Time": time,
+            "Time": self.dyn.atoms.info["time_fs"],
             "Epot/N": e_pot,
             "EKin/N": e_kin,
             "T": current_temp,
@@ -746,7 +848,7 @@ class MolecularDynamics(BaseCalculation):
         """Write molecular dynamics statistics."""
         stats = self.get_stats()
 
-        # we do not want to print step 0 in restarts
+        # Do not print step 0 for restarts
         if self.restart and self.dyn.nsteps == 0:
             return
 
@@ -762,15 +864,21 @@ class MolecularDynamics(BaseCalculation):
 
     def _write_traj(self) -> None:
         """Write current structure to trajectory file."""
+        # Do not save step 0 for restarts
+        if self.restart and self.dyn.nsteps == 0:
+            return
+
         if self.dyn.nsteps >= self.traj_start:
             # Append if restarting or already started writing
             append = self.restart or (
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
+            self._set_time_step()
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self.traj_file
             write_kwargs["append"] = append
+
             output_structs(
                 images=self.struct,
                 struct_path=self.struct_path,
@@ -787,9 +895,11 @@ class MolecularDynamics(BaseCalculation):
         # Append if final file has been created
         append = self.created_final_file
 
+        self._set_time_step()
         write_kwargs = self.write_kwargs
         write_kwargs["filename"] = self.final_file
         write_kwargs["append"] = append
+
         output_structs(
             images=self.struct,
             struct_path=self.struct_path,
@@ -888,6 +998,8 @@ class MolecularDynamics(BaseCalculation):
         if step > 0:
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self._restart_file
+            self._set_time_step()
+
             output_structs(
                 images=self.struct,
                 struct_path=self.struct_path,
@@ -900,19 +1012,7 @@ class MolecularDynamics(BaseCalculation):
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
-        # Check if restarting simulation
-        if self.restart:
-            try:
-                with open(self.stats_file, encoding="utf8") as stats_file:
-                    last_line = stats_file.readlines()[-1].split()
-                try:
-                    self.offset = int(last_line[0])
-                except (IndexError, ValueError) as e:
-                    raise ValueError("Unable to read restart file") from e
-            except FileNotFoundError as e:
-                raise FileNotFoundError("Unable to read restart file") from e
-
-        else:
+        if not self.restart:
             if self.minimize:
                 self._optimize_structure()
             if self.rescale_velocities:
@@ -1122,25 +1222,6 @@ class NPT(MolecularDynamics):
 
         pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
         return f"{super()._set_param_prefix(file_prefix)}{pressure}"
-
-    @property
-    def _restart_file(self) -> str:
-        """
-        Restart file name.
-
-        Returns
-        -------
-        str
-           File name for restart file, includes pressure.
-        """
-        step = self.offset + self.dyn.nsteps
-        pressure = f"p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        return self._build_filename(
-            f"res-{step}.extxyz",
-            f"T{self.temp}",
-            pressure,
-            prefix_override=self.restart_stem,
-        )
 
     def get_stats(self) -> dict[str, float]:
         """

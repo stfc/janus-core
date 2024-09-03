@@ -256,6 +256,7 @@ def test_restart(tmp_path):
         restart_every=4,
         stats_every=1,
         restart=True,
+        restart_auto=False,
         file_prefix=file_prefix,
     )
     nvt_restart.run()
@@ -270,7 +271,7 @@ def test_restart(tmp_path):
 
     traj = read(traj_path, index=":")
     assert all(isinstance(image, Atoms) for image in traj)
-    assert len(traj) == 10
+    assert len(traj) == 9
 
 
 def test_minimize(tmp_path):
@@ -490,10 +491,10 @@ def test_rescale_every(tmp_path):
 
 def test_rotate_restart(tmp_path):
     """Test setting rotate_restart."""
-    file_prefix = tmp_path / "Cl4Na4-nvt"
-    restart_path_1 = tmp_path / "Cl4Na4-nvt-T300.0-res-1.extxyz"
-    restart_path_2 = tmp_path / "Cl4Na4-nvt-T300.0-res-2.extxyz"
-    restart_path_3 = tmp_path / "Cl4Na4-nvt-T300.0-res-3.extxyz"
+    file_prefix = tmp_path / "NaCl-nvt"
+    restart_path_1 = tmp_path / "NaCl-nvt-res-1.extxyz"
+    restart_path_2 = tmp_path / "NaCl-nvt-res-2.extxyz"
+    restart_path_3 = tmp_path / "NaCl-nvt-res-3.extxyz"
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         arch="mace",
@@ -884,3 +885,176 @@ def test_logging(tmp_path):
     assert log_file.exists()
     assert "emissions" in single_point.struct.info
     assert single_point.struct.info["emissions"] > 0
+
+
+def test_auto_restart(tmp_path):
+    """Test auto restarting simulation."""
+    # tmp_path for all files other than restart
+    # Include T300.0 to test Path.stem vs Path.name
+    final_path = tmp_path / "md-T300.0-final.extxyz"
+    traj_path = tmp_path / "md-T300.0-traj.extxyz"
+    stats_path = tmp_path / "md-T300.0-stats.dat"
+    log_file = tmp_path / "md.log"
+
+    # Predicted restart file, from defaults
+    restart_path = Path(".").absolute() / "NaCl-nvt-T300.0-res-4.extxyz"
+    assert not restart_path.exists()
+
+    try:
+        nvt = NVT(
+            struct_path=DATA_PATH / "NaCl.cif",
+            arch="mace_mp",
+            calc_kwargs={"model": MODEL_PATH},
+            temp=300.0,
+            steps=4,
+            stats_file=stats_path,
+            stats_every=3,
+            traj_file=traj_path,
+            traj_every=1,
+            final_file=final_path,
+            restart_every=4,
+            timestep=100,
+        )
+        nvt.run()
+
+        assert nvt.dyn.nsteps == 4
+        assert stats_path.exists()
+        assert traj_path.exists()
+        assert restart_path.exists()
+
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
+        # Header and steps 0 & 3 only in stats
+        assert len(lines) == 3
+        assert int(lines[-1].split()[0]) == 3
+
+        restart_struct = read(restart_path)
+        traj_struct = read(traj_path, index=-1)
+
+        # Prepare with auto restart from step 4
+        nvt_restart = NVT(
+            struct_path=DATA_PATH / "NaCl.cif",
+            arch="mace_mp",
+            calc_kwargs={"model": MODEL_PATH},
+            temp=300.0,
+            steps=3,
+            stats_every=1,
+            restart=True,
+            restart_auto=True,
+            stats_file=stats_path,
+            traj_file=traj_path,
+            traj_every=1,
+            final_file=final_path,
+            log_kwargs={"filename": log_file},
+        )
+
+        assert_log_contains(log_file, includes="Auto restart successful")
+
+        # Check saved restart struct is same as last trajectory struct
+        assert restart_struct.positions == pytest.approx(traj_struct.positions)
+        # Check saved restart struct is starting structure for new sim
+        assert restart_struct.positions == pytest.approx(nvt_restart.struct.positions)
+        # Check starting structure for new sim is same as final structure of old sim
+        assert nvt.struct.positions == pytest.approx(
+            nvt_restart.struct.positions, rel=1e-6
+        )
+
+        # Offset from restart file, not stats
+        assert nvt_restart.offset == 4
+
+        nvt_restart.run()
+
+        # Check outputs are appended
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
+        # Header and steps 0 & 3, and 5, 6 and 7
+        assert len(lines) == 6
+        assert int(lines[-1].split()[0]) == 7
+
+        final_traj = read(traj_path, index=":")
+        assert len(final_traj) == 8
+
+    finally:
+        restart_path.unlink(missing_ok=True)
+
+
+def test_auto_restart_restart_stem(tmp_path):
+    """Test auto restarting simulation with restart stem defined."""
+    file_prefix = tmp_path / "npt"
+    traj_path = tmp_path / "npt-traj.extxyz"
+    stats_path = tmp_path / "npt-stats.dat"
+    log_file = tmp_path / "md.log"
+
+    # Set restart stem and predict restart file
+    restart_stem = tmp_path / "npt-test"
+    restart_path = tmp_path / "npt-test-4.extxyz"
+
+    npt = NPT(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+        temp=300.0,
+        steps=6,
+        stats_every=3,
+        traj_every=1,
+        file_prefix=file_prefix,
+        restart_stem=str(restart_stem),
+        restart_every=4,
+        timestep=10,
+    )
+    npt.run()
+
+    assert npt.dyn.nsteps == 6
+    assert stats_path.exists()
+    assert traj_path.exists()
+    assert restart_path.exists()
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+    # Header and steps 3, 6 only in stats
+    assert len(lines) == 3
+    assert int(lines[-1].split()[0]) == 6
+
+    restart_struct = read(restart_path)
+    # Initial structure not saved by npt, so 4th structure from traj
+    traj_struct = read(traj_path, index=3)
+
+    # Prepare with auto restart from step 4
+    npt_restart = NPT(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+        temp=300.0,
+        steps=3,
+        stats_every=1,
+        restart_stem=restart_stem,
+        restart=True,
+        restart_auto=True,
+        file_prefix=file_prefix,
+        traj_every=1,
+        log_kwargs={"filename": log_file},
+    )
+
+    assert_log_contains(log_file, includes="Auto restart successful")
+
+    # Check saved restart struct is same as last trajectory struct
+    assert restart_struct.positions == pytest.approx(traj_struct.positions)
+    # Check saved restart struct is starting structure for new sim
+    assert restart_struct.positions == pytest.approx(npt_restart.struct.positions)
+    # Check starting structure for new sim is different to final structure of old sim
+    assert npt.struct.positions != pytest.approx(npt_restart.struct.positions, rel=1e-6)
+
+    # Offset from restart file, not stats
+    assert npt_restart.offset == 4
+
+    npt_restart.run()
+
+    # Check outputs are appended
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+    # Header and steps 0, 3, 6 and 5, 6 and 7
+    assert len(lines) == 6
+    assert int(lines[-1].split()[0]) == 7
+
+    final_traj = read(traj_path, index=":")
+    assert len(final_traj) == 9

@@ -112,6 +112,9 @@ def md(
         ),
     ] = None,
     restart: Annotated[bool, Option(help="Whether restarting dynamics.")] = False,
+    restart_auto: Annotated[
+        bool, Option(help="Whether to infer restart file if restarting dynamics.")
+    ] = True,
     restart_stem: Annotated[
         Optional[Path],
         Option(help="Stem for restart file name. Default inferred from `file_prefix`."),
@@ -242,6 +245,8 @@ def md(
         and temperature.
     restart : bool
         Whether restarting dynamics. Default is False.
+    restart_auto : bool
+        Whether to infer restart file name if restarting dynamics. Default is True.
     restart_stem : str
         Stem for restart file name. Default inferred from `file_prefix`.
     restart_every : int
@@ -351,6 +356,7 @@ def md(
         "rescale_every": rescale_every,
         "file_prefix": file_prefix,
         "restart": restart,
+        "restart_auto": restart_auto,
         "restart_stem": restart_stem,
         "restart_every": restart_every,
         "rotate_restart": rotate_restart,
