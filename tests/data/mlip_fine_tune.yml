@@ -14,8 +14,8 @@ stress_key: dft_stress
 energy_key: dft_energy
 forces_key: dft_forces
 compute_stress: False
-compute_forces: False
-clip_grad: 100
+compute_forces: True
+clip_grad: 10
 error_table: PerAtomRMSE
 lr: 0.005
 scaling: rms_forces_scaling
