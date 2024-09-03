@@ -165,6 +165,8 @@ def test_minimising_all(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--n-volumes",
+            4,
             "--minimize-all",
             "--file-prefix",
             file_prefix,
