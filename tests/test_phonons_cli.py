@@ -55,6 +55,18 @@ def test_phonons():
         with open(summary_path, encoding="utf8") as file:
             phonon_summary = yaml.safe_load(file)
 
+        has_eigenvectors = False
+        has_velocity = False
+        with open(bands_path, encoding="utf8") as file:
+            for line in file:
+                if "eigenvector" in line:
+                    has_eigenvectors = True
+                if "group_velocity" in line:
+                    has_velocity = True
+                if has_eigenvectors and has_velocity:
+                    break
+        assert has_eigenvectors and has_velocity
+
         assert "command" in phonon_summary
         assert "janus phonons" in phonon_summary["command"]
         assert "start_time" in phonon_summary
@@ -86,6 +98,7 @@ def test_bands_simple(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--bands",
             "--no-write-full",
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -143,6 +156,7 @@ def test_thermal_props(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--thermal",
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -163,6 +177,7 @@ def test_dos(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--dos",
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -183,6 +198,7 @@ def test_pdos(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--pdos",
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -192,11 +208,10 @@ def test_pdos(tmp_path):
 
 
 def test_plot(tmp_path):
-    """Test for ploting routines."""
+    """Test for plotting routines."""
     file_prefix = tmp_path / "NaCl"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
-    hdf5_results = tmp_path / "NaCl-force_constants.hdf5"
     autoband_results = tmp_path / "NaCl-auto_bands.yml"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
     svgs = [
@@ -212,11 +227,14 @@ def test_plot(tmp_path):
             "phonons",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--supercell",
+            "1x1x1",
             "--pdos",
             "--dos",
             "--bands",
-            "--hdf5",
+            "--no-hdf5",
             "--plot-to-file",
+            "--no-write-full",
             "--file-prefix",
             file_prefix,
         ],
@@ -224,15 +242,10 @@ def test_plot(tmp_path):
     assert result.exit_code == 0
     assert pdos_results.exists()
     assert dos_results.exists()
-    assert hdf5_results.exists()
     for svg in svgs:
         assert svg.exists()
 
     assert autoband_results.exists()
-    with open(autoband_results, encoding="utf8") as file:
-        bands = yaml.safe_load(file)
-    assert "eigenvector" in bands["phonon"][0]["band"][0]
-    assert "group_velocity" in bands["phonon"][0]["band"][0]
 
     # Read phonons summary file
     assert summary_path.exists()
@@ -256,6 +269,7 @@ def test_supercell(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--supercell",
             "1x2x3",
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -312,6 +326,7 @@ def test_minimize_kwargs(tmp_path):
             "--minimize",
             "--minimize-kwargs",
             minimize_kwargs,
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -342,6 +357,7 @@ def test_minimize_filename(tmp_path):
             "--minimize",
             "--minimize-kwargs",
             minimize_kwargs,
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
@@ -362,8 +378,11 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             "phonons",
             "--struct",
             DATA_PATH / "NaCl-traj.xyz",
+            "--supercell",
+            "1x1x1",
             "--read-kwargs",
             read_kwargs,
+            "--no-hdf5",
             "--file-prefix",
             file_prefix,
         ],
