@@ -129,7 +129,7 @@ def md(
         int, Option(help="Restart files to keep if rotating.")
     ] = 4,
     final_file: Annotated[
-        Path,
+        Optional[Path],
         Option(
             help=(
                 """
@@ -140,7 +140,7 @@ def md(
         ),
     ] = None,
     stats_file: Annotated[
-        Path,
+        Optional[Path],
         Option(
             help=(
                 """
@@ -152,7 +152,7 @@ def md(
     ] = None,
     stats_every: Annotated[int, Option(help="Frequency to output statistics.")] = 100,
     traj_file: Annotated[
-        Path,
+        Optional[Path],
         Option(help="File to save trajectory. Default inferred from `file_prefix`."),
     ] = None,
     traj_append: Annotated[bool, Option(help="Whether to append trajectory.")] = False,
@@ -162,17 +162,17 @@ def md(
     ] = 100,
     temp_start: Annotated[
         Optional[float],
-        Option(help="Temperature to start heating, in K.  [default: None]"),
+        Option(help="Temperature to start heating, in K."),
     ] = None,
     temp_end: Annotated[
         Optional[float],
-        Option(help="Maximum temperature for heating, in K.  [default: None]"),
+        Option(help="Maximum temperature for heating, in K."),
     ] = None,
     temp_step: Annotated[
-        float, Option(help="Size of temperature steps when heating, in K.")
+        Optional[float], Option(help="Size of temperature steps when heating, in K.")
     ] = None,
     temp_time: Annotated[
-        float, Option(help="Time between heating steps, in fs.")
+        Optional[float], Option(help="Time between heating steps, in fs.")
     ] = None,
     write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
@@ -292,10 +292,10 @@ def md(
         Default is None.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
-    summary : Path
+    summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Path
+    config : Optional[Path]
         Path to yaml configuration file to define the above options. Default is None.
     """
     # Check options from configuration file are all valid

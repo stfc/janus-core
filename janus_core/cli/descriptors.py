@@ -1,7 +1,7 @@
 """Set up MLIP descriptors commandline interface."""
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -53,7 +53,7 @@ def descriptors(
     device: Device = "cpu",
     model_path: ModelPath = None,
     out: Annotated[
-        Path,
+        Optional[Path],
         Option(
             help=(
                 "Path to save structure with calculated descriptors. Default is "
@@ -101,10 +101,10 @@ def descriptors(
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
-    summary : Path
+    summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Path
+    config : Optional[Path]
         Path to yaml configuration file to define the above options. Default is None.
     """
     # Check options from configuration file are all valid

@@ -96,7 +96,7 @@ def geomopt(
     ctx: Context,
     struct: StructPath,
     optimizer: Annotated[
-        str,
+        Optional[str],
         Option(help="Name of ASE optimizer function to use."),
     ] = "LBFGS",
     fmax: Annotated[
@@ -117,7 +117,7 @@ def geomopt(
         ),
     ] = False,
     filter_func: Annotated[
-        str,
+        Optional[str],
         Option(
             help=(
                 "Name of ASE filter/constraint function to use. If using "
@@ -130,7 +130,7 @@ def geomopt(
         float, Option(help="Scalar pressure when optimizing cell geometry, in GPa.")
     ] = 0.0,
     out: Annotated[
-        Path,
+        Optional[Path],
         Option(
             help=(
                 "Path to save optimized structure. Default is inferred from name "
@@ -140,7 +140,7 @@ def geomopt(
     ] = None,
     traj: Annotated[
         str,
-        Option(help="Path if saving optimization frames.  [default: None]"),
+        Option(help="Path if saving optimization frames."),
     ] = None,
     read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
@@ -202,10 +202,10 @@ def geomopt(
         Default is {}.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
-    summary : Path
+    summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Path
+    config : Optional[Path]
         Path to yaml configuration file to define the above options. Default is None.
     """
     # Check options from configuration file are all valid

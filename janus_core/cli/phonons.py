@@ -188,10 +188,10 @@ def phonons(
         chemical formula.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
-    summary : Path
+    summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Path
+    config : Optional[Path]
         Path to yaml configuration file to define the above options. Default is None.
     """
     # Check options from configuration file are all valid
