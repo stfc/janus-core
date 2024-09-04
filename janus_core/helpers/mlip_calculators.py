@@ -230,11 +230,8 @@ def choose_calculator(
         model = model_path if model_path else ""
 
         calculator = NequIPCalculator.from_deployed_model(
-           model_path=model,
-           device=device,
-           **kwargs)
-
-
+            model_path=model, device=device, **kwargs
+        )
 
     else:
         raise ValueError(
