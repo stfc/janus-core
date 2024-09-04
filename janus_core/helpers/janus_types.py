@@ -124,6 +124,7 @@ Architectures = Literal[
     "sevennet",
     "nequip",
     "dpa3",
+    "orb",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]

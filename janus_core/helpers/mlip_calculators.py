@@ -257,6 +257,36 @@ def choose_calculator(
 
         calculator = DP(model=model_path, **kwargs)
 
+    elif arch == "orb":
+        __version__ = "0.3"
+        from orb_models.forcefield.calculator import ORBCalculator
+        from orb_models.forcefield.graph_regressor import GraphRegressor
+        import orb_models.forcefield.pretrained as orb_ff
+
+        if isinstance(model_path, str):
+            match model_path:
+                case "orb-v1":
+                    model = orb_ff.orb_v1()
+                case "orb-mptraj-only-v1":
+                    model = orb_ff.orb_v1_mptraj_only()
+                case "orb-d3-v1":
+                    model = orb_ff.orb_d3_v1()
+                case "orb-d3-xs-v1":
+                    model = orb_ff.orb_d3_xs_v1()
+                case "orb-d3-sm-v1":
+                    model = orb_ff.orb_d3_sm_v1()
+                case _:
+                    raise ValueError(
+                        "Please specify `model_path`, as there is no "
+                        f"default model for {arch}"
+                    )
+        elif isinstance(model_path, GraphRegressor):
+            model = model_path
+        else:
+            model = orb_ff.orb_v1_mptraj_only()
+
+        calculator = ORBCalculator(model=model, device=device, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "
