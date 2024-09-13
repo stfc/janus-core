@@ -6,7 +6,7 @@ from typing import Union
 from ase import Atoms
 import numpy as np
 
-from janus_core.helpers.janus_types import Observable
+from janus_core.helpers.observables import Observable
 
 
 class Correlator:
@@ -178,6 +178,8 @@ class Correlation:
 
     Parameters
     ----------
+    n_atoms : int
+        Number of possible atoms to track.
     a : tuple[Observable, dict]
         Getter for a and kwargs.
     b : tuple[Observable, dict]
@@ -196,6 +198,7 @@ class Correlation:
 
     def __init__(
         self,
+        n_atoms: int,
         a: Union[Observable, tuple[Observable, tuple, dict]],
         b: Union[Observable, tuple[Observable, tuple, dict]],
         name: str,
@@ -209,6 +212,8 @@ class Correlation:
 
         Parameters
         ----------
+        n_atoms : int
+            Number of possible atoms to track.
         a : tuple[Observable, tuple, dict]
             Getter for a and kwargs.
         b : tuple[Observable, tuple, dict]
@@ -237,7 +242,18 @@ class Correlation:
             self._get_b = b
             self._b_args, self._b_kwargs = (), {}
 
-        self._correlator = Correlator(blocks=blocks, points=points, averaging=averaging)
+        self._a_atoms = self._get_a.atom_count(n_atoms)
+        self._b_atoms = self._get_b.atom_count(n_atoms)
+
+        self._correlators = []
+        for _ in zip(range(self._get_a.dimension), range(self._get_b.dimension)):
+            for _ in zip(
+                range(max(1, self._a_atoms)),
+                range(max(1, self._b_atoms)),
+            ):
+                self._correlators.append(
+                    Correlator(blocks=blocks, points=points, averaging=averaging)
+                )
         self._update_frequency = update_frequency
 
     @property
@@ -261,14 +277,17 @@ class Correlation:
         atoms : Atoms
             Atoms object to observe values from.
         """
-        self._correlator.update(
-            self._get_a(atoms, *self._a_args, **self._a_kwargs),
-            self._get_b(atoms, *self._b_args, **self._b_kwargs),
-        )
+        for i, values in enumerate(
+            zip(
+                self._get_a(atoms, *self._a_args, **self._a_kwargs),
+                self._get_b(atoms, *self._b_args, **self._b_kwargs),
+            )
+        ):
+            self._correlators[i].update(*values)
 
     def get(self) -> tuple[Iterable[float], Iterable[float]]:
         """
-        Get the correlation value and lags.
+        Get the correlation value and lags, averaging over atoms if applicable.
 
         Returns
         -------
@@ -277,7 +296,13 @@ class Correlation:
         lags : Iterable[float]]
             The correlation lag times t'.
         """
-        return self._correlator.get()
+        if self._correlators:
+            avg_value, lags = self._correlators[0].get()
+            for cor in self._correlators[1:]:
+                value, _ = cor.get()
+                avg_value += value
+            return avg_value / max(1, min(self._a_atoms, self._b_atoms)), lags
+        return [], []
 
     def __str__(self) -> str:
         """

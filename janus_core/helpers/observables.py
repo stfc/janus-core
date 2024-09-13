@@ -1,54 +1,126 @@
 """Module for built-in correlation observables."""
 
+from typing import Optional, Union
+
 from ase import Atoms, units
 
+from janus_core.helpers.janus_types import Observable, SliceLike
 
-class Stress:
+
+class ComponentMixin:
+    """
+    Mixin to handle Observables with components.
+
+    Parameters
+    ----------
+    components : dict[str, int]
+        Symbolic components mapped to indices.
+    """
+
+    def __init__(self, components: dict[str, int]):
+        """
+        Initialise the mixin with components.
+
+        Parameters
+        ----------
+        components : dict[str, int]
+            Symbolic components mapped to indices.
+        """
+        self._components = components
+
+    @property
+    def allowed_components(self) -> dict[str, int]:
+        """
+        Allowed symbolic components with associated indices.
+
+        Returns
+        -------
+        Dict[str, int]
+            The allowed components and associated indices.
+        """
+        return self._components
+
+    @property
+    def _indices(self) -> list[int]:
+        """
+        Get indices associated with self._components.
+
+        Returns
+        -------
+        list[int]
+            The indices for each self._components.
+        """
+        return [self._components[c] for c in self.components]
+
+    def _set_components(self, components: list[str]):
+        """
+        Check if components are valid, if so set them.
+
+        Parameters
+        ----------
+        components : str
+            The component symbols to check.
+
+        Raises
+        ------
+        ValueError
+            If any component is invalid.
+        """
+        for component in components:
+            if component not in self.allowed_components:
+                component_names = list(self._components.keys())
+                raise ValueError(
+                    f"'{component}' invalid, must be '{', '.join(component_names)}'"
+                )
+        self.components = components
+
+
+# pylint: disable=too-few-public-methods
+class Stress(Observable, ComponentMixin):
     """
     Observable for stress components.
 
     Parameters
     ----------
-    component : str
-        Symbol for tensor components, xx, yy, etc.
+    components : list[str]
+        Symbols for correlated tensor components, xx, yy, etc.
     include_ideal_gas : bool
         Calculate with the ideal gas contribution.
     """
 
-    def __init__(self, component: str, *, include_ideal_gas: bool = True):
+    def __init__(self, components: list[str], *, include_ideal_gas: bool = True):
         """
-        Initialise the observables from a symbolic str component.
+        Initialise the observable from a symbolic str component.
 
         Parameters
         ----------
-        component : str
-            Symbol for tensor components, xx, yy, etc.
+        components : list[str]
+            Symbols for tensor components, xx, yy, etc.
         include_ideal_gas : bool
             Calculate with the ideal gas contribution.
         """
-        components = {
-            "xx": 0,
-            "yy": 1,
-            "zz": 2,
-            "yz": 3,
-            "zy": 3,
-            "xz": 4,
-            "zx": 4,
-            "xy": 5,
-            "yx": 5,
-        }
-        if component not in components:
-            raise ValueError(
-                f"'{component}' invalid, must be '{', '.join(list(components.keys()))}'"
-            )
+        ComponentMixin.__init__(
+            self,
+            components={
+                "xx": 0,
+                "yy": 1,
+                "zz": 2,
+                "yz": 3,
+                "zy": 3,
+                "xz": 4,
+                "zx": 4,
+                "xy": 5,
+                "yx": 5,
+            },
+        )
+        self._set_components(components)
 
-        self.component = component
-        self._index = components[self.component]
+        Observable.__init__(self, len(components))
         self.include_ideal_gas = include_ideal_gas
 
-    def __call__(self, atoms: Atoms, *args, **kwargs) -> float:
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
         """
-        Get the stress component.
+        Get the stress components.
 
         Parameters
         ----------
@@ -61,12 +133,72 @@ class Stress:
 
         Returns
         -------
-        float
-            The stress component in GPa units.
+        list[float]
+            The stress components in GPa units.
         """
         return (
-            atoms.get_stress(include_ideal_gas=self.include_ideal_gas, voigt=True)[
-                self._index
-            ]
+            atoms.get_stress(include_ideal_gas=self.include_ideal_gas, voigt=True)
             / units.GPa
-        )
+        )[self._indices]
+
+
+StressDiagonal = Stress(["xx", "yy", "zz"])
+ShearStress = Stress(["xy", "yz", "zx"])
+
+
+# pylint: disable=too-few-public-methods
+class Velocity(Observable, ComponentMixin):
+    """
+    Observable for per atom velocity components.
+
+    Parameters
+    ----------
+    components : list[str]
+        Symbols for velocity components, x, y, z.
+    atoms : Optional[Union[list[int], SliceLike]]
+        List or slice of atoms to observe velocities from.
+    """
+
+    def __init__(
+        self,
+        components: list[str],
+        atoms: Optional[Union[list[int], SliceLike]] = None,
+    ):
+        """
+        Initialise the observable from a symbolic str component and atom index.
+
+        Parameters
+        ----------
+        components : list[str]
+            Symbols for tensor components, x, y, and z.
+        atoms : Union[list[int], SliceLike]
+            List or slice of atoms to observe velocities from.
+        """
+        ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
+        self._set_components(components)
+
+        Observable.__init__(self, len(components))
+        if atoms:
+            self.atoms = atoms
+        else:
+            atoms = slice(None, None, None)
+
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
+        """
+        Get the velocity components for correlated atoms.
+
+        Parameters
+        ----------
+        atoms : Atoms
+            Atoms object to extract values from.
+        *args : tuple
+            Additional positional arguments passed to getter.
+        **kwargs : dict
+            Additional kwargs passed getter.
+
+        Returns
+        -------
+        list[float]
+            The velocity values.
+        """
+        return atoms.get_velocities()[self.atoms, :][:, self._indices].flatten()
