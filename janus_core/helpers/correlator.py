@@ -178,6 +178,8 @@ class Correlation:
 
     Parameters
     ----------
+    n_atoms : int
+        Number of possible atoms to track.
     a : tuple[Observable, dict]
         Getter for a and kwargs.
     b : tuple[Observable, dict]
@@ -196,6 +198,7 @@ class Correlation:
 
     def __init__(
         self,
+        n_atoms: int,
         a: Union[Observable, tuple[Observable, tuple, dict]],
         b: Union[Observable, tuple[Observable, tuple, dict]],
         name: str,
@@ -209,6 +212,8 @@ class Correlation:
 
         Parameters
         ----------
+        n_atoms : int
+            Number of possible atoms to track.
         a : tuple[Observable, tuple, dict]
             Getter for a and kwargs.
         b : tuple[Observable, tuple, dict]
@@ -237,11 +242,14 @@ class Correlation:
             self._get_b = b
             self._b_args, self._b_kwargs = (), {}
 
+        self._a_atoms = self._get_a.atom_count(n_atoms)
+        self._b_atoms = self._get_b.atom_count(n_atoms)
+
         self._correlators = []
         for _ in zip(range(self._get_a.dimension), range(self._get_b.dimension)):
             for _ in zip(
-                range(max(1, self._get_a.atom_count)),
-                range(max(1, self._get_b.atom_count)),
+                range(max(1, self._a_atoms)),
+                range(max(1, self._b_atoms)),
             ):
                 self._correlators.append(
                     Correlator(blocks=blocks, points=points, averaging=averaging)
@@ -293,9 +301,7 @@ class Correlation:
             for cor in self._correlators[1:]:
                 value, _ = cor.get()
                 avg_value += value
-            return avg_value / max(
-                1, min(self._get_a.atom_count, self._get_b.atom_count)
-            ), lags
+            return avg_value / max(1, min(self._a_atoms, self._b_atoms)), lags
         return [], []
 
     def __str__(self) -> str:
