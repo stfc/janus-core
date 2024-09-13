@@ -13,8 +13,6 @@ from ase.eos import EquationOfState
 import numpy as np
 from numpy.typing import NDArray
 
-from janus_core.helpers.observables import Observable
-
 # General
 
 T = TypeVar("T")
@@ -23,7 +21,6 @@ MaybeSequence = Union[T, Sequence[T]]
 PathLike = Union[str, Path]
 StartStopStep = tuple[Optional[int], Optional[int], int]
 SliceLike = Union[slice, range, int, StartStopStep]
-
 # ASE Arg types
 
 
@@ -155,3 +152,122 @@ class EoSResults(TypedDict, total=False):
     bulk_modulus: float
     v_0: float
     e_0: float
+
+
+# pylint: disable=too-few-public-methods
+class Observable:
+    """
+    Observable data that may be correlated.
+
+    Parameters
+    ----------
+    dimension : int
+        The dimension of the observed data.
+    getter : Optional[callable]
+        An optional callable to construct the Observable from.
+    """
+
+    def __init__(self, dimension: int = 1, *, getter: Optional[callable] = None):
+        """
+        Initialise an observable with a given dimensionality.
+
+        Parameters
+        ----------
+        dimension : int
+            The dimension of the observed data.
+        getter : Optional[callable]
+            An optional callable to construct the Observable from.
+        """
+        self._dimension = dimension
+        self._getter = getter
+        self.atoms = None
+
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
+        """
+        Call the user supplied getter if it exits.
+
+        Parameters
+        ----------
+        atoms : Atoms
+            Atoms object to extract values from.
+        *args : tuple
+            Additional positional arguments passed to getter.
+        **kwargs : dict
+            Additional kwargs passed getter.
+
+        Returns
+        -------
+        list[float]
+            The observed value, with dimensions atoms by self.dimension.
+
+        Raises
+        ------
+        ValueError
+            If user supplied getter is None.
+        """
+        if self._getter:
+            value = self._getter(atoms, *args, **kwargs)
+            if not isinstance(value, list):
+                return [value]
+            return value
+        raise ValueError("No user getter supplied")
+
+    @property
+    def dimension(self):
+        """
+        Dimension of the observable. Commensurate with self.__call__.
+
+        Returns
+        -------
+        int
+            Observables dimension.
+        """
+        return self._dimension
+
+    def atom_count(self, n_atoms: int):
+        """
+        Atom count to average over.
+
+        Parameters
+        ----------
+        n_atoms : int
+            Total possible atoms.
+
+        Returns
+        -------
+        int
+            Atom count averaged over.
+        """
+        if self.atoms:
+            if isinstance(self.atoms, list):
+                return len(self.atoms)
+            if isinstance(self.atoms, int):
+                return 1
+
+            start = self.atoms.start
+            stop = self.atoms.stop
+            step = self.atoms.step
+            start = start if start is None else 0
+            stop = stop if stop is None else n_atoms
+            step = step if step is None else 1
+            return len(range(start, stop, step))
+        return 0
+
+
+class CorrelationKwargs(TypedDict, total=True):
+    """Arguments for on-the-fly correlations <ab>."""
+
+    #: observable a in <ab>, with optional args and kwargs
+    a: Union[Observable, tuple[Observable, tuple, dict]]
+    #: observable b in <ab>, with optional args and kwargs
+    b: Union[Observable, tuple[Observable, tuple, dict]]
+    #: name used for correlation in output
+    name: str
+    #: blocks used in multi-tau algorithm
+    blocks: int
+    #: points per block
+    points: int
+    #: averaging between blocks
+    averaging: int
+    #: frequency to update the correlation (steps)
+    update_frequency: int

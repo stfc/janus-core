@@ -16,7 +16,9 @@ from yaml import Loader, load, safe_load
 from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.processing.correlator import Correlator
-from janus_core.processing.observables import Stress
+from janus_core.processing.observables import Stress, Velocity
+from janus_core.processing import post_process
+from janus_core.helpers.janus_types import Observable
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"

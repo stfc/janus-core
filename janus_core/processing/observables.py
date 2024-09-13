@@ -1,10 +1,12 @@
 """Module for built-in correlation observables."""
 
 from __future__ import annotations
-from typing import Optional
+
+from typing import Optional, Union
 
 from ase import Atoms, units
 
+from janus_core.helpers.janus_types import Observable, SliceLike
 
 # pylint: disable=too-few-public-methods
 class Observable:
@@ -89,7 +91,6 @@ class Observable:
         if self.atoms:
             return len(self.atoms)
         return 0
-
 
 class ComponentMixin:
     """
@@ -239,11 +240,15 @@ class Velocity(Observable, ComponentMixin):
     ----------
     components : list[str]
         Symbols for velocity components, x, y, z.
-    atoms : list[int]
-        List of atoms to observe velocities from.
+    atoms : Optional[Union[list[int], SliceLike]]
+        List or slice of atoms to observe velocities from.
     """
 
-    def __init__(self, components: list[str], atoms: list[int]):
+    def __init__(
+        self,
+        components: list[str],
+        atoms: Optional[Union[list[int], SliceLike]] = None,
+    ):
         """
         Initialise the observable from a symbolic str component and atom index.
 
@@ -251,14 +256,17 @@ class Velocity(Observable, ComponentMixin):
         ----------
         components : list[str]
             Symbols for tensor components, x, y, and z.
-        atoms : list[int]
-            List of atoms to observe velocities from.
+        atoms : Union[list[int], SliceLike]
+            List or slice of atoms to observe velocities from.
         """
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
         self._set_components(components)
 
         Observable.__init__(self, len(components))
-        self.atoms = atoms
+        if atoms:
+            self.atoms = atoms
+        else:
+            atoms = slice(None, None, None)
 
     def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
         """
