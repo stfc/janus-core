@@ -46,7 +46,7 @@ def phonons(
         float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
     mesh: Annotated[
-        tuple[float, float, float], Option(help="Mesh numbers along a, b, c axes.")
+        tuple[int, int, int], Option(help="Mesh numbers along a, b, c axes.")
     ] = (10, 10, 10),
     bands: Annotated[
         bool,
@@ -127,7 +127,7 @@ def phonons(
         2x2x2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
-    mesh : tuple[float, float, float]
+    mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     bands : bool
         Whether to calculate and save the band structure. Default is False.

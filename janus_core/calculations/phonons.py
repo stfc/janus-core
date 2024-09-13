@@ -60,7 +60,7 @@ class Phonons(BaseCalculation):
         Size of supercell for calculation. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
-    mesh : MaybeSequence[float]
+    mesh : MaybeSequence[int]
         Mesh for sampling. Default is (10, 10, 10).
     symmetrize : bool
         Whether to symmetrize force constants after calculation.
@@ -140,7 +140,7 @@ class Phonons(BaseCalculation):
         calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
-        mesh: MaybeSequence[float] = (10, 10, 10),
+        mesh: MaybeSequence[int] = (10, 10, 10),
         symmetrize: bool = False,
         minimize: bool = False,
         minimize_kwargs: Optional[dict[str, Any]] = None,
@@ -189,7 +189,7 @@ class Phonons(BaseCalculation):
             Size of supercell for calculation. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
-        mesh : MaybeSequence[float]
+        mesh : MaybeSequence[int]
             Mesh for sampling. Default is (10, 10, 10).
         symmetrize : bool
             Whether to symmetrize force constants after calculations.
@@ -497,7 +497,7 @@ class Phonons(BaseCalculation):
 
     def calc_thermal_props(
         self,
-        mesh: Optional[MaybeSequence[float]] = None,
+        mesh: Optional[MaybeSequence[int]] = None,
         write_thermal: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -506,7 +506,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : Optional[MaybeSequence[float]]
+        mesh : Optional[MaybeSequence[int]]
             Mesh for sampling. Default is self.mesh.
         write_thermal : Optional[bool]
             Whether to write out thermal properties to file. Default is
@@ -577,7 +577,7 @@ class Phonons(BaseCalculation):
     def calc_dos(
         self,
         *,
-        mesh: Optional[MaybeSequence[float]] = None,
+        mesh: Optional[MaybeSequence[int]] = None,
         write_dos: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -586,7 +586,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : Optional[MaybeSequence[float]]
+        mesh : Optional[MaybeSequence[int]]
             Mesh for sampling. Default is self.mesh.
         write_dos : Optional[bool]
             Whether to write out results to file. Default is True.
@@ -682,7 +682,7 @@ class Phonons(BaseCalculation):
     def calc_pdos(
         self,
         *,
-        mesh: Optional[MaybeSequence[float]] = None,
+        mesh: Optional[MaybeSequence[int]] = None,
         write_pdos: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -691,7 +691,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : Optional[MaybeSequence[float]]
+        mesh : Optional[MaybeSequence[int]]
             Mesh for sampling. Default is self.mesh.
         write_pdos : Optional[bool]
             Whether to write out results to file. Default is self.write_results.
