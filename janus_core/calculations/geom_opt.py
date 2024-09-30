@@ -311,16 +311,14 @@ class GeomOpt(BaseCalculation):
             "trajectory": self.traj_kwargs.get("filename"),
         }
 
-    def _get_constraint_args(self, constraint_class: object) -> list[Any]:
+    def _set_mandatory_constraint_kwargs(self) -> None:
         """Inspect constraint class for mandatory arguments
 
         For now we are just looking for the "atoms" parameter of FixSymmetry
         """
-        parameters = inspect.signature(constraint_class.__init__).parameters
+        parameters = inspect.signature(self.constraint_func.__init__).parameters
         if "atoms" in parameters:
-            return [self.struct]
-
-        return []
+            self.constraint_kwargs["atoms"] = self.struct
 
     def set_optimizer(self) -> None:
         """Set optimizer for geometry optimization."""
@@ -329,8 +327,8 @@ class GeomOpt(BaseCalculation):
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)
 
         if self.constraint_func is not None:
-            constraint_args = self._get_constraint_args(self.constraint_func)
-            self.struct.set_constraint(self.constraint_func(*constraint_args, **self.constraint_kwargs))
+            self._set_mandatory_constraint_kwargs()
+            self.struct.set_constraint(self.constraint_func(**self.constraint_kwargs))
 
             if self.logger:
                 self.logger.info("Using constraint: %s", self.constraint_func.__name__)
