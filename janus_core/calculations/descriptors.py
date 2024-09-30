@@ -163,6 +163,14 @@ class Descriptors(BaseCalculation):
         ):
             raise ValueError("Please attach a calculator to `struct`.")
 
+        if not hasattr(self.struct.calc, "get_descriptors") or not callable(
+            self.struct.calc.get_descriptors
+        ):
+            raise NotImplementedError(
+                "The attached calculator does not currently support calculating "
+                "descriptors"
+            )
+
         # Set output file
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
