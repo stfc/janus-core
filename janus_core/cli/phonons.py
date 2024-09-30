@@ -40,8 +40,8 @@ def phonons(
     ctx: Context,
     struct: StructPath,
     supercell: Annotated[
-        str, Option(help="Supercell lattice vectors in the form '1x2x3'.")
-    ] = "2x2x2",
+        tuple[int, int, int], Option(help="Supercell lattice vectors.")
+    ] = (2, 2, 2),
     displacement: Annotated[
         float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
@@ -122,9 +122,8 @@ def phonons(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    supercell : str
-        Supercell lattice vectors. Must be passed in the form '1x2x3'. Default is
-        2x2x2.
+    supercell : tuple[int, int, int]
+        Supercell lattice vectors. Default is (2, 2, 2).
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]
@@ -199,17 +198,6 @@ def phonons(
     if "fmax" in minimize_kwargs:
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
-
-    try:
-        supercell = [int(x) for x in supercell.split("x")]
-    except ValueError as exc:
-        raise ValueError(
-            "Please pass lattice vectors as integers in the form 1x2x3"
-        ) from exc
-
-    # Validate supercell list
-    if len(supercell) != 3:
-        raise ValueError("Please pass three lattice vectors in the form 1x2x3")
 
     calcs = []
     if bands:
