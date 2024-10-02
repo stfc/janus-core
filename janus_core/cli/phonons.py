@@ -41,7 +41,7 @@ def phonons(
     supercell: Annotated[
         str,
         Option(help="Supercell lattice vectors in the form '1x2x3'."),
-    ] = "2x2x2",
+    ] = "2 2 2",
     displacement: Annotated[
         float,
         Option(help="Displacement for force constants calculation, in A."),
@@ -134,8 +134,11 @@ def phonons(
     struct : Path
         Path of structure to simulate.
     supercell : str
-        Supercell lattice vectors. Must be passed in the form '1x2x3'. Default is
-        2x2x2.
+        Supercell lattice vectors. Must be passed inside a string, as a series of
+        either 3 or 9 wihtespace-separated numbers, i.e. '1 2 3' or '1 2 3 4 5 6 7 8 9'.
+        If 3 numbers are provided, the supercell is assumed to be symmetrical, so the
+        remaining values are set to 0. Otherwise, all 9 values are used to construct
+        the transformation matrix, as in Phonopy. Default is '2 2 2'.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     bands : bool
@@ -210,15 +213,15 @@ def phonons(
     minimize_kwargs["fmax"] = fmax
 
     try:
-        supercell = [int(x) for x in supercell.split("x")]
+        supercell = [int(x) for x in supercell.split()]
     except ValueError as exc:
         raise ValueError(
             "Please pass lattice vectors as integers in the form 1x2x3"
         ) from exc
 
     # Validate supercell list
-    if len(supercell) != 3:
-        raise ValueError("Please pass three lattice vectors in the form 1x2x3")
+    if len(supercell) not in [3, 9]:
+        raise ValueError("Please pass three or nine lattice vectors in the form '1 2 3'")
 
     calcs = []
     if bands:
