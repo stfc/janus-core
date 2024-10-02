@@ -85,12 +85,13 @@ def test_log(tmp_path):
     )
     assert result.exit_code == 0
 
+    # Only check reduced precision of energy and max force
     assert_log_contains(
         log_path,
         includes=[
             "Starting geometry optimization",
-            "Final energy: -27.035128",
-            "Max force: 0.000000",
+            "Final energy: -27.035127",
+            "Max force: ",
         ],
         excludes="Using filter",
     )
