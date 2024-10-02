@@ -228,7 +228,7 @@ def test_plot(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--supercell",
-            "1x1x1",
+            "1 1 1",
             "--pdos",
             "--dos",
             "--bands",
@@ -268,7 +268,7 @@ def test_supercell(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--supercell",
-            "1x2x3",
+            "1 2 3",
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -285,7 +285,7 @@ def test_supercell(tmp_path):
     assert params["supercell_matrix"] == [[1, 0, 0], [0, 2, 0], [0, 0, 3]]
 
 
-test_data = ["2", "2.1x2.1x2.1", "2x2xa"]
+test_data = ["2", "2x2x2", "2.1 2.1 2.1", "2 2 a", "2 2", "2 2 2 2 2 2"]
 
 
 @pytest.mark.parametrize("supercell", test_data)
@@ -379,7 +379,7 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             "--struct",
             DATA_PATH / "NaCl-traj.xyz",
             "--supercell",
-            "1x1x1",
+            "1 1 1",
             "--read-kwargs",
             read_kwargs,
             "--no-hdf5",
