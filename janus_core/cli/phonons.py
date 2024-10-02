@@ -215,7 +215,7 @@ def phonons(
         supercell = [int(x) for x in supercell.split()]
     except ValueError as exc:
         raise ValueError(
-            "Please pass lattice vectors as integers in the form 1x2x3"
+            "Please pass lattice vectors as integers in the form '1 2 3'"
         ) from exc
 
     # Validate supercell list
