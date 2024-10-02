@@ -216,6 +216,8 @@ class Phonons(BaseCalculation):
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
+        enable_progress_bar : bool
+            Whether to show a progress bar during phonon calculations. Default is False.
         """
         (read_kwargs, minimize_kwargs) = none_to_dict((read_kwargs, minimize_kwargs))
 
