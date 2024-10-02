@@ -301,6 +301,7 @@ class GeomOpt(BaseCalculation):
         if self.logger:
             self.logger.info("After optimization spacegroup: %s", s_grp)
             self.logger.info("Max force: %.6f", max_force)
+            self.logger.info("Final energy: %.6f", self.struct.get_potential_energy())
 
         if not converged:
             warnings.warn(
