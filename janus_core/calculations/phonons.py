@@ -8,6 +8,7 @@ from numpy import ndarray
 import phonopy
 from phonopy.file_IO import write_force_constants_to_hdf5
 from phonopy.structure.atoms import PhonopyAtoms
+from tqdm import tqdm
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
@@ -149,6 +150,7 @@ class Phonons(BaseCalculation):
         write_results: bool = True,
         write_full: bool = True,
         file_prefix: Optional[PathLike] = None,
+        enable_progress_bar: bool = False
     ) -> None:
         """
         Initialise Phonons class.
@@ -229,6 +231,7 @@ class Phonons(BaseCalculation):
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
+        self.enable_progress_bar = enable_progress_bar
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -356,6 +359,9 @@ class Phonons(BaseCalculation):
         phonon = phonopy.Phonopy(cell, supercell_matrix)
         phonon.generate_displacements(distance=self.displacement)
         disp_supercells = phonon.supercells_with_displacements
+
+        if self.enable_progress_bar:
+            disp_supercells = tqdm(disp_supercells)
 
         phonon.forces = [
             self._calc_forces(supercell)
