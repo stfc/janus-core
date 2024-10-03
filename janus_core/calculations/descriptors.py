@@ -166,7 +166,11 @@ class Descriptors(BaseCalculation):
         ):
             raise ValueError("Please attach a calculator to `struct`.")
 
-        self._check_calculator(self.struct.calc)
+        if isinstance(self.struct, Atoms):
+            self._check_calculator(self.struct.calc)
+        if isinstance(self.struct, Sequence):
+            for image in self.struct:
+                self._check_calculator(image.calc)
 
         # Set output file
         self.write_kwargs.setdefault("filename", None)
