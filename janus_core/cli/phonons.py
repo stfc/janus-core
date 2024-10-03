@@ -21,6 +21,7 @@ from janus_core.cli.types import (
 from janus_core.cli.utils import (
     carbon_summary,
     check_config,
+    dict_tuples_to_lists,
     end_summary,
     parse_typer_dicts,
     save_struct_calc,
@@ -39,30 +40,22 @@ def phonons(
     ctx: Context,
     struct: StructPath,
     supercell: Annotated[
-        str,
-        Option(help="Supercell lattice vectors in the form '1x2x3'."),
-    ] = "2x2x2",
+        tuple[int, int, int], Option(help="Supercell lattice vectors.")
+    ] = (2, 2, 2),
     displacement: Annotated[
-        float,
-        Option(help="Displacement for force constants calculation, in A."),
+        float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
+    mesh: Annotated[
+        tuple[int, int, int], Option(help="Mesh numbers along a, b, c axes.")
+    ] = (10, 10, 10),
     bands: Annotated[
         bool,
         Option(help="Whether to compute band structure."),
     ] = False,
-    dos: Annotated[
-        bool,
-        Option(help="Whether to calculate the DOS."),
-    ] = False,
-    pdos: Annotated[
-        bool,
-        Option(
-            help="Whether to calculate the PDOS.",
-        ),
-    ] = False,
+    dos: Annotated[bool, Option(help="Whether to calculate the DOS.")] = False,
+    pdos: Annotated[bool, Option(help="Whether to calculate the PDOS.")] = False,
     thermal: Annotated[
-        bool,
-        Option(help="Whether to calculate thermal properties."),
+        bool, Option(help="Whether to calculate thermal properties.")
     ] = False,
     temp_min: Annotated[
         float,
@@ -80,18 +73,14 @@ def phonons(
         bool, Option(help="Whether to symmetrize force constants.")
     ] = False,
     minimize: Annotated[
-        bool,
-        Option(
-            help="Whether to minimize structure before calculations.",
-        ),
+        bool, Option(help="Whether to minimize structure before calculations.")
     ] = False,
     fmax: Annotated[
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
     hdf5: Annotated[
-        bool,
-        Option(help="Whether to save force constants in hdf5."),
+        bool, Option(help="Whether to save force constants in hdf5.")
     ] = True,
     plot_to_file: Annotated[
         bool,
@@ -133,11 +122,12 @@ def phonons(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    supercell : str
-        Supercell lattice vectors. Must be passed in the form '1x2x3'. Default is
-        2x2x2.
+    supercell : tuple[int, int, int]
+        Supercell lattice vectors. Default is (2, 2, 2).
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    mesh : tuple[int, int, int]
+        Mesh for sampling. Default is (10, 10, 10).
     bands : bool
         Whether to calculate and save the band structure. Default is False.
     dos : bool
@@ -209,17 +199,6 @@ def phonons(
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
 
-    try:
-        supercell = [int(x) for x in supercell.split("x")]
-    except ValueError as exc:
-        raise ValueError(
-            "Please pass lattice vectors as integers in the form 1x2x3"
-        ) from exc
-
-    # Validate supercell list
-    if len(supercell) != 3:
-        raise ValueError("Please pass three lattice vectors in the form 1x2x3")
-
     calcs = []
     if bands:
         calcs.append("bands")
@@ -247,6 +226,7 @@ def phonons(
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
+        "mesh": mesh,
         "symmetrize": symmetrize,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
@@ -282,6 +262,9 @@ def phonons(
         calc_kwargs=calc_kwargs,
         log=log,
     )
+
+    # Convert all tuples to list in inputs nested dictionary
+    dict_tuples_to_lists(inputs)
 
     # Save summary information before calculations begin
     start_summary(command="phonons", summary=summary, inputs=inputs)

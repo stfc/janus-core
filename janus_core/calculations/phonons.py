@@ -60,6 +60,8 @@ class Phonons(BaseCalculation):
         Size of supercell for calculation. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    mesh : tuple[int, int, int]
+        Mesh for sampling. Default is (10, 10, 10).
     symmetrize : bool
         Whether to symmetrize force constants after calculation.
         Default is False.
@@ -106,7 +108,7 @@ class Phonons(BaseCalculation):
         Calculate band structure and optionally write and plot results.
     write_bands(bands_file, save_plots, plot_file)
         Write results of band structure calculations.
-    calc_thermal_props(write_thermal)
+    calc_thermal_props(mesh, write_thermal)
         Calculate thermal properties and optionally write results.
     write_thermal_props(thermal_file)
         Write results of thermal properties calculations.
@@ -138,6 +140,7 @@ class Phonons(BaseCalculation):
         calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
+        mesh: tuple[int, int, int] = (10, 10, 10),
         symmetrize: bool = False,
         minimize: bool = False,
         minimize_kwargs: Optional[dict[str, Any]] = None,
@@ -186,6 +189,8 @@ class Phonons(BaseCalculation):
             Size of supercell for calculation. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
+        mesh : tuple[int, int, int]
+            Mesh for sampling. Default is (10, 10, 10).
         symmetrize : bool
             Whether to symmetrize force constants after calculations.
             Default is False.
@@ -219,6 +224,7 @@ class Phonons(BaseCalculation):
 
         self.calcs = calcs
         self.displacement = displacement
+        self.mesh = mesh
         self.symmetrize = symmetrize
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
@@ -490,13 +496,18 @@ class Phonons(BaseCalculation):
             bplt.savefig(plot_file)
 
     def calc_thermal_props(
-        self, write_thermal: Optional[bool] = None, **kwargs
+        self,
+        mesh: Optional[tuple[int, int, int]] = None,
+        write_thermal: Optional[bool] = None,
+        **kwargs,
     ) -> None:
         """
         Calculate thermal properties and optionally write results.
 
         Parameters
         ----------
+        mesh : Optional[tuple[int, int, int]]
+            Mesh for sampling. Default is self.mesh.
         write_thermal : Optional[bool]
             Whether to write out thermal properties to file. Default is
             self.write_results.
@@ -505,6 +516,9 @@ class Phonons(BaseCalculation):
         """
         if write_thermal is None:
             write_thermal = self.write_results
+
+        if mesh is None:
+            mesh = self.mesh
 
         # Calculate phonons if not already in results
         if "phonon" not in self.results:
@@ -515,7 +529,7 @@ class Phonons(BaseCalculation):
             self.logger.info("Starting thermal properties calculation")
             self.tracker.start_task("Thermal calculation")
 
-        self.results["phonon"].run_mesh()
+        self.results["phonon"].run_mesh(mesh)
         self.results["phonon"].run_thermal_properties(
             t_step=self.temp_step, t_max=self.temp_max, t_min=self.temp_min
         )
@@ -563,7 +577,7 @@ class Phonons(BaseCalculation):
     def calc_dos(
         self,
         *,
-        mesh: MaybeList[float] = (10, 10, 10),
+        mesh: Optional[tuple[int, int, int]] = None,
         write_dos: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -572,8 +586,8 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : MaybeList[float]
-            Mesh for sampling. Default is (10, 10, 10).
+        mesh : Optional[tuple[int, int, int]]
+            Mesh for sampling. Default is self.mesh.
         write_dos : Optional[bool]
             Whether to write out results to file. Default is True.
         **kwargs
@@ -581,6 +595,9 @@ class Phonons(BaseCalculation):
         """
         if write_dos is None:
             write_dos = self.write_results
+
+        if mesh is None:
+            mesh = self.mesh
 
         # Calculate phonons if not already in results
         if "phonon" not in self.results:
@@ -665,7 +682,7 @@ class Phonons(BaseCalculation):
     def calc_pdos(
         self,
         *,
-        mesh: MaybeList[float] = (10, 10, 10),
+        mesh: Optional[tuple[int, int, int]] = None,
         write_pdos: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -674,8 +691,8 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : MaybeList[float]
-            Mesh for sampling. Default is (10, 10, 10).
+        mesh : Optional[tuple[int, int, int]]
+            Mesh for sampling. Default is self.mesh.
         write_pdos : Optional[bool]
             Whether to write out results to file. Default is self.write_results.
         **kwargs
@@ -683,6 +700,9 @@ class Phonons(BaseCalculation):
         """
         if write_pdos is None:
             write_pdos = self.write_results
+
+        if mesh is None:
+            mesh = self.mesh
 
         # Calculate phonons if not already in results
         if "phonon" not in self.results:
