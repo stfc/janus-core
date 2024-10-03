@@ -256,7 +256,14 @@ def test_plot(tmp_path):
     assert phonon_summary["inputs"]["calcs"][2] == "pdos"
 
 
-def test_supercell(tmp_path):
+test_data = [
+    ("1 2 3", [[1, 0, 0], [0, 2, 0], [0, 0, 3]]),
+    ("1 1 0 -1 1 0 0 0 2", [[1, 1, 0], [-1, 1, 0], [0, 0, 2]])
+]
+
+
+@pytest.mark.parametrize("supercell,supercell_matrix", test_data)
+def test_supercell(supercell, supercell_matrix, tmp_path):
     """Test setting the supercell."""
     file_prefix = tmp_path / "NaCl"
     param_file = tmp_path / "NaCl-phonopy.yml"
@@ -268,7 +275,7 @@ def test_supercell(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--supercell",
-            "1 2 3",
+            supercell,
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -282,7 +289,7 @@ def test_supercell(tmp_path):
 
     assert "supercell_matrix" in params
     assert len(params["supercell_matrix"]) == 3
-    assert params["supercell_matrix"] == [[1, 0, 0], [0, 2, 0], [0, 0, 3]]
+    assert params["supercell_matrix"] == supercell_matrix
 
 
 
