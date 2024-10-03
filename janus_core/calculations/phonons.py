@@ -257,7 +257,13 @@ class Phonons(BaseCalculation):
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
         if len(self.supercell) not in [3, 9]:
-            raise ValueError("`supercell` must be an integer, or list of length 3 or 9")
+            raise ValueError(
+                "`supercell` must be an integer, or list of length 3 or 9. A list of "
+                "length 3 must specify the values of a diagonal supercell, and a list "
+                "of length 9 must specify all values of a full supercell matrix, where "
+                "the first three values are the first row, the second three are the "
+                "second row, etc."
+            )
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)

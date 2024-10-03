@@ -226,7 +226,9 @@ def phonons(
     # Validate supercell list
     if len(supercell) not in [3, 9]:
         raise ValueError(
-            "Please pass three or nine lattice vectors in the form '1 2 3'"
+            "Please pass three or nine lattice vectors in the form '1 2 3' or "
+            "'1 2 3 4 5 6 7 8 9'. In the latter case first three values are the first "
+            "row of the supercell matrix, the second three are the second row, etc."
         )
 
     calcs = []
