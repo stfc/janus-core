@@ -4,7 +4,10 @@ from collections.abc import Sequence
 from typing import Any, Optional
 
 from ase import Atoms
+from ase.calculators.calculator import Calculator
+from ase.calculators.mixing import SumCalculator
 import numpy as np
+from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.helpers.janus_types import (
@@ -163,19 +166,38 @@ class Descriptors(BaseCalculation):
         ):
             raise ValueError("Please attach a calculator to `struct`.")
 
-        if not hasattr(self.struct.calc, "get_descriptors") or not callable(
-            self.struct.calc.get_descriptors
-        ):
-            raise NotImplementedError(
-                "The attached calculator does not currently support calculating "
-                "descriptors"
-            )
+        self._check_calculator(self.struct.calc)
 
         # Set output file
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
             "descriptors.extxyz", filename=self.write_kwargs["filename"]
         ).absolute()
+
+    @staticmethod
+    def _check_calculator(calc: Calculator) -> None:
+        """
+        Ensure calculator has ability to calculate descriptors.
+
+        Parameters
+        ----------
+        calc : Calculator
+            ASE Calculator to calculate descriptors.
+        """
+        # If dispersion added to MLIP calculator, use MLIP calculator for descriptors
+        if isinstance(calc, SumCalculator):
+            if (
+                len(calc.mixer.calcs) == 2
+                and isinstance(calc.mixer.calcs[1], TorchDFTD3Calculator)
+                and hasattr(calc.mixer.calcs[0], "get_descriptors")
+            ):
+                calc.get_descriptors = calc.mixer.calcs[0].get_descriptors
+
+        if not hasattr(calc, "get_descriptors") or not callable(calc.get_descriptors):
+            raise NotImplementedError(
+                "The attached calculator does not currently support calculating "
+                "descriptors"
+            )
 
     def run(self) -> None:
         """Calculate descriptors for structure(s)."""
