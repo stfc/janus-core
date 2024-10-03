@@ -196,11 +196,12 @@ class Phonons(BaseCalculation):
         supercell : MaybeList[int]
             The size of a supercell for calculation, or the supercell itself.
             If a single number is provided, it is interpreted as the size, so a
-            symmetrical supercell of that size in all dimensions is constructed.
+            diagonal supercell of that size in all dimensions is constructed.
             If three values are provided, they are interpreted as the diagonal
-            values of a symmetrical supercell. If nine values are provided, they
-            are assumed to be the full supercell matrix in the style of Phonopy.
-            Default is 2.
+            values of a diagonal supercell. If nine values are provided, they
+            are assumed to be the full supercell matrix in the style of Phonopy,
+            so the first three values will be used as the first row, the second
+            three as the second row, etc. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
         mesh : tuple[int, int, int]

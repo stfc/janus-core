@@ -30,7 +30,12 @@ def phonons(
     struct: StructPath,
     supercell: Annotated[
         str,
-        Option(help="Supercell lattice vectors in the form '1x2x3'."),
+        Option(help="Supercell lattice vectors in the form '1 2 3' or "
+                    "'1 2 3 4 5 6 7 8 9'. If three values are provided, "
+                    "the supercell is assumed to be diagonal. Otherwise, "
+                    "the first three values will be interpreted as the "
+                    "first row of the supercell matrix, the second three, "
+                    "as the second row, etc."),
     ] = "2 2 2",
     displacement: Annotated[
         float, Option(help="Displacement for force constants calculation, in A.")
@@ -118,9 +123,9 @@ def phonons(
     supercell : str
         Supercell lattice vectors. Must be passed inside a string, as a series of
         either 3 or 9 wihtespace-separated numbers, i.e. '1 2 3' or '1 2 3 4 5 6 7 8 9'.
-        If 3 numbers are provided, the supercell is assumed to be symmetrical, so the
-        remaining values are set to 0. Otherwise, all 9 values are used to construct
-        the transformation matrix, as in Phonopy. Default is '2 2 2'.
+        If 3 numbers are provided, the supercell is assumed to be diagonal. Otherwise,
+        all 9 values are used to construct the transformation matrix, using the first
+        three as the first row, the second three as the second row, etc. Default is '2 2 2'.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]
