@@ -7,7 +7,6 @@ from ase import Atoms
 from ase.calculators.calculator import Calculator
 from ase.calculators.mixing import SumCalculator
 import numpy as np
-from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.helpers.janus_types import (
@@ -192,7 +191,7 @@ class Descriptors(BaseCalculation):
         if isinstance(calc, SumCalculator):
             if (
                 len(calc.mixer.calcs) == 2
-                and isinstance(calc.mixer.calcs[1], TorchDFTD3Calculator)
+                and calc.mixer.calcs[1].name == "TorchDFTD3Calculator"
                 and hasattr(calc.mixer.calcs[0], "get_descriptors")
             ):
                 calc.get_descriptors = calc.mixer.calcs[0].get_descriptors
