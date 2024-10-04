@@ -88,3 +88,48 @@ def test_logging(tmp_path):
 
     assert log_file.exists()
     assert single_point.struct.info["emissions"] > 0
+
+
+def test_dispersion():
+    """Test using mace_mp with dispersion."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"dispersion": False},
+    )
+
+    descriptors = Descriptors(
+        single_point.struct,
+        calc_per_element=True,
+    )
+    descriptors.run()
+
+    single_point_disp = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"dispersion": True},
+    )
+
+    descriptors_disp = Descriptors(
+        single_point_disp.struct,
+        calc_per_element=True,
+    )
+    descriptors_disp.run()
+
+    assert (
+        descriptors_disp.struct.info["mace_mp_descriptor"]
+        == descriptors.struct.info["mace_mp_descriptor"]
+    )
+
+
+def test_not_implemented_error():
+    """Test correct error raised if descriptors not implemented."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="chgnet",
+    )
+    with pytest.raises(NotImplementedError):
+        Descriptors(
+            single_point.struct,
+            calc_per_element=True,
+        )
