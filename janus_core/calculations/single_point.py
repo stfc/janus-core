@@ -198,9 +198,9 @@ class SinglePoint(BaseCalculation):
                         f"Property '{prop}' cannot currently be calculated."
                     )
 
-        # If none specified, get all valid properties
+        # If none specified, get energy, forces and stress
         if not value:
-            value = get_args(Properties)
+            value = ("energy", "forces", "stress")
 
         self._properties = value
 
@@ -246,6 +246,20 @@ class SinglePoint(BaseCalculation):
 
         return self.struct.get_stress()
 
+    def _get_hessian(self) -> MaybeList[ndarray]:
+        """
+        Calculate hessian using MLIP.
+
+        Returns
+        -------
+        MaybeList[ndarray]
+            Hessian of structure(s).
+        """
+        if isinstance(self.struct, Sequence):
+            return [struct.calc.get_hessian(struct) for struct in self.struct]
+
+        return self.struct.calc.get_hessian(self.struct)
+
     def run(self) -> CalcResults:
         """
         Run single point calculations.
@@ -267,6 +281,8 @@ class SinglePoint(BaseCalculation):
             self.results["forces"] = self._get_forces()
         if "stress" in self.properties:
             self.results["stress"] = self._get_stress()
+        if "hessian" in self.properties:
+            self.results["hessian"] = self._get_hessian()
 
         if self.logger:
             emissions = self.tracker.stop_task().emissions
