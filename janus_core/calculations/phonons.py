@@ -63,7 +63,7 @@ class Phonons(BaseCalculation):
     mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     symmetrize : bool
-        Whether to symmetrize force constants after calculation.
+        Whether to symmetrize structure and force constants after calculation.
         Default is False.
     minimize : bool
         Whether to perform geometry optimisation before calculating phonons.
@@ -195,7 +195,7 @@ class Phonons(BaseCalculation):
         mesh : tuple[int, int, int]
             Mesh for sampling. Default is (10, 10, 10).
         symmetrize : bool
-            Whether to symmetrize force constants after calculations.
+            Whether to symmetrize structure and force constants after calculation.
             Default is False.
         minimize : bool
             Whether to perform geometry optimisation before calculating phonons.
@@ -293,6 +293,9 @@ class Phonons(BaseCalculation):
                 self.minimize_kwargs.setdefault("write_results", True)
             else:
                 self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
+
+            if self.symmetrize:
+                self.minimize_kwargs.setdefault("symmetrize", True)
 
         self.calc = self.struct.calc
         self.results = {}
