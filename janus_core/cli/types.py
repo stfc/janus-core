@@ -173,6 +173,20 @@ EnsembleKwargs = Annotated[
     ),
 ]
 
+DisplacementKwargs = Annotated[
+    Optional[TyperDict],
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to generate_displacements. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 PostProcessKwargs = Annotated[
     Optional[TyperDict],
     Option(

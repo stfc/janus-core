@@ -60,6 +60,8 @@ class Phonons(BaseCalculation):
         Size of supercell for calculation. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    displacement_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to generate_displacements. Default is {}.
     mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     symmetrize : bool
@@ -142,6 +144,7 @@ class Phonons(BaseCalculation):
         calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
+        displacement_kwargs: Optional[dict[str, Any]] = None,
         mesh: tuple[int, int, int] = (10, 10, 10),
         symmetrize: bool = False,
         minimize: bool = False,
@@ -192,6 +195,8 @@ class Phonons(BaseCalculation):
             Size of supercell for calculation. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
+        displacement_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to generate_displacements. Default is {}.
         mesh : tuple[int, int, int]
             Mesh for sampling. Default is (10, 10, 10).
         symmetrize : bool
@@ -225,10 +230,13 @@ class Phonons(BaseCalculation):
         enable_progress_bar : bool
             Whether to show a progress bar during phonon calculations. Default is False.
         """
-        (read_kwargs, minimize_kwargs) = none_to_dict((read_kwargs, minimize_kwargs))
+        (read_kwargs, displacement_kwargs, minimize_kwargs) = none_to_dict(
+            (read_kwargs, displacement_kwargs, minimize_kwargs)
+        )
 
         self.calcs = calcs
         self.displacement = displacement
+        self.displacement_kwargs = displacement_kwargs
         self.mesh = mesh
         self.symmetrize = symmetrize
         self.minimize = minimize
@@ -369,7 +377,10 @@ class Phonons(BaseCalculation):
             (0, 0, self.supercell[2]),
         )
         phonon = phonopy.Phonopy(cell, supercell_matrix)
-        phonon.generate_displacements(distance=self.displacement)
+        phonon.generate_displacements(
+            distance=self.displacement,
+            **self.displacement_kwargs,
+        )
         disp_supercells = phonon.supercells_with_displacements
 
         if self.enable_progress_bar:
