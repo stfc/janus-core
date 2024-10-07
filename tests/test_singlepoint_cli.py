@@ -376,6 +376,8 @@ def test_hessian(tmp_path):
             "energy",
             "--out",
             results_path,
+            "--calc-kwargs",
+            "{'dispersion': True}",
             "--log",
             log_path,
             "--summary",

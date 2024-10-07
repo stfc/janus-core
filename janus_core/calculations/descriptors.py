@@ -4,8 +4,6 @@ from collections.abc import Sequence
 from typing import Any, Optional
 
 from ase import Atoms
-from ase.calculators.calculator import Calculator
-from ase.calculators.mixing import SumCalculator
 import numpy as np
 
 from janus_core.calculations.base import BaseCalculation
@@ -17,7 +15,7 @@ from janus_core.helpers.janus_types import (
     MaybeSequence,
     PathLike,
 )
-from janus_core.helpers.utils import none_to_dict, output_structs
+from janus_core.helpers.utils import check_calculator, none_to_dict, output_structs
 
 
 class Descriptors(BaseCalculation):
@@ -166,41 +164,16 @@ class Descriptors(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         if isinstance(self.struct, Atoms):
-            self._check_calculator(self.struct.calc)
+            check_calculator(self.struct.calc, "get_descriptors")
         if isinstance(self.struct, Sequence):
             for image in self.struct:
-                self._check_calculator(image.calc)
+                check_calculator(image.calc, "get_descriptors")
 
         # Set output file
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
             "descriptors.extxyz", filename=self.write_kwargs["filename"]
         ).absolute()
-
-    @staticmethod
-    def _check_calculator(calc: Calculator) -> None:
-        """
-        Ensure calculator has ability to calculate descriptors.
-
-        Parameters
-        ----------
-        calc : Calculator
-            ASE Calculator to calculate descriptors.
-        """
-        # If dispersion added to MLIP calculator, use MLIP calculator for descriptors
-        if isinstance(calc, SumCalculator):
-            if (
-                len(calc.mixer.calcs) == 2
-                and calc.mixer.calcs[1].name == "TorchDFTD3Calculator"
-                and hasattr(calc.mixer.calcs[0], "get_descriptors")
-            ):
-                calc.get_descriptors = calc.mixer.calcs[0].get_descriptors
-
-        if not hasattr(calc, "get_descriptors") or not callable(calc.get_descriptors):
-            raise NotImplementedError(
-                "The attached calculator does not currently support calculating "
-                "descriptors"
-            )
 
     def run(self) -> None:
         """Calculate descriptors for structure(s)."""

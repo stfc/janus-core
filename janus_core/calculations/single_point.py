@@ -18,7 +18,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     Properties,
 )
-from janus_core.helpers.utils import none_to_dict, output_structs
+from janus_core.helpers.utils import check_calculator, none_to_dict, output_structs
 
 
 class SinglePoint(BaseCalculation):
@@ -208,11 +208,9 @@ class SinglePoint(BaseCalculation):
         if "hessian" in value:
             if isinstance(self.struct, Sequence):
                 for image in self.struct:
-                    if not hasattr(image.calc, "get_hessian"):
-                        raise NotImplementedError("Calculator cannot calculate hessian")
+                    check_calculator(image.calc, "get_hessian")
             else:
-                if not hasattr(self.struct.calc, "get_hessian"):
-                    raise NotImplementedError("Calculator cannot calculate hessian")
+                check_calculator(self.struct.calc, "get_hessian")
 
         self._properties = value
 
