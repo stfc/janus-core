@@ -133,7 +133,6 @@ class SinglePoint(BaseCalculation):
         """
         (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
 
-        self.properties = properties
         self.write_results = write_results
         self.write_kwargs = write_kwargs
         self.log_kwargs = log_kwargs
@@ -157,6 +156,9 @@ class SinglePoint(BaseCalculation):
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
         )
+
+        # Properties validated using calculator
+        self.properties = properties
 
         # Set output file
         self.write_kwargs.setdefault("filename", None)
@@ -201,6 +203,16 @@ class SinglePoint(BaseCalculation):
         # If none specified, get energy, forces and stress
         if not value:
             value = ("energy", "forces", "stress")
+
+        # Validate properties
+        if "hessian" in value:
+            if isinstance(self.struct, Sequence):
+                for image in self.struct:
+                    if not hasattr(image.calc, "get_hessian"):
+                        raise NotImplementedError("Calculator cannot calculate hessian")
+            else:
+                if not hasattr(self.struct.calc, "get_hessian"):
+                    raise NotImplementedError("Calculator cannot calculate hessian")
 
         self._properties = value
 
