@@ -317,3 +317,42 @@ def test_logging(tmp_path):
     assert log_file.exists()
     assert "emissions" in single_point.struct.info
     assert single_point.struct.info["emissions"] > 0
+
+
+def test_hessian():
+    """Test Hessian."""
+    sp = SinglePoint(
+        calc_kwargs={"model": MACE_PATH},
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        properties="hessian",
+    )
+    results = sp.run()
+    assert "hessian" in results
+    assert results["hessian"].shape == (24, 8, 3)
+
+
+def test_hessian_traj():
+    """Test calculating Hessian for trajectory."""
+    sp = SinglePoint(
+        calc_kwargs={"model": MACE_PATH},
+        struct_path=DATA_PATH / "benzene-traj.xyz",
+        arch="mace_mp",
+        properties="hessian",
+    )
+    results = sp.run()
+    assert "hessian" in results
+    assert len(results["hessian"]) == 2
+    assert results["hessian"][0].shape == (36, 12, 3)
+    assert results["hessian"][1].shape == (36, 12, 3)
+
+
+@pytest.mark.parametrize("struct", ["NaCl.cif", "benzene-traj.xyz"])
+def test_hessian_not_implemented(struct):
+    """Test unimplemented Hessian."""
+    with pytest.raises(NotImplementedError):
+        SinglePoint(
+            struct_path=DATA_PATH / struct,
+            arch="chgnet",
+            properties="hessian",
+        )
