@@ -74,7 +74,7 @@ def test_properties(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    # Check energy is can be calculated successfully
+    # Check energy can be calculated successfully
     result = runner.invoke(
         app,
         [
@@ -355,3 +355,37 @@ def test_write_cif(tmp_path):
     assert result.exit_code == 0
     atoms = read(results_path)
     assert isinstance(atoms, Atoms)
+
+
+def test_hessian(tmp_path):
+    """Test Hessian calculation."""
+    results_path = tmp_path / "NaCl-results.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    # Check Hessian can be calculated successfully
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--properties",
+            "hessian",
+            "--properties",
+            "energy",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    atoms = read(results_path)
+    assert "mace_mp_energy" in atoms.info
+    assert "mace_mp_hessian" in atoms.info
+    assert "mace_stress" not in atoms.info
+    assert atoms.info["mace_mp_hessian"].shape == (24, 8, 3)

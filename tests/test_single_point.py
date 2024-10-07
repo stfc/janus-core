@@ -330,6 +330,7 @@ def test_hessian():
     results = sp.run()
     assert "hessian" in results
     assert results["hessian"].shape == (24, 8, 3)
+    assert "mace_mp_hessian" in sp.struct.info
 
 
 def test_hessian_traj():
@@ -345,6 +346,8 @@ def test_hessian_traj():
     assert len(results["hessian"]) == 2
     assert results["hessian"][0].shape == (36, 12, 3)
     assert results["hessian"][1].shape == (36, 12, 3)
+    assert "mace_mp_hessian" in sp.struct[0].info
+    assert "mace_mp_hessian" in sp.struct[1].info
 
 
 @pytest.mark.parametrize("struct", ["NaCl.cif", "benzene-traj.xyz"])
