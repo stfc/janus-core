@@ -15,6 +15,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    DisplacementKwargs,
     LogPath,
     MinimizeKwargs,
     ModelPath,
@@ -46,6 +47,7 @@ def phonons(
     displacement: Annotated[
         float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
+    displacement_kwargs: DisplacementKwargs = None,
     mesh: Annotated[
         tuple[int, int, int], Option(help="Mesh numbers along a, b, c axes.")
     ] = (10, 10, 10),
@@ -134,6 +136,8 @@ def phonons(
         matrix row-wise.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    displacement_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to generate_displacements. Default is {}.
     mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     bands : bool
@@ -210,8 +214,8 @@ def phonons(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    read_kwargs, calc_kwargs, minimize_kwargs = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, minimize_kwargs]
+    displacement_kwargs, read_kwargs, calc_kwargs, minimize_kwargs = parse_typer_dicts(
+        [displacement_kwargs, read_kwargs, calc_kwargs, minimize_kwargs]
     )
 
     # Read only first structure by default and ensure only one image is read
@@ -266,6 +270,7 @@ def phonons(
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
+        "displacement_kwargs": displacement_kwargs,
         "mesh": mesh,
         "symmetrize": symmetrize,
         "minimize": minimize,
