@@ -80,8 +80,8 @@ def singlepoint(
         Device to run model on. Default is "cpu".
     model_path : Optional[str]
         Path to MLIP model. Default is `None`.
-    properties : Optional[str]
-        Physical properties to calculate. Default is "energy".
+    properties : Optional[list[str]]
+        Physical properties to calculate. Default is ("energy", "forces", "stress").
     out : Optional[Path]
         Path to save structure with calculated results. Default is inferred from name
         of the structure file.
