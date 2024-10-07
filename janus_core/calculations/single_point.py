@@ -258,6 +258,31 @@ class SinglePoint(BaseCalculation):
 
         return self.struct.get_stress()
 
+    def _calc_hessian(self, struct: Atoms) -> ndarray:
+        """
+        Calculate analytical Hessian for a given structure.
+
+        Parameters
+        ----------
+        struct : Atoms
+            Structure to calculate Hessian for.
+
+        Returns
+        -------
+        ndarray
+            Analytical Hessian.
+        """
+        if "arch" in struct.calc.parameters:
+            arch = struct.calc.parameters["arch"]
+            label = f"{arch}_"
+        else:
+            label = ""
+
+        # Calculate hessian
+        hessian = struct.calc.get_hessian(struct)
+        struct.info[f"{label}hessian"] = hessian
+        return hessian
+
     def _get_hessian(self) -> MaybeList[ndarray]:
         """
         Calculate hessian using MLIP.
@@ -268,9 +293,9 @@ class SinglePoint(BaseCalculation):
             Hessian of structure(s).
         """
         if isinstance(self.struct, Sequence):
-            return [struct.calc.get_hessian(struct) for struct in self.struct]
+            return [self._calc_hessian(struct) for struct in self.struct]
 
-        return self.struct.calc.get_hessian(self.struct)
+        return self._calc_hessian(self.struct)
 
     def run(self) -> CalcResults:
         """
