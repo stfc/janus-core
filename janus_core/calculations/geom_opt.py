@@ -1,9 +1,10 @@
 """Prepare and run geometry optimization."""
 
+import inspect
 from typing import Any, Callable, Optional, Union
 import warnings
 
-from ase import Atoms, filters, units
+from ase import Atoms, constraints, filters, units
 from ase.filters import FrechetCellFilter
 from ase.io import read
 import ase.optimize
@@ -62,9 +63,14 @@ class GeomOpt(BaseCalculation):
     angle_tolerance : float
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
+    constraint_func : Optional[Union[Callable, str]]
+        Constraint function, or name of function from ase.constraints. Default is None.
+    constraint_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to constraint_func. Default is {}.
     filter_func : Optional[Union[Callable, str]]
-        Filter function, or name of function from ase.filters to apply constraints to
-        atoms. Default is `FrechetCellFilter`.
+        Filter function, or name of function from ase.filters to apply filters
+        to atoms. (These are used for lattice-vector optimisation.) Default is
+        `FrechetCellFilter`.
     filter_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to filter_func. Default is {}.
     optimizer : Union[Callable, str]
@@ -106,6 +112,8 @@ class GeomOpt(BaseCalculation):
         steps: int = 1000,
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
+        constraint_func: Optional[Union[Callable, str]] = None,
+        constraint_kwargs: Optional[dict[str, Any]] = None,
         filter_func: Optional[Union[Callable, str]] = FrechetCellFilter,
         filter_kwargs: Optional[dict[str, Any]] = None,
         optimizer: Union[Callable, str] = LBFGS,
@@ -173,9 +181,9 @@ class GeomOpt(BaseCalculation):
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
             Must include "filename" keyword. Default is {}.
         """
-        (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs) = (
+        (read_kwargs, constraint_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs) = (
             none_to_dict(
-                (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs)
+                (read_kwargs, constraint_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs)
             )
         )
 
@@ -183,6 +191,8 @@ class GeomOpt(BaseCalculation):
         self.steps = steps
         self.symmetry_tolerance = symmetry_tolerance
         self.angle_tolerance = angle_tolerance
+        self.constraint_func = constraint_func
+        self.constraint_kwargs = constraint_kwargs
         self.filter_func = filter_func
         self.filter_kwargs = filter_kwargs
         self.optimizer = optimizer
@@ -232,11 +242,27 @@ class GeomOpt(BaseCalculation):
         # Configure optimizer dynamics
         self.set_optimizer()
 
+    def _set_mandatory_constraint_kwargs(self) -> None:
+        """Inspect constraint class for mandatory arguments
+
+        For now we are just looking for the "atoms" parameter of FixSymmetry
+        """
+        parameters = inspect.signature(self.constraint_func.__init__).parameters
+        if "atoms" in parameters:
+            self.constraint_kwargs["atoms"] = self.struct
+
     def set_optimizer(self) -> None:
         """Set optimizer for geometry optimization."""
         self._set_functions()
         if self.logger:
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)
+
+        if self.constraint_func is not None:
+            self._set_mandatory_constraint_kwargs()
+            self.struct.set_constraint(self.constraint_func(**self.constraint_kwargs))
+
+            if self.logger:
+                self.logger.info("Using constraint: %s", self.constraint_func.__name__)
 
         if self.filter_func is not None:
             if "scalar_pressure" in self.filter_kwargs:
@@ -263,12 +289,18 @@ class GeomOpt(BaseCalculation):
             self.dyn = self.optimizer(self.struct, **self.opt_kwargs)
 
     def _set_functions(self) -> None:
-        """Set optimizer and filter functions."""
+        """Set optimizer, constraint and filter functions."""
         if isinstance(self.optimizer, str):
             try:
                 self.optimizer = getattr(ase.optimize, self.optimizer)
             except AttributeError as e:
                 raise AttributeError(f"No such optimizer: {self.optimizer}") from e
+
+        if self.constraint_func is not None and isinstance(self.constraint_func, str):
+            try:
+                self.constraint_func = getattr(constraints, self.constraint_func)
+            except AttributeError as e:
+                raise AttributeError(f"No such constraint: {self.constraint_func}") from e
 
         if self.filter_func is not None and isinstance(self.filter_func, str):
             try:

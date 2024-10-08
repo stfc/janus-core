@@ -126,6 +126,12 @@ def geomopt(
             )
         ),
     ] = None,
+    constraint_func: Annotated[
+        str,
+        Option(
+            help="Name of ASE constraint function to use."
+        ),
+    ] = None,
     pressure: Annotated[
         float, Option(help="Scalar pressure when optimizing cell geometry, in GPa.")
     ] = 0.0,
@@ -177,9 +183,13 @@ def geomopt(
     opt_cell_fully : bool
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
+    constraint_func : Optional[str]
+        Name of constraint function from ase.constraints, to apply constraints
+        to atoms. Parameters should be included as a "constraint_kwargs" dict
+        within "minimize_kwargs". Default is None
     filter_func : Optional[str]
-        Name of filter function from ase.filters or ase.constraints, to apply
-        constraints to atoms. If using --opt-cell-lengths or --opt-cell-fully, defaults
+        Name of filter function from ase.filters, to apply (unit cell) filter to atoms.
+    If using --opt-cell-lengths or --opt-cell-fully, defaults
         to `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
     pressure : float
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
@@ -221,6 +231,7 @@ def geomopt(
     # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
+
     if out:
         write_kwargs["filename"] = out
 
@@ -255,6 +266,7 @@ def geomopt(
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
+        "constraint_func": constraint_func,
         **opt_cell_fully_dict,
         **minimize_kwargs,
         "write_results": True,
