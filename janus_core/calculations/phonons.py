@@ -20,7 +20,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
-from janus_core.helpers.utils import none_to_dict, write_table
+from janus_core.helpers.utils import none_to_dict, track_progress, write_table
 
 
 class Phonons(BaseCalculation):
@@ -90,6 +90,8 @@ class Phonons(BaseCalculation):
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from chemical formula of the
         structure.
+    enable_progress_bar : bool
+        Whether to show a progress bar during phonon calculations. Default is False.
 
     Attributes
     ----------
@@ -152,6 +154,7 @@ class Phonons(BaseCalculation):
         write_results: bool = True,
         write_full: bool = True,
         file_prefix: Optional[PathLike] = None,
+        enable_progress_bar: bool = False,
     ) -> None:
         """
         Initialise Phonons class.
@@ -219,6 +222,8 @@ class Phonons(BaseCalculation):
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
+        enable_progress_bar : bool
+            Whether to show a progress bar during phonon calculations. Default is False.
         """
         (read_kwargs, minimize_kwargs) = none_to_dict((read_kwargs, minimize_kwargs))
 
@@ -235,6 +240,7 @@ class Phonons(BaseCalculation):
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
+        self.enable_progress_bar = enable_progress_bar
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -362,6 +368,11 @@ class Phonons(BaseCalculation):
         phonon = phonopy.Phonopy(cell, supercell_matrix)
         phonon.generate_displacements(distance=self.displacement)
         disp_supercells = phonon.supercells_with_displacements
+
+        if self.enable_progress_bar:
+            disp_supercells = track_progress(
+                disp_supercells, "Computing displacements..."
+            )
 
         phonon.forces = [
             self._calc_forces(supercell)
