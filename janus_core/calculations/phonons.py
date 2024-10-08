@@ -1,14 +1,20 @@
 """Phonon calculations."""
 
-from collections.abc import Sequence
-from typing import Any, Optional, get_args
+from collections.abc import Iterable, Sequence
+from typing import Any, Optional, Union, get_args
 
 from ase import Atoms
 from numpy import ndarray
 import phonopy
 from phonopy.file_IO import write_force_constants_to_hdf5
 from phonopy.structure.atoms import PhonopyAtoms
-from tqdm import tqdm
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+)
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
@@ -89,6 +95,8 @@ class Phonons(BaseCalculation):
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from chemical formula of the
         structure.
+    enable_progress_bar : bool
+        Whether to show a progress bar during phonon calculations. Default is False.
 
     Attributes
     ----------
@@ -150,7 +158,7 @@ class Phonons(BaseCalculation):
         write_results: bool = True,
         write_full: bool = True,
         file_prefix: Optional[PathLike] = None,
-        enable_progress_bar: bool = False
+        enable_progress_bar: bool = False,
     ) -> None:
         """
         Initialise Phonons class.
@@ -363,7 +371,9 @@ class Phonons(BaseCalculation):
         disp_supercells = phonon.supercells_with_displacements
 
         if self.enable_progress_bar:
-            disp_supercells = tqdm(disp_supercells)
+            disp_supercells = track_progress(
+                disp_supercells, "Computing displacements..."
+            )
 
         phonon.forces = [
             self._calc_forces(supercell)
@@ -835,3 +845,35 @@ class Phonons(BaseCalculation):
             self.calc_dos(plot_bands="bands" in self.calcs)
         if "pdos" in self.calcs:
             self.calc_pdos()
+
+
+def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Iterable:
+    """
+    Track the progress of iterating over a sequence.
+
+    This is done by displaying a progress bar in the console using the rich library.
+    The function is an iterator over the sequence, updating the progress bar each
+    iteration.
+
+    Parameters
+    ----------
+    sequence : Iterable
+        The sequence to iterate over. Must support "len".
+    description : str
+        The text to display to the left of the progress bar.
+
+    Returns
+    -------
+    Iterable
+        An iterable of the values in the sequence.
+    """
+    text_column = TextColumn("{task.description}")
+    bar_column = BarColumn(bar_width=None)
+    completion_column = MofNCompleteColumn()
+    time_column = TimeRemainingColumn()
+    progress = Progress(
+        text_column, bar_column, completion_column, time_column, expand=True
+    )
+
+    with progress:
+        yield from progress.track(sequence, description=description)

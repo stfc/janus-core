@@ -258,7 +258,7 @@ def phonons(
         "write_results": True,
         "write_full": write_full,
         "file_prefix": file_prefix,
-        "enable_progress_bar": True
+        "enable_progress_bar": True,
     }
 
     # Initialise phonons
