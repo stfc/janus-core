@@ -33,6 +33,7 @@ numpy = "^1.26.4"
 phonopy = "^2.23.1"
 python = "^3.9"
 pyyaml = "^6.0.1"
+rich = "^13.9.1"
 seekpath = "^1.9.7"
 spglib = "^2.3.0"
 torch = ">= 2.1, <= 2.2" # Range required for dgl
