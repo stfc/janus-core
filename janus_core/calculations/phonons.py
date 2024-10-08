@@ -1,20 +1,13 @@
 """Phonon calculations."""
 
-from collections.abc import Iterable, Sequence
-from typing import Any, Optional, Union, get_args
+from collections.abc import Sequence
+from typing import Any, Optional, get_args
 
 from ase import Atoms
 from numpy import ndarray
 import phonopy
 from phonopy.file_IO import write_force_constants_to_hdf5
 from phonopy.structure.atoms import PhonopyAtoms
-from rich.progress import (
-    BarColumn,
-    MofNCompleteColumn,
-    Progress,
-    TextColumn,
-    TimeRemainingColumn,
-)
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
@@ -27,7 +20,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
-from janus_core.helpers.utils import none_to_dict, write_table
+from janus_core.helpers.utils import none_to_dict, track_progress, write_table
 
 
 class Phonons(BaseCalculation):
@@ -845,46 +838,3 @@ class Phonons(BaseCalculation):
             self.calc_dos(plot_bands="bands" in self.calcs)
         if "pdos" in self.calcs:
             self.calc_pdos()
-
-
-def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Iterable:
-    """
-    Track the progress of iterating over a sequence.
-
-    This is done by displaying a progress bar in the console using the rich library.
-    The function is an iterator over the sequence, updating the progress bar each
-    iteration.
-
-    Parameters
-    ----------
-    sequence : Iterable
-        The sequence to iterate over. Must support "len".
-    description : str
-        The text to display to the left of the progress bar.
-
-    Returns
-    -------
-    Iterable
-        An iterable of the values in the sequence.
-    """
-    from rich.style import Style
-
-    text_column = TextColumn("{task.description}")
-    bar_column = BarColumn(
-        bar_width=None,
-        complete_style=Style(color="#FBBB10"),
-        finished_style=Style(color="#E38408"),
-    )
-    completion_column = MofNCompleteColumn()
-    time_column = TimeRemainingColumn()
-    progress = Progress(
-        text_column,
-        bar_column,
-        completion_column,
-        time_column,
-        expand=True,
-        auto_refresh=False,
-    )
-
-    with progress:
-        yield from progress.track(sequence, description=description)
