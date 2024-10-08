@@ -651,3 +651,61 @@ def test_reuse_output(tmp_path):
     assert result.exit_code == 0
     results_2 = read(results_path_2)
     assert results_1.positions != pytest.approx(results_2.positions)
+
+
+def test_symmetrize(tmp_path):
+    """Test symmetrizing final structure."""
+    results_path_1 = tmp_path / "test" / "NaCl-opt-1.extxyz"
+    results_path_2 = tmp_path / "test" / "NaCl-opt-2.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--fmax",
+            0.001,
+            "--out",
+            results_path_1,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    results_1 = read(results_path_1)
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            results_path_1,
+            "--fmax",
+            0.001,
+            "--out",
+            results_path_2,
+            "--symmetrize",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    results_2 = read(results_path_2)
+    assert results_1.positions != pytest.approx(results_2.positions)
+
+    expected = [
+        5.619999999999999,
+        5.619999999999999,
+        5.619999999999999,
+        89.00000000000003,
+        90.0,
+        90.0,
+    ]
+    assert results_2.cell.cellpar() == pytest.approx(expected)
