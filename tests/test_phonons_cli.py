@@ -149,7 +149,7 @@ def test_hdf5(tmp_path):
 def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
     file_prefix = tmp_path / "test" / "NaCl"
-    thermal_results = tmp_path / "test" / "NaCl-thermal.dat"
+    thermal_results = tmp_path / "test" / "NaCl-thermal.yml"
 
     result = runner.invoke(
         app,

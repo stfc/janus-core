@@ -22,7 +22,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
-from janus_core.helpers.utils import none_to_dict, track_progress, write_table
+from janus_core.helpers.utils import none_to_dict, track_progress
 
 
 class Phonons(BaseCalculation):
@@ -627,23 +627,8 @@ class Phonons(BaseCalculation):
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        thermal_file = self._build_filename("thermal.dat", filename=thermal_file)
-
-        data = {
-            "temperature": self.results["thermal_properties"]["temperatures"],
-            "Cv": self.results["thermal_properties"]["heat_capacity"],
-            "H": self.results["thermal_properties"]["free_energy"],
-            "S": self.results["thermal_properties"]["entropy"],
-        }
-
-        with open(thermal_file, "w", encoding="utf8") as out:
-            write_table(
-                fmt="ascii",
-                file=out,
-                **data,
-                units={"temperature": "K", "Cv": "J/mol/K", "H": "eV", "S": "eV"},
-                formats=dict.fromkeys(data, ".8f"),
-            )
+        thermal_file = self._build_filename("thermal.yml", filename=thermal_file)
+        self.results["phonon"].write_yaml_thermal_properties(filename=thermal_file)
 
     def calc_dos(
         self,
