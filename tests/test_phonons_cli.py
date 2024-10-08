@@ -179,6 +179,8 @@ def test_dos(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--dos",
+            "--dos-kwargs",
+            "{'freq_min': -1, 'freq_max': 0}",
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -186,6 +188,10 @@ def test_dos(tmp_path):
     )
     assert result.exit_code == 0
     assert dos_results.exists()
+    with open(dos_results, encoding="utf8") as file:
+        lines = file.readlines()
+    assert lines[1].split()[0] == "-1.0000000000"
+    assert lines[-1].split()[0] == "0.0000000000"
 
 
 def test_pdos(tmp_path):
