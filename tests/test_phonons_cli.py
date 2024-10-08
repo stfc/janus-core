@@ -303,7 +303,7 @@ test_data = [
     ("--supercell", [2]),
     ("--supercell", ["2x2x2"]),
     ("--supercell", ["2 2 2"]),
-    ("--supercell", [2.1, 2.1, 2.1]),
+    ("--supercell", ["2.1", "2.1", "2.1"]),
     ("--supercell", [2, 2, "a"]),
     ("--supercell", [2, 2]),
     ("--supercell", [2] * 6),
@@ -311,7 +311,7 @@ test_data = [
     ("--supercell-matrix", [2]),
     ("--supercell-matrix", ["2x2x2" * 3]),
     ("--supercell-matrix", ["2 2 2 2 2 2 2 2 2"]),
-    ("--supercell-matrix", [2.1] * 9),
+    ("--supercell-matrix", ["2.1"] * 9),
     ("--supercell-matrix", [2, 2, "a"] * 3),
     ("--supercell-matrix", [2] * 6),
     ("--supercell-matrix", [2] * 12),
@@ -336,9 +336,6 @@ def test_invalid_supercell(supercell_arg, supercell, tmp_path):
         ],
     )
     assert result.exit_code == 1 or result.exit_code == 2
-
-    print(result.exception)
-    # assert isinstance(result.exception, ValueError)
 
 
 def test_minimize_kwargs(tmp_path):
