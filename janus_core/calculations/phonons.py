@@ -867,12 +867,23 @@ def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Ite
     Iterable
         An iterable of the values in the sequence.
     """
+    from rich.style import Style
+
     text_column = TextColumn("{task.description}")
-    bar_column = BarColumn(bar_width=None)
+    bar_column = BarColumn(
+        bar_width=None,
+        complete_style=Style(color="#FBBB10"),
+        finished_style=Style(color="#E38408"),
+    )
     completion_column = MofNCompleteColumn()
     time_column = TimeRemainingColumn()
     progress = Progress(
-        text_column, bar_column, completion_column, time_column, expand=True
+        text_column,
+        bar_column,
+        completion_column,
+        time_column,
+        expand=True,
+        auto_refresh=False,
     )
 
     with progress:
