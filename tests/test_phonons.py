@@ -99,3 +99,35 @@ def test_logging(tmp_path):
 
     assert log_file.exists()
     assert single_point.struct.info["emissions"] > 0
+
+
+def test_symmetrize(tmp_path):
+    """Test symmetrize."""
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    phonons_1 = Phonons(
+        struct=single_point.struct.copy(),
+        write_results=False,
+        minimize=True,
+        minimize_kwargs={"fmax": 0.001},
+        symmetrize=False,
+    )
+    phonons_1.calc_force_constants()
+
+    phonons_2 = Phonons(
+        struct=single_point.struct.copy(),
+        write_results=False,
+        minimize=True,
+        minimize_kwargs={"fmax": 0.001},
+        symmetrize=True,
+    )
+    phonons_2.calc_force_constants()
+
+    assert phonons_1.struct.positions != pytest.approx(phonons_2.struct.positions)
+    assert phonons_1.results["phonon"].forces != pytest.approx(
+        phonons_2.results["phonon"].forces
+    )
