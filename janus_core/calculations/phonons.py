@@ -371,7 +371,7 @@ class Phonons(BaseCalculation):
             supercell_matrix = (
                 tuple(self.supercell[:3]),
                 tuple(self.supercell[3:6]),
-                tuple(self.supercell[6:])
+                tuple(self.supercell[6:]),
             )
 
         phonon = phonopy.Phonopy(cell, supercell_matrix)
