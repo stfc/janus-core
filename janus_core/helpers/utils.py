@@ -199,7 +199,7 @@ def spacegroup(
 
 def snap_symmetry(struct: Atoms, sym_tolerance: float = 0.001) -> None:
     """
-    Refine symmetry of structure.
+    Symmetrize structure's cell vectors and atomic positions.
 
     Parameters
     ----------
