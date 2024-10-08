@@ -72,6 +72,8 @@ class Phonons(BaseCalculation):
         Default is False.
     minimize_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to geometry optimizer. Default is {}.
+    dos_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to run_total_dos. Default is {}.
     temp_min : float
         Start temperature for thermal properties calculations, in K. Default is 0.0.
     temp_max : float
@@ -149,6 +151,7 @@ class Phonons(BaseCalculation):
         symmetrize: bool = False,
         minimize: bool = False,
         minimize_kwargs: Optional[dict[str, Any]] = None,
+        dos_kwargs: Optional[dict[str, Any]] = None,
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
@@ -207,6 +210,8 @@ class Phonons(BaseCalculation):
             Default is False.
         minimize_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to geometry optimizer. Default is {}.
+        dos_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to run_total_dos. Default is {}.
         temp_min : float
             Start temperature for thermal calculations, in K. Default is 0.0.
         temp_max : float
@@ -230,8 +235,8 @@ class Phonons(BaseCalculation):
         enable_progress_bar : bool
             Whether to show a progress bar during phonon calculations. Default is False.
         """
-        (read_kwargs, displacement_kwargs, minimize_kwargs) = none_to_dict(
-            (read_kwargs, displacement_kwargs, minimize_kwargs)
+        (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs) = none_to_dict(
+            (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs)
         )
 
         self.calcs = calcs
@@ -241,6 +246,7 @@ class Phonons(BaseCalculation):
         self.symmetrize = symmetrize
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
+        self.dos_kwargs = dos_kwargs
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.temp_step = temp_step
@@ -634,7 +640,7 @@ class Phonons(BaseCalculation):
             self.tracker.start_task("DOS calculation")
 
         self.results["phonon"].run_mesh(mesh)
-        self.results["phonon"].run_total_dos()
+        self.results["phonon"].run_total_dos(**self.dos_kwargs)
 
         if self.logger:
             emissions = self.tracker.stop_task().emissions
