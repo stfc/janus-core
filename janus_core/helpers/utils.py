@@ -11,6 +11,14 @@ from typing import Any, Literal, Optional, TextIO, Union, get_args
 from ase import Atoms
 from ase.io import read, write
 from ase.io.formats import filetype
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+)
+from rich.style import Style
 from spglib import get_spacegroup
 
 from janus_core.helpers.janus_types import (
@@ -691,20 +699,11 @@ def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Ite
     description : str
         The text to display to the left of the progress bar.
 
-    Returns
-    -------
+    Yields
+    ------
     Iterable
         An iterable of the values in the sequence.
     """
-    from rich.progress import (
-        BarColumn,
-        MofNCompleteColumn,
-        Progress,
-        TextColumn,
-        TimeRemainingColumn,
-    )
-    from rich.style import Style
-
     text_column = TextColumn("{task.description}")
     bar_column = BarColumn(
         bar_width=None,
