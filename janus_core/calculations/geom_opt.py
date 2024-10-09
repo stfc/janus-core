@@ -307,10 +307,10 @@ class GeomOpt(BaseCalculation):
 
             # Update max force
             old_max_force = max_force
-            if self.filter_func is not None:
-                max_force = linalg.norm(self.filtered_struct.get_forces(), axis=1).max()
-            else:
-                max_force = linalg.norm(self.struct.get_forces(), axis=1).max()
+            struct = (
+                self.filtered_struct if self.filter_func is not None else self.struct
+            )
+            max_force = linalg.norm(struct.get_forces(), axis=1).max()
 
             if max_force >= old_max_force:
                 warnings.warn(
