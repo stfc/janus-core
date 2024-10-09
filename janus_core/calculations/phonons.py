@@ -92,8 +92,7 @@ class Phonons(BaseCalculation):
     temp_step : float
         Temperature step for thermal properties calculations, in K. Default is 50.0.
     force_consts_to_hdf5 : bool
-        Whether to write force constants in hdf format or not.
-        Default is True.
+        Whether to write force constants in hdf format or not. Default is True.
     plot_to_file : bool
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
@@ -119,7 +118,7 @@ class Phonons(BaseCalculation):
     -------
     calc_force_constants(write_force_consts)
         Calculate force constants and optionally write results.
-    write_force_constants(phonopy_file, force_consts_to_hdf5 force_consts_file)
+    write_force_constants(phonopy_file, force_consts_to_hdf5, force_consts_file)
         Write results of force constants calculations.
     calc_bands(write_bands)
         Calculate band structure and optionally write and plot results.
@@ -240,8 +239,7 @@ class Phonons(BaseCalculation):
         temp_step : float
             Temperature step for thermal calculations, in K. Default is 50.0.
         force_consts_to_hdf5 : bool
-            Whether to write force constants in hdf format or not.
-            Default is True.
+            Whether to write force constants in hdf format or not. Default is True.
         plot_to_file : bool
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
