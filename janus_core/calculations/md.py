@@ -509,12 +509,21 @@ class MolecularDynamics(BaseCalculation):
 
         self._parse_correlations()
 
-    def _set_time_step(self):
-        """Set time in fs and current dynamics step to info."""
+    def _set_info(self):
+        """Set time in fs, current dynamics step, and density to info."""
         time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
         step = self.offset + self.dyn.nsteps
         self.dyn.atoms.info["time_fs"] = time
         self.dyn.atoms.info["step"] = step
+        try:
+            density = (
+                np.sum(self.dyn.atoms.get_masses())
+                / self.dyn.atoms.get_volume()
+                * DENS_FACT
+            )
+            self.dyn.atoms.info["density"] = density
+        except ValueError:
+            self.dyn.atoms.info["density"] = 0.0
 
     def _prepare_restart(self) -> None:
         """Prepare restart files, structure and offset."""
@@ -726,19 +735,13 @@ class MolecularDynamics(BaseCalculation):
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
         current_temp = e_kin / (1.5 * units.kB)
 
-        self._set_time_step()
+        self._set_info()
 
         time_now = datetime.datetime.now()
         real_time = time_now - self.dyn.atoms.info["real_time"]
         self.dyn.atoms.info["real_time"] = time_now
 
         try:
-            density = (
-                np.sum(self.dyn.atoms.get_masses())
-                / self.dyn.atoms.get_volume()
-                * DENS_FACT
-            )
-            self.dyn.atoms.info["density"] = density
             volume = self.dyn.atoms.get_volume()
             pressure = (
                 -np.trace(
@@ -754,7 +757,6 @@ class MolecularDynamics(BaseCalculation):
         except ValueError:
             volume = 0.0
             pressure = 0.0
-            density = 0.0
             pressure_tensor = np.zeros(6)
 
         return {
@@ -765,7 +767,7 @@ class MolecularDynamics(BaseCalculation):
             "EKin/N": e_kin,
             "T": current_temp,
             "ETot/N": e_pot + e_kin,
-            "Density": density,
+            "Density": self.dyn.atoms.info["density"],
             "Volume": volume,
             "P": pressure,
             "Pxx": pressure_tensor[0],
@@ -874,7 +876,7 @@ class MolecularDynamics(BaseCalculation):
                 self.dyn.nsteps > self.traj_start + self.traj_start % self.traj_every
             )
 
-            self._set_time_step()
+            self._set_info()
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self.traj_file
             write_kwargs["append"] = append
@@ -895,7 +897,7 @@ class MolecularDynamics(BaseCalculation):
         # Append if final file has been created
         append = self.created_final_file
 
-        self._set_time_step()
+        self._set_info()
         write_kwargs = self.write_kwargs
         write_kwargs["filename"] = self.final_file
         write_kwargs["append"] = append
@@ -998,7 +1000,7 @@ class MolecularDynamics(BaseCalculation):
         if step > 0:
             write_kwargs = self.write_kwargs
             write_kwargs["filename"] = self._restart_file
-            self._set_time_step()
+            self._set_info()
 
             output_structs(
                 images=self.struct,

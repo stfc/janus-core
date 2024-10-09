@@ -140,8 +140,8 @@ def singlepoint(
     ).absolute()
     log = s_point.log_kwargs["filename"]
 
-    # Store only filename as filemode is not set by user
-    inputs = {"log": log}
+    # Store inputs for yaml summary
+    inputs = singlepoint_kwargs.copy()
 
     # Add structure, MLIP information, and log to inputs
     save_struct_calc(

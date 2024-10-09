@@ -186,6 +186,7 @@ def config_tracker(
             logging_logger=carbon_logger,
             project_name="janus-core",
             log_level=log_level,
+            allow_multiple_runs=True,
         )
 
         # Suppress further logging from codecarbon

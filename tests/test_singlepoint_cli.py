@@ -240,6 +240,7 @@ def test_summary(tmp_path):
     assert "inputs" in sp_summary
     assert "end_time" in sp_summary
 
+    assert "properties" in sp_summary["inputs"]
     assert "traj" in sp_summary["inputs"]
     assert "length" in sp_summary["inputs"]["traj"]
     assert "struct" in sp_summary["inputs"]["traj"]

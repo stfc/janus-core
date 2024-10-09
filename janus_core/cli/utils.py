@@ -36,6 +36,22 @@ def dict_paths_to_strs(dictionary: dict) -> None:
             dictionary[key] = str(value)
 
 
+def dict_tuples_to_lists(dictionary: dict) -> None:
+    """
+    Recursively iterate over dictionary, converting tuple values to lists.
+
+    Parameters
+    ----------
+    dictionary : dict
+        Dictionary to be converted.
+    """
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            dict_paths_to_strs(value)
+        elif isinstance(value, tuple):
+            dictionary[key] = list(value)
+
+
 def dict_remove_hyphens(dictionary: dict) -> dict:
     """
     Recursively iterate over dictionary, replacing hyphens with underscores in keys.

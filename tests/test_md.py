@@ -1058,3 +1058,30 @@ def test_auto_restart_restart_stem(tmp_path):
 
     final_traj = read(traj_path, index=":")
     assert len(final_traj) == 9
+
+
+def test_set_info(tmp_path):
+    """Test info is set at correct frequency."""
+    file_prefix = tmp_path / "npt"
+    traj_path = tmp_path / "npt-traj.extxyz"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    npt = NPT(
+        struct=single_point.struct,
+        steps=10,
+        temp=1000,
+        stats_every=7,
+        file_prefix=file_prefix,
+        seed=2024,
+        traj_every=10,
+    )
+
+    npt.run()
+    final_struct = read(traj_path, index="-1")
+    assert npt.struct.info["density"] == pytest.approx(2.120952627887493)
+    assert final_struct.info["density"] == pytest.approx(2.120952627887493)

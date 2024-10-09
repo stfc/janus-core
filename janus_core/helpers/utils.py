@@ -6,11 +6,19 @@ from copy import copy
 from io import StringIO
 import logging
 from pathlib import Path
-from typing import Any, Literal, Optional, TextIO, get_args
+from typing import Any, Literal, Optional, TextIO, Union, get_args
 
 from ase import Atoms
 from ase.io import read, write
 from ase.io.formats import filetype
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+)
+from rich.style import Style
 from spglib import get_spacegroup
 
 from janus_core.helpers.janus_types import (
@@ -674,3 +682,44 @@ def _dump_csv(
 
     for cols in zip(*columns.values()):
         print(",".join(map(format, cols, formats)), file=file)
+
+
+def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Iterable:
+    """
+    Track the progress of iterating over a sequence.
+
+    This is done by displaying a progress bar in the console using the rich library.
+    The function is an iterator over the sequence, updating the progress bar each
+    iteration.
+
+    Parameters
+    ----------
+    sequence : Iterable
+        The sequence to iterate over. Must support "len".
+    description : str
+        The text to display to the left of the progress bar.
+
+    Yields
+    ------
+    Iterable
+        An iterable of the values in the sequence.
+    """
+    text_column = TextColumn("{task.description}")
+    bar_column = BarColumn(
+        bar_width=None,
+        complete_style=Style(color="#FBBB10"),
+        finished_style=Style(color="#E38408"),
+    )
+    completion_column = MofNCompleteColumn()
+    time_column = TimeRemainingColumn()
+    progress = Progress(
+        text_column,
+        bar_column,
+        completion_column,
+        time_column,
+        expand=True,
+        auto_refresh=False,
+    )
+
+    with progress:
+        yield from progress.track(sequence, description=description)
