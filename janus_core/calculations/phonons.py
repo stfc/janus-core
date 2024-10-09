@@ -9,7 +9,12 @@ from ase import Atoms
 from numpy import ndarray
 import phonopy
 from phonopy.file_IO import write_force_constants_to_hdf5
+from phonopy.phonon.band_structure import (
+    get_band_qpoints_and_path_connections,
+    get_band_qpoints_by_seekpath,
+)
 from phonopy.structure.atoms import PhonopyAtoms
+from yaml import safe_load
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
@@ -83,6 +88,9 @@ class Phonons(BaseCalculation):
         Default is False.
     minimize_kwargs : dict[str, Any] | None
         Keyword arguments to pass to geometry optimizer. Default is {}.
+    paths : PathLike | None
+        Filepath to info to generate a path of q-points for band structure. Default is
+        None.
     dos_kwargs : dict[str, Any] | None
         Keyword arguments to pass to run_total_dos. Default is {}.
     temp_min : float
@@ -162,6 +170,7 @@ class Phonons(BaseCalculation):
         symmetrize: bool = False,
         minimize: bool = False,
         minimize_kwargs: dict[str, Any] | None = None,
+        paths: PathLike | None = None,
         dos_kwargs: dict[str, Any] | None = None,
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
@@ -230,6 +239,9 @@ class Phonons(BaseCalculation):
             Default is False.
         minimize_kwargs : dict[str, Any] | None
             Keyword arguments to pass to geometry optimizer. Default is {}.
+        paths : PathLike | None
+            Path to info to generate a path of q-points for band structure. Default is
+            None.
         dos_kwargs : dict[str, Any] | None
             Keyword arguments to pass to run_total_dos. Default is {}.
         temp_min : float
@@ -265,6 +277,7 @@ class Phonons(BaseCalculation):
         self.symmetrize = symmetrize
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
+        self.paths = paths
         self.dos_kwargs = dos_kwargs
         self.temp_min = temp_min
         self.temp_max = temp_max
@@ -549,17 +562,44 @@ class Phonons(BaseCalculation):
         if save_plots is None:
             save_plots = self.plot_to_file
 
-        bands_file = self._build_filename("auto_bands.yml", filename=bands_file)
-        self.results["phonon"].auto_band_structure(
-            write_yaml=True,
-            filename=bands_file,
+        if self.paths:
+            bands_file = self._build_filename("bands.yml", filename=bands_file)
+
+            with open(self.paths, encoding="utf8") as paths_file:
+                loaded_paths = safe_load(paths_file)
+
+            labels = loaded_paths["labels"]
+            num_q = sum([len(q) for q in loaded_paths["paths"]])
+            num_labels = len(labels)
+            assert (
+                num_q == num_labels
+            ), "Number of labels is different to number of q-points"
+
+            q_points, connections = get_band_qpoints_and_path_connections(
+                band_paths=loaded_paths["paths"], npoints=loaded_paths["npoints"]
+            )
+
+        else:
+            bands_file = self._build_filename("auto_bands.yml.xz", filename=bands_file)
+            q_points, labels, connections = get_band_qpoints_by_seekpath(
+                self.results["phonon"].primitive, 51
+            )
+
+        self.results["phonon"].run_band_structure(
+            paths=q_points,
+            path_connections=connections,
+            labels=labels,
             with_eigenvectors=self.write_full,
             with_group_velocities=self.write_full,
+        )
+        self.results["phonon"].write_yaml_band_structure(
+            filename=bands_file,
+            compression="lzma",
         )
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:
-            plot_file = self._build_filename("auto_bands.svg", filename=plot_file)
+            plot_file = self._build_filename("bands.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
     def calc_thermal_props(

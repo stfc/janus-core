@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import lzma
 from pathlib import Path
 
 import pytest
@@ -26,7 +27,7 @@ def test_help():
 def test_phonons():
     """Test calculating force constants and band structure."""
     phonopy_path = Path("./NaCl-phonopy.yml").absolute()
-    bands_path = Path("./NaCl-auto_bands.yml").absolute()
+    bands_path = Path("./NaCl-auto_bands.yml.xz").absolute()
     log_path = Path("./NaCl-phonons-log.yml").absolute()
     summary_path = Path("./NaCl-phonons-summary.yml").absolute()
 
@@ -59,7 +60,7 @@ def test_phonons():
 
         has_eigenvectors = False
         has_velocity = False
-        with open(bands_path, encoding="utf8") as file:
+        with lzma.open(bands_path, mode="rt") as file:
             for line in file:
                 if "eigenvector" in line:
                     has_eigenvectors = True
@@ -89,7 +90,7 @@ def test_phonons():
 def test_bands_simple(tmp_path):
     """Test calculating force constants and reduced bands information."""
     file_prefix = tmp_path / "NaCl"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
 
     result = runner.invoke(
@@ -108,7 +109,7 @@ def test_bands_simple(tmp_path):
     assert result.exit_code == 0
 
     assert autoband_results.exists()
-    with open(autoband_results, encoding="utf8") as file:
+    with lzma.open(autoband_results, mode="rb") as file:
         bands = yaml.safe_load(file)
     assert "eigenvector" not in bands["phonon"][0]["band"][0]
 
@@ -220,13 +221,13 @@ def test_plot(tmp_path):
     file_prefix = tmp_path / "NaCl"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
     svgs = [
         tmp_path / "NaCl-dos.svg",
         tmp_path / "NaCl-pdos.svg",
         tmp_path / "NaCl-bs-dos.svg",
-        tmp_path / "NaCl-auto_bands.svg",
+        tmp_path / "NaCl-bands.svg",
     ]
 
     result = runner.invoke(
