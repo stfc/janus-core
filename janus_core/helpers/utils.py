@@ -11,6 +11,7 @@ from typing import Any, Literal, Optional, TextIO, Union, get_args
 from ase import Atoms
 from ase.io import read, write
 from ase.io.formats import filetype
+from ase.spacegroup.symmetrize import refine_symmetry
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
@@ -194,6 +195,21 @@ def spacegroup(
         symprec=sym_tolerance,
         angle_tolerance=angle_tolerance,
     )
+
+
+def snap_symmetry(struct: Atoms, sym_tolerance: float = 0.001) -> None:
+    """
+    Symmetrize structure's cell vectors and atomic positions.
+
+    Parameters
+    ----------
+    struct : Atoms
+        Structure as an ase Atoms object.
+    sym_tolerance : float
+        Atom displacement tolerance for spglib symmetry determination, in Å.
+        Default is 0.001.
+    """
+    refine_symmetry(struct, symprec=sym_tolerance, verbose=False)
 
 
 def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None, None]:

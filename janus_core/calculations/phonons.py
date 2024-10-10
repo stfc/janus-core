@@ -63,7 +63,7 @@ class Phonons(BaseCalculation):
     mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     symmetrize : bool
-        Whether to symmetrize force constants after calculation.
+        Whether to symmetrize structure and force constants after calculation.
         Default is False.
     minimize : bool
         Whether to perform geometry optimisation before calculating phonons.
@@ -195,7 +195,7 @@ class Phonons(BaseCalculation):
         mesh : tuple[int, int, int]
             Mesh for sampling. Default is (10, 10, 10).
         symmetrize : bool
-            Whether to symmetrize force constants after calculations.
+            Whether to symmetrize structure and force constants after calculation.
             Default is False.
         minimize : bool
             Whether to perform geometry optimisation before calculating phonons.
@@ -278,21 +278,24 @@ class Phonons(BaseCalculation):
                     "name": self.logger.name,
                     "filemode": "a",
                 }
+
+            # Write out file by default
+            self.minimize_kwargs.setdefault("write_results", True)
+
             # If not specified otherwise, save optimized structure consistently with
             # other phonon output files
             opt_file = self._build_filename("opt.extxyz")
-
             if "write_kwargs" in self.minimize_kwargs:
                 # Use _build_filename even if given filename to ensure directory exists
                 self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
                 self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
                     "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
                 ).absolute()
-
-                # Assume if write_kwargs are specified that results should be written
-                self.minimize_kwargs.setdefault("write_results", True)
             else:
                 self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
+
+            if self.symmetrize:
+                self.minimize_kwargs.setdefault("symmetrize", True)
 
         self.calc = self.struct.calc
         self.results = {}

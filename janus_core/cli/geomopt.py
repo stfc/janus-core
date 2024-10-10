@@ -129,6 +129,15 @@ def geomopt(
     pressure: Annotated[
         float, Option(help="Scalar pressure when optimizing cell geometry, in GPa.")
     ] = 0.0,
+    symmetrize: Annotated[
+        bool, Option(help="Whether to refine symmetry after geometry optimization.")
+    ] = False,
+    symmetry_tolerance: Annotated[
+        float,
+        Option(
+            help="Atom displacement tolerance for spglib symmetry determination, in Å."
+        ),
+    ] = 0.001,
     out: Annotated[
         Optional[Path],
         Option(
@@ -185,6 +194,11 @@ def geomopt(
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
         0.0.
+    symmetrize : bool
+        Whether to refine symmetry after geometry optimization. Default is False.
+    symmetry_tolerance : float
+        Atom displacement tolerance for spglib symmetry determination, in Å.
+        Default is 0.001.
     out : Optional[Path]
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
@@ -255,6 +269,8 @@ def geomopt(
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
+        "symmetrize": symmetrize,
+        "symmetry_tolerance": symmetry_tolerance,
         **opt_cell_fully_dict,
         **minimize_kwargs,
         "write_results": True,

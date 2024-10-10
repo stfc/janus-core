@@ -18,6 +18,7 @@ from janus_core.helpers.utils import (
     Devices,
     none_to_dict,
     output_structs,
+    snap_symmetry,
     spacegroup,
 )
 
@@ -56,6 +57,8 @@ class GeomOpt(BaseCalculation):
         Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
     steps : int
         Set maximum number of optimization steps to run. Default is 1000.
+    symmetrize : bool
+        Whether to refine symmetry after geometry optimization. Default is False.
     symmetry_tolerance : float
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
@@ -104,6 +107,7 @@ class GeomOpt(BaseCalculation):
         tracker_kwargs: Optional[dict[str, Any]] = None,
         fmax: float = 0.1,
         steps: int = 1000,
+        symmetrize: bool = False,
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
         filter_func: Optional[Union[Callable, str]] = FrechetCellFilter,
@@ -148,6 +152,8 @@ class GeomOpt(BaseCalculation):
             Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
         steps : int
             Set maximum number of optimization steps to run. Default is 1000.
+        symmetrize : bool
+            Whether to refine symmetry after geometry optimization. Default is False.
         symmetry_tolerance : float
             Atom displacement tolerance for spglib symmetry determination, in Å.
             Default is 0.001.
@@ -181,6 +187,7 @@ class GeomOpt(BaseCalculation):
 
         self.fmax = fmax
         self.steps = steps
+        self.symmetrize = symmetrize
         self.symmetry_tolerance = symmetry_tolerance
         self.angle_tolerance = angle_tolerance
         self.filter_func = filter_func
@@ -289,14 +296,29 @@ class GeomOpt(BaseCalculation):
 
         converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
 
-        s_grp = spacegroup(self.struct, self.symmetry_tolerance, self.angle_tolerance)
-        self.struct.info["final_spacegroup"] = s_grp
-
         # Calculate current maximum force
         if self.filter_func is not None:
             max_force = linalg.norm(self.filtered_struct.get_forces(), axis=1).max()
         else:
             max_force = linalg.norm(self.struct.get_forces(), axis=1).max()
+
+        if self.symmetrize:
+            snap_symmetry(self.struct, self.symmetry_tolerance)
+
+            # Update max force
+            old_max_force = max_force
+            struct = (
+                self.filtered_struct if self.filter_func is not None else self.struct
+            )
+            max_force = linalg.norm(struct.get_forces(), axis=1).max()
+
+            if max_force >= old_max_force:
+                warnings.warn(
+                    "Refining symmetry increased the maximum force", stacklevel=2
+                )
+
+        s_grp = spacegroup(self.struct, self.symmetry_tolerance, self.angle_tolerance)
+        self.struct.info["final_spacegroup"] = s_grp
 
         if self.logger:
             self.logger.info("After optimization spacegroup: %s", s_grp)
