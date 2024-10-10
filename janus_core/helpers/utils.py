@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, Literal, Optional, TextIO, Union, get_args
 
 from ase import Atoms
+from ase.calculators.calculator import Calculator
+from ase.calculators.mixing import SumCalculator
 from ase.io import read, write
 from ase.io.formats import filetype
 from ase.spacegroup.symmetrize import refine_symmetry
@@ -739,3 +741,33 @@ def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Ite
 
     with progress:
         yield from progress.track(sequence, description=description)
+
+
+def check_calculator(calc: Calculator, attribute: str) -> None:
+    """
+    Ensure calculator has ability to calculate properties.
+
+    If the calculator is a SumCalculator that inlcudes the TorchDFTD3Calculator, this
+    also sets the relevant function so that the MLIP component of the calculator is
+    used for properties unrelated to dispersion.
+
+    Parameters
+    ----------
+    calc : Calculator
+        ASE Calculator to check.
+    attribute : str
+        Attribute to check calculator for.
+    """
+    # If dispersion added to MLIP calculator, use only MLIP calculator for calculation
+    if isinstance(calc, SumCalculator):
+        if (
+            len(calc.mixer.calcs) == 2
+            and calc.mixer.calcs[1].name == "TorchDFTD3Calculator"
+            and hasattr(calc.mixer.calcs[0], attribute)
+        ):
+            setattr(calc, attribute, getattr(calc.mixer.calcs[0], attribute))
+
+    if not hasattr(calc, attribute) or not callable(getattr(calc, attribute)):
+        raise NotImplementedError(
+            f"The attached calculator does not currently support {attribute}"
+        )

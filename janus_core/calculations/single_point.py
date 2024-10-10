@@ -18,7 +18,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     Properties,
 )
-from janus_core.helpers.utils import none_to_dict, output_structs
+from janus_core.helpers.utils import check_calculator, none_to_dict, output_structs
 
 
 class SinglePoint(BaseCalculation):
@@ -133,7 +133,6 @@ class SinglePoint(BaseCalculation):
         """
         (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
 
-        self.properties = properties
         self.write_results = write_results
         self.write_kwargs = write_kwargs
         self.log_kwargs = log_kwargs
@@ -157,6 +156,9 @@ class SinglePoint(BaseCalculation):
             log_kwargs=log_kwargs,
             tracker_kwargs=tracker_kwargs,
         )
+
+        # Properties validated using calculator
+        self.properties = properties
 
         # Set output file
         self.write_kwargs.setdefault("filename", None)
@@ -198,9 +200,17 @@ class SinglePoint(BaseCalculation):
                         f"Property '{prop}' cannot currently be calculated."
                     )
 
-        # If none specified, get all valid properties
+        # If none specified, get energy, forces and stress
         if not value:
-            value = get_args(Properties)
+            value = ("energy", "forces", "stress")
+
+        # Validate properties
+        if "hessian" in value:
+            if isinstance(self.struct, Sequence):
+                for image in self.struct:
+                    check_calculator(image.calc, "get_hessian")
+            else:
+                check_calculator(self.struct.calc, "get_hessian")
 
         self._properties = value
 
@@ -246,6 +256,45 @@ class SinglePoint(BaseCalculation):
 
         return self.struct.get_stress()
 
+    def _calc_hessian(self, struct: Atoms) -> ndarray:
+        """
+        Calculate analytical Hessian for a given structure.
+
+        Parameters
+        ----------
+        struct : Atoms
+            Structure to calculate Hessian for.
+
+        Returns
+        -------
+        ndarray
+            Analytical Hessian.
+        """
+        if "arch" in struct.calc.parameters:
+            arch = struct.calc.parameters["arch"]
+            label = f"{arch}_"
+        else:
+            label = ""
+
+        # Calculate hessian
+        hessian = struct.calc.get_hessian(struct)
+        struct.info[f"{label}hessian"] = hessian
+        return hessian
+
+    def _get_hessian(self) -> MaybeList[ndarray]:
+        """
+        Calculate hessian using MLIP.
+
+        Returns
+        -------
+        MaybeList[ndarray]
+            Hessian of structure(s).
+        """
+        if isinstance(self.struct, Sequence):
+            return [self._calc_hessian(struct) for struct in self.struct]
+
+        return self._calc_hessian(self.struct)
+
     def run(self) -> CalcResults:
         """
         Run single point calculations.
@@ -267,6 +316,8 @@ class SinglePoint(BaseCalculation):
             self.results["forces"] = self._get_forces()
         if "stress" in self.properties:
             self.results["stress"] = self._get_stress()
+        if "hessian" in self.properties:
+            self.results["hessian"] = self._get_hessian()
 
         if self.logger:
             emissions = self.tracker.stop_task().emissions

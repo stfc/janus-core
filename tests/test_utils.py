@@ -1,14 +1,12 @@
 """Test utility functions."""
 
 from pathlib import Path
-from typing import get_args
 
 from ase import Atoms
 from ase.io import read
 import pytest
 
 from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
-from janus_core.helpers.janus_types import Properties
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.utils import none_to_dict, output_structs
 
@@ -73,7 +71,11 @@ def test_output_structs(
     struct = read(DATA_PATH)
     struct.calc = choose_calculator(arch=arch)
 
-    results_keys = set(get_args(Properties)) if not properties else set(properties)
+    if properties:
+        results_keys = set(properties)
+    else:
+        results_keys = {"energy", "forces", "stress"}
+
     label_keys = {f"{arch}_{key}" for key in results_keys}
 
     write_kwargs = {}
