@@ -20,16 +20,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set path
-        run: |
-            echo "/github/home/.local/bin" >> $GITHUB_PATH
-            rm -rf /github/home/.local
-            rm -rf /github/home/.cache
-
       - name: Install python dependencies
         run: |
           python3 -m pip install pipx
           pipx install poetry
+          pipx ensurepath
+          source ~/.zshrc
           poetry env use ${{ matrix.python-version }}
           poetry install --with dev
 
