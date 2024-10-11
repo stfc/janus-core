@@ -1,5 +1,5 @@
 """Module for post-processing trajectories."""
-
+1;4000;35c
 from collections.abc import Sequence
 from itertools import combinations_with_replacement
 from typing import Optional, Union
@@ -278,7 +278,7 @@ def compute_vaf(
 
     if fft:
         vafs = np.fft.fft(vafs, axis=0)
-        lags = 1. / lags
+        lags = np.fft.fftfreq(nsteps, time_step)
 
     vafs = (
         lags,
