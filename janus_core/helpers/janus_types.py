@@ -142,7 +142,7 @@ Architectures = Literal[
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh"]
-Properties = Literal["energy", "stress", "forces"]
+Properties = Literal["energy", "stress", "forces", "hessian"]
 PhononCalcs = Literal["bands", "dos", "pdos", "thermal"]
 
 
