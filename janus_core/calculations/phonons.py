@@ -88,9 +88,12 @@ class Phonons(BaseCalculation):
         Default is False.
     minimize_kwargs : dict[str, Any] | None
         Keyword arguments to pass to geometry optimizer. Default is {}.
+    n_qpoints : int
+        Number of q-points to sample along generated path, including end points.
+        Unused if `paths` is specified. Default is 51.
     paths : PathLike | None
-        Filepath to info to generate a path of q-points for band structure. Default is
-        None.
+        Path to yaml file with info to generate a path of q-points for band structure.
+        Default is None.
     dos_kwargs : dict[str, Any] | None
         Keyword arguments to pass to run_total_dos. Default is {}.
     temp_min : float
@@ -170,6 +173,7 @@ class Phonons(BaseCalculation):
         symmetrize: bool = False,
         minimize: bool = False,
         minimize_kwargs: dict[str, Any] | None = None,
+        n_qpoints: int = 51,
         paths: PathLike | None = None,
         dos_kwargs: dict[str, Any] | None = None,
         temp_min: float = 0.0,
@@ -239,9 +243,12 @@ class Phonons(BaseCalculation):
             Default is False.
         minimize_kwargs : dict[str, Any] | None
             Keyword arguments to pass to geometry optimizer. Default is {}.
+        n_qpoints : int
+            Number of q-points to sample along generated path, including end points.
+            Unused if `paths` is specified. Default is 51.
         paths : PathLike | None
-            Path to info to generate a path of q-points for band structure. Default is
-            None.
+           Path to yaml file with info to generate a path of q-points for band
+           structure. Default is None.
         dos_kwargs : dict[str, Any] | None
             Keyword arguments to pass to run_total_dos. Default is {}.
         temp_min : float
@@ -277,6 +284,7 @@ class Phonons(BaseCalculation):
         self.symmetrize = symmetrize
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
+        self.n_qpoints = n_qpoints
         self.paths = paths
         self.dos_kwargs = dos_kwargs
         self.temp_min = temp_min
@@ -582,7 +590,7 @@ class Phonons(BaseCalculation):
         else:
             bands_file = self._build_filename("auto_bands.yml.xz", filename=bands_file)
             q_points, labels, connections = get_band_qpoints_by_seekpath(
-                self.results["phonon"].primitive, 51
+                self.results["phonon"].primitive, self.n_qpoints
             )
 
         self.results["phonon"].run_band_structure(

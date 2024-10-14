@@ -56,6 +56,24 @@ def phonons(
         bool,
         Option(help="Whether to compute band structure."),
     ] = False,
+    n_qpoints: Annotated[
+        int,
+        Option(
+            help=(
+                "Number of q-points to sample along generated path, including end "
+                "points. Unused if `paths` is specified"
+            )
+        ),
+    ] = 51,
+    paths: Annotated[
+        Optional[Path],
+        Option(
+            help=(
+                "Path to yaml file with info to generate a path of q-points for band "
+                "structure."
+            )
+        ),
+    ] = None,
     dos: Annotated[bool, Option(help="Whether to calculate the DOS.")] = False,
     pdos: Annotated[bool, Option(help="Whether to calculate the PDOS.")] = False,
     thermal: Annotated[
@@ -144,6 +162,12 @@ def phonons(
         Mesh for sampling. Default is (10, 10, 10).
     bands : bool
         Whether to calculate and save the band structure. Default is False.
+    n_qpoints : int
+        Number of q-points to sample along generated path, including end points.
+        Unused if `paths` is specified. Default is 51.
+    paths : Optional[PathLike]
+        Path to yaml file with info to generate a path of q-points for band structure.
+        Default is None.
     dos : bool
         Whether to calculate and save the DOS. Default is False.
     pdos : bool
@@ -285,6 +309,8 @@ def phonons(
         "symmetrize": symmetrize,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
+        "n_qpoints": n_qpoints,
+        "paths": paths,
         "dos_kwargs": dos_kwargs,
         "temp_min": temp_min,
         "temp_max": temp_max,
