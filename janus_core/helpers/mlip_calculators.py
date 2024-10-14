@@ -6,19 +6,22 @@ Similar in spirit to matcalc and quacc approaches
 - https://github.com/Quantum-Accelerators/quacc.git
 """
 
-from pathlib import Path
-from typing import Any, Optional, Union, get_args
+from __future__ import annotations
 
-from ase.calculators.calculator import Calculator
-import torch
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, get_args
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 
+if TYPE_CHECKING:
+    from ase.calculators.calculator import Calculator
+    import torch
+
 
 def _set_model_path(
-    model_path: Optional[PathLike] = None,
-    kwargs: Optional[dict[str, Any]] = None,
-) -> Optional[Union[PathLike, torch.nn.Module]]:
+    model_path: PathLike | None = None,
+    kwargs: dict[str, Any] | None = None,
+) -> PathLike | torch.nn.Module | None:
     """
     Set `model_path`.
 
@@ -31,7 +34,7 @@ def _set_model_path(
 
     Returns
     -------
-    Optional[Union[PathLike, torch.nn.Module]]
+    Optional[PathLike | torch.nn.Module]
         Path to MLIP model file, loaded model, or None.
     """
     kwargs = kwargs if kwargs else {}
@@ -66,7 +69,7 @@ def _set_model_path(
 def choose_calculator(
     arch: Architectures = "mace",
     device: Devices = "cpu",
-    model_path: Optional[PathLike] = None,
+    model_path: PathLike | None = None,
     **kwargs,
 ) -> Calculator:
     """
@@ -139,6 +142,7 @@ def choose_calculator(
         from matgl import __version__, load_model
         from matgl.apps.pes import Potential
         from matgl.ext.ase import M3GNetCalculator
+        import torch
 
         # Set before loading model to avoid type mismatches
         torch.set_default_dtype(torch.float32)
@@ -163,6 +167,7 @@ def choose_calculator(
         from chgnet import __version__
         from chgnet.model.dynamics import CHGNetCalculator
         from chgnet.model.model import CHGNet
+        import torch
 
         # Set before loading to avoid type mismatches
         torch.set_default_dtype(torch.float32)

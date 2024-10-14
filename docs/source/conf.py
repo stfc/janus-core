@@ -203,7 +203,9 @@ nitpick_ignore = [
     ("py:class", "Architectures"),
     ("py:class", "Devices"),
     ("py:class", "MaybeSequence"),
+    ("py:class", "PathLike"),
     ("py:class", "Atoms"),
+    ("py:class", "Calculator"),
     ("py:class", "Context"),
     ("py:class", "Path"),
 ]
