@@ -12,13 +12,13 @@ if TYPE_CHECKING:
     from janus_core.helpers.janus_types import ASEReadArgs
 
 
-def parse_dict_class(value: str | ASEReadArgs):
+def parse_dict_class(value: str | ASEReadArgs) -> TyperDict:
     """
     Convert string input into a dictionary.
 
     Parameters
     ----------
-    value : str
+    value : str | ASEReadArgs
         String representing dictionary to be parsed.
 
     Returns
