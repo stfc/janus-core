@@ -453,3 +453,54 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         phonon_summary = yaml.safe_load(file)
         assert "emissions" not in phonon_summary
+
+
+def test_displacement_kwargs(tmp_path):
+    """Test displacment_kwargs can be set."""
+    file_prefix_1 = tmp_path / "NaCl_1"
+    file_prefix_2 = tmp_path / "NaCl_2"
+    displacement_file_1 = tmp_path / "NaCl_1-phonopy.yml"
+    displacement_file_2 = tmp_path / "NaCl_2-phonopy.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--displacement-kwargs",
+            "{'is_plusminus': True}",
+            "--file-prefix",
+            file_prefix_1,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--displacement-kwargs",
+            "{'is_plusminus': False}",
+            "--file-prefix",
+            file_prefix_2,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Check parameters
+    with open(displacement_file_1, encoding="utf8") as file:
+        params = yaml.safe_load(file)
+        n_displacments_1 = len(params["displacements"])
+
+    assert n_displacments_1 == 4
+
+    with open(displacement_file_2, encoding="utf8") as file:
+        params = yaml.safe_load(file)
+        n_displacments_2 = len(params["displacements"])
+
+    assert n_displacments_2 == 2
