@@ -98,6 +98,8 @@ def test_bands_simple(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--bands",
+            "--n-qpoints",
+            21,
             "--no-write-full",
             "--no-hdf5",
             "--file-prefix",
@@ -110,6 +112,7 @@ def test_bands_simple(tmp_path):
     with lzma.open(autoband_results, mode="rb") as file:
         bands = yaml.safe_load(file)
     assert "eigenvector" not in bands["phonon"][0]["band"][0]
+    assert bands["nqpoint"] == 126
 
     # Read phonons summary file
     assert summary_path.exists()
