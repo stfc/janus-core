@@ -200,4 +200,12 @@ nitpick_ignore = [
     ("py:class", "ase.optimize.optimize.Optimizer"),
     ("py:class", "codecarbon.emissions_tracker.OfflineEmissionsTracker"),
     ("py:class", "_io.StringIO"),
+    ("py:class", "Architectures"),
+    ("py:class", "Devices"),
+    ("py:class", "MaybeSequence"),
+    ("py:class", "PathLike"),
+    ("py:class", "Atoms"),
+    ("py:class", "Calculator"),
+    ("py:class", "Context"),
+    ("py:class", "Path"),
 ]

@@ -1,23 +1,27 @@
 """Utility functions for CLI."""
 
+from __future__ import annotations
+
 from collections.abc import Sequence
 import datetime
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ase import Atoms
-from typer import Context
 from typer_config import conf_callback_factory, yaml_loader
 import yaml
 
-from janus_core.cli.types import TyperDict
-from janus_core.helpers.janus_types import (
-    Architectures,
-    ASEReadArgs,
-    Devices,
-    MaybeSequence,
-)
+if TYPE_CHECKING:
+    from ase import Atoms
+    from typer import Context
+
+    from janus_core.cli.types import TyperDict
+    from janus_core.helpers.janus_types import (
+        Architectures,
+        ASEReadArgs,
+        Devices,
+        MaybeSequence,
+    )
 
 
 def dict_paths_to_strs(dictionary: dict) -> None:
@@ -246,6 +250,8 @@ def save_struct_calc(
     log : Path
         Path to log file.
     """
+    from ase import Atoms
+
     # Clean up duplicate parameters
     for key in (
         "struct",
