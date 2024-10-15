@@ -132,3 +132,21 @@ def test_logging(tmp_path):
 
     assert log_file.exists()
     assert single_point.struct.info["emissions"] > 0
+
+
+def test_plot(tmp_path):
+    """Test plotting equation of state."""
+    plot_file = tmp_path / "plot.svg"
+
+    eos = EoS(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+        plot_to_file=True,
+        plot_file=plot_file,
+        file_prefix=tmp_path / "NaCl",
+    )
+
+    results = eos.run()
+    assert all(key in results for key in ("eos", "bulk_modulus", "e_0", "v_0"))
+    assert plot_file.exists()
