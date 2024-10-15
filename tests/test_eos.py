@@ -143,7 +143,7 @@ def test_plot(tmp_path):
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
         plot_to_file=True,
-        plot_file=plot_file,
+        plot_kwargs={"filename": plot_file},
         file_prefix=tmp_path / "NaCl",
     )
 

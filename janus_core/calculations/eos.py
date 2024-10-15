@@ -76,8 +76,8 @@ class EoS(BaseCalculation):
         Default is {}.
     plot_to_file : bool
         Whether to save plot equation of state to svg. Default is False.
-    plot_file : Optional[PathLike]
-        File to save equation of state plot. Default is inferred from `file_prefix`.
+    plot_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to EquationOfState.plot. Default is {}.
     file_prefix : Optional[PathLike]
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula of the structure.
@@ -124,7 +124,7 @@ class EoS(BaseCalculation):
         write_structures: bool = False,
         write_kwargs: Optional[OutputKwargs] = None,
         plot_to_file: bool = False,
-        plot_file: Optional[PathLike] = None,
+        plot_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
     ) -> None:
         """
@@ -182,15 +182,14 @@ class EoS(BaseCalculation):
             Default is {}.
         plot_to_file : bool
             Whether to save plot equation of state to svg. Default is False.
-        plot_file : Optional[PathLike]
-            File to save equation of state plot. Default is inferred from
-            `file_prefix`.
+        plot_kwargs : Optional[dict[str, Any]]
+            Keyword arguments to pass to EquationOfState.plot. Default is {}.
         file_prefix : Optional[PathLike]
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
         """
-        (read_kwargs, minimize_kwargs, write_kwargs) = none_to_dict(
-            (read_kwargs, minimize_kwargs, write_kwargs)
+        (read_kwargs, minimize_kwargs, write_kwargs, plot_kwargs) = none_to_dict(
+            (read_kwargs, minimize_kwargs, write_kwargs, plot_kwargs)
         )
 
         self.min_volume = min_volume
@@ -204,7 +203,7 @@ class EoS(BaseCalculation):
         self.write_structures = write_structures
         self.write_kwargs = write_kwargs
         self.plot_to_file = plot_to_file
-        self.plot_file = plot_file
+        self.plot_kwargs = plot_kwargs
 
         if (
             (self.minimize or self.minimize_all)
@@ -262,8 +261,9 @@ class EoS(BaseCalculation):
             "generated.extxyz", filename=self.write_kwargs["filename"]
         ).absolute()
 
-        self.plot_file = self._build_filename(
-            "eos-plot.svg", filename=plot_file
+        self.plot_kwargs.setdefault("filename", None)
+        self.plot_kwargs["filename"] = self._build_filename(
+            "eos-plot.svg", filename=self.plot_kwargs["filename"]
         ).absolute()
 
         self.results = {}
@@ -338,7 +338,7 @@ class EoS(BaseCalculation):
         }
 
         if self.plot_to_file:
-            eos.plot(filename=self.plot_file)
+            eos.plot(**self.plot_kwargs)
 
         return self.results
 
