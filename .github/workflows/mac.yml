@@ -31,6 +31,7 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
         run: |
+          source ~/.zshrc
           poetry run pytest --run-extra-mlips --cov janus_core --cov-append .
 
       - name: Report coverage to Coveralls
