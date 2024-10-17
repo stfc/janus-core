@@ -2,11 +2,112 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from ase import Atoms, units
 
-from janus_core.helpers.janus_types import Observable, SliceLike
+if TYPE_CHECKING:
+    from janus_core.helpers.janus_types import SliceLike
+
+
+# pylint: disable=too-few-public-methods
+class Observable:
+    """
+    Observable data that may be correlated.
+
+    Parameters
+    ----------
+    dimension : int
+        The dimension of the observed data.
+    getter : Optional[callable]
+        An optional callable to construct the Observable from.
+    """
+
+    def __init__(self, dimension: int = 1, *, getter: Optional[callable] = None):
+        """
+        Initialise an observable with a given dimensionality.
+
+        Parameters
+        ----------
+        dimension : int
+            The dimension of the observed data.
+        getter : Optional[callable]
+            An optional callable to construct the Observable from.
+        """
+        self._dimension = dimension
+        self._getter = getter
+        self.atoms = None
+
+    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
+        """
+        Call the user supplied getter if it exits.
+
+        Parameters
+        ----------
+        atoms : Atoms
+            Atoms object to extract values from.
+        *args : tuple
+            Additional positional arguments passed to getter.
+        **kwargs : dict
+            Additional kwargs passed getter.
+
+        Returns
+        -------
+        list[float]
+            The observed value, with dimensions atoms by self.dimension.
+
+        Raises
+        ------
+        ValueError
+            If user supplied getter is None.
+        """
+        if self._getter:
+            value = self._getter(atoms, *args, **kwargs)
+            if not isinstance(value, list):
+                return [value]
+            return value
+        raise ValueError("No user getter supplied")
+
+    @property
+    def dimension(self):
+        """
+        Dimension of the observable. Commensurate with self.__call__.
+
+        Returns
+        -------
+        int
+            Observables dimension.
+        """
+        return self._dimension
+
+    def atom_count(self, n_atoms: int):
+        """
+        Atom count to average over.
+
+        Parameters
+        ----------
+        n_atoms : int
+            Total possible atoms.
+
+        Returns
+        -------
+        int
+            Atom count averaged over.
+        """
+        if self.atoms:
+            if isinstance(self.atoms, list):
+                return len(self.atoms)
+            if isinstance(self.atoms, int):
+                return 1
+
+            start = self.atoms.start
+            stop = self.atoms.stop
+            step = self.atoms.step
+            start = start if start is None else 0
+            stop = stop if stop is None else n_atoms
+            step = step if step is None else 1
+            return len(range(start, stop, step))
+        return 0
 
 # pylint: disable=too-few-public-methods
 class Observable:
@@ -247,7 +348,7 @@ class Velocity(Observable, ComponentMixin):
     def __init__(
         self,
         components: list[str],
-        atoms: Optional[Union[list[int], SliceLike]] = None,
+        atoms: Optional[Union[list[int], "SliceLike"]] = None,
     ):
         """
         Initialise the observable from a symbolic str component and atom index.

@@ -699,7 +699,8 @@ class MolecularDynamics(BaseCalculation):
         """Parse correlation kwargs into Correlations."""
         if self.correlation_kwargs:
             self._correlations = [
-                Correlation(self.n_atoms, **cor) for cor in self.correlation_kwargs
+                Correlation(n_atoms=self.n_atoms, **cor)
+                for cor in self.correlation_kwargs
             ]
         else:
             self._correlations = ()
