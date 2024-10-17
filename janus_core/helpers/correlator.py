@@ -180,9 +180,9 @@ class Correlation:
     ----------
     n_atoms : int
         Number of possible atoms to track.
-    a : tuple[Observable, dict]
+    a : Union[Observable, tuple[Observable, tuple, dict]]
         Getter for a and kwargs.
-    b : tuple[Observable, dict]
+    b : Union[Observable, tuple[Observable, tuple, dict]]
         Getter for b and kwargs.
     name : str
         Name of correlation.
@@ -198,6 +198,7 @@ class Correlation:
 
     def __init__(
         self,
+        *,
         n_atoms: int,
         a: Union[Observable, tuple[Observable, tuple, dict]],
         b: Union[Observable, tuple[Observable, tuple, dict]],
@@ -214,9 +215,9 @@ class Correlation:
         ----------
         n_atoms : int
             Number of possible atoms to track.
-        a : tuple[Observable, tuple, dict]
+        a : Union[Observable, tuple[Observable, tuple, dict]]
             Getter for a and kwargs.
-        b : tuple[Observable, tuple, dict]
+        b : Union[Observable, tuple[Observable, tuple, dict]]
             Getter for b and kwargs.
         name : str
             Name of correlation.
