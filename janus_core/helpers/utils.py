@@ -166,6 +166,25 @@ def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None
     yield from (dictionary if dictionary else {} for dictionary in dictionaries)
 
 
+def param_to_sequence(param: Any) -> Sequence[Any]:
+    """
+    Convert parameter to sequence.
+
+    Parameters
+    ----------
+    param : Any
+        Parameter to be converted.
+
+    Returns
+    -------
+    Sequence[Any]
+        Parameter as sequence.
+    """
+    if param is None or param == {} or isinstance(param, (str, Path)):
+        param = (param,)
+    return param
+
+
 def write_table(
     fmt: Literal["ascii", "csv"],
     file: Optional[TextIO] = None,

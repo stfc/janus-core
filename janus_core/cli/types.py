@@ -72,6 +72,14 @@ Architecture = Annotated[
 Device = Annotated[Optional[str], Option(help="Device to run calculations on.")]
 ModelPath = Annotated[Optional[str], Option(help="Path to MLIP model.")]
 
+ArchitectureList = Annotated[
+    Optional[list[str]], Option(help="MLIP architecture to use for calculations.")
+]
+DeviceList = Annotated[
+    Optional[list[str]], Option(help="Device to run calculations on.")
+]
+ModelPathList = Annotated[Optional[list[str]], Option(help="Path to MLIP model.")]
+
 ReadKwargsAll = Annotated[
     Optional[TyperDict],
     Option(
@@ -104,6 +112,21 @@ ReadKwargsLast = Annotated[
 
 CalcKwargs = Annotated[
     Optional[TyperDict],
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to selected calculator. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}". For the default
+            architecture ('mace_mp'), "{'model':'small'}" is set unless overwritten.
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+CalcKwargsList = Annotated[
+    Optional[list[TyperDict]],
     Option(
         parser=parse_dict_class,
         help=(

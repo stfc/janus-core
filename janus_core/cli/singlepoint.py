@@ -7,11 +7,11 @@ from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.cli.types import (
-    Architecture,
-    CalcKwargs,
-    Device,
+    ArchitectureList,
+    CalcKwargsList,
+    DeviceList,
     LogPath,
-    ModelPath,
+    ModelPathList,
     ReadKwargsAll,
     StructPath,
     Summary,
@@ -28,9 +28,9 @@ def singlepoint(
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
-    arch: Architecture = "mace_mp",
-    device: Device = "cpu",
-    model_path: ModelPath = None,
+    arch: ArchitectureList = ("mace_mp",),
+    device: DeviceList = ("cpu",),
+    model_path: ModelPathList = None,
     properties: Annotated[
         Optional[list[str]],
         Option(
@@ -50,7 +50,7 @@ def singlepoint(
         ),
     ] = None,
     read_kwargs: ReadKwargsAll = None,
-    calc_kwargs: CalcKwargs = None,
+    calc_kwargs: CalcKwargsList = None,
     write_kwargs: WriteKwargs = None,
     log: LogPath = None,
     tracker: Annotated[
