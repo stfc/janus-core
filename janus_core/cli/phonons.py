@@ -10,6 +10,8 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    DisplacementKwargs,
+    DoSKwargs,
     LogPath,
     MinimizeKwargs,
     ModelPath,
@@ -34,6 +36,7 @@ def phonons(
     displacement: Annotated[
         float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
+    displacement_kwargs: DisplacementKwargs = None,
     mesh: Annotated[
         tuple[int, int, int], Option(help="Mesh numbers along a, b, c axes.")
     ] = (10, 10, 10),
@@ -41,6 +44,24 @@ def phonons(
         bool,
         Option(help="Whether to compute band structure."),
     ] = False,
+    n_qpoints: Annotated[
+        int,
+        Option(
+            help=(
+                "Number of q-points to sample along generated path, including end "
+                "points. Unused if `paths` is specified"
+            )
+        ),
+    ] = 51,
+    paths: Annotated[
+        Optional[Path],
+        Option(
+            help=(
+                "Path to yaml file with info to generate a path of q-points for band "
+                "structure."
+            )
+        ),
+    ] = None,
     dos: Annotated[bool, Option(help="Whether to calculate the DOS.")] = False,
     pdos: Annotated[bool, Option(help="Whether to calculate the PDOS.")] = False,
     thermal: Annotated[
@@ -68,6 +89,7 @@ def phonons(
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
+    dos_kwargs: DoSKwargs = None,
     hdf5: Annotated[
         bool, Option(help="Whether to save force constants in hdf5.")
     ] = True,
@@ -115,10 +137,18 @@ def phonons(
         Supercell lattice vectors. Default is (2, 2, 2).
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    displacement_kwargs : Optional[dict[str, Any]]
+        Keyword arguments to pass to generate_displacements. Default is {}.
     mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     bands : bool
         Whether to calculate and save the band structure. Default is False.
+    n_qpoints : int
+        Number of q-points to sample along generated path, including end points.
+        Unused if `paths` is specified. Default is 51.
+    paths : Optional[PathLike]
+        Path to yaml file with info to generate a path of q-points for band structure.
+        Default is None.
     dos : bool
         Whether to calculate and save the DOS. Default is False.
     pdos : bool
@@ -143,6 +173,8 @@ def phonons(
         Default is 0.1.
     minimize_kwargs : Optional[dict[str, Any]]
         Other keyword arguments to pass to geometry optimizer. Default is {}.
+    dos_kwargs : Optional[dict[str, Any]]
+        Other keyword arguments to pass to run_total_dos. Default is {}.
     hdf5 : bool
         Whether to save force constants in hdf5 format. Default is True.
     plot_to_file : bool
@@ -188,8 +220,14 @@ def phonons(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    read_kwargs, calc_kwargs, minimize_kwargs = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, minimize_kwargs]
+    (
+        displacement_kwargs,
+        read_kwargs,
+        calc_kwargs,
+        minimize_kwargs,
+        dos_kwargs,
+    ) = parse_typer_dicts(
+        [displacement_kwargs, read_kwargs, calc_kwargs, minimize_kwargs, dos_kwargs]
     )
 
     # Read only first structure by default and ensure only one image is read
@@ -227,10 +265,14 @@ def phonons(
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
+        "displacement_kwargs": displacement_kwargs,
         "mesh": mesh,
         "symmetrize": symmetrize,
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
+        "n_qpoints": n_qpoints,
+        "paths": paths,
+        "dos_kwargs": dos_kwargs,
         "temp_min": temp_min,
         "temp_max": temp_max,
         "temp_step": temp_step,

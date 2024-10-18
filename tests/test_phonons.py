@@ -41,6 +41,8 @@ def test_calc_phonons():
 def test_optimize(tmp_path):
     """Test optimizing structure before calculation."""
     log_file = tmp_path / "phonons.log"
+    file_prefix = tmp_path / "NaCl"
+
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         arch="mace",
@@ -50,6 +52,7 @@ def test_optimize(tmp_path):
         struct=single_point.struct,
         log_kwargs={"filename": log_file},
         minimize=True,
+        file_prefix=file_prefix,
     )
     phonons.calc_force_constants(write_force_consts=False)
 
@@ -101,7 +104,7 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_symmetrize(tmp_path):
+def test_symmetrize():
     """Test symmetrize."""
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-deformed.cif",
@@ -119,7 +122,7 @@ def test_symmetrize(tmp_path):
     phonons_1.calc_force_constants()
 
     phonons_2 = Phonons(
-        struct=single_point.struct.copy(),
+        struct=phonons_1.struct.copy(),
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
