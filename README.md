@@ -257,7 +257,7 @@ Contributors to this project were funded by
 [![CoSeC](https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/cosec-100.webp)](https://www.scd.stfc.ac.uk/Pages/CoSeC.aspx)
 
 
-[ci-badge]: https://github.com/stfc/janus-core/workflows/ci/badge.svg
+[ci-badge]: https://github.com/stfc/janus-core/actions/workflows/ci.yml/badge.svg?branch=main
 [ci-link]: https://github.com/stfc/janus-core/actions
 [cov-badge]: https://coveralls.io/repos/github/stfc/janus-core/badge.svg?branch=main
 [cov-link]: https://coveralls.io/github/stfc/janus-core?branch=main
