@@ -51,6 +51,10 @@ def eos(
         Option(help="Whether to write out all genereated structures."),
     ] = False,
     write_kwargs: WriteKwargs = None,
+    plot_to_file: Annotated[
+        bool,
+        Option(help="Whether to plot equation of state."),
+    ] = False,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
@@ -101,6 +105,8 @@ def eos(
     write_kwargs : Optional[dict[str, Any]],
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
+    plot_to_file : bool
+        Whether to save plot equation of state to svg. Default is False.
     arch : Optional[str]
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
@@ -177,6 +183,7 @@ def eos(
         "minimize_kwargs": minimize_kwargs,
         "write_structures": write_structures,
         "write_kwargs": write_kwargs,
+        "plot_to_file": plot_to_file,
         "file_prefix": file_prefix,
     }
 

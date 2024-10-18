@@ -278,3 +278,25 @@ def test_invalid_traj_input(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_plot(tmp_path):
+    """Test plotting equation of state."""
+    file_prefix = tmp_path / "NaCl"
+    plot_path = tmp_path / "NaCl-eos-plot.svg"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--n-volumes",
+            4,
+            "--plot-to-file",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+    assert plot_path.exists()
