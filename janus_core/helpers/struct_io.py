@@ -48,6 +48,8 @@ def results_to_info(
     if struct.calc and "arch" in struct.calc.parameters:
         arch = struct.calc.parameters["arch"]
         struct.info["arch"] = arch
+    if struct.calc and "model" in struct.calc.parameters:
+        struct.info["mlip_model"] = struct.calc.parameters["model"]
 
         for key in properties & struct.calc.results.keys():
             tag = f"{arch}_{key}"
@@ -265,6 +267,8 @@ def output_structs(
         for image in images:
             if image.calc and "arch" in image.calc.parameters:
                 image.info["arch"] = image.calc.parameters["arch"]
+            if image.calc and "model" in image.calc.parameters:
+                image.info["mlip_model"] = image.calc.parameters["model"]
 
     # Add label for system
     for image in images:
