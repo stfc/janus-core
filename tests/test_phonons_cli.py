@@ -504,3 +504,32 @@ def test_displacement_kwargs(tmp_path):
         n_displacments_2 = len(params["displacements"])
 
     assert n_displacments_2 == 2
+
+
+def test_paths(tmp_path):
+    """Test displacment_kwargs can be set."""
+    file_prefix = tmp_path / "NaCl"
+    paths = DATA_PATH / "paths.yml"
+    band_results = tmp_path / "NaCl-bands.yml.xz"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--bands",
+            "--paths",
+            paths,
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert band_results.exists()
+    with lzma.open(band_results, mode="rb") as file:
+        bands = yaml.safe_load(file)
+    assert bands["nqpoint"] == 11
+    assert bands["npath"] == 1
