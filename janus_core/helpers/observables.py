@@ -1,6 +1,8 @@
 """Module for built-in correlation observables."""
 
-from typing import TYPE_CHECKING, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from ase import Atoms, units
 
@@ -247,7 +249,7 @@ class Velocity(Observable, ComponentMixin):
     def __init__(
         self,
         components: list[str],
-        atoms: Optional[Union[list[int], "SliceLike"]] = None,
+        atoms: list[int] | SliceLike | None = None,
     ):
         """
         Initialise the observable from a symbolic str component and atom index.
