@@ -19,11 +19,9 @@ class Observable:
     ----------
     dimension : int
         The dimension of the observed data.
-    getter : Optional[callable]
-        An optional callable to construct the Observable from.
     """
 
-    def __init__(self, dimension: int = 1, *, getter: Optional[callable] = None):
+    def __init__(self, dimension: int = 1):
         """
         Initialise an observable with a given dimensionality.
 
@@ -31,16 +29,13 @@ class Observable:
         ----------
         dimension : int
             The dimension of the observed data.
-        getter : Optional[callable]
-            An optional callable to construct the Observable from.
         """
         self._dimension = dimension
-        self._getter = getter
         self.atoms = None
 
     def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
         """
-        Call the user supplied getter if it exits.
+        Signature for returning observed value from atoms.
 
         Parameters
         ----------
@@ -55,18 +50,7 @@ class Observable:
         -------
         list[float]
             The observed value, with dimensions atoms by self.dimension.
-
-        Raises
-        ------
-        ValueError
-            If user supplied getter is None.
         """
-        if self._getter:
-            value = self._getter(atoms, *args, **kwargs)
-            if not isinstance(value, list):
-                return [value]
-            return value
-        raise ValueError("No user getter supplied")
 
     @property
     def dimension(self):

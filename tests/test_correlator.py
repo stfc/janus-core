@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 
-from ase import Atoms
 from ase.io import read
 from ase.units import GPa
 import numpy as np
@@ -18,7 +17,6 @@ from janus_core.calculations.single_point import SinglePoint
 from janus_core.processing.correlator import Correlator
 from janus_core.processing.observables import Stress, Velocity
 from janus_core.processing import post_process
-from janus_core.helpers.janus_types import Observable
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -148,15 +146,6 @@ def test_md_correlations(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    def user_observable_a(atoms: Atoms, kappa, *, gamma) -> float:
-        """User specified getter for correlation."""
-        return (
-            gamma
-            * kappa
-            * atoms.get_stress(include_ideal_gas=True, voigt=True)[-1]
-            / GPa
-        )
-
     nve = NVE(
         struct=single_point.struct,
         temp=300.0,
@@ -166,15 +155,6 @@ def test_md_correlations(tmp_path):
         stats_every=1,
         file_prefix=file_prefix,
         correlation_kwargs=[
-            {
-                "a": (Observable(1, getter=user_observable_a), (2,), {"gamma": 2}),
-                "b": Stress([("xy")]),
-                "name": "user_correlation",
-                "blocks": 1,
-                "points": 11,
-                "averaging": 1,
-                "update_frequency": 1,
-            },
             {
                 "a": Stress([("xy")]),
                 "b": Stress([("xy")]),
@@ -197,8 +177,7 @@ def test_md_correlations(tmp_path):
     assert cor_path.exists()
     with open(cor_path, encoding="utf8") as in_file:
         cor = load(in_file, Loader=Loader)
-    assert len(cor) == 2
-    assert "user_correlation" in cor
+    assert len(cor) == 1
     assert "stress_xy_auto_cor" in cor
 
     stress_cor = cor["stress_xy_auto_cor"]
@@ -206,13 +185,5 @@ def test_md_correlations(tmp_path):
     assert len(value) == len(lags) == 11
 
     direct = correlate(pxy, pxy, fft=False)
-    # input data differs due to i/o, error is expected 1e-5
-    assert direct == approx(value, rel=1e-5)
-
-    user_cor = cor["user_correlation"]
-    value, lags = user_cor["value"], stress_cor["lags"]
-    assert len(value) == len(lags) == 11
-
-    direct = correlate([v * 4.0 for v in pxy], pxy, fft=False)
     # input data differs due to i/o, error is expected 1e-5
     assert direct == approx(value, rel=1e-5)
