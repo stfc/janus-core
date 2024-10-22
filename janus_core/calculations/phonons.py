@@ -571,20 +571,20 @@ class Phonons(BaseCalculation):
             save_plots = self.plot_to_file
 
         if self.paths:
-            bands_file = self._build_filename("bands.yml", filename=bands_file)
+            bands_file = self._build_filename("bands.yml.xz", filename=bands_file)
 
             with open(self.paths, encoding="utf8") as paths_file:
-                loaded_paths = safe_load(paths_file)
+                paths_info = safe_load(paths_file)
 
-            labels = loaded_paths["labels"]
-            num_q = sum([len(q) for q in loaded_paths["paths"]])
+            labels = paths_info["labels"]
+            num_q_points = sum([len(q) for q in paths_info["paths"]])
             num_labels = len(labels)
             assert (
-                num_q == num_labels
-            ), "Number of labels is different to number of q-points"
+                num_q_points == num_labels
+            ), "Number of labels is different to number of q-points specified"
 
             q_points, connections = get_band_qpoints_and_path_connections(
-                band_paths=loaded_paths["paths"], npoints=loaded_paths["npoints"]
+                band_paths=paths_info["paths"], npoints=paths_info["npoints"]
             )
 
         else:
