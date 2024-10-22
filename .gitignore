@@ -19,6 +19,7 @@
 *.dot
 *.png
 *.svg
+*.xz
 ~*
 *~
 .project
