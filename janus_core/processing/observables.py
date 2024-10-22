@@ -8,6 +8,7 @@ from ase import Atoms, units
 
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import SliceLike
+    from janus_core.helpers.utils import slicelike_len_for
 
 
 # pylint: disable=too-few-public-methods
@@ -81,16 +82,7 @@ class Observable:
         if self.atoms:
             if isinstance(self.atoms, list):
                 return len(self.atoms)
-            if isinstance(self.atoms, int):
-                return 1
-
-            start = self.atoms.start
-            stop = self.atoms.stop
-            step = self.atoms.step
-            start = start if start is None else 0
-            stop = stop if stop is None else n_atoms
-            step = step if step is None else 1
-            return len(range(start, stop, step))
+            return slicelike_len_for(self.n_atoms)
         return 0
 
 # pylint: disable=too-few-public-methods

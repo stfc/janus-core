@@ -15,33 +15,8 @@ from janus_core.helpers.janus_types import (
     MaybeSequence,
     PathLike,
     SliceLike,
-    StartStopStep,
 )
-
-
-def _process_index(index: SliceLike) -> StartStopStep:
-    """
-    Standarize `SliceLike`s into tuple of `start`, `stop`, `step`.
-
-    Parameters
-    ----------
-    index : SliceLike
-        `SliceLike` to standardize.
-
-    Returns
-    -------
-    StartStopStep
-        Standardized `SliceLike` as `start`, `stop`, `step` triplet.
-    """
-    if isinstance(index, int):
-        if index == -1:
-            return (index, None, 1)
-        return (index, index + 1, 1)
-
-    if isinstance(index, (slice, range)):
-        return (index.start, index.stop, index.step)
-
-    return index
+from janus_core.helpers.utils import slicelike_to_startstopstep
 
 
 def compute_rdf(
@@ -94,7 +69,7 @@ def compute_rdf(
         If `by_elements` is true returns a `dict` of RDF by element pairs.
         Otherwise returns RDF of total system filtered by elements.
     """
-    index = _process_index(index)
+    index = slicelike_to_startstopstep(index)
 
     if not isinstance(data, Sequence):
         data = [data]
@@ -261,7 +236,7 @@ def compute_vaf(
             )
 
     # Extract requested data
-    index = _process_index(index)
+    index = slicelike_to_startstopstep(index)
     data = data[slice(*index)]
 
     if use_velocities:

@@ -18,8 +18,7 @@ from rich.progress import (
 )
 from rich.style import Style
 
-from janus_core.helpers.janus_types import MaybeSequence, PathLike
-
+from janus_core.helpers.janus_types import MaybeSequence, PathLike, SliceLike, StartStopStep
 
 class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
     """
@@ -410,7 +409,6 @@ def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
     with progress:
         yield from progress.track(sequence, description=description)
 
-
 def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
     """
     Check files specified in a dictionary read from a configuration file exist.
@@ -432,3 +430,52 @@ def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
         # Only check if file key is in the configuration file
         if not Path(config[file_key]).exists():
             raise FileNotFoundError(f"{config[file_key]} does not exist")
+
+def slicelike_to_startstopstep(index: SliceLike) -> StartStopStep:
+    """
+    Standarize `SliceLike`s into tuple of `start`, `stop`, `step`.
+
+    Parameters
+    ----------
+    index : SliceLike
+        `SliceLike` to standardize.
+
+    Returns
+    -------
+    StartStopStep
+        Standardized `SliceLike` as `start`, `stop`, `step` triplet.
+    """
+    if isinstance(index, int):
+        if index == -1:
+            return (index, None, 1)
+        return (index, index + 1, 1)
+
+    if isinstance(index, (slice, range)):
+        return (index.start, index.stop, index.step)
+
+    return index
+
+
+def slicelike_len_for(slc: SliceLike, sliceable_length: int) -> int:
+    """
+    Calculate the length of a SliceLike applied to a sliceable of a given length.
+
+    Parameters
+    ----------
+    slc : SliceLike
+        The applied SliceLike.
+    sliceable_length : int
+        The length of the sliceable object.
+
+    Returns
+    -------
+    int
+        Length of the result of applying slc.
+    """
+    start, stop, step = slicelike_to_startstopstep(slc)
+    if stop is None:
+        stop = sliceable_length
+    # start = start if start is None else 0
+    # stop = stop if stop is None else sliceable_length
+    # step = step if step is None else 1
+    return len(range(start, stop, step))

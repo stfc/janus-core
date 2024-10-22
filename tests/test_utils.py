@@ -9,9 +9,16 @@ from ase.io import read
 import pytest
 
 from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
+from janus_core.helpers.janus_types import SliceLike, StartStopStep
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.struct_io import output_structs
 from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import (
+    none_to_dict,
+    output_structs,
+    slicelike_len_for,
+    slicelike_to_startstopstep,
+)
 
 DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
 MODEL_PATH = Path(__file__).parent / "models/mace_mp_small.model"
@@ -166,3 +173,37 @@ def test_none_to_dict(dicts_in):
     assert dicts[2] == dicts_in[2]
     assert dicts[3] == dicts_in[3]
     assert dicts[4] == {}
+
+
+@pytest.mark.parametrize(
+    "slc, expected",
+    [
+        ((1, 2, 3), (1, 2, 3)),
+        (1, (1, 2, 1)),
+        (range(1, 2, 3), (1, 2, 3)),
+        (slice(1, 2, 3), (1, 2, 3)),
+        (-1, (-1, None, 1)),
+        (range(10), (0, 10, 1)),
+        (slice(0, None, 1), (0, None, 1)),
+    ],
+)
+def test_slicelike_to_startstopstep(slc: SliceLike, expected: StartStopStep):
+    """Test converting SliceLike to StartStopStep."""
+    assert slicelike_to_startstopstep(slc) == expected
+
+
+@pytest.mark.parametrize(
+    "slc_len, expected",
+    [
+        (((1, 2, 3), 3), 1),
+        ((1, 1), 1),
+        ((range(1, 2, 3), 3), 1),
+        ((slice(1, 2, 3), 3), 1),
+        ((-1, 1), 2),
+        ((range(10), 10), 10),
+        ((slice(0, None, 2), 10), 5),
+    ],
+)
+def test_slicelike_len_for(slc_len: tuple[SliceLike, int], expected: int):
+    """Test converting SliceLike to StartStopStep."""
+    assert slicelike_len_for(*slc_len) == expected
