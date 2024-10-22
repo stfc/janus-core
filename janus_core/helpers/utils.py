@@ -32,6 +32,8 @@ from janus_core.helpers.janus_types import (
     MaybeSequence,
     PathLike,
     Properties,
+    SliceLike,
+    StartStopStep,
 )
 from janus_core.helpers.mlip_calculators import choose_calculator
 
@@ -771,3 +773,53 @@ def check_calculator(calc: Calculator, attribute: str) -> None:
         raise NotImplementedError(
             f"The attached calculator does not currently support {attribute}"
         )
+
+
+def slicelike_to_startstopstep(index: SliceLike) -> StartStopStep:
+    """
+    Standarize `SliceLike`s into tuple of `start`, `stop`, `step`.
+
+    Parameters
+    ----------
+    index : SliceLike
+        `SliceLike` to standardize.
+
+    Returns
+    -------
+    StartStopStep
+        Standardized `SliceLike` as `start`, `stop`, `step` triplet.
+    """
+    if isinstance(index, int):
+        if index == -1:
+            return (index, None, 1)
+        return (index, index + 1, 1)
+
+    if isinstance(index, (slice, range)):
+        return (index.start, index.stop, index.step)
+
+    return index
+
+
+def slicelike_len_for(slc: SliceLike, sliceable_length: int) -> int:
+    """
+    Calculate the length of a SliceLike applied to a sliceable of a given length.
+
+    Parameters
+    ----------
+    slc : SliceLike
+        The applied SliceLike.
+    sliceable_length : int
+        The length of the sliceable object.
+
+    Returns
+    -------
+    int
+        Length of the result of applying slc.
+    """
+    start, stop, step = slicelike_to_startstopstep(slc)
+    if stop is None:
+        stop = sliceable_length
+    # start = start if start is None else 0
+    # stop = stop if stop is None else sliceable_length
+    # step = step if step is None else 1
+    return len(range(start, stop, step))
