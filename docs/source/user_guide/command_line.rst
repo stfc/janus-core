@@ -320,7 +320,8 @@ Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the
 This will save the Phonopy parameters, including displacements and force constants, to ``NaCl-phonopy.yml`` and ``NaCl-force_constants.hdf5``,
 in addition to generating a log file, ``NaCl-phonons-log.yml``, and summary of inputs, ``NaCl-phonons-summary.yml``.
 
-Additionally, the ``--bands`` option can be added to calculate the band structure and save the results to ``NaCl-auto_bands.yml``:
+Additionally, the ``--bands`` option can be added to calculate the band structure
+and save the results to a compressed yaml file, ``NaCl-auto_bands.yml.xz``:
 
 .. code-block:: bash
 
@@ -347,6 +348,80 @@ Similar to Phonopy, the supercell matrix can be defined in three ways:
 3. Nine integers (``--supercell "2 0 0 0 2 0 0 0 2"``) specifying all elements, filling the matrix row-wise.
 
 For all options, run ``janus phonons --help``.
+
+Band paths
+++++++++++
+
+By default, q-points along BZ high symmetry paths are generated using `SeeK-path <https://github.com/giovannipizzi/seekpath>`_,
+but band paths can also be specified explicitly using the ``--paths`` option to specify a yaml file.
+
+.. code-block:: bash
+
+    janus phonons --struct tests/data/NaCl.cif --bands --plot-to-file --paths tests/data/paths.yml
+
+
+This will save the results in a compressed yaml file, ``NaCl-bands.yml.xz``, as well as the generated plot, ``NaCl-bands.svg``.
+
+The ``--paths`` file must include:
+
+- ``labels``, which label band segment points
+
+- ``paths``, which list reciprocal points in reduced coordinates to give the band paths
+
+  - Multiple lists can be specified to define disconnected paths
+
+- ``npoints``, which gives the number of sampling points, including path ends, in each path segment
+
+These correspond to ``BAND_LABELS``, ``BAND``, and ``BAND_POINTS`` in `phonopy <https://phonopy.github.io/phonopy/setting-tags.html#band-structure-tags>`_.
+
+For example:
+
+.. code-block:: yaml
+
+    labels:
+    - $\Gamma$
+    - $\mathrm{X}$
+    - $\mathrm{U}$
+    - $\mathrm{K}$
+    - $\Gamma$
+    - $\mathrm{L}$
+    - $\mathrm{W}$
+    - $\mathrm{X}$
+    npoints: 101
+    paths:
+    - - - 0.0
+        - 0.0
+        - 0.0
+      - - 0.5
+        - 0.0
+        - 0.5
+      - - 0.625
+        - 0.25
+        - 0.625
+    - - - 0.375
+        - 0.375
+        - 0.75
+      - - 0.0
+        - 0.0
+        - 0.0
+      - - 0.5
+        - 0.5
+        - 0.5
+      - - 0.5
+        - 0.25
+        - 0.75
+      - - 0.5
+        - 0.0
+        - 0.5
+
+
+This defines two disconnected paths, one between :math:`{\Gamma}`, :math:`X` and :math:`U`,
+and one between :math:`K`, :math:`{\Gamma}`, :math:`L`, :math:`W`, and :math:`X`,
+with 101 sampling points for each path segment.
+
+.. image::  ../images/NaCl-bands.svg
+   :height: 700px
+   :align: center
 
 
 Training and fine-tuning MLIPs
