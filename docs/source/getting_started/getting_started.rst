@@ -12,7 +12,7 @@ Dependencies
 - mace-torch = 0.3.6
 - chgnet = 0.3.8 (optional)
 - matgl = 1.1.3 (optional)
-- sevenn = 0.9.3 (optional)
+- sevenn = 0.10.0 (optional)
 - alignn = 2024.5.27 (optional)
 
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.

@@ -18,7 +18,7 @@ New MLIPs should be added as optional dependencies under ``[tool.poetry.dependen
 
     [tool.poetry.dependencies]
     alignn = { version = "2024.5.27", optional = true }
-    sevenn = { version = "0.9.3", optional = true }
+    sevenn = { version = "0.10.0", optional = true }
     torch_geometric = { version = "^2.5.3", optional = true }
 
     [tool.poetry.extras]
