@@ -96,8 +96,8 @@ def test_vaf(tmp_path):
         file_prefix=file_prefix,
         correlation_kwargs=[
             {
-                "a": Velocity(["x", "y", "z"], na),
-                "b": Velocity(["x", "y", "z"], na),
+                "a": Velocity(components=["x", "y", "z"], atoms_slice=na),
+                "b": Velocity(components=["x", "y", "z"], atoms_slice=na),
                 "name": "vaf_Na",
                 "blocks": 1,
                 "points": 11,
@@ -105,8 +105,8 @@ def test_vaf(tmp_path):
                 "update_frequency": 1,
             },
             {
-                "a": Velocity(["x", "y", "z"], cl),
-                "b": Velocity(["x", "y", "z"], cl),
+                "a": Velocity(components=["x", "y", "z"], atoms_slice=cl),
+                "b": Velocity(components=["x", "y", "z"], atoms_slice=cl),
                 "name": "vaf_Cl",
                 "blocks": 1,
                 "points": 11,
@@ -130,8 +130,8 @@ def test_vaf(tmp_path):
         vaf = safe_load(cor)
     vaf_na = np.array(vaf["vaf_Na"]["value"])
     vaf_cl = np.array(vaf["vaf_Cl"]["value"])
-    assert vaf_na == approx(vaf_post[0], rel=1e-5)
-    assert vaf_cl == approx(vaf_post[1], rel=1e-5)
+    assert vaf_na * 3 == approx(vaf_post[0], rel=1e-5)
+    assert vaf_cl * 3 == approx(vaf_post[1], rel=1e-5)
 
 
 def test_md_correlations(tmp_path):
@@ -156,8 +156,8 @@ def test_md_correlations(tmp_path):
         file_prefix=file_prefix,
         correlation_kwargs=[
             {
-                "a": Stress([("xy")]),
-                "b": Stress([("xy")]),
+                "a": Stress(components=[("xy")]),
+                "b": Stress(components=[("xy")]),
                 "name": "stress_xy_auto_cor",
                 "blocks": 1,
                 "points": 11,

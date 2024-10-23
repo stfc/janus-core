@@ -244,18 +244,18 @@ class Correlation:
             self._get_b = b
             self._b_args, self._b_kwargs = (), {}
 
-        self._a_atoms = self._get_a.atom_count(n_atoms)
-        self._b_atoms = self._get_b.atom_count(n_atoms)
+        a_values = self._get_a.value_count(n_atoms)
+        b_values = self._get_b.value_count(n_atoms)
+
+        if a_values != b_values:
+            raise ValueError("Observables have inconsistent sizes")
+        self._values = a_values
 
         self._correlators = []
-        for _ in zip(range(self._get_a.dimension), range(self._get_b.dimension)):
-            for _ in zip(
-                range(max(1, self._a_atoms)),
-                range(max(1, self._b_atoms)),
-            ):
-                self._correlators.append(
-                    Correlator(blocks=blocks, points=points, averaging=averaging)
-                )
+        for _ in range(self._values):
+            self._correlators.append(
+                Correlator(blocks=blocks, points=points, averaging=averaging)
+            )
         self._update_frequency = update_frequency
 
     @property
@@ -299,11 +299,9 @@ class Correlation:
             The correlation lag times t'.
         """
         if self._correlators:
-            avg_value, lags = self._correlators[0].get()
-            for cor in self._correlators[1:]:
-                value, _ = cor.get()
-                avg_value += value
-            return avg_value / max(1, min(self._a_atoms, self._b_atoms)), lags
+            _, lags = self._correlators[0].get()
+            avg_value = sum([cor.get()[0] for cor in self._correlators]) / self._values
+            return avg_value, lags
         return [], []
 
     def __str__(self) -> str:
