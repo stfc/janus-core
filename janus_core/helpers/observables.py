@@ -32,7 +32,6 @@ class Observable:
             The dimension of the observed data.
         """
         self._dimension = dimension
-        self.atoms = None
 
     def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
         """
@@ -53,6 +52,22 @@ class Observable:
             The observed value, with dimensions atoms by self.dimension.
         """
 
+    def value_count(self, n_atoms: int | None = None) -> int:
+        """
+        Count of values returned by __call__.
+
+        Parameters
+        ----------
+        n_atoms : int | None
+            Atom count to expand atoms_slice.
+
+        Returns
+        -------
+        int
+            The number of values returned by __call__.
+        """
+        return self.dimension
+
     @property
     def dimension(self):
         """
@@ -64,26 +79,6 @@ class Observable:
             Observables dimension.
         """
         return self._dimension
-
-    def atom_count(self, n_atoms: int):
-        """
-        Atom count to average over.
-
-        Parameters
-        ----------
-        n_atoms : int
-            Total possible atoms.
-
-        Returns
-        -------
-        int
-            Atom count averaged over.
-        """
-        if self.atoms:
-            if isinstance(self.atoms, list):
-                return len(self.atoms)
-            return slicelike_len_for(self.n_atoms)
-        return 0
 
 
 class ComponentMixin:
@@ -163,11 +158,19 @@ class Stress(Observable, ComponentMixin):
     ----------
     components : list[str]
         Symbols for correlated tensor components, xx, yy, etc.
+    atoms_slice : list[int] | SliceLike | None = None
+        List or slice of atoms to observe velocities from.
     include_ideal_gas : bool
         Calculate with the ideal gas contribution.
     """
 
-    def __init__(self, components: list[str], *, include_ideal_gas: bool = True):
+    def __init__(
+        self,
+        *,
+        components: list[str],
+        atoms_slice: list[int] | SliceLike | None = None,
+        include_ideal_gas: bool = True,
+    ):
         """
         Initialise the observable from a symbolic str component.
 
@@ -175,6 +178,8 @@ class Stress(Observable, ComponentMixin):
         ----------
         components : list[str]
             Symbols for tensor components, xx, yy, etc.
+        atoms_slice : list[int] | SliceLike | None = None
+            List or slice of atoms to observe velocities from.
         include_ideal_gas : bool
             Calculate with the ideal gas contribution.
         """
@@ -193,6 +198,11 @@ class Stress(Observable, ComponentMixin):
             },
         )
         self._set_components(components)
+
+        if atoms_slice:
+            self.atoms_slice = atoms_slice
+        else:
+            self.atoms_slice = slice(0, None, 1)
 
         Observable.__init__(self, len(components))
         self.include_ideal_gas = include_ideal_gas
@@ -215,14 +225,18 @@ class Stress(Observable, ComponentMixin):
         list[float]
             The stress components in GPa units.
         """
+        sliced_atoms = atoms[self.atoms_slice]
+        sliced_atoms.calc = atoms.calc
         return (
-            atoms.get_stress(include_ideal_gas=self.include_ideal_gas, voigt=True)
+            sliced_atoms.get_stress(
+                include_ideal_gas=self.include_ideal_gas, voigt=True
+            )
             / units.GPa
         )[self._indices]
 
 
-StressDiagonal = Stress(["xx", "yy", "zz"])
-ShearStress = Stress(["xy", "yz", "zx"])
+StressDiagonal = Stress(components=["xx", "yy", "zz"])
+ShearStress = Stress(components=["xy", "yz", "zx"])
 
 
 # pylint: disable=too-few-public-methods
@@ -234,14 +248,15 @@ class Velocity(Observable, ComponentMixin):
     ----------
     components : list[str]
         Symbols for velocity components, x, y, z.
-    atoms : Optional[Union[list[int], SliceLike]]
+    atoms_slice : list[int] | SliceLike | None = None
         List or slice of atoms to observe velocities from.
     """
 
     def __init__(
         self,
+        *,
         components: list[str],
-        atoms: list[int] | SliceLike | None = None,
+        atoms_slice: list[int] | SliceLike | None = None,
     ):
         """
         Initialise the observable from a symbolic str component and atom index.
@@ -250,17 +265,18 @@ class Velocity(Observable, ComponentMixin):
         ----------
         components : list[str]
             Symbols for tensor components, x, y, and z.
-        atoms : Union[list[int], SliceLike]
+        atoms_slice : Union[list[int], SliceLike]
             List or slice of atoms to observe velocities from.
         """
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
         self._set_components(components)
 
         Observable.__init__(self, len(components))
-        if atoms:
-            self.atoms = atoms
+
+        if atoms_slice:
+            self.atoms_slice = atoms_slice
         else:
-            atoms = slice(None, None, None)
+            self.atoms_slice = slice(0, None, 1)
 
     def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
         """
@@ -280,4 +296,22 @@ class Velocity(Observable, ComponentMixin):
         list[float]
             The velocity values.
         """
-        return atoms.get_velocities()[self.atoms, :][:, self._indices].flatten()
+        return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
+
+    def value_count(self, n_atoms: int | None = None) -> int:
+        """
+        Count of values returned by __call__.
+
+        Parameters
+        ----------
+        n_atoms : int | None
+            Atom count to expand atoms_slice.
+
+        Returns
+        -------
+        int
+            The number of values returned by __call__.
+        """
+        if isinstance(self.atoms_slice, list):
+            return len(self.atoms_slice) * self.dimension
+        return slicelike_len_for(self.atoms_slice, self.n_atoms) * self.dimension
