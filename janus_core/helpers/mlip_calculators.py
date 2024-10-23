@@ -207,8 +207,7 @@ def choose_calculator(
         calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
 
     elif arch == "sevennet":
-        # Disable constant-imported-as-non-constant
-        from sevenn._const import SEVENN_VERSION as __version__  # noqa: N811
+        from sevenn import __version__
         from sevenn.sevennet_calculator import SevenNetCalculator
 
         if isinstance(model_path, Path):
