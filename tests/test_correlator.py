@@ -3,18 +3,18 @@
 from collections.abc import Iterable
 from pathlib import Path
 
-from ase import Atoms
 from ase.io import read
 from ase.units import GPa
 import numpy as np
 from pytest import approx
 from typer.testing import CliRunner
-from yaml import Loader, load
+from yaml import Loader, load, safe_load
 
 from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
+from janus_core.helpers import post_process
 from janus_core.helpers.correlator import Correlator
-from janus_core.helpers.observables import Stress
+from janus_core.helpers.observables import Stress, Velocity
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -64,6 +64,74 @@ def test_correlation():
     assert fft == approx(correlation, rel=1e-10)
 
 
+def test_vaf(tmp_path):
+    """Test the correlator against post-process."""
+    file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
+    cor_path = tmp_path / "Cl4Na4-nve-T300.0-cor.dat"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    na = []
+    cl = []
+    for i, atom in enumerate(single_point.struct):
+        if atom.symbol == "Na":
+            na.append(i)
+        else:
+            cl.append(i)
+
+    nve = NVE(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=10,
+        seed=1,
+        traj_every=1,
+        stats_every=1,
+        file_prefix=file_prefix,
+        correlation_kwargs=[
+            {
+                "a": Velocity(components=["x", "y", "z"], atoms_slice=na),
+                "b": Velocity(components=["x", "y", "z"], atoms_slice=na),
+                "name": "vaf_Na",
+                "blocks": 1,
+                "points": 11,
+                "averaging": 1,
+                "update_frequency": 1,
+            },
+            {
+                "a": Velocity(components=["x", "y", "z"], atoms_slice=cl),
+                "b": Velocity(components=["x", "y", "z"], atoms_slice=cl),
+                "name": "vaf_Cl",
+                "blocks": 1,
+                "points": 11,
+                "averaging": 1,
+                "update_frequency": 1,
+            },
+        ],
+        write_kwargs={"invalidate_calc": False},
+    )
+
+    nve.run()
+
+    assert cor_path.exists()
+    assert traj_path.exists()
+
+    traj = read(traj_path, index=":")
+    vaf_post = post_process.compute_vaf(
+        traj, use_velocities=True, filter_atoms=(na, cl)
+    )
+    with open(cor_path) as cor:
+        vaf = safe_load(cor)
+    vaf_na = np.array(vaf["vaf_Na"]["value"])
+    vaf_cl = np.array(vaf["vaf_Cl"]["value"])
+    assert vaf_na * 3 == approx(vaf_post[0], rel=1e-5)
+    assert vaf_cl * 3 == approx(vaf_post[1], rel=1e-5)
+
+
 def test_md_correlations(tmp_path):
     """Test correlations as part of MD cycle."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
@@ -76,15 +144,6 @@ def test_md_correlations(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    def user_observable_a(atoms: Atoms, kappa, **kwargs) -> float:
-        """User specified getter for correlation."""
-        return (
-            kwargs["gamma"]
-            * kappa
-            * atoms.get_stress(include_ideal_gas=True, voigt=True)[-1]
-            / GPa
-        )
-
     nve = NVE(
         struct=single_point.struct,
         temp=300.0,
@@ -95,17 +154,8 @@ def test_md_correlations(tmp_path):
         file_prefix=file_prefix,
         correlation_kwargs=[
             {
-                "a": (user_observable_a, (2,), {"gamma": 2}),
-                "b": Stress("xy"),
-                "name": "user_correlation",
-                "blocks": 1,
-                "points": 11,
-                "averaging": 1,
-                "update_frequency": 1,
-            },
-            {
-                "a": Stress("xy"),
-                "b": Stress("xy"),
+                "a": Stress(components=[("xy")]),
+                "b": Stress(components=[("xy")]),
                 "name": "stress_xy_auto_cor",
                 "blocks": 1,
                 "points": 11,
@@ -125,8 +175,7 @@ def test_md_correlations(tmp_path):
     assert cor_path.exists()
     with open(cor_path, encoding="utf8") as in_file:
         cor = load(in_file, Loader=Loader)
-    assert len(cor) == 2
-    assert "user_correlation" in cor
+    assert len(cor) == 1
     assert "stress_xy_auto_cor" in cor
 
     stress_cor = cor["stress_xy_auto_cor"]
@@ -134,13 +183,5 @@ def test_md_correlations(tmp_path):
     assert len(value) == len(lags) == 11
 
     direct = correlate(pxy, pxy, fft=False)
-    # input data differs due to i/o, error is expected 1e-5
-    assert direct == approx(value, rel=1e-5)
-
-    user_cor = cor["user_correlation"]
-    value, lags = user_cor["value"], stress_cor["lags"]
-    assert len(value) == len(lags) == 11
-
-    direct = correlate([v * 4.0 for v in pxy], pxy, fft=False)
     # input data differs due to i/o, error is expected 1e-5
     assert direct == approx(value, rel=1e-5)
