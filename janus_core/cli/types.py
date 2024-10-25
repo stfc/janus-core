@@ -173,6 +173,20 @@ DoSKwargs = Annotated[
     ),
 ]
 
+PDoSKwargs = Annotated[
+    Optional[TyperDict],
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to run_projected_dos. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 EnsembleKwargs = Annotated[
     Optional[TyperDict],
     Option(

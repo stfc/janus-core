@@ -96,6 +96,8 @@ class Phonons(BaseCalculation):
         Default is None.
     dos_kwargs : dict[str, Any] | None
         Keyword arguments to pass to run_total_dos. Default is {}.
+    pdos_kwargs : dict[str, Any] | None
+        Keyword arguments to pass to run_projected_dos. Default is {}.
     temp_min : float
         Start temperature for thermal properties calculations, in K. Default is 0.0.
     temp_max : float
@@ -176,6 +178,7 @@ class Phonons(BaseCalculation):
         n_qpoints: int = 51,
         paths: PathLike | None = None,
         dos_kwargs: dict[str, Any] | None = None,
+        pdos_kwargs: dict[str, Any] | None = None,
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
@@ -251,6 +254,8 @@ class Phonons(BaseCalculation):
            structure. Default is None.
         dos_kwargs : dict[str, Any] | None
             Keyword arguments to pass to run_total_dos. Default is {}.
+        pdos_kwargs : dict[str, Any] | None
+            Keyword arguments to pass to run_projected_dos. Default is {}.
         temp_min : float
             Start temperature for thermal calculations, in K. Default is 0.0.
         temp_max : float
@@ -273,8 +278,16 @@ class Phonons(BaseCalculation):
         enable_progress_bar : bool
             Whether to show a progress bar during phonon calculations. Default is False.
         """
-        (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs) = none_to_dict(
-            (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs)
+        (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs, pdos_kwargs) = (
+            none_to_dict(
+                (
+                    read_kwargs,
+                    displacement_kwargs,
+                    minimize_kwargs,
+                    dos_kwargs,
+                    pdos_kwargs,
+                )
+            )
         )
 
         self.calcs = calcs
@@ -287,6 +300,7 @@ class Phonons(BaseCalculation):
         self.n_qpoints = n_qpoints
         self.paths = paths
         self.dos_kwargs = dos_kwargs
+        self.pdos_kwargs = pdos_kwargs
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.temp_step = temp_step
@@ -821,7 +835,7 @@ class Phonons(BaseCalculation):
         self.results["phonon"].run_mesh(
             mesh, with_eigenvectors=True, is_mesh_symmetry=False
         )
-        self.results["phonon"].run_projected_dos()
+        self.results["phonon"].run_projected_dos(**self.pdos_kwargs)
 
         if self.logger:
             self.logger.info("PDOS calculation complete")

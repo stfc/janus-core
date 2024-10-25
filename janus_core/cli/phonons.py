@@ -20,6 +20,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     ModelPath,
+    PDoSKwargs,
     ReadKwargsLast,
     StructPath,
     Summary,
@@ -75,7 +76,9 @@ def phonons(
         ),
     ] = None,
     dos: Annotated[bool, Option(help="Whether to calculate the DOS.")] = False,
+    dos_kwargs: DoSKwargs = None,
     pdos: Annotated[bool, Option(help="Whether to calculate the PDOS.")] = False,
+    pdos_kwargs: PDoSKwargs = None,
     thermal: Annotated[
         bool, Option(help="Whether to calculate thermal properties.")
     ] = False,
@@ -101,7 +104,6 @@ def phonons(
         float, Option(help="Maximum force for optimization convergence.")
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
-    dos_kwargs: DoSKwargs = None,
     hdf5: Annotated[
         bool, Option(help="Whether to save force constants in hdf5.")
     ] = True,
@@ -170,8 +172,12 @@ def phonons(
         Default is None.
     dos : bool
         Whether to calculate and save the DOS. Default is False.
+    dos_kwargs : Optional[dict[str, Any]]
+        Other keyword arguments to pass to run_total_dos. Default is {}.
     pdos : bool
         Whether to calculate and save the PDOS. Default is False.
+    pdos_kwargs : Optional[dict[str, Any]]
+        Other keyword arguments to pass to run_projected_dos. Default is {}.
     thermal : bool
         Whether to calculate thermal properties. Default is False.
     temp_min : float
@@ -192,8 +198,6 @@ def phonons(
         Default is 0.1.
     minimize_kwargs : Optional[dict[str, Any]]
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    dos_kwargs : Optional[dict[str, Any]]
-        Other keyword arguments to pass to run_total_dos. Default is {}.
     hdf5 : bool
         Whether to save force constants in hdf5 format. Default is True.
     plot_to_file : bool
@@ -248,8 +252,16 @@ def phonons(
         calc_kwargs,
         minimize_kwargs,
         dos_kwargs,
+        pdos_kwargs,
     ) = parse_typer_dicts(
-        [displacement_kwargs, read_kwargs, calc_kwargs, minimize_kwargs, dos_kwargs]
+        [
+            displacement_kwargs,
+            read_kwargs,
+            calc_kwargs,
+            minimize_kwargs,
+            dos_kwargs,
+            pdos_kwargs,
+        ]
     )
 
     # Read only first structure by default and ensure only one image is read
@@ -312,6 +324,7 @@ def phonons(
         "n_qpoints": n_qpoints,
         "paths": paths,
         "dos_kwargs": dos_kwargs,
+        "pdos_kwargs": pdos_kwargs,
         "temp_min": temp_min,
         "temp_max": temp_max,
         "temp_step": temp_step,

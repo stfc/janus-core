@@ -210,6 +210,8 @@ def test_pdos(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--pdos",
+            "--pdos-kwargs",
+            "{'freq_min': -1, 'freq_max': 0, 'xyz_projection': True}",
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -217,6 +219,10 @@ def test_pdos(tmp_path):
     )
     assert result.exit_code == 0
     assert pdos_results.exists()
+    with open(pdos_results, encoding="utf8") as file:
+        lines = file.readlines()
+    assert lines[1].split()[0] == "-1.0000000000"
+    assert lines[-1].split()[0] == "0.0000000000"
 
 
 def test_plot(tmp_path):
