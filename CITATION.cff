@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "janus-core"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Elliott
+    given-names: Kasoar
+    orcid: "https://orcid.org/0009-0005-2015-9478"
+  - family-names: Federica
+    given-names: Zanca
+  - family-names: Jacob
+    given-names: Wilkins
+  - family-names: Harvey
+    given-names: Devereux
+  - family-names: David
+    given-names: Mason
+  - family-names: Patrick
+    given-names: Austen
+  - family-names: Alin
+    given-names: Elena
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.13152495
+repository-code: 'https://github.com/stfc/janus-core'
+abstract: Tools for machine learnt interatomic potentials
+license: BSD-3-Clause
