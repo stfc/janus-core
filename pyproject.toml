@@ -5,6 +5,7 @@ description = "Tools for machine learnt interatomic potentials"
 authors = [
     "Elliott Kasoar",
     "Federica Zanca",
+    "Harvey Devereux",
     "Patrick Austin",
     "David Mason",
     "Jacob Wilkins",
