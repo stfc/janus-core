@@ -64,7 +64,7 @@ Rules enforced by ruff are currently set up to be comparable to:
 - `isort <https://pycqa.github.io/isort/>`_ (import sorter)
 - `flake8-bugbear <https://pypi.org/project/flake8-bugbear/>`_ (bug finder)
 
-The full set of `ruff rules <https://docs.astral.sh/ruff/rules/>`_ are specified by the ``[tool.ruff]]`` sections of `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`
+The full set of `ruff rules <https://docs.astral.sh/ruff/rules/>`_ are specified by the ``[tool.ruff]`` sections of `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
 
 Building the documentation
