@@ -101,7 +101,7 @@ def phonons(
     ] = None,
     log: LogPath = None,
     summary: Summary = None,
-):
+) -> None:
     """
     Perform phonon calculations and write out results.
 

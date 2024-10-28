@@ -23,7 +23,7 @@ class Correlator:
         Averaging window per block level.
     """
 
-    def __init__(self, *, blocks: int, points: int, averaging: int):
+    def __init__(self, *, blocks: int, points: int, averaging: int) -> None:
         """
         Initialise an empty Correlator.
 
@@ -50,7 +50,7 @@ class Correlator:
         self._correlation = np.zeros((self._blocks, self._points))
         self._count_correlated = np.zeros((self._blocks, self._points), dtype=int)
 
-    def update(self, a: float, b: float):
+    def update(self, a: float, b: float) -> None:
         """
         Update the correlation, <ab>, with new values a and b.
 
@@ -63,7 +63,7 @@ class Correlator:
         """
         self._propagate(a, b, 0)
 
-    def _propagate(self, a: float, b: float, block: int):
+    def _propagate(self, a: float, b: float, block: int) -> None:
         """
         Propagate update down block hierarchy.
 
@@ -203,7 +203,7 @@ class Correlation:
         points: int,
         averaging: int,
         update_frequency: int,
-    ):
+    ) -> None:
         """
         Initialise a correlation.
 
@@ -252,7 +252,7 @@ class Correlation:
         """
         return self._update_frequency
 
-    def update(self, atoms: Atoms):
+    def update(self, atoms: Atoms) -> None:
         """
         Update a correlation.
 

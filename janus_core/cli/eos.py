@@ -73,7 +73,7 @@ def eos(
     ] = None,
     log: LogPath = None,
     summary: Summary = None,
-):
+) -> None:
     """
     Calculate equation of state and write out results.
 

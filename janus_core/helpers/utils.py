@@ -67,7 +67,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         struct_path: Optional[PathLike],
         file_prefix: Optional[PathLike],
         *additional,
-    ):
+    ) -> None:
         """
         Provide mixin functions for standard filename handling.
 
@@ -643,7 +643,7 @@ def _dump_ascii(
     header: list[str],
     columns: dict[str, Sequence[Any]],
     formats: Sequence[str],
-):
+) -> None:
     """
     Dump data as an ASCII style table.
 
@@ -675,7 +675,7 @@ def _dump_csv(
     header: list[str],
     columns: dict[str, Sequence[Any]],
     formats: Sequence[str],
-):
+) -> None:
     """
     Dump data as a csv style table.
 

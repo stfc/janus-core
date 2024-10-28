@@ -41,7 +41,7 @@ class TyperDict:
         Value of string representing a dictionary.
     """
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         """
         Initialise class.
 
@@ -52,7 +52,7 @@ class TyperDict:
         """
         self.value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return string representation of class.
 

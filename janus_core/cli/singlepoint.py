@@ -54,7 +54,7 @@ def singlepoint(
     write_kwargs: WriteKwargs = None,
     log: LogPath = None,
     summary: Summary = None,
-):
+) -> None:
     """
     Perform single point calculations and save to file.
 

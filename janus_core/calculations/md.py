@@ -509,7 +509,7 @@ class MolecularDynamics(BaseCalculation):
 
         self._parse_correlations()
 
-    def _set_info(self):
+    def _set_info(self) -> None:
         """Set time in fs, current dynamics step, and density to info."""
         time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
         step = self.offset + self.dyn.nsteps
@@ -631,7 +631,7 @@ class MolecularDynamics(BaseCalculation):
             optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
             optimizer.run()
 
-    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None):
+    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None) -> str:
         """
         Set ensemble parameters for output files.
 
@@ -1205,7 +1205,7 @@ class NPT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
-    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None):
+    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None) -> str:
         """
         Set ensemble parameters for output files.
 
