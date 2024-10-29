@@ -300,3 +300,29 @@ def test_plot(tmp_path):
     )
     assert result.exit_code == 0
     assert plot_path.exists()
+
+
+def test_no_carbon(tmp_path):
+    """Test disabling carbon tracking."""
+    file_prefix = tmp_path / "NaCl"
+    summary_path = tmp_path / "NaCl-eos-summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--n-volumes",
+            4,
+            "--no-tracker",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read eos summary file
+    with open(summary_path, encoding="utf8") as file:
+        eos_summary = yaml.safe_load(file)
+    assert "emissions" not in eos_summary

@@ -18,6 +18,9 @@ def train(
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
     log: Annotated[Path, Option(help="Path to save logs to.")] = Path("train-log.yml"),
+    tracker: Annotated[
+        bool, Option(help="Whether to save carbon emissions of calculation")
+    ] = True,
     summary: Annotated[
         Path,
         Option(
@@ -38,6 +41,9 @@ def train(
         Whether to fine-tune a foundational model. Default is False.
     log : Optional[Path]
         Path to write logs to. Default is Path("train-log.yml").
+    tracker : bool
+        Whether to save carbon emissions of calculation in log file and summary.
+        Default is True.
     summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is Path("train-summary.yml").
@@ -72,12 +78,18 @@ def train(
     # Save summary information before training begins
     start_summary(command="train", summary=summary, inputs=inputs)
 
+    log_kwargs = {"filemode": "w"}
+    if log:
+        log_kwargs["filename"] = log
+
     # Run training
     run_train(
-        mlip_config, attach_logger=True, log_kwargs={"filename": log, "filemode": "w"}
+        mlip_config, attach_logger=True, log_kwargs=log_kwargs, track_carbon=tracker
     )
 
-    carbon_summary(summary=summary, log=log)
+    # Save carbon summary
+    if tracker:
+        carbon_summary(summary=summary, log=log)
 
     # Save time after training has finished
     end_summary(summary)

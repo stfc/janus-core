@@ -411,3 +411,28 @@ def test_invalid_traj_input(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_no_carbon(tmp_path):
+    """Test disabling carbon tracking."""
+    file_prefix = tmp_path / "NaCl"
+    summary_path = tmp_path / "NaCl-phonons-summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--no-tracker",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read phonons summary file
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+        assert "emissions" not in phonon_summary

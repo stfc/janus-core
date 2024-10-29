@@ -43,6 +43,7 @@ def train(
     req_file_keys: Optional[list[PathLike]] = None,
     attach_logger: bool = False,
     log_kwargs: Optional[dict[str, Any]] = None,
+    track_carbon: bool = True,
     tracker_kwargs: Optional[dict[str, Any]] = None,
 ) -> None:
     """
@@ -62,6 +63,8 @@ def train(
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
@@ -80,7 +83,7 @@ def train(
         log_kwargs.setdefault("filename", "train-log.yml")
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
-    tracker = config_tracker(logger, **tracker_kwargs)
+    tracker = config_tracker(logger, track_carbon, **tracker_kwargs)
 
     if logger and "foundation_model" in options:
         logger.info("Fine tuning model: %s", options["foundation_model"])
@@ -89,9 +92,11 @@ def train(
     mlip_args = mace_parser().parse_args(["--config", str(mlip_config)])
     if logger:
         logger.info("Starting training")
+    if tracker:
         tracker.start_task("Training")
     run_train(mlip_args)
     if logger:
         logger.info("Training complete")
+    if tracker:
         tracker.stop_task()
         tracker.stop()

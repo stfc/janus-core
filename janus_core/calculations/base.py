@@ -47,6 +47,8 @@ class BaseCalculation(FileNameMixin):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
     file_prefix : Optional[PathLike]
@@ -79,6 +81,7 @@ class BaseCalculation(FileNameMixin):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         file_prefix: Optional[PathLike] = None,
         additional_prefix: Optional[str] = None,
@@ -115,6 +118,8 @@ class BaseCalculation(FileNameMixin):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         file_prefix : Optional[PathLike]
@@ -137,6 +142,7 @@ class BaseCalculation(FileNameMixin):
         self.read_kwargs = read_kwargs
         self.calc_kwargs = calc_kwargs
         self.log_kwargs = log_kwargs
+        self.track_carbon = track_carbon
         self.tracker_kwargs = tracker_kwargs
 
         if not self.model_path and "model_path" in self.calc_kwargs:
@@ -179,4 +185,6 @@ class BaseCalculation(FileNameMixin):
 
         self.log_kwargs.setdefault("name", calc_name)
         self.logger = config_logger(**self.log_kwargs)
-        self.tracker = config_tracker(self.logger, **self.tracker_kwargs)
+        self.tracker = config_tracker(
+            self.logger, self.track_carbon, **self.tracker_kwargs
+        )

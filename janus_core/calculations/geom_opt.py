@@ -51,6 +51,8 @@ class GeomOpt(BaseCalculation):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     fmax : float
@@ -104,6 +106,7 @@ class GeomOpt(BaseCalculation):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         fmax: float = 0.1,
         steps: int = 1000,
@@ -146,6 +149,8 @@ class GeomOpt(BaseCalculation):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         fmax : float
@@ -224,6 +229,7 @@ class GeomOpt(BaseCalculation):
             set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
+            track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
         )
 
@@ -292,6 +298,7 @@ class GeomOpt(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting geometry optimization")
+        if self.tracker:
             self.tracker.start_task("Geometry optimization")
 
         converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
@@ -351,7 +358,8 @@ class GeomOpt(BaseCalculation):
             )
 
         if self.logger:
+            self.logger.info("Geometry optimization complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.stop()
-            self.logger.info("Geometry optimization complete")

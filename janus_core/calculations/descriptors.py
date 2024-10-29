@@ -47,6 +47,8 @@ class Descriptors(BaseCalculation):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     invariants_only : bool
@@ -79,6 +81,7 @@ class Descriptors(BaseCalculation):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         invariants_only: bool = True,
         calc_per_element: bool = False,
@@ -114,6 +117,8 @@ class Descriptors(BaseCalculation):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         invariants_only : bool
@@ -153,6 +158,7 @@ class Descriptors(BaseCalculation):
             set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
+            track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
         )
 
@@ -182,6 +188,7 @@ class Descriptors(BaseCalculation):
             self.logger.info("invariants_only: %s", self.invariants_only)
             self.logger.info("calc_per_element: %s", self.calc_per_element)
             self.logger.info("calc_per_atom: %s", self.calc_per_atom)
+        if self.tracker:
             self.tracker.start_task("Descriptors")
 
         if isinstance(self.struct, Sequence):
@@ -191,6 +198,8 @@ class Descriptors(BaseCalculation):
             self._calc_descriptors(self.struct)
 
         if self.logger:
+            self.logger.info("Descriptors calculation complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             if isinstance(self.struct, Sequence):
                 for image in self.struct:
@@ -198,7 +207,6 @@ class Descriptors(BaseCalculation):
             else:
                 self.struct.info["emissions"] = emissions
             self.tracker.stop()
-            self.logger.info("Descriptors calculation complete")
 
         output_structs(
             self.struct,

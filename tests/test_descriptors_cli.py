@@ -239,3 +239,32 @@ def test_per_atom(tmp_path):
             "calc_per_atom: True",
         ],
     )
+
+
+def test_no_carbon(tmp_path):
+    """Test disabling carbon tracking."""
+    out_path = tmp_path / "test" / "NaCl-descriptors.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "descriptors",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            out_path,
+            "--log",
+            log_path,
+            "--no-tracker",
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read descriptors summary file
+    with open(summary_path, encoding="utf8") as file:
+        descriptors_summary = yaml.safe_load(file)
+    assert "emissions" not in descriptors_summary
