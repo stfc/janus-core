@@ -15,7 +15,9 @@ from janus_core.helpers.janus_types import (
     MaybeSequence,
     PathLike,
 )
-from janus_core.helpers.utils import check_calculator, none_to_dict, output_structs
+from janus_core.helpers.mlip_calculators import check_calculator
+from janus_core.helpers.struct_io import output_structs
+from janus_core.helpers.utils import none_to_dict
 
 
 class Descriptors(BaseCalculation):

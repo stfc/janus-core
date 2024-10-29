@@ -49,7 +49,7 @@ def train(
         is Path("train-summary.yml").
     """
     from janus_core.cli.utils import carbon_summary, end_summary, start_summary
-    from janus_core.helpers.train import train as run_train
+    from janus_core.training.train import train as run_train
 
     with open(mlip_config, encoding="utf8") as config_file:
         config = yaml.safe_load(config_file)

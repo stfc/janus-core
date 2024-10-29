@@ -10,7 +10,7 @@ from typer.testing import CliRunner
 from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.janus import app
-from janus_core.helpers import post_process
+from janus_core.processing import post_process
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"

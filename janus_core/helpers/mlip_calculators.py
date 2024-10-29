@@ -11,6 +11,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, get_args
 
+from ase.calculators.mixing import SumCalculator
+
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 
 if TYPE_CHECKING:
@@ -231,3 +233,33 @@ def choose_calculator(
     calculator.parameters["arch"] = arch
 
     return calculator
+
+
+def check_calculator(calc: Calculator, attribute: str) -> None:
+    """
+    Ensure calculator has ability to calculate properties.
+
+    If the calculator is a SumCalculator that inlcudes the TorchDFTD3Calculator, this
+    also sets the relevant function so that the MLIP component of the calculator is
+    used for properties unrelated to dispersion.
+
+    Parameters
+    ----------
+    calc : Calculator
+        ASE Calculator to check.
+    attribute : str
+        Attribute to check calculator for.
+    """
+    # If dispersion added to MLIP calculator, use only MLIP calculator for calculation
+    if isinstance(calc, SumCalculator):
+        if (
+            len(calc.mixer.calcs) == 2
+            and calc.mixer.calcs[1].name == "TorchDFTD3Calculator"
+            and hasattr(calc.mixer.calcs[0], attribute)
+        ):
+            setattr(calc, attribute, getattr(calc.mixer.calcs[0], attribute))
+
+    if not hasattr(calc, attribute) or not callable(getattr(calc, attribute)):
+        raise NotImplementedError(
+            f"The attached calculator does not currently support {attribute}"
+        )

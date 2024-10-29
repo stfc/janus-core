@@ -26,24 +26,20 @@ import yaml
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
-from janus_core.helpers.correlator import Correlation
 from janus_core.helpers.janus_types import (
+    Architectures,
+    ASEReadArgs,
     CorrelationKwargs,
+    Devices,
     Ensembles,
     OutputKwargs,
     PathLike,
     PostProcessKwargs,
 )
-from janus_core.helpers.post_process import compute_rdf, compute_vaf
-from janus_core.helpers.utils import (
-    Architectures,
-    ASEReadArgs,
-    Devices,
-    input_structs,
-    none_to_dict,
-    output_structs,
-    write_table,
-)
+from janus_core.helpers.struct_io import input_structs, output_structs
+from janus_core.helpers.utils import none_to_dict, write_table
+from janus_core.processing.correlator import Correlation
+from janus_core.processing.post_process import compute_rdf, compute_vaf
 
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 

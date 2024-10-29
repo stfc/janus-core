@@ -19,7 +19,8 @@ from janus_core.helpers.janus_types import (
     OutputKwargs,
     PathLike,
 )
-from janus_core.helpers.utils import none_to_dict, output_structs
+from janus_core.helpers.struct_io import output_structs
+from janus_core.helpers.utils import none_to_dict
 
 
 class EoS(BaseCalculation):
