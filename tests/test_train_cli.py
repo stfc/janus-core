@@ -65,20 +65,19 @@ def test_help():
 
 def test_train(tmp_path):
     """Test MLIP training."""
-    summary_path = tmp_path / "summary.yml"
-    model = "test.model"
-    compiled_model = "test_compiled.model"
-    results_path = "results"
-    checkpoints_path = "checkpoints"
-    logs_path = "logs"
+    model = Path("test.model")
+    compiled_model = Path("test_compiled.model")
+    results_path = Path("results")
+    checkpoints_path = Path("checkpoints")
+    logs_path = Path("logs")
     log_path = Path("./train-log.yml").absolute()
     summary_path = Path("./train-summary.yml").absolute()
 
-    assert not Path(model).exists()
-    assert not Path(compiled_model).exists()
-    assert not Path(logs_path).exists()
-    assert not Path(results_path).exists()
-    assert not Path(checkpoints_path).exists()
+    assert not model.exists()
+    assert not compiled_model.exists()
+    assert not logs_path.exists()
+    assert not results_path.exists()
+    assert not checkpoints_path.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
 
@@ -95,12 +94,11 @@ def test_train(tmp_path):
     try:
         assert result.exit_code == 0
 
-        assert Path(model).exists()
-        assert Path(compiled_model).exists()
-        assert Path(logs_path).is_dir()
-        assert Path(results_path).is_dir()
-        assert Path(checkpoints_path).is_dir()
-
+        assert model.exists()
+        assert compiled_model.exists()
+        assert logs_path.is_dir()
+        assert results_path.is_dir()
+        assert checkpoints_path.is_dir()
         assert log_path.exists()
         assert summary_path.exists()
 
@@ -109,7 +107,6 @@ def test_train(tmp_path):
         )
 
         # Read train summary file and check contents
-        assert summary_path.exists()
         with open(summary_path, encoding="utf8") as file:
             train_summary = yaml.safe_load(file)
 
@@ -124,8 +121,8 @@ def test_train(tmp_path):
 
     finally:
         # Tidy up models
-        Path(model).unlink(missing_ok=True)
-        Path(compiled_model).unlink(missing_ok=True)
+        model.unlink(missing_ok=True)
+        compiled_model.unlink(missing_ok=True)
 
         # Tidy up directories
         shutil.rmtree(logs_path, ignore_errors=True)
@@ -165,17 +162,17 @@ def test_fine_tune(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    model = "test-finetuned.model"
-    compiled_model = "test-finetuned_compiled.model"
-    logs_path = "logs"
-    results_path = "results"
-    checkpoints_path = "checkpoints"
+    model = Path("test-finetuned.model")
+    compiled_model = Path("test-finetuned_compiled.model")
+    logs_path = Path("logs")
+    results_path = Path("results")
+    checkpoints_path = Path("checkpoints")
 
-    assert not Path(model).exists()
-    assert not Path(compiled_model).exists()
-    assert not Path(logs_path).exists()
-    assert not Path(results_path).exists()
-    assert not Path(checkpoints_path).exists()
+    assert not model.exists()
+    assert not compiled_model.exists()
+    assert not logs_path.exists()
+    assert not results_path.exists()
+    assert not checkpoints_path.exists()
 
     config = write_tmp_config(DATA_PATH / "mlip_fine_tune.yml", tmp_path)
 
@@ -193,15 +190,15 @@ def test_fine_tune(tmp_path):
         ],
     )
     try:
-        assert Path(model).exists()
-        assert Path(compiled_model).exists()
-        assert Path(logs_path).is_dir()
-        assert Path(results_path).is_dir()
-        assert Path(checkpoints_path).is_dir()
+        assert model.exists()
+        assert compiled_model.exists()
+        assert logs_path.is_dir()
+        assert results_path.is_dir()
+        assert checkpoints_path.is_dir()
     finally:
         # Tidy up models
-        Path(model).unlink(missing_ok=True)
-        Path(compiled_model).unlink(missing_ok=True)
+        model.unlink(missing_ok=True)
+        compiled_model.unlink(missing_ok=True)
 
         # Tidy up directories
         shutil.rmtree(logs_path, ignore_errors=True)
@@ -266,22 +263,19 @@ def test_fine_tune_invalid_foundation(tmp_path):
 
 def test_no_carbon(tmp_path):
     """Test disabling carbon tracking."""
+    model = Path("test.model")
+    compiled_model = Path("test_compiled.model")
+    results_path = Path("results")
+    checkpoints_path = Path("checkpoints")
+    logs_path = Path("logs")
+    log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    model = "test.model"
-    compiled_model = "test_compiled.model"
-    results_path = "results"
-    checkpoints_path = "checkpoints"
-    logs_path = "logs"
-    log_path = Path("./train-log.yml").absolute()
-    summary_path = Path("./train-summary.yml").absolute()
 
-    assert not Path(model).exists()
-    assert not Path(compiled_model).exists()
-    assert not Path(logs_path).exists()
-    assert not Path(results_path).exists()
-    assert not Path(checkpoints_path).exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
+    assert not model.exists()
+    assert not compiled_model.exists()
+    assert not logs_path.exists()
+    assert not results_path.exists()
+    assert not checkpoints_path.exists()
 
     config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
 
@@ -292,26 +286,27 @@ def test_no_carbon(tmp_path):
             "--mlip-config",
             config,
             "--no-tracker",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
         ],
     )
     try:
         assert result.exit_code == 0
 
-        assert summary_path.exists()
         with open(summary_path, encoding="utf8") as file:
             train_summary = yaml.safe_load(file)
         assert "emissions" not in train_summary
+
     finally:
         # Tidy up models
-        Path(model).unlink(missing_ok=True)
-        Path(compiled_model).unlink(missing_ok=True)
+        model.unlink(missing_ok=True)
+        compiled_model.unlink(missing_ok=True)
 
         # Tidy up directories
         shutil.rmtree(logs_path, ignore_errors=True)
         shutil.rmtree(results_path, ignore_errors=True)
         shutil.rmtree(checkpoints_path, ignore_errors=True)
-
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
 
         clear_log_handlers()

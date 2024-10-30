@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-try:
-    from mace.cli.run_train import run as run_train
-except ImportError as e:
-    raise NotImplementedError("Please update MACE to use this module.") from e
+from mace.cli.run_train import run
 from mace.tools import build_default_arg_parser as mace_parser
 import yaml
 
@@ -17,7 +15,7 @@ from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import none_to_dict
 
 
-def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
+def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
     """
     Check files specified in the MLIP configuration file exist.
 
@@ -25,7 +23,7 @@ def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
     ----------
     config : dict
         MLIP configuration file options.
-    req_file_keys : list[Pathlike]
+    req_file_keys : Sequence[Pathlike]
         List of files that must exist if defined in the configuration file.
 
     Raises
@@ -42,7 +40,7 @@ def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
 
 def train(
     mlip_config: PathLike,
-    req_file_keys: list[PathLike] | None = None,
+    req_file_keys: Sequence[PathLike] | None = None,
     attach_logger: bool = False,
     log_kwargs: dict[str, Any] | None = None,
     track_carbon: bool = True,
@@ -58,9 +56,9 @@ def train(
     ----------
     mlip_config : PathLike
         Configuration file to pass to MLIP.
-    req_file_keys : list[PathLike] | None
+    req_file_keys : Sequence[PathLike] | None
         List of files that must exist if defined in the configuration file.
-        Default is ["train_file", "test_file", "valid_file", "statistics_file"].
+        Default is ("train_file", "test_file", "valid_file", "statistics_file").
     attach_logger : bool
         Whether to attach a logger. Default is False.
     log_kwargs : dict[str, Any] | None
@@ -73,7 +71,7 @@ def train(
     log_kwargs, tracker_kwargs = none_to_dict(log_kwargs, tracker_kwargs)
 
     if req_file_keys is None:
-        req_file_keys = ["train_file", "test_file", "valid_file", "statistics_file"]
+        req_file_keys = ("train_file", "test_file", "valid_file", "statistics_file")
 
     # Validate inputs
     with open(mlip_config, encoding="utf8") as file:
@@ -92,11 +90,14 @@ def train(
 
     # Path must be passed as a string
     mlip_args = mace_parser().parse_args(["--config", str(mlip_config)])
+
     if logger:
         logger.info("Starting training")
     if tracker:
         tracker.start_task("Training")
-    run_train(mlip_args)
+
+    run(mlip_args)
+
     if logger:
         logger.info("Training complete")
     if tracker:
