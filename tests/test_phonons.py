@@ -41,6 +41,8 @@ def test_calc_phonons():
 def test_optimize(tmp_path):
     """Test optimizing structure before calculation."""
     log_file = tmp_path / "phonons.log"
+    opt_file = tmp_path / "NaCl-opt.extxyz"
+
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         arch="mace",
@@ -50,9 +52,11 @@ def test_optimize(tmp_path):
         struct=single_point.struct,
         log_kwargs={"filename": log_file},
         minimize=True,
+        minimize_kwargs={"write_kwargs": {"filename": opt_file}},
     )
     phonons.calc_force_constants(write_force_consts=False)
 
+    assert opt_file.exists()
     assert_log_contains(
         log_file,
         includes=["Using filter", "Using optimizer", "Starting geometry optimization"],
@@ -103,6 +107,8 @@ def test_logging(tmp_path):
 
 def test_symmetrize(tmp_path):
     """Test symmetrize."""
+    file_prefix = tmp_path / "NaCl"
+
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
@@ -115,6 +121,7 @@ def test_symmetrize(tmp_path):
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
         symmetrize=False,
+        file_prefix=file_prefix,
     )
     phonons_1.calc_force_constants()
 
@@ -124,6 +131,7 @@ def test_symmetrize(tmp_path):
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
         symmetrize=True,
+        file_prefix=file_prefix,
     )
     phonons_2.calc_force_constants()
 
