@@ -251,13 +251,13 @@ def check_calculator(calc: Calculator, attribute: str) -> None:
         Attribute to check calculator for.
     """
     # If dispersion added to MLIP calculator, use only MLIP calculator for calculation
-    if isinstance(calc, SumCalculator):
-        if (
-            len(calc.mixer.calcs) == 2
-            and calc.mixer.calcs[1].name == "TorchDFTD3Calculator"
-            and hasattr(calc.mixer.calcs[0], attribute)
-        ):
-            setattr(calc, attribute, getattr(calc.mixer.calcs[0], attribute))
+    if (
+        isinstance(calc, SumCalculator)
+        and len(calc.mixer.calcs) == 2
+        and calc.mixer.calcs[1].name == "TorchDFTD3Calculator"
+        and hasattr(calc.mixer.calcs[0], attribute)
+    ):
+        setattr(calc, attribute, getattr(calc.mixer.calcs[0], attribute))
 
     if not hasattr(calc, attribute) or not callable(getattr(calc, attribute)):
         raise NotImplementedError(
