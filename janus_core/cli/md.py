@@ -171,7 +171,7 @@ def md(
     ] = None,
     log: LogPath = None,
     summary: Summary = None,
-):
+) -> None:
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
 

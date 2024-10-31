@@ -147,7 +147,7 @@ def geomopt(
     write_kwargs: WriteKwargs = None,
     log: LogPath = None,
     summary: Summary = None,
-):
+) -> None:
     """
     Perform geometry optimization and save optimized structure to file.
 

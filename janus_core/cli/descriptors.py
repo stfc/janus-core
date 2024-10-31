@@ -57,7 +57,7 @@ def descriptors(
     write_kwargs: WriteKwargs = None,
     log: LogPath = None,
     summary: Summary = None,
-):
+) -> None:
     """
     Calculate MLIP descriptors for the given structure(s).
 

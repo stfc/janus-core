@@ -26,7 +26,7 @@ def train(
             )
         ),
     ] = Path("train-summary.yml"),
-):
+) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
 
