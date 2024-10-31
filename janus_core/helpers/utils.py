@@ -151,12 +151,12 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
 def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None, None]:
     """
-    Ensure dictionaries that may be None are dictionaires.
+    Ensure dictionaries that may be None are dictionaries.
 
     Parameters
     ----------
-    dictionaries : Sequence[dict]
-        Sequence of dictionaries that be be None.
+    dictionaries : Sequence[Optional[dict]]
+        Sequence of dictionaries that could be None.
 
     Yields
     ------
