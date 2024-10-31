@@ -44,12 +44,13 @@ def results_to_info(
     if not properties:
         properties = get_args(Properties)
 
+    if struct.calc and "model" in struct.calc.parameters:
+        struct.info["mlip_model"] = struct.calc.parameters["model"]
+
     # Only add to info if MLIP calculator with "arch" parameter set
     if struct.calc and "arch" in struct.calc.parameters:
         arch = struct.calc.parameters["arch"]
         struct.info["arch"] = arch
-    if struct.calc and "model" in struct.calc.parameters:
-        struct.info["mlip_model"] = struct.calc.parameters["model"]
 
         for key in properties & struct.calc.results.keys():
             tag = f"{arch}_{key}"
