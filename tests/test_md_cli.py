@@ -741,3 +741,32 @@ def test_auto_restart(tmp_path):
     # Includes header and steps 0, 3, and steps 5, 6, 7
     assert len(lines) == 6
     assert int(lines[-1].split()[0]) == 7
+
+
+def test_no_carbon(tmp_path):
+    """Test disabling carbon tracking."""
+    file_prefix = tmp_path / "nvt"
+    summary_path = tmp_path / "nvt-md-summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-tracker",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            1,
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    # Read summary
+    with open(summary_path, encoding="utf8") as file:
+        summary = yaml.safe_load(file)
+    assert "emissions" not in summary

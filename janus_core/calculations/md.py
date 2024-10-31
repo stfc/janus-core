@@ -76,6 +76,8 @@ class MolecularDynamics(BaseCalculation):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     struct : Atoms
@@ -187,6 +189,7 @@ class MolecularDynamics(BaseCalculation):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         ensemble: Optional[Ensembles] = None,
         steps: int = 0,
@@ -250,6 +253,8 @@ class MolecularDynamics(BaseCalculation):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         ensemble : Ensembles
@@ -448,6 +453,7 @@ class MolecularDynamics(BaseCalculation):
             set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
+            track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
             file_prefix=file_prefix,
             additional_prefix=self.ensemble,
@@ -1070,6 +1076,7 @@ class MolecularDynamics(BaseCalculation):
 
             if self.logger:
                 self.logger.info("Beginning temperature ramp at %sK", temps[0])
+            if self.tracker:
                 self.tracker.start_task("Temperature ramp")
 
             for temp in temps:
@@ -1087,6 +1094,7 @@ class MolecularDynamics(BaseCalculation):
 
             if self.logger:
                 self.logger.info("Temperature ramp complete at %sK", temps[-1])
+            if self.tracker:
                 emissions = self.tracker.stop_task().emissions
                 self.struct.info["emissions"] = emissions
 
@@ -1094,6 +1102,7 @@ class MolecularDynamics(BaseCalculation):
         if self.steps > 0:
             if self.logger:
                 self.logger.info("Starting molecular dynamics simulation")
+            if self.tracker:
                 self.tracker.start_task("Molecular dynamics")
             self.temp = md_temp
             if self.ramp_temp:
@@ -1104,10 +1113,11 @@ class MolecularDynamics(BaseCalculation):
             self._write_final_state()
             self.created_final_file = True
             if self.logger:
+                self.logger.info("Molecular dynamics simulation complete")
+            if self.tracker:
                 emissions = self.tracker.stop_task().emissions
                 self.struct.info["emissions"] = emissions
                 self.tracker.stop()
-                self.logger.info("Molecular dynamics simulation complete")
 
 
 class NPT(MolecularDynamics):

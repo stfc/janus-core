@@ -100,6 +100,9 @@ def phonons(
         ),
     ] = None,
     log: LogPath = None,
+    tracker: Annotated[
+        bool, Option(help="Whether to save carbon emissions of calculation")
+    ] = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -167,6 +170,9 @@ def phonons(
         chemical formula.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
+    tracker : bool
+        Whether to save carbon emissions of calculation in log file and summary.
+        Default is True.
     summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
@@ -224,6 +230,7 @@ def phonons(
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,
         "log_kwargs": log_kwargs,
+        "track_carbon": tracker,
         "calcs": calcs,
         "supercell": supercell,
         "displacement": displacement,
@@ -275,7 +282,8 @@ def phonons(
     phonon.run()
 
     # Save carbon summary
-    carbon_summary(summary=summary, log=log)
+    if tracker:
+        carbon_summary(summary=summary, log=log)
 
     # Time after calculations have finished
     end_summary(summary)

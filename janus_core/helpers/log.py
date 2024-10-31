@@ -153,6 +153,7 @@ def config_logger(
 
 def config_tracker(
     janus_logger: Optional[logging.Logger],
+    track_carbon: bool = True,
     *,
     country_iso_code: str = "GBR",
     save_to_file: bool = False,
@@ -165,6 +166,8 @@ def config_tracker(
     ----------
     janus_logger : Optional[logging.Logger]
         Logger for codecarbon output.
+    track_carbon : bool
+        Whether to track carbon emissions for calculation. Default is True.
     country_iso_code : str
         3 letter ISO Code of the country where the code is running. Default is "GBR".
     save_to_file : bool
@@ -177,7 +180,7 @@ def config_tracker(
     Optional[OfflineEmissionsTracker]
         Configured offline codecarbon tracker, if logger is specified.
     """
-    if janus_logger:
+    if janus_logger and track_carbon:
         carbon_logger = LoggerOutput(janus_logger)
         tracker = OfflineEmissionsTracker(
             country_iso_code=country_iso_code,

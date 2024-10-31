@@ -260,3 +260,56 @@ def test_fine_tune_invalid_foundation(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+
+
+def test_no_carbon(tmp_path):
+    """Test disabling carbon tracking."""
+    summary_path = tmp_path / "summary.yml"
+    model = "test.model"
+    compiled_model = "test_compiled.model"
+    results_path = "results"
+    checkpoints_path = "checkpoints"
+    logs_path = "logs"
+    log_path = Path("./train-log.yml").absolute()
+    summary_path = Path("./train-summary.yml").absolute()
+
+    assert not Path(model).exists()
+    assert not Path(compiled_model).exists()
+    assert not Path(logs_path).exists()
+    assert not Path(results_path).exists()
+    assert not Path(checkpoints_path).exists()
+    assert not log_path.exists()
+    assert not summary_path.exists()
+
+    config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
+
+    result = runner.invoke(
+        app,
+        [
+            "train",
+            "--mlip-config",
+            config,
+            "--no-tracker",
+        ],
+    )
+    try:
+        assert result.exit_code == 0
+
+        assert summary_path.exists()
+        with open(summary_path, encoding="utf8") as file:
+            train_summary = yaml.safe_load(file)
+        assert "emissions" not in train_summary
+    finally:
+        # Tidy up models
+        Path(model).unlink(missing_ok=True)
+        Path(compiled_model).unlink(missing_ok=True)
+
+        # Tidy up directories
+        shutil.rmtree(logs_path, ignore_errors=True)
+        shutil.rmtree(results_path, ignore_errors=True)
+        shutil.rmtree(checkpoints_path, ignore_errors=True)
+
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+
+        clear_log_handlers()

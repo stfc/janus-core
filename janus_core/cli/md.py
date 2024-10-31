@@ -170,6 +170,9 @@ def md(
         Option(help="Random seed for numpy.random and random functions."),
     ] = None,
     log: LogPath = None,
+    tracker: Annotated[
+        bool, Option(help="Whether to save carbon emissions of calculation")
+    ] = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -281,6 +284,9 @@ def md(
         Default is None.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
+    tracker : bool
+        Whether to save carbon emissions of calculation in log file and summary.
+        Default is True.
     summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
@@ -339,6 +345,7 @@ def md(
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,
         "log_kwargs": log_kwargs,
+        "track_carbon": tracker,
         "ensemble_kwargs": ensemble_kwargs,
         "timestep": timestep,
         "steps": steps,
@@ -436,7 +443,8 @@ def md(
     dyn.run()
 
     # Save carbon summary
-    carbon_summary(summary=summary, log=log)
+    if tracker:
+        carbon_summary(summary=summary, log=log)
 
     # Save time after simulation has finished
     end_summary(summary=summary)

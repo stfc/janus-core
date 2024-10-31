@@ -51,6 +51,8 @@ class SinglePoint(BaseCalculation):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
     properties : MaybeSequence[Properties]
@@ -86,6 +88,7 @@ class SinglePoint(BaseCalculation):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         properties: MaybeSequence[Properties] = (),
         write_results: bool = False,
@@ -120,6 +123,8 @@ class SinglePoint(BaseCalculation):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         properties : MaybeSequence[Properties]
@@ -154,6 +159,7 @@ class SinglePoint(BaseCalculation):
             set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
+            track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
         )
 
@@ -308,6 +314,7 @@ class SinglePoint(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting single point calculation")
+        if self.tracker:
             self.tracker.start_task("Single point")
 
         if "energy" in self.properties:
@@ -320,6 +327,8 @@ class SinglePoint(BaseCalculation):
             self.results["hessian"] = self._get_hessian()
 
         if self.logger:
+            self.logger.info("Single point calculation complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             if isinstance(self.struct, Sequence):
                 for image in self.struct:
@@ -327,7 +336,6 @@ class SinglePoint(BaseCalculation):
             else:
                 self.struct.info["emissions"] = emissions
             self.tracker.stop()
-            self.logger.info("Single point calculation complete")
 
         output_structs(
             self.struct,

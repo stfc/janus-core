@@ -56,6 +56,9 @@ def descriptors(
     calc_kwargs: CalcKwargs = None,
     write_kwargs: WriteKwargs = None,
     log: LogPath = None,
+    tracker: Annotated[
+        bool, Option(help="Whether to save carbon emissions of calculation")
+    ] = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -92,6 +95,9 @@ def descriptors(
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log : Optional[Path]
         Path to write logs to. Default is inferred from the name of the structure file.
+    tracker : bool
+        Whether to save carbon emissions of calculation in log file and summary.
+        Default is True.
     summary : Optional[Path]
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
@@ -137,6 +143,7 @@ def descriptors(
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,
         "log_kwargs": log_kwargs,
+        "track_carbon": tracker,
         "invariants_only": invariants_only,
         "calc_per_element": calc_per_element,
         "calc_per_atom": calc_per_atom,
@@ -176,7 +183,8 @@ def descriptors(
     descript.run()
 
     # Save carbon summary
-    carbon_summary(summary=summary, log=log)
+    if tracker:
+        carbon_summary(summary=summary, log=log)
 
     # Time after calculation has finished
     end_summary(summary)

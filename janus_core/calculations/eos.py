@@ -51,6 +51,8 @@ class EoS(BaseCalculation):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     min_volume : float
@@ -112,6 +114,7 @@ class EoS(BaseCalculation):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         min_volume: float = 0.95,
         max_volume: float = 1.05,
@@ -155,6 +158,8 @@ class EoS(BaseCalculation):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         min_volume : float
@@ -241,6 +246,7 @@ class EoS(BaseCalculation):
             set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
+            track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
             file_prefix=file_prefix,
         )
@@ -313,6 +319,7 @@ class EoS(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting of fitting equation of state")
+        if self.tracker:
             self.tracker.start_task("Fit EoS")
 
         v_0, e_0, bulk_modulus = eos.fit()
@@ -320,10 +327,11 @@ class EoS(BaseCalculation):
         bulk_modulus *= 1.0e24 / kJ
 
         if self.logger:
+            self.logger.info("Equation of state fitting complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.stop()
-            self.logger.info("Equation of state fitting complete")
 
         if self.write_results:
             with open(f"{self.file_prefix}-eos-fit.dat", "w", encoding="utf8") as out:
@@ -346,6 +354,7 @@ class EoS(BaseCalculation):
         """Calculate volumes and energies for all lattice constants."""
         if self.logger:
             self.logger.info("Starting calculations for configurations")
+        if self.tracker:
             self.tracker.start_task("Calculate configurations")
 
         cell = self.struct.get_cell()
@@ -380,6 +389,7 @@ class EoS(BaseCalculation):
             )
 
         if self.logger:
+            self.logger.info("Calculations for configurations complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
-            self.logger.info("Calculations for configurations complete")

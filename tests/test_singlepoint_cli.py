@@ -391,3 +391,34 @@ def test_hessian(tmp_path):
     assert "mace_mp_hessian" in atoms.info
     assert "mace_stress" not in atoms.info
     assert atoms.info["mace_mp_hessian"].shape == (24, 8, 3)
+
+
+def test_no_carbon(tmp_path):
+    """Test disabling carbon tracking."""
+    results_path = tmp_path / "NaCl-results.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--properties",
+            "energy",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--no-tracker",
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Read singlepoint summary file
+    with open(summary_path, encoding="utf8") as file:
+        sp_summary = yaml.safe_load(file)
+    assert "emissions" not in sp_summary

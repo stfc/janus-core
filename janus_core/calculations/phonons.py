@@ -52,6 +52,8 @@ class Phonons(BaseCalculation):
         Whether to attach a logger. Default is False.
     log_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_logger`. Default is {}.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation. Default is True.
     tracker_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to `config_tracker`. Default is {}.
     calcs : Optional[MaybeSequence[PhononCalcs]]
@@ -138,6 +140,7 @@ class Phonons(BaseCalculation):
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
+        track_carbon: bool = True,
         tracker_kwargs: Optional[dict[str, Any]] = None,
         calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
@@ -184,6 +187,8 @@ class Phonons(BaseCalculation):
             Whether to attach a logger. Default is False.
         log_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_logger`. Default is {}.
+        track_carbon : bool
+            Whether to track carbon emissions of calculation. Default is True.
         tracker_kwargs : Optional[dict[str, Any]]
             Keyword arguments to pass to `config_tracker`. Default is {}.
         calcs : Optional[MaybeSequence[PhononCalcs]]
@@ -264,6 +269,7 @@ class Phonons(BaseCalculation):
             set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
+            track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
             file_prefix=file_prefix,
         )
@@ -359,6 +365,7 @@ class Phonons(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting phonons calculation")
+        if self.tracker:
             self.tracker.start_task("Phonon calculation")
 
         cell = self._ASE_to_PhonopyAtoms(self.struct)
@@ -390,10 +397,11 @@ class Phonons(BaseCalculation):
             self.results["phonon"].symmetrize_force_constants(level=1)
 
         if self.logger:
+            self.logger.info("Phonons calculation complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.flush()
-            self.logger.info("Phonons calculation complete")
 
         if write_force_consts:
             self.write_force_constants(**kwargs)
@@ -541,6 +549,7 @@ class Phonons(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting thermal properties calculation")
+        if self.tracker:
             self.tracker.start_task("Thermal calculation")
 
         self.results["phonon"].run_mesh(mesh)
@@ -552,10 +561,11 @@ class Phonons(BaseCalculation):
         ].get_thermal_properties_dict()
 
         if self.logger:
+            self.logger.info("Thermal properties calculation complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.flush()
-            self.logger.info("Thermal properties calculation complete")
 
         if write_thermal:
             self.write_thermal_props(**kwargs)
@@ -620,16 +630,18 @@ class Phonons(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting DOS calculation")
+        if self.tracker:
             self.tracker.start_task("DOS calculation")
 
         self.results["phonon"].run_mesh(mesh)
         self.results["phonon"].run_total_dos()
 
         if self.logger:
+            self.logger.info("DOS calculation complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.flush()
-            self.logger.info("DOS calculation complete")
 
         if write_dos:
             self.write_dos(**kwargs)
@@ -725,6 +737,7 @@ class Phonons(BaseCalculation):
 
         if self.logger:
             self.logger.info("Starting PDOS calculation")
+        if self.tracker:
             self.tracker.start_task("PDOS calculation")
 
         self.results["phonon"].run_mesh(
@@ -733,10 +746,11 @@ class Phonons(BaseCalculation):
         self.results["phonon"].run_projected_dos()
 
         if self.logger:
+            self.logger.info("PDOS calculation complete")
+        if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.flush()
-            self.logger.info("PDOS calculation complete")
 
         if write_pdos:
             self.write_pdos(**kwargs)
