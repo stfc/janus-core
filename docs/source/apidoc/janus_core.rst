@@ -146,6 +146,16 @@ janus\_core.cli.phonons module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.cli.preprocess module
+---------------------------------
+
+.. automodule:: janus_core.cli.preprocess
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.cli.singlepoint module
 ----------------------------------
 
@@ -283,6 +293,16 @@ janus\_core.processing.symmetry module
 --------------------------------------
 
 .. automodule:: janus_core.processing.symmetry
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.training.preprocess module
+--------------------------------------
+
+.. automodule:: janus_core.training.preprocess
    :members:
    :special-members:
    :private-members:

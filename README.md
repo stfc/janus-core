@@ -114,6 +114,7 @@ janus phonons
 janus eos
 janus train
 janus descriptors
+janus preprocess
 ```
 
 For example, a single point calcuation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field) can be performed by running:
