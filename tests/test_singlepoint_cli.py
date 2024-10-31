@@ -54,16 +54,22 @@ def test_singlepoint():
 
     finally:
         # Check atoms can read read, then delete file
+        # Ensure files deleted if command fails
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+
         atoms = read_atoms(results_path)
         assert "mace_mp_energy" in atoms.info
+
+        assert "arch" in atoms.info
+        assert "mlip_model" in atoms.info
+        assert atoms.info["arch"] == "mace_mp"
+        assert atoms.info["mlip_model"] == "small"
 
         assert "mace_mp_forces" in atoms.arrays
         assert "system_name" in atoms.info
         assert atoms.info["system_name"] == "NaCl"
 
-        # Ensure files deleted if command fails
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         clear_log_handlers()
 
 
