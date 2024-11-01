@@ -228,9 +228,7 @@ def test_plot(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--supercell",
-            1,
-            1,
-            1,
+            "1 1 1",
             "--pdos",
             "--dos",
             "--bands",
@@ -259,17 +257,14 @@ def test_plot(tmp_path):
 
 
 test_data = [
-    ("--supercell", [1, 2, 3], [[1, 0, 0], [0, 2, 0], [0, 0, 3]]),
-    (
-        "--supercell-matrix",
-        [1, 1, 0, -1, 1, 0, 0, 0, 2],
-        [[1, 1, 0], [-1, 1, 0], [0, 0, 2]],
-    ),
+    ("1", [[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+    ("1 2 3", [[1, 0, 0], [0, 2, 0], [0, 0, 3]]),
+    ("1 1 0 -1 1 0 0 0 2", [[1, 1, 0], [-1, 1, 0], [0, 0, 2]]),
 ]
 
 
-@pytest.mark.parametrize("supercell_arg,supercell,supercell_matrix", test_data)
-def test_supercell(supercell_arg, supercell, supercell_matrix, tmp_path):
+@pytest.mark.parametrize("supercell,supercell_matrix", test_data)
+def test_supercell(supercell, supercell_matrix, tmp_path):
     """Test setting the supercell."""
     file_prefix = tmp_path / "NaCl"
     param_file = tmp_path / "NaCl-phonopy.yml"
@@ -280,8 +275,8 @@ def test_supercell(supercell_arg, supercell, supercell_matrix, tmp_path):
             "phonons",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            supercell_arg,
-            *supercell,
+            "--supercell",
+            supercell,
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -298,28 +293,11 @@ def test_supercell(supercell_arg, supercell, supercell_matrix, tmp_path):
     assert params["supercell_matrix"] == supercell_matrix
 
 
-
-test_data = [
-    ("--supercell", [2]),
-    ("--supercell", ["2x2x2"]),
-    ("--supercell", ["2 2 2"]),
-    ("--supercell", ["2.1", "2.1", "2.1"]),
-    ("--supercell", [2, 2, "a"]),
-    ("--supercell", [2, 2]),
-    ("--supercell", [2] * 6),
-    ("--supercell", [2] * 9),
-    ("--supercell-matrix", [2]),
-    ("--supercell-matrix", ["2x2x2" * 3]),
-    ("--supercell-matrix", ["2 2 2 2 2 2 2 2 2"]),
-    ("--supercell-matrix", ["2.1"] * 9),
-    ("--supercell-matrix", [2, 2, "a"] * 3),
-    ("--supercell-matrix", [2] * 6),
-    ("--supercell-matrix", [2] * 12),
-]
+test_data = ["2x2x2", "2.1 2.1 2.1", "2 2 a", "2 2", "2 2 2 2 2 2"]
 
 
-@pytest.mark.parametrize("supercell_arg,supercell", test_data)
-def test_invalid_supercell(supercell_arg, supercell, tmp_path):
+@pytest.mark.parametrize("supercell", test_data)
+def test_invalid_supercell(supercell, tmp_path):
     """Test errors are raise for invalid supercells."""
     file_prefix = tmp_path / "test"
 
@@ -329,8 +307,8 @@ def test_invalid_supercell(supercell_arg, supercell, tmp_path):
             "phonons",
             "--struct",
             DATA_PATH / "NaCl.cif",
-            supercell_arg,
-            *supercell,
+            "--supercell",
+            supercell,
             "--file-prefix",
             file_prefix,
         ],
@@ -408,9 +386,7 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             "--struct",
             DATA_PATH / "NaCl-traj.xyz",
             "--supercell",
-            1,
-            1,
-            1,
+            "1 1 1",
             "--read-kwargs",
             read_kwargs,
             "--no-hdf5",

@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Annotated, Optional
 
-from typer import BadParameter, Context, Option, Typer
+from typer import Context, Option, Typer
 from typer_config import use_config
 
 from janus_core.cli.types import (
@@ -29,26 +29,19 @@ def phonons(
     ctx: Context,
     struct: StructPath,
     supercell: Annotated[
-        tuple[int, int, int],
+        str,
         Option(
-            help="Supercell lattice vectors in the form '1 2 3'. "
-            "Mutually exclusive with --supercell-matrix. "
-            "Default is '2 2 2', which is used when neither "
-            "--supercell nor --supercell-matrix are provided."
+            help="Supercell specification as a string, in the Phonopy style. "
+            "There are three different valid inputs: single value (i.e. '2') "
+            "which specifies what all of the diagonal values of the supercell "
+            "matrix whould be, three values (i.e. '1 2 3') which specify the "
+            "individual diagonal elements of the supercell matrix, or nine "
+            "values (i.e. '1 2 3 4 5 6 7 8 9') which specify all the elements "
+            "of the full supercell matrix. In the last case, the first three "
+            "values form the first row of the matrix, the second three the "
+            "second row, etc."
         ),
-    ] = None,
-    supercell_matrix: Annotated[
-        tuple[int, int, int, int, int, int, int, int, int],
-        Option(
-            help="Full supercell matrix in the form '1 2 3 4 5 6 7 8 9'"
-            " The values are interpreted as in phonopy, i.e. "
-            "the first three values specify the first row of "
-            "the supercell matrix, the second three the second "
-            "row, etc. Mutually exclusive with --supercell. If "
-            "neither --supercell nor --supercell-matrix are "
-            "provided, '--supercell 2 2 2' is used as default."
-        ),
-    ] = None,
+    ] = "2 2 2",
     displacement: Annotated[
         float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
@@ -132,17 +125,16 @@ def phonons(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    supercell : tuple[int, int, int]
-        Supercell lattice vectors in the form '1 2 3'. Mutually exclusive with
-        `supercell_matrix`. Default is `(2, 2, 2)`, which is used when neither
-        the `supercell` nor `supercell_matrix` parameters are provided.
-    supercell_matrix : tuple[int, int, int, int, int, int, int, int, int]
-        Full supercell matrix in the form '1 2 3 4 5 6 7 8 9' The values are
-        interpreted as in phonopy, i.e. the first three values specify the first
-        row of the supercell matrix, the second three the second row, etc.
-        Mutually exclusive with `supercell`. If neither `supercell` nor
-        `supercell_matrix` are provided, this parameter is ignored and the default
-        value for the `supercell` parameter is used.
+    supercell : str
+        Supercell specification as a string, in the Phonopy style.
+        There are three different valid inputs: single value (i.e. '2')
+        which specifies what all of the diagonal values of the supercell
+        matrix whould be, three values (i.e. '1 2 3') which specify the
+        individual diagonal elements of the supercell matrix, or nine
+        values (i.e. '1 2 3 4 5 6 7 8 9') which specify all the elements
+        of the full supercell matrix. In the last case, the first three
+        values form the first row of the matrix, the second three the
+        second row, etc.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]
@@ -217,18 +209,6 @@ def phonons(
         set_read_kwargs_index,
         start_summary,
     )
-    if supercell is not None:
-        if supercell_matrix is not None:
-            raise BadParameter(
-                "The --supercell and --supercell-matrix parameters are mutually "
-                "exclusive. Please use only one one of the options."
-            )
-        supercell_value = list(supercell)
-    else:
-        if supercell_matrix is not None:
-            supercell_value = list(supercell_matrix)
-        else:
-            supercell_value = [2, 2, 2]
 
     # Check options from configuration file are all valid
     check_config(ctx)
@@ -244,6 +224,24 @@ def phonons(
     if "fmax" in minimize_kwargs:
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
+
+    try:
+        supercell = [int(x) for x in supercell.split()]
+    except ValueError as exc:
+        raise ValueError(
+            "Please pass lattice vectors as integers in the form '1 2 3'"
+        ) from exc
+
+    supercell_length = len(supercell)
+    if supercell_length == 1:
+        supercell = supercell[0]
+    elif supercell_length not in [3, 9]:
+        raise ValueError(
+            "Please pass one, three or nine lattice vectors in the form '1', '1 2 3' "
+            "or '1 2 3 4 5 6 7 8 9'. In the latter case first three values are the "
+            "first row of the supercell matrix, the second three are the second row, "
+            "etc."
+        )
 
     calcs = []
     if bands:
@@ -271,7 +269,7 @@ def phonons(
         "log_kwargs": log_kwargs,
         "track_carbon": tracker,
         "calcs": calcs,
-        "supercell": supercell_value,
+        "supercell": supercell,
         "displacement": displacement,
         "mesh": mesh,
         "symmetrize": symmetrize,
