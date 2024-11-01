@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from pathlib import Path
 from typing import Any
 
 from mace.cli.run_train import run
@@ -12,30 +11,7 @@ import yaml
 
 from janus_core.helpers.janus_types import PathLike
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import none_to_dict
-
-
-def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
-    """
-    Check files specified in the MLIP configuration file exist.
-
-    Parameters
-    ----------
-    config : dict
-        MLIP configuration file options.
-    req_file_keys : Sequence[Pathlike]
-        List of files that must exist if defined in the configuration file.
-
-    Raises
-    ------
-    FileNotFoundError
-        If a key from `req_file_keys` is in the configuration file, but the
-        file corresponding to the configuration value do not exist.
-    """
-    for file_key in req_file_keys:
-        # Only check if file key is in the configuration file
-        if file_key in config and not Path(config[file_key]).exists():
-            raise FileNotFoundError(f"{config[file_key]} does not exist")
+from janus_core.helpers.utils import check_files_exist, none_to_dict
 
 
 def train(
