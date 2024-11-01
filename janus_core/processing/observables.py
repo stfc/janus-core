@@ -147,6 +147,7 @@ class ComponentMixin:
 
 # pylint: disable=too-few-public-methods
 class Stress(Observable, ComponentMixin):
+    __module__ = "observables"
     """
     Observable for stress components.
 
@@ -233,6 +234,7 @@ ShearStress = Stress(components=["xy", "yz", "zx"])
 
 # pylint: disable=too-few-public-methods
 class Velocity(Observable, ComponentMixin):
+    __module__ = "observables"
     """
     Observable for per atom velocity components.
 
