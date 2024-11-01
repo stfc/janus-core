@@ -147,7 +147,6 @@ class ComponentMixin:
 
 # pylint: disable=too-few-public-methods
 class Stress(Observable, ComponentMixin):
-    __module__ = "observables"
     """
     Observable for stress components.
 
@@ -160,6 +159,8 @@ class Stress(Observable, ComponentMixin):
     include_ideal_gas : bool
         Calculate with the ideal gas contribution.
     """
+
+    __module__ = "observables"
 
     def __init__(
         self,
@@ -234,7 +235,6 @@ ShearStress = Stress(components=["xy", "yz", "zx"])
 
 # pylint: disable=too-few-public-methods
 class Velocity(Observable, ComponentMixin):
-    __module__ = "observables"
     """
     Observable for per atom velocity components.
 
@@ -245,6 +245,8 @@ class Velocity(Observable, ComponentMixin):
     atoms_slice : list[int] | SliceLike | None = None
         List or slice of atoms to observe velocities from.
     """
+
+    __module__ = "observables"
 
     def __init__(
         self,
