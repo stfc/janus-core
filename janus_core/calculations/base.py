@@ -12,7 +12,8 @@ from janus_core.helpers.janus_types import (
     PathLike,
 )
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import FileNameMixin, input_structs, none_to_dict
+from janus_core.helpers.struct_io import input_structs
+from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
 
 class BaseCalculation(FileNameMixin):

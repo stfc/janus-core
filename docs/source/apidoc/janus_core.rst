@@ -14,106 +14,6 @@ Module contents
 Submodules
 ----------
 
-janus\_core.cli.janus module
-----------------------------
-
-.. automodule:: janus_core.cli.janus
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.singlepoint module
-----------------------------------
-
-.. automodule:: janus_core.cli.singlepoint
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.geomopt module
-------------------------------
-
-.. automodule:: janus_core.cli.geomopt
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.md module
--------------------------
-
-.. automodule:: janus_core.cli.md
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.train module
-----------------------------
-
-.. automodule:: janus_core.cli.train
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.phonons module
-------------------------------
-
-.. automodule:: janus_core.cli.phonons
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.eos module
---------------------------
-
-.. automodule:: janus_core.cli.eos
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.descriptors module
-----------------------------------
-
-.. automodule:: janus_core.cli.descriptors
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.types module
-----------------------------
-
-.. automodule:: janus_core.cli.types
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
-janus\_core.cli.utils module
-----------------------------
-
-.. automodule:: janus_core.cli.utils
-   :members:
-   :special-members:
-   :private-members:
-   :undoc-members:
-   :show-inheritance:
-
 janus\_core.calculations.base module
 ------------------------------------
 
@@ -124,10 +24,20 @@ janus\_core.calculations.base module
    :undoc-members:
    :show-inheritance:
 
-janus\_core.calculations.single\_point module
----------------------------------------------
+janus\_core.calculations.descriptors module
+-------------------------------------------
 
-.. automodule:: janus_core.calculations.single_point
+.. automodule:: janus_core.calculations.descriptors
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.calculations.eos module
+-----------------------------------
+
+.. automodule:: janus_core.calculations.eos
    :members:
    :special-members:
    :private-members:
@@ -166,40 +76,110 @@ janus\_core.calculations.phonons module
    :undoc-members:
    :show-inheritance:
 
-janus\_core.calculations.eos module
------------------------------------
+janus\_core.calculations.single\_point module
+---------------------------------------------
 
-.. automodule:: janus_core.calculations.eos
+.. automodule:: janus_core.calculations.single_point
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.calculations.descriptors module
--------------------------------------------
+janus\_core.cli.descriptors module
+----------------------------------
 
-.. automodule:: janus_core.calculations.descriptors
+.. automodule:: janus_core.cli.descriptors
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.mlip\_calculators module
---------------------------------------------
+janus\_core.cli.eos module
+--------------------------
 
-.. automodule:: janus_core.helpers.mlip_calculators
+.. automodule:: janus_core.cli.eos
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.log module
+janus\_core.cli.geomopt module
 ------------------------------
 
-.. automodule:: janus_core.helpers.log
+.. automodule:: janus_core.cli.geomopt
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.janus module
+----------------------------
+
+.. automodule:: janus_core.cli.janus
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.md module
+-------------------------
+
+.. automodule:: janus_core.cli.md
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.phonons module
+------------------------------
+
+.. automodule:: janus_core.cli.phonons
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.singlepoint module
+----------------------------------
+
+.. automodule:: janus_core.cli.singlepoint
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.train module
+----------------------------
+
+.. automodule:: janus_core.cli.train
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.types module
+----------------------------
+
+.. automodule:: janus_core.cli.types
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.utils module
+----------------------------
+
+.. automodule:: janus_core.cli.utils
    :members:
    :special-members:
    :private-members:
@@ -217,20 +197,30 @@ janus\_core.helpers.janus\_types module
    :exclude-members: clear,copy,setdefault,items,keys,get,pop,popitem,fromkeys,update,values
    :special-members:
 
-janus\_core.helpers.utils module
---------------------------------
+janus\_core.helpers.log module
+------------------------------
 
-.. automodule:: janus_core.helpers.utils
+.. automodule:: janus_core.helpers.log
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.train module
+janus\_core.helpers.mlip\_calculators module
+--------------------------------------------
+
+.. automodule:: janus_core.helpers.mlip_calculators
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.helpers.utils module
 --------------------------------
 
-.. automodule:: janus_core.helpers.train
+.. automodule:: janus_core.helpers.utils
    :members:
    :special-members:
    :private-members:
@@ -248,30 +238,61 @@ janus\_core.helpers.stats
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.post_process module
----------------------------------------
+janus\_core.helpers.struct\_io
+------------------------------
 
-.. automodule:: janus_core.helpers.post_process
+.. automodule:: janus_core.helpers.struct_io
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.processing.correlator module
+----------------------------------------
+
+.. automodule:: janus_core.processing.correlator
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.correlator module
--------------------------------------
+janus\_core.processing.observables module
+-----------------------------------------
 
-.. automodule:: janus_core.helpers.correlator
+.. automodule:: janus_core.processing.observables
    :members:
    :special-members:
    :private-members:
    :undoc-members:
    :show-inheritance:
 
-janus\_core.helpers.observables module
+janus\_core.processing.post\_process module
+-------------------------------------------
+
+.. automodule:: janus_core.processing.post_process
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.processing.symmetry module
 --------------------------------------
 
-.. automodule:: janus_core.helpers.observables
+.. automodule:: janus_core.processing.symmetry
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.training.train module
+---------------------------------
+
+.. automodule:: janus_core.training.train
    :members:
    :special-members:
    :private-members:

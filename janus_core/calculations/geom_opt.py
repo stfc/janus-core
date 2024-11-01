@@ -11,16 +11,17 @@ from ase.optimize import LBFGS
 from numpy import linalg
 
 from janus_core.calculations.base import BaseCalculation
-from janus_core.helpers.janus_types import ASEOptArgs, OutputKwargs, PathLike
-from janus_core.helpers.utils import (
+from janus_core.helpers.janus_types import (
     Architectures,
+    ASEOptArgs,
     ASEReadArgs,
     Devices,
-    none_to_dict,
-    output_structs,
-    snap_symmetry,
-    spacegroup,
+    OutputKwargs,
+    PathLike,
 )
+from janus_core.helpers.struct_io import output_structs
+from janus_core.helpers.utils import none_to_dict
+from janus_core.processing.symmetry import snap_symmetry, spacegroup
 
 
 class GeomOpt(BaseCalculation):

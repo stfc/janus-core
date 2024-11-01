@@ -187,9 +187,9 @@ Alternatively, using ``tox``::
 Adding a new Observable
 =======================
 
-Additional built-in observable quantities may be added for use by the ``janus_core.helpers.correlator.Correlation`` class. These should conform to the ``__call__`` signature of ``janus_core.helpers.janus_types.Observable``. For a user this can be accomplished by writing a function, or class also implementing a commensurate ``__call__``.
+Additional built-in observable quantities may be added for use by the ``janus_core.processing.correlator.Correlation`` class. These should conform to the ``__call__`` signature of ``janus_core.helpers.janus_types.Observable``. For a user this can be accomplished by writing a function, or class also implementing a commensurate ``__call__``.
 
-Built-in observables are collected within the ``janus_core.helpers.observables`` module. For example the ``janus_core.helpers.observables.Stress`` observable allows a user to quickly setup a given correlation of stress tensor components (with and without the ideal gas contribution). An observable for the ``xy`` component is obtained without the ideal gas contribution as:
+Built-in observables are collected within the ``janus_core.processing.observables`` module. For example the ``janus_core.processing.observables.Stress`` observable allows a user to quickly setup a given correlation of stress tensor components (with and without the ideal gas contribution). An observable for the ``xy`` component is obtained without the ideal gas contribution as:
 
 .. code-block:: python
 
@@ -203,4 +203,4 @@ A new built-in observables can be implemented by a class with the method:
 
 The ``__call__`` should contain all the logic for obtaining some ``float`` value from an ``Atoms`` object, alongside optional positional arguments and kwargs. The args and kwargs are set by a user when specifying correlations for a ``janus_core.calculations.md.MolecularDynamics`` run. See also ``janus_core.helpers.janus_types.CorrelationKwargs``. These are set at the instantiation of the ``janus_core.calculations.md.MolecularDynamics`` object and are not modified. These could be used e.g. to specify an observable calculated only from one atom's data.
 
-``janus_core.helpers.observables.Stress`` includes a constructor to take a symbolic component, e.g. ``"xx"`` or ``"yz"``, and determine the index required from ``ase.Atoms.get_stress`` on instantiation for ease of use.
+``janus_core.processing.observables.Stress`` includes a constructor to take a symbolic component, e.g. ``"xx"`` or ``"yz"``, and determine the index required from ``ase.Atoms.get_stress`` on instantiation for ease of use.
