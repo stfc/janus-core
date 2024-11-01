@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from ase import Atoms, units
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 
 # pylint: disable=too-few-public-methods
-class Observable:
+class Observable(ABC):
     """
     Observable data that may be correlated.
 
@@ -33,6 +34,7 @@ class Observable:
         """
         self._dimension = dimension
 
+    @abstractmethod
     def __call__(self, atoms: Atoms) -> list[float]:
         """
         Signature for returning observed value from atoms.

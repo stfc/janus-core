@@ -242,8 +242,10 @@ class Correlation:
             raise ValueError("Observables have inconsistent sizes")
         self._values = a_values
 
-        self._correlators = [Correlator(blocks=blocks, points=points, averaging=averaging)
-                             for _ in range(self._values)]
+        self._correlators = [
+            Correlator(blocks=blocks, points=points, averaging=averaging)
+            for _ in range(self._values)
+        ]
         self._update_frequency = update_frequency
 
     @property
@@ -284,8 +286,7 @@ class Correlation:
         """
         if self._correlators:
             _, lags = self._correlators[0].get()
-            avg_value = np.mean(cor.get()[0] for cor in self._correlators)
-            return avg_value, lags
+            return np.mean([cor.get()[0] for cor in self._correlators], axis=0), lags
         return [], []
 
     def __str__(self) -> str:
