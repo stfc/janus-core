@@ -33,7 +33,7 @@ class Observable:
         """
         self._dimension = dimension
 
-    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
+    def __call__(self, atoms: Atoms) -> list[float]:
         """
         Signature for returning observed value from atoms.
 
@@ -41,10 +41,6 @@ class Observable:
         ----------
         atoms : Atoms
             Atoms object to extract values from.
-        *args : tuple
-            Additional positional arguments passed to getter.
-        **kwargs : dict
-            Additional kwargs passed getter.
 
         Returns
         -------
@@ -207,7 +203,7 @@ class Stress(Observable, ComponentMixin):
         Observable.__init__(self, len(components))
         self.include_ideal_gas = include_ideal_gas
 
-    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
+    def __call__(self, atoms: Atoms) -> list[float]:
         """
         Get the stress components.
 
@@ -215,10 +211,6 @@ class Stress(Observable, ComponentMixin):
         ----------
         atoms : Atoms
             Atoms object to extract values from.
-        *args : tuple
-            Additional positional arguments passed to getter.
-        **kwargs : dict
-            Additional kwargs passed getter.
 
         Returns
         -------
@@ -278,7 +270,7 @@ class Velocity(Observable, ComponentMixin):
         else:
             self.atoms_slice = slice(0, None, 1)
 
-    def __call__(self, atoms: Atoms, *args, **kwargs) -> list[float]:
+    def __call__(self, atoms: Atoms) -> list[float]:
         """
         Get the velocity components for correlated atoms.
 
@@ -286,10 +278,6 @@ class Velocity(Observable, ComponentMixin):
         ----------
         atoms : Atoms
             Atoms object to extract values from.
-        *args : tuple
-            Additional positional arguments passed to getter.
-        **kwargs : dict
-            Additional kwargs passed getter.
 
         Returns
         -------

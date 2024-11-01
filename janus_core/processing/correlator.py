@@ -181,10 +181,10 @@ class Correlation:
     ----------
     n_atoms : int
         Number of possible atoms to track.
-    a : Union[Observable, tuple[Observable, tuple, dict]]
-        Getter for a and kwargs.
-    b : Union[Observable, tuple[Observable, tuple, dict]]
-        Getter for b and kwargs.
+    a : Observable
+        Observable for a.
+    b : Observable
+        Observable for b.
     name : str
         Name of correlation.
     blocks : int
@@ -201,8 +201,8 @@ class Correlation:
         self,
         *,
         n_atoms: int,
-        a: Observable | tuple[Observable, tuple, dict],
-        b: Observable | tuple[Observable, tuple, dict],
+        a: Observable,
+        b: Observable,
         name: str,
         blocks: int,
         points: int,
@@ -216,10 +216,10 @@ class Correlation:
         ----------
         n_atoms : int
             Number of possible atoms to track.
-        a : Union[Observable, tuple[Observable, tuple, dict]]
-            Getter for a and kwargs.
-        b : Union[Observable, tuple[Observable, tuple, dict]]
-            Getter for b and kwargs.
+        a : Observable
+            Observable for a.
+        b : Observable
+            Observable for b.
         name : str
             Name of correlation.
         blocks : int
@@ -232,17 +232,8 @@ class Correlation:
             Frequency to update the correlation, md steps.
         """
         self.name = name
-        if isinstance(a, tuple):
-            self._get_a, self._a_args, self._a_kwargs = a
-        else:
-            self._get_a = a
-            self._a_args, self._a_kwargs = (), {}
-
-        if isinstance(b, tuple):
-            self._get_b, self._b_args, self._b_kwargs = b
-        else:
-            self._get_b = b
-            self._b_args, self._b_kwargs = (), {}
+        self._get_a = a
+        self._get_b = b
 
         a_values = self._get_a.value_count(n_atoms)
         b_values = self._get_b.value_count(n_atoms)
@@ -281,8 +272,8 @@ class Correlation:
         """
         for i, values in enumerate(
             zip(
-                self._get_a(atoms, *self._a_args, **self._a_kwargs),
-                self._get_b(atoms, *self._b_args, **self._b_kwargs),
+                self._get_a(atoms),
+                self._get_b(atoms),
             )
         ):
             self._correlators[i].update(*values)

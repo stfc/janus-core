@@ -159,10 +159,10 @@ class EoSResults(TypedDict, total=False):
 class CorrelationKwargs(TypedDict, total=True):
     """Arguments for on-the-fly correlations <ab>."""
 
-    #: observable a in <ab>, with optional args and kwargs
-    a: Union[Observable, tuple[Observable, tuple, dict]]
-    #: observable b in <ab>, with optional args and kwargs
-    b: Union[Observable, tuple[Observable, tuple, dict]]
+    #: observable a in <ab>
+    a: Observable
+    #: observable b in <ab>
+    b: Observable
     #: name used for correlation in output
     name: str
     #: blocks used in multi-tau algorithm
