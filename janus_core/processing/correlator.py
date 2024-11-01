@@ -242,11 +242,8 @@ class Correlation:
             raise ValueError("Observables have inconsistent sizes")
         self._values = a_values
 
-        self._correlators = []
-        for _ in range(self._values):
-            self._correlators.append(
-                Correlator(blocks=blocks, points=points, averaging=averaging)
-            )
+        self._correlators = [Correlator(blocks=blocks, points=points, averaging=averaging)
+                             for _ in range(self._values)]
         self._update_frequency = update_frequency
 
     @property
@@ -270,13 +267,9 @@ class Correlation:
         atoms : Atoms
             Atoms object to observe values from.
         """
-        for i, values in enumerate(
-            zip(
-                self._get_a(atoms),
-                self._get_b(atoms),
-            )
-        ):
-            self._correlators[i].update(*values)
+        atom_pairs = zip(self._get_a(atoms), self._get_b(atoms))
+        for corr, values in zip(self._correlators, atom_pairs):
+            corr.update(*values)
 
     def get(self) -> tuple[Iterable[float], Iterable[float]]:
         """
@@ -291,7 +284,7 @@ class Correlation:
         """
         if self._correlators:
             _, lags = self._correlators[0].get()
-            avg_value = sum([cor.get()[0] for cor in self._correlators]) / self._values
+            avg_value = np.mean(cor.get()[0] for cor in self._correlators)
             return avg_value, lags
         return [], []
 
