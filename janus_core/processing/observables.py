@@ -105,7 +105,7 @@ class ComponentMixin:
 
         Returns
         -------
-        Dict[str, int]
+        dict[str, int]
             The allowed components and associated indices.
         """
         return self._components
