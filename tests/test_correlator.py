@@ -130,8 +130,8 @@ def test_vaf(tmp_path):
         vaf = safe_load(cor)
     vaf_na = np.array(vaf["vaf_Na"]["value"])
     vaf_cl = np.array(vaf["vaf_Cl"]["value"])
-    assert vaf_na * 3 == approx(vaf_post[0], rel=1e-5)
-    assert vaf_cl * 3 == approx(vaf_post[1], rel=1e-5)
+    assert vaf_na * 3 == approx(vaf_post[1][0], rel=1e-5)
+    assert vaf_cl * 3 == approx(vaf_post[1][1], rel=1e-5)
 
 
 def test_md_correlations(tmp_path):
