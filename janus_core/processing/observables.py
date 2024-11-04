@@ -138,11 +138,12 @@ class ComponentMixin:
         ValueError
             If any component is invalid.
         """
-        for component in self.allowed_components.keys() - components.keys():
-            if component not in self.allowed_components:
-                raise ValueError(
-                    f"'{component}' invalid, must be '{', '.join(component_names)}'"
-                )
+        if any(components - self.allowed_components.keys()):
+            raise ValueError(
+                f"'{components-self.allowed_components.keys()}'"
+                " invalid, must be '{', '.join(self._components)}'"
+            )
+
         self.components = components
 
 
@@ -228,8 +229,8 @@ class Stress(Observable, ComponentMixin):
         )[self._indices]
 
 
-StressDiagonal = Stress(components=["xx", "yy", "zz"])
-ShearStress = Stress(components=["xy", "yz", "zx"])
+StressHydrostatic = Stress(components=["xx", "yy", "zz"])
+StressShear = Stress(components=["xy", "yz", "zx"])
 
 
 # pylint: disable=too-few-public-methods
