@@ -203,9 +203,13 @@ nitpick_ignore = [
     ("py:class", "Architectures"),
     ("py:class", "Devices"),
     ("py:class", "MaybeSequence"),
+    ("py:class", "SliceLike"),
     ("py:class", "PathLike"),
     ("py:class", "Atoms"),
     ("py:class", "Calculator"),
     ("py:class", "Context"),
     ("py:class", "Path"),
+    ("py:obj", "dimension"),
+    ("py:obj", "allowed_components"),
+    ("py:obj", "janus_core.processing.observables.Stress.value_count")
 ]

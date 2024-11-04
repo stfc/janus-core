@@ -18,7 +18,13 @@ from rich.progress import (
 )
 from rich.style import Style
 
-from janus_core.helpers.janus_types import MaybeSequence, PathLike, SliceLike, StartStopStep
+from janus_core.helpers.janus_types import (
+    MaybeSequence,
+    PathLike,
+    SliceLike,
+    StartStopStep,
+)
+
 
 class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
     """

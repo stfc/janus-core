@@ -162,8 +162,6 @@ class Stress(Observable, ComponentMixin):
         Calculate with the ideal gas contribution.
     """
 
-    __module__ = "observables"
-
     def __init__(
         self,
         *,
@@ -247,8 +245,6 @@ class Velocity(Observable, ComponentMixin):
     atoms_slice : list[int] | SliceLike | None = None
         List or slice of atoms to observe velocities from.
     """
-
-    __module__ = "observables"
 
     def __init__(
         self,
