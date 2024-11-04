@@ -232,7 +232,7 @@ def choose_calculator(
 
     calculator.parameters["version"] = __version__
     calculator.parameters["arch"] = arch
-    calculator.parameters["model"] = str(model_path)
+    calculator.parameters["model_path"] = str(model_path)
 
     return calculator
 

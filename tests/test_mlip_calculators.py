@@ -56,7 +56,7 @@ def test_mlips(arch, device, kwargs):
     """Test mace calculators can be configured."""
     calculator = choose_calculator(arch=arch, device=device, **kwargs)
     assert calculator.parameters["version"] is not None
-    assert calculator.parameters["model"] is not None
+    assert calculator.parameters["model_path"] is not None
 
 
 def test_invalid_arch():
@@ -128,7 +128,7 @@ def test_extra_mlips(arch, device, kwargs):
             **kwargs,
         )
         assert calculator.parameters["version"] is not None
-        assert calculator.parameters["model"] is not None
+        assert calculator.parameters["model_path"] is not None
     except BadZipFile:
         pytest.skip()
 

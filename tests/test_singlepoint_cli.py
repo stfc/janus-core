@@ -62,9 +62,9 @@ def test_singlepoint():
         assert "mace_mp_energy" in atoms.info
 
         assert "arch" in atoms.info
-        assert "mlip_model" in atoms.info
+        assert "model_path" in atoms.info
         assert atoms.info["arch"] == "mace_mp"
-        assert atoms.info["mlip_model"] == "small"
+        assert atoms.info["model_path"] == "small"
 
         assert "mace_mp_forces" in atoms.arrays
         assert "system_name" in atoms.info
