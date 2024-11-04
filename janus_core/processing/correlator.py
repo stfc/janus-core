@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from ase import Atoms
 import numpy as np
 
-from janus_core.helpers.observables import Observable
+from janus_core.processing.observables import Observable
 
 
 class Correlator:

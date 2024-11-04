@@ -13,7 +13,7 @@ from ase.eos import EquationOfState
 import numpy as np
 from numpy.typing import NDArray
 
-from janus_core.helpers.observables import Observable
+from janus_core.processing.observables import Observable
 
 # General
 
