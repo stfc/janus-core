@@ -190,7 +190,8 @@ def compute_vaf(
     fft: bool = False,
     index: SliceLike = (0, None, 1),
     filter_atoms: MaybeSequence[MaybeSequence[Optional[int]]] = ((None),),
-) -> NDArray[float64]:
+    time_step: float = 1.0,
+) -> tuple[NDArray[float64], list[NDArray[float64]]]:
     """
     Compute the velocity autocorrelation function (VAF) of `data`.
 
@@ -212,11 +213,36 @@ def compute_vaf(
     filter_atoms : MaybeSequence[MaybeSequence[Optional[int]]]
         Compute the VAF averaged over subsets of the system.
         Default is all atoms.
+    time_step : float
+        Time step for scaling lags to align with input data.
+        Default is 1 (i.e. no scaling).
 
     Returns
     -------
-    MaybeSequence[NDArray[float64]]
+    lags : numpy.ndarray
+        Lags at which the VAFs have been computed.
+    vafs : list[numpy.ndarray]
         Computed VAF(s).
+
+    Notes
+    -----
+    `filter_atoms` is given as a series of sequences of atoms, where
+    each element in the series denotes a VAF subset to calculate and
+    each sequence determines the atoms (by index) to be included in that VAF.
+
+    E.g.
+
+    .. code-block: Python
+
+        # Species indices in cell
+        na = (1, 3, 5, 7)
+        cl = (2, 4, 6, 8)
+
+        compute_vaf(..., filter_atoms=(na, cl))
+
+    Would compute separate VAFs for each species.
+
+    By default, one VAF will be computed for all atoms in the structure.
     """
     # Ensure if passed scalars they are turned into correct dimensionality
     if not isinstance(filter_atoms, Sequence):
@@ -270,17 +296,24 @@ def compute_vaf(
 
     vafs /= n_steps - np.arange(n_steps)
 
+    lags = np.arange(n_steps) * time_step
+
     if fft:
         vafs = np.fft.fft(vafs, axis=0)
+        lags = np.fft.fftfreq(n_steps, time_step)
 
-    vafs = [
-        np.average([vafs[used_atoms[i]] for i in atoms], axis=0)
-        for atoms in filter_atoms
-    ]
+    vafs = (
+        lags,
+        [
+            np.average([vafs[used_atoms[i]] for i in atoms], axis=0)
+            for atoms in filter_atoms
+        ],
+    )
 
     if filenames:
-        for filename, vaf in zip(filenames, vafs):
+        for vaf, filename in zip(vafs[1], filenames):
             with open(filename, "w", encoding="utf-8") as out_file:
-                print(*vaf, file=out_file, sep="\n")
+                for lag, dat in zip(lags, vaf):
+                    print(lag, dat, file=out_file)
 
     return vafs

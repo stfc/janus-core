@@ -179,7 +179,7 @@ def test_vaf(tmp_path):
     vaf_filter = ((3, 4), (1, 2, 3))
 
     data = read(DATA_PATH / "lj-traj.xyz", index=":")
-    vaf = post_process.compute_vaf(data)
+    lags, vaf = post_process.compute_vaf(data)
     expected = np.loadtxt(DATA_PATH / "vaf-lj.dat")
 
     assert isinstance(vaf, list)
@@ -187,13 +187,13 @@ def test_vaf(tmp_path):
     assert isinstance(vaf[0], np.ndarray)
     assert vaf[0] == approx(expected, rel=1e-9)
 
-    vaf = post_process.compute_vaf(data, fft=True)
+    lags, vaf = post_process.compute_vaf(data, fft=True)
 
     assert isinstance(vaf, list)
     assert len(vaf) == 1
     assert isinstance(vaf[0], np.ndarray)
 
-    vaf = post_process.compute_vaf(
+    lags, vaf = post_process.compute_vaf(
         data, filter_atoms=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
     )
 
@@ -205,5 +205,8 @@ def test_vaf(tmp_path):
         assert (tmp_path / name).exists()
         expected = np.loadtxt(DATA_PATH / name)
         written = np.loadtxt(tmp_path / name)
+        w_lag, w_vaf = written[:, 0], written[:, 1]
+
         assert vaf[i] == approx(expected, rel=1e-9)
-        assert vaf[i] == approx(written, rel=1e-9)
+        assert lags == approx(w_lag, rel=1e-9)
+        assert vaf[i] == approx(w_vaf, rel=1e-9)
