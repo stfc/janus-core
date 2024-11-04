@@ -191,7 +191,7 @@ def compute_vaf(
     index: SliceLike = (0, None, 1),
     filter_atoms: MaybeSequence[MaybeSequence[Optional[int]]] = ((None),),
     time_step: float = 1.0,
-) -> NDArray[float64]:
+) -> tuple[NDArray[float64], list[NDArray[float64]]]:
     """
     Compute the velocity autocorrelation function (VAF) of `data`.
 
@@ -219,8 +219,30 @@ def compute_vaf(
 
     Returns
     -------
-    MaybeSequence[NDArray[float64]]
+    lags : numpy.ndarray
+        Lags at which the VAFs have been computed.
+    vafs : list[numpy.ndarray]
         Computed VAF(s).
+
+    Notes
+    -----
+    `filter_atoms` is given as a series of sequences of atoms, where
+    each element in the series denotes a VAF subset to calculate and
+    each sequence determines the atoms (by index) to be included in that VAF.
+
+    E.g.
+
+    .. code-block: Python
+
+        # Species indices in cell
+        na = (1, 3, 5, 7)
+        cl = (2, 4, 6, 8)
+
+        compute_vaf(..., filter_atoms=(na, cl))
+
+    Would compute separate VAFs for each species.
+
+    By default, one VAF will be computed for all atoms in the structure.
     """
     # Ensure if passed scalars they are turned into correct dimensionality
     if not isinstance(filter_atoms, Sequence):
