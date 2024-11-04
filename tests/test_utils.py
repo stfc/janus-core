@@ -12,10 +12,8 @@ from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
 from janus_core.helpers.janus_types import SliceLike, StartStopStep
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.struct_io import output_structs
-from janus_core.helpers.utils import none_to_dict
 from janus_core.helpers.utils import (
     none_to_dict,
-    output_structs,
     slicelike_len_for,
     slicelike_to_startstopstep,
 )
