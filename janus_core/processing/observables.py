@@ -138,9 +138,8 @@ class ComponentMixin:
         ValueError
             If any component is invalid.
         """
-        for component in components:
+        for component in self.allowed_components.keys() - components.keys():
             if component not in self.allowed_components:
-                component_names = list(self._components.keys())
                 raise ValueError(
                     f"'{component}' invalid, must be '{', '.join(component_names)}'"
                 )
@@ -267,10 +266,7 @@ class Velocity(Observable, ComponentMixin):
 
         Observable.__init__(self, len(components))
 
-        if atoms_slice:
-            self.atoms_slice = atoms_slice
-        else:
-            self.atoms_slice = slice(0, None, 1)
+        self.atoms_slice = atoms_slice if atoms_slice else slice(0, None, 1)
 
     def __call__(self, atoms: Atoms) -> list[float]:
         """
