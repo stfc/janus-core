@@ -16,7 +16,12 @@ from janus_core.helpers.utils import check_files_exist, none_to_dict
 
 def train(
     mlip_config: PathLike,
-    req_file_keys: Sequence[PathLike] | None = None,
+    req_file_keys: Sequence[PathLike] = (
+        "train_file",
+        "test_file",
+        "valid_file",
+        "statistics_file",
+    ),
     attach_logger: bool = False,
     log_kwargs: dict[str, Any] | None = None,
     track_carbon: bool = True,
@@ -32,7 +37,7 @@ def train(
     ----------
     mlip_config : PathLike
         Configuration file to pass to MLIP.
-    req_file_keys : Sequence[PathLike] | None
+    req_file_keys : Sequence[PathLike]
         List of files that must exist if defined in the configuration file.
         Default is ("train_file", "test_file", "valid_file", "statistics_file").
     attach_logger : bool
@@ -45,9 +50,6 @@ def train(
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
     log_kwargs, tracker_kwargs = none_to_dict(log_kwargs, tracker_kwargs)
-
-    if req_file_keys is None:
-        req_file_keys = ("train_file", "test_file", "valid_file", "statistics_file")
 
     # Validate inputs
     with open(mlip_config, encoding="utf8") as file:
