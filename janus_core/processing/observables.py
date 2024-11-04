@@ -98,19 +98,7 @@ class ComponentMixin:
         components : dict[str, int]
             Symbolic components mapped to indices.
         """
-        self._components = components
-
-    @property
-    def allowed_components(self) -> dict[str, int]:
-        """
-        Allowed symbolic components with associated indices.
-
-        Returns
-        -------
-        dict[str, int]
-            The allowed components and associated indices.
-        """
-        return self._components
+        self._allowed_components = components
 
     @property
     def _indices(self) -> list[int]:
@@ -122,7 +110,7 @@ class ComponentMixin:
         list[int]
             The indices for each self._components.
         """
-        return [self._components[c] for c in self.components]
+        return [self._allowed_components[c] for c in self.components]
 
     def _set_components(self, components: list[str]):
         """
@@ -138,7 +126,7 @@ class ComponentMixin:
         ValueError
             If any component is invalid.
         """
-        if any(components - self.allowed_components.keys()):
+        if any(components - self._allowed_components.keys()):
             raise ValueError(
                 f"'{components-self.allowed_components.keys()}'"
                 " invalid, must be '{', '.join(self._components)}'"
