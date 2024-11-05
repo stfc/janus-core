@@ -273,6 +273,9 @@ will return
 
 This is also the case the calculations performed using the CLI, with the same information written to extxyz output files.
 
+> [!TIP]
+> For complete provenance tracking, calculations and training can be run using the [aiida-mlip](https://github.com/stfc/aiida-mlip/) AiiDA plugin.
+
 
 ## Development
 
