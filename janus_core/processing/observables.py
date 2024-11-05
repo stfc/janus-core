@@ -9,7 +9,7 @@ from ase import Atoms, units
 
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import SliceLike
-    from janus_core.helpers.utils import slicelike_len_for
+    from janus_core.helpers.utils import selector_len
 
 
 # pylint: disable=too-few-public-methods
@@ -287,6 +287,4 @@ class Velocity(Observable, ComponentMixin):
         int
             The number of values returned by __call__.
         """
-        if isinstance(self.atoms_slice, list):
-            return len(self.atoms_slice) * self.dimension
-        return slicelike_len_for(self.atoms_slice, self.n_atoms) * self.dimension
+        return selector_len(self.atoms_slice, self.n_atoms) * self.dimension

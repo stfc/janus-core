@@ -462,26 +462,27 @@ def slicelike_to_startstopstep(index: SliceLike) -> StartStopStep:
     return index
 
 
-def slicelike_len_for(slc: SliceLike, sliceable_length: int) -> int:
+def selector_len(slc: Union[SliceLike, list], selectable_length: int) -> int:
     """
-    Calculate the length of a SliceLike applied to a sliceable of a given length.
+    Calculate the length of a selector applied to an indexable of a given length.
 
     Parameters
     ----------
-    slc : SliceLike
-        The applied SliceLike.
-    sliceable_length : int
-        The length of the sliceable object.
+    slc : Union[SliceLike, list]
+        The applied SliceLike or list for selection.
+    selectable_length : int
+        The length of the selectable object.
 
     Returns
     -------
     int
         Length of the result of applying slc.
     """
+    if isinstance(slc, int):
+        return 1
+    if isinstance(slc, list):
+        return len(slc)
     start, stop, step = slicelike_to_startstopstep(slc)
     if stop is None:
-        stop = sliceable_length
-    # start = start if start is None else 0
-    # stop = stop if stop is None else sliceable_length
-    # step = step if step is None else 1
+        stop = selectable_length
     return len(range(start, stop, step))

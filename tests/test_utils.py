@@ -14,7 +14,7 @@ from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.struct_io import output_structs
 from janus_core.helpers.utils import (
     none_to_dict,
-    slicelike_len_for,
+    selector_len,
     slicelike_to_startstopstep,
 )
 
@@ -197,11 +197,15 @@ def test_slicelike_to_startstopstep(slc: SliceLike, expected: StartStopStep):
         ((1, 1), 1),
         ((range(1, 2, 3), 3), 1),
         ((slice(1, 2, 3), 3), 1),
-        ((-1, 1), 2),
+        ((-1, 5), 1),
+        ((-3, 4), 1),
         ((range(10), 10), 10),
         ((slice(0, None, 2), 10), 5),
+        (([-2, -1, 0], 9), 3),
+        (([-1], 10), 1),
+        (([0, -1, 2, 9], 10), 4),
     ],
 )
-def test_slicelike_len_for(slc_len: tuple[SliceLike, int], expected: int):
+def test_selector_len(slc_len: tuple[SliceLike | list, int], expected: int):
     """Test converting SliceLike to StartStopStep."""
-    assert slicelike_len_for(*slc_len) == expected
+    assert selector_len(*slc_len) == expected
