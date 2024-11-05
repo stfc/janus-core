@@ -207,12 +207,13 @@ class Stress(Observable, ComponentMixin):
         """
         sliced_atoms = atoms[self.atoms_slice]
         sliced_atoms.calc = atoms.calc
-        return (
+        stresses = (
             sliced_atoms.get_stress(
                 include_ideal_gas=self.include_ideal_gas, voigt=True
             )
             / units.GPa
-        )[self._indices]
+        )
+        return stresses[self._indices]
 
 
 StressHydrostatic = Stress(components=["xx", "yy", "zz"])
