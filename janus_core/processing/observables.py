@@ -128,8 +128,8 @@ class ComponentMixin:
         """
         if any(components - self._allowed_components.keys()):
             raise ValueError(
-                f"'{components-self.allowed_components.keys()}'"
-                " invalid, must be '{', '.join(self._components)}'"
+                f"'{components-self._allowed_components.keys()}'"
+                f" invalid, must be '{', '.join(self._allowed_components)}'"
             )
 
         self.components = components
