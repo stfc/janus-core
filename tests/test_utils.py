@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 from ase import Atoms
 from ase.io import read
@@ -192,21 +191,21 @@ def test_slicelike_to_startstopstep(slc: SliceLike, expected: StartStopStep):
 
 
 @pytest.mark.parametrize(
-    "slc_len, expected",
+    "slc, len, expected",
     [
-        (((1, 2, 3), 3), 1),
-        ((1, 1), 1),
-        ((range(1, 2, 3), 3), 1),
-        ((slice(1, 2, 3), 3), 1),
-        ((-1, 5), 1),
-        ((-3, 4), 1),
-        ((range(10), 10), 10),
-        ((slice(0, None, 2), 10), 5),
-        (([-2, -1, 0], 9), 3),
-        (([-1], 10), 1),
-        (([0, -1, 2, 9], 10), 4),
+        ((1, 2, 3), 3, 1),
+        (1, 1, 1),
+        (range(1, 2, 3), 3, 1),
+        (slice(1, 2, 3), 3, 1),
+        (-1, 5, 1),
+        (-3, 4, 1),
+        (range(10), 10, 10),
+        (slice(0, None, 2), 10, 5),
+        ([-2, -1, 0], 9, 3),
+        ([-1], 10, 1),
+        ([0, -1, 2, 9], 10, 4),
     ],
 )
-def test_selector_len(slc_len: tuple[Union[SliceLike, list], int], expected: int):
+def test_selector_len(slc: SliceLike | list[int], len: int, expected: int):
     """Test converting SliceLike to StartStopStep."""
-    assert selector_len(*slc_len) == expected
+    assert selector_len(slc, len) == expected
