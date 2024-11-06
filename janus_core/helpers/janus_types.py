@@ -6,12 +6,15 @@ from collections.abc import Collection, Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
-from typing import IO, Literal, Optional, TypedDict, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Literal, Optional, TypedDict, TypeVar, Union
 
 from ase import Atoms
 from ase.eos import EquationOfState
 import numpy as np
 from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from janus_core.processing.observables import Observable
 
 # General
 
@@ -76,36 +79,13 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_step: int
     vaf_output_file: PathLike | None
 
-
 class CorrelationKwargs(TypedDict, total=True):
     """Arguments for on-the-fly correlations <ab>."""
 
     #: observable a in <ab>, with optional args and kwargs
-    a: Observable | tuple[Observable, tuple, dict]
+    a: Observable
     #: observable b in <ab>, with optional args and kwargs
-    b: Observable | tuple[Observable, tuple, dict]
-    #: name used for correlation in output
-    name: str
-    #: blocks used in multi-tau algorithm
-    blocks: int
-    #: points per block
-    points: int
-    #: averaging between blocks
-    averaging: int
-    #: frequency to update the correlation (steps)
-    update_frequency: int
-
-
-class CorrelationKwargs(TypedDict, total=True):
-    """Arguments for on-the-fly correlations <ab>."""
-
-    # imported here to prevent circular imports.
-    from janus_core.processing.observables import Observable
-
-    #: observable a in <ab>, with optional args and kwargs
-    a: Union[Observable, tuple[Observable, tuple, dict]]
-    #: observable b in <ab>, with optional args and kwargs
-    b: Union[Observable, tuple[Observable, tuple, dict]]
+    b: Observable
     #: name used for correlation in output
     name: str
     #: blocks used in multi-tau algorithm

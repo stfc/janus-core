@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from ase import Atoms, units
 
-from janus_core.helpers.janus_types import SliceLike
+if TYPE_CHECKING:
+    from janus_core.helpers.janus_types import SliceLike
+
 from janus_core.helpers.utils import selector_len
 
 
