@@ -339,6 +339,13 @@ Further calculations, including thermal properties, DOS, and PDOS, can also be c
 This will create additional output files: ``NaCl-thermal.dat`` for the thermal properties (heat capacity, entropy, and free energy)
 between 0K and 300K, ``NaCl-dos.dat`` for the DOS, and ``NaCl-pdos.dat`` for the PDOS.
 
+To define the supercell, the ``--supercell`` option can be used, which *must* be passed in as a space-separated string.
+Similar to Phonopy, the supercell matrix can be defined in three ways:
+
+1. One integer (``--supercell "2"``) specifying all diagonal elements.
+2. Three integers (``--supercell "2 2 2"``) specifying each individual diagonal element.
+3. Nine integers (``--supercell "2 0 0 0 2 0 0 0 2"``) specifying all elements, filling the matrix row-wise.
+
 For all options, run ``janus phonons --help``.
 
 

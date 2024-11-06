@@ -31,15 +31,11 @@ def phonons(
     supercell: Annotated[
         str,
         Option(
-            help="Supercell specification as a string, in the Phonopy style. "
-            "There are three different valid inputs: single value (i.e. '2') "
-            "which specifies what all of the diagonal values of the supercell "
-            "matrix whould be, three values (i.e. '1 2 3') which specify the "
-            "individual diagonal elements of the supercell matrix, or nine "
-            "values (i.e. '1 2 3 4 5 6 7 8 9') which specify all the elements "
-            "of the full supercell matrix. In the last case, the first three "
-            "values form the first row of the matrix, the second three the "
-            "second row, etc."
+            help="Supercell matrix, in the Phonopy style. Must be passed as a string "
+            "in one of three forms: single integer ('2'), which specifies all "
+            "diagonal elements; three integers ('1 2 3'), which specifies each "
+            "individual diagonal element; or nine values ('1 2 3 4 5 6 7 8 9'), "
+            "which specifies all elements, filling the matrix row-wise."
         ),
     ] = "2 2 2",
     displacement: Annotated[
@@ -126,15 +122,11 @@ def phonons(
     struct : Path
         Path of structure to simulate.
     supercell : str
-        Supercell specification as a string, in the Phonopy style.
-        There are three different valid inputs: single value (i.e. '2')
-        which specifies what all of the diagonal values of the supercell
-        matrix whould be, three values (i.e. '1 2 3') which specify the
-        individual diagonal elements of the supercell matrix, or nine
-        values (i.e. '1 2 3 4 5 6 7 8 9') which specify all the elements
-        of the full supercell matrix. In the last case, the first three
-        values form the first row of the matrix, the second three the
-        second row, etc.
+        Supercell matrix, in the Phonopy style. Must be passed as a string in one of
+        three forms: single integer ('2'), which specifies all diagonal elements;
+        three integers ('1 2 3'), which specifies each individual diagonal element;
+        or nine values ('1 2 3 4 5 6 7 8 9'), which specifies all elements, filling the
+        matrix row-wise.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]

@@ -59,7 +59,14 @@ class Phonons(BaseCalculation):
     calcs : Optional[MaybeSequence[PhononCalcs]]
         Phonon calculations to run. Default calculates force constants only.
     supercell : MaybeList[int]
-        Size of supercell for calculation. Default is 2.
+        The size of a supercell for calculation, or the supercell itself.
+        If a single number is provided, it is interpreted as the size, so a
+        diagonal supercell of that size in all dimensions is constructed.
+        If three values are provided, they are interpreted as the diagonal
+        values of a diagonal supercell. If nine values are provided, they
+        are assumed to be the full supercell matrix in the style of Phonopy,
+        so the first three values will be used as the first row, the second
+        three as the second row, etc. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]
