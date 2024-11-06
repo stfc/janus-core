@@ -187,32 +187,52 @@ Alternatively, using ``tox``::
 Adding a new Observable
 =======================
 
-Additional built-in observable quantities may be added for use by the ``janus_core.processing.correlator.Correlation`` class. These should extend ``janus_core.processing.observables.Observable``. The abstract method ``__call__`` should be implemented to obtain the values of the observed quantity from an ``Atoms`` object:
+Additional built-in observable quantities may be added for use by the ``janus_core.processing.correlator.Correlation`` class. These should extend ``janus_core.processing.observables.Observable``. The abstract method ``__call__`` should be implemented to obtain the values of the observed quantity from an ``Atoms`` object, and potentially ``value_count`` may need to be overloaded indicating the number of values returned by ``__call__``. The number of values returned will depend on the dimension of the underlying ``Observable``, and potentially the number of atoms resulting from the ``Observable``'s slice. These values are correlated individually and averaged.
+
+As an example of building a new ``Observable`` consider the ``janus_core.processing.observables.Stress`` and ``janus_core.processing.observables.Velocity`` built-ins. ``janus_core.processing.observables.Stress`` returns the required stress components as calculated by ``Atoms.get_stress`` called upon the tracked atoms. Therefore ``__call__`` returns one ``float`` per component correlated. The call method applies the atom slice and returns the desired stress components.
 
 .. code-block:: python
 
-    @abstractmethod
-    def __call__(self, atoms: Atoms) -> list[float]
+    def __call__(self, atoms: Atoms) -> list[float]:
+        sliced_atoms = atoms[self.atoms_slice]
+        sliced_atoms.calc = atoms.calc
+        stresses = (
+            sliced_atoms.get_stress(
+                include_ideal_gas=self.include_ideal_gas, voigt=True
+            )
+            / units.GPa
+        )
+        return stresses[self._indices]
 
-These values are returned as a ``list[float]`` representing the dimensions of the observed value which may be returned for a slice of atoms individually. ``value_count`` should be overloaded to return the expected length returned by ``__call__``. This is so enough correlators may be spawned to track the correlated the values. Note the final correlation will be the average of the correlations across these dimensions and atom counts.
-
-For example the ``janus_core.processing.observables.Stress`` built-in returns the required stress components as calculated by ``Atoms.get_stress`` called upon the tracked atoms. Therefore ``__call__`` returns one ``float`` per component correlated. For example an observable representing the ``xy`` and ``zy`` components of stress computed across all odd-index atoms in some ``Atoms`` object can be constructed as follows:
+For example an observable representing the ``xy`` and ``zy`` components of stress computed across all odd-index atoms in some ``Atoms`` object can be constructed as follows:
 
 .. code-block:: python
 
     s = Stress(components=["xy", "zy"], atoms_slice=(0, None, 2))
 
-In this case ``s(atoms)`` will return 2 values.
+In this case ``s(atoms)`` will return 2 values, no matter how many atoms are sliced from ``atoms_slice``.
 
-The ``janus_core.processing.observables.Velocity`` built-in's ``__call__`` not only returns atom velocity for the requested dimensions, but also returns them for every tracked atom. ``value_count`` is overloaded to reflect this. Therefore given the observable
+However, the ``janus_core.processing.observables.Velocity`` built-in's ``__call__`` not only returns atom velocity for the requested dimensions, but also returns them for every tracked atom, i.e:
+
+.. code-block:: python
+
+       def __call__(self, atoms: Atoms) -> list[float]:
+           return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
+
+so ``value_count`` is overloaded to reflect this.
+
+.. code-block:: python
+
+       def value_count(self, n_atoms: int | None = None) -> int:
+           return selector_len(self.atoms_slice, n_atoms) * self.dimension
+
+Unlike ``janus_core.processing.observables.Stress`` when we create a ``janus_core.processing.observables.Velocity`` observable like so,
 
 .. code-block:: python
 
     v = Velocity(components=["x", "y", "z"], atoms_slice=(0, None, 2))
 
-The value of ``v(atoms)`` will have the length ``3 * len(atoms)//2``. The 3 dimensions for each odd-indexed atom.
-
-New built-in observables are collected within the ``janus_core.processing.observables`` module. Special cases may also be defined for ease of use:
+the value of ``v(atoms)`` will have the length ``3 * len(atoms)//2``. The 3 dimensions of velocity for each odd-indexed atom. New built-in observables may be written by implementing new ``__call__`` methods to return the desired quantities. These should be collected within the ``janus_core.processing.observables`` module. Special cases may also be defined for ease of use, for example:
 
 .. code-block:: python
 
