@@ -10,7 +10,7 @@ from ase import Atoms, units
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import SliceLike
 
-from janus_core.helpers.utils import selector_len
+from janus_core.helpers.utils import selector_len, slicelike_to_startstopstep
 
 
 # pylint: disable=too-few-public-methods
@@ -20,20 +20,33 @@ class Observable(ABC):
 
     Parameters
     ----------
+    atoms_slice : list[int] | SliceLike | None = None
+        A slice of atoms to observe.
     dimension : int
         The dimension of the observed data.
     """
 
-    def __init__(self, dimension: int = 1):
+    def __init__(
+        self, atoms_slice: list[int] | SliceLike | None = None, dimension: int = 1
+    ):
         """
         Initialise an observable with a given dimensionality.
 
         Parameters
         ----------
+        atoms_slice : list[int] | SliceLike | None = None
+            A slice of atoms to observe.
         dimension : int
             The dimension of the observed data.
         """
         self._dimension = dimension
+        if atoms_slice:
+            if isinstance(atoms_slice, list):
+                self.atoms_slice = atoms_slice
+            else:
+                self.atoms_slice = slice(*slicelike_to_startstopstep(atoms_slice))
+        else:
+            self.atoms_slice = slice(0, None, 1)
 
     @abstractmethod
     def __call__(self, atoms: Atoms) -> list[float]:
@@ -186,12 +199,7 @@ class Stress(Observable, ComponentMixin):
         )
         self._set_components(components)
 
-        if atoms_slice:
-            self.atoms_slice = atoms_slice
-        else:
-            self.atoms_slice = slice(0, None, 1)
-
-        Observable.__init__(self, len(components))
+        Observable.__init__(self, atoms_slice, len(components))
         self.include_ideal_gas = include_ideal_gas
 
     def __call__(self, atoms: Atoms) -> list[float]:
@@ -255,9 +263,7 @@ class Velocity(Observable, ComponentMixin):
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
         self._set_components(components)
 
-        Observable.__init__(self, len(components))
-
-        self.atoms_slice = atoms_slice if atoms_slice else slice(0, None, 1)
+        Observable.__init__(self, atoms_slice, len(components))
 
     def __call__(self, atoms: Atoms) -> list[float]:
         """

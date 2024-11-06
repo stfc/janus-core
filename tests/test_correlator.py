@@ -78,13 +78,8 @@ def test_vaf(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    na = []
-    cl = []
-    for i, atom in enumerate(single_point.struct):
-        if atom.symbol == "Na":
-            na.append(i)
-        else:
-            cl.append(i)
+    na = list(range(0, len(single_point.struct), 2))
+    cl = list(range(1, len(single_point.struct), 2))
 
     nve = NVE(
         struct=single_point.struct,
@@ -96,8 +91,11 @@ def test_vaf(tmp_path):
         file_prefix=file_prefix,
         correlation_kwargs=[
             {
-                "a": Velocity(components=["x", "y", "z"], atoms_slice=na),
-                "b": Velocity(components=["x", "y", "z"], atoms_slice=na),
+                "a": Velocity(components=["x", "y", "z"], atoms_slice=(0, None, 2)),
+                "b": Velocity(
+                    components=["x", "y", "z"],
+                    atoms_slice=range(0, len(single_point.struct), 2),
+                ),
                 "name": "vaf_Na",
                 "blocks": 1,
                 "points": 11,
@@ -106,7 +104,9 @@ def test_vaf(tmp_path):
             },
             {
                 "a": Velocity(components=["x", "y", "z"], atoms_slice=cl),
-                "b": Velocity(components=["x", "y", "z"], atoms_slice=cl),
+                "b": Velocity(
+                    components=["x", "y", "z"], atoms_slice=slice(1, None, 2)
+                ),
                 "name": "vaf_Cl",
                 "blocks": 1,
                 "points": 11,
