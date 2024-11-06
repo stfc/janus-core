@@ -1,4 +1,9 @@
+# ruff: noqa: I002, FA100
 """Set up commandline interface."""
+
+# Issues with future annotations and typer
+# c.f. https://github.com/maxb2/typer-config/issues/295
+# from __future__ import annotations
 
 from typing import Annotated
 

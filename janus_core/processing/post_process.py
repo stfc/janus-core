@@ -1,8 +1,9 @@
 """Module for post-processing trajectories."""
 
+from __future__ import annotations
+
 from collections.abc import Sequence
 from itertools import combinations_with_replacement
-from typing import Optional, Union
 
 from ase import Atoms
 from ase.geometry.analysis import Analysis
@@ -45,17 +46,17 @@ def _process_index(index: SliceLike) -> StartStopStep:
 
 def compute_rdf(
     data: MaybeSequence[Atoms],
-    ana: Optional[Analysis] = None,
+    ana: Analysis | None = None,
     /,
     *,
-    filenames: Optional[MaybeSequence[PathLike]] = None,
+    filenames: MaybeSequence[PathLike] | None = None,
     by_elements: bool = False,
     rmax: float = 2.5,
     nbins: int = 50,
-    elements: Optional[MaybeSequence[Union[int, str]]] = None,
+    elements: MaybeSequence[int | str] | None = None,
     index: SliceLike = (0, None, 1),
-    volume: Optional[float] = None,
-) -> Union[NDArray[float64], dict[tuple[str, str], NDArray[float64]]]:
+    volume: float | None = None,
+) -> NDArray[float64] | dict[tuple[str, str] | NDArray[float64]]:
     """
     Compute the rdf of data.
 
@@ -184,12 +185,12 @@ def compute_rdf(
 
 def compute_vaf(
     data: Sequence[Atoms],
-    filenames: Optional[MaybeSequence[PathLike]] = None,
+    filenames: MaybeSequence[PathLike] | None = None,
     *,
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[Optional[int]]] = ((None),),
+    filter_atoms: MaybeSequence[MaybeSequence[int | None]] = ((None),),
     time_step: float = 1.0,
 ) -> tuple[NDArray[float64], list[NDArray[float64]]]:
     """

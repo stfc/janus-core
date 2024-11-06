@@ -1,5 +1,7 @@
 """Test commandline interface with no sub-commands."""
 
+from __future__ import annotations
+
 from typer.testing import CliRunner
 
 from janus_core.cli.janus import app

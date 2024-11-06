@@ -1,10 +1,12 @@
 """Utility functions for janus_core."""
 
+from __future__ import annotations
+
 from abc import ABC
 from collections.abc import Generator, Iterable, Sequence
 from io import StringIO
 from pathlib import Path
-from typing import Any, Literal, Optional, TextIO, Union
+from typing import Any, Literal, TextIO
 
 from ase import Atoms
 from rich.progress import (
@@ -28,9 +30,9 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     struct : MaybeSequence[Atoms]
         Structure from which to derive the default name. If `struct` is a sequence,
         the first structure will be used.
-    struct_path : Optional[PathLike]
+    struct_path : PathLike | None
         Path to file containing structures.
-    file_prefix : Optional[PathLike]
+    file_prefix : PathLike | None
         Default prefix to use.
     *additional
         Components to add to default file_prefix (joined by hyphens).
@@ -47,8 +49,8 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
     def __init__(
         self,
         struct: MaybeSequence[Atoms],
-        struct_path: Optional[PathLike],
-        file_prefix: Optional[PathLike],
+        struct_path: PathLike | None,
+        file_prefix: PathLike | None,
         *additional,
     ) -> None:
         """
@@ -59,9 +61,9 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         struct : MaybeSequence[Atoms]
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
-        struct_path : Optional[PathLike]
+        struct_path : PathLike | None
             Path to file structures were read from. Used as default prefix is not None.
-        file_prefix : Optional[PathLike]
+        file_prefix : PathLike | None
             Default prefix to use.
         *additional
             Components to add to default file_prefix (joined by hyphens).
@@ -72,9 +74,9 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
     @staticmethod
     def _get_default_prefix(
-        file_prefix: Optional[PathLike],
+        file_prefix: PathLike | None,
         struct: MaybeSequence[Atoms],
-        struct_path: Optional[PathLike],
+        struct_path: PathLike | None,
         *additional,
     ) -> str:
         """
@@ -82,12 +84,12 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
         Parameters
         ----------
-        file_prefix : Optional[PathLike]
+        file_prefix : PathLike | None
             Given file_prefix.
         struct : MaybeSequence[Atoms]
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
-        struct_path : Optional[PathLike]
+        struct_path : PathLike | None
             Path to file containing structures.
         *additional
             Components to add to default file_prefix (joined by hyphens).
@@ -114,8 +116,8 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         self,
         suffix: str,
         *additional,
-        filename: Optional[PathLike] = None,
-        prefix_override: Optional[str] = None,
+        filename: PathLike | None = None,
+        prefix_override: str | None = None,
     ) -> Path:
         """
         Set filename using the file prefix and suffix if not specified otherwise.
@@ -126,7 +128,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             Default suffix to use if `filename` is not specified.
         *additional
             Extra components to add to suffix (joined with hyphens).
-        filename : Optional[PathLike]
+        filename : PathLike | None
             Filename to use, if specified. Default is None.
         prefix_override : Optional[str]
             Replace file_prefix if not None.
@@ -149,7 +151,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         return built_filename
 
 
-def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None, None]:
+def none_to_dict(dictionaries: Sequence[dict | None]) -> Generator[dict, None, None]:
     """
     Ensure dictionaries that may be None are dictionaries.
 
@@ -168,13 +170,13 @@ def none_to_dict(dictionaries: Sequence[Optional[dict]]) -> Generator[dict, None
 
 def write_table(
     fmt: Literal["ascii", "csv"],
-    file: Optional[TextIO] = None,
-    units: Optional[dict[str, str]] = None,
-    formats: Optional[dict[str, str]] = None,
+    file: TextIO | None = None,
+    units: dict[str, str] | None = None,
+    formats: dict[str, str] | None = None,
     *,
     print_header: bool = True,
     **columns,
-) -> Optional[StringIO]:
+) -> StringIO | None:
     """
     Dump a table in a standard format.
 
@@ -368,7 +370,7 @@ def _dump_csv(
         print(",".join(map(format, cols, formats)), file=file)
 
 
-def track_progress(sequence: Union[Sequence, Iterable], description: str) -> Iterable:
+def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
     """
     Track the progress of iterating over a sequence.
 

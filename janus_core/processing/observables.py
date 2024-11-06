@@ -1,5 +1,7 @@
 """Module for built-in correlation observables."""
 
+from __future__ import annotations
+
 from ase import Atoms, units
 
 

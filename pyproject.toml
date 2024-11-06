@@ -115,7 +115,7 @@ select = [
     # pycodestyle
     "E", "W",
     # Pyflakes
-    "F",
+    "F", "FA",
     # pyupgrade
     "I",
     # pep8-naming
@@ -126,6 +126,7 @@ select = [
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

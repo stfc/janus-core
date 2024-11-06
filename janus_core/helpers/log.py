@@ -1,8 +1,10 @@
 """Configure logger with yaml-styled format."""
 
+from __future__ import annotations
+
 import json
 import logging
-from typing import Literal, Optional
+from typing import Literal
 
 from codecarbon import OfflineEmissionsTracker
 from codecarbon.output import LoggerOutput
@@ -98,12 +100,12 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
 
 def config_logger(
     name: str,
-    filename: Optional[str] = None,
+    filename: str | None = None,
     level: LogLevel = logging.INFO,
     capture_warnings: bool = True,
     filemode: Literal["r", "w", "a", "x", "r+", "w+", "a+", "x+"] = "w",
     force: bool = True,
-) -> Optional[logging.Logger]:
+) -> logging.Logger | None:
     """
     Configure logger with yaml-styled format.
 
@@ -152,13 +154,13 @@ def config_logger(
 
 
 def config_tracker(
-    janus_logger: Optional[logging.Logger],
+    janus_logger: logging.Logger | None,
     track_carbon: bool = True,
     *,
     country_iso_code: str = "GBR",
     save_to_file: bool = False,
     log_level: Literal["debug", "info", "warning", "error", "critical"] = "critical",
-) -> Optional[OfflineEmissionsTracker]:
+) -> OfflineEmissionsTracker | None:
     """
     Configure codecarbon tracker to log outputs.
 

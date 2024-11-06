@@ -1,7 +1,9 @@
 """Train MLIP."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 try:
     from mace.cli.run_train import run as run_train
@@ -40,11 +42,11 @@ def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
 
 def train(
     mlip_config: PathLike,
-    req_file_keys: Optional[list[PathLike]] = None,
+    req_file_keys: list[PathLike] | None = None,
     attach_logger: bool = False,
-    log_kwargs: Optional[dict[str, Any]] = None,
+    log_kwargs: dict[str, Any] | None = None,
     track_carbon: bool = True,
-    tracker_kwargs: Optional[dict[str, Any]] = None,
+    tracker_kwargs: dict[str, Any] | None = None,
 ) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.

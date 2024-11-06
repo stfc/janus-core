@@ -1,6 +1,8 @@
 """Prepare and run geometry optimization."""
 
-from typing import Any, Callable, Optional, Union
+from __future__ import annotations
+
+from typing import Any, Callable
 import warnings
 
 from ase import Atoms, filters, units
@@ -97,30 +99,30 @@ class GeomOpt(BaseCalculation):
 
     def __init__(
         self,
-        struct: Optional[Atoms] = None,
-        struct_path: Optional[PathLike] = None,
+        struct: Atoms | None = None,
+        struct_path: PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
-        read_kwargs: Optional[ASEReadArgs] = None,
-        calc_kwargs: Optional[dict[str, Any]] = None,
-        set_calc: Optional[bool] = None,
+        model_path: PathLike | None = None,
+        read_kwargs: ASEReadArgs | None = None,
+        calc_kwargs: dict[str, Any] | None = None,
+        set_calc: bool | None = None,
         attach_logger: bool = False,
-        log_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool = True,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: dict[str, Any] | None = None,
         fmax: float = 0.1,
         steps: int = 1000,
         symmetrize: bool = False,
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
-        filter_func: Optional[Union[Callable, str]] = FrechetCellFilter,
-        filter_kwargs: Optional[dict[str, Any]] = None,
-        optimizer: Union[Callable, str] = LBFGS,
-        opt_kwargs: Optional[ASEOptArgs] = None,
+        filter_func: Callable | str | None = FrechetCellFilter,
+        filter_kwargs: dict[str, Any] | None = None,
+        optimizer: Callable | str = LBFGS,
+        opt_kwargs: ASEOptArgs | None = None,
         write_results: bool = False,
-        write_kwargs: Optional[OutputKwargs] = None,
-        traj_kwargs: Optional[OutputKwargs] = None,
+        write_kwargs: OutputKwargs | None = None,
+        traj_kwargs: OutputKwargs | None = None,
     ) -> None:
         """
         Initialise GeomOpt class.

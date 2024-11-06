@@ -1,5 +1,7 @@
 """Test descriptors commandline interface."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from ase.io import read

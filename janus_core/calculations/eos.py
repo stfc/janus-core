@@ -1,7 +1,9 @@
 """Equation of State."""
 
+from __future__ import annotations
+
 from copy import copy
-from typing import Any, Optional
+from typing import Any
 
 from ase import Atoms
 from ase.eos import EquationOfState
@@ -105,31 +107,31 @@ class EoS(BaseCalculation):
 
     def __init__(
         self,
-        struct: Optional[Atoms] = None,
-        struct_path: Optional[PathLike] = None,
+        struct: Atoms | None = None,
+        struct_path: PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
-        read_kwargs: Optional[ASEReadArgs] = None,
-        calc_kwargs: Optional[dict[str, Any]] = None,
-        set_calc: Optional[bool] = None,
+        model_path: PathLike | None = None,
+        read_kwargs: ASEReadArgs | None = None,
+        calc_kwargs: dict[str, Any] | None = None,
+        set_calc: bool | None = None,
         attach_logger: bool = False,
-        log_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool = True,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: dict[str, Any] | None = None,
         min_volume: float = 0.95,
         max_volume: float = 1.05,
         n_volumes: int = 7,
         eos_type: EoSNames = "birchmurnaghan",
         minimize: bool = True,
         minimize_all: bool = False,
-        minimize_kwargs: Optional[dict[str, Any]] = None,
+        minimize_kwargs: dict[str, Any] | None = None,
         write_results: bool = True,
         write_structures: bool = False,
-        write_kwargs: Optional[OutputKwargs] = None,
+        write_kwargs: OutputKwargs | None = None,
         plot_to_file: bool = False,
-        plot_kwargs: Optional[dict[str, Any]] = None,
-        file_prefix: Optional[PathLike] = None,
+        plot_kwargs: dict[str, Any] | None = None,
+        file_prefix: PathLike | None = None,
     ) -> None:
         """
         Initialise class.

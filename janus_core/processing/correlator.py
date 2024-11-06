@@ -1,7 +1,8 @@
 """Module to correlate scalar data on-the-fly."""
 
+from __future__ import annotations
+
 from collections.abc import Iterable
-from typing import Union
 
 from ase import Atoms
 import numpy as np
@@ -196,8 +197,8 @@ class Correlation:
 
     def __init__(
         self,
-        a: Union[Observable, tuple[Observable, tuple, dict]],
-        b: Union[Observable, tuple[Observable, tuple, dict]],
+        a: Observable | tuple[Observable, tuple, dict],
+        b: Observable | tuple[Observable, tuple, dict],
         name: str,
         blocks: int,
         points: int,

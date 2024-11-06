@@ -1,5 +1,7 @@
 """Test importing janus_core."""
 
+from __future__ import annotations
+
 import janus_core
 
 

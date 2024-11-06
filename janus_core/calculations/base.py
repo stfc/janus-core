@@ -1,6 +1,8 @@
 """Prepare structures for MLIP calculations."""
 
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from ase import Atoms
 
@@ -71,22 +73,22 @@ class BaseCalculation(FileNameMixin):
         self,
         *,
         calc_name: str = "base",
-        struct: Optional[MaybeSequence[Atoms]] = None,
-        struct_path: Optional[PathLike] = None,
+        struct: MaybeSequence[Atoms] | None = None,
+        struct_path: PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
-        read_kwargs: Optional[ASEReadArgs] = None,
+        model_path: PathLike | None = None,
+        read_kwargs: ASEReadArgs | None = None,
         sequence_allowed: bool = True,
-        calc_kwargs: Optional[dict[str, Any]] = None,
-        set_calc: Optional[bool] = None,
+        calc_kwargs: dict[str, Any] | None = None,
+        set_calc: bool | None = None,
         attach_logger: bool = False,
-        log_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool = True,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
-        file_prefix: Optional[PathLike] = None,
-        additional_prefix: Optional[str] = None,
-        param_prefix: Optional[str] = None,
+        tracker_kwargs: dict[str, Any] | None = None,
+        file_prefix: PathLike | None = None,
+        additional_prefix: str | None = None,
+        param_prefix: str | None = None,
     ) -> None:
         """
         Read the structure being simulated and attach an MLIP calculator.

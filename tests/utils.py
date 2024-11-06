@@ -1,9 +1,10 @@
 """Utility functions for tests."""
 
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 import re
-from typing import Union
 
 from ase import Atoms
 from ase.io import read
@@ -12,7 +13,7 @@ import yaml
 from janus_core.helpers.janus_types import MaybeSequence, PathLike
 
 
-def read_atoms(path: Path) -> Union[Atoms, None]:
+def read_atoms(path: Path) -> Atoms | None:
     """
     Read Atoms structure file, and delete file regardless of success.
 

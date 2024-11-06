@@ -1,5 +1,7 @@
 """Run molecular dynamics simulations."""
 
+from __future__ import annotations
+
 import datetime
 from functools import partial
 from itertools import combinations_with_replacement
@@ -7,7 +9,7 @@ from math import isclose
 from os.path import getmtime
 from pathlib import Path
 import random
-from typing import Any, Optional, Union
+from typing import Any
 from warnings import warn
 
 from ase import Atoms, units
@@ -175,51 +177,51 @@ class MolecularDynamics(BaseCalculation):
 
     def __init__(
         self,
-        struct: Optional[Atoms] = None,
-        struct_path: Optional[PathLike] = None,
+        struct: Atoms | None = None,
+        struct_path: PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
-        read_kwargs: Optional[ASEReadArgs] = None,
-        calc_kwargs: Optional[dict[str, Any]] = None,
-        set_calc: Optional[bool] = None,
+        model_path: PathLike | None = None,
+        read_kwargs: ASEReadArgs | None = None,
+        calc_kwargs: dict[str, Any] | None = None,
+        set_calc: bool | None = None,
         attach_logger: bool = False,
-        log_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool = True,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
-        ensemble: Optional[Ensembles] = None,
+        tracker_kwargs: dict[str, Any] | None = None,
+        ensemble: Ensembles | None = None,
         steps: int = 0,
         timestep: float = 1.0,
         temp: float = 300,
         equil_steps: int = 0,
         minimize: bool = False,
         minimize_every: int = -1,
-        minimize_kwargs: Optional[dict[str, Any]] = None,
+        minimize_kwargs: dict[str, Any] | None = None,
         rescale_velocities: bool = False,
         remove_rot: bool = False,
         rescale_every: int = 10,
-        file_prefix: Optional[PathLike] = None,
+        file_prefix: PathLike | None = None,
         restart: bool = False,
         restart_auto: bool = True,
-        restart_stem: Optional[PathLike] = None,
+        restart_stem: PathLike | None = None,
         restart_every: int = 1000,
         rotate_restart: bool = False,
         restarts_to_keep: int = 4,
-        final_file: Optional[PathLike] = None,
-        stats_file: Optional[PathLike] = None,
+        final_file: PathLike | None = None,
+        stats_file: PathLike | None = None,
         stats_every: int = 100,
-        traj_file: Optional[PathLike] = None,
+        traj_file: PathLike | None = None,
         traj_append: bool = False,
         traj_start: int = 0,
         traj_every: int = 100,
-        temp_start: Optional[float] = None,
-        temp_end: Optional[float] = None,
-        temp_step: Optional[float] = None,
-        temp_time: Optional[float] = None,
-        write_kwargs: Optional[OutputKwargs] = None,
-        post_process_kwargs: Optional[PostProcessKwargs] = None,
-        correlation_kwargs: Optional[list[CorrelationKwargs]] = None,
-        seed: Optional[int] = None,
+        temp_start: float | None = None,
+        temp_end: float | None = None,
+        temp_step: float | None = None,
+        temp_time: float | None = None,
+        write_kwargs: OutputKwargs | None = None,
+        post_process_kwargs: PostProcessKwargs | None = None,
+        correlation_kwargs: list[CorrelationKwargs] | None = None,
+        seed: int | None = None,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -493,7 +495,7 @@ class MolecularDynamics(BaseCalculation):
                 "filemode": "a",
             }
 
-        self.dyn: Union[Langevin, VelocityVerlet, ASE_NPT]
+        self.dyn: Langevin | VelocityVerlet | ASE_NPT
         self.n_atoms = len(self.struct)
 
         self.offset = 0
@@ -633,7 +635,7 @@ class MolecularDynamics(BaseCalculation):
             optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
             optimizer.run()
 
-    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None) -> str:
+    def _set_param_prefix(self, file_prefix: PathLike | None = None) -> str:
         """
         Set ensemble parameters for output files.
 
@@ -1156,8 +1158,8 @@ class NPT(MolecularDynamics):
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
         ensemble: Ensembles = "npt",
-        file_prefix: Optional[PathLike] = None,
-        ensemble_kwargs: Optional[dict[str, Any]] = None,
+        file_prefix: PathLike | None = None,
+        ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -1211,7 +1213,7 @@ class NPT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
-    def _set_param_prefix(self, file_prefix: Optional[PathLike] = None) -> str:
+    def _set_param_prefix(self, file_prefix: PathLike | None = None) -> str:
         """
         Set ensemble parameters for output files.
 
@@ -1297,7 +1299,7 @@ class NVT(MolecularDynamics):
         *args,
         friction: float = 0.005,
         ensemble: Ensembles = "nvt",
-        ensemble_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -1391,7 +1393,7 @@ class NVE(MolecularDynamics):
         self,
         *args,
         ensemble: Ensembles = "nve",
-        ensemble_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -1442,7 +1444,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         *args,
         thermostat_time: float = 50.0,
         ensemble: Ensembles = "nvt-nh",
-        ensemble_kwargs: Optional[dict[str, Any]] = None,
+        ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -1546,8 +1548,8 @@ class NPH(NPT):
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
         ensemble: Ensembles = "nph",
-        file_prefix: Optional[PathLike] = None,
-        ensemble_kwargs: Optional[dict[str, Any]] = None,
+        file_prefix: PathLike | None = None,
+        ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """

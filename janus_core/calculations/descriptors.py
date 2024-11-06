@@ -1,7 +1,9 @@
 """Calculate MLIP descriptors for structures."""
 
+from __future__ import annotations
+
 from collections.abc import Sequence
-from typing import Any, Optional
+from typing import Any
 
 from ase import Atoms
 import numpy as np
@@ -73,23 +75,23 @@ class Descriptors(BaseCalculation):
 
     def __init__(
         self,
-        struct: Optional[MaybeSequence[Atoms]] = None,
-        struct_path: Optional[PathLike] = None,
+        struct: MaybeSequence[Atoms] | None = None,
+        struct_path: PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
-        read_kwargs: Optional[ASEReadArgs] = None,
-        calc_kwargs: Optional[dict[str, Any]] = None,
-        set_calc: Optional[bool] = None,
+        model_path: PathLike | None = None,
+        read_kwargs: ASEReadArgs | None = None,
+        calc_kwargs: dict[str, Any] | None = None,
+        set_calc: bool | None = None,
         attach_logger: bool = False,
-        log_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool = True,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: dict[str, Any] | None = None,
         invariants_only: bool = True,
         calc_per_element: bool = False,
         calc_per_atom: bool = False,
         write_results: bool = False,
-        write_kwargs: Optional[ASEWriteArgs] = None,
+        write_kwargs: ASEWriteArgs | None = None,
     ) -> None:
         """
         Initialise class.
