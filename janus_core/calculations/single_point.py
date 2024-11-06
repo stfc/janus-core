@@ -35,12 +35,12 @@ class SinglePoint(BaseCalculation):
     struct_path : Optional[PathLike]
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
-    arch : Architectures
+    arch : MaybeSequence[Architectures]
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
-    device : Devices
+    device : MaybeSequence[Devices]
         Device to run model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : Optional[MaybeSequence[PathLike]]
         Path to MLIP model. Default is `None`.
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. By default,
@@ -82,9 +82,9 @@ class SinglePoint(BaseCalculation):
         *,
         struct: Optional[MaybeSequence[Atoms]] = None,
         struct_path: Optional[PathLike] = None,
-        arch: Architectures = "mace_mp",
-        device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
+        arch: MaybeSequence[Architectures] = "mace_mp",
+        device: MaybeSequence[Devices] = "cpu",
+        model_path: Optional[MaybeSequence[PathLike]] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         calc_kwargs: Optional[dict[str, Any]] = None,
         set_calc: Optional[bool] = None,
@@ -107,12 +107,12 @@ class SinglePoint(BaseCalculation):
         struct_path : Optional[PathLike]
             Path of structure to simulate. Required if `struct` is None.
             Default is None.
-        arch : Architectures
+        arch : MaybeSequence[Architectures]
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
-        device : Devices
+        device : MaybeSequence[Devices]
             Device to run MLIP model on. Default is "cpu".
-        model_path : Optional[PathLike]
+        model_path : Optional[MaybeSequence[PathLike]]
             Path to MLIP model. Default is `None`.
         read_kwargs : Optional[ASEReadArgs]
             Keyword arguments to pass to ase.io.read. By default,

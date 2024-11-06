@@ -30,17 +30,17 @@ class BaseCalculation(FileNameMixin):
     struct_path : Optional[PathLike]
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
-    arch : Architectures
+    arch : MaybeSequence[Architectures]
         MLIP architecture to use for calculations. Default is "mace_mp".
-    device : Devices
+    device : MaybeSequence[Devices]
         Device to run model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : Optional[MaybeSequence[PathLike]]
         Path to MLIP model. Default is `None`.
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. Default is {}.
     sequence_allowed : bool
         Whether a sequence of Atoms objects is allowed. Default is True.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : Optional[MaybeSequence[dict[str, Any]]]
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc : Optional[bool]
         Whether to set (new) calculators for structures. Default is None.
@@ -73,12 +73,12 @@ class BaseCalculation(FileNameMixin):
         calc_name: str = "base",
         struct: Optional[MaybeSequence[Atoms]] = None,
         struct_path: Optional[PathLike] = None,
-        arch: Architectures = "mace_mp",
-        device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
+        arch: MaybeSequence[Architectures] = "mace_mp",
+        device: MaybeSequence[Devices] = "cpu",
+        model_path: Optional[MaybeSequence[PathLike]] = None,
         read_kwargs: Optional[ASEReadArgs] = None,
         sequence_allowed: bool = True,
-        calc_kwargs: Optional[dict[str, Any]] = None,
+        calc_kwargs: Optional[MaybeSequence[dict[str, Any]]] = None,
         set_calc: Optional[bool] = None,
         attach_logger: bool = False,
         log_kwargs: Optional[dict[str, Any]] = None,
@@ -101,17 +101,17 @@ class BaseCalculation(FileNameMixin):
         struct_path : Optional[PathLike]
             Path of structure to simulate. Required if `struct` is None. Default is
             None.
-        arch : Architectures
+        arch : MaybeSequence[Architectures]
             MLIP architecture to use for calculations. Default is "mace_mp".
-        device : Devices
+        device : MaybeSequence[Devices]
             Device to run MLIP model on. Default is "cpu".
-        model_path : Optional[PathLike]
+        model_path : Optional[MaybeSequence[PathLike]]
             Path to MLIP model. Default is `None`.
         read_kwargs : Optional[ASEReadArgs]
             Keyword arguments to pass to ase.io.read. Default is {}.
         sequence_allowed : bool
             Whether a sequence of Atoms objects is allowed. Default is True.
-        calc_kwargs : Optional[dict[str, Any]]
+        calc_kwargs : Optional[MaybeSequence[dict[str, Any]]]
             Keyword arguments to pass to the selected calculator. Default is {}.
         set_calc : Optional[bool]
             Whether to set (new) calculators for structures. Default is None.

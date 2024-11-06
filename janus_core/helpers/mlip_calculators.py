@@ -68,6 +68,47 @@ def _set_model_path(
     return model_path
 
 
+def _set_torch(calculate: callable, dtype: torch.dtype):
+    """
+    Wrap calculate function to set torch default dtype before calculations.
+
+    Parameters
+    ----------
+    calculate : callable
+        Function to wrap.
+    dtype : torch.dtype
+        Default dtype to set.
+
+    Returns
+    -------
+    callable
+        Wrapped function.
+    """
+
+    def wrapper(*args, **kwargs) -> callable:
+        """
+        Wrap function to set torch default dtype.
+
+        Parameters
+        ----------
+        *args
+            Arguments passed to calculate.
+        **kwargs
+            Additional keyword arguments passed to calculate.
+
+        Returns
+        -------
+        callable
+            Wrapped function.
+        """
+        import torch
+
+        torch.set_default_dtype(dtype)
+        return calculate(*args, **kwargs)
+
+    return wrapper
+
+
 def choose_calculator(
     arch: Architectures = "mace",
     device: Devices = "cpu",
@@ -123,12 +164,14 @@ def choose_calculator(
     elif arch == "mace_mp":
         from mace import __version__
         from mace.calculators import mace_mp
+        import torch
 
         # Default to "small" model and float64 precision
         model = model_path if model_path else "small"
         kwargs.setdefault("default_dtype", "float64")
 
         calculator = mace_mp(model=model, device=device, **kwargs)
+        calculator.calculate = _set_torch(calculator.calculate, torch.float64)
 
     elif arch == "mace_off":
         from mace import __version__
@@ -164,6 +207,7 @@ def choose_calculator(
             potential = load_model("M3GNet-MP-2021.2.8-DIRECT-PES")
 
         calculator = M3GNetCalculator(potential=potential, **kwargs)
+        calculator.calculate = _set_torch(calculator.calculate, torch.float32)
 
     elif arch == "chgnet":
         from chgnet import __version__
@@ -186,6 +230,7 @@ def choose_calculator(
             model = None
 
         calculator = CHGNetCalculator(model=model, use_device=device, **kwargs)
+        calculator.calculate = _set_torch(calculator.calculate, torch.float32)
 
     elif arch == "alignn":
         from alignn import __version__
