@@ -59,7 +59,14 @@ class Phonons(BaseCalculation):
     calcs : Optional[MaybeSequence[PhononCalcs]]
         Phonon calculations to run. Default calculates force constants only.
     supercell : MaybeList[int]
-        Size of supercell for calculation. Default is 2.
+        The size of a supercell for calculation, or the supercell itself.
+        If a single number is provided, it is interpreted as the size, so a
+        diagonal supercell of that size in all dimensions is constructed.
+        If three values are provided, they are interpreted as the diagonal
+        values of a diagonal supercell. If nine values are provided, they
+        are assumed to be the full supercell matrix in the style of Phonopy,
+        so the first three values will be used as the first row, the second
+        three as the second row, etc. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]
@@ -194,7 +201,14 @@ class Phonons(BaseCalculation):
         calcs : Optional[MaybeSequence[PhononCalcs]]
             Phonon calculations to run. Default calculates force constants only.
         supercell : MaybeList[int]
-            Size of supercell for calculation. Default is 2.
+            The size of a supercell for calculation, or the supercell itself.
+            If a single number is provided, it is interpreted as the size, so a
+            diagonal supercell of that size in all dimensions is constructed.
+            If three values are provided, they are interpreted as the diagonal
+            values of a diagonal supercell. If nine values are provided, they
+            are assumed to be the full supercell matrix in the style of Phonopy,
+            so the first three values will be used as the first row, the second
+            three as the second row, etc. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
         mesh : tuple[int, int, int]
@@ -249,8 +263,14 @@ class Phonons(BaseCalculation):
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
-        if len(self.supercell) != 3:
-            raise ValueError("`supercell` must be an integer, or list of length 3")
+        if len(self.supercell) not in [3, 9]:
+            raise ValueError(
+                "`supercell` must be an integer, or list of length 3 or 9. A list of "
+                "length 3 must specify the values of a diagonal supercell, and a list "
+                "of length 9 must specify all values of a full supercell matrix, where "
+                "the first three values are the first row, the second three are the "
+                "second row, etc."
+            )
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -370,11 +390,19 @@ class Phonons(BaseCalculation):
 
         cell = self._ASE_to_PhonopyAtoms(self.struct)
 
-        supercell_matrix = (
-            (self.supercell[0], 0, 0),
-            (0, self.supercell[1], 0),
-            (0, 0, self.supercell[2]),
-        )
+        if len(self.supercell) == 3:
+            supercell_matrix = (
+                (self.supercell[0], 0, 0),
+                (0, self.supercell[1], 0),
+                (0, 0, self.supercell[2]),
+            )
+        else:
+            supercell_matrix = (
+                tuple(self.supercell[:3]),
+                tuple(self.supercell[3:6]),
+                tuple(self.supercell[6:]),
+            )
+
         phonon = phonopy.Phonopy(cell, supercell_matrix)
         phonon.generate_displacements(distance=self.displacement)
         disp_supercells = phonon.supercells_with_displacements

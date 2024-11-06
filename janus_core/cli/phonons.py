@@ -29,8 +29,15 @@ def phonons(
     ctx: Context,
     struct: StructPath,
     supercell: Annotated[
-        tuple[int, int, int], Option(help="Supercell lattice vectors.")
-    ] = (2, 2, 2),
+        str,
+        Option(
+            help="Supercell matrix, in the Phonopy style. Must be passed as a string "
+            "in one of three forms: single integer ('2'), which specifies all "
+            "diagonal elements; three integers ('1 2 3'), which specifies each "
+            "individual diagonal element; or nine values ('1 2 3 4 5 6 7 8 9'), "
+            "which specifies all elements, filling the matrix row-wise."
+        ),
+    ] = "2 2 2",
     displacement: Annotated[
         float, Option(help="Displacement for force constants calculation, in A.")
     ] = 0.01,
@@ -114,8 +121,12 @@ def phonons(
         Typer (Click) Context. Automatically set.
     struct : Path
         Path of structure to simulate.
-    supercell : tuple[int, int, int]
-        Supercell lattice vectors. Default is (2, 2, 2).
+    supercell : str
+        Supercell matrix, in the Phonopy style. Must be passed as a string in one of
+        three forms: single integer ('2'), which specifies all diagonal elements;
+        three integers ('1 2 3'), which specifies each individual diagonal element;
+        or nine values ('1 2 3 4 5 6 7 8 9'), which specifies all elements, filling the
+        matrix row-wise.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
     mesh : tuple[int, int, int]
@@ -205,6 +216,22 @@ def phonons(
     if "fmax" in minimize_kwargs:
         raise ValueError("'fmax' must be passed through the --fmax option")
     minimize_kwargs["fmax"] = fmax
+
+    try:
+        supercell = [int(x) for x in supercell.split()]
+    except ValueError as exc:
+        raise ValueError(
+            "Please pass lattice vectors as integers in the form '1 2 3'"
+        ) from exc
+
+    supercell_length = len(supercell)
+    if supercell_length == 1:
+        supercell = supercell[0]
+    elif supercell_length not in [3, 9]:
+        raise ValueError(
+            "Please pass lattice vectors as space-separated integers in quotes. "
+            "For example, '1 2 3'."
+        )
 
     calcs = []
     if bands:
