@@ -18,10 +18,10 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
 
     Parameters
     ----------
-    fmt : Optional[str]
+    fmt : str | None
         A format string in the given style for the logged output as a whole. Default is
         defined by `FORMAT`.
-    datefmt : Optional[str]
+    datefmt : str | None
         A format string in the given style for the date/time portion of the logged
         output. Default is taken from logging.Formatter.formatTime().
     style : Literal['%', '{', '$']
@@ -30,7 +30,7 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
     validate : bool
         If True, incorrect or mismatched fmt and style will raise a ValueError. Default
         is True.
-    defaults : Optional[dict[str, logging.Any]]
+    defaults : dict[str, logging.Any] | None
          A dictionary with default values to use in custom fields. Default is None.
     *args
         Arguments to pass to logging.Formatter.__init__.
@@ -113,7 +113,7 @@ def config_logger(
     ----------
     name : str
         Name of logger. Default is None.
-    filename : Optional[str]
+    filename : str | None
         Name of log file if writing logs. Default is None.
     level : LogLevel
         Threshold for logger. Default is logging.INFO.
@@ -127,7 +127,7 @@ def config_logger(
 
     Returns
     -------
-    Optional[logging.Logger]
+    logging.Logger | None
         Configured logger if `filename` has been specified.
     """
     if filename:
@@ -166,7 +166,7 @@ def config_tracker(
 
     Parameters
     ----------
-    janus_logger : Optional[logging.Logger]
+    janus_logger : logging.Logger | None
         Logger for codecarbon output.
     track_carbon : bool
         Whether to track carbon emissions for calculation. Default is True.
@@ -179,7 +179,7 @@ def config_tracker(
 
     Returns
     -------
-    Optional[OfflineEmissionsTracker]
+    OfflineEmissionsTracker | None
         Configured offline codecarbon tracker, if logger is specified.
     """
     if janus_logger and track_carbon:

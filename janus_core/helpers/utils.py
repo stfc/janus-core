@@ -130,7 +130,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             Extra components to add to suffix (joined with hyphens).
         filename : PathLike | None
             Filename to use, if specified. Default is None.
-        prefix_override : Optional[str]
+        prefix_override : str | None
             Replace file_prefix if not None.
 
         Returns
@@ -157,7 +157,7 @@ def none_to_dict(dictionaries: Sequence[dict | None]) -> Generator[dict, None, N
 
     Parameters
     ----------
-    dictionaries : Sequence[Optional[dict]]
+    dictionaries : Sequence[dict | None]
         Sequence of dictionaries that could be None.
 
     Yields
@@ -222,7 +222,7 @@ def write_table(
 
     Returns
     -------
-    Optional[StringIO]
+    StringIO | None
         If no file given write columns to StringIO.
 
     Notes

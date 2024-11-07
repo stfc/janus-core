@@ -24,7 +24,7 @@ def read_atoms(path: Path) -> Atoms | None:
 
     Returns
     -------
-    Union[Atoms, None]
+    Atoms | None
         Atoms structure read from file, or None is any Exception is thrown.
     """
     assert path.exists()

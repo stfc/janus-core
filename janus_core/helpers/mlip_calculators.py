@@ -29,14 +29,14 @@ def _set_model_path(
 
     Parameters
     ----------
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP file.
-    kwargs : Optional[dict[str, Any]]
+    kwargs : dict[str, Any] | None
         Dictionary of additional keyword arguments passed to the selected calculator.
 
     Returns
     -------
-    Optional[PathLike | torch.nn.Module]
+    PathLike | torch.nn.Module | None
         Path to MLIP model file, loaded model, or None.
     """
     kwargs = kwargs if kwargs else {}
@@ -83,7 +83,7 @@ def choose_calculator(
         MLIP architecture. Default is "mace".
     device : Devices
         Device to run calculator on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP file.
     **kwargs
         Additional keyword arguments passed to the selected calculator.
