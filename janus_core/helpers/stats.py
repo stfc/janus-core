@@ -1,5 +1,7 @@
 """Module that reads the md stats output timeseries."""
 
+from __future__ import annotations
+
 from collections.abc import Iterator
 from functools import singledispatchmethod
 import re

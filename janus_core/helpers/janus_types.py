@@ -1,5 +1,7 @@
 """Module containing types used in Janus-Core."""
 
+from __future__ import annotations
+
 from collections.abc import Collection, Sequence
 from enum import Enum
 import logging
@@ -35,9 +37,9 @@ SliceLike = Union[slice, range, int, StartStopStep]
 class ASEReadArgs(TypedDict, total=False):
     """Main arguments for ase.io.read."""
 
-    filename: Union[str, PurePath, IO]
-    index: Union[int, slice, str]
-    format: Optional[str]
+    filename: str | PurePath | IO
+    index: int | slice | str
+    format: str | None
     parallel: bool
     do_not_split_by_at_sign: bool
 
@@ -45,9 +47,9 @@ class ASEReadArgs(TypedDict, total=False):
 class ASEWriteArgs(TypedDict, total=False):
     """Main arguments for ase.io.write."""
 
-    filename: Union[str, PurePath, IO]
+    filename: str | PurePath | IO
     images: MaybeSequence[Atoms]
-    format: Optional[str]
+    format: str | None
     parallel: bool
     append: bool
 
@@ -55,9 +57,9 @@ class ASEWriteArgs(TypedDict, total=False):
 class ASEOptArgs(TypedDict, total=False):
     """Main arguments for ase optimisers."""
 
-    restart: Optional[bool]
-    logfile: Optional[PathLike]
-    trajectory: Optional[str]
+    restart: bool | None
+    logfile: PathLike | None
+    trajectory: str | None
 
 
 class PostProcessKwargs(TypedDict, total=False):
@@ -67,21 +69,21 @@ class PostProcessKwargs(TypedDict, total=False):
     rdf_compute: bool
     rdf_rmax: float
     rdf_nbins: int
-    rdf_elements: MaybeSequence[Union[str, int]]
+    rdf_elements: MaybeSequence[str | int]
     rdf_by_elements: bool
     rdf_start: int
-    rdf_stop: Optional[int]
+    rdf_stop: int | None
     rdf_step: int
-    rdf_output_file: Optional[str]
+    rdf_output_file: str | None
     # VAF
     vaf_compute: bool
     vaf_velocities: bool
     vaf_fft: bool
     vaf_atoms: Sequence[Sequence[int]]
     vaf_start: int
-    vaf_stop: Optional[int]
+    vaf_stop: int | None
     vaf_step: int
-    vaf_output_file: Optional[PathLike]
+    vaf_output_file: PathLike | None
 
 
 @runtime_checkable
@@ -107,9 +109,9 @@ class CorrelationKwargs(TypedDict, total=True):
     """Arguments for on-the-fly correlations <ab>."""
 
     #: observable a in <ab>, with optional args and kwargs
-    a: Union[Observable, tuple[Observable, tuple, dict]]
+    a: Observable | tuple[Observable, tuple, dict]
     #: observable b in <ab>, with optional args and kwargs
-    b: Union[Observable, tuple[Observable, tuple, dict]]
+    b: Observable | tuple[Observable, tuple, dict]
     #: name used for correlation in output
     name: str
     #: blocks used in multi-tau algorithm

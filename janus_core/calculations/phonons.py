@@ -1,7 +1,9 @@
 """Phonon calculations."""
 
+from __future__ import annotations
+
 from collections.abc import Sequence
-from typing import Any, Optional, get_args
+from typing import Any, get_args
 
 from ase import Atoms
 from numpy import ndarray
@@ -137,25 +139,25 @@ class Phonons(BaseCalculation):
 
     def __init__(
         self,
-        struct: Optional[Atoms] = None,
-        struct_path: Optional[PathLike] = None,
+        struct: Atoms | None = None,
+        struct_path: PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: Optional[PathLike] = None,
-        read_kwargs: Optional[ASEReadArgs] = None,
-        calc_kwargs: Optional[dict[str, Any]] = None,
-        set_calc: Optional[bool] = None,
+        model_path: PathLike | None = None,
+        read_kwargs: ASEReadArgs | None = None,
+        calc_kwargs: dict[str, Any] | None = None,
+        set_calc: bool | None = None,
         attach_logger: bool = False,
-        log_kwargs: Optional[dict[str, Any]] = None,
+        log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool = True,
-        tracker_kwargs: Optional[dict[str, Any]] = None,
+        tracker_kwargs: dict[str, Any] | None = None,
         calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
         mesh: tuple[int, int, int] = (10, 10, 10),
         symmetrize: bool = False,
         minimize: bool = False,
-        minimize_kwargs: Optional[dict[str, Any]] = None,
+        minimize_kwargs: dict[str, Any] | None = None,
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
@@ -163,7 +165,7 @@ class Phonons(BaseCalculation):
         plot_to_file: bool = False,
         write_results: bool = True,
         write_full: bool = True,
-        file_prefix: Optional[PathLike] = None,
+        file_prefix: PathLike | None = None,
         enable_progress_bar: bool = False,
     ) -> None:
         """
@@ -364,7 +366,7 @@ class Phonons(BaseCalculation):
         self._calcs = value
 
     def calc_force_constants(
-        self, write_force_consts: Optional[bool] = None, **kwargs
+        self, write_force_consts: bool | None = None, **kwargs
     ) -> None:
         """
         Calculate force constants and optionally write results.
@@ -437,9 +439,9 @@ class Phonons(BaseCalculation):
     def write_force_constants(
         self,
         *,
-        phonopy_file: Optional[PathLike] = None,
-        force_consts_to_hdf5: Optional[bool] = None,
-        force_consts_file: Optional[PathLike] = None,
+        phonopy_file: PathLike | None = None,
+        force_consts_to_hdf5: bool | None = None,
+        force_consts_file: PathLike | None = None,
     ) -> None:
         """
         Write results of force constants calculations.
@@ -480,7 +482,7 @@ class Phonons(BaseCalculation):
                 phonon.force_constants, filename=force_consts_file
             )
 
-    def calc_bands(self, write_bands: Optional[bool] = None, **kwargs) -> None:
+    def calc_bands(self, write_bands: bool | None = None, **kwargs) -> None:
         """
         Calculate band structure and optionally write and plot results.
 
@@ -505,9 +507,9 @@ class Phonons(BaseCalculation):
     def write_bands(
         self,
         *,
-        bands_file: Optional[PathLike] = None,
-        save_plots: Optional[bool] = None,
-        plot_file: Optional[PathLike] = None,
+        bands_file: PathLike | None = None,
+        save_plots: bool | None = None,
+        plot_file: PathLike | None = None,
     ) -> None:
         """
         Write results of band structure calculations.
@@ -547,8 +549,8 @@ class Phonons(BaseCalculation):
 
     def calc_thermal_props(
         self,
-        mesh: Optional[tuple[int, int, int]] = None,
-        write_thermal: Optional[bool] = None,
+        mesh: tuple[int, int, int] | None = None,
+        write_thermal: bool | None = None,
         **kwargs,
     ) -> None:
         """
@@ -598,7 +600,7 @@ class Phonons(BaseCalculation):
         if write_thermal:
             self.write_thermal_props(**kwargs)
 
-    def write_thermal_props(self, thermal_file: Optional[PathLike] = None) -> None:
+    def write_thermal_props(self, thermal_file: PathLike | None = None) -> None:
         """
         Write results of thermal properties calculations.
 
@@ -629,8 +631,8 @@ class Phonons(BaseCalculation):
     def calc_dos(
         self,
         *,
-        mesh: Optional[tuple[int, int, int]] = None,
-        write_dos: Optional[bool] = None,
+        mesh: tuple[int, int, int] | None = None,
+        write_dos: bool | None = None,
         **kwargs,
     ) -> None:
         """
@@ -677,11 +679,11 @@ class Phonons(BaseCalculation):
     def write_dos(
         self,
         *,
-        dos_file: Optional[PathLike] = None,
-        plot_to_file: Optional[bool] = None,
-        plot_file: Optional[PathLike] = None,
+        dos_file: PathLike | None = None,
+        plot_to_file: bool | None = None,
+        plot_file: PathLike | None = None,
         plot_bands: bool = False,
-        plot_bands_file: Optional[PathLike] = None,
+        plot_bands_file: PathLike | None = None,
     ) -> None:
         """
         Write results of DOS calculation.
@@ -736,8 +738,8 @@ class Phonons(BaseCalculation):
     def calc_pdos(
         self,
         *,
-        mesh: Optional[tuple[int, int, int]] = None,
-        write_pdos: Optional[bool] = None,
+        mesh: tuple[int, int, int] | None = None,
+        write_pdos: bool | None = None,
         **kwargs,
     ) -> None:
         """
@@ -786,9 +788,9 @@ class Phonons(BaseCalculation):
     def write_pdos(
         self,
         *,
-        pdos_file: Optional[PathLike] = None,
-        plot_to_file: Optional[bool] = None,
-        plot_file: Optional[PathLike] = None,
+        pdos_file: PathLike | None = None,
+        plot_to_file: bool | None = None,
+        plot_file: PathLike | None = None,
     ) -> None:
         """
         Write results of PDOS calculation.

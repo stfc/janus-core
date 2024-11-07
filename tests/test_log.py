@@ -1,5 +1,7 @@
 """Test logging module."""
 
+from __future__ import annotations
+
 import yaml
 
 from janus_core.helpers.log import config_logger

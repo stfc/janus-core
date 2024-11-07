@@ -1,5 +1,7 @@
 """Test configuration of MLIP calculators."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from zipfile import BadZipFile
 

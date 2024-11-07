@@ -3,6 +3,8 @@
 Based on https://docs.pytest.org/en/latest/example/simple.html.
 """
 
+from __future__ import annotations
+
 import pytest
 
 

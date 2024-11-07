@@ -1,5 +1,7 @@
 """Module for functions operating on structure symmetry."""
 
+from __future__ import annotations
+
 from ase import Atoms
 from ase.spacegroup.symmetrize import refine_symmetry
 from spglib import get_spacegroup

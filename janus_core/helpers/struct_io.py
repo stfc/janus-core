@@ -1,10 +1,12 @@
 """Module for functions for input and output of structures."""
 
+from __future__ import annotations
+
 from collections.abc import Collection, Sequence
 from copy import copy
 import logging
 from pathlib import Path
-from typing import Any, Optional, get_args
+from typing import Any, get_args
 
 from ase import Atoms
 from ase.io import read, write
@@ -67,8 +69,8 @@ def attach_calculator(
     *,
     arch: Architectures = "mace_mp",
     device: Devices = "cpu",
-    model_path: Optional[PathLike] = None,
-    calc_kwargs: Optional[dict[str, Any]] = None,
+    model_path: PathLike | None = None,
+    calc_kwargs: dict[str, Any] | None = None,
 ) -> None:
     """
     Configure calculator and attach to structure(s).
@@ -103,17 +105,17 @@ def attach_calculator(
 
 
 def input_structs(
-    struct: Optional[MaybeSequence[Atoms]] = None,
+    struct: MaybeSequence[Atoms] | None = None,
     *,
-    struct_path: Optional[PathLike] = None,
-    read_kwargs: Optional[ASEReadArgs] = None,
+    struct_path: PathLike | None = None,
+    read_kwargs: ASEReadArgs | None = None,
     sequence_allowed: bool = True,
     arch: Architectures = "mace_mp",
     device: Devices = "cpu",
-    model_path: Optional[PathLike] = None,
-    calc_kwargs: Optional[dict[str, Any]] = None,
-    set_calc: Optional[bool] = None,
-    logger: Optional[logging.Logger] = None,
+    model_path: PathLike | None = None,
+    calc_kwargs: dict[str, Any] | None = None,
+    set_calc: bool | None = None,
+    logger: logging.Logger | None = None,
 ) -> MaybeSequence[Atoms]:
     """
     Read input structures and/or attach MLIP calculators.
@@ -216,12 +218,12 @@ def input_structs(
 def output_structs(
     images: MaybeSequence[Atoms],
     *,
-    struct_path: Optional[PathLike] = None,
+    struct_path: PathLike | None = None,
     set_info: bool = True,
     write_results: bool = False,
     properties: Collection[Properties] = (),
     invalidate_calc: bool = False,
-    write_kwargs: Optional[ASEWriteArgs] = None,
+    write_kwargs: ASEWriteArgs | None = None,
 ) -> None:
     """
     Copy or move calculated results to Atoms.info dict and/or write structures to file.

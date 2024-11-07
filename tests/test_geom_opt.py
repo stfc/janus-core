@@ -1,5 +1,7 @@
 """Test geometry optimization."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from ase.filters import FrechetCellFilter, UnitCellFilter
