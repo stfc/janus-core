@@ -232,20 +232,13 @@ class Correlation:
             Frequency to update the correlation, md steps.
         """
         self.name = name
+        self.blocks = blocks
+        self.points = points
+        self.averaging = averaging
         self._get_a = a
         self._get_b = b
 
-        a_values = self._get_a.value_count(n_atoms)
-        b_values = self._get_b.value_count(n_atoms)
-
-        if a_values != b_values:
-            raise ValueError("Observables have inconsistent sizes")
-        self._values = a_values
-
-        self._correlators = [
-            Correlator(blocks=blocks, points=points, averaging=averaging)
-            for _ in range(self._values)
-        ]
+        self._correlators = None
         self._update_frequency = update_frequency
 
     @property
@@ -269,8 +262,15 @@ class Correlation:
         atoms : Atoms
             Atoms object to observe values from.
         """
-        atom_pairs = zip(self._get_a(atoms), self._get_b(atoms))
-        for corr, values in zip(self._correlators, atom_pairs):
+        value_pairs = zip(self._get_a(atoms), self._get_b(atoms))
+        if self._correlators is None:
+            self._correlators = [
+                Correlator(
+                    blocks=self.blocks, points=self.points, averaging=self.averaging
+                )
+                for _ in range(len(self._get_a(atoms)))
+            ]
+        for corr, values in zip(self._correlators, value_pairs):
             corr.update(*values)
 
     def get(self) -> tuple[Iterable[float], Iterable[float]]:

@@ -10,7 +10,7 @@ from ase import Atoms, units
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import SliceLike
 
-from janus_core.helpers.utils import selector_len, slicelike_to_startstopstep
+from janus_core.helpers.utils import slicelike_to_startstopstep
 
 
 # pylint: disable=too-few-public-methods
@@ -22,13 +22,9 @@ class Observable(ABC):
     ----------
     atoms_slice : list[int] | SliceLike | None = None
         A slice of atoms to observe.
-    dimension : int
-        The dimension of the observed data.
     """
 
-    def __init__(
-        self, atoms_slice: list[int] | SliceLike | None = None, dimension: int = 1
-    ):
+    def __init__(self, atoms_slice: list[int] | SliceLike | None = None):
         """
         Initialise an observable with a given dimensionality.
 
@@ -36,10 +32,7 @@ class Observable(ABC):
         ----------
         atoms_slice : list[int] | SliceLike | None = None
             A slice of atoms to observe.
-        dimension : int
-            The dimension of the observed data.
         """
-        self._dimension = dimension
         if atoms_slice:
             if isinstance(atoms_slice, list):
                 self.atoms_slice = atoms_slice
@@ -63,34 +56,6 @@ class Observable(ABC):
         list[float]
             The observed value, with dimensions atoms by self.dimension.
         """
-
-    def value_count(self, n_atoms: int | None = None) -> int:
-        """
-        Count of values returned by __call__.
-
-        Parameters
-        ----------
-        n_atoms : int | None
-            Atom count to expand atoms_slice.
-
-        Returns
-        -------
-        int
-            The number of values returned by __call__.
-        """
-        return self.dimension
-
-    @property
-    def dimension(self):
-        """
-        Dimension of the observable. Commensurate with self.__call__.
-
-        Returns
-        -------
-        int
-            Observables dimension.
-        """
-        return self._dimension
 
 
 class ComponentMixin:
@@ -199,7 +164,7 @@ class Stress(Observable, ComponentMixin):
         )
         self._set_components(components)
 
-        Observable.__init__(self, atoms_slice, len(components))
+        Observable.__init__(self, atoms_slice)
         self.include_ideal_gas = include_ideal_gas
 
     def __call__(self, atoms: Atoms) -> list[float]:
@@ -217,6 +182,7 @@ class Stress(Observable, ComponentMixin):
             The stress components in GPa units.
         """
         sliced_atoms = atoms[self.atoms_slice]
+        # must be re-attached after slicing for get_stress
         sliced_atoms.calc = atoms.calc
         stresses = (
             sliced_atoms.get_stress(
@@ -263,7 +229,7 @@ class Velocity(Observable, ComponentMixin):
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
         self._set_components(components)
 
-        Observable.__init__(self, atoms_slice, len(components))
+        Observable.__init__(self, atoms_slice)
 
     def __call__(self, atoms: Atoms) -> list[float]:
         """
@@ -280,19 +246,3 @@ class Velocity(Observable, ComponentMixin):
             The velocity values.
         """
         return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
-
-    def value_count(self, n_atoms: int | None = None) -> int:
-        """
-        Count of values returned by __call__.
-
-        Parameters
-        ----------
-        n_atoms : int | None
-            Atom count to expand atoms_slice.
-
-        Returns
-        -------
-        int
-            The number of values returned by __call__.
-        """
-        return selector_len(self.atoms_slice, n_atoms) * self.dimension

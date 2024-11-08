@@ -187,54 +187,87 @@ Alternatively, using ``tox``::
 Adding a new Observable
 =======================
 
-Additional built-in observable quantities may be added for use by the ``janus_core.processing.correlator.Correlation`` class. These should extend ``janus_core.processing.observables.Observable``. The abstract method ``__call__`` should be implemented to obtain the values of the observed quantity from an ``Atoms`` object, and potentially ``value_count`` may need to be overloaded indicating the number of values returned by ``__call__``. The number of values returned will depend on the dimension of the underlying ``Observable``, and potentially the number of atoms resulting from the ``Observable``'s slice. These values are correlated individually and averaged.
+A ``janus_core.processing.observables.Observable`` abstracts obtaining a quantity derived from ``Atoms``. They may be used as kernels for input into analysis such as a correlation.
 
-As an example of building a new ``Observable`` consider the ``janus_core.processing.observables.Stress`` and ``janus_core.processing.observables.Velocity`` built-ins. ``janus_core.processing.observables.Stress`` returns the required stress components as calculated by ``Atoms.get_stress`` called upon the tracked atoms. Therefore ``__call__`` returns one ``float`` per component correlated. The call method applies the atom slice and returns the desired stress components.
+Additional built-in observable quantities may be added for use by the ``janus_core.processing.correlator.Correlation`` class. These should extend ``janus_core.processing.observables.Observable`` and are implemented within the ``janus_core.processing.observables`` module.
+
+The abstract method ``__call__`` should be implemented to obtain the values of the observed quantity from an ``Atoms`` object. When used as part of a ``janus_core.processing.correlator.Correlation``, each value will be correlated and the results averaged.
+
+As an example of building a new ``Observable`` consider the ``janus_core.processing.observables.Stress`` built-in. The following steps may be taken:
+
+1. Defining the observable.
+---------------------------
+
+The stress tensor may be computed on an atoms object using ``Atoms.get_stress``. A user may wish to obtain a particular component, or perhaps only compute the stress on some subset of ``Atoms``. For example during a ``janus_core.calculations.md.MolecularDynamics`` run a user may wish to correlate only the off-diagonal components (shear stress), computed across all atoms.
+
+2. Writing the ``__call__`` method.
+-----------------------------------
+
+In the call method we can use the base ``janus_core.processing.observables.Observable``'s optional atom selector ``atoms_slice`` to first define the subset of atoms to compute the stress for:
 
 .. code-block:: python
 
     def __call__(self, atoms: Atoms) -> list[float]:
         sliced_atoms = atoms[self.atoms_slice]
+        # must be re-attached after slicing for get_stress
         sliced_atoms.calc = atoms.calc
-        stresses = (
+
+Next the stresses may be obtained from:
+
+.. code-block:: python
+
+    stresses = (
             sliced_atoms.get_stress(
                 include_ideal_gas=self.include_ideal_gas, voigt=True
             )
             / units.GPa
         )
-        return stresses[self._indices]
 
-For example an observable representing the ``xy`` and ``zy`` components of stress computed across all odd-index atoms in some ``Atoms`` object can be constructed as follows:
+Finally, to facilitate handling components in a symbolic way, ``janus_core.processing.observables.ComponentMixin`` exists to parse ``str`` symbolic components to ``int`` indices by defining a suitable mapping. For the stress tensor (and the format of ``Atoms.get_stress``) a suitable mapping is defined in ``janus_core.processing.observables.Stress``'s ``__init__`` method:
+
+.. code-block:: python
+
+        ComponentMixin.__init__(
+            self,
+            components={
+                "xx": 0,
+                "yy": 1,
+                "zz": 2,
+                "yz": 3,
+                "zy": 3,
+                "xz": 4,
+                "zx": 4,
+                "xy": 5,
+                "yx": 5,
+            },
+        )
+
+This then concludes the ``__call__`` method for ``janus_core.processing.observables.Stress`` by using ``janus_core.processing.observables.ComponentMixin``'s
+pre-calculated indices:
+
+.. code-block:: python
+
+    return stesses[self._indices]
+
+The combination of the above means a user may obtain, say, the ``xy`` and ``zy`` stress tensor components over odd-indexed atoms by calling the following observable on an ``Atoms``:
 
 .. code-block:: python
 
     s = Stress(components=["xy", "zy"], atoms_slice=(0, None, 2))
 
-In this case ``s(atoms)`` will return 2 values, no matter how many atoms are sliced from ``atoms_slice``.
 
-However, the ``janus_core.processing.observables.Velocity`` built-in's ``__call__`` not only returns atom velocity for the requested dimensions, but also returns them for every tracked atom, i.e:
-
-.. code-block:: python
-
-       def __call__(self, atoms: Atoms) -> list[float]:
-           return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
-
-so ``value_count`` is overloaded to reflect this.
-
-.. code-block:: python
-
-       def value_count(self, n_atoms: int | None = None) -> int:
-           return selector_len(self.atoms_slice, n_atoms) * self.dimension
-
-Unlike ``janus_core.processing.observables.Stress`` when we create a ``janus_core.processing.observables.Velocity`` observable like so,
-
-.. code-block:: python
-
-    v = Velocity(components=["x", "y", "z"], atoms_slice=(0, None, 2))
-
-the value of ``v(atoms)`` will have the length ``3 * len(atoms)//2``. The 3 dimensions of velocity for each odd-indexed atom. New built-in observables may be written by implementing new ``__call__`` methods to return the desired quantities. These should be collected within the ``janus_core.processing.observables`` module. Special cases may also be defined for ease of use, for example:
+Since usually total system stresses are required we can define two built-ins to handle the shear and hydrostatic stresses like so:
 
 .. code-block:: python
 
     StressHydrostatic = Stress(components=["xx", "yy", "zz"])
     StressShear = Stress(components=["xy", "yz", "zx"])
+
+Where by default ``janus_core.processing.observables.Observable``'s ``atoms_slice`` is ``slice(0, None, 1)``, which expands to all atoms in an ``Atoms``.
+
+For comparison the ``janus_core.processing.observables.Velocity`` built-in's ``__call__`` not only returns atom velocity for the requested components, but also returns them for every tracked atom i.e:
+
+.. code-block:: python
+
+    def __call__(self, atoms: Atoms) -> list[float]:
+        return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
