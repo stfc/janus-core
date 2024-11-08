@@ -26,46 +26,46 @@ class BaseCalculation(FileNameMixin):
     ----------
     calc_name : str
         Name of calculation being run, used for name of logger. Default is "base".
-    struct : Optional[MaybeSequence[Atoms]]
+    struct : MaybeSequence[Atoms] | None
         ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
         Default is None.
-    struct_path : Optional[PathLike]
+    struct_path : PathLike | None
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
     arch : Architectures
         MLIP architecture to use for calculations. Default is "mace_mp".
     device : Devices
         Device to run model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP model. Default is `None`.
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. Default is {}.
     sequence_allowed : bool
         Whether a sequence of Atoms objects is allowed. Default is True.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : dict[str, Any] | None
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : Optional[bool]
+    set_calc : bool | None
         Whether to set (new) calculators for structures. Default is None.
     attach_logger : bool
         Whether to attach a logger. Default is False.
-    log_kwargs : Optional[dict[str, Any]]
+    log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
         Whether to track carbon emissions of calculation. Default is True.
-    tracker_kwargs : Optional[dict[str, Any]]
+    tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
-    file_prefix : Optional[PathLike]
+    file_prefix : PathLike | None
         Prefix for output filenames. Default is None.
-    additional_prefix : Optional[str]
+    additional_prefix : str | None
         Component to add to default file_prefix (joined by hyphens). Default is None.
-    param_prefix : Optional[str]
+    param_prefix : str | None
         Additional parameters to add to default file_prefix. Default is None.
 
     Attributes
     ----------
-    logger : Optional[logging.Logger]
+    logger : logging.Logger | None
         Logger if log file has been specified.
-    tracker : Optional[OfflineEmissionsTracker]
+    tracker : OfflineEmissionsTracker | None
         Tracker if logging is enabled.
     """
 
@@ -97,40 +97,40 @@ class BaseCalculation(FileNameMixin):
         ----------
         calc_name : str
             Name of calculation being run, used for name of logger. Default is "base".
-        struct : Optional[MaybeSequence[Atoms]]
+        struct : MaybeSequence[Atoms] | None
             ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
             Default is None.
-        struct_path : Optional[PathLike]
+        struct_path : PathLike | None
             Path of structure to simulate. Required if `struct` is None. Default is
             None.
         arch : Architectures
             MLIP architecture to use for calculations. Default is "mace_mp".
         device : Devices
             Device to run MLIP model on. Default is "cpu".
-        model_path : Optional[PathLike]
+        model_path : PathLike | None
             Path to MLIP model. Default is `None`.
-        read_kwargs : Optional[ASEReadArgs]
+        read_kwargs : ASEReadArgs | None
             Keyword arguments to pass to ase.io.read. Default is {}.
         sequence_allowed : bool
             Whether a sequence of Atoms objects is allowed. Default is True.
-        calc_kwargs : Optional[dict[str, Any]]
+        calc_kwargs : dict[str, Any] | None
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : Optional[bool]
+        set_calc : bool | None
             Whether to set (new) calculators for structures. Default is None.
         attach_logger : bool
             Whether to attach a logger. Default is False.
-        log_kwargs : Optional[dict[str, Any]]
+        log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
         track_carbon : bool
             Whether to track carbon emissions of calculation. Default is True.
-        tracker_kwargs : Optional[dict[str, Any]]
+        tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
-        file_prefix : Optional[PathLike]
+        file_prefix : PathLike | None
             Prefix for output filenames. Default is None.
-        additional_prefix : Optional[str]
+        additional_prefix : str | None
             Component to add to default file_prefix (joined by hyphens). Default is
             None.
-        param_prefix : Optional[str]
+        param_prefix : str | None
             Additional parameters to add to default file_prefix. Default is None.
         """
         (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(

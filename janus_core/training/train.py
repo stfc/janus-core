@@ -58,16 +58,16 @@ def train(
     ----------
     mlip_config : PathLike
         Configuration file to pass to MLIP.
-    req_file_keys : Optional[list[PathLike]]
+    req_file_keys : list[PathLike] | None
         List of files that must exist if defined in the configuration file.
         Default is ["train_file", "test_file", "valid_file", "statistics_file"].
     attach_logger : bool
         Whether to attach a logger. Default is False.
-    log_kwargs : Optional[dict[str, Any]]
+    log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
         Whether to track carbon emissions of calculation. Default is True.
-    tracker_kwargs : Optional[dict[str, Any]]
+    tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
     (log_kwargs, tracker_kwargs) = none_to_dict((log_kwargs, tracker_kwargs))

@@ -28,32 +28,32 @@ class Descriptors(BaseCalculation):
 
     Parameters
     ----------
-    struct : Optional[MaybeSequence[Atoms]]
+    struct : MaybeSequence[Atoms] | None
         ASE Atoms structure(s) to calculate descriptors for. Required if `struct_path`
         is None. Default is None.
-    struct_path : Optional[PathLike]
+    struct_path : PathLike | None
         Path of structure to calculate descriptors for. Required if `struct` is None.
         Default is None.
     arch : Architectures
         MLIP architecture to use for calculations. Default is "mace_mp".
     device : Devices
         Device to run MLIP model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP model. Default is `None`.
-    read_kwargs : Optional[ASEReadArgs]
+    read_kwargs : ASEReadArgs | None
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : dict[str, Any] | None
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : Optional[bool]
+    set_calc : bool | None
         Whether to set (new) calculators for structures. Default is None.
     attach_logger : bool
         Whether to attach a logger. Default is False.
-    log_kwargs : Optional[dict[str, Any]]
+    log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
         Whether to track carbon emissions of calculation. Default is True.
-    tracker_kwargs : Optional[dict[str, Any]]
+    tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     invariants_only : bool
         Whether only the invariant descriptors should be returned. Default is True.
@@ -63,7 +63,7 @@ class Descriptors(BaseCalculation):
         Whether to calculate descriptors for each atom. Default is False.
     write_results : bool
         True to write out structure with results of calculations. Default is False.
-    write_kwargs : Optional[ASEWriteArgs],
+    write_kwargs : ASEWriteArgs | None
         Keyword arguments to pass to ase.io.write if saving structure with
         results of calculations. Default is {}.
 
@@ -98,32 +98,32 @@ class Descriptors(BaseCalculation):
 
         Parameters
         ----------
-        struct : Optional[MaybeSequence[Atoms]]
+        struct : MaybeSequence[Atoms] | None
             ASE Atoms structure(s) to calculate descriptors for. Required if
             `struct_path` is None. Default is None.
-        struct_path : Optional[PathLike]
+        struct_path : PathLike | None
             Path of structure to calculate descriptors for. Required if `struct` is
             None. Default is None.
         arch : Architectures
             MLIP architecture to use for calculations. Default is "mace_mp".
         device : Devices
             Device to run MLIP model on. Default is "cpu".
-        model_path : Optional[PathLike]
+        model_path : PathLike | None
             Path to MLIP model. Default is `None`.
-        read_kwargs : Optional[ASEReadArgs]
+        read_kwargs : ASEReadArgs | None
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-        calc_kwargs : Optional[dict[str, Any]]
+        calc_kwargs : dict[str, Any] | None
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : Optional[bool]
+        set_calc : bool | None
             Whether to set (new) calculators for structures. Default is None.
         attach_logger : bool
             Whether to attach a logger. Default is False.
-        log_kwargs : Optional[dict[str, Any]]
+        log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
         track_carbon : bool
             Whether to track carbon emissions of calculation. Default is True.
-        tracker_kwargs : Optional[dict[str, Any]]
+        tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
         invariants_only : bool
             Whether only the invariant descriptors should be returned. Default is True.
@@ -133,7 +133,7 @@ class Descriptors(BaseCalculation):
             Whether to calculate descriptors for each atom. Default is False.
         write_results : bool
             True to write out structure with results of calculations. Default is False.
-        write_kwargs : Optional[ASEWriteArgs],
+        write_kwargs : ASEWriteArgs | None
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
         """

@@ -64,9 +64,9 @@ def compute_rdf(
     ----------
     data : MaybeSequence[Atoms]
         Dataset to compute RDF of.
-    ana : Optional[Analysis]
+    ana : Analysis | None
         ASE Analysis object for data reuse.
-    filenames : Optional[MaybeSequence[PathLike]]
+    filenames : MaybeSequence[PathLike] | None
         Filenames to output data to. Must match number of RDFs computed.
     by_elements : bool
         Split RDF into pairwise by elements group. Default is False.
@@ -76,7 +76,7 @@ def compute_rdf(
         Maximum distance of RDF.
     nbins : int
         Number of bins to divide RDF.
-    elements : Optional[MaybeSequence[Union[int, str]]]
+    elements : MaybeSequence[int | str] | None
         Make partial RDFs. If `by_elements` is true will filter to
         only display pairs in list.
     index : SliceLike
@@ -84,13 +84,13 @@ def compute_rdf(
         `index` if `int`,
         `start`, `stop`, `step` if `tuple`,
         `slice` if `slice` or `range`.
-    volume : Optional[float]
+    volume : float | None
         Volume of cell for normalisation. Only needs to be provided
         if aperiodic cell. Default is (2*rmax)**3.
 
     Returns
     -------
-    Union[NDArray[float64], dict[tuple[str, str], NDArray[float64]]]
+    NDArray[float64] | dict[tuple[str, str] | NDArray[float64]]
         If `by_elements` is true returns a `dict` of RDF by element pairs.
         Otherwise returns RDF of total system filtered by elements.
     """
@@ -200,7 +200,7 @@ def compute_vaf(
     ----------
     data : Sequence[Atoms]
         Dataset to compute VAF of.
-    filenames : Optional[MaybeSequence[PathLike]]
+    filenames : MaybeSequence[PathLike] | None
         If present, dump resultant VAF to file.
     use_velocities : bool
         Compute VAF using velocities rather than momenta.
@@ -211,7 +211,7 @@ def compute_vaf(
     index : SliceLike
         Images to analyze as `start`, `stop`, `step`.
         Default is all images.
-    filter_atoms : MaybeSequence[MaybeSequence[Optional[int]]]
+    filter_atoms : MaybeSequence[MaybeSequence[int | None]]
         Compute the VAF averaged over subsets of the system.
         Default is all atoms.
     time_step : float

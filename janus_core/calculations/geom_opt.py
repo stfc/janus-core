@@ -32,31 +32,31 @@ class GeomOpt(BaseCalculation):
 
     Parameters
     ----------
-    struct : Optional[Atoms]
+    struct : Atoms | None
         ASE Atoms structure to optimize geometry for. Required if `struct_path` is
         None. Default is None.
-    struct_path : Optional[PathLike]
+    struct_path : PathLike | None
         Path of structure to optimize. Required if `struct` is None. Default is None.
     arch : Architectures
         MLIP architecture to use for optimization. Default is "mace_mp".
     device : Devices
         Device to run MLIP model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP model. Default is `None`.
-    read_kwargs : Optional[ASEReadArgs]
+    read_kwargs : ASEReadArgs | None
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : dict[str, Any] | None
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : Optional[bool]
+    set_calc : bool | None
         Whether to set (new) calculators for structures. Default is None.
     attach_logger : bool
         Whether to attach a logger. Default is False.
-    log_kwargs : Optional[dict[str, Any]]
+    log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
         Whether to track carbon emissions of calculation. Default is True.
-    tracker_kwargs : Optional[dict[str, Any]]
+    tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     fmax : float
         Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
@@ -70,22 +70,22 @@ class GeomOpt(BaseCalculation):
     angle_tolerance : float
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
-    filter_func : Optional[Union[Callable, str]]
+    filter_func : Callable | str | None
         Filter function, or name of function from ase.filters to apply constraints to
         atoms. Default is `FrechetCellFilter`.
-    filter_kwargs : Optional[dict[str, Any]]
+    filter_kwargs : dict[str, Any] | None
         Keyword arguments to pass to filter_func. Default is {}.
-    optimizer : Union[Callable, str]
+    optimizer : Callable | str
         Optimization function, or name of function from ase.optimize. Default is
         `LBFGS`.
-    opt_kwargs : Optional[ASEOptArgs]
+    opt_kwargs : ASEOptArgs | None
         Keyword arguments to pass to optimizer. Default is {}.
     write_results : bool
         True to write out optimized structure. Default is False.
-    write_kwargs : Optional[OutputKwargs],
+    write_kwargs : OutputKwargs | None
         Keyword arguments to pass to ase.io.write to save optimized structure.
         Default is {}.
-    traj_kwargs : Optional[OutputKwargs]
+    traj_kwargs : OutputKwargs | None
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
 
@@ -129,32 +129,32 @@ class GeomOpt(BaseCalculation):
 
         Parameters
         ----------
-        struct : Optional[Atoms]
+        struct : Atoms | None
             ASE Atoms structure to optimize geometry for. Required if `struct_path` is
             None. Default is None.
-        struct_path : Optional[PathLike]
+        struct_path : PathLike | None
             Path of structure to optimize. Required if `struct` is None. Default is
             None.
         arch : Architectures
             MLIP architecture to use for optimization. Default is "mace_mp".
         device : Devices
             Device to run MLIP model on. Default is "cpu".
-        model_path : Optional[PathLike]
+        model_path : PathLike | None
             Path to MLIP model. Default is `None`.
-        read_kwargs : Optional[ASEReadArgs]
+        read_kwargs : ASEReadArgs | None
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-        calc_kwargs : Optional[dict[str, Any]]
+        calc_kwargs : dict[str, Any] | None
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : Optional[bool]
+        set_calc : bool | None
             Whether to set (new) calculators for structures. Default is None.
         attach_logger : bool
             Whether to attach a logger. Default is False.
-        log_kwargs : Optional[dict[str, Any]]
+        log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
         track_carbon : bool
             Whether to track carbon emissions of calculation. Default is True.
-        tracker_kwargs : Optional[dict[str, Any]]
+        tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
         fmax : float
             Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
@@ -168,22 +168,22 @@ class GeomOpt(BaseCalculation):
         angle_tolerance : float
             Angle precision for spglib symmetry determination, in degrees. Default is
             -1.0, which means an internally optimized routine is used to judge symmetry.
-        filter_func : Optional[Union[Callable, str]]
+        filter_func : Callable | str | None
             Filter function, or name of function from ase.filters to apply constraints
             to atoms. Default is `FrechetCellFilter`.
-        filter_kwargs : Optional[dict[str, Any]]
+        filter_kwargs : dict[str, Any] | None
             Keyword arguments to pass to filter_func. Default is {}.
-        optimizer : Union[Callable, str]
+        optimizer : Callable | str
             Optimization function, or name of function from ase.optimize. Default is
             `LBFGS`.
-        opt_kwargs : Optional[ASEOptArgs]
+        opt_kwargs : ASEOptArgs | None
             Keyword arguments to pass to optimizer. Default is {}.
         write_results : bool
             True to write out optimized structure. Default is False.
-        write_kwargs : Optional[OutputKwargs],
+        write_kwargs : OutputKwargs | None
             Keyword arguments to pass to ase.io.write to save optimized structure.
             Default is {}.
-        traj_kwargs : Optional[OutputKwargs]
+        traj_kwargs : OutputKwargs | None
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
             Must include "filename" keyword. Default is {}.
         """

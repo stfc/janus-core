@@ -77,15 +77,15 @@ def attach_calculator(
 
     Parameters
     ----------
-    struct : Optional[MaybeSequence[Atoms]]
+    struct : MaybeSequence[Atoms] | None
         ASE Atoms structure(s) to attach calculators to.
     arch : Architectures
         MLIP architecture to use for calculations. Default is "mace_mp".
     device : Devices
         Device to run model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP model. Default is `None`.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : dict[str, Any] | None
         Keyword arguments to pass to the selected calculator. Default is {}.
     """
     calc_kwargs = calc_kwargs if calc_kwargs else {}
@@ -122,10 +122,10 @@ def input_structs(
 
     Parameters
     ----------
-    struct : Optional[MaybeSequence[Atoms]]
+    struct : MaybeSequence[Atoms] | None
         ASE Atoms structure(s) to simulate. Required if `struct_path` is None. Default
         is None.
-    struct_path : Optional[PathLike]
+    struct_path : PathLike | None
         Path of structure to simulate. Required if `struct` is None. Default is None.
     read_kwargs : ASEReadArgs
         Keyword arguments to pass to ase.io.read. Default is {}.
@@ -135,15 +135,15 @@ def input_structs(
         MLIP architecture to use for calculations. Default is "mace_mp".
     device : Devices
         Device to run model on. Default is "cpu".
-    model_path : Optional[PathLike]
+    model_path : PathLike | None
         Path to MLIP model. Default is `None`.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs : dict[str, Any] | None
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : Optional[bool]
+    set_calc : bool | None
         Whether to set (new) calculators for structures.  Default is True if
         `struct_path` is specified or `struct` is missing calculators, else default is
         False.
-    logger : Optional[logging.Logger]
+    logger : logging.Logger | None
         Logger if log file has been specified. Default is None.
 
     Returns
@@ -232,7 +232,7 @@ def output_structs(
     ----------
     images : MaybeSequence[Atoms]
         Atoms object or a list of Atoms objects to interact with.
-    struct_path : Optional[PathLike]
+    struct_path : PathLike | None
         Path of structure being simulated. If specified, the file stem is added to the
         info dict under "system_name". Default is None.
     set_info : bool
@@ -244,7 +244,7 @@ def output_structs(
     invalidate_calc : bool
         Whether to remove all calculator results after copying properties to info dict.
         Default is False.
-    write_kwargs : Optional[ASEWriteArgs]
+    write_kwargs : ASEWriteArgs | None
         Keyword arguments passed to ase.io.write. Default is {}.
     """
     # Separate kwargs for output_structs from kwargs for ase.io.write
