@@ -31,7 +31,10 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinxcontrib.contentui",
     "sphinx_copybutton",
+    "sphinx_autodoc_typehints",
 ]
+
+always_use_bars_union = True
 
 numpydoc_validation_checks = {"all", "EX01", "SA01", "ES01"}
 numpydoc_validation_exclude = {
