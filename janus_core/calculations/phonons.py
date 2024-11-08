@@ -90,8 +90,8 @@ class Phonons(BaseCalculation):
         Keyword arguments to pass to geometry optimizer. Default is {}.
     n_qpoints : int
         Number of q-points to sample along generated path, including end points.
-        Unused if `paths` is specified. Default is 51.
-    paths : PathLike | None
+        Unused if `qpoint_file` is specified. Default is 51.
+    qpoint_file : PathLike | None
         Path to yaml file with info to generate a path of q-points for band structure.
         Default is None.
     dos_kwargs : dict[str, Any] | None
@@ -176,7 +176,7 @@ class Phonons(BaseCalculation):
         minimize: bool = False,
         minimize_kwargs: dict[str, Any] | None = None,
         n_qpoints: int = 51,
-        paths: PathLike | None = None,
+        qpoint_file: PathLike | None = None,
         dos_kwargs: dict[str, Any] | None = None,
         pdos_kwargs: dict[str, Any] | None = None,
         temp_min: float = 0.0,
@@ -248,8 +248,8 @@ class Phonons(BaseCalculation):
             Keyword arguments to pass to geometry optimizer. Default is {}.
         n_qpoints : int
             Number of q-points to sample along generated path, including end points.
-            Unused if `paths` is specified. Default is 51.
-        paths : PathLike | None
+            Unused if `qpoint_file` is specified. Default is 51.
+        qpoint_file : PathLike | None
            Path to yaml file with info to generate a path of q-points for band
            structure. Default is None.
         dos_kwargs : dict[str, Any] | None
@@ -298,7 +298,7 @@ class Phonons(BaseCalculation):
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
         self.n_qpoints = n_qpoints
-        self.paths = paths
+        self.qpoint_file = qpoint_file
         self.dos_kwargs = dos_kwargs
         self.pdos_kwargs = pdos_kwargs
         self.temp_min = temp_min
@@ -584,14 +584,14 @@ class Phonons(BaseCalculation):
         if save_plots is None:
             save_plots = self.plot_to_file
 
-        if self.paths:
+        if self.qpoint_file:
             bands_file = self._build_filename("bands.yml.xz", filename=bands_file)
 
-            with open(self.paths, encoding="utf8") as paths_file:
-                paths_info = safe_load(paths_file)
+            with open(self.qpoint_file, encoding="utf8") as file:
+                paths_info = safe_load(file)
 
             labels = paths_info["labels"]
-            num_q_points = sum([len(q) for q in paths_info["paths"]])
+            num_q_points = sum(len(q) for q in paths_info["paths"])
             num_labels = len(labels)
             assert (
                 num_q_points == num_labels

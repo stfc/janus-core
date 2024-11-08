@@ -62,11 +62,11 @@ def phonons(
         Option(
             help=(
                 "Number of q-points to sample along generated path, including end "
-                "points. Unused if `paths` is specified"
+                "points. Unused if `qpoint_file` is specified"
             )
         ),
     ] = 51,
-    paths: Annotated[
+    qpoint_file: Annotated[
         Optional[Path],
         Option(
             help=(
@@ -166,8 +166,8 @@ def phonons(
         Whether to calculate and save the band structure. Default is False.
     n_qpoints : int
         Number of q-points to sample along generated path, including end points.
-        Unused if `paths` is specified. Default is 51.
-    paths : Optional[PathLike]
+        Unused if `qpoint_file` is specified. Default is 51.
+    qpoint_file : Optional[PathLike]
         Path to yaml file with info to generate a path of q-points for band structure.
         Default is None.
     dos : bool
@@ -322,7 +322,7 @@ def phonons(
         "minimize": minimize,
         "minimize_kwargs": minimize_kwargs,
         "n_qpoints": n_qpoints,
-        "paths": paths,
+        "qpoint_file": qpoint_file,
         "dos_kwargs": dos_kwargs,
         "pdos_kwargs": pdos_kwargs,
         "temp_min": temp_min,

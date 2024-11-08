@@ -192,8 +192,7 @@ def test_dos(tmp_path):
     )
     assert result.exit_code == 0
     assert dos_results.exists()
-    with open(dos_results, encoding="utf8") as file:
-        lines = file.readlines()
+    lines = dos_results.read_text().splitlines()
     assert lines[1].split()[0] == "-1.0000000000"
     assert lines[-1].split()[0] == "0.0000000000"
 
@@ -462,7 +461,7 @@ def test_no_carbon(tmp_path):
 
 
 def test_displacement_kwargs(tmp_path):
-    """Test displacment_kwargs can be set."""
+    """Test displacement_kwargs can be set."""
     file_prefix_1 = tmp_path / "NaCl_1"
     file_prefix_2 = tmp_path / "NaCl_2"
     displacement_file_1 = tmp_path / "NaCl_1-phonopy.yml"
@@ -501,21 +500,21 @@ def test_displacement_kwargs(tmp_path):
     # Check parameters
     with open(displacement_file_1, encoding="utf8") as file:
         params = yaml.safe_load(file)
-        n_displacments_1 = len(params["displacements"])
+        n_displacements_1 = len(params["displacements"])
 
-    assert n_displacments_1 == 4
+    assert n_displacements_1 == 4
 
     with open(displacement_file_2, encoding="utf8") as file:
         params = yaml.safe_load(file)
-        n_displacments_2 = len(params["displacements"])
+        n_displacements_2 = len(params["displacements"])
 
-    assert n_displacments_2 == 2
+    assert n_displacements_2 == 2
 
 
 def test_paths(tmp_path):
-    """Test displacment_kwargs can be set."""
+    """Test displacement_kwargs can be set."""
     file_prefix = tmp_path / "NaCl"
-    paths = DATA_PATH / "paths.yml"
+    qpoint_file = DATA_PATH / "paths.yml"
     band_results = tmp_path / "NaCl-bands.yml.xz"
 
     result = runner.invoke(
@@ -526,8 +525,8 @@ def test_paths(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--no-hdf5",
             "--bands",
-            "--paths",
-            paths,
+            "--qpoint-file",
+            qpoint_file,
             "--file-prefix",
             file_prefix,
         ],
