@@ -26,7 +26,7 @@ class Stats:
 
     Parameters
     ----------
-    source : PathLike
+    source
         File that contains the stats of a molecular dynamics simulation.
     """
 
@@ -36,7 +36,7 @@ class Stats:
 
         Parameters
         ----------
-        source : PathLike
+        source
             File that contains the stats of a molecular dynamics simulation.
         """
         self._data = zeros((0, 0))
@@ -54,7 +54,7 @@ class Stats:
 
         Parameters
         ----------
-        lab : str
+        lab
             Label to find.
 
         Returns
@@ -91,7 +91,7 @@ class Stats:
 
         Parameters
         ----------
-        ind : Any
+        ind
             Index or label to find.
 
         Returns

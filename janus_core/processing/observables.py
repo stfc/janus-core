@@ -11,9 +11,9 @@ class Stress:
 
     Parameters
     ----------
-    component : str
+    component
         Symbol for tensor components, xx, yy, etc.
-    include_ideal_gas : bool
+    include_ideal_gas
         Calculate with the ideal gas contribution.
     """
 
@@ -23,9 +23,9 @@ class Stress:
 
         Parameters
         ----------
-        component : str
+        component
             Symbol for tensor components, xx, yy, etc.
-        include_ideal_gas : bool
+        include_ideal_gas
             Calculate with the ideal gas contribution.
         """
         components = {
@@ -54,11 +54,11 @@ class Stress:
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to extract values from.
-        *args : tuple
+        *args
             Additional positional arguments passed to getter.
-        **kwargs : dict
+        **kwargs
             Additional kwargs passed getter.
 
         Returns

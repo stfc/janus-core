@@ -16,11 +16,11 @@ class Correlator:
 
     Parameters
     ----------
-    blocks : int
+    blocks
         Number of correlation blocks.
-    points : int
+    points
         Number of points per block.
-    averaging : int
+    averaging
         Averaging window per block level.
     """
 
@@ -30,11 +30,11 @@ class Correlator:
 
         Parameters
         ----------
-        blocks : int
+        blocks
             Number of correlation blocks.
-        points : int
+        points
             Number of points per block.
-        averaging : int
+        averaging
             Averaging window per block level.
         """
         self._blocks = blocks
@@ -57,9 +57,9 @@ class Correlator:
 
         Parameters
         ----------
-        a : float
+        a
             Newly observed value of left correland.
-        b : float
+        b
             Newly observed value of right correland.
         """
         self._propagate(a, b, 0)
@@ -70,11 +70,11 @@ class Correlator:
 
         Parameters
         ----------
-        a : float
+        a
             Newly observed value of left correland/average.
-        b : float
+        b
             Newly observed value of right correland/average.
-        block : int
+        block
             Block in the hierachy being updated.
         """
         if block == self._blocks:
@@ -126,11 +126,11 @@ class Correlator:
 
         Parameters
         ----------
-        block : int
+        block
             Block to check the shift register of.
-        p_i : int
+        p_i
             Index i in the shift (left correland).
-        p_j : int
+        p_j
             Index j in the shift (right correland).
 
         Returns
@@ -146,9 +146,9 @@ class Correlator:
 
         Returns
         -------
-        correlation : Iterable[float]
+        correlation
             The correlation values <a(t)b(t+t')>.
-        lags : Iterable[float]]
+        lags
             The correlation lag times t'.
         """
         correlation = np.zeros(self._points * self._blocks)
@@ -179,19 +179,19 @@ class Correlation:
 
     Parameters
     ----------
-    a : tuple[Observable, dict]
+    a
         Getter for a and kwargs.
-    b : tuple[Observable, dict]
+    b
         Getter for b and kwargs.
-    name : str
+    name
         Name of correlation.
-    blocks : int
+    blocks
         Number of correlation blocks.
-    points : int
+    points
         Number of points per block.
-    averaging : int
+    averaging
         Averaging window per block level.
-    update_frequency : int
+    update_frequency
         Frequency to update the correlation, md steps.
     """
 
@@ -210,19 +210,19 @@ class Correlation:
 
         Parameters
         ----------
-        a : tuple[Observable, tuple, dict]
+        a
             Getter for a and kwargs.
-        b : tuple[Observable, tuple, dict]
+        b
             Getter for b and kwargs.
-        name : str
+        name
             Name of correlation.
-        blocks : int
+        blocks
             Number of correlation blocks.
-        points : int
+        points
             Number of points per block.
-        averaging : int
+        averaging
             Averaging window per block level.
-        update_frequency : int
+        update_frequency
             Frequency to update the correlation, md steps.
         """
         self.name = name
@@ -259,7 +259,7 @@ class Correlation:
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to observe values from.
         """
         self._correlator.update(
@@ -273,9 +273,9 @@ class Correlation:
 
         Returns
         -------
-        correlation : Iterable[float]
+        correlation
             The correlation values <a(t)b(t+t')>.
-        lags : Iterable[float]]
+        lags
             The correlation lag times t'.
         """
         return self._correlator.get()

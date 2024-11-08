@@ -23,9 +23,9 @@ def check_files_exist(config: dict, req_file_keys: list[PathLike]) -> None:
 
     Parameters
     ----------
-    config : dict
+    config
         MLIP configuration file options.
-    req_file_keys : list[Pathlike]
+    req_file_keys
         List of files that must exist if defined in the configuration file.
 
     Raises
@@ -56,18 +56,18 @@ def train(
 
     Parameters
     ----------
-    mlip_config : PathLike
+    mlip_config
         Configuration file to pass to MLIP.
-    req_file_keys : list[PathLike] | None
+    req_file_keys
         List of files that must exist if defined in the configuration file.
         Default is ["train_file", "test_file", "valid_file", "statistics_file"].
-    attach_logger : bool
+    attach_logger
         Whether to attach a logger. Default is False.
-    log_kwargs : dict[str, Any] | None
+    log_kwargs
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool
+    track_carbon
         Whether to track carbon emissions of calculation. Default is True.
-    tracker_kwargs : dict[str, Any] | None
+    tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
     (log_kwargs, tracker_kwargs) = none_to_dict((log_kwargs, tracker_kwargs))

@@ -29,9 +29,9 @@ def _set_model_path(
 
     Parameters
     ----------
-    model_path : PathLike | None
+    model_path
         Path to MLIP file.
-    kwargs : dict[str, Any] | None
+    kwargs
         Dictionary of additional keyword arguments passed to the selected calculator.
 
     Returns
@@ -79,11 +79,11 @@ def choose_calculator(
 
     Parameters
     ----------
-    arch : Architectures
+    arch
         MLIP architecture. Default is "mace".
-    device : Devices
+    device
         Device to run calculator on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP file.
     **kwargs
         Additional keyword arguments passed to the selected calculator.
@@ -245,9 +245,9 @@ def check_calculator(calc: Calculator, attribute: str) -> None:
 
     Parameters
     ----------
-    calc : Calculator
+    calc
         ASE Calculator to check.
-    attribute : str
+    attribute
         Attribute to check calculator for.
     """
     # If dispersion added to MLIP calculator, use only MLIP calculator for calculation

@@ -96,11 +96,11 @@ class Observable(Protocol):
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to extract values from.
-        *args : tuple
+        *args
             Additional positional arguments passed to getter.
-        **kwargs : dict
+        **kwargs
             Additional kwargs passed getter.
         """
 

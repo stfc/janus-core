@@ -30,7 +30,7 @@ def dict_paths_to_strs(dictionary: dict) -> None:
 
     Parameters
     ----------
-    dictionary : dict
+    dictionary
         Dictionary to be converted.
     """
     for key, value in dictionary.items():
@@ -46,7 +46,7 @@ def dict_tuples_to_lists(dictionary: dict) -> None:
 
     Parameters
     ----------
-    dictionary : dict
+    dictionary
         Dictionary to be converted.
     """
     for key, value in dictionary.items():
@@ -62,7 +62,7 @@ def dict_remove_hyphens(dictionary: dict) -> dict:
 
     Parameters
     ----------
-    dictionary : dict
+    dictionary
         Dictionary to be converted.
 
     Returns
@@ -84,7 +84,7 @@ def set_read_kwargs_index(read_kwargs: dict[str, Any]) -> None:
 
     Parameters
     ----------
-    read_kwargs : dict[str, Any]
+    read_kwargs
         Keyword arguments to be passed to ase.io.read. If specified,
         read_kwargs["index"] must be an integer, and if not, a default value
         of -1 is set.
@@ -102,7 +102,7 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
 
     Parameters
     ----------
-    typer_dicts : list[TyperDict]
+    typer_dicts
         List of TyperDict objects to convert.
 
     Returns
@@ -120,7 +120,7 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
         if not isinstance(typer_dicts[i], dict):
             raise ValueError(
                 f"""{typer_dicts[i]} must be passed as a dictionary wrapped in quotes.\
- For example, "{{'key' : value}}" """
+ For example, "{{'key': value}}" """
             )
     return typer_dicts
 
@@ -131,7 +131,7 @@ def yaml_converter_loader(config_file: str) -> dict[str, Any]:
 
     Parameters
     ----------
-    config_file : str
+    config_file
         Yaml configuration file to read.
 
     Returns
@@ -156,11 +156,11 @@ def start_summary(*, command: str, summary: Path, inputs: dict) -> None:
 
     Parameters
     ----------
-    command : str
+    command
         Name of CLI command being used.
-    summary : Path
+    summary
         Path to summary file being saved.
-    inputs : dict
+    inputs
         Inputs to CLI command to save.
     """
     save_info = {
@@ -178,9 +178,9 @@ def carbon_summary(*, summary: Path, log: Path) -> None:
 
     Parameters
     ----------
-    summary : Path
+    summary
         Path to summary file being saved.
-    log : Path
+    log
         Path to log file with carbon emissions saved.
     """
     with open(log, encoding="utf8") as file:
@@ -202,7 +202,7 @@ def end_summary(summary: Path) -> None:
 
     Parameters
     ----------
-    summary : Path
+    summary
         Path to summary file being saved.
     """
     with open(summary, "a", encoding="utf8") as outfile:
@@ -231,23 +231,23 @@ def save_struct_calc(
 
     Parameters
     ----------
-    inputs : dict
+    inputs
         Inputs dictionary to add information to.
-    struct : MaybeSequence[Atoms]
+    struct
         Structure to be simulated.
-    struct_path : Path
+    struct_path
         Path of structure file.
-    arch : Architectures
+    arch
         MLIP architecture.
-    device : Devices
+    device
         Device to run calculations on.
-    model_path : str
+    model_path
         Path to MLIP model.
-    read_kwargs : ASEReadArgs
+    read_kwargs
         Keyword arguments to pass to ase.io.read.
-    calc_kwargs : dict[str, Any]]
+    calc_kwargs
         Keyword arguments to pass to the calculator.
-    log : Path
+    log
         Path to log file.
     """
     from ase import Atoms
@@ -301,7 +301,7 @@ def check_config(ctx: Context) -> None:
 
     Parameters
     ----------
-    ctx : Context
+    ctx
         Typer (Click) Context within command.
     """
     # Compare options from config file (default_map) to function definition (params)

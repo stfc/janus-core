@@ -18,7 +18,7 @@ def parse_dict_class(value: str | ASEReadArgs) -> TyperDict:
 
     Parameters
     ----------
-    value : str | ASEReadArgs
+    value
         String representing dictionary to be parsed.
 
     Returns
@@ -37,7 +37,7 @@ class TyperDict:
 
     Parameters
     ----------
-    value : str
+    value
         Value of string representing a dictionary.
     """
 
@@ -47,7 +47,7 @@ class TyperDict:
 
         Parameters
         ----------
-        value : str
+        value
             Value of string representing a dictionary.
         """
         self.value = value

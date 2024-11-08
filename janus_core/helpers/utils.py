@@ -27,23 +27,15 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
     Parameters
     ----------
-    struct : MaybeSequence[Atoms]
+    struct
         Structure from which to derive the default name. If `struct` is a sequence,
         the first structure will be used.
-    struct_path : PathLike | None
+    struct_path
         Path to file containing structures.
-    file_prefix : PathLike | None
+    file_prefix
         Default prefix to use.
     *additional
         Components to add to default file_prefix (joined by hyphens).
-
-    Methods
-    -------
-    _get_default_prefix(file_prefix, struct)
-        Return a prefix from the provided file_prefix or from chemical formula of
-        struct.
-    _build_filename(suffix, *additional, filename, prefix_override)
-         Return a standard format filename if filename not provided.
     """
 
     def __init__(
@@ -58,12 +50,12 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
         Parameters
         ----------
-        struct : MaybeSequence[Atoms]
+        struct
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
-        struct_path : PathLike | None
+        struct_path
             Path to file structures were read from. Used as default prefix is not None.
-        file_prefix : PathLike | None
+        file_prefix
             Default prefix to use.
         *additional
             Components to add to default file_prefix (joined by hyphens).
@@ -84,12 +76,12 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
         Parameters
         ----------
-        file_prefix : PathLike | None
+        file_prefix
             Given file_prefix.
-        struct : MaybeSequence[Atoms]
+        struct
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
-        struct_path : PathLike | None
+        struct_path
             Path to file containing structures.
         *additional
             Components to add to default file_prefix (joined by hyphens).
@@ -124,13 +116,13 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
         Parameters
         ----------
-        suffix : str
+        suffix
             Default suffix to use if `filename` is not specified.
         *additional
             Extra components to add to suffix (joined with hyphens).
-        filename : PathLike | None
+        filename
             Filename to use, if specified. Default is None.
-        prefix_override : str | None
+        prefix_override
             Replace file_prefix if not None.
 
         Returns
@@ -157,7 +149,7 @@ def none_to_dict(dictionaries: Sequence[dict | None]) -> Generator[dict, None, N
 
     Parameters
     ----------
-    dictionaries : Sequence[dict | None]
+    dictionaries
         Sequence of dictionaries that could be None.
 
     Yields
@@ -190,12 +182,12 @@ def write_table(
 
     Parameters
     ----------
-    fmt : {'ascii', 'csv'}
+    fmt
         Format to write table in.
-    file : TextIO
+    file
         File to dump to. If unspecified function returns
         io.StringIO object simulating file.
-    units : dict[str, str]
+    units
         Units as ``{key: unit}``:
 
         key
@@ -205,16 +197,16 @@ def write_table(
 
         Units which do not match any columns in `columns` are
         ignored.
-    formats : dict[str, str]
+    formats
         Output formats as ``{key: format}``:
 
         key
             To align with those in `columns`.
         format
             Python magic format string to use.
-    print_header : bool
+    print_header
         Whether to print the header or just append formatted data.
-    **columns : dict[str, Any]
+    **columns
         Dictionary of columns names to data with optional
         "<header>_units"/"<header>_format" to define units/format.
 
@@ -317,19 +309,19 @@ def _dump_ascii(
 
     Parameters
     ----------
-    file : TextIO
+    file
         File to dump to.
-    header : list[str]
+    header
         Column name information.
-    columns : dict[str, Sequence[Any]]
+    columns
         Column data by key (ordered with header info).
-    formats : Sequence[str]
+    formats
         Python magic string formats to apply
         (must align with header info).
 
     See Also
     --------
-    write_table : Main entry function.
+    write_table
     """
     if header:
         print(f"# {' | '.join(header)}", file=file)
@@ -349,19 +341,19 @@ def _dump_csv(
 
     Parameters
     ----------
-    file : TextIO
+    file
         File to dump to.
-    header : list[str]
+    header
         Column name information.
-    columns : dict[str, Sequence[Any]]
+    columns
         Column data by key (ordered with header info).
-    formats : Sequence[str]
+    formats
         Python magic string formats to apply
         (must align with header info).
 
     See Also
     --------
-    write_table : Main entry function.
+    write_table
     """
     if header:
         print(",".join(header), file=file)
@@ -380,9 +372,9 @@ def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
 
     Parameters
     ----------
-    sequence : Iterable
+    sequence
         The sequence to iterate over. Must support "len".
-    description : str
+    description
         The text to display to the left of the progress bar.
 
     Yields
