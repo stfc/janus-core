@@ -180,7 +180,14 @@ class Stress(Observable, ComponentMixin):
         -------
         list[float]
             The stress components in GPa units.
+
+        Raises
+        ------
+        ValueError
+            If atoms is not an Atoms object.
         """
+        if not isinstance(atoms, Atoms):
+            raise ValueError("atoms should be an Atoms object")
         sliced_atoms = atoms[self.atoms_slice]
         # must be re-attached after slicing for get_stress
         sliced_atoms.calc = atoms.calc
