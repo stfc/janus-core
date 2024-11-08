@@ -22,6 +22,7 @@ from janus_core.helpers.janus_types import (
     Properties,
 )
 from janus_core.helpers.mlip_calculators import choose_calculator
+from janus_core.helpers.utils import none_to_dict
 
 
 def results_to_info(
@@ -88,7 +89,7 @@ def attach_calculator(
     calc_kwargs : dict[str, Any] | None
         Keyword arguments to pass to the selected calculator. Default is {}.
     """
-    calc_kwargs = calc_kwargs if calc_kwargs else {}
+    (calc_kwargs,) = none_to_dict(calc_kwargs)
 
     calculator = choose_calculator(
         arch=arch,
@@ -151,7 +152,7 @@ def input_structs(
     MaybeSequence[Atoms]
         Structure(s) with attached MLIP calculators.
     """
-    read_kwargs = read_kwargs if read_kwargs else {}
+    (read_kwargs,) = none_to_dict(read_kwargs)
 
     # Validate parameters
     if not struct and not struct_path:
@@ -249,7 +250,7 @@ def output_structs(
     """
     # Separate kwargs for output_structs from kwargs for ase.io.write
     # This assumes values passed via kwargs have priority over passed parameters
-    write_kwargs = write_kwargs if write_kwargs else {}
+    (write_kwargs,) = none_to_dict(write_kwargs)
     set_info = write_kwargs.pop("set_info", set_info)
     properties = write_kwargs.pop("properties", properties)
     invalidate_calc = write_kwargs.pop("invalidate_calc", invalidate_calc)

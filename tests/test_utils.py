@@ -148,7 +148,7 @@ def test_output_structs(
 )
 def test_none_to_dict(dicts_in):
     """Test none_to_dict removes Nones from sequence, and preserves dictionaries."""
-    dicts = list(none_to_dict(dicts_in))
+    dicts = list(none_to_dict(*dicts_in))
     for dictionary in dicts:
         assert dictionary is not None
 

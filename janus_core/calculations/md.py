@@ -339,13 +339,11 @@ class MolecularDynamics(BaseCalculation):
             post_process_kwargs,
             correlation_kwargs,
         ) = none_to_dict(
-            (
-                read_kwargs,
-                minimize_kwargs,
-                write_kwargs,
-                post_process_kwargs,
-                correlation_kwargs,
-            )
+            read_kwargs,
+            minimize_kwargs,
+            write_kwargs,
+            post_process_kwargs,
+            correlation_kwargs,
         )
 
         self.ensemble = ensemble
@@ -1190,7 +1188,7 @@ class NPT(MolecularDynamics):
         self.pressure = pressure
         super().__init__(*args, ensemble=ensemble, file_prefix=file_prefix, **kwargs)
 
-        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         self.ttime = thermostat_time * units.fs
 
         if barostat_time:
@@ -1320,7 +1318,7 @@ class NVT(MolecularDynamics):
         """
         super().__init__(*args, ensemble=ensemble, **kwargs)
 
-        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         self.dyn = Langevin(
             self.struct,
             timestep=self.timestep,
@@ -1411,7 +1409,7 @@ class NVE(MolecularDynamics):
             Additional keyword arguments.
         """
         super().__init__(*args, ensemble=ensemble, **kwargs)
-        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
 
         self.dyn = VelocityVerlet(
             self.struct,
@@ -1463,7 +1461,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         **kwargs
             Additional keyword arguments.
         """
-        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         super().__init__(
             *args,
             ensemble=ensemble,
@@ -1575,7 +1573,7 @@ class NPH(NPT):
         **kwargs
             Additional keyword arguments.
         """
-        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs else {}
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         super().__init__(
             *args,
             thermostat_time=thermostat_time,

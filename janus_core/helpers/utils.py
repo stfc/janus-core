@@ -151,13 +151,13 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         return built_filename
 
 
-def none_to_dict(dictionaries: Sequence[dict | None]) -> Generator[dict, None, None]:
+def none_to_dict(*dictionaries: Sequence[dict | None]) -> Generator[dict, None, None]:
     """
     Ensure dictionaries that may be None are dictionaries.
 
     Parameters
     ----------
-    dictionaries : Sequence[dict | None]
+    *dictionaries : Sequence[dict | None]
         Sequence of dictionaries that could be None.
 
     Yields
@@ -259,7 +259,7 @@ def write_table(
     2 4
     3 6
     """
-    units = units if units else {}
+    (units,) = none_to_dict(units)
     units.update(
         {
             key.removesuffix("_units"): val
@@ -268,7 +268,7 @@ def write_table(
         }
     )
 
-    formats = formats if formats else {}
+    (formats,) = none_to_dict(formats)
     formats.update(
         {
             key.removesuffix("_format"): val

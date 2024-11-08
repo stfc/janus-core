@@ -133,8 +133,8 @@ class BaseCalculation(FileNameMixin):
         param_prefix : str | None
             Additional parameters to add to default file_prefix. Default is None.
         """
-        (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs) = none_to_dict(
-            (read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs)
+        read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs = none_to_dict(
+            read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs
         )
 
         self.struct = struct

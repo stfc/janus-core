@@ -278,15 +278,13 @@ class Phonons(BaseCalculation):
         enable_progress_bar : bool
             Whether to show a progress bar during phonon calculations. Default is False.
         """
-        (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs, pdos_kwargs) = (
+        read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs, pdos_kwargs = (
             none_to_dict(
-                (
-                    read_kwargs,
-                    displacement_kwargs,
-                    minimize_kwargs,
-                    dos_kwargs,
-                    pdos_kwargs,
-                )
+                read_kwargs,
+                displacement_kwargs,
+                minimize_kwargs,
+                dos_kwargs,
+                pdos_kwargs,
             )
         )
 
