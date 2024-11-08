@@ -70,7 +70,7 @@ def train(
     tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
-    (log_kwargs, tracker_kwargs) = none_to_dict((log_kwargs, tracker_kwargs))
+    log_kwargs, tracker_kwargs = none_to_dict(log_kwargs, tracker_kwargs)
 
     if req_file_keys is None:
         req_file_keys = ["train_file", "test_file", "valid_file", "statistics_file"]

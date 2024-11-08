@@ -137,7 +137,7 @@ class Descriptors(BaseCalculation):
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
         """
-        (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
+        read_kwargs, write_kwargs = none_to_dict(read_kwargs, write_kwargs)
 
         self.invariants_only = invariants_only
         self.calc_per_element = calc_per_element

@@ -187,9 +187,9 @@ class GeomOpt(BaseCalculation):
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
             Must include "filename" keyword. Default is {}.
         """
-        (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs) = (
+        read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs = (
             none_to_dict(
-                (read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs)
+                read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs
             )
         )
 

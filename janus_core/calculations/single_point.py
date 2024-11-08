@@ -140,7 +140,7 @@ class SinglePoint(BaseCalculation):
             Keyword arguments to pass to ase.io.write if saving structure with results
             of calculations. Default is {}.
         """
-        (read_kwargs, write_kwargs) = none_to_dict((read_kwargs, write_kwargs))
+        read_kwargs, write_kwargs = none_to_dict(read_kwargs, write_kwargs)
 
         self.write_results = write_results
         self.write_kwargs = write_kwargs

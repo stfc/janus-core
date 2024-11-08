@@ -196,8 +196,8 @@ class EoS(BaseCalculation):
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
         """
-        (read_kwargs, minimize_kwargs, write_kwargs, plot_kwargs) = none_to_dict(
-            (read_kwargs, minimize_kwargs, write_kwargs, plot_kwargs)
+        read_kwargs, minimize_kwargs, write_kwargs, plot_kwargs = none_to_dict(
+            read_kwargs, minimize_kwargs, write_kwargs, plot_kwargs
         )
 
         self.min_volume = min_volume

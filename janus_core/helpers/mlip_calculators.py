@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, get_args
 from ase.calculators.mixing import SumCalculator
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
+from janus_core.helpers.utils import none_to_dict
 
 if TYPE_CHECKING:
     from ase.calculators.calculator import Calculator
@@ -39,7 +40,7 @@ def _set_model_path(
     PathLike | torch.nn.Module | None
         Path to MLIP model file, loaded model, or None.
     """
-    kwargs = kwargs if kwargs else {}
+    (kwargs,) = none_to_dict(kwargs)
 
     # kwargs that may be used for `model_path`` for different MLIPs
     # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
