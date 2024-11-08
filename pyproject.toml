@@ -79,7 +79,7 @@ docs = [
     "furo<2025.0.0,>=2024.1.29",
     "markupsafe<2.1",
     "numpydoc<2.0.0,>=1.6.0",
-    "sphinx<8.0.0,>=7.2.6",
+    "sphinx<9.0.0,>=8.0.2",
     "sphinxcontrib-contentui<1.0.0,>=0.2.5",
     "sphinxcontrib-details-directive<1.0,>=0.1",
     "sphinx-copybutton<1.0.0,>=0.5.2",
@@ -152,6 +152,7 @@ checks = [
     "EX01",
     "SA01",
     "ES01",
+    "PR04", # Ignore no type (types come from signature as via sphinx_autodoc_typehints)
 ]
 # Don't report on objects that match any of these regex
 exclude = [

@@ -30,20 +30,20 @@ def preprocess(
 
     Parameters
     ----------
-    mlip_config : PathLike
+    mlip_config
         Configuration file to pass to MLIP.
-    req_file_keys : Sequence[PathLike]
+    req_file_keys
         List of files that must exist if defined in the configuration file.
         Default is ("train_file", "test_file", "valid_file").
-    attach_logger : bool | None
+    attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
-    log_kwargs : dict[str, Any] | None
+    log_kwargs
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool | None
+    track_carbon
         Whether to track carbon emissions of calculation. Requires attach_logger.
         Default is True if attach_logger is True, else False.
-    tracker_kwargs : dict[str, Any] | None
+    tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
     log_kwargs, tracker_kwargs = none_to_dict(log_kwargs, tracker_kwargs)

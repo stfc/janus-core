@@ -84,58 +84,58 @@ def eos(
 
     Parameters
     ----------
-    ctx : Context
+    ctx
         Typer (Click) Context. Automatically set.
-    struct : Path
+    struct
         Path of structure to simulate.
-    min_volume : float
+    min_volume
         Minimum volume scale factor. Default is 0.95.
-    max_volume : float
+    max_volume
         Maximum volume scale factor. Default is 1.05.
-    n_volumes : int
+    n_volumes
         Number of volumes to use. Default is 7.
-    eos_type : Optional[str]
+    eos_type
         Type of fit for equation of state. Default is "birchmurnaghan".
-    minimize : bool
+    minimize
         Whether to minimize initial structure before calculations. Default is True.
-    minimize_all : bool
+    minimize_all
         Whether to optimize geometry for all generated structures. Default is False.
-    fmax : float
+    fmax
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
-    minimize_kwargs : Optional[dict[str, Any]]
+    minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    write_structures : bool
+    write_structures
         True to write out all genereated structures. Default is False.
-    write_kwargs : Optional[dict[str, Any]],
+    write_kwargs
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
-    plot_to_file : bool
+    plot_to_file
         Whether to save plot equation of state to svg. Default is False.
-    arch : Optional[str]
+    arch
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
-    device : Optional[str]
+    device
         Device to run model on. Default is "cpu".
-    model_path : Optional[str]
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : Optional[dict[str, Any]]
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    file_prefix : Optional[PathLike]
+    file_prefix
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is inferred from the name of the structure file.
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Optional[Path]
+    config
         Path to yaml configuration file to define the above options. Default is None.
     """
     from janus_core.calculations.eos import EoS

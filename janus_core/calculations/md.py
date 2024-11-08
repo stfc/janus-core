@@ -55,107 +55,107 @@ class MolecularDynamics(BaseCalculation):
 
     Parameters
     ----------
-    struct : Atoms | None
+    struct
         ASE Atoms structure to simulate. Required if `struct_path` is None. Default is
         None.
-    struct_path : PathLike | None
+    struct_path
         Path of structure to simulate. Required if `struct` is None. Default is None.
-    arch : Architectures
+    arch
         MLIP architecture to use for simulation. Default is "mace_mp".
-    device : Devices
+    device
         Device to run MLIP model on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : ASEReadArgs | None
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
-    calc_kwargs : dict[str, Any] | None
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : bool | None
+    set_calc
         Whether to set (new) calculators for structures. Default is None.
-    attach_logger : bool | None
+    attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
-    log_kwargs : dict[str, Any] | None
+    log_kwargs
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool | None
+    track_carbon
         Whether to track carbon emissions of calculation. Requires attach_logger.
         Default is True if attach_logger is True, else False.
-    tracker_kwargs : dict[str, Any] | None
+    tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
-    struct : Atoms
+    struct
         Structure to simulate.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is None.
-    steps : int
+    steps
         Number of steps in simulation. Default is 0.
-    timestep : float
+    timestep
         Timestep for integrator, in fs. Default is 1.0.
-    temp : float
+    temp
         Temperature, in K. Default is 300.
-    equil_steps : int
+    equil_steps
         Maximum number of steps at which to perform optimization and reset velocities.
         Default is 0.
-    minimize : bool
+    minimize
         Whether to minimize structure during equilibration. Default is False.
-    minimize_every : int
+    minimize_every
         Frequency of minimizations. Default is -1, which disables minimization after
         beginning dynamics.
-    minimize_kwargs : dict[str, Any] | None
+    minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
-    rescale_velocities : bool
+    rescale_velocities
         Whether to rescale velocities. Default is False.
-    remove_rot : bool
+    remove_rot
         Whether to remove rotation. Default is False.
-    rescale_every : int
+    rescale_every
         Frequency to rescale velocities. Default is 10.
-    file_prefix : PathLike | None
+    file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         and temperature.
-    restart : bool
+    restart
         Whether restarting dynamics. Default is False.
-    restart_auto : bool
+    restart_auto
         Whether to infer restart file name if restarting dynamics. Default is True.
-    restart_stem : str
+    restart_stem
         Stem for restart file name. Default inferred from `file_prefix`.
-    restart_every : int
+    restart_every
         Frequency of steps to save restart info. Default is 1000.
-    rotate_restart : bool
+    rotate_restart
         Whether to rotate restart files. Default is False.
-    restarts_to_keep : int
+    restarts_to_keep
         Restart files to keep if rotating. Default is 4.
-    final_file : PathLike | None
+    final_file
         File to save final configuration at each temperature of similation. Default
         inferred from `file_prefix`.
-    stats_file : PathLike | None
+    stats_file
         File to save thermodynamical statistics. Default inferred from `file_prefix`.
-    stats_every : int
+    stats_every
         Frequency to output statistics. Default is 100.
-    traj_file : PathLike | None
+    traj_file
         Trajectory file to save. Default inferred from `file_prefix`.
-    traj_append : bool
+    traj_append
         Whether to append trajectory. Default is False.
-    traj_start : int
+    traj_start
         Step to start saving trajectory. Default is 0.
-    traj_every : int
+    traj_every
         Frequency of steps to save trajectory. Default is 100.
-    temp_start : float | None
+    temp_start
         Temperature to start heating, in K. Default is None, which disables heating.
-    temp_end : float | None
+    temp_end
         Maximum temperature for heating, in K. Default is None, which disables heating.
-    temp_step : float | None
+    temp_step
         Size of temperature steps when heating, in K. Default is None, which disables
         heating.
-    temp_time : float | None
+    temp_time
         Time between heating steps, in fs. Default is None, which disables heating.
-    write_kwargs : OutputKwargs | None
+    write_kwargs
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
-    post_process_kwargs : PostProcessKwargs | None
+    post_process_kwargs
         Keyword arguments to control post-processing operations.
-    correlation_kwargs : CorrelationKwargs | None
+    correlation_kwargs
         Keyword arguments to control on-the-fly correlations.
-    seed : int | None
+    seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
 
@@ -233,109 +233,109 @@ class MolecularDynamics(BaseCalculation):
 
         Parameters
         ----------
-        struct : Atoms | None
+        struct
             ASE Atoms structure to simulate. Required if `struct_path` is None. Default
             is None.
-        struct_path : PathLike | None
+        struct_path
             Path of structure to simulate. Required if `struct` is None. Default is
             None.
-        arch : Architectures
+        arch
             MLIP architecture to use for simulation. Default is "mace_mp".
-        device : Devices
+        device
             Device to run MLIP model on. Default is "cpu".
-        model_path : PathLike | None
+        model_path
             Path to MLIP model. Default is `None`.
-        read_kwargs : ASEReadArgs | None
+        read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-        calc_kwargs : dict[str, Any] | None
+        calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : bool | None
+        set_calc
             Whether to set (new) calculators for structures. Default is None.
-        attach_logger : bool | None
+        attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
-        log_kwargs : dict[str, Any] | None
+        log_kwargs
             Keyword arguments to pass to `config_logger`. Default is {}.
-        track_carbon : bool | None
+        track_carbon
             Whether to track carbon emissions of calculation. Requires attach_logger.
             Default is True if attach_logger is True, else False.
-        tracker_kwargs : dict[str, Any] | None
+        tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is None.
-        steps : int
+        steps
             Number of steps in simulation. Default is 0.
-        timestep : float
+        timestep
             Timestep for integrator, in fs. Default is 1.0.
-        temp : float
+        temp
             Temperature, in K. Default is 300.
-        equil_steps : int
+        equil_steps
             Maximum number of steps at which to perform optimization and reset
             velocities. Default is 0.
-        minimize : bool
+        minimize
             Whether to minimize structure during equilibration. Default is False.
-        minimize_every : int
+        minimize_every
             Frequency of minimizations. Default is -1, which disables minimization
             after beginning dynamics.
-        minimize_kwargs : dict[str, Any] | None
+        minimize_kwargs
             Keyword arguments to pass to geometry optimizer. Default is {}.
-        rescale_velocities : bool
+        rescale_velocities
             Whether to rescale velocities. Default is False.
-        remove_rot : bool
+        remove_rot
             Whether to remove rotation. Default is False.
-        rescale_every : int
+        rescale_every
             Frequency to rescale velocities. Default is 10.
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames. Default is inferred from structure, ensemble,
             and temperature.
-        restart : bool
+        restart
             Whether restarting dynamics. Default is False.
-        restart_auto : bool
+        restart_auto
             Whether to infer restart file name if restarting dynamics. Default is True.
-        restart_stem : str
+        restart_stem
             Stem for restart file name. Default inferred from `file_prefix`.
-        restart_every : int
+        restart_every
             Frequency of steps to save restart info. Default is 1000.
-        rotate_restart : bool
+        rotate_restart
             Whether to rotate restart files. Default is False.
-        restarts_to_keep : int
+        restarts_to_keep
             Restart files to keep if rotating. Default is 4.
-        final_file : PathLike | None
+        final_file
             File to save final configuration at each temperature of similation. Default
             inferred from `file_prefix`.
-        stats_file : PathLike | None
+        stats_file
             File to save thermodynamical statistics. Default inferred from
             `file_prefix`.
-        stats_every : int
+        stats_every
             Frequency to output statistics. Default is 100.
-        traj_file : PathLike | None
+        traj_file
             Trajectory file to save. Default inferred from `file_prefix`.
-        traj_append : bool
+        traj_append
             Whether to append trajectory. Default is False.
-        traj_start : int
+        traj_start
             Step to start saving trajectory. Default is 0.
-        traj_every : int
+        traj_every
             Frequency of steps to save trajectory. Default is 100.
-        temp_start : float | None
+        temp_start
             Temperature to start heating, in K. Default is None, which disables
             heating.
-        temp_end : float | None
+        temp_end
             Maximum temperature for heating, in K. Default is None, which disables
             heating.
-        temp_step : float | None
+        temp_step
             Size of temperature steps when heating, in K. Default is None, which
             disables heating.
-        temp_time : float | None
+        temp_time
             Time between heating steps, in fs. Default is None, which disables heating.
-        write_kwargs : OutputKwargs | None
+        write_kwargs
             Keyword arguments to pass to `output_structs` when saving trajectory and
             final files. Default is {}.
-        post_process_kwargs : PostProcessKwargs | None
+        post_process_kwargs
             Keyword arguments to control post-processing operations.
-        correlation_kwargs : list[CorrelationKwargs] | None
+        correlation_kwargs
             Keyword arguments to control on-the-fly correlations.
-        seed : int | None
+        seed
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
         """
@@ -650,7 +650,7 @@ class MolecularDynamics(BaseCalculation):
 
         Parameters
         ----------
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames on class init. If not None, param_prefix = "".
 
         Returns
@@ -1151,20 +1151,20 @@ class NPT(MolecularDynamics):
     ----------
     *args
         Additional arguments.
-    thermostat_time : float
+    thermostat_time
         Thermostat time, in fs. Default is 50.0.
-    barostat_time : float
+    barostat_time
         Barostat time, in fs. Default is 75.0.
-    bulk_modulus : float
+    bulk_modulus
         Bulk modulus, in GPa. Default is 2.0.
-    pressure : float
+    pressure
         Pressure, in GPa. Default is 0.0.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is "npt".
-    file_prefix : PathLike | None
+    file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         temperature, and pressure.
-    ensemble_kwargs : dict[str, Any] | None
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1194,20 +1194,20 @@ class NPT(MolecularDynamics):
         ----------
         *args
             Additional arguments.
-        thermostat_time : float
+        thermostat_time
             Thermostat time, in fs. Default is 50.0.
-        barostat_time : float
+        barostat_time
             Barostat time, in fs. Default is 75.0.
-        bulk_modulus : float
+        bulk_modulus
             Bulk modulus, in GPa. Default is 2.0.
-        pressure : float
+        pressure
             Pressure, in GPa. Default is 0.0.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is "npt".
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames. Default is inferred from structure, ensemble,
             temperature, and pressure.
-        ensemble_kwargs : dict[str, Any] | None
+        ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
@@ -1244,7 +1244,7 @@ class NPT(MolecularDynamics):
 
         Parameters
         ----------
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames on class init. If not None, param_prefix = "".
 
         Returns
@@ -1307,11 +1307,11 @@ class NVT(MolecularDynamics):
     ----------
     *args
         Additional arguments.
-    friction : float
+    friction
         Friction coefficient in fs^-1. Default is 0.005.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is "nvt".
-    ensemble_kwargs : dict[str, Any] | None
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1337,11 +1337,11 @@ class NVT(MolecularDynamics):
         ----------
         *args
             Additional arguments.
-        friction : float
+        friction
             Friction coefficient in fs^-1. Default is 0.005.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is "nvt".
-        ensemble_kwargs : dict[str, Any] | None
+        ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
@@ -1404,9 +1404,9 @@ class NVE(MolecularDynamics):
     ----------
     *args
         Additional arguments.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is "nve".
-    ensemble_kwargs : dict[str, Any] | None
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1431,9 +1431,9 @@ class NVE(MolecularDynamics):
         ----------
         *args
             Additional arguments.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is "nve".
-        ensemble_kwargs : dict[str, Any] | None
+        ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
@@ -1457,11 +1457,11 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
     ----------
     *args
         Additional arguments.
-    thermostat_time : float
+    thermostat_time
         Thermostat time, in fs. Default is 50.0.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is "nvt-nh".
-    ensemble_kwargs : dict[str, Any] | None
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1482,11 +1482,11 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         ----------
         *args
             Additional arguments.
-        thermostat_time : float
+        thermostat_time
             Thermostat time, in fs. Default is 50.0.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is "nvt-nh".
-        ensemble_kwargs : dict[str, Any] | None
+        ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
@@ -1547,11 +1547,11 @@ class NVT_CSVR(NVT):  # noqa: N801 (invalid-class-name)
     ----------
     *args
         Additional arguments.
-    taut : float
+    taut
         Time constant for CSVR thermostat coupling, in fs. Default is 100.0.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is "nvt-csvr".
-    ensemble_kwargs : dict[str, Any] | None
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1572,11 +1572,11 @@ class NVT_CSVR(NVT):  # noqa: N801 (invalid-class-name)
         ----------
         *args
             Additional arguments.
-        taut : float
+        taut
             Time constant for CSVR thermostat coupling, in fs. Defaylt is 100.0.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is "nvt-csvr".
-        ensemble_kwargs : dict[str, Any] | None
+        ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
@@ -1615,18 +1615,18 @@ class NPH(NPT):
     ----------
     *args
         Additional arguments.
-    thermostat_time : float
+    thermostat_time
         Thermostat time, in fs. Default is 50.0.
-    bulk_modulus : float
+    bulk_modulus
         Bulk modulus, in GPa. Default is 2.0.
-    pressure : float
+    pressure
         Pressure, in GPa. Default is 0.0.
-    ensemble : Ensembles
+    ensemble
         Name for thermodynamic ensemble. Default is "nph".
-    file_prefix : PathLike | None
+    file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         temperature, and pressure.
-    ensemble_kwargs : dict[str, Any] | None
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
@@ -1655,18 +1655,18 @@ class NPH(NPT):
         ----------
         *args
             Additional arguments.
-        thermostat_time : float
+        thermostat_time
             Thermostat time, in fs. Default is 50.0.
-        bulk_modulus : float
+        bulk_modulus
             Bulk modulus, in GPa. Default is 2.0.
-        pressure : float
+        pressure
             Pressure, in GPa. Default is 0.0.
-        ensemble : Ensembles
+        ensemble
             Name for thermodynamic ensemble. Default is "nph".
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames. Default is inferred from structure, ensemble,
             temperature, and pressure.
-        ensemble_kwargs : dict[str, Any] | None
+        ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.

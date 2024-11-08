@@ -27,11 +27,11 @@ class Correlator:
 
     Parameters
     ----------
-    blocks : int
+    blocks
         Number of correlation blocks.
-    points : int
+    points
         Number of points per block.
-    averaging : int
+    averaging
         Averaging window per block level.
 
     Attributes
@@ -62,11 +62,11 @@ class Correlator:
 
         Parameters
         ----------
-        blocks : int
+        blocks
             Number of resolution levels.
-        points : int
+        points
             Data points at each resolution.
-        averaging : int
+        averaging
             Coarse-graining between resolution levels.
         """
         self._blocks = blocks
@@ -89,9 +89,9 @@ class Correlator:
 
         Parameters
         ----------
-        a : float
+        a
             Newly observed value of left correland.
-        b : float
+        b
             Newly observed value of right correland.
         """
         self._propagate(a, b, 0)
@@ -102,11 +102,11 @@ class Correlator:
 
         Parameters
         ----------
-        a : float
+        a
             Newly observed value of left correland/average.
-        b : float
+        b
             Newly observed value of right correland/average.
-        block : int
+        block
             Block in the hierachy being updated.
         """
         if block == self._blocks:
@@ -171,11 +171,11 @@ class Correlator:
 
         Parameters
         ----------
-        block : int
+        block
             Block to check the shift register of.
-        p_i : int
+        p_i
             Index i in the shift (left correland).
-        p_j : int
+        p_j
             Index j in the shift (right correland).
 
         Returns
@@ -247,19 +247,19 @@ class Correlation:
 
     Parameters
     ----------
-    a : Observable
+    a
         Observable for a.
-    b : Observable
+    b
         Observable for b.
-    name : str
+    name
         Name of correlation.
-    blocks : int
+    blocks
         Number of correlation blocks.
-    points : int
+    points
         Number of points per block.
-    averaging : int
+    averaging
         Averaging window per block level.
-    update_frequency : int
+    update_frequency
         Frequency to update the correlation, md steps.
     """
 
@@ -279,19 +279,19 @@ class Correlation:
 
         Parameters
         ----------
-        a : Observable
+        a
             Observable for a.
-        b : Observable
+        b
             Observable for b.
-        name : str
+        name
             Name of correlation.
-        blocks : int
+        blocks
             Number of correlation blocks.
-        points : int
+        points
             Number of points per block.
-        averaging : int
+        averaging
             Averaging window per block level.
-        update_frequency : int
+        update_frequency
             Frequency to update the correlation, md steps.
         """
         self.name = name
@@ -322,7 +322,7 @@ class Correlation:
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to observe values from.
         """
         # All pairs of data to be correlated.

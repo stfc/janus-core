@@ -37,29 +37,29 @@ def compute_rdf(
 
     Parameters
     ----------
-    data : MaybeSequence[Atoms]
+    data
         Dataset to compute RDF of.
-    ana : Analysis | None
+    ana
         ASE Analysis object for data reuse.
-    filenames : MaybeSequence[PathLike] | None
+    filenames
         Filenames to output data to. Must match number of RDFs computed.
-    by_elements : bool
+    by_elements
         Split RDF into pairwise by elements group. Default is False.
         N.B. mixed RDFs (e.g. C-H) include all self-RDFs (e.g. C-C),
         to get the pure (C-H) RDF subtract the self-RDFs.
-    rmax : float
+    rmax
         Maximum distance of RDF.
-    nbins : int
+    nbins
         Number of bins to divide RDF.
-    elements : MaybeSequence[int | str] | None
+    elements
         Make partial RDFs. If `by_elements` is true will filter to
         only display pairs in list.
-    index : SliceLike
+    index
         Images to analyze as:
         `index` if `int`,
         `start`, `stop`, `step` if `tuple`,
         `slice` if `slice` or `range`.
-    volume : float | None
+    volume
         Volume of cell for normalisation. Only needs to be provided
         if aperiodic cell. Default is (2*rmax)**3.
 
@@ -173,23 +173,23 @@ def compute_vaf(
 
     Parameters
     ----------
-    data : Sequence[Atoms]
+    data
         Dataset to compute VAF of.
-    filenames : MaybeSequence[PathLike] | None
+    filenames
         If present, dump resultant VAF to file.
-    use_velocities : bool
+    use_velocities
         Compute VAF using velocities rather than momenta.
         Default is False.
-    fft : bool
+    fft
         Compute the fourier transformed VAF.
         Default is False.
-    index : SliceLike
+    index
         Images to analyze as `start`, `stop`, `step`.
         Default is all images.
-    filter_atoms : MaybeSequence[MaybeSequence[int | None]]
+    filter_atoms
         Compute the VAF averaged over subsets of the system.
         Default is all atoms.
-    time_step : float
+    time_step
         Time step for scaling lags to align with input data.
         Default is 1 (i.e. no scaling).
 

@@ -36,38 +36,38 @@ class Phonons(BaseCalculation):
 
     Parameters
     ----------
-    struct : Atoms | None
+    struct
         ASE Atoms structure to calculate phonons for. Required if `struct_path` is
         None. Default is None.
-    struct_path : PathLike | None
+    struct_path
         Path of structure to calculate phonons for. Required if `struct` is None.
         Default is None.
-    arch : Architectures
+    arch
         MLIP architecture to use for calculations. Default is "mace_mp".
-    device : Devices
+    device
         Device to run MLIP model on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : ASEReadArgs | None
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
-    calc_kwargs : dict[str, Any] | None
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : bool | None
+    set_calc
         Whether to set (new) calculators for structures. Default is None.
-    attach_logger : bool | None
+    attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
-    log_kwargs : dict[str, Any] | None
+    log_kwargs
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool | None
+    track_carbon
         Whether to track carbon emissions of calculation. Requires attach_logger.
         Default is True if attach_logger is True, else False.
-    tracker_kwargs : dict[str, Any] | None
+    tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
-    calcs : MaybeSequence[PhononCalcs] | None
+    calcs
         Phonon calculations to run. Default calculates force constants only.
-    supercell : MaybeList[int]
+    supercell
         The size of a supercell for calculation, or the supercell itself.
         If a single number is provided, it is interpreted as the size, so a
         diagonal supercell of that size in all dimensions is constructed.
@@ -76,50 +76,50 @@ class Phonons(BaseCalculation):
         are assumed to be the full supercell matrix in the style of Phonopy,
         so the first three values will be used as the first row, the second
         three as the second row, etc. Default is 2.
-    displacement : float
+    displacement
         Displacement for force constants calculation, in A. Default is 0.01.
-    displacement_kwargs : dict[str, Any] | None
+    displacement_kwargs
         Keyword arguments to pass to generate_displacements. Default is {}.
-    mesh : tuple[int, int, int]
+    mesh
         Mesh for sampling. Default is (10, 10, 10).
-    symmetrize : bool
+    symmetrize
         Whether to symmetrize structure and force constants after calculation.
         Default is False.
-    minimize : bool
+    minimize
         Whether to perform geometry optimisation before calculating phonons.
         Default is False.
-    minimize_kwargs : dict[str, Any] | None
+    minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
-    n_qpoints : int
+    n_qpoints
         Number of q-points to sample along generated path, including end points.
         Unused if `qpoint_file` is specified. Default is 51.
-    qpoint_file : PathLike | None
+    qpoint_file
         Path to yaml file with info to generate a path of q-points for band structure.
         Default is None.
-    dos_kwargs : dict[str, Any] | None
+    dos_kwargs
         Keyword arguments to pass to run_total_dos. Default is {}.
-    pdos_kwargs : dict[str, Any] | None
+    pdos_kwargs
         Keyword arguments to pass to run_projected_dos. Default is {}.
-    temp_min : float
+    temp_min
         Start temperature for thermal properties calculations, in K. Default is 0.0.
-    temp_max : float
+    temp_max
         End temperature for thermal properties calculations, in K. Default is 1000.0.
-    temp_step : float
+    temp_step
         Temperature step for thermal properties calculations, in K. Default is 50.0.
-    force_consts_to_hdf5 : bool
+    force_consts_to_hdf5
         Whether to write force constants in hdf format or not. Default is True.
-    plot_to_file : bool
+    plot_to_file
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
-    write_results : bool
+    write_results
         Default for whether to write out results to file. Default is True.
-    write_full : bool
+    write_full
         Whether to maximize information written in various output files.
         Default is True.
-    file_prefix : PathLike | None
+    file_prefix
         Prefix for output filenames. Default is inferred from chemical formula of the
         structure.
-    enable_progress_bar : bool
+    enable_progress_bar
         Whether to show a progress bar during phonon calculations. Default is False.
 
     Attributes
@@ -196,38 +196,38 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        struct : Atoms | None
+        struct
             ASE Atoms structure to calculate phonons for. Required if `struct_path` is
             None. Default is None.
-        struct_path : PathLike | None
+        struct_path
             Path of structure to calculate phonons for. Required if `struct` is None.
             Default is None.
-        arch : Architectures
+        arch
             MLIP architecture to use for calculations. Default is "mace_mp".
-        device : Devices
+        device
             Device to run MLIP model on. Default is "cpu".
-        model_path : PathLike | None
+        model_path
             Path to MLIP model. Default is `None`.
-        read_kwargs : ASEReadArgs | None
+        read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-        calc_kwargs : dict[str, Any] | None
+        calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : bool | None
+        set_calc
             Whether to set (new) calculators for structures. Default is None.
-        attach_logger : bool | None
+        attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
-        log_kwargs : dict[str, Any] | None
+        log_kwargs
             Keyword arguments to pass to `config_logger`. Default is {}.
-        track_carbon : bool | None
+        track_carbon
             Whether to track carbon emissions of calculation. Requires attach_logger.
             Default is True if attach_logger is True, else False.
-        tracker_kwargs : dict[str, Any] | None
+        tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
-        calcs : MaybeSequence[PhononCalcs] | None
+        calcs
             Phonon calculations to run. Default calculates force constants only.
-        supercell : MaybeList[int]
+        supercell
             The size of a supercell for calculation, or the supercell itself.
             If a single number is provided, it is interpreted as the size, so a
             diagonal supercell of that size in all dimensions is constructed.
@@ -236,50 +236,50 @@ class Phonons(BaseCalculation):
             are assumed to be the full supercell matrix in the style of Phonopy,
             so the first three values will be used as the first row, the second
             three as the second row, etc. Default is 2.
-        displacement : float
+        displacement
             Displacement for force constants calculation, in A. Default is 0.01.
-        displacement_kwargs : dict[str, Any] | None
+        displacement_kwargs
             Keyword arguments to pass to generate_displacements. Default is {}.
-        mesh : tuple[int, int, int]
+        mesh
             Mesh for sampling. Default is (10, 10, 10).
-        symmetrize : bool
+        symmetrize
             Whether to symmetrize structure and force constants after calculation.
             Default is False.
-        minimize : bool
+        minimize
             Whether to perform geometry optimisation before calculating phonons.
             Default is False.
-        minimize_kwargs : dict[str, Any] | None
+        minimize_kwargs
             Keyword arguments to pass to geometry optimizer. Default is {}.
-        n_qpoints : int
+        n_qpoints
             Number of q-points to sample along generated path, including end points.
             Unused if `qpoint_file` is specified. Default is 51.
-        qpoint_file : PathLike | None
+        qpoint_file
            Path to yaml file with info to generate a path of q-points for band
            structure. Default is None.
-        dos_kwargs : dict[str, Any] | None
+        dos_kwargs
             Keyword arguments to pass to run_total_dos. Default is {}.
-        pdos_kwargs : dict[str, Any] | None
+        pdos_kwargs
             Keyword arguments to pass to run_projected_dos. Default is {}.
-        temp_min : float
+        temp_min
             Start temperature for thermal calculations, in K. Default is 0.0.
-        temp_max : float
+        temp_max
             End temperature for thermal calculations, in K. Default is 1000.0.
-        temp_step : float
+        temp_step
             Temperature step for thermal calculations, in K. Default is 50.0.
-        force_consts_to_hdf5 : bool
+        force_consts_to_hdf5
             Whether to write force constants in hdf format or not. Default is True.
-        plot_to_file : bool
+        plot_to_file
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
-        write_results : bool
+        write_results
             Default for whether to write out results to file. Default is True.
-        write_full : bool
+        write_full
             Whether to maximize information written in various output files.
             Default is True.
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
-        enable_progress_bar : bool
+        enable_progress_bar
             Whether to show a progress bar during phonon calculations. Default is False.
         """
         read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs, pdos_kwargs = (
@@ -397,7 +397,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        value : MaybeSequence[PhononCalcs]
+        value
             Phonon calculations to be run.
         """
         if isinstance(value, str):
@@ -423,7 +423,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        write_force_consts : bool | None
+        write_force_consts
             Whether to write out results to file. Default is self.write_results.
         **kwargs
             Additional keyword arguments to pass to `write_force_constants`.
@@ -503,13 +503,13 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        phonopy_file : PathLike | None
+        phonopy_file
             Name of yaml file to save params of phonopy and optionally force constants.
             Default is inferred from `file_prefix`.
-        force_consts_to_hdf5 : bool | None
+        force_consts_to_hdf5
             Whether to save the force constants separately to an hdf5 file. Default is
             self.force_consts_to_hdf5.
-        force_consts_file : PathLike | None
+        force_consts_file
             Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
             is False. Default is inferred from `file_prefix`.
         """
@@ -543,7 +543,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        write_bands : bool | None
+        write_bands
             Whether to write out results to file. Default is self.write_results.
         **kwargs
             Additional keyword arguments to pass to `write_bands`.
@@ -571,12 +571,12 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        bands_file : PathLike | None
+        bands_file
             Name of yaml file to save band structure. Default is inferred from
             `file_prefix`.
-        save_plots : bool | None
+        save_plots
             Whether to save plot to file. Default is self.plot_to_file.
-        plot_file : PathLike | None
+        plot_file
             Name of svg file if saving band structure plot. Default is inferred from
             `file_prefix`.
         """
@@ -640,9 +640,9 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : tuple[int, int, int] | None
+        mesh
             Mesh for sampling. Default is self.mesh.
-        write_thermal : bool | None
+        write_thermal
             Whether to write out thermal properties to file. Default is
             self.write_results.
         **kwargs
@@ -688,7 +688,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        thermal_file : PathLike | None
+        thermal_file
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
@@ -707,9 +707,9 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : tuple[int, int, int] | None
+        mesh
             Mesh for sampling. Default is self.mesh.
-        write_dos : bool | None
+        write_dos
             Whether to write out results to file. Default is True.
         **kwargs
             Additional keyword arguments to pass to `write_dos`.
@@ -757,17 +757,17 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        dos_file : PathLike | None
+        dos_file
             Name of data file to save the calculated DOS. Default is inferred from
             `file_prefix`.
-        plot_to_file : bool | None
+        plot_to_file
             Whether to save plot to file. Default is self.plot_to_file.
-        plot_file : PathLike | None
+        plot_file
             Name of svg file if saving plot of the DOS. Default is inferred from
             `file_prefix`.
-        plot_bands : bool
+        plot_bands
             Whether to plot the band structure and DOS together. Default is True.
-        plot_bands_file : PathLike | None
+        plot_bands_file
             Name of svg file if saving plot of the band structure and DOS.
             Default is inferred from `file_prefix`.
         """
@@ -814,9 +814,9 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        mesh : tuple[int, int, int] | None
+        mesh
             Mesh for sampling. Default is self.mesh.
-        write_pdos : bool | None
+        write_pdos
             Whether to write out results to file. Default is self.write_results.
         **kwargs
             Additional keyword arguments to pass to `write_pdos`.
@@ -864,12 +864,12 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        pdos_file : PathLike | None
+        pdos_file
             Name of file to save the calculated PDOS. Default is inferred from
             `file_prefix`.
-        plot_to_file : bool | None
+        plot_to_file
             Whether to save plot to file. Default is self.plot_to_file.
-        plot_file : PathLike | None
+        plot_file
             Name of svg file if saving plot of the calculated PDOS. Default is inferred
             from `file_prefix`.
         """
@@ -898,7 +898,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        struct : PhonopyAtoms
+        struct
             PhonopyAtoms structure to be converted.
 
         Returns
@@ -922,7 +922,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        struct : Atoms
+        struct
             ASE Atoms structure to be converted.
 
         Returns
@@ -943,7 +943,7 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
-        struct : PhonopyAtoms
+        struct
             Structure to calculate forces on.
 
         Returns

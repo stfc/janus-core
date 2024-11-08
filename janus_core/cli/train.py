@@ -37,16 +37,16 @@ def train(
 
     Parameters
     ----------
-    mlip_config : Path
+    mlip_config
         Configuration file to pass to MLIP CLI.
-    fine_tune : bool
+    fine_tune
         Whether to fine-tune a foundational model. Default is False.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is Path("train-log.yml").
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is Path("train-summary.yml").
     """

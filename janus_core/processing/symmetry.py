@@ -15,12 +15,12 @@ def spacegroup(
 
     Parameters
     ----------
-    struct : Atoms
+    struct
         Structure as an ase Atoms object.
-    sym_tolerance : float
+    sym_tolerance
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
-    angle_tolerance : float
+    angle_tolerance
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
 
@@ -46,9 +46,9 @@ def snap_symmetry(struct: Atoms, sym_tolerance: float = 0.001) -> None:
 
     Parameters
     ----------
-    struct : Atoms
+    struct
         Structure as an ase Atoms object.
-    sym_tolerance : float
+    sym_tolerance
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
     """

@@ -18,29 +18,24 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
 
     Parameters
     ----------
-    fmt : str | None
+    fmt
         A format string in the given style for the logged output as a whole. Default is
         defined by `FORMAT`.
-    datefmt : str | None
+    datefmt
         A format string in the given style for the date/time portion of the logged
         output. Default is taken from logging.Formatter.formatTime().
-    style : Literal['%', '{', '$']
+    style
         Determines how the format string will be merged with its data. Can be one of
         '%', '{' or '$'. Default is '%'.
-    validate : bool
+    validate
         If True, incorrect or mismatched fmt and style will raise a ValueError. Default
         is True.
-    defaults : dict[str, logging.Any] | None
+    defaults
          A dictionary with default values to use in custom fields. Default is None.
     *args
         Arguments to pass to logging.Formatter.__init__.
     **kwargs
         Keyword arguments to pass to logging.Formatter.__init__.
-
-    Methods
-    -------
-    format(record)
-        Format log message to convert new lines into a yaml list.
     """
 
     FORMAT = """
@@ -71,7 +66,7 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
 
         Parameters
         ----------
-        record : logging.LogRecord
+        record
             Log record to be formatted.
 
         Returns
@@ -112,17 +107,17 @@ def config_logger(
 
     Parameters
     ----------
-    name : str
+    name
         Name of logger. Default is None.
-    filename : str | None
+    filename
         Name of log file if writing logs. Default is None.
-    level : LogLevel
+    level
         Threshold for logger. Default is logging.INFO.
-    capture_warnings : bool
+    capture_warnings
         Whether to capture warnings in log. Default is True.
-    filemode : str
+    filemode
         Mode of file to open. Default is "w".
-    force : bool
+    force
         If true, remove and close existing handlers attached to the root logger before
         configuration. Default is True.
 
@@ -168,15 +163,15 @@ def config_tracker(
 
     Parameters
     ----------
-    janus_logger : logging.Logger | None
+    janus_logger
         Logger for codecarbon output.
-    track_carbon : bool
+    track_carbon
         Whether to track carbon emissions for calculation. Default is True.
-    country_iso_code : str
+    country_iso_code
         3 letter ISO Code of the country where the code is running. Default is "GBR".
-    save_to_file : bool
+    save_to_file
         Whether to also output results to a csv file. Default is False.
-    log_level : Literal["debug", "info", "warning", "error", "critical"]
+    log_level
         Log level of internal carbon tracker log. Default is "critical".
     **kwargs
         Additional keyword arguments to pass to OfflineEmissionsTracker.
