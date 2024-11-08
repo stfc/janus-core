@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 from ase import Atoms
 from ase.io import read
@@ -17,6 +16,7 @@ from janus_core.helpers.utils import (
     none_to_dict,
     selector_len,
     slicelike_to_startstopstep,
+    validate_slicelike,
 )
 
 DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
@@ -207,6 +207,46 @@ def test_slicelike_to_startstopstep(slc: SliceLike, expected: StartStopStep):
         ([0, -1, 2, 9], 10, 4),
     ],
 )
-def test_selector_len(slc: Union[SliceLike, list[int]], len: int, expected: int):
+def test_selector_len(slc: SliceLike | list[int], len: int, expected: int):
     """Test converting SliceLike to StartStopStep."""
     assert selector_len(slc, len) == expected
+
+
+@pytest.mark.parametrize(
+    "slc",
+    [
+        slice(0, 1, 1),
+        slice(0, None, 1),
+        range(3),
+        range(0, 10, 1),
+        -1,
+        0,
+        1,
+        (0),
+        (0, 1, 1),
+        (0, None, 1),
+    ],
+)
+def test_valid_slicelikes(slc):
+    """Test validate_slicelike on valid SliceLikes."""
+    validate_slicelike(slc)
+
+
+@pytest.mark.parametrize(
+    "slc",
+    [
+        1.0,
+        "",
+        None,
+        [1],
+        (None, 0, None),
+        (0, 1, None),
+        (None, None, None),
+        (0, 1),
+        (0, 1, 2, 3),
+    ],
+)
+def test_invalid_slicelikes(slc):
+    """Test validate_slicelike on invalid SliceLikes."""
+    with pytest.raises(ValueError):
+        validate_slicelike(slc)

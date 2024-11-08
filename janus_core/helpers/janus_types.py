@@ -79,6 +79,7 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_step: int
     vaf_output_file: PathLike | None
 
+
 class CorrelationKwargs(TypedDict, total=True):
     """Arguments for on-the-fly correlations <ab>."""
 
