@@ -437,7 +437,7 @@ def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
         if not Path(config[file_key]).exists():
             raise FileNotFoundError(f"{config[file_key]} does not exist")
 
-def validate_slicelike(maybe_slicelike: SliceLike):
+def validate_slicelike(maybe_slicelike: SliceLike) -> None:
     """
     Raise an exception if slc is not a valid SliceLike.
 
