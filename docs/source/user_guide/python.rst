@@ -14,7 +14,7 @@ Jupyter Notebook tutorials illustrating the use of currently available calculati
 Calculation outputs
 ===================
 
-By default, calculations performed will modify the underlying `ase.Atoms <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_ object
+By default, calculations performed will modify the underlying :class:`ase.Atoms` object
 to store information in the ``Atoms.info`` and ``Atoms.arrays`` dictionaries about the MLIP used.
 
 Additional dictionary keys include ``arch``, corresponding to the MLIP architecture used,
