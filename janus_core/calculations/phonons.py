@@ -9,7 +9,12 @@ from ase import Atoms
 from numpy import ndarray
 import phonopy
 from phonopy.file_IO import write_force_constants_to_hdf5
+from phonopy.phonon.band_structure import (
+    get_band_qpoints_and_path_connections,
+    get_band_qpoints_by_seekpath,
+)
 from phonopy.structure.atoms import PhonopyAtoms
+from yaml import safe_load
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
@@ -22,7 +27,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
-from janus_core.helpers.utils import none_to_dict, track_progress, write_table
+from janus_core.helpers.utils import none_to_dict, track_progress
 
 
 class Phonons(BaseCalculation):
@@ -71,6 +76,8 @@ class Phonons(BaseCalculation):
         three as the second row, etc. Default is 2.
     displacement : float
         Displacement for force constants calculation, in A. Default is 0.01.
+    displacement_kwargs : dict[str, Any] | None
+        Keyword arguments to pass to generate_displacements. Default is {}.
     mesh : tuple[int, int, int]
         Mesh for sampling. Default is (10, 10, 10).
     symmetrize : bool
@@ -81,6 +88,16 @@ class Phonons(BaseCalculation):
         Default is False.
     minimize_kwargs : dict[str, Any] | None
         Keyword arguments to pass to geometry optimizer. Default is {}.
+    n_qpoints : int
+        Number of q-points to sample along generated path, including end points.
+        Unused if `qpoint_file` is specified. Default is 51.
+    qpoint_file : PathLike | None
+        Path to yaml file with info to generate a path of q-points for band structure.
+        Default is None.
+    dos_kwargs : dict[str, Any] | None
+        Keyword arguments to pass to run_total_dos. Default is {}.
+    pdos_kwargs : dict[str, Any] | None
+        Keyword arguments to pass to run_projected_dos. Default is {}.
     temp_min : float
         Start temperature for thermal properties calculations, in K. Default is 0.0.
     temp_max : float
@@ -88,8 +105,7 @@ class Phonons(BaseCalculation):
     temp_step : float
         Temperature step for thermal properties calculations, in K. Default is 50.0.
     force_consts_to_hdf5 : bool
-        Whether to write force constants in hdf format or not.
-        Default is True.
+        Whether to write force constants in hdf format or not. Default is True.
     plot_to_file : bool
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
@@ -115,7 +131,7 @@ class Phonons(BaseCalculation):
     -------
     calc_force_constants(write_force_consts)
         Calculate force constants and optionally write results.
-    write_force_constants(phonopy_file, force_consts_to_hdf5 force_consts_file)
+    write_force_constants(phonopy_file, force_consts_to_hdf5, force_consts_file)
         Write results of force constants calculations.
     calc_bands(write_bands)
         Calculate band structure and optionally write and plot results.
@@ -154,10 +170,15 @@ class Phonons(BaseCalculation):
         calcs: MaybeSequence[PhononCalcs] = (),
         supercell: MaybeList[int] = 2,
         displacement: float = 0.01,
+        displacement_kwargs: dict[str, Any] | None = None,
         mesh: tuple[int, int, int] = (10, 10, 10),
         symmetrize: bool = False,
         minimize: bool = False,
         minimize_kwargs: dict[str, Any] | None = None,
+        n_qpoints: int = 51,
+        qpoint_file: PathLike | None = None,
+        dos_kwargs: dict[str, Any] | None = None,
+        pdos_kwargs: dict[str, Any] | None = None,
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
@@ -213,6 +234,8 @@ class Phonons(BaseCalculation):
             three as the second row, etc. Default is 2.
         displacement : float
             Displacement for force constants calculation, in A. Default is 0.01.
+        displacement_kwargs : dict[str, Any] | None
+            Keyword arguments to pass to generate_displacements. Default is {}.
         mesh : tuple[int, int, int]
             Mesh for sampling. Default is (10, 10, 10).
         symmetrize : bool
@@ -223,6 +246,16 @@ class Phonons(BaseCalculation):
             Default is False.
         minimize_kwargs : dict[str, Any] | None
             Keyword arguments to pass to geometry optimizer. Default is {}.
+        n_qpoints : int
+            Number of q-points to sample along generated path, including end points.
+            Unused if `qpoint_file` is specified. Default is 51.
+        qpoint_file : PathLike | None
+           Path to yaml file with info to generate a path of q-points for band
+           structure. Default is None.
+        dos_kwargs : dict[str, Any] | None
+            Keyword arguments to pass to run_total_dos. Default is {}.
+        pdos_kwargs : dict[str, Any] | None
+            Keyword arguments to pass to run_projected_dos. Default is {}.
         temp_min : float
             Start temperature for thermal calculations, in K. Default is 0.0.
         temp_max : float
@@ -230,8 +263,7 @@ class Phonons(BaseCalculation):
         temp_step : float
             Temperature step for thermal calculations, in K. Default is 50.0.
         force_consts_to_hdf5 : bool
-            Whether to write force constants in hdf format or not.
-            Default is True.
+            Whether to write force constants in hdf format or not. Default is True.
         plot_to_file : bool
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
@@ -246,14 +278,29 @@ class Phonons(BaseCalculation):
         enable_progress_bar : bool
             Whether to show a progress bar during phonon calculations. Default is False.
         """
-        (read_kwargs, minimize_kwargs) = none_to_dict((read_kwargs, minimize_kwargs))
+        (read_kwargs, displacement_kwargs, minimize_kwargs, dos_kwargs, pdos_kwargs) = (
+            none_to_dict(
+                (
+                    read_kwargs,
+                    displacement_kwargs,
+                    minimize_kwargs,
+                    dos_kwargs,
+                    pdos_kwargs,
+                )
+            )
+        )
 
         self.calcs = calcs
         self.displacement = displacement
+        self.displacement_kwargs = displacement_kwargs
         self.mesh = mesh
         self.symmetrize = symmetrize
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
+        self.n_qpoints = n_qpoints
+        self.qpoint_file = qpoint_file
+        self.dos_kwargs = dos_kwargs
+        self.pdos_kwargs = pdos_kwargs
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.temp_step = temp_step
@@ -406,7 +453,10 @@ class Phonons(BaseCalculation):
             )
 
         phonon = phonopy.Phonopy(cell, supercell_matrix)
-        phonon.generate_displacements(distance=self.displacement)
+        phonon.generate_displacements(
+            distance=self.displacement,
+            **self.displacement_kwargs,
+        )
         disp_supercells = phonon.supercells_with_displacements
 
         if self.enable_progress_bar:
@@ -534,17 +584,44 @@ class Phonons(BaseCalculation):
         if save_plots is None:
             save_plots = self.plot_to_file
 
-        bands_file = self._build_filename("auto_bands.yml", filename=bands_file)
-        self.results["phonon"].auto_band_structure(
-            write_yaml=True,
-            filename=bands_file,
+        if self.qpoint_file:
+            bands_file = self._build_filename("bands.yml.xz", filename=bands_file)
+
+            with open(self.qpoint_file, encoding="utf8") as file:
+                paths_info = safe_load(file)
+
+            labels = paths_info["labels"]
+            num_q_points = sum(len(q) for q in paths_info["paths"])
+            num_labels = len(labels)
+            assert (
+                num_q_points == num_labels
+            ), "Number of labels is different to number of q-points specified"
+
+            q_points, connections = get_band_qpoints_and_path_connections(
+                band_paths=paths_info["paths"], npoints=paths_info["npoints"]
+            )
+
+        else:
+            bands_file = self._build_filename("auto_bands.yml.xz", filename=bands_file)
+            q_points, labels, connections = get_band_qpoints_by_seekpath(
+                self.results["phonon"].primitive, self.n_qpoints
+            )
+
+        self.results["phonon"].run_band_structure(
+            paths=q_points,
+            path_connections=connections,
+            labels=labels,
             with_eigenvectors=self.write_full,
             with_group_velocities=self.write_full,
+        )
+        self.results["phonon"].write_yaml_band_structure(
+            filename=bands_file,
+            compression="lzma",
         )
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:
-            plot_file = self._build_filename("auto_bands.svg", filename=plot_file)
+            plot_file = self._build_filename("bands.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
     def calc_thermal_props(
@@ -610,23 +687,8 @@ class Phonons(BaseCalculation):
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        thermal_file = self._build_filename("thermal.dat", filename=thermal_file)
-
-        data = {
-            "temperature": self.results["thermal_properties"]["temperatures"],
-            "Cv": self.results["thermal_properties"]["heat_capacity"],
-            "H": self.results["thermal_properties"]["free_energy"],
-            "S": self.results["thermal_properties"]["entropy"],
-        }
-
-        with open(thermal_file, "w", encoding="utf8") as out:
-            write_table(
-                fmt="ascii",
-                file=out,
-                **data,
-                units={"temperature": "K", "Cv": "J/mol/K", "H": "eV", "S": "eV"},
-                formats=dict.fromkeys(data, ".8f"),
-            )
+        thermal_file = self._build_filename("thermal.yml", filename=thermal_file)
+        self.results["phonon"].write_yaml_thermal_properties(filename=thermal_file)
 
     def calc_dos(
         self,
@@ -664,7 +726,7 @@ class Phonons(BaseCalculation):
             self.tracker.start_task("DOS calculation")
 
         self.results["phonon"].run_mesh(mesh)
-        self.results["phonon"].run_total_dos()
+        self.results["phonon"].run_total_dos(**self.dos_kwargs)
 
         if self.logger:
             self.logger.info("DOS calculation complete")
@@ -773,7 +835,7 @@ class Phonons(BaseCalculation):
         self.results["phonon"].run_mesh(
             mesh, with_eigenvectors=True, is_mesh_symmetry=False
         )
-        self.results["phonon"].run_projected_dos()
+        self.results["phonon"].run_projected_dos(**self.pdos_kwargs)
 
         if self.logger:
             self.logger.info("PDOS calculation complete")

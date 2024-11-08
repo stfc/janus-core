@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import lzma
 from pathlib import Path
 
 import pytest
@@ -26,7 +27,7 @@ def test_help():
 def test_phonons():
     """Test calculating force constants and band structure."""
     phonopy_path = Path("./NaCl-phonopy.yml").absolute()
-    bands_path = Path("./NaCl-auto_bands.yml").absolute()
+    bands_path = Path("./NaCl-auto_bands.yml.xz").absolute()
     log_path = Path("./NaCl-phonons-log.yml").absolute()
     summary_path = Path("./NaCl-phonons-summary.yml").absolute()
 
@@ -59,7 +60,7 @@ def test_phonons():
 
         has_eigenvectors = False
         has_velocity = False
-        with open(bands_path, encoding="utf8") as file:
+        with lzma.open(bands_path, mode="rt") as file:
             for line in file:
                 if "eigenvector" in line:
                     has_eigenvectors = True
@@ -89,7 +90,7 @@ def test_phonons():
 def test_bands_simple(tmp_path):
     """Test calculating force constants and reduced bands information."""
     file_prefix = tmp_path / "NaCl"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
 
     result = runner.invoke(
@@ -99,6 +100,8 @@ def test_bands_simple(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--bands",
+            "--n-qpoints",
+            21,
             "--no-write-full",
             "--no-hdf5",
             "--file-prefix",
@@ -108,9 +111,10 @@ def test_bands_simple(tmp_path):
     assert result.exit_code == 0
 
     assert autoband_results.exists()
-    with open(autoband_results, encoding="utf8") as file:
+    with lzma.open(autoband_results, mode="rb") as file:
         bands = yaml.safe_load(file)
     assert "eigenvector" not in bands["phonon"][0]["band"][0]
+    assert bands["nqpoint"] == 126
 
     # Read phonons summary file
     assert summary_path.exists()
@@ -149,7 +153,7 @@ def test_hdf5(tmp_path):
 def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
     file_prefix = tmp_path / "test" / "NaCl"
-    thermal_results = tmp_path / "test" / "NaCl-thermal.dat"
+    thermal_results = tmp_path / "test" / "NaCl-thermal.yml"
 
     result = runner.invoke(
         app,
@@ -179,6 +183,8 @@ def test_dos(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--dos",
+            "--dos-kwargs",
+            "{'freq_min': -1, 'freq_max': 0}",
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -186,6 +192,9 @@ def test_dos(tmp_path):
     )
     assert result.exit_code == 0
     assert dos_results.exists()
+    lines = dos_results.read_text().splitlines()
+    assert lines[1].split()[0] == "-1.0000000000"
+    assert lines[-1].split()[0] == "0.0000000000"
 
 
 def test_pdos(tmp_path):
@@ -200,6 +209,8 @@ def test_pdos(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--pdos",
+            "--pdos-kwargs",
+            "{'freq_min': -1, 'freq_max': 0, 'xyz_projection': True}",
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
@@ -207,6 +218,10 @@ def test_pdos(tmp_path):
     )
     assert result.exit_code == 0
     assert pdos_results.exists()
+    with open(pdos_results, encoding="utf8") as file:
+        lines = file.readlines()
+    assert lines[1].split()[0] == "-1.0000000000"
+    assert lines[-1].split()[0] == "0.0000000000"
 
 
 def test_plot(tmp_path):
@@ -214,13 +229,13 @@ def test_plot(tmp_path):
     file_prefix = tmp_path / "NaCl"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
     svgs = [
         tmp_path / "NaCl-dos.svg",
         tmp_path / "NaCl-pdos.svg",
         tmp_path / "NaCl-bs-dos.svg",
-        tmp_path / "NaCl-auto_bands.svg",
+        tmp_path / "NaCl-bands.svg",
     ]
 
     result = runner.invoke(
@@ -443,3 +458,83 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         phonon_summary = yaml.safe_load(file)
         assert "emissions" not in phonon_summary
+
+
+def test_displacement_kwargs(tmp_path):
+    """Test displacement_kwargs can be set."""
+    file_prefix_1 = tmp_path / "NaCl_1"
+    file_prefix_2 = tmp_path / "NaCl_2"
+    displacement_file_1 = tmp_path / "NaCl_1-phonopy.yml"
+    displacement_file_2 = tmp_path / "NaCl_2-phonopy.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--displacement-kwargs",
+            "{'is_plusminus': True}",
+            "--file-prefix",
+            file_prefix_1,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--displacement-kwargs",
+            "{'is_plusminus': False}",
+            "--file-prefix",
+            file_prefix_2,
+        ],
+    )
+    assert result.exit_code == 0
+
+    # Check parameters
+    with open(displacement_file_1, encoding="utf8") as file:
+        params = yaml.safe_load(file)
+        n_displacements_1 = len(params["displacements"])
+
+    assert n_displacements_1 == 4
+
+    with open(displacement_file_2, encoding="utf8") as file:
+        params = yaml.safe_load(file)
+        n_displacements_2 = len(params["displacements"])
+
+    assert n_displacements_2 == 2
+
+
+def test_paths(tmp_path):
+    """Test displacement_kwargs can be set."""
+    file_prefix = tmp_path / "NaCl"
+    qpoint_file = DATA_PATH / "paths.yml"
+    band_results = tmp_path / "NaCl-bands.yml.xz"
+
+    result = runner.invoke(
+        app,
+        [
+            "phonons",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-hdf5",
+            "--bands",
+            "--qpoint-file",
+            qpoint_file,
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert band_results.exists()
+    with lzma.open(band_results, mode="rb") as file:
+        bands = yaml.safe_load(file)
+    assert bands["nqpoint"] == 11
+    assert bands["npath"] == 1

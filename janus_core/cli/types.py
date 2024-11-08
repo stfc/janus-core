@@ -159,6 +159,34 @@ MinimizeKwargs = Annotated[
     ),
 ]
 
+DoSKwargs = Annotated[
+    Optional[TyperDict],
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to run_total_dos. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key' : value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+PDoSKwargs = Annotated[
+    Optional[TyperDict],
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to run_projected_dos. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 EnsembleKwargs = Annotated[
     Optional[TyperDict],
     Option(
@@ -166,6 +194,20 @@ EnsembleKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to ensemble initialization. Must be passed as a
+            dictionary wrapped in quotes, e.g. "{'key' : value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+DisplacementKwargs = Annotated[
+    Optional[TyperDict],
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to generate_displacements. Must be passed as a
             dictionary wrapped in quotes, e.g. "{'key' : value}".
             """
         ),

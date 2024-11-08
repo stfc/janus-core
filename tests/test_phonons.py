@@ -128,7 +128,7 @@ def test_symmetrize(tmp_path):
     phonons_1.calc_force_constants()
 
     phonons_2 = Phonons(
-        struct=single_point.struct.copy(),
+        struct=phonons_1.struct.copy(),
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
