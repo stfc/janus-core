@@ -126,20 +126,20 @@ def choose_calculator(
         from mace.calculators import mace_mp
 
         # Default to "small" model and float64 precision
-        model = model_path if model_path else "small"
+        model_path = model_path if model_path else "small"
         kwargs.setdefault("default_dtype", "float64")
 
-        calculator = mace_mp(model=model, device=device, **kwargs)
+        calculator = mace_mp(model=model_path, device=device, **kwargs)
 
     elif arch == "mace_off":
         from mace import __version__
         from mace.calculators import mace_off
 
         # Default to "small" model and float64 precision
-        model = model_path if model_path else "small"
+        model_path = model_path if model_path else "small"
         kwargs.setdefault("default_dtype", "float64")
 
-        calculator = mace_off(model=model, device=device, **kwargs)
+        calculator = mace_off(model=model_path, device=device, **kwargs)
 
     elif arch == "m3gnet":
         from matgl import __version__, load_model
@@ -155,6 +155,7 @@ def choose_calculator(
         # Otherwise, load the model if given a path, else use a default model
         if isinstance(model_path, Potential):
             potential = model_path
+            model_path = "loaded_Potential"
         elif isinstance(model_path, Path):
             if model_path.is_file():
                 model_path = model_path.parent
@@ -162,7 +163,8 @@ def choose_calculator(
         elif isinstance(model_path, str):
             potential = load_model(model_path)
         else:
-            potential = load_model("M3GNet-MP-2021.2.8-DIRECT-PES")
+            model_path = "M3GNet-MP-2021.2.8-DIRECT-PES"
+            potential = load_model(model_path)
 
         calculator = M3GNetCalculator(potential=potential, **kwargs)
 
@@ -179,11 +181,13 @@ def choose_calculator(
         # Otherwise, load the model if given a path, else use a default model
         if isinstance(model_path, CHGNet):
             model = model_path
+            model_path = "loaded_CHGNet"
         elif isinstance(model_path, Path):
             model = CHGNet.from_file(model_path)
         elif isinstance(model_path, str):
             model = CHGNet.load(model_name=model_path, use_device=device)
         else:
+            model_path = "0.3.0"
             model = None
 
         calculator = CHGNetCalculator(model=model, use_device=device, **kwargs)
@@ -198,31 +202,28 @@ def choose_calculator(
 
         # Set default path to directory containing config and model location
         if isinstance(model_path, Path):
-            path = model_path
-            if path.is_file():
-                path = path.parent
+            if model_path.is_file():
+                model_path = model_path.parent
         # If a string, assume referring to model_name e.g. "v5.27.2024"
         elif isinstance(model_path, str):
-            path = get_figshare_model_ff(model_name=model_path)
+            model_path = get_figshare_model_ff(model_name=model_path)
         else:
-            path = default_path()
+            model_path = default_path()
 
-        calculator = AlignnAtomwiseCalculator(path=path, device=device, **kwargs)
+        calculator = AlignnAtomwiseCalculator(path=model_path, device=device, **kwargs)
 
     elif arch == "sevennet":
         from sevenn import __version__
         from sevenn.sevennet_calculator import SevenNetCalculator
 
         if isinstance(model_path, Path):
-            model = str(model_path)
-        elif isinstance(model_path, str):
-            model = model_path
-        else:
-            model = "SevenNet-0_11July2024"
+            model_path = str(model_path)
+        elif not isinstance(model_path, str):
+            model_path = "SevenNet-0_11July2024"
 
         kwargs.setdefault("file_type", "checkpoint")
         kwargs.setdefault("sevennet_config", None)
-        calculator = SevenNetCalculator(model=model, device=device, **kwargs)
+        calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
 
     else:
         raise ValueError(
@@ -232,6 +233,7 @@ def choose_calculator(
 
     calculator.parameters["version"] = __version__
     calculator.parameters["arch"] = arch
+    calculator.parameters["model_path"] = str(model_path)
 
     return calculator
 

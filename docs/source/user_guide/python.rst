@@ -9,3 +9,51 @@ Jupyter Notebook tutorials illustrating the use of currently available calculati
 - `Molecular Dynamics <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/md.ipynb>`_
 - `Equation of State <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/eos.ipynb>`_
 - `Phonons <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/phonons.ipynb>`_
+
+
+Calculation outputs
+===================
+
+By default, calculations performed will modify the underlying :class:`ase.Atoms` object
+to store information in the ``Atoms.info`` and ``Atoms.arrays`` dictionaries about the MLIP used.
+
+Additional dictionary keys include ``arch``, corresponding to the MLIP architecture used,
+and ``model_path``, corresponding to the model path, name or label.
+
+Results from the MLIP calculator, which are typically stored in ``Atoms.calc.results``, will also,
+by default, be copied to these dictionaries, prefixed by the MLIP ``arch``.
+
+For example:
+
+.. code-block:: python
+
+    from janus_core.calculations.single_point import SinglePoint
+
+    single_point = SinglePoint(
+        struct_path="tests/data/NaCl.cif",
+        arch="mace_mp",
+        model_path="tests/models/mace_mp_small.model",
+    )
+
+    single_point.run()
+    print(single_point.struct.info)
+
+will return
+
+.. code-block:: python
+
+    {
+        'spacegroup': Spacegroup(1, setting=1),
+        'unit_cell': 'conventional',
+        'occupancy': {'0': {'Na': 1.0}, '1': {'Cl': 1.0}, '2': {'Na': 1.0}, '3': {'Cl': 1.0}, '4': {'Na': 1.0}, '5': {'Cl': 1.0}, '6': {'Na': 1.0}, '7': {'Cl': 1.0}},
+        'model_path': 'tests/models/mace_mp_small.model',
+        'arch': 'mace_mp',
+        'mace_mp_energy': -27.035127799332745,
+        'mace_mp_stress': array([-4.78327600e-03, -4.78327600e-03, -4.78327600e-03,  1.08000967e-19, -2.74004242e-19, -2.04504710e-19]),
+        'system_name': 'NaCl',
+    }
+
+.. note::
+    If running calculations with multiple MLIPs, ``arch`` and ``mlip_model`` will be overwritten with the most recent MLIP information.
+    Results labelled by the architecture (e.g. ``mace_mp_energy``) will be saved between MLIPs,
+    unless the same ``arch`` is chosen, in which case these values will also be overwritten.

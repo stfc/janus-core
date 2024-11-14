@@ -79,6 +79,13 @@ def test_output_structs(
     else:
         results_keys = {"energy", "forces", "stress"}
 
+    if arch == "mace_mp":
+        model = "small"
+    if arch == "m3gnet":
+        model = "M3GNet-MP-2021.2.8-DIRECT-PES"
+    if arch == "chgnet":
+        model = "0.3.0"
+
     label_keys = {f"{arch}_{key}" for key in results_keys}
 
     write_kwargs = {}
@@ -117,6 +124,7 @@ def test_output_structs(
     if "set_info" not in write_kwargs or write_kwargs["set_info"]:
         assert label_keys <= struct.info.keys() | struct.arrays.keys()
         assert struct.info["arch"] == arch
+        assert struct.info["model_path"] == model
 
     # Check file written correctly if write_results
     if write_results:
@@ -128,6 +136,7 @@ def test_output_structs(
         if "set_info" not in write_kwargs or write_kwargs["set_info"]:
             assert label_keys <= atoms.info.keys() | atoms.arrays.keys()
             assert atoms.info["arch"] == arch
+            assert atoms.info["model_path"] == model
 
         # Check calculator results depend on invalidate_calc
         if invalidate_calc:

@@ -47,6 +47,9 @@ def results_to_info(
     if not properties:
         properties = get_args(Properties)
 
+    if struct.calc and "model_path" in struct.calc.parameters:
+        struct.info["model_path"] = struct.calc.parameters["model_path"]
+
     # Only add to info if MLIP calculator with "arch" parameter set
     if struct.calc and "arch" in struct.calc.parameters:
         arch = struct.calc.parameters["arch"]
@@ -268,6 +271,8 @@ def output_structs(
         for image in images:
             if image.calc and "arch" in image.calc.parameters:
                 image.info["arch"] = image.calc.parameters["arch"]
+            if image.calc and "model_path" in image.calc.parameters:
+                image.info["model_path"] = image.calc.parameters["model_path"]
 
     # Add label for system
     for image in images:

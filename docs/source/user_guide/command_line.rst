@@ -118,6 +118,33 @@ This will run a singlepoint energy calculation on ``KCl.cif`` using the `MACE-MP
 Example configurations for all commands can be found in `janus-tutorials <https://github.com/stfc/janus-tutorials/tree/main/configs>`_
 
 
+Output files
+------------
+
+By default, calculations performed will modify the underlying `ase.Atoms <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_ object
+to store information in the ``Atoms.info`` and ``Atoms.arrays`` dictionaries about the MLIP used.
+
+Additional dictionary keys include ``arch``, corresponding to the MLIP architecture used,
+and ``model_path``, corresponding to the model path, name or label.
+
+Results from the MLIP calculator, which are typically stored in ``Atoms.calc.results``, will also, by default,
+be copied to these dictionaries, prefixed by the MLIP ``arch``.
+
+This information is then saved when extxyz files are written. For example:
+
+.. code-block:: bash
+
+    janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path /path/to/mace/model
+
+
+Generates an output file, ``NaCl-results.extxyz``, with ``arch``, ``model_path``, ``mace_mp_energy``, ``mace_mp_forces``, and ``mace_mp_stress``.
+
+.. note::
+    If running calculations with multiple MLIPs, ``arch`` and ``mlip_model`` will be overwritten with the most recent MLIP information.
+    Results labelled by the architecture (e.g. ``mace_mp_energy``) will be saved between MLIPs,
+    unless the same ``arch`` is chosen, in which case these values will also be overwritten.
+
+
 Single point calculations
 -------------------------
 
