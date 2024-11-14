@@ -1,0 +1,11 @@
+train_file: "tests/data/mlip_train.xyz"
+valid_file: "tests/data/mlip_valid.xyz"
+test_file: "tests/data/mlip_test.xyz"
+energy_key: 'dft_energy'
+forces_key: 'dft_forces'
+stress_key: 'dft_stress'
+r_max: 4.0
+scaling: 'rms_forces_scaling'
+batch_size: 4
+seed: 2024
+compute_statistics: False

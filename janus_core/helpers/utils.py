@@ -409,3 +409,26 @@ def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
 
     with progress:
         yield from progress.track(sequence, description=description)
+
+
+def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
+    """
+    Check files specified in a dictionary read from a configuration file exist.
+
+    Parameters
+    ----------
+    config : dict
+        Dictionary read from configuration file.
+    req_file_keys : Sequence[Pathlike]
+        Files that must exist if defined in the configuration file.
+
+    Raises
+    ------
+    FileNotFoundError
+        If a key from `req_file_keys` is in the configuration file, but the
+        file corresponding to the configuration value do not exist.
+    """
+    for file_key in config.keys() & req_file_keys:
+        # Only check if file key is in the configuration file
+        if not Path(config[file_key]).exists():
+            raise FileNotFoundError(f"{config[file_key]} does not exist")

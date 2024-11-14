@@ -428,7 +428,7 @@ Training and fine-tuning MLIPs
 ------------------------------
 
 .. note::
-    Currently only MACE models are supported. See the `MACE CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_ for further configuration details
+    Currently only MACE models are supported. See the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_ for further configuration details
 
 Models can be trained by passing a configuration file to the MLIP's command line interface:
 
@@ -444,6 +444,27 @@ Foundational models can also be fine-tuned, by including the ``foundation_model`
 .. code-block:: bash
 
     janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
+
+
+Preprocessing training data
+----------------------------
+
+.. note::
+    Currently only MACE models are supported. See the `MACE preprocess_data CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/preprocess_data.py>`_ for further configuration details
+
+Large datasets, which may not fit into GPU memory, can be preprocessed,
+converting xyz training, test, and validation files into HDF5 files that can then be used for on-line data loading.
+
+This can be done by passing a configuration file to the MLIP's command line interface:
+
+.. code-block:: bash
+
+    janus preprocess --mlip-config /path/to/preprocessing/config.yml
+
+For MACE, this will create separate folders for ``train``, ``val`` and ``test`` HDF5 data files, when relevant,
+as well as saving the statistics of your data in ``statistics.json``, if requested.
+
+Additionally, a log file, ``preprocess-log.yml``, and summary file, ``preprocess-summary.yml``, will be generated.
 
 
 Calculate descriptors
