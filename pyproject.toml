@@ -29,7 +29,7 @@ janus = "janus_core.cli.janus:app"
 [tool.poetry.dependencies]
 ase = "^3.23"
 codecarbon = "^2.5.0"
-mace-torch = "0.3.6"
+mace-torch = "0.3.8"
 numpy = "^1.26.4"
 phonopy = "^2.23.1"
 python = "^3.9"
