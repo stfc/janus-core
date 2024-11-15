@@ -415,6 +415,7 @@ def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
     with progress:
         yield from progress.track(sequence, description=description)
 
+
 def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
     """
     Check files specified in a dictionary read from a configuration file exist.
@@ -436,6 +437,7 @@ def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
         # Only check if file key is in the configuration file
         if not Path(config[file_key]).exists():
             raise FileNotFoundError(f"{config[file_key]} does not exist")
+
 
 def validate_slicelike(maybe_slicelike: SliceLike) -> None:
     """
