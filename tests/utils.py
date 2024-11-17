@@ -64,7 +64,9 @@ def assert_log_contains(
     with open(log_path, encoding="utf8") as log_file:
         logs = yaml.safe_load(log_file)
     # Nested join as log["message"] may be a list
-    messages = "".join("".join(log["message"]) for log in logs)
+    messages = "".join(
+        "".join(log["message"]) if log["message"] else "" for log in logs
+    )
 
     assert all(inc in messages for inc in includes)
     assert all(exc not in messages for exc in excludes)
