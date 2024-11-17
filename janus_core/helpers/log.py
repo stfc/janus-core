@@ -80,6 +80,7 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
             Formatted log message.
         """
         # Parse JSON dump from codecarbon
+        record.msg = str(record.msg)
         if len(record.msg) > 1 and (record.msg[0] == "{" and record.msg[-1] == "}"):
             msg_dict = json.loads(record.msg)
             record.msg = ""
