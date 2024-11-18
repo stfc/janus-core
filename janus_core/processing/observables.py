@@ -30,8 +30,8 @@ class Observable(ABC):
 
         Parameters
         ----------
-        atoms_slice : list[int] | SliceLike | None = None
-            A slice of atoms to observe.
+        atoms_slice : list[int] | SliceLike | None
+            A slice of atoms to observe. By default all atoms are included.
         """
         if atoms_slice:
             if isinstance(atoms_slice, list):
