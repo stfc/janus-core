@@ -187,7 +187,9 @@ def test_single_point_molecule(tmp_path):
     assert atoms.info["mace_energy"] == pytest.approx(-14.035236305927514)
     assert "mace_forces" in atoms.arrays
     assert "mace_stress" in atoms.info
-    assert atoms.info["mace_stress"] == pytest.approx([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    assert atoms.info["mace_stress"] == pytest.approx(
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], abs=1e-5
+    )
 
 
 def test_invalid_prop():

@@ -20,6 +20,7 @@
 *.png
 *.svg
 *.xz
+*.txt
 ~*
 *~
 .project
