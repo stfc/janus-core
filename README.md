@@ -95,9 +95,11 @@ Current and planned features include:
 - [x] Equation of State
 - [x] Training ML potentials
   - MACE
-- [x] Fine tunning MLIPs
+- [x] Fine-tuning MLIPs
   - MACE
-- [x] Descriptors
+- [x] MLIP descriptors
+  - MACE
+- [x] Data preprocessing
   - MACE
 - [ ] Rare events simulations
   - PLUMED
