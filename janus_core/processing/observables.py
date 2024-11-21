@@ -91,7 +91,20 @@ class ComponentMixin:
         """
         return [self._allowed_components[c] for c in self.components]
 
-    def _set_components(self, components: list[str]):
+    @property
+    def components(self) -> list[str]:
+        """
+        Get the symbolic components of the observable.
+
+        Returns
+        -------
+        list[str]
+            The observables components.
+        """
+        return self._components
+
+    @components.setter
+    def components(self, components: list[str]):
         """
         Check if components are valid, if so set them.
 
@@ -111,7 +124,7 @@ class ComponentMixin:
                 f" invalid, must be '{', '.join(self._allowed_components)}'"
             )
 
-        self.components = components
+        self._components = components
 
 
 # pylint: disable=too-few-public-methods
@@ -162,7 +175,7 @@ class Stress(Observable, ComponentMixin):
                 "yx": 5,
             },
         )
-        self._set_components(components)
+        self.components = components
 
         Observable.__init__(self, atoms_slice)
         self.include_ideal_gas = include_ideal_gas
@@ -234,7 +247,7 @@ class Velocity(Observable, ComponentMixin):
             List or slice of atoms to observe velocities from.
         """
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
-        self._set_components(components)
+        self.components = components
 
         Observable.__init__(self, atoms_slice)
 
