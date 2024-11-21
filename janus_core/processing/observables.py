@@ -82,12 +82,12 @@ class ComponentMixin:
     @property
     def _indices(self) -> list[int]:
         """
-        Get indices associated with self._components.
+        Get indices associated with self.components.
 
         Returns
         -------
         list[int]
-            The indices for each self._components.
+            The indices for each self.components.
         """
         return [self._allowed_components[c] for c in self.components]
 
