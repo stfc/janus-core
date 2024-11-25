@@ -33,13 +33,14 @@ class Observable(ABC):
         atoms_slice : list[int] | SliceLike | None
             A slice of atoms to observe. By default all atoms are included.
         """
-        if atoms_slice:
-            if isinstance(atoms_slice, list):
-                self.atoms_slice = atoms_slice
-            else:
-                self.atoms_slice = slice(*slicelike_to_startstopstep(atoms_slice))
-        else:
+        if not atoms_slice:
             self.atoms_slice = slice(0, None, 1)
+            return
+
+        if isinstance(atoms_slice, list):
+            self.atoms_slice = atoms_slice
+        else:
+            self.atoms_slice = slice(*slicelike_to_startstopstep(atoms_slice))
 
     @abstractmethod
     def __call__(self, atoms: Atoms) -> list[float]:

@@ -179,8 +179,6 @@ class Correlation:
 
     Parameters
     ----------
-    n_atoms : int
-        Number of possible atoms to track.
     a : Observable
         Observable for a.
     b : Observable
@@ -200,7 +198,6 @@ class Correlation:
     def __init__(
         self,
         *,
-        n_atoms: int,
         a: Observable,
         b: Observable,
         name: str,
@@ -214,8 +211,6 @@ class Correlation:
 
         Parameters
         ----------
-        n_atoms : int
-            Number of possible atoms to track.
         a : Observable
             Observable for a.
         b : Observable
