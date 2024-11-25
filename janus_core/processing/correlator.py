@@ -140,19 +140,39 @@ class Correlator:
         """
         return self._shift_not_null[block, p_i] and self._shift_not_null[block, p_j]
 
-    def get(self) -> tuple[Iterable[float], Iterable[float]]:
+    def get_lags(self) -> Iterable[float]:
         """
-        Obtain the correlation and lag times.
+        Obtain the correlation lag times.
 
         Returns
         -------
-        correlation : Iterable[float]
+        Iterable[float]
+            The correlation lag times.
+        """
+        lags = np.zeros(self._points * self._blocks)
+
+        lag = 0
+        for i in range(self._points):
+            if self._count_correlated[0, i] > 0:
+                lags[lag] = i
+                lag += 1
+        for k in range(1, self._max_block_used):
+            for i in range(self._min_dist, self._points):
+                if self._count_correlated[k, i] > 0:
+                    lags[lag] = float(i) * float(self._averaging) ** k
+                    lag += 1
+        return lags[0:lag]
+
+    def get_value(self) -> Iterable[float]:
+        """
+        Obtain the correlation value.
+
+        Returns
+        -------
+        Iterable[float]
             The correlation values <a(t)b(t+t')>.
-        lags : Iterable[float]]
-            The correlation lag times t'.
         """
         correlation = np.zeros(self._points * self._blocks)
-        lags = np.zeros(self._points * self._blocks)
 
         lag = 0
         for i in range(self._points):
@@ -160,7 +180,6 @@ class Correlator:
                 correlation[lag] = (
                     self._correlation[0, i] / self._count_correlated[0, i]
                 )
-                lags[lag] = i
                 lag += 1
         for k in range(1, self._max_block_used):
             for i in range(self._min_dist, self._points):
@@ -168,9 +187,8 @@ class Correlator:
                     correlation[lag] = (
                         self._correlation[k, i] / self._count_correlated[k, i]
                     )
-                    lags[lag] = float(i) * float(self._averaging) ** k
                     lag += 1
-        return (correlation[0:lag], lags[0:lag])
+        return correlation[0:lag]
 
 
 class Correlation:
@@ -280,8 +298,8 @@ class Correlation:
             The correlation lag times t'.
         """
         if self._correlators:
-            _, lags = self._correlators[0].get()
-            return np.mean([cor.get()[0] for cor in self._correlators], axis=0), lags
+            lags = self._correlators[0].get_lags()
+            return np.mean([cor.get_value() for cor in self._correlators], axis=0), lags
         return [], []
 
     def __str__(self) -> str:

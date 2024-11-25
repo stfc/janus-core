@@ -43,7 +43,7 @@ def correlate(
 def test_setup():
     """Test initial values."""
     cor = Correlator(blocks=1, points=100, averaging=2)
-    correlation, lags = cor.get()
+    correlation, lags = cor.get_value(), cor.get_lags()
     assert len(correlation) == len(lags)
     assert len(correlation) == 0
 
@@ -55,7 +55,7 @@ def test_correlation():
     signal = np.exp(-np.linspace(0.0, 1.0, points))
     for val in signal:
         cor.update(val, val)
-    correlation, lags = cor.get()
+    correlation, lags = cor.get_value(), cor.get_lags()
 
     direct = correlate(signal, signal, fft=False)
     fft = correlate(signal, signal, fft=True)
