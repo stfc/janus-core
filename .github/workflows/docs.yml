@@ -22,35 +22,30 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    container: sphinxdoc/sphinx
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install poetry
-      run: |
-        apt update
-        apt upgrade -y
-        apt install -y pipx
-        pipx install poetry
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.5.4"
 
-    - name: add deps
-      run: |
-        apt install -y python3-dev build-essential
+      - name: Set up Python 3.11
+        run: uv python install 3.11
 
-    - name: sphinx
-      run: |
-        export PATH="$HOME/.local/bin:$PATH"
-        poetry install --with docs
-        cd docs
-        poetry run make html
+      - name: Install dependencies
+        run: uv sync
 
-    - name: upload
-      uses: actions/upload-pages-artifact@v3
-      with:
-        # Upload entire repository
-        path: './docs/build/html/.'
+      - name: Build docs
+        run: cd docs && uv run make html
 
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: './docs/build/html/.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
