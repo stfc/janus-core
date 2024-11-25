@@ -187,20 +187,87 @@ Alternatively, using ``tox``::
 Adding a new Observable
 =======================
 
-Additional built-in observable quantities may be added for use by the ``janus_core.processing.correlator.Correlation`` class. These should conform to the ``__call__`` signature of ``janus_core.helpers.janus_types.Observable``. For a user this can be accomplished by writing a function, or class also implementing a commensurate ``__call__``.
+A :class:`janus_core.processing.observables.Observable` abstracts obtaining a quantity derived from ``Atoms``. They may be used as kernels for input into analysis such as a correlation.
 
-Built-in observables are collected within the ``janus_core.processing.observables`` module. For example the ``janus_core.processing.observables.Stress`` observable allows a user to quickly setup a given correlation of stress tensor components (with and without the ideal gas contribution). An observable for the ``xy`` component is obtained without the ideal gas contribution as:
+Additional built-in observable quantities may be added for use by the :class:`janus_core.processing.correlator.Correlation` class. These should extend :class:`janus_core.processing.observables.Observable` and are implemented within the :py:mod:`janus_core.processing.observables` module.
+
+The abstract method ``__call__`` should be implemented to obtain the values of the observed quantity from an ``Atoms`` object. When used as part of a :class:`janus_core.processing.correlator.Correlation`, each value will be correlated and the results averaged.
+
+As an example of building a new ``Observable`` consider the :class:`janus_core.processing.observables.Stress` built-in. The following steps may be taken:
+
+1. Defining the observable.
+---------------------------
+
+The stress tensor may be computed on an atoms object using ``Atoms.get_stress``. A user may wish to obtain a particular component, or perhaps only compute the stress on some subset of ``Atoms``. For example during a :class:`janus_core.calculations.md.MolecularDynamics` run a user may wish to correlate only the off-diagonal components (shear stress), computed across all atoms.
+
+2. Writing the ``__call__`` method.
+-----------------------------------
+
+In the call method we can use the base :class:`janus_core.processing.observables.Observable`'s optional atom selector ``atoms_slice`` to first define the subset of atoms to compute the stress for:
 
 .. code-block:: python
 
-    Stress("xy", False)
+    def __call__(self, atoms: Atoms) -> list[float]:
+        sliced_atoms = atoms[self.atoms_slice]
+        # must be re-attached after slicing for get_stress
+        sliced_atoms.calc = atoms.calc
 
-A new built-in observables can be implemented by a class with the method:
+Next the stresses may be obtained from:
 
 .. code-block:: python
 
-   def __call__(self, atoms: Atoms, *args, **kwargs) -> float
+    stresses = (
+            sliced_atoms.get_stress(
+                include_ideal_gas=self.include_ideal_gas, voigt=True
+            )
+            / units.GPa
+        )
 
-The ``__call__`` should contain all the logic for obtaining some ``float`` value from an ``Atoms`` object, alongside optional positional arguments and kwargs. The args and kwargs are set by a user when specifying correlations for a ``janus_core.calculations.md.MolecularDynamics`` run. See also ``janus_core.helpers.janus_types.CorrelationKwargs``. These are set at the instantiation of the ``janus_core.calculations.md.MolecularDynamics`` object and are not modified. These could be used e.g. to specify an observable calculated only from one atom's data.
+Finally, to facilitate handling components in a symbolic way, :class:`janus_core.processing.observables.ComponentMixin` exists to parse ``str`` symbolic components to ``int`` indices by defining a suitable mapping. For the stress tensor (and the format of ``Atoms.get_stress``) a suitable mapping is defined in :class:`janus_core.processing.observables.Stress`'s ``__init__`` method:
 
-``janus_core.processing.observables.Stress`` includes a constructor to take a symbolic component, e.g. ``"xx"`` or ``"yz"``, and determine the index required from ``ase.Atoms.get_stress`` on instantiation for ease of use.
+.. code-block:: python
+
+        ComponentMixin.__init__(
+            self,
+            components={
+                "xx": 0,
+                "yy": 1,
+                "zz": 2,
+                "yz": 3,
+                "zy": 3,
+                "xz": 4,
+                "zx": 4,
+                "xy": 5,
+                "yx": 5,
+            },
+        )
+
+This then concludes the ``__call__`` method for :class:`janus_core.processing.observables.Stress` by using :class:`janus_core.processing.observables.ComponentMixin`'s
+pre-calculated indices:
+
+.. code-block:: python
+
+    return stesses[self._indices]
+
+The combination of the above means a user may obtain, say, the ``xy`` and ``zy`` stress tensor components over odd-indexed atoms by calling the following observable on an ``Atoms``:
+
+.. code-block:: python
+
+    s = Stress(components=["xy", "zy"], atoms_slice=(0, None, 2))
+
+
+Since usually total system stresses are required we can define two built-ins to handle the shear and hydrostatic stresses like so:
+
+.. code-block:: python
+
+    StressHydrostatic = Stress(components=["xx", "yy", "zz"])
+    StressShear = Stress(components=["xy", "yz", "zx"])
+
+Where by default :class:`janus_core.processing.observables.Observable`'s ``atoms_slice`` is ``slice(0, None, 1)``, which expands to all atoms in an ``Atoms``.
+
+For comparison the :class:`janus_core.processing.observables.Velocity` built-in's ``__call__`` not only returns atom velocity for the requested components, but also returns them for every tracked atom i.e:
+
+.. code-block:: python
+
+    def __call__(self, atoms: Atoms) -> list[float]:
+        return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()

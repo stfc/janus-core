@@ -278,6 +278,7 @@ janus\_core.processing.observables module
    :private-members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
 
 janus\_core.processing.post\_process module
 -------------------------------------------

@@ -18,7 +18,12 @@ from rich.progress import (
 )
 from rich.style import Style
 
-from janus_core.helpers.janus_types import MaybeSequence, PathLike
+from janus_core.helpers.janus_types import (
+    MaybeSequence,
+    PathLike,
+    SliceLike,
+    StartStopStep,
+)
 
 
 class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-method)
@@ -432,3 +437,83 @@ def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
         # Only check if file key is in the configuration file
         if not Path(config[file_key]).exists():
             raise FileNotFoundError(f"{config[file_key]} does not exist")
+
+
+def validate_slicelike(maybe_slicelike: SliceLike) -> None:
+    """
+    Raise an exception if slc is not a valid SliceLike.
+
+    Parameters
+    ----------
+    maybe_slicelike : SliceLike
+        Candidate to test.
+
+    Raises
+    ------
+    ValueError
+        If maybe_slicelike is not SliceLike.
+    """
+    if isinstance(maybe_slicelike, (slice, range, int)):
+        return
+    if isinstance(maybe_slicelike, tuple) and len(maybe_slicelike) == 3:
+        start, stop, step = maybe_slicelike
+        if (
+            (start is None or isinstance(start, int))
+            and (stop is None or isinstance(stop, int))
+            and isinstance(step, int)
+        ):
+            return
+
+    raise ValueError(f"{maybe_slicelike} is not a valid SliceLike")
+
+
+def slicelike_to_startstopstep(index: SliceLike) -> StartStopStep:
+    """
+    Standarize `SliceLike`s into tuple of `start`, `stop`, `step`.
+
+    Parameters
+    ----------
+    index : SliceLike
+        `SliceLike` to standardize.
+
+    Returns
+    -------
+    StartStopStep
+        Standardized `SliceLike` as `start`, `stop`, `step` triplet.
+    """
+    validate_slicelike(index)
+    if isinstance(index, int):
+        if index == -1:
+            return (index, None, 1)
+        return (index, index + 1, 1)
+
+    if isinstance(index, (slice, range)):
+        return (index.start, index.stop, index.step)
+
+    return index
+
+
+def selector_len(slc: SliceLike | list, selectable_length: int) -> int:
+    """
+    Calculate the length of a selector applied to an indexable of a given length.
+
+    Parameters
+    ----------
+    slc : Union[SliceLike, list]
+        The applied SliceLike or list for selection.
+    selectable_length : int
+        The length of the selectable object.
+
+    Returns
+    -------
+    int
+        Length of the result of applying slc.
+    """
+    if isinstance(slc, int):
+        return 1
+    if isinstance(slc, list):
+        return len(slc)
+    start, stop, step = slicelike_to_startstopstep(slc)
+    if stop is None:
+        stop = selectable_length
+    return len(range(start, stop, step))

@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from ase import Atoms
 import numpy as np
 
-from janus_core.helpers.janus_types import Observable
+from janus_core.processing.observables import Observable
 
 
 class Correlator:
@@ -140,19 +140,39 @@ class Correlator:
         """
         return self._shift_not_null[block, p_i] and self._shift_not_null[block, p_j]
 
-    def get(self) -> tuple[Iterable[float], Iterable[float]]:
+    def get_lags(self) -> Iterable[float]:
         """
-        Obtain the correlation and lag times.
+        Obtain the correlation lag times.
 
         Returns
         -------
-        correlation : Iterable[float]
+        Iterable[float]
+            The correlation lag times.
+        """
+        lags = np.zeros(self._points * self._blocks)
+
+        lag = 0
+        for i in range(self._points):
+            if self._count_correlated[0, i] > 0:
+                lags[lag] = i
+                lag += 1
+        for k in range(1, self._max_block_used):
+            for i in range(self._min_dist, self._points):
+                if self._count_correlated[k, i] > 0:
+                    lags[lag] = float(i) * float(self._averaging) ** k
+                    lag += 1
+        return lags[0:lag]
+
+    def get_value(self) -> Iterable[float]:
+        """
+        Obtain the correlation value.
+
+        Returns
+        -------
+        Iterable[float]
             The correlation values <a(t)b(t+t')>.
-        lags : Iterable[float]]
-            The correlation lag times t'.
         """
         correlation = np.zeros(self._points * self._blocks)
-        lags = np.zeros(self._points * self._blocks)
 
         lag = 0
         for i in range(self._points):
@@ -160,7 +180,6 @@ class Correlator:
                 correlation[lag] = (
                     self._correlation[0, i] / self._count_correlated[0, i]
                 )
-                lags[lag] = i
                 lag += 1
         for k in range(1, self._max_block_used):
             for i in range(self._min_dist, self._points):
@@ -168,9 +187,8 @@ class Correlator:
                     correlation[lag] = (
                         self._correlation[k, i] / self._count_correlated[k, i]
                     )
-                    lags[lag] = float(i) * float(self._averaging) ** k
                     lag += 1
-        return (correlation[0:lag], lags[0:lag])
+        return correlation[0:lag]
 
 
 class Correlation:
@@ -179,10 +197,10 @@ class Correlation:
 
     Parameters
     ----------
-    a : tuple[Observable, dict]
-        Getter for a and kwargs.
-    b : tuple[Observable, dict]
-        Getter for b and kwargs.
+    a : Observable
+        Observable for a.
+    b : Observable
+        Observable for b.
     name : str
         Name of correlation.
     blocks : int
@@ -197,8 +215,9 @@ class Correlation:
 
     def __init__(
         self,
-        a: Observable | tuple[Observable, tuple, dict],
-        b: Observable | tuple[Observable, tuple, dict],
+        *,
+        a: Observable,
+        b: Observable,
         name: str,
         blocks: int,
         points: int,
@@ -210,10 +229,10 @@ class Correlation:
 
         Parameters
         ----------
-        a : tuple[Observable, tuple, dict]
-            Getter for a and kwargs.
-        b : tuple[Observable, tuple, dict]
-            Getter for b and kwargs.
+        a : Observable
+            Observable for a.
+        b : Observable
+            Observable for b.
         name : str
             Name of correlation.
         blocks : int
@@ -226,19 +245,13 @@ class Correlation:
             Frequency to update the correlation, md steps.
         """
         self.name = name
-        if isinstance(a, tuple):
-            self._get_a, self._a_args, self._a_kwargs = a
-        else:
-            self._get_a = a
-            self._a_args, self._a_kwargs = (), {}
+        self.blocks = blocks
+        self.points = points
+        self.averaging = averaging
+        self._get_a = a
+        self._get_b = b
 
-        if isinstance(b, tuple):
-            self._get_b, self._b_args, self._b_kwargs = b
-        else:
-            self._get_b = b
-            self._b_args, self._b_kwargs = (), {}
-
-        self._correlator = Correlator(blocks=blocks, points=points, averaging=averaging)
+        self._correlators = None
         self._update_frequency = update_frequency
 
     @property
@@ -262,14 +275,20 @@ class Correlation:
         atoms : Atoms
             Atoms object to observe values from.
         """
-        self._correlator.update(
-            self._get_a(atoms, *self._a_args, **self._a_kwargs),
-            self._get_b(atoms, *self._b_args, **self._b_kwargs),
-        )
+        value_pairs = zip(self._get_a(atoms), self._get_b(atoms))
+        if self._correlators is None:
+            self._correlators = [
+                Correlator(
+                    blocks=self.blocks, points=self.points, averaging=self.averaging
+                )
+                for _ in range(len(self._get_a(atoms)))
+            ]
+        for corr, values in zip(self._correlators, value_pairs):
+            corr.update(*values)
 
     def get(self) -> tuple[Iterable[float], Iterable[float]]:
         """
-        Get the correlation value and lags.
+        Get the correlation value and lags, averaging over atoms if applicable.
 
         Returns
         -------
@@ -278,7 +297,10 @@ class Correlation:
         lags : Iterable[float]]
             The correlation lag times t'.
         """
-        return self._correlator.get()
+        if self._correlators:
+            lags = self._correlators[0].get_lags()
+            return np.mean([cor.get_value() for cor in self._correlators], axis=0), lags
+        return [], []
 
     def __str__(self) -> str:
         """

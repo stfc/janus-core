@@ -9,9 +9,15 @@ from ase.io import read
 import pytest
 
 from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
+from janus_core.helpers.janus_types import SliceLike, StartStopStep
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.struct_io import output_structs
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import (
+    none_to_dict,
+    selector_len,
+    slicelike_to_startstopstep,
+    validate_slicelike,
+)
 
 DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
 MODEL_PATH = Path(__file__).parent / "models/mace_mp_small.model"
@@ -166,3 +172,81 @@ def test_none_to_dict(dicts_in):
     assert dicts[2] == dicts_in[2]
     assert dicts[3] == dicts_in[3]
     assert dicts[4] == {}
+
+
+@pytest.mark.parametrize(
+    "slc, expected",
+    [
+        ((1, 2, 3), (1, 2, 3)),
+        (1, (1, 2, 1)),
+        (range(1, 2, 3), (1, 2, 3)),
+        (slice(1, 2, 3), (1, 2, 3)),
+        (-1, (-1, None, 1)),
+        (range(10), (0, 10, 1)),
+        (slice(0, None, 1), (0, None, 1)),
+    ],
+)
+def test_slicelike_to_startstopstep(slc: SliceLike, expected: StartStopStep):
+    """Test converting SliceLike to StartStopStep."""
+    assert slicelike_to_startstopstep(slc) == expected
+
+
+@pytest.mark.parametrize(
+    "slc, len, expected",
+    [
+        ((1, 2, 3), 3, 1),
+        (1, 1, 1),
+        (range(1, 2, 3), 3, 1),
+        (slice(1, 2, 3), 3, 1),
+        (-1, 5, 1),
+        (-3, 4, 1),
+        (range(10), 10, 10),
+        (slice(0, None, 2), 10, 5),
+        ([-2, -1, 0], 9, 3),
+        ([-1], 10, 1),
+        ([0, -1, 2, 9], 10, 4),
+    ],
+)
+def test_selector_len(slc: SliceLike | list[int], len: int, expected: int):
+    """Test converting SliceLike to StartStopStep."""
+    assert selector_len(slc, len) == expected
+
+
+@pytest.mark.parametrize(
+    "slc",
+    [
+        slice(0, 1, 1),
+        slice(0, None, 1),
+        range(3),
+        range(0, 10, 1),
+        -1,
+        0,
+        1,
+        (0),
+        (0, 1, 1),
+        (0, None, 1),
+    ],
+)
+def test_valid_slicelikes(slc):
+    """Test validate_slicelike on valid SliceLikes."""
+    validate_slicelike(slc)
+
+
+@pytest.mark.parametrize(
+    "slc",
+    [
+        1.0,
+        "",
+        None,
+        [1],
+        (None, 0, None),
+        (0, 1, None),
+        (None, None, None),
+        (0, 1),
+        (0, 1, 2, 3),
+    ],
+)
+def test_invalid_slicelikes(slc):
+    """Test validate_slicelike on invalid SliceLikes."""
+    with pytest.raises(ValueError):
+        validate_slicelike(slc)
