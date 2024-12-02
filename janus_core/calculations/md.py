@@ -1105,7 +1105,7 @@ class MolecularDynamics(BaseCalculation):
                 self._set_velocity_distribution()
                 if not isinstance(self, NVE):
                     self.dyn.set_temperature(temperature_K=self.temp)
-            self.dyn.run(self.steps)
+            self.dyn.run(self.steps - self.offset)
             self._write_final_state()
             self.created_final_file = True
             if self.logger:
