@@ -1454,7 +1454,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         **kwargs,
     ) -> None:
         """
-        Initialise dynamics for NVT simulation.
+        Initialise dynamics for NVT Nosé-Hoover simulation.
 
         Parameters
         ----------
@@ -1515,6 +1515,67 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
             Default formats attached to statistical properties.
         """
         return super().default_formats | {"Target_T": ".5f"}
+
+
+class NVT_Bussi(NVT):  # noqa: N801 (invalid-class-name)
+    """
+    Configure Bussi stochastic velocity rescaling (NVT) simulation.
+
+    Parameters
+    ----------
+    *args
+        Additional arguments.
+    taut : float
+        Time constant for Bussi temperature coupling, in fs. Default is 100.0.
+    ensemble : Ensembles
+        Name for thermodynamic ensemble. Default is "nvt-bussi".
+    ensemble_kwargs : dict[str, Any] | None
+        Keyword arguments to pass to ensemble initialization. Default is {}.
+    **kwargs
+        Additional keyword arguments.
+    """
+
+    def __init__(
+        self,
+        *args,
+        taut: float = 100.0,
+        ensemble: Ensembles = "nvt-bussi",
+        ensemble_kwargs: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
+        """
+        Initialise dynamics for Bussi stochastic velocity rescaling (NVT) simulation.
+
+        Parameters
+        ----------
+        *args
+            Additional arguments.
+        taut : float
+            Time constant for Bussi temperature coupling, in fs. Defaylt is 100.0.
+        ensemble : Ensembles
+            Name for thermodynamic ensemble. Default is "nvt-bussi".
+        ensemble_kwargs : dict[str, Any] | None
+            Keyword arguments to pass to ensemble initialization. Default is {}.
+        **kwargs
+            Additional keyword arguments.
+        """
+        try:
+            from ase.md.bussi import Bussi
+        except ImportError as e:
+            raise NotImplementedError(
+                "Please download the latest ASE commits to use this module."
+            ) from e
+
+        super().__init__(*args, ensemble=ensemble, **kwargs)
+
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
+        self.dyn = Bussi(
+            self.struct,
+            timestep=self.timestep,
+            temperature_K=self.temp,
+            taut=taut * units.fs,
+            **ensemble_kwargs,
+        )
 
 
 class NPH(NPT):
