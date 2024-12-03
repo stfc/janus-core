@@ -715,7 +715,7 @@ def test_auto_restart(tmp_path):
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--steps",
-            3,
+            7,
             "--traj-every",
             1,
             "--stats-every",
