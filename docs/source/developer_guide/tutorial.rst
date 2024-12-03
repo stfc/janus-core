@@ -12,20 +12,36 @@ The following steps can then be taken, using `ALIGNN-FF <https://github.com/usni
 1. Add required dependencies
 ----------------------------
 
-Dependencies for ``janus-core`` are specified through a ``pyproject.toml`` file, with syntax defined by `poetry's dependency specification <https://python-poetry.org/docs/dependency-specification/>`_.
+Dependencies for ``janus-core`` are specified through a ``pyproject.toml`` file,
+with syntax consistent with `PEP 621 <https://docs.astral.sh/uv/concepts/projects/dependencies/#project-dependencies>`_.
 
-New MLIPs should be added as optional dependencies under ``[tool.poetry.dependencies]``, and added as an ``extra`` under ``[tool.poetry.extras]``::
+New MLIPs should be added as optional dependencies under ``[project.optional-dependencies]``,
+both with its own label, and to ``all`` if it is compatible with existing MLIPs::
 
-    [tool.poetry.dependencies]
-    alignn = { version = "2024.5.27", optional = true }
-    sevenn = { version = "0.10.0", optional = true }
-    torch_geometric = { version = "^2.5.3", optional = true }
+    [project.optional-dependencies]
+    alignn = [
+        "alignn == 2024.5.27",]
 
-    [tool.poetry.extras]
-    alignn = ["alignn"]
-    sevennet = ["sevenn", "torch_geometric"]
+    chgnet = [
+        "chgnet == 0.3.8",]
 
-Poetry will automatically resolve dependencies of the MLIP, if present, to ensure consistency with existing dependencies.
+    m3gnet = [
+        "matgl == 1.1.3",
+        "dgl == 2.1.0",
+        "torchdata == 0.7.1",]
+
+    sevennet = [
+        "sevenn == 0.10.0",
+        "torch-geometric == 2.6.1",]
+
+    all = [
+        "janus-core[alignn]",
+        "janus-core[chgnet]",
+        "janus-core[m3gnet]",
+        "janus-core[sevennet]",
+    ]
+
+uv will automatically resolve dependencies of the MLIP, if present, to ensure consistency with existing dependencies.
 
 .. note::
     In the case of ``sevennet``, it was necessary to add ``torch_geometric`` as an additional dependency, but in most cases this should not be required
@@ -34,14 +50,13 @@ Extra dependencies can then be installed by running:
 
 .. code-block:: bash
 
-    poetry lock
-    poetry install --extras "alignn sevennet"
+    uv sync --extra alignn --extra sevennet
 
 or, for all extras:
 
 .. code-block:: bash
 
-    poetry install --extras all
+    uv sync --extra all
 
 
 2. Register MLIP architecture
