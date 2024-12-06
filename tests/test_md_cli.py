@@ -101,6 +101,12 @@ def test_md(ensemble):
         # Check at least one image has been saved in trajectory
         atoms = read(traj_path)
         assert isinstance(atoms, Atoms)
+        assert "energy" in atoms.calc.results
+        assert "mace_mp_energy" in atoms.info
+        assert "forces" in atoms.calc.results
+        assert "mace_mp_forces" in atoms.arrays
+        assert "momenta" in atoms.arrays
+        assert "masses" in atoms.arrays
 
     finally:
         final_path.unlink(missing_ok=True)
