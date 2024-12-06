@@ -470,7 +470,9 @@ class MolecularDynamics(BaseCalculation):
         opt_file = self._build_filename("opt.extxyz", self.param_prefix, filename=None)
 
         # Set defaults
-        default_columns = ["symbols", "positions", "momenta", "masses", "forces"]
+        default_columns = ["symbols", "positions", "momenta", "masses"]
+        if not write_kwargs.get("invalidate_calc", False):
+            default_columns.append("forces")
         if "arch" in self.struct.calc.parameters and write_kwargs.get("set_info", True):
             default_columns.append(f"{arch}_forces")
 
