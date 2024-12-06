@@ -426,10 +426,6 @@ class MolecularDynamics(BaseCalculation):
         if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
             raise ValueError("Start and end temperatures must be positive")
 
-        self.write_kwargs.setdefault(
-            "columns", ["symbols", "positions", "momenta", "masses"]
-        )
-
         # Read last image by default
         read_kwargs.setdefault("index", -1)
 
@@ -472,6 +468,13 @@ class MolecularDynamics(BaseCalculation):
 
         # If not specified otherwise, save optimized structure consistently with others
         opt_file = self._build_filename("opt.extxyz", self.param_prefix, filename=None)
+
+        # Set defaults
+        default_columns = ["symbols", "positions", "momenta", "masses", "forces"]
+        if "arch" in self.struct.calc.parameters and write_kwargs.get("set_info", True):
+            default_columns.append(f"{arch}_forces")
+
+        self.write_kwargs.setdefault("columns", default_columns)
 
         if "write_kwargs" in self.minimize_kwargs:
             # Use _build_filename even if given filename to ensure directory exists
