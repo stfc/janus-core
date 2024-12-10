@@ -20,20 +20,18 @@ both with its own label, and to ``all`` if it is compatible with existing MLIPs:
 
     [project.optional-dependencies]
     alignn = [
-        "alignn == 2024.5.27",]
-
+        "alignn == 2024.5.27",
+    ]
     chgnet = [
-        "chgnet == 0.3.8",]
-
+        "chgnet == 0.3.8",
+    ]
     m3gnet = [
         "matgl == 1.1.3",
         "dgl == 2.1.0",
-        "torchdata == 0.7.1",]
-
     sevennet = [
         "sevenn == 0.10.0",
-        "torch-geometric == 2.6.1",]
-
+        "torch-geometric == 2.6.1",
+    ]
     all = [
         "janus-core[alignn]",
         "janus-core[chgnet]",
