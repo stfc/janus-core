@@ -474,7 +474,7 @@ class MolecularDynamics(BaseCalculation):
         if not write_kwargs.get("invalidate_calc", False):
             default_columns.append("forces")
         if "arch" in self.struct.calc.parameters and write_kwargs.get("set_info", True):
-            default_columns.append(f"{arch}_forces")
+            default_columns.append(f"{self.arch}_forces")
 
         self.write_kwargs.setdefault("columns", default_columns)
 
@@ -1084,6 +1084,9 @@ class MolecularDynamics(BaseCalculation):
                 self.temp = temp
                 self._set_velocity_distribution()
                 if isclose(temp, 0.0):
+                    # Calculate forces and energies to be output
+                    self.struct.get_potential_energy()
+                    self.struct.get_forces()
                     self._write_final_state()
                     self.created_final_file = True
                     continue
