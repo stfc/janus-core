@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from ase import Atoms
@@ -164,6 +165,16 @@ class BaseCalculation(FileNameMixin):
             calc_kwargs=self.calc_kwargs,
             set_calc=set_calc,
         )
+
+        # Set architecture to match calculator architecture
+        if isinstance(self.struct, Sequence):
+            if all(
+                image.calc and "arch" in image.calc.parameters for image in self.struct
+            ):
+                self.arch = self.struct[0].calc.parameters["arch"]
+        else:
+            if self.struct.calc and "arch" in self.struct.calc.parameters:
+                self.arch = self.struct.calc.parameters["arch"]
 
         FileNameMixin.__init__(
             self,

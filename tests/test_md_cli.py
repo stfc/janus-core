@@ -101,6 +101,12 @@ def test_md(ensemble):
         # Check at least one image has been saved in trajectory
         atoms = read(traj_path)
         assert isinstance(atoms, Atoms)
+        assert "energy" in atoms.calc.results
+        assert "mace_mp_energy" in atoms.info
+        assert "forces" in atoms.calc.results
+        assert "mace_mp_forces" in atoms.arrays
+        assert "momenta" in atoms.arrays
+        assert "masses" in atoms.arrays
 
     finally:
         final_path.unlink(missing_ok=True)
@@ -477,7 +483,7 @@ def test_write_kwargs(tmp_path):
     traj_path = tmp_path / "md-traj.extxyz"
 
     write_kwargs = (
-        "{'invalidate_calc': False, 'columns': ['symbols', 'positions', 'masses']}"
+        "{'invalidate_calc': True, 'columns': ['symbols', 'positions', 'masses']}"
     )
 
     result = runner.invoke(
@@ -509,13 +515,11 @@ def test_write_kwargs(tmp_path):
     assert not final_atoms.has("momenta")
     assert not traj[0].has("momenta")
 
-    # Check calculated results have been saved
-    assert "energy" in final_atoms.calc.results
-    assert "energy" in traj[0].calc.results
-
-    # Check labelled info has been set
-    assert "mace_mp_energy" in final_atoms.info
+    # Check results saved with arch label, but calc is not attached
+    assert final_atoms.calc is None
+    assert traj[0].calc is None
     assert "mace_mp_energy" in traj[0].info
+    assert "mace_mp_energy" in final_atoms.info
 
     assert "system_name" in final_atoms.info
     assert final_atoms.info["system_name"] == "NaCl"
