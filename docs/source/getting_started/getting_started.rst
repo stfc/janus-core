@@ -57,4 +57,4 @@ Currently supported extras are:
 - ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
 - ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
 
-``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[tool.poetry.extras]``.
+``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.

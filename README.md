@@ -60,7 +60,7 @@ or to install all supported MLIPs:
 python3 -m pip install janus-core[all]
 ```
 
-Individual `extras` are listed in [Getting Started](https://stfc.github.io/janus-core/getting_started/getting_started.html#installation), as well as in [pyproject.toml](pyproject.toml) under `[tool.poetry.extras]`.
+Individual `extras` are listed in [Getting Started](https://stfc.github.io/janus-core/getting_started/getting_started.html#installation), as well as in [pyproject.toml](pyproject.toml) under `[project.optional-dependencies]`.
 
 
 ### Further help
@@ -282,19 +282,18 @@ This is also the case the calculations performed using the CLI, with the same in
 
 ## Development
 
-We recommend installing poetry for dependency management when developing for `janus-core`:
+We recommend installing uv for dependency management when developing for `janus-core`:
 
-1. Install [poetry](https://python-poetry.org/docs/#installation)
-2. (Optional) Create a virtual environment
-3. Install `janus-core` with dependencies:
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation)
+2. Install `janus-core` with dependencies in a virtual environment:
 
 ```shell
 git clone https://github.com/stfc/janus-core
 cd janus-core
-python3 -m pip install --upgrade pip
-poetry install --with pre-commit,dev,docs  # install with useful dev dependencies
-pre-commit install  # install pre-commit hooks
-pytest -v  # discover and run all tests
+uv sync --all-extras # Create a virtual environment and install all dependencies
+source .venv/bin/activate
+pre-commit install  # Install pre-commit hooks
+pytest -v  # Discover and run all tests
 ```
 
 

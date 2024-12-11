@@ -2,27 +2,36 @@
 Getting started
 ===============
 
-We recommend `installing poetry <https://python-poetry.org/docs/#installation>`_ for dependency management when developing for ``janus-core``.
+We recommend `installing uv <https://docs.astral.sh/uv/getting-started/installation/>`_ for dependency management when developing for ``janus-core``.
 
 This provides a number of useful features, including:
 
-- Dependency management (``poetry [add,update,remove]`` etc.) and organization (groups)
-- Storing the versions of all installations in a ``poetry.lock`` file, for reproducible builds
-- Improved dependency resolution
-- Virtual environment management (optional)
-- Building and publishing tools
+- `Dependency management <https://docs.astral.sh/uv/concepts/projects/dependencies/>`_ (``uv [add,remove]`` etc.) and organization (`groups <https://docs.astral.sh/uv/concepts/projects/dependencies/#dependency-groups>`_)
+
+- Storing the versions of all installations in a `uv.lock <https://docs.astral.sh/uv/concepts/projects/sync/>`_ file, for reproducible builds
+
+- Improved `dependency resolution <https://docs.astral.sh/uv/concepts/resolution/>`_
+
+- Virtual environment management
+
+- `Building and publishing <https://docs.astral.sh/uv/guides/publish/>`_ tools
+
+  * Currently, an external build backend, such as `pdm <https://pypi.org/project/pdm-backend>`_, is required
+
 
 Dependencies useful for development can then be installed by running::
 
-    poetry install --with pre-commit,dev,docs
+    uv sync
+    source .venv/bin/activate
+
 
 Extras, such as optional MLIPs, can also be installed by running::
 
-    poetry install --with pre-commit,dev,docs --extras "alignn sevennet"
+    uv sync --extra alignn --extra sevennet
 
 or to install all supported MLIPs::
 
-    poetry install --with pre-commit,dev,docs --extras all
+    uv sync --all-extras
 
 
 Running unit tests
