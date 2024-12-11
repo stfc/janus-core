@@ -200,6 +200,12 @@ def config_tracker(
         while carbon_logger.hasHandlers():
             carbon_logger.removeHandler(carbon_logger.handlers[0])
 
+        if not hasattr(tracker, "_emissions"):
+            raise ValueError(
+                "Carbon tracker has not been configured correctly. Please try "
+                "reconfiguring, or disable the tracker."
+            )
+
     else:
         tracker = None
 
