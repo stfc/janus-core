@@ -16,12 +16,12 @@ class Correlator:
 
     Implements the algorithm detailed in https://doi.org/10.1063/1.3491098.
 
-    Data pairs are observed iteratively and stored in a set of rolling hierarchical data 
+    Data pairs are observed iteratively and stored in a set of rolling hierarchical data
     blocks.
-    
-    Once a block is filled, coarse graining may be applied to update coarser block levels by 
-    updating the coarser block with the average of values accumulated up to that point in 
-    the filled block.
+
+    Once a block is filled, coarse graining may be applied to update coarser block
+    levels by updating the coarser block with the average of values accumulated up to
+    that point in the filled block.
 
     The correlation is continuously updated when any block is updated with new data.
 
