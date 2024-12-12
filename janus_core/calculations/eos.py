@@ -265,6 +265,7 @@ class EoS(BaseCalculation):
                 "name": self.logger.name,
                 "filemode": "a",
             }
+        self.minimize_kwargs["track_carbon"] = self.track_carbon
 
         # Set output files
         self.write_kwargs.setdefault("filename", None)

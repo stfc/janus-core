@@ -353,6 +353,7 @@ class Phonons(BaseCalculation):
                     "name": self.logger.name,
                     "filemode": "a",
                 }
+            self.minimize_kwargs["track_carbon"] = self.track_carbon
 
             # Write out file by default
             self.minimize_kwargs.setdefault("write_results", True)

@@ -499,6 +499,7 @@ class MolecularDynamics(BaseCalculation):
                 "name": self.logger.name,
                 "filemode": "a",
             }
+        self.minimize_kwargs["track_carbon"] = self.track_carbon
 
         self.dyn: Langevin | VelocityVerlet | ASE_NPT
         self.n_atoms = len(self.struct)
