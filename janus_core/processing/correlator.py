@@ -16,6 +16,15 @@ class Correlator:
 
     Implements the algorithm detailed in https://doi.org/10.1063/1.3491098.
 
+    Data pairs are observed iteratively and stored in a set of rolling hierarchical data 
+    blocks.
+    
+    Once a block is filled, coarse graining may be applied to update coarser block levels by 
+    updating the coarser block with the average of values accumulated up to that point in 
+    the filled block.
+
+    The correlation is continuously updated when any block is updated with new data.
+
     Parameters
     ----------
     blocks : int
@@ -41,13 +50,13 @@ class Correlator:
         """
         # Number of resoluion levels.
         self._blocks = blocks
-        # Data points a each resolution.
+        # Data points at each resolution.
         self._points = points
         # Coarse-graining between resolution levels.
         self._averaging = averaging
         # Which levels have been updated with data.
         self._max_block_used = 0
-        # First point in a block relevant for correlation updates.
+        # First point in coarse-grained block relevant for correlation updates.
         self._min_dist = self._points / self._averaging
 
         # Sum of data seen for calculating the average between blocks.
@@ -118,7 +127,7 @@ class Correlator:
         # Update the correlation.
         i = self._shift_index[block]
         if block == 0:
-            # Need to multiply all (full resolution).
+            # Need to multiply by all in this block (full resolution).
             j = i
             for point in range(self._points):
                 if self._shifts_valid(block, i, j):
@@ -133,6 +142,7 @@ class Correlator:
                     j += self._points
         else:
             # Only need to update after points/averaging.
+            # The previous block already accounts for those points.
             for point in range(self._min_dist, self._points):
                 if j < 0:
                     j = j + self._points
