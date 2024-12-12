@@ -40,11 +40,12 @@ def train(
     req_file_keys : Sequence[PathLike]
         List of files that must exist if defined in the configuration file.
         Default is ("train_file", "test_file", "valid_file", "statistics_file").
-    attach_logger : bool
-        Whether to attach a logger. Default is False.
+    attach_logger : bool | None
+        Whether to attach a logger. Default is True if "filename" is passed in
+        log_kwargs, else False.
     log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool
+    track_carbon : bool | None
         Whether to track carbon emissions of calculation. Requires attach_logger.
         Default is True if attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
@@ -56,6 +57,11 @@ def train(
     with open(mlip_config, encoding="utf8") as file:
         options = yaml.safe_load(file)
     check_files_exist(options, req_file_keys)
+
+    if "filename" in log_kwargs:
+        attach_logger = True
+    else:
+        attach_logger = attach_logger if attach_logger else False
 
     if not attach_logger:
         if track_carbon:
