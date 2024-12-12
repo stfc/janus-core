@@ -520,7 +520,7 @@ class MolecularDynamics(BaseCalculation):
         """Set time in fs, current dynamics step, and density to info."""
         time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
         step = self.offset + self.dyn.nsteps
-        self.dyn.atoms.info["time_fs"] = time
+        self.dyn.atoms.info["time"] = time
         self.dyn.atoms.info["step"] = step
         try:
             density = (
@@ -769,7 +769,7 @@ class MolecularDynamics(BaseCalculation):
         return {
             "Step": self.dyn.atoms.info["step"],
             "Real_Time": real_time.total_seconds(),
-            "Time": self.dyn.atoms.info["time_fs"],
+            "Time": self.dyn.atoms.info["time"],
             "Epot/N": e_pot,
             "EKin/N": e_kin,
             "T": current_temp,
@@ -1021,6 +1021,19 @@ class MolecularDynamics(BaseCalculation):
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
+        unit_keys = (
+            "energy",
+            "forces",
+            "stress",
+            "time",
+            "real_time",
+            "temperature",
+            "pressure",
+            "density",
+            "momenta",
+        )
+        self._set_units(unit_keys)
+
         if not self.restart:
             if self.minimize:
                 self._optimize_structure()

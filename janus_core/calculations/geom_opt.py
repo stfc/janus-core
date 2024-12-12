@@ -304,6 +304,8 @@ class GeomOpt(BaseCalculation):
         if self.tracker:
             self.tracker.start_task("Geometry optimization")
 
+        self._set_units()
+
         converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
 
         # Calculate current maximum force
