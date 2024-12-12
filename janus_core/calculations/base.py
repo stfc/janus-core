@@ -52,7 +52,8 @@ class BaseCalculation(FileNameMixin):
     log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
-        Whether to track carbon emissions of calculation. Default is True.
+        Whether to track carbon emissions of calculation. Requires attach_logger.
+        Default is True if attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
     file_prefix : PathLike | None
@@ -85,7 +86,7 @@ class BaseCalculation(FileNameMixin):
         set_calc: bool | None = None,
         attach_logger: bool = False,
         log_kwargs: dict[str, Any] | None = None,
-        track_carbon: bool = True,
+        track_carbon: bool | None = None,
         tracker_kwargs: dict[str, Any] | None = None,
         file_prefix: PathLike | None = None,
         additional_prefix: str | None = None,
@@ -123,7 +124,8 @@ class BaseCalculation(FileNameMixin):
         log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
         track_carbon : bool
-            Whether to track carbon emissions of calculation. Default is True.
+            Whether to track carbon emissions of calculation. Requires attach_logger.
+            Default is True if attach_logger is True, else False.
         tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
         file_prefix : PathLike | None
@@ -146,11 +148,17 @@ class BaseCalculation(FileNameMixin):
         self.read_kwargs = read_kwargs
         self.calc_kwargs = calc_kwargs
         self.log_kwargs = log_kwargs
-        self.track_carbon = track_carbon
         self.tracker_kwargs = tracker_kwargs
 
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
+
+        if not attach_logger:
+            if track_carbon:
+                raise ValueError("Carbon tracking requires logging to be enabled")
+            self.track_carbon = False
+        else:
+            self.track_carbon = track_carbon if track_carbon is not None else True
 
         # Read structures and/or attach calculators
         # Note: logger not set up so yet so not passed here

@@ -19,7 +19,7 @@ def preprocess(
     req_file_keys: Sequence[PathLike] = ("train_file", "test_file", "valid_file"),
     attach_logger: bool = False,
     log_kwargs: dict[str, Any] | None = None,
-    track_carbon: bool = True,
+    track_carbon: bool | None = None,
     tracker_kwargs: dict[str, Any] | None = None,
 ) -> None:
     """
@@ -40,7 +40,8 @@ def preprocess(
     log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
-        Whether to track carbon emissions of calculation. Default is True.
+        Whether to track carbon emissions of calculation. Requires attach_logger.
+        Default is True if attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
@@ -50,6 +51,13 @@ def preprocess(
     with open(mlip_config, encoding="utf8") as file:
         options = yaml.safe_load(file)
     check_files_exist(options, req_file_keys)
+
+    if not attach_logger:
+        if track_carbon:
+            raise ValueError("Carbon tracking requires logging to be enabled")
+        track_carbon = False
+    else:
+        track_carbon = track_carbon if track_carbon is not None else True
 
     # Configure logging
     if attach_logger:

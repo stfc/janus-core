@@ -52,7 +52,8 @@ class Descriptors(BaseCalculation):
     log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
     track_carbon : bool
-        Whether to track carbon emissions of calculation. Default is True.
+        Whether to track carbon emissions of calculation. Default is True if
+        attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     invariants_only : bool
@@ -85,7 +86,7 @@ class Descriptors(BaseCalculation):
         set_calc: bool | None = None,
         attach_logger: bool = False,
         log_kwargs: dict[str, Any] | None = None,
-        track_carbon: bool = True,
+        track_carbon: bool | None = None,
         tracker_kwargs: dict[str, Any] | None = None,
         invariants_only: bool = True,
         calc_per_element: bool = False,
@@ -122,7 +123,8 @@ class Descriptors(BaseCalculation):
         log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
         track_carbon : bool
-            Whether to track carbon emissions of calculation. Default is True.
+            Whether to track carbon emissions of calculation. Requires attach_logger.
+            Default is True if attach_logger is True, else False.
         tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
         invariants_only : bool
