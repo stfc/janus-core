@@ -47,14 +47,14 @@ class Correlator:
         self._averaging = averaging
         # Which levels have been updated with data.
         self._max_block_used = 0
-        # First point in a block relevant for correlation updates. 
+        # First point in a block relevant for correlation updates.
         self._min_dist = self._points / self._averaging
 
         # Sum of data seen for calculating the average between blocks.
         self._accumulator = np.zeros((self._blocks, 2))
         # Data points accumulated at each block.
         self._count_accumulated = np.zeros(self._blocks, dtype=int)
-        # Current position in each blocks data store. 
+        # Current position in each blocks data store.
         self._shift_index = np.zeros(self._blocks, dtype=int)
         # Rolling data store for each block.
         self._shift = np.zeros((self._blocks, self._points, 2))
@@ -97,7 +97,7 @@ class Correlator:
 
         shift = self._shift_index[block]
         self._max_block_used = max(self._max_block_used, block)
-        
+
         # Update the rolling data store, and accumulate
         self._shift[block, shift, :] = a, b
         self._accumulator[block, :] += a, b
@@ -137,7 +137,7 @@ class Correlator:
                 if j < 0:
                     j = j + self._points
                 if self._shifts_valid(block, i, j):
-                   # Correlate at this lag.
+                    # Correlate at this lag.
                     self._correlation[block, point] += (
                         self._shift[block, i, 0] * self._shift[block, j, 1]
                     )
@@ -212,7 +212,7 @@ class Correlator:
                 lag += 1
         for k in range(1, self._max_block_used):
             for i in range(self._min_dist, self._points):
-                # Indices at less than points/averaging are accounted in the previous block.
+                # Indices less than points/averaging accounted in the previous block.
                 if self._count_correlated[k, i] > 0:
                     # Data has been correlated at a coarse-grained level.
                     correlation[lag] = (
@@ -307,14 +307,14 @@ class Correlation:
             Atoms object to observe values from.
         """
         # All pairs of data to be correlated.
-        value_pairs = zip(self._get_a(atoms), self._get_b(atoms))
+        value_pairs = zip(self._get_a(atoms).flatten(), self._get_b(atoms).flatten())
         if self._correlators is None:
             # Initialise correlators automatically.
             self._correlators = [
                 Correlator(
                     blocks=self.blocks, points=self.points, averaging=self.averaging
                 )
-                for _ in range(len(self._get_a(atoms)))
+                for _ in range(len(self._get_a(atoms).flatten()))
             ]
         for corr, values in zip(self._correlators, value_pairs):
             corr.update(*values)
