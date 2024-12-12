@@ -613,8 +613,6 @@ class MolecularDynamics(BaseCalculation):
         centre-of-mass momentum, and (optionally) total angular momentum.
         """
         atoms = self.struct
-        if self.dyn.nsteps >= 0:
-            atoms = self.dyn.atoms
 
         MaxwellBoltzmannDistribution(atoms, temperature_K=self.temp)
         Stationary(atoms)
@@ -1569,6 +1567,9 @@ class NVT_Bussi(NVT):  # noqa: N801 (invalid-class-name)
         super().__init__(*args, ensemble=ensemble, **kwargs)
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
+
+        # Velocity distribution must be non-zero before dynamics is set
+        self._set_velocity_distribution()
         self.dyn = Bussi(
             self.struct,
             timestep=self.timestep,
