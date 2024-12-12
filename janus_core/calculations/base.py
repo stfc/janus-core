@@ -18,6 +18,17 @@ from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.struct_io import input_structs
 from janus_core.helpers.utils import FileNameMixin, none_to_dict
 
+UNITS = {
+    "energy": "eV",
+    "forces": "ev/Ang",
+    "stress": "ev/Ang^3",
+    "time": "fs",
+    "real_time": "s",
+    "temperature": "K",
+    "pressure": "GPa",
+    "momenta": "(eV / u)^0.5",
+}
+
 
 class BaseCalculation(FileNameMixin):
     """
@@ -202,3 +213,22 @@ class BaseCalculation(FileNameMixin):
         self.tracker = config_tracker(
             self.logger, self.track_carbon, **self.tracker_kwargs
         )
+
+    def _set_units(self, keys: Sequence = ("energy", "forces", "stress")) -> None:
+        """
+        Save units to structure info.
+
+        Parameters
+        ----------
+        keys : Sequence
+            Keys for which to add units to structure info. Default is
+            ("energy", "forces", "stress").
+        """
+        if isinstance(self.struct, Sequence):
+            for image in self.struct:
+                for key in keys:
+                    image.info[f"{key}_units"] = UNITS[key]
+            return
+
+        for key in keys:
+            self.struct.info[f"{key}_units"] = UNITS[key]
