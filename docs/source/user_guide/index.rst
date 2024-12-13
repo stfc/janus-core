@@ -7,3 +7,4 @@ User guide
 
     command_line
     python
+    troubleshooting

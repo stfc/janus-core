@@ -11,7 +11,7 @@ import yaml
 
 from janus_core.helpers.janus_types import PathLike
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import check_files_exist, none_to_dict
+from janus_core.helpers.utils import check_files_exist, none_to_dict, set_log_tracker
 
 
 def train(
@@ -24,7 +24,7 @@ def train(
     ),
     attach_logger: bool = False,
     log_kwargs: dict[str, Any] | None = None,
-    track_carbon: bool = True,
+    track_carbon: bool | None = None,
     tracker_kwargs: dict[str, Any] | None = None,
 ) -> None:
     """
@@ -40,12 +40,14 @@ def train(
     req_file_keys : Sequence[PathLike]
         List of files that must exist if defined in the configuration file.
         Default is ("train_file", "test_file", "valid_file", "statistics_file").
-    attach_logger : bool
-        Whether to attach a logger. Default is False.
+    attach_logger : bool | None
+        Whether to attach a logger. Default is True if "filename" is passed in
+        log_kwargs, else False.
     log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool
-        Whether to track carbon emissions of calculation. Default is True.
+    track_carbon : bool | None
+        Whether to track carbon emissions of calculation. Requires attach_logger.
+        Default is True if attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
@@ -55,6 +57,10 @@ def train(
     with open(mlip_config, encoding="utf8") as file:
         options = yaml.safe_load(file)
     check_files_exist(options, req_file_keys)
+
+    attach_logger, track_carbon = set_log_tracker(
+        attach_logger, log_kwargs, track_carbon
+    )
 
     # Configure logging
     if attach_logger:
