@@ -16,7 +16,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.struct_io import input_structs
-from janus_core.helpers.utils import FileNameMixin, none_to_dict
+from janus_core.helpers.utils import FileNameMixin, none_to_dict, set_log_tracker
 
 
 class BaseCalculation(FileNameMixin):
@@ -155,17 +155,9 @@ class BaseCalculation(FileNameMixin):
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
 
-        if "filename" in log_kwargs:
-            attach_logger = True
-        else:
-            attach_logger = attach_logger if attach_logger else False
-
-        if not attach_logger:
-            if track_carbon:
-                raise ValueError("Carbon tracking requires logging to be enabled")
-            self.track_carbon = False
-        else:
-            self.track_carbon = track_carbon if track_carbon is not None else True
+        attach_logger, self.track_carbon = set_log_tracker(
+            attach_logger, log_kwargs, track_carbon
+        )
 
         # Read structures and/or attach calculators
         # Note: logger not set up so yet so not passed here

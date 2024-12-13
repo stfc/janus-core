@@ -11,7 +11,7 @@ import yaml
 
 from janus_core.helpers.janus_types import PathLike
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import check_files_exist, none_to_dict
+from janus_core.helpers.utils import check_files_exist, none_to_dict, set_log_tracker
 
 
 def train(
@@ -58,17 +58,9 @@ def train(
         options = yaml.safe_load(file)
     check_files_exist(options, req_file_keys)
 
-    if "filename" in log_kwargs:
-        attach_logger = True
-    else:
-        attach_logger = attach_logger if attach_logger else False
-
-    if not attach_logger:
-        if track_carbon:
-            raise ValueError("Carbon tracking requires logging to be enabled")
-        track_carbon = False
-    else:
-        track_carbon = track_carbon if track_carbon is not None else True
+    attach_logger, track_carbon = set_log_tracker(
+        attach_logger, log_kwargs, track_carbon
+    )
 
     # Configure logging
     if attach_logger:

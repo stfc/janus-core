@@ -517,3 +517,38 @@ def selector_len(slc: SliceLike | list, selectable_length: int) -> int:
     if stop is None:
         stop = selectable_length
     return len(range(start, stop, step))
+
+
+def set_log_tracker(
+    attach_logger: bool, log_kwargs: dict, track_carbon: bool
+) -> tuple[bool, bool]:
+    """
+    Set attach_logger and track_carbon default values.
+
+    Parameters
+    ----------
+    attach_logger : bool
+        Whether to attach a logger.
+    log_kwargs : dict[str, Any]
+        Keyword arguments to pass to `config_logger`.
+    track_carbon : bool
+        Whether to track carbon emissions of calculation.
+
+    Returns
+    -------
+    tuple[bool, bool]
+        Default values for attach_logger and track_carbon.
+    """
+    if "filename" in log_kwargs:
+        attach_logger = True
+    else:
+        attach_logger = attach_logger if attach_logger else False
+
+    if not attach_logger:
+        if track_carbon:
+            raise ValueError("Carbon tracking requires logging to be enabled")
+        track_carbon = False
+    else:
+        track_carbon = track_carbon if track_carbon is not None else True
+
+    return attach_logger, track_carbon
