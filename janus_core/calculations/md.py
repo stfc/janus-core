@@ -1569,7 +1569,11 @@ class NVT_Bussi(NVT):  # noqa: N801 (invalid-class-name)
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
 
         # Velocity distribution must be non-zero before dynamics is set
-        self._set_velocity_distribution()
+        if np.isclose(self.struct.get_kinetic_energy(), 0.0, rtol=0, atol=1e-12):
+            if self.logger:
+                self.logger.warning("Velocities modified during Bussi initialisation")
+            self._set_velocity_distribution()
+
         self.dyn = Bussi(
             self.struct,
             timestep=self.timestep,
