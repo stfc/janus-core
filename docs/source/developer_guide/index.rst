@@ -7,3 +7,4 @@ Developer guide
 
     get_started
     tutorial
+    ci
