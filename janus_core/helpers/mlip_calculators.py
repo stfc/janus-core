@@ -258,7 +258,7 @@ def choose_calculator(
         calculator = DP(model=model_path, **kwargs)
 
     elif arch == "orb":
-        __version__ = "0.3"
+        from orb_models import __version__
         from orb_models.forcefield.calculator import ORBCalculator
         from orb_models.forcefield.graph_regressor import GraphRegressor
         import orb_models.forcefield.pretrained as orb_ff
