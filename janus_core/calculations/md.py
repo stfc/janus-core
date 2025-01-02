@@ -1515,18 +1515,18 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         return super().default_formats | {"Target_T": ".5f"}
 
 
-class NVT_Bussi(NVT):  # noqa: N801 (invalid-class-name)
+class NVT_CSVR(NVT):  # noqa: N801 (invalid-class-name)
     """
-    Configure Bussi stochastic velocity rescaling (NVT) simulation.
+    Configure NVT simulation using CSVR thermostat proposed by Bussi et al.
 
     Parameters
     ----------
     *args
         Additional arguments.
     taut : float
-        Time constant for Bussi temperature coupling, in fs. Default is 100.0.
+        Time constant for CSVR thermostat coupling, in fs. Default is 100.0.
     ensemble : Ensembles
-        Name for thermodynamic ensemble. Default is "nvt-bussi".
+        Name for thermodynamic ensemble. Default is "nvt-csvr".
     ensemble_kwargs : dict[str, Any] | None
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
@@ -1537,21 +1537,21 @@ class NVT_Bussi(NVT):  # noqa: N801 (invalid-class-name)
         self,
         *args,
         taut: float = 100.0,
-        ensemble: Ensembles = "nvt-bussi",
+        ensemble: Ensembles = "nvt-csvr",
         ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
-        Initialise dynamics for Bussi stochastic velocity rescaling (NVT) simulation.
+        Initialise dynamics for NVT simulation using CSVR thermostat.
 
         Parameters
         ----------
         *args
             Additional arguments.
         taut : float
-            Time constant for Bussi temperature coupling, in fs. Defaylt is 100.0.
+            Time constant for CSVR thermostat coupling, in fs. Defaylt is 100.0.
         ensemble : Ensembles
-            Name for thermodynamic ensemble. Default is "nvt-bussi".
+            Name for thermodynamic ensemble. Default is "nvt-csvr".
         ensemble_kwargs : dict[str, Any] | None
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
@@ -1571,7 +1571,7 @@ class NVT_Bussi(NVT):  # noqa: N801 (invalid-class-name)
         # Velocity distribution must be non-zero before dynamics is set
         if np.isclose(self.struct.get_kinetic_energy(), 0.0, rtol=0, atol=1e-12):
             if self.logger:
-                self.logger.warning("Velocities modified during Bussi initialisation")
+                self.logger.warning("Velocities modified during MD initialisation")
             self._set_velocity_distribution()
 
         self.dyn = Bussi(

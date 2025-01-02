@@ -61,7 +61,7 @@ def md(
     taut: Annotated[
         float,
         Option(
-            help="Temperature coupling time constant for Bussi NVT simulation, in fs."
+            help="Temperature coupling time constant for NVT CSVR simulation, in fs."
         ),
     ] = 100.0,
     ensemble_kwargs: EnsembleKwargs = None,
@@ -214,7 +214,7 @@ def md(
     friction : float
         Friction coefficient in fs^-1. Default is 0.005.
     taut : float
-        Time constant for Bussi temperature coupling, in fs. Default is 100.0.
+        Time constant for CSVR thermostat coupling, in fs. Default is 100.0.
     ensemble_kwargs : Optional[dict[str, Any]]
         Keyword arguments to pass to ensemble initialization. Default is {}.
     arch : Optional[str]
@@ -306,7 +306,7 @@ def md(
     config : Optional[Path]
         Path to yaml configuration file to define the above options. Default is None.
     """
-    from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH, NVT_Bussi
+    from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_CSVR, NVT_NH
     from janus_core.cli.utils import (
         carbon_summary,
         check_config,
@@ -433,7 +433,7 @@ def md(
         for key in ("barostat_time", "bulk_modulus", "pressure", "friction", "taut"):
             del dyn_kwargs[key]
         dyn = NVT_NH(**dyn_kwargs)
-    elif ensemble == "nvt-bussi":
+    elif ensemble == "nvt-csvr":
         for key in (
             "thermostat_time",
             "barostat_time",
@@ -442,7 +442,7 @@ def md(
             "friction",
         ):
             del dyn_kwargs[key]
-        dyn = NVT_Bussi(**dyn_kwargs)
+        dyn = NVT_CSVR(**dyn_kwargs)
     else:
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
 

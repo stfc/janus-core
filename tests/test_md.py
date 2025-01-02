@@ -21,7 +21,7 @@ MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 try:
     from ase.md.bussi import Bussi  # noqa: F401
 
-    from janus_core.calculations.md import NVT_Bussi
+    from janus_core.calculations.md import NVT_CSVR
 
     ASE_IMPORT_ERROR = False
 except ImportError:
@@ -236,13 +236,13 @@ def test_nph():
 
 
 @pytest.mark.skipif(ASE_IMPORT_ERROR, reason="Requires updated version of ASE")
-def test_nvt_bussi():
-    """Test Bussi molecular dynamics."""
-    restart_path_1 = Path("NaCl-nvt-bussi-T300.0-res-2.extxyz")
-    restart_path_2 = Path("NaCl-nvt-bussi-T300.0-res-4.extxyz")
-    restart_final = Path("NaCl-nvt-bussi-T300.0-final.extxyz")
-    traj_path = Path("NaCl-nvt-bussi-T300.0-traj.extxyz")
-    stats_path = Path("NaCl-nvt-bussi-T300.0-stats.dat")
+def test_nvt_csvr():
+    """Test NVT CSVR molecular dynamics."""
+    restart_path_1 = Path("NaCl-nvt-csvr-T300.0-res-2.extxyz")
+    restart_path_2 = Path("NaCl-nvt-csvr-T300.0-res-4.extxyz")
+    restart_final = Path("NaCl-nvt-csvr-T300.0-final.extxyz")
+    traj_path = Path("NaCl-nvt-csvr-T300.0-traj.extxyz")
+    stats_path = Path("NaCl-nvt-csvr-T300.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
@@ -250,7 +250,7 @@ def test_nvt_bussi():
     assert not traj_path.exists()
     assert not stats_path.exists()
 
-    bussi = NVT_Bussi(
+    csvr = NVT_CSVR(
         struct_path=DATA_PATH / "NaCl.cif",
         arch="mace",
         model_path=MODEL_PATH,
@@ -263,7 +263,7 @@ def test_nvt_bussi():
     )
 
     try:
-        bussi.run()
+        csvr.run()
         restart_atoms_1 = read(restart_path_1)
         assert isinstance(restart_atoms_1, Atoms)
         restart_atoms_2 = read(restart_path_2)

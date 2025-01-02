@@ -118,7 +118,7 @@ Architectures = Literal[
     "mace", "mace_mp", "mace_off", "m3gnet", "chgnet", "alignn", "sevennet"
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
-Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-bussi"]
+Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr"]
 Properties = Literal["energy", "stress", "forces", "hessian"]
 PhononCalcs = Literal["bands", "dos", "pdos", "thermal"]
 
