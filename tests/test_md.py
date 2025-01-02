@@ -15,9 +15,6 @@ from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.stats import Stats
 from tests.utils import assert_log_contains
 
-DATA_PATH = Path(__file__).parent / "data"
-MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
-
 try:
     from ase.md.bussi import Bussi  # noqa: F401
 
@@ -26,6 +23,9 @@ try:
     ASE_IMPORT_ERROR = False
 except ImportError:
     ASE_IMPORT_ERROR = True
+
+DATA_PATH = Path(__file__).parent / "data"
+MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 test_data = [
     (NVT, "nvt"),

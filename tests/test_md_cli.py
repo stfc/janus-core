@@ -14,6 +14,13 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
 
+try:
+    from ase.md.bussi import Bussi  # noqa: F401
+
+    ASE_IMPORT_ERROR = False
+except ImportError:
+    ASE_IMPORT_ERROR = True
+
 DATA_PATH = Path(__file__).parent / "data"
 
 runner = CliRunner()
@@ -32,6 +39,7 @@ test_data = [
     ("npt"),
     ("nvt-nh"),
     ("nph"),
+    ("nvt-csvr"),
 ]
 
 
@@ -45,7 +53,11 @@ def test_md(ensemble):
         "npt": "NaCl-npt-T300.0-p0.0-",
         "nvt-nh": "NaCl-nvt-nh-T300.0-",
         "nph": "NaCl-nph-T300.0-p0.0-",
+        "nvt-csvr": "NaCl-nvt-csvr-T300.0-",
     }
+
+    if ensemble == "nvt-csvr" and ASE_IMPORT_ERROR:
+        return
 
     final_path = Path(f"{file_prefix[ensemble]}final.extxyz").absolute()
     restart_path = Path(f"{file_prefix[ensemble]}res-2.extxyz").absolute()
