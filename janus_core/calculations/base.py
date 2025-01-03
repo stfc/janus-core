@@ -22,6 +22,7 @@ UNITS = {
     "energy": "eV",
     "forces": "ev/Ang",
     "stress": "ev/Ang^3",
+    "hessian": "ev/Ang^2",
     "time": "fs",
     "real_time": "s",
     "temperature": "K",
