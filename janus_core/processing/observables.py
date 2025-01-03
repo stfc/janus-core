@@ -5,12 +5,15 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from ase import Atoms, units
+from ase import Atoms
+from ase.units import create_units
 
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import SliceLike
 
 from janus_core.helpers.utils import slicelike_to_startstopstep
+
+units = create_units("2014")
 
 
 # pylint: disable=too-few-public-methods

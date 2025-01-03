@@ -12,7 +12,7 @@ import random
 from typing import Any
 from warnings import warn
 
-from ase import Atoms, units
+from ase import Atoms
 from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.langevin import Langevin
@@ -23,6 +23,7 @@ from ase.md.velocitydistribution import (
     ZeroRotation,
 )
 from ase.md.verlet import VelocityVerlet
+from ase.units import create_units
 import numpy as np
 import yaml
 
@@ -43,6 +44,7 @@ from janus_core.helpers.utils import none_to_dict, write_table
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
 
+units = create_units("2014")
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
 
