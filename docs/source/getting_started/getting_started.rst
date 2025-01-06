@@ -7,7 +7,7 @@ Dependencies
 
 ``janus-core`` dependencies currently include:
 
-- Python >= 3.9
+- Python >= 3.10
 - ASE >= 3.23
 - mace-torch = 0.3.8
 - chgnet = 0.3.8 (optional)
