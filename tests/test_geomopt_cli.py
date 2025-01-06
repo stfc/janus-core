@@ -740,3 +740,32 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         geomopt_summary = yaml.safe_load(file)
     assert "emissions" not in geomopt_summary
+
+
+def test_units(tmp_path):
+    """Test correct units are saved."""
+    results_path = tmp_path / "NaCl-opt.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    atoms = read(results_path)
+    expected_units = {"energy": "eV", "forces": "ev/Ang", "stress": "ev/Ang^3"}
+    assert "units" in atoms.info
+    for prop, units in expected_units.items():
+        assert atoms.info["units"][prop] == units
