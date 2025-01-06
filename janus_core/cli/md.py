@@ -6,7 +6,7 @@
 # from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Optional, get_args
+from typing import Annotated, get_args
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -101,7 +101,7 @@ def md(
         int, Option(help="Frequency to rescale velocities during equilibration.")
     ] = 10,
     file_prefix: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 """
@@ -116,7 +116,7 @@ def md(
         bool, Option(help="Whether to infer restart file if restarting dynamics.")
     ] = True,
     restart_stem: Annotated[
-        Optional[Path],
+        Path | None,
         Option(help="Stem for restart file name. Default inferred from `file_prefix`."),
     ] = None,
     restart_every: Annotated[
@@ -129,7 +129,7 @@ def md(
         int, Option(help="Restart files to keep if rotating.")
     ] = 4,
     final_file: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 """
@@ -140,7 +140,7 @@ def md(
         ),
     ] = None,
     stats_file: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 """
@@ -152,7 +152,7 @@ def md(
     ] = None,
     stats_every: Annotated[int, Option(help="Frequency to output statistics.")] = 100,
     traj_file: Annotated[
-        Optional[Path],
+        Path | None,
         Option(help="File to save trajectory. Default inferred from `file_prefix`."),
     ] = None,
     traj_append: Annotated[bool, Option(help="Whether to append trajectory.")] = False,
@@ -161,23 +161,23 @@ def md(
         int, Option(help="Frequency of steps to save trajectory.")
     ] = 100,
     temp_start: Annotated[
-        Optional[float],
+        float | None,
         Option(help="Temperature to start heating, in K."),
     ] = None,
     temp_end: Annotated[
-        Optional[float],
+        float | None,
         Option(help="Maximum temperature for heating, in K."),
     ] = None,
     temp_step: Annotated[
-        Optional[float], Option(help="Size of temperature steps when heating, in K.")
+        float | None, Option(help="Size of temperature steps when heating, in K.")
     ] = None,
     temp_time: Annotated[
-        Optional[float], Option(help="Time between heating steps, in fs.")
+        float | None, Option(help="Time between heating steps, in fs.")
     ] = None,
     write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
     seed: Annotated[
-        Optional[int],
+        int | None,
         Option(help="Random seed for numpy.random and random functions."),
     ] = None,
     log: LogPath = None,

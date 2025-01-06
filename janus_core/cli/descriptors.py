@@ -6,7 +6,7 @@
 # from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -49,7 +49,7 @@ def descriptors(
     device: Device = "cpu",
     model_path: ModelPath = None,
     out: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 "Path to save structure with calculated descriptors. Default is "

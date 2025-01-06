@@ -6,7 +6,7 @@ from collections.abc import Collection, Sequence
 from enum import Enum
 import logging
 from pathlib import Path, PurePath
-from typing import IO, TYPE_CHECKING, Literal, Optional, TypedDict, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Literal, TypedDict, TypeVar, Union
 
 from ase import Atoms
 from ase.eos import EquationOfState
@@ -22,7 +22,7 @@ T = TypeVar("T")
 MaybeList = Union[T, list[T]]
 MaybeSequence = Union[T, Sequence[T]]
 PathLike = Union[str, Path]
-StartStopStep = tuple[Optional[int], Optional[int], int]
+StartStopStep = tuple[int | None, int | None, int]
 SliceLike = Union[slice, range, int, StartStopStep]
 
 # ASE Arg types
