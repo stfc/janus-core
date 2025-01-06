@@ -228,9 +228,6 @@ class BaseCalculation(FileNameMixin):
         """
         if isinstance(self.struct, Sequence):
             for image in self.struct:
-                for key in keys:
-                    image.info[f"{key}_units"] = UNITS[key]
-            return
-
-        for key in keys:
-            self.struct.info[f"{key}_units"] = UNITS[key]
+                image.info["units"] = {key: UNITS[key] for key in keys}
+        else:
+            self.struct.info["units"] = {key: UNITS[key] for key in keys}
