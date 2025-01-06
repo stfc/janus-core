@@ -453,7 +453,7 @@ def validate_slicelike(maybe_slicelike: SliceLike) -> None:
     ValueError
         If maybe_slicelike is not SliceLike.
     """
-    if isinstance(maybe_slicelike, (slice, range, int)):
+    if isinstance(maybe_slicelike, slice | range | int):
         return
     if isinstance(maybe_slicelike, tuple) and len(maybe_slicelike) == 3:
         start, stop, step = maybe_slicelike
@@ -487,7 +487,7 @@ def slicelike_to_startstopstep(index: SliceLike) -> StartStopStep:
             return (index, None, 1)
         return (index, index + 1, 1)
 
-    if isinstance(index, (slice, range)):
+    if isinstance(index, slice | range):
         return (index.start, index.stop, index.step)
 
     return index
