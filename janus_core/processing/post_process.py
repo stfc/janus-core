@@ -122,9 +122,9 @@ def compute_rdf(
                     f"to number of samples ({len(rdf)})"
                 )
 
-            for (dists, rdfs), out_path in zip(rdf.values(), filenames, strict=False):
+            for (dists, rdfs), out_path in zip(rdf.values(), filenames, strict=True):
                 with open(out_path, "w", encoding="utf-8") as out_file:
-                    for dist, rdf_i in zip(dists, rdfs, strict=False):
+                    for dist, rdf_i in zip(dists, rdfs, strict=True):
                         print(dist, rdf_i, file=out_file)
 
     else:
@@ -152,7 +152,7 @@ def compute_rdf(
                 filenames = filenames[0]
 
             with open(filenames, "w", encoding="utf-8") as out_file:
-                for dist, rdf_i in zip(*rdf, strict=False):
+                for dist, rdf_i in zip(*rdf, strict=True):
                     print(dist, rdf_i, file=out_file)
 
     return rdf
@@ -287,9 +287,9 @@ def compute_vaf(
     )
 
     if filenames:
-        for vaf, filename in zip(vafs[1], filenames, strict=False):
+        for vaf, filename in zip(vafs[1], filenames, strict=True):
             with open(filename, "w", encoding="utf-8") as out_file:
-                for lag, dat in zip(lags, vaf, strict=False):
+                for lag, dat in zip(lags, vaf, strict=True):
                     print(lag, dat, file=out_file)
 
     return vafs

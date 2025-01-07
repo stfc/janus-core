@@ -326,7 +326,7 @@ class Correlation:
             Atoms object to observe values from.
         """
         # All pairs of data to be correlated.
-        value_pairs = zip(self._get_a(atoms).flatten(), self._get_b(atoms).flatten(), strict=False)
+        value_pairs = zip(self._get_a(atoms).flatten(), self._get_b(atoms).flatten(), strict=True)
         if self._correlators is None:
             # Initialise correlators automatically.
             self._correlators = [
@@ -335,7 +335,7 @@ class Correlation:
                 )
                 for _ in range(len(self._get_a(atoms).flatten()))
             ]
-        for corr, values in zip(self._correlators, value_pairs, strict=False):
+        for corr, values in zip(self._correlators, value_pairs, strict=True):
             corr.update(*values)
 
     def get(self) -> tuple[Iterable[float], Iterable[float]]:

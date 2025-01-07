@@ -205,7 +205,7 @@ class Stats:
         Iterator[tuple[str, str]]
             Zipped labels and units.
         """
-        return zip(self.labels, self.units, strict=False)
+        return zip(self.labels, self.units, strict=True)
 
     def read(self) -> None:
         """Read MD stats and store them in `data`."""

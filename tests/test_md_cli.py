@@ -258,7 +258,7 @@ def test_seed(tmp_path):
         final_stats_2 = lines[2].split()
 
     for i, (stats_1, stats_2) in enumerate(
-        zip(final_stats_1, final_stats_2, strict=False)
+        zip(final_stats_1, final_stats_2, strict=True)
     ):
         if i != 1:
             assert stats_1 == stats_2

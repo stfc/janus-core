@@ -339,7 +339,7 @@ def _dump_ascii(
     if header:
         print(f"# {' | '.join(header)}", file=file)
 
-    for cols in zip(*columns.values(), strict=False):
+    for cols in zip(*columns.values(), strict=True):
         print(*map(format, cols, formats), file=file)
 
 
@@ -371,7 +371,7 @@ def _dump_csv(
     if header:
         print(",".join(header), file=file)
 
-    for cols in zip(*columns.values(), strict=False):
+    for cols in zip(*columns.values(), strict=True):
         print(",".join(map(format, cols, formats)), file=file)
 
 
