@@ -116,7 +116,7 @@ def test_md(ensemble):
             "stress": "ev/Ang^3",
             "temperature": "K",
             "density": "g/cm^3",
-            "momenta": "(eV/u)^0.5",
+            "momenta": "(eV*u)^0.5",
         }
         if ensemble in ("nvt", "nvt-nh"):
             expected_units["pressure"] = "GPa"
