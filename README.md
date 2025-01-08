@@ -20,11 +20,11 @@ Tools for machine learnt interatomic potentials
 
 - Python >= 3.10
 - ASE >= 3.23
-- mace-torch = 0.3.8
+- mace-torch = 0.3.9
 - chgnet = 0.3.8 (optional)
 - matgl = 1.1.3 (optional)
-- sevenn = 0.10.0 (optional)
-- alignn = 2024.5.27 (optional)
+- sevenn = 0.10.3 (optional)
+- alignn = 2024.12.02 (optional)
 
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
