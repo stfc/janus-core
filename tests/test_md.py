@@ -15,6 +15,15 @@ from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.stats import Stats
 from tests.utils import assert_log_contains
 
+try:
+    from ase.md.bussi import Bussi  # noqa: F401
+
+    from janus_core.calculations.md import NVT_CSVR
+
+    ASE_IMPORT_ERROR = False
+except ImportError:
+    ASE_IMPORT_ERROR = True
+
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
@@ -222,6 +231,57 @@ def test_nph():
     finally:
         restart_path.unlink(missing_ok=True)
         restart_final_path.unlink(missing_ok=True)
+        traj_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
+
+
+@pytest.mark.skipif(ASE_IMPORT_ERROR, reason="Requires updated version of ASE")
+def test_nvt_csvr():
+    """Test NVT CSVR molecular dynamics."""
+    restart_path_1 = Path("NaCl-nvt-csvr-T300.0-res-2.extxyz")
+    restart_path_2 = Path("NaCl-nvt-csvr-T300.0-res-4.extxyz")
+    restart_final = Path("NaCl-nvt-csvr-T300.0-final.extxyz")
+    traj_path = Path("NaCl-nvt-csvr-T300.0-traj.extxyz")
+    stats_path = Path("NaCl-nvt-csvr-T300.0-stats.dat")
+
+    assert not restart_path_1.exists()
+    assert not restart_path_2.exists()
+    assert not restart_final.exists()
+    assert not traj_path.exists()
+    assert not stats_path.exists()
+
+    csvr = NVT_CSVR(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model_path=MODEL_PATH,
+        temp=300.0,
+        steps=4,
+        traj_every=1,
+        restart_every=2,
+        stats_every=1,
+        taut=10,
+    )
+
+    try:
+        csvr.run()
+        restart_atoms_1 = read(restart_path_1)
+        assert isinstance(restart_atoms_1, Atoms)
+        restart_atoms_2 = read(restart_path_2)
+        assert isinstance(restart_atoms_2, Atoms)
+        restart_atoms_final = read(restart_final)
+        assert isinstance(restart_atoms_final, Atoms)
+        traj = read(traj_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 5
+
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
+            assert "Target_T [K]" in lines[0]
+            assert len(lines) == 6
+    finally:
+        restart_path_1.unlink(missing_ok=True)
+        restart_path_2.unlink(missing_ok=True)
+        restart_final.unlink(missing_ok=True)
         traj_path.unlink(missing_ok=True)
         stats_path.unlink(missing_ok=True)
 
