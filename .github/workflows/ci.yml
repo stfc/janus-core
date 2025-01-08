@@ -27,7 +27,9 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest --run-extra-mlips --cov janus_core --cov-append .
+        run: |
+          unset CI
+          uv run pytest --run-extra-mlips --cov janus_core --cov-append .
 
       - name: Report coverage to Coveralls
         uses: coverallsapp/github-action@v2
