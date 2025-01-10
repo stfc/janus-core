@@ -161,6 +161,7 @@ def config_tracker(
     country_iso_code: str = "GBR",
     save_to_file: bool = False,
     log_level: Literal["debug", "info", "warning", "error", "critical"] = "critical",
+    **kwargs,
 ) -> OfflineEmissionsTracker | None:
     """
     Configure codecarbon tracker to log outputs.
@@ -177,6 +178,8 @@ def config_tracker(
         Whether to also output results to a csv file. Default is False.
     log_level : Literal["debug", "info", "warning", "error", "critical"]
         Log level of internal carbon tracker log. Default is "critical".
+    **kwargs
+        Additional keyword arguments to pass to OfflineEmissionsTracker.
 
     Returns
     -------
@@ -193,12 +196,19 @@ def config_tracker(
             project_name="janus-core",
             log_level=log_level,
             allow_multiple_runs=True,
+            **kwargs,
         )
 
         # Suppress further logging from codecarbon
         carbon_logger = logging.getLogger("codecarbon")
         while carbon_logger.hasHandlers():
             carbon_logger.removeHandler(carbon_logger.handlers[0])
+
+        if not hasattr(tracker, "_emissions"):
+            raise ValueError(
+                "Carbon tracker has not been configured correctly. Please try "
+                "reconfiguring, or disable the tracker."
+            )
 
     else:
         tracker = None

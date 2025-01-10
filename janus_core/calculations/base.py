@@ -16,7 +16,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.struct_io import input_structs
-from janus_core.helpers.utils import FileNameMixin, none_to_dict
+from janus_core.helpers.utils import FileNameMixin, none_to_dict, set_log_tracker
 
 
 class BaseCalculation(FileNameMixin):
@@ -47,12 +47,14 @@ class BaseCalculation(FileNameMixin):
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc : bool | None
         Whether to set (new) calculators for structures. Default is None.
-    attach_logger : bool
-        Whether to attach a logger. Default is False.
+    attach_logger : bool | None
+        Whether to attach a logger. Default is True if "filename" is passed in
+        log_kwargs, else False.
     log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool
-        Whether to track carbon emissions of calculation. Default is True.
+    track_carbon : bool | None
+        Whether to track carbon emissions of calculation. Requires attach_logger.
+        Default is True if attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
     file_prefix : PathLike | None
@@ -83,9 +85,9 @@ class BaseCalculation(FileNameMixin):
         sequence_allowed: bool = True,
         calc_kwargs: dict[str, Any] | None = None,
         set_calc: bool | None = None,
-        attach_logger: bool = False,
+        attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
-        track_carbon: bool = True,
+        track_carbon: bool | None = None,
         tracker_kwargs: dict[str, Any] | None = None,
         file_prefix: PathLike | None = None,
         additional_prefix: str | None = None,
@@ -118,12 +120,14 @@ class BaseCalculation(FileNameMixin):
             Keyword arguments to pass to the selected calculator. Default is {}.
         set_calc : bool | None
             Whether to set (new) calculators for structures. Default is None.
-        attach_logger : bool
-            Whether to attach a logger. Default is False.
+        attach_logger : bool | None
+            Whether to attach a logger. Default is True if "filename" is passed in
+            log_kwargs, else False.
         log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
-        track_carbon : bool
-            Whether to track carbon emissions of calculation. Default is True.
+        track_carbon : bool | None
+            Whether to track carbon emissions of calculation. Requires attach_logger.
+            Default is True if attach_logger is True, else False.
         tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
         file_prefix : PathLike | None
@@ -146,11 +150,14 @@ class BaseCalculation(FileNameMixin):
         self.read_kwargs = read_kwargs
         self.calc_kwargs = calc_kwargs
         self.log_kwargs = log_kwargs
-        self.track_carbon = track_carbon
         self.tracker_kwargs = tracker_kwargs
 
         if not self.model_path and "model_path" in self.calc_kwargs:
             raise ValueError("`model_path` must be passed explicitly")
+
+        attach_logger, self.track_carbon = set_log_tracker(
+            attach_logger, log_kwargs, track_carbon
+        )
 
         # Read structures and/or attach calculators
         # Note: logger not set up so yet so not passed here

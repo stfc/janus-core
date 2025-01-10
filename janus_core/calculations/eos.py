@@ -50,12 +50,14 @@ class EoS(BaseCalculation):
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc : bool | None
         Whether to set (new) calculators for structures. Default is None.
-    attach_logger : bool
-        Whether to attach a logger. Default is False.
+    attach_logger : bool | None
+        Whether to attach a logger. Default is True if "filename" is passed in
+        log_kwargs, else False.
     log_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool
-        Whether to track carbon emissions of calculation. Default is True.
+    track_carbon : bool | None
+        Whether to track carbon emissions of calculation. Default is True if
+        attach_logger is True, else False.
     tracker_kwargs : dict[str, Any] | None
         Keyword arguments to pass to `config_tracker`. Default is {}.
     min_volume : float
@@ -115,9 +117,9 @@ class EoS(BaseCalculation):
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         set_calc: bool | None = None,
-        attach_logger: bool = False,
+        attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
-        track_carbon: bool = True,
+        track_carbon: bool | None = None,
         tracker_kwargs: dict[str, Any] | None = None,
         min_volume: float = 0.95,
         max_volume: float = 1.05,
@@ -157,12 +159,14 @@ class EoS(BaseCalculation):
             Keyword arguments to pass to the selected calculator. Default is {}.
         set_calc : bool | None
             Whether to set (new) calculators for structures. Default is None.
-        attach_logger : bool
-            Whether to attach a logger. Default is False.
+        attach_logger : bool | None
+            Whether to attach a logger. Default is True if "filename" is passed in
+            log_kwargs, else False.
         log_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_logger`. Default is {}.
-        track_carbon : bool
-            Whether to track carbon emissions of calculation. Default is True.
+        track_carbon : bool | None
+            Whether to track carbon emissions of calculation. Requires attach_logger.
+            Default is True if attach_logger is True, else False.
         tracker_kwargs : dict[str, Any] | None
             Keyword arguments to pass to `config_tracker`. Default is {}.
         min_volume : float
@@ -263,6 +267,7 @@ class EoS(BaseCalculation):
                 "name": self.logger.name,
                 "filemode": "a",
             }
+        self.minimize_kwargs["track_carbon"] = self.track_carbon
 
         # Set output files
         self.write_kwargs.setdefault("filename", None)
