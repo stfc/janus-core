@@ -266,4 +266,4 @@ class Velocity(Observable, ComponentMixin):
         list[float]
             The velocity values.
         """
-        return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
+        return atoms.get_velocities()[self.atoms_slice, :][:, self._indices]
