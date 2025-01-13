@@ -33,6 +33,27 @@ class Correlator:
         Number of points per block.
     averaging : int
         Averaging window per block level.
+
+    Attributes
+    ----------
+    _max_block_used : int
+        Which levels have been updated with data.
+    _min_dist : int
+        First point in coarse-grained block relevant for correlation updates.
+    _accumulator : NDArray[float64]
+        Sum of data seen for calculating the average between blocks.
+    _count_accumulated : NDArray[int]
+        Data points accumulated at this block.
+    _shift_index : NDArray[int]
+        Current position in each block's data store.
+    _shift : NDArray[float64]
+        Rolling data store for each block.
+    _shift_not_null : NDArray[bool]
+        If data is stored in this block's rolling data store, at a given index.
+    _correlation : NDArray[float64]
+        Running correlation values.
+    _count_correlated : NDArray[int]
+        Count of correlation updates for each block.
     """
 
     def __init__(self, *, blocks: int, points: int, averaging: int) -> None:
@@ -42,36 +63,24 @@ class Correlator:
         Parameters
         ----------
         blocks : int
-            Number of correlation blocks.
+            Number of resolution levels.
         points : int
-            Number of points per block.
+            Data points at each resolution.
         averaging : int
-            Averaging window per block level.
+            Coarse-graining between resolution levels.
         """
-        # Number of resoluion levels.
         self._blocks = blocks
-        # Data points at each resolution.
         self._points = points
-        # Coarse-graining between resolution levels.
         self._averaging = averaging
-        # Which levels have been updated with data.
         self._max_block_used = 0
-        # First point in coarse-grained block relevant for correlation updates.
         self._min_dist = self._points / self._averaging
 
-        # Sum of data seen for calculating the average between blocks.
         self._accumulator = np.zeros((self._blocks, 2))
-        # Data points accumulated at each block.
         self._count_accumulated = np.zeros(self._blocks, dtype=int)
-        # Current position in each blocks data store.
         self._shift_index = np.zeros(self._blocks, dtype=int)
-        # Rolling data store for each block.
         self._shift = np.zeros((self._blocks, self._points, 2))
-        # If data is stored in this block's rolling data store, at a given index.
         self._shift_not_null = np.zeros((self._blocks, self._points), dtype=bool)
-        # Running correlation values.
         self._correlation = np.zeros((self._blocks, self._points))
-        # Count of correlation updates.
         self._count_correlated = np.zeros((self._blocks, self._points), dtype=int)
 
     def update(self, a: float, b: float) -> None:
