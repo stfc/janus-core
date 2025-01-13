@@ -216,7 +216,7 @@ class BaseCalculation(FileNameMixin):
             self.logger, self.track_carbon, **self.tracker_kwargs
         )
 
-    def _set_units(self, keys: Sequence = ("energy", "forces", "stress")) -> None:
+    def _set_units(self, keys: Sequence[str] = ("energy", "forces", "stress")) -> None:
         """
         Save units to structure info.
 
