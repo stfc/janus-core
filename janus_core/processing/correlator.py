@@ -326,7 +326,9 @@ class Correlation:
             Atoms object to observe values from.
         """
         # All pairs of data to be correlated.
-        value_pairs = zip(self._get_a(atoms).flatten(), self._get_b(atoms).flatten(), strict=True)
+        value_pairs = zip(
+            self._get_a(atoms).flatten(), self._get_b(atoms).flatten(), strict=True
+        )
         if self._correlators is None:
             # Initialise correlators automatically.
             self._correlators = [
