@@ -2,7 +2,7 @@
 
 version=$1
 
-sed -i "s;^version =.*;version = \"$version\";g" pyproject.toml
+sed -i.bak "s;^version =.*;version = \"$version\";g" pyproject.toml && rm pyproject.toml.bak
 
 git add pyproject.toml
 git commit -m "bump version for release $version"
