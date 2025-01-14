@@ -120,6 +120,23 @@ def test_md(ensemble):
         assert "momenta" in atoms.arrays
         assert "masses" in atoms.arrays
 
+        expected_units = {
+            "time": "fs",
+            "real_time": "s",
+            "energy": "eV",
+            "forces": "ev/Ang",
+            "stress": "ev/Ang^3",
+            "temperature": "K",
+            "density": "g/cm^3",
+            "momenta": "(eV*u)^0.5",
+        }
+        if ensemble in ("nvt", "nvt-nh"):
+            expected_units["pressure"] = "GPa"
+
+        assert "units" in atoms.info
+        for prop, units in expected_units.items():
+            assert atoms.info["units"][prop] == units
+
     finally:
         final_path.unlink(missing_ok=True)
         restart_path.unlink(missing_ok=True)
@@ -165,7 +182,7 @@ def test_log(tmp_path):
         assert len(lines) == 22
 
         # Test constant volume
-        assert lines[0].split(" | ")[8] == "Volume [A^3]"
+        assert lines[0].split(" | ")[8] == "Volume [Ang^3]"
         init_volume = float(lines[1].split()[8])
         final_volume = float(lines[-1].split()[8])
         assert init_volume == 179.406144

@@ -325,6 +325,8 @@ class SinglePoint(BaseCalculation):
         if self.tracker:
             self.tracker.start_task("Single point")
 
+        self._set_info_units(self.properties)
+
         if "energy" in self.properties:
             self.results["energy"] = self._get_potential_energy()
         if "forces" in self.properties:

@@ -72,6 +72,11 @@ def test_singlepoint():
         assert "system_name" in atoms.info
         assert atoms.info["system_name"] == "NaCl"
 
+        expected_units = {"energy": "eV", "forces": "ev/Ang", "stress": "ev/Ang^3"}
+        assert "units" in atoms.info
+        for prop, units in expected_units.items():
+            assert atoms.info["units"][prop] == units
+
         clear_log_handlers()
 
 
@@ -399,6 +404,7 @@ def test_hessian(tmp_path):
     assert "mace_mp_hessian" in atoms.info
     assert "mace_stress" not in atoms.info
     assert atoms.info["mace_mp_hessian"].shape == (24, 8, 3)
+    assert atoms.info["units"]["hessian"] == "ev/Ang^2"
 
 
 def test_no_carbon(tmp_path):

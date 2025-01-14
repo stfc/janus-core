@@ -12,7 +12,7 @@ import random
 from typing import Any
 from warnings import warn
 
-from ase import Atoms, units
+from ase import Atoms
 from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.langevin import Langevin
@@ -23,9 +23,11 @@ from ase.md.velocitydistribution import (
     ZeroRotation,
 )
 from ase.md.verlet import VelocityVerlet
+from ase.units import create_units
 import numpy as np
 import yaml
 
+from janus_core.calculations.base import UNITS as JANUS_UNITS
 from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.janus_types import (
@@ -43,6 +45,7 @@ from janus_core.helpers.utils import none_to_dict, write_table
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
 
+units = create_units("2014")
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
 
 
@@ -525,7 +528,7 @@ class MolecularDynamics(BaseCalculation):
         """Set time in fs, current dynamics step, and density to info."""
         time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
         step = self.offset + self.dyn.nsteps
-        self.dyn.atoms.info["time_fs"] = time
+        self.dyn.atoms.info["time"] = time
         self.dyn.atoms.info["step"] = step
         try:
             density = (
@@ -772,7 +775,7 @@ class MolecularDynamics(BaseCalculation):
         return {
             "Step": self.dyn.atoms.info["step"],
             "Real_Time": real_time.total_seconds(),
-            "Time": self.dyn.atoms.info["time_fs"],
+            "Time": self.dyn.atoms.info["time"],
             "Epot/N": e_pot,
             "EKin/N": e_kin,
             "T": current_temp,
@@ -800,21 +803,21 @@ class MolecularDynamics(BaseCalculation):
         """
         return {
             "Step": None,
-            "Real_Time": "s",
-            "Time": "fs",
-            "Epot/N": "eV",
-            "EKin/N": "eV",
-            "T": "K",
-            "ETot/N": "eV",
-            "Density": "g/cm^3",
-            "Volume": "A^3",
-            "P": "GPa",
-            "Pxx": "GPa",
-            "Pyy": "GPa",
-            "Pzz": "GPa",
-            "Pyz": "GPa",
-            "Pxz": "GPa",
-            "Pxy": "GPa",
+            "Real_Time": JANUS_UNITS["real_time"],
+            "Time": JANUS_UNITS["time"],
+            "Epot/N": JANUS_UNITS["energy"],
+            "EKin/N": JANUS_UNITS["energy"],
+            "T": JANUS_UNITS["temperature"],
+            "ETot/N": JANUS_UNITS["energy"],
+            "Density": JANUS_UNITS["density"],
+            "Volume": JANUS_UNITS["volume"],
+            "P": JANUS_UNITS["pressure"],
+            "Pxx": JANUS_UNITS["pressure"],
+            "Pyy": JANUS_UNITS["pressure"],
+            "Pzz": JANUS_UNITS["pressure"],
+            "Pyz": JANUS_UNITS["pressure"],
+            "Pxz": JANUS_UNITS["pressure"],
+            "Pxy": JANUS_UNITS["pressure"],
         }
 
     @property
@@ -1024,6 +1027,19 @@ class MolecularDynamics(BaseCalculation):
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
+        unit_keys = (
+            "energy",
+            "forces",
+            "stress",
+            "time",
+            "real_time",
+            "temperature",
+            "pressure",
+            "density",
+            "momenta",
+        )
+        self._set_info_units(unit_keys)
+
         if not self.restart:
             if self.minimize:
                 self._optimize_structure()
@@ -1265,7 +1281,10 @@ class NPT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_P": "GPa", "Target_T": "K"}
+        return super().unit_info | {
+            "Target_P": JANUS_UNITS["pressure"],
+            "Target_T": JANUS_UNITS["temperature"],
+        }
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1362,7 +1381,7 @@ class NVT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": "K"}
+        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1505,7 +1524,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": "K"}
+        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
