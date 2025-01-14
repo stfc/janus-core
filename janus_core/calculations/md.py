@@ -27,7 +27,7 @@ from ase.units import create_units
 import numpy as np
 import yaml
 
-from janus_core.calculations.base import BaseCalculation
+from janus_core.calculations.base import UNITS, BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.janus_types import (
     Architectures,
@@ -799,21 +799,21 @@ class MolecularDynamics(BaseCalculation):
         """
         return {
             "Step": None,
-            "Real_Time": "s",
-            "Time": "fs",
-            "Epot/N": "eV",
-            "EKin/N": "eV",
-            "T": "K",
-            "ETot/N": "eV",
-            "Density": "g/cm^3",
-            "Volume": "A^3",
-            "P": "GPa",
-            "Pxx": "GPa",
-            "Pyy": "GPa",
-            "Pzz": "GPa",
-            "Pyz": "GPa",
-            "Pxz": "GPa",
-            "Pxy": "GPa",
+            "Real_Time": UNITS["real_time"],
+            "Time": UNITS["time"],
+            "Epot/N": UNITS["energy"],
+            "EKin/N": UNITS["energy"],
+            "T": UNITS["temperature"],
+            "ETot/N": UNITS["energy"],
+            "Density": UNITS["density"],
+            "Volume": UNITS["volume"],
+            "P": UNITS["pressure"],
+            "Pxx": UNITS["pressure"],
+            "Pyy": UNITS["pressure"],
+            "Pzz": UNITS["pressure"],
+            "Pyz": UNITS["pressure"],
+            "Pxz": UNITS["pressure"],
+            "Pxy": UNITS["pressure"],
         }
 
     @property
@@ -1277,7 +1277,10 @@ class NPT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_P": "GPa", "Target_T": "K"}
+        return super().unit_info | {
+            "Target_P": UNITS["pressure"],
+            "Target_T": UNITS["temperature"],
+        }
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1374,7 +1377,7 @@ class NVT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": "K"}
+        return super().unit_info | {"Target_T": UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1517,7 +1520,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": "K"}
+        return super().unit_info | {"Target_T": UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:

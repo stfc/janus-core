@@ -170,7 +170,7 @@ def test_log(tmp_path):
         assert len(lines) == 22
 
         # Test constant volume
-        assert lines[0].split(" | ")[8] == "Volume [A^3]"
+        assert lines[0].split(" | ")[8] == "Volume [Ang^3]"
         init_volume = float(lines[1].split()[8])
         final_volume = float(lines[-1].split()[8])
         assert init_volume == 179.406144
