@@ -290,7 +290,7 @@ class EoS(BaseCalculation):
             Dictionary containing equation of state ASE object, and the fitted minimum
             bulk modulus, volume, and energy.
         """
-        self._set_units()
+        self._set_info_units()
 
         if self.minimize:
             if self.logger:

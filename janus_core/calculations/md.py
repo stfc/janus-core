@@ -27,7 +27,8 @@ from ase.units import create_units
 import numpy as np
 import yaml
 
-from janus_core.calculations.base import UNITS, BaseCalculation
+from janus_core.calculations.base import UNITS as JANUS_UNITS
+from janus_core.calculations.base import BaseCalculation
 from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.helpers.janus_types import (
     Architectures,
@@ -799,21 +800,21 @@ class MolecularDynamics(BaseCalculation):
         """
         return {
             "Step": None,
-            "Real_Time": UNITS["real_time"],
-            "Time": UNITS["time"],
-            "Epot/N": UNITS["energy"],
-            "EKin/N": UNITS["energy"],
-            "T": UNITS["temperature"],
-            "ETot/N": UNITS["energy"],
-            "Density": UNITS["density"],
-            "Volume": UNITS["volume"],
-            "P": UNITS["pressure"],
-            "Pxx": UNITS["pressure"],
-            "Pyy": UNITS["pressure"],
-            "Pzz": UNITS["pressure"],
-            "Pyz": UNITS["pressure"],
-            "Pxz": UNITS["pressure"],
-            "Pxy": UNITS["pressure"],
+            "Real_Time": JANUS_UNITS["real_time"],
+            "Time": JANUS_UNITS["time"],
+            "Epot/N": JANUS_UNITS["energy"],
+            "EKin/N": JANUS_UNITS["energy"],
+            "T": JANUS_UNITS["temperature"],
+            "ETot/N": JANUS_UNITS["energy"],
+            "Density": JANUS_UNITS["density"],
+            "Volume": JANUS_UNITS["volume"],
+            "P": JANUS_UNITS["pressure"],
+            "Pxx": JANUS_UNITS["pressure"],
+            "Pyy": JANUS_UNITS["pressure"],
+            "Pzz": JANUS_UNITS["pressure"],
+            "Pyz": JANUS_UNITS["pressure"],
+            "Pxz": JANUS_UNITS["pressure"],
+            "Pxy": JANUS_UNITS["pressure"],
         }
 
     @property
@@ -1034,7 +1035,7 @@ class MolecularDynamics(BaseCalculation):
             "density",
             "momenta",
         )
-        self._set_units(unit_keys)
+        self._set_info_units(unit_keys)
 
         if not self.restart:
             if self.minimize:
@@ -1278,8 +1279,8 @@ class NPT(MolecularDynamics):
             Units attached to statistical properties.
         """
         return super().unit_info | {
-            "Target_P": UNITS["pressure"],
-            "Target_T": UNITS["temperature"],
+            "Target_P": JANUS_UNITS["pressure"],
+            "Target_T": JANUS_UNITS["temperature"],
         }
 
     @property
@@ -1377,7 +1378,7 @@ class NVT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": UNITS["temperature"]}
+        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1520,7 +1521,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": UNITS["temperature"]}
+        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:

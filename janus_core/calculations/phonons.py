@@ -435,7 +435,7 @@ class Phonons(BaseCalculation):
         if self.tracker:
             self.tracker.start_task("Phonon calculation")
 
-        self._set_units()
+        self._set_info_units()
 
         cell = self._ASE_to_PhonopyAtoms(self.struct)
 

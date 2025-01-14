@@ -304,7 +304,7 @@ class GeomOpt(BaseCalculation):
         if self.tracker:
             self.tracker.start_task("Geometry optimization")
 
-        self._set_units()
+        self._set_info_units()
 
         converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
 
