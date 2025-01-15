@@ -12,6 +12,9 @@ jobs:
     if: github.repository == 'stfc/janus-core' && startsWith(github.ref, 'refs/tags/v')
     environment:
       name: release
+    permissions:
+      # For PyPI's trusted publishing.
+      id-token: write
 
     steps:
       - name: Checkout repository
