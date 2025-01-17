@@ -57,3 +57,30 @@ will return
     If running calculations with multiple MLIPs, ``arch`` and ``mlip_model`` will be overwritten with the most recent MLIP information.
     Results labelled by the architecture (e.g. ``mace_mp_energy``) will be saved between MLIPs,
     unless the same ``arch`` is chosen, in which case these values will also be overwritten.
+
+
+Additional Calculators
+======================
+
+Although ``janus-core`` only directly supports the MLIP calculators listed in :doc:`Getting started </getting_started/getting_started>`,
+any valid `ASE calculator <https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html>`_
+can be attached to a structure, including calculators for currently unsupported MLIPs.
+
+This structure can then be passed to ``janus-core`` calculations, which can be run as usual.
+
+For example, performing geometry optimisation using the (`ASE built-in <https://wiki.fysik.dtu.dk/ase/ase/calculators/others.html#lennard-jones>`_) Lennard Jones potential calculator:
+
+.. code-block:: python
+
+    from janus_core.calculations.geom_opt import GeomOpt
+    from ase.calculators.lj import LennardJones
+    from ase.io import read
+
+    struct = read("tests/data/NaCl-deformed.cif")
+    struct.calc = LennardJones()
+
+    geom_opt = GeomOpt(
+        struct=struct,
+        fmax=0.001,
+    )
+    geom_opt.run()
