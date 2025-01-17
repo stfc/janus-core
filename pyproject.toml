@@ -66,8 +66,8 @@ all = [
 janus = "janus_core.cli.janus:app"
 
 [project.urls]
-repository = "https://github.com/stfc/janus-core/"
-documentation = "https://stfc.github.io/janus-core/"
+Repository = "https://github.com/stfc/janus-core/"
+Documentation = "https://stfc.github.io/janus-core/"
 
 [dependency-groups]
 dev = [
