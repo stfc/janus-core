@@ -183,7 +183,7 @@ def input_structs(
             struct = struct[0]
 
     # Check struct is valid type
-    if not isinstance(struct, (Atoms, Sequence)) or isinstance(struct, str):
+    if not isinstance(struct, Atoms | Sequence) or isinstance(struct, str):
         raise ValueError("`struct` must be an ASE Atoms object or sequence of Atoms")
 
     # Check struct is valid length

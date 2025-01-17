@@ -64,7 +64,7 @@ def _set_model_path(
         model_path = kwargs.pop(present.pop())
 
     # Convert to path if file/directory exists
-    if isinstance(model_path, (Path, str)) and Path(model_path).expanduser().exists():
+    if isinstance(model_path, Path | str) and Path(model_path).expanduser().exists():
         return Path(model_path).expanduser()
     return model_path
 

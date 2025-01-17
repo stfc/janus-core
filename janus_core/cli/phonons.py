@@ -1,12 +1,9 @@
-# ruff: noqa: I002, FA100
 """Set up phonons commandline interface."""
 
-# Issues with future annotations and typer
-# c.f. https://github.com/maxb2/typer-config/issues/295
-# from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -67,7 +64,7 @@ def phonons(
         ),
     ] = 51,
     qpoint_file: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 "Path to yaml file with info to generate a path of q-points for band "
@@ -125,7 +122,7 @@ def phonons(
     read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     file_prefix: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 """

@@ -1,9 +1,6 @@
-# ruff: noqa: I002, FA100
 """Set up commandline interface."""
 
-# Issues with future annotations and typer
-# c.f. https://github.com/maxb2/typer-config/issues/295
-# from __future__ import annotations
+from __future__ import annotations
 
 from typing import Annotated
 
@@ -39,7 +36,7 @@ def print_version(
     version: Annotated[
         bool, Option("--version", help="Print janus version and exit.")
     ] = None,
-) -> False:
+) -> None:
     """
     Print current janus-core version and exit.
 

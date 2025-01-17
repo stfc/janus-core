@@ -1,12 +1,9 @@
-# ruff: noqa: I002, FA100
 """Set up geomopt commandline interface."""
 
-# Issues with future annotations and typer
-# c.f. https://github.com/maxb2/typer-config/issues/295
-# from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -30,7 +27,7 @@ app = Typer()
 
 def _set_minimize_kwargs(
     minimize_kwargs: dict[str, Any],
-    traj: Optional[str],
+    traj: str | None,
     opt_cell_lengths: bool,
     pressure: float,
 ) -> None:
@@ -91,7 +88,7 @@ def geomopt(
     ctx: Context,
     struct: StructPath,
     optimizer: Annotated[
-        Optional[str],
+        str | None,
         Option(help="Name of ASE optimizer function to use."),
     ] = "LBFGS",
     fmax: Annotated[
@@ -112,7 +109,7 @@ def geomopt(
         ),
     ] = False,
     filter_func: Annotated[
-        Optional[str],
+        str | None,
         Option(
             help=(
                 "Name of ASE filter/constraint function to use. If using "
@@ -134,7 +131,7 @@ def geomopt(
         ),
     ] = 0.001,
     out: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 "Path to save optimized structure. Default is inferred from name "

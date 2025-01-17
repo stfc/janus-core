@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated
 
 from typer import Option
 
@@ -67,13 +67,13 @@ class TyperDict:
 StructPath = Annotated[Path, Option(help="Path of structure to simulate.")]
 
 Architecture = Annotated[
-    Optional[str], Option(help="MLIP architecture to use for calculations.")
+    str | None, Option(help="MLIP architecture to use for calculations.")
 ]
-Device = Annotated[Optional[str], Option(help="Device to run calculations on.")]
-ModelPath = Annotated[Optional[str], Option(help="Path to MLIP model.")]
+Device = Annotated[str | None, Option(help="Device to run calculations on.")]
+ModelPath = Annotated[str | None, Option(help="Path to MLIP model.")]
 
 ReadKwargsAll = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -88,7 +88,7 @@ ReadKwargsAll = Annotated[
 ]
 
 ReadKwargsLast = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -103,7 +103,7 @@ ReadKwargsLast = Annotated[
 ]
 
 CalcKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -118,7 +118,7 @@ CalcKwargs = Annotated[
 ]
 
 WriteKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -132,7 +132,7 @@ WriteKwargs = Annotated[
 ]
 
 OptKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -146,7 +146,7 @@ OptKwargs = Annotated[
 ]
 
 MinimizeKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -160,7 +160,7 @@ MinimizeKwargs = Annotated[
 ]
 
 DoSKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -174,7 +174,7 @@ DoSKwargs = Annotated[
 ]
 
 PDoSKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -188,7 +188,7 @@ PDoSKwargs = Annotated[
 ]
 
 EnsembleKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -202,7 +202,7 @@ EnsembleKwargs = Annotated[
 ]
 
 DisplacementKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -216,7 +216,7 @@ DisplacementKwargs = Annotated[
 ]
 
 PostProcessKwargs = Annotated[
-    Optional[TyperDict],
+    TyperDict | None,
     Option(
         parser=parse_dict_class,
         help=(
@@ -230,7 +230,7 @@ PostProcessKwargs = Annotated[
 ]
 
 LogPath = Annotated[
-    Optional[Path],
+    Path | None,
     Option(
         help=(
             "Path to save logs to. Default is inferred from the name of the structure "
@@ -240,7 +240,7 @@ LogPath = Annotated[
 ]
 
 Summary = Annotated[
-    Optional[Path],
+    Path | None,
     Option(
         help=(
             "Path to save summary of inputs, start/end time, and carbon emissions. "

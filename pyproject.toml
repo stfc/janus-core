@@ -11,7 +11,7 @@ authors = [
     { name = "Jacob Wilkins" },
     { name = "Alin M. Elena" },
 ]
-requires-python = "<3.13,>=3.9"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python",
     "Intended Audience :: Science/Research",
@@ -34,7 +34,7 @@ dependencies = [
     "torch<=2.2,>=2.1",
     "torch-dftd==0.4.0",
     "typer<1.0.0,>=0.12.5",
-    "typer-config<2.0.0,>=1.4.0",
+    "typer-config<2.0.0,>=1.4.2",
 ]
 
 [project.optional-dependencies]
@@ -107,7 +107,7 @@ source=["janus_core"]
 
 [tool.ruff]
 exclude = ["conf.py"]
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 # Ignore complexity

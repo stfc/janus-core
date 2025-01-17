@@ -322,7 +322,9 @@ class EoS(BaseCalculation):
         if self.write_results:
             with open(f"{self.file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
                 print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
-                for eos_data in zip(self.lattice_scalars, self.energies, self.volumes):
+                for eos_data in zip(
+                    self.lattice_scalars, self.energies, self.volumes, strict=True
+                ):
                     print(*eos_data, file=out)
 
         eos = EquationOfState(self.volumes, self.energies, self.eos_type)

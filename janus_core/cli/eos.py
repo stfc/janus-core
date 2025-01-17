@@ -1,12 +1,9 @@
-# ruff: noqa: I002, FA100
 """Set up eos commandline interface."""
 
-# Issues with future annotations and typer
-# c.f. https://github.com/maxb2/typer-config/issues/295
-# from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Optional, get_args
+from typing import Annotated, get_args
 
 from typer import Context, Option, Typer
 from typer_config import use_config
@@ -66,7 +63,7 @@ def eos(
     read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     file_prefix: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             help=(
                 """
