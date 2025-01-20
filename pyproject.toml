@@ -39,7 +39,7 @@ dependencies = [
 
 [project.optional-dependencies]
 alignn = [
-    "alignn == 2024.12.02",
+    "alignn == 2024.5.27",
 ]
 chgnet = [
     "chgnet == 0.3.8",
