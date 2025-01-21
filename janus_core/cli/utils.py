@@ -17,11 +17,13 @@ if TYPE_CHECKING:
     from ase import Atoms
     from typer import Context
 
-    from janus_core.cli.types import TyperDict
+    from janus_core.cli.types import CorrelationKwargs, TyperDict
     from janus_core.helpers.janus_types import (
         MaybeSequence,
         PathLike,
     )
+
+from janus_core.processing.observables import Observable, Stress, Velocity
 
 
 def dict_paths_to_strs(dictionary: dict) -> None:
@@ -322,3 +324,84 @@ def check_config(ctx: Context) -> None:
         # Check options individually so can inform user of specific issue
         if option not in ctx.params:
             raise ValueError(f"'{option}' in configuration file is not a valid option")
+
+
+def _select_observable(name: str, kwargs: dict) -> Observable:
+    """
+    Select an Observable from a string.
+
+    Parameters
+    ----------
+    name : str
+        The name of an Observable to convert.
+    kwargs : dict
+        A list of kwargs of the Observables init.
+
+    Returns
+    -------
+    Observable
+        The selected observable.
+    """
+    if name.lower() == "velocity":
+        return Velocity(**kwargs)
+    if name.lower() == "stress":
+        return Stress(**kwargs)
+    raise ValueError(f"Observable {name} is not valid")
+
+
+def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
+    """
+    Parse CLI CorrelationKwargs to md correlation_kwargs.
+
+    Parameters
+    ----------
+    kwargs : CorrelationKwargs
+        CLI correlation keyword options.
+
+    Returns
+    -------
+    List[dict]
+        The parsed correlation_kwargs for md.
+    """
+    parsed_kwargs = []
+    for name, kwarg in kwargs.value.items():
+        if "a" not in kwarg and "b" not in kwarg:
+            raise ValueError("At least on observable must be supplied as 'a' or 'b'")
+
+        if "b" not in kwarg:
+            a = kwarg["a"]
+            b = a
+        elif "a" not in kwarg:
+            a = kwarg["b"]
+            b = a
+        else:
+            a = kwarg["a"]
+            b = kwarg["b"]
+
+        a_kwargs = kwarg["a_kwargs"] if "a_kwargs" in kwarg else {}
+        b_kwargs = kwarg["b_kwargs"] if "b_kwargs" in kwarg else {}
+
+        if a_kwargs and b_kwargs == ".":
+            b_kwargs = a_kwargs
+        elif b_kwargs and a_kwargs == ".":
+            a_kwargs = b_kwargs
+
+        blocks = kwarg["blocks"] if "blocks" in kwarg else 1
+        points = kwarg["points"] if "blocks" in kwarg else 1
+        averaging = kwarg["blocks"] if "blocks" in kwarg else 1
+        update_frequency = (
+            kwarg["update_frequency"] if "update_frequency" in kwarg else 1
+        )
+
+        parsed_kwargs.append(
+            {
+                "name": name,
+                "a": _select_observable(a, a_kwargs),
+                "b": _select_observable(b, b_kwargs),
+                "blocks": blocks,
+                "points": points,
+                "averaging": averaging,
+                "update_frequency": update_frequency,
+            }
+        )
+    return parsed_kwargs

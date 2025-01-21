@@ -76,6 +76,7 @@ def test_md(ensemble):
     traj_path = results_dir / f"{file_prefix[ensemble]}traj.extxyz"
     rdf_path = results_dir / f"{file_prefix[ensemble]}rdf.dat"
     vaf_path = results_dir / f"{file_prefix[ensemble]}vaf.dat"
+    cor_path = results_dir / f"{file_prefix[ensemble]}cor.dat"
     log_path = results_dir / f"{file_prefix[ensemble]}md-log.yml"
     summary_path = results_dir / f"{file_prefix[ensemble]}md-summary.yml"
 
@@ -100,6 +101,12 @@ def test_md(ensemble):
                 2,
                 "--post-process-kwargs",
                 "{'rdf_compute': True, 'vaf_compute': True}",
+                "--correlation-kwargs",
+                (
+                    "[{'a': Velocity(), 'b': Velocity(), 'name':"
+                    "'vaf', 'blocks': 1, 'points': 1, 'averaging'"
+                    ": 1, 'update_frequency': 1}]"
+                ),
             ],
         )
 
@@ -111,6 +118,7 @@ def test_md(ensemble):
         assert traj_path.exists()
         assert rdf_path.exists()
         assert vaf_path.exists()
+        assert cor_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
 

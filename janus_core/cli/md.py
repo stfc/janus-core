@@ -12,6 +12,7 @@ import yaml
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
+    CorrelationKwargs,
     Device,
     EnsembleKwargs,
     FilePrefix,
@@ -24,7 +25,7 @@ from janus_core.cli.types import (
     Summary,
     WriteKwargs,
 )
-from janus_core.cli.utils import yaml_converter_callback
+from janus_core.cli.utils import parse_correlation_kwargs, yaml_converter_callback
 
 app = Typer()
 
@@ -221,6 +222,7 @@ def md(
     ] = None,
     write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
+    correlation_kwargs: CorrelationKwargs = None,
     seed: Annotated[
         int | None,
         Option(help="Random seed for numpy.random and random functions."),
@@ -350,7 +352,9 @@ def md(
         files. Default is {}.
     post_process_kwargs
         Kwargs to pass to post-processing.
-    seed
+    correlation_kwargs : Optional[CorrelationKwargs]
+        Kwrag to pass for on-the-fly correlations.
+    seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
     log
@@ -379,7 +383,6 @@ def md(
 
     # Check options from configuration file are all valid
     check_config(ctx)
-
     [
         read_kwargs,
         calc_kwargs,
@@ -397,6 +400,7 @@ def md(
             post_process_kwargs,
         ]
     )
+    correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
 
     if ensemble not in get_args(Ensembles):
         raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
@@ -482,6 +486,7 @@ def md(
         "temp_time": temp_time,
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
+        "correlation_kwargs": correlation_kwargs,
         "seed": seed,
     }
 

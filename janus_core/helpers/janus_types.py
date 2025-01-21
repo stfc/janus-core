@@ -80,7 +80,7 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_output_files: Sequence[PathLike] | None
 
 
-class CorrelationKwargs(TypedDict, total=True):
+class Correlation(TypedDict, total=True):
     """Arguments for on-the-fly correlations <ab>."""
 
     #: observable a in <ab>, with optional args and kwargs
@@ -98,6 +98,8 @@ class CorrelationKwargs(TypedDict, total=True):
     #: frequency to update the correlation (steps)
     update_frequency: int
 
+
+CorrelationKwargs = list[Correlation]
 
 # eos_names from ase.eos
 EoSNames = Literal[
