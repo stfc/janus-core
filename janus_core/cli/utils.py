@@ -391,8 +391,8 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
             a_kwargs = b_kwargs
 
         blocks = kwarg["blocks"] if "blocks" in kwarg else 1
-        points = kwarg["points"] if "blocks" in kwarg else 1
-        averaging = kwarg["blocks"] if "blocks" in kwarg else 1
+        points = kwarg["points"] if "points" in kwarg else 1
+        averaging = kwarg["averaging"] if "averaging" in kwarg else 1
         update_frequency = (
             kwarg["update_frequency"] if "update_frequency" in kwarg else 1
         )
