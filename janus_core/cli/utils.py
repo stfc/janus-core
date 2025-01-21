@@ -368,6 +368,7 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         if "a" not in kwarg and "b" not in kwarg:
             raise ValueError("At least on observable must be supplied as 'a' or 'b'")
 
+        # Accept on Observable to be replicated.
         if "b" not in kwarg:
             a = kwarg["a"]
             b = a
@@ -381,6 +382,9 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         a_kwargs = kwarg["a_kwargs"] if "a_kwargs" in kwarg else {}
         b_kwargs = kwarg["b_kwargs"] if "b_kwargs" in kwarg else {}
 
+        # Accept "." in place of one kwargs to repeat.
+        if a_kwargs == "." and b_kwargs == ".":
+            raise ValueError("a_kwargs and b_kwargs cannot 'ditto' eachother")
         if a_kwargs and b_kwargs == ".":
             b_kwargs = a_kwargs
         elif b_kwargs and a_kwargs == ".":

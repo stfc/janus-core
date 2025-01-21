@@ -103,9 +103,9 @@ def test_md(ensemble):
                 "{'rdf_compute': True, 'vaf_compute': True}",
                 "--correlation-kwargs",
                 (
-                    "[{'a': Velocity(), 'b': Velocity(), 'name':"
-                    "'vaf', 'blocks': 1, 'points': 1, 'averaging'"
-                    ": 1, 'update_frequency': 1}]"
+                    "{'vaf': {'a': 'Velocity'},"
+                    " 'vaf_x': {'a': 'velocity',"
+                    "'a_kwargs': {'components': ['x']}, 'b_kwargs': '.'}}"
                 ),
             ],
         )
