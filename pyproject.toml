@@ -24,7 +24,7 @@ readme = "README.md"
 dependencies = [
     "ase<4.0,>=3.24",
     "codecarbon<3.0.0,>=2.5.0",
-    "mace-torch==0.3.8",
+    "mace-torch==0.3.9",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pyyaml<7.0.0,>=6.0.1",
@@ -49,7 +49,7 @@ m3gnet = [
     "dgl == 2.1.0",
 ]
 sevennet = [
-    "sevenn == 0.10.0",
+    "sevenn == 0.10.3",
 ]
 all = [
     "janus-core[alignn]",
