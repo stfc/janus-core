@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         PathLike,
     )
 
-from janus_core.processing.observables import Observable, Stress, Velocity
+from janus_core.processing import observables
 
 
 def dict_paths_to_strs(dictionary: dict) -> None:
@@ -326,29 +326,6 @@ def check_config(ctx: Context) -> None:
             raise ValueError(f"'{option}' in configuration file is not a valid option")
 
 
-def _select_observable(name: str, kwargs: dict) -> Observable:
-    """
-    Select an Observable from a string.
-
-    Parameters
-    ----------
-    name : str
-        The name of an Observable to convert.
-    kwargs : dict
-        A list of kwargs of the Observables init.
-
-    Returns
-    -------
-    Observable
-        The selected observable.
-    """
-    if name.lower() == "velocity":
-        return Velocity(**kwargs)
-    if name.lower() == "stress":
-        return Stress(**kwargs)
-    raise ValueError(f"Observable {name} is not valid")
-
-
 def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
     """
     Parse CLI CorrelationKwargs to md correlation_kwargs.
@@ -400,8 +377,8 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         parsed_kwargs.append(
             {
                 "name": name,
-                "a": _select_observable(a, a_kwargs),
-                "b": _select_observable(b, b_kwargs),
+                "a": getattr(observables, a)(**a_kwargs),
+                "b": getattr(observables, b)(**b_kwargs),
                 "blocks": blocks,
                 "points": points,
                 "averaging": averaging,
