@@ -22,7 +22,7 @@ classifiers = [
 readme = "README.md"
 
 dependencies = [
-    "ase<4.0,>=3.23",
+    "ase<4.0,>=3.24",
     "codecarbon<3.0.0,>=2.5.0",
     "mace-torch==0.3.8",
     "numpy<2.0.0,>=1.26.4",
