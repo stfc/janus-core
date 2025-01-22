@@ -9,20 +9,11 @@ from ase.io import read
 import numpy as np
 import pytest
 
-from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_NH
+from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_CSVR, NVT_NH
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.stats import Stats
 from tests.utils import assert_log_contains
-
-try:
-    from ase.md.bussi import Bussi  # noqa: F401
-
-    from janus_core.calculations.md import NVT_CSVR
-
-    ASE_IMPORT_ERROR = False
-except ImportError:
-    ASE_IMPORT_ERROR = True
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -235,7 +226,6 @@ def test_nph():
         stats_path.unlink(missing_ok=True)
 
 
-@pytest.mark.skipif(ASE_IMPORT_ERROR, reason="Requires updated version of ASE")
 def test_nvt_csvr():
     """Test NVT CSVR molecular dynamics."""
     restart_path_1 = Path("NaCl-nvt-csvr-T300.0-res-2.extxyz")

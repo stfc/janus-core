@@ -15,6 +15,7 @@ from warnings import warn
 from ase import Atoms
 from ase.geometry.analysis import Analysis
 from ase.io import read
+from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
 from ase.md.npt import NPT as ASE_NPT
 from ase.md.velocitydistribution import (
@@ -1581,13 +1582,6 @@ class NVT_CSVR(NVT):  # noqa: N801 (invalid-class-name)
         **kwargs
             Additional keyword arguments.
         """
-        try:
-            from ase.md.bussi import Bussi
-        except ImportError as e:
-            raise NotImplementedError(
-                "Please download the latest ASE commits to use this module."
-            ) from e
-
         super().__init__(*args, ensemble=ensemble, **kwargs)
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
