@@ -36,11 +36,11 @@ def results_to_info(
 
     Parameters
     ----------
-    struct : Atoms
+    struct
         Atoms object to copy or move calculated results to info dict.
-    properties : Collection[Properties]
+    properties
         Properties to copy from results to info dict. Default is ().
-    invalidate_calc : bool
+    invalidate_calc
         Whether to remove all calculator results after copying properties to info dict.
         Default is False.
     """
@@ -81,15 +81,15 @@ def attach_calculator(
 
     Parameters
     ----------
-    struct : MaybeSequence[Atoms] | None
+    struct
         ASE Atoms structure(s) to attach calculators to.
-    arch : Architectures
+    arch
         MLIP architecture to use for calculations. Default is "mace_mp".
-    device : Devices
+    device
         Device to run model on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP model. Default is `None`.
-    calc_kwargs : dict[str, Any] | None
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     """
     (calc_kwargs,) = none_to_dict(calc_kwargs)
@@ -126,28 +126,28 @@ def input_structs(
 
     Parameters
     ----------
-    struct : MaybeSequence[Atoms] | None
+    struct
         ASE Atoms structure(s) to simulate. Required if `struct_path` is None. Default
         is None.
-    struct_path : PathLike | None
+    struct_path
         Path of structure to simulate. Required if `struct` is None. Default is None.
-    read_kwargs : ASEReadArgs
+    read_kwargs
         Keyword arguments to pass to ase.io.read. Default is {}.
-    sequence_allowed : bool
+    sequence_allowed
         Whether a sequence of Atoms objects is allowed. Default is True.
-    arch : Architectures
+    arch
         MLIP architecture to use for calculations. Default is "mace_mp".
-    device : Devices
+    device
         Device to run model on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP model. Default is `None`.
-    calc_kwargs : dict[str, Any] | None
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : bool | None
+    set_calc
         Whether to set (new) calculators for structures.  Default is True if
         `struct_path` is specified or `struct` is missing calculators, else default is
         False.
-    logger : logging.Logger | None
+    logger
         Logger if log file has been specified. Default is None.
 
     Returns
@@ -234,21 +234,21 @@ def output_structs(
 
     Parameters
     ----------
-    images : MaybeSequence[Atoms]
+    images
         Atoms object or a list of Atoms objects to interact with.
-    struct_path : PathLike | None
+    struct_path
         Path of structure being simulated. If specified, the file stem is added to the
         info dict under "system_name". Default is None.
-    set_info : bool
+    set_info
         True to set info dict from calculated results. Default is True.
-    write_results : bool
+    write_results
         True to write out structure with results of calculations. Default is False.
-    properties : Collection[Properties]
+    properties
         Properties to copy from calculated results to info dict. Default is ().
-    invalidate_calc : bool
+    invalidate_calc
         Whether to remove all calculator results after copying properties to info dict.
         Default is False.
-    write_kwargs : ASEWriteArgs | None
+    write_kwargs
         Keyword arguments passed to ase.io.write. Default is {}.
     """
     # Separate kwargs for output_structs from kwargs for ase.io.write

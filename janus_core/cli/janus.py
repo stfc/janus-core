@@ -42,7 +42,7 @@ def print_version(
 
     Parameters
     ----------
-    version : bool
+    version
         Whether to print the current janus-core version.
     """
     if version:

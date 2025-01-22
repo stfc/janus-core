@@ -188,119 +188,119 @@ def md(
 
     Parameters
     ----------
-    ctx : Context
+    ctx
         Typer (Click) Context. Automatically set.
-    ensemble : str
+    ensemble
         Name of thermodynamic ensemble.
-    struct : Path
+    struct
         Path of structure to simulate.
-    steps : int
+    steps
         Number of steps in simulation. Default is 0.
-    timestep : float
+    timestep
         Timestep for integrator, in fs. Default is 1.0.
-    temp : float
+    temp
         Temperature, in K. Default is 300.
-    thermostat_time : float
+    thermostat_time
         Thermostat time, in fs. Default is 50.0.
-    barostat_time : float
+    barostat_time
         Barostat time, in fs. Default is 75.0.
-    bulk_modulus : float
+    bulk_modulus
         Bulk modulus, in GPa. Default is 2.0.
-    pressure : float
+    pressure
         Pressure, in GPa. Default is 0.0.
-    friction : float
+    friction
         Friction coefficient in fs^-1. Default is 0.005.
-    taut : float
+    taut
         Time constant for CSVR thermostat coupling, in fs. Default is 100.0.
-    ensemble_kwargs : Optional[dict[str, Any]]
+    ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
-    arch : Optional[str]
+    arch
         MLIP architecture to use for molecular dynamics.
         Default is "mace_mp".
-    device : Optional[str]
+    device
         Device to run model on. Default is "cpu".
-    model_path : Optional[str]
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : Optional[dict[str, Any]]
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    equil_steps : int
+    equil_steps
         Maximum number of steps at which to perform optimization and reset velocities.
         Default is 0.
-    minimize : bool
+    minimize
         Whether to minimize structure during equilibration. Default is False.
-    minimize_every : int
+    minimize_every
         Frequency of minimizations. Default is -1, which disables minimization after
         beginning dynamics.
-    minimize_kwargs : Optional[dict[str, Any]]
+    minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
-    rescale_velocities : bool
+    rescale_velocities
         Whether to rescale velocities. Default is False.
-    remove_rot : bool
+    remove_rot
         Whether to remove rotation. Default is False.
-    rescale_every : int
+    rescale_every
         Frequency to rescale velocities. Default is 10.
-    file_prefix : Optional[PathLike]
+    file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         and temperature.
-    restart : bool
+    restart
         Whether restarting dynamics. Default is False.
-    restart_auto : bool
+    restart_auto
         Whether to infer restart file name if restarting dynamics. Default is True.
-    restart_stem : str
+    restart_stem
         Stem for restart file name. Default inferred from `file_prefix`.
-    restart_every : int
+    restart_every
         Frequency of steps to save restart info. Default is 1000.
-    rotate_restart : bool
+    rotate_restart
         Whether to rotate restart files. Default is False.
-    restarts_to_keep : int
+    restarts_to_keep
         Restart files to keep if rotating. Default is 4.
-    final_file : Optional[PathLike]
+    final_file
         File to save final configuration at each temperature of similation. Default
         inferred from `file_prefix`.
-    stats_file : Optional[PathLike]
+    stats_file
         File to save thermodynamical statistics. Default inferred from `file_prefix`.
-    stats_every : int
+    stats_every
         Frequency to output statistics. Default is 100.
-    traj_file : Optional[PathLike]
+    traj_file
         Trajectory file to save. Default inferred from `file_prefix`.
-    traj_append : bool
+    traj_append
         Whether to append trajectory. Default is False.
-    traj_start : int
+    traj_start
         Step to start saving trajectory. Default is 0.
-    traj_every : int
+    traj_every
         Frequency of steps to save trajectory. Default is 100.
-    temp_start : Optional[float]
+    temp_start
         Temperature to start heating, in K. Default is None, which disables
         heating.
-    temp_end : Optional[float]
+    temp_end
         Maximum temperature for heating, in K. Default is None, which disables
         heating.
-    temp_step : Optional[float]
+    temp_step
         Size of temperature steps when heating, in K. Default is None, which disables
         heating.
-    temp_time : Optional[float]
+    temp_time
         Time between heating steps, in fs. Default is None, which disables
         heating.
-    write_kwargs : Optional[dict[str, Any]],
+    write_kwargs
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
-    post_process_kwargs : Optional[PostProcessKwargs]
+    post_process_kwargs
         Kwargs to pass to post-processing.
-    seed : Optional[int]
+    seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is inferred from the name of the structure file.
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Optional[Path]
+    config
         Path to yaml configuration file to define the above options. Default is None.
     """
     from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_CSVR, NVT_NH

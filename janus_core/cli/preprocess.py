@@ -35,14 +35,14 @@ def preprocess(
 
     Parameters
     ----------
-    mlip_config : Path
+    mlip_config
         Configuration file to pass to MLIP CLI.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is Path("preprocess-log.yml").
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is Path("preprocess-summary.yml").
     """

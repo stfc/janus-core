@@ -19,7 +19,7 @@ def read_atoms(path: Path) -> Atoms | None:
 
     Parameters
     ----------
-    path : Path
+    path
         Path to file containing Atoms structure to be read.
 
     Returns
@@ -49,11 +49,11 @@ def assert_log_contains(
 
     Parameters
     ----------
-    log_path : PathLike
+    log_path
         Path to log file to check messsages of.
-    includes : MaybeSequence[str]
+    includes
         Messages that must appear in the log file. Default is None.
-    excludes : MaybeSequence[str]
+    excludes
         Messages that must not appear in the log file. Default is None.
     """
     # Convert single strings to iterable
@@ -81,7 +81,7 @@ def strip_ansi_codes(output: str) -> str:
 
     Parameters
     ----------
-    output : str
+    output
         Output that may contain ANSI sequences to be removed.
 
     Returns

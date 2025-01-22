@@ -23,7 +23,7 @@ class Observable(ABC):
 
     Parameters
     ----------
-    atoms_slice : list[int] | SliceLike | None = None
+    atoms_slice
         A slice of atoms to observe.
     """
 
@@ -33,7 +33,7 @@ class Observable(ABC):
 
         Parameters
         ----------
-        atoms_slice : list[int] | SliceLike | None
+        atoms_slice
             A slice of atoms to observe. By default all atoms are included.
         """
         if not atoms_slice:
@@ -52,7 +52,7 @@ class Observable(ABC):
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to extract values from.
 
         Returns
@@ -68,7 +68,7 @@ class ComponentMixin:
 
     Parameters
     ----------
-    components : dict[str, int]
+    components
         Symbolic components mapped to indices.
     """
 
@@ -78,7 +78,7 @@ class ComponentMixin:
 
         Parameters
         ----------
-        components : dict[str, int]
+        components
             Symbolic components mapped to indices.
         """
         self._allowed_components = components
@@ -114,7 +114,7 @@ class ComponentMixin:
 
         Parameters
         ----------
-        components : str
+        components
             The component symbols to check.
 
         Raises
@@ -138,11 +138,11 @@ class Stress(Observable, ComponentMixin):
 
     Parameters
     ----------
-    components : list[str]
+    components
         Symbols for correlated tensor components, xx, yy, etc.
-    atoms_slice : list[int] | SliceLike | None = None
+    atoms_slice
         List or slice of atoms to observe velocities from.
-    include_ideal_gas : bool
+    include_ideal_gas
         Calculate with the ideal gas contribution.
     """
 
@@ -158,11 +158,11 @@ class Stress(Observable, ComponentMixin):
 
         Parameters
         ----------
-        components : list[str]
+        components
             Symbols for tensor components, xx, yy, etc.
-        atoms_slice : list[int] | SliceLike | None = None
+        atoms_slice
             List or slice of atoms to observe velocities from.
-        include_ideal_gas : bool
+        include_ideal_gas
             Calculate with the ideal gas contribution.
         """
         ComponentMixin.__init__(
@@ -190,7 +190,7 @@ class Stress(Observable, ComponentMixin):
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to extract values from.
 
         Returns
@@ -228,9 +228,9 @@ class Velocity(Observable, ComponentMixin):
 
     Parameters
     ----------
-    components : list[str]
+    components
         Symbols for velocity components, x, y, z.
-    atoms_slice : list[int] | SliceLike | None = None
+    atoms_slice
         List or slice of atoms to observe velocities from.
     """
 
@@ -245,9 +245,9 @@ class Velocity(Observable, ComponentMixin):
 
         Parameters
         ----------
-        components : list[str]
+        components
             Symbols for tensor components, x, y, and z.
-        atoms_slice : Union[list[int], SliceLike]
+        atoms_slice
             List or slice of atoms to observe velocities from.
         """
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
@@ -261,7 +261,7 @@ class Velocity(Observable, ComponentMixin):
 
         Parameters
         ----------
-        atoms : Atoms
+        atoms
             Atoms object to extract values from.
 
         Returns

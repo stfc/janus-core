@@ -36,14 +36,14 @@ def _set_minimize_kwargs(
 
     Parameters
     ----------
-    minimize_kwargs : dict[str, Any]
+    minimize_kwargs
         Other keyword arguments to pass to geometry optimizer.
-    traj : Optional[str]
+    traj
         Path if saving optimization frames.
-    opt_cell_lengths : bool
+    opt_cell_lengths
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function.
-    pressure : float
+    pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True.
     """
@@ -158,66 +158,66 @@ def geomopt(
 
     Parameters
     ----------
-    ctx : Context
+    ctx
         Typer (Click) Context. Automatically set.
-    struct : Path
+    struct
         Path of structure to simulate.
-    optimizer : Optional[str]
+    optimizer
         Name of optimization function from ase.optimize. Default is `LBFGS`.
-    fmax : float
+    fmax
         Set force convergence criteria for optimizer, in eV/Å. Default is 0.1.
-    steps : int
+    steps
         Set maximum number of optimization steps to run. Default is 1000.
-    arch : Optional[str]
+    arch
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
-    device : Optional[str]
+    device
         Device to run model on. Default is "cpu".
-    model_path : Optional[str]
+    model_path
         Path to MLIP model. Default is `None`.
-    opt_cell_lengths : bool
+    opt_cell_lengths
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function. Default is False.
-    opt_cell_fully : bool
+    opt_cell_fully
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
-    filter_func : Optional[str]
+    filter_func
         Name of filter function from ase.filters or ase.constraints, to apply
         constraints to atoms. If using --opt-cell-lengths or --opt-cell-fully, defaults
         to `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
-    pressure : float
+    pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
         0.0.
-    symmetrize : bool
+    symmetrize
         Whether to refine symmetry after geometry optimization. Default is False.
-    symmetry_tolerance : float
+    symmetry_tolerance
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
-    out : Optional[Path]
+    out
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
-    traj : Optional[str]
+    traj
         Path if saving optimization frames. Default is None.
-    read_kwargs : Optional[dict[str, Any]]
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    minimize_kwargs : Optional[dict[str, Any]]
+    minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    write_kwargs : Optional[dict[str, Any]]
+    write_kwargs
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is inferred from the name of the structure file.
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Optional[Path]
+    config
         Path to yaml configuration file to define the above options. Default is None.
     """
     from janus_core.calculations.geom_opt import GeomOpt

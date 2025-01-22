@@ -22,9 +22,9 @@ def write_tmp_config(config_path: Path, tmp_path: Path) -> Path:
 
     Parameters
     ----------
-    config_path : Path
+    config_path
         Path to yaml config file to be fixed.
-    tmp_path : Path
+    tmp_path
         Temporary path from pytest in which to write corrected config.
 
     Returns
