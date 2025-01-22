@@ -19,7 +19,7 @@ Tools for machine learnt interatomic potentials
 `janus-core` dependencies currently include:
 
 - Python >= 3.10
-- ASE >= 3.23
+- ASE >= 3.24
 - mace-torch = 0.3.9
 - chgnet = 0.3.8 (optional)
 - matgl = 1.1.3 (optional)
