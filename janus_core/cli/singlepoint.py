@@ -65,38 +65,38 @@ def singlepoint(
 
     Parameters
     ----------
-    ctx : Context
+    ctx
         Typer (Click) Context. Automatically set.
-    struct : Path
+    struct
         Path of structure to simulate.
-    arch : Optional[str]
+    arch
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
-    device : Optional[str]
+    device
         Device to run model on. Default is "cpu".
-    model_path : Optional[str]
+    model_path
         Path to MLIP model. Default is `None`.
-    properties : Optional[list[str]]
+    properties
         Physical properties to calculate. Default is ("energy", "forces", "stress").
-    out : Optional[Path]
+    out
         Path to save structure with calculated results. Default is inferred from name
         of the structure file.
-    read_kwargs : Optional[dict[str, Any]]
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    write_kwargs : Optional[dict[str, Any]]
+    write_kwargs
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is inferred from the name of the structure file.
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Optional[Path]
+    config
         Path to yaml configuration file to define the above options. Default is None.
     """
     from janus_core.calculations.single_point import SinglePoint

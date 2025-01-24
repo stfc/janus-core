@@ -31,61 +31,61 @@ class EoS(BaseCalculation):
 
     Parameters
     ----------
-    struct : Atoms | None
+    struct
         ASE Atoms structure to calculate equation of state for. Required if
         `struct_path` is None. Default is None.
-    struct_path : PathLike | None
+    struct_path
         Path of structure to calculate equation of state for. Required if `struct` is
         None. Default is None.
-    arch : Architectures
+    arch
         MLIP architecture to use for calculations. Default is "mace_mp".
-    device : Devices
+    device
         Device to run MLIP model on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : ASEReadArgs | None
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
-    calc_kwargs : dict[str, Any] | None
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : bool | None
+    set_calc
         Whether to set (new) calculators for structures. Default is None.
-    attach_logger : bool | None
+    attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
-    log_kwargs : dict[str, Any] | None
+    log_kwargs
         Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool | None
+    track_carbon
         Whether to track carbon emissions of calculation. Default is True if
         attach_logger is True, else False.
-    tracker_kwargs : dict[str, Any] | None
+    tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
-    min_volume : float
+    min_volume
         Minimum volume scale factor. Default is 0.95.
-    max_volume : float
+    max_volume
         Maximum volume scale factor. Default is 1.05.
-    n_volumes : int
+    n_volumes
         Number of volumes to use. Default is 7.
-    eos_type : EoSNames
+    eos_type
         Type of fit for equation of state. Default is "birchmurnaghan".
-    minimize : bool
+    minimize
         Whether to minimize initial structure before calculations. Default is True.
-    minimize_all : bool
+    minimize_all
         Whether to optimize geometry for all generated structures. Default is False.
-    minimize_kwargs : dict[str, Any] | None
+    minimize_kwargs
         Keyword arguments to pass to optimize. Default is None.
-    write_results : bool
+    write_results
         True to write out results of equation of state calculations. Default is True.
-    write_structures : bool
+    write_structures
         True to write out all genereated structures. Default is False.
-    write_kwargs : OutputKwargs | None
+    write_kwargs
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
-    plot_to_file : bool
+    plot_to_file
         Whether to save plot equation of state to svg. Default is False.
-    plot_kwargs : dict[str, Any] | None
+    plot_kwargs
         Keyword arguments to pass to EquationOfState.plot. Default is {}.
-    file_prefix : PathLike | None
+    file_prefix
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula of the structure.
 
@@ -140,63 +140,63 @@ class EoS(BaseCalculation):
 
         Parameters
         ----------
-        struct : Atoms | None
+        struct
             ASE Atoms structure to optimize geometry for. Required if `struct_path` is
             None. Default is None.
-        struct_path : PathLike | None
+        struct_path
             Path of structure to optimize. Required if `struct` is None. Default is
             None.
-        arch : Architectures
+        arch
             MLIP architecture to use for optimization. Default is "mace_mp".
-        device : Devices
+        device
             Device to run MLIP model on. Default is "cpu".
-        model_path : PathLike | None
+        model_path
             Path to MLIP model. Default is `None`.
-        read_kwargs : ASEReadArgs | None
+        read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
-        calc_kwargs : dict[str, Any] | None
+        calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : bool | None
+        set_calc
             Whether to set (new) calculators for structures. Default is None.
-        attach_logger : bool | None
+        attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
-        log_kwargs : dict[str, Any] | None
+        log_kwargs
             Keyword arguments to pass to `config_logger`. Default is {}.
-        track_carbon : bool | None
+        track_carbon
             Whether to track carbon emissions of calculation. Requires attach_logger.
             Default is True if attach_logger is True, else False.
-        tracker_kwargs : dict[str, Any] | None
+        tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
-        min_volume : float
+        min_volume
             Minimum volume scale factor. Default is 0.95.
-        max_volume : float
+        max_volume
             Maximum volume scale factor. Default is 1.05.
-        n_volumes : int
+        n_volumes
             Number of volumes to use. Default is 7.
-        eos_type : EoSNames
+        eos_type
             Type of fit for equation of state. Default is "birchmurnaghan".
-        minimize : bool
+        minimize
             Whether to minimize initial structure before calculations. Default is True.
-        minimize_all : bool
+        minimize_all
             Whether to optimize geometry for all generated structures. Default is
             False.
-        minimize_kwargs : dict[str, Any] | None
+        minimize_kwargs
             Keyword arguments to pass to optimize. Default is None.
-        write_results : bool
+        write_results
             True to write out results of equation of state calculations. Default is
             True.
-        write_structures : bool
+        write_structures
             True to write out all genereated structures. Default is False.
-        write_kwargs : OutputKwargs | None
+        write_kwargs
             Keyword arguments to pass to ase.io.write to save generated structures.
             Default is {}.
-        plot_to_file : bool
+        plot_to_file
             Whether to save plot equation of state to svg. Default is False.
-        plot_kwargs : dict[str, Any] | None
+        plot_kwargs
             Keyword arguments to pass to EquationOfState.plot. Default is {}.
-        file_prefix : PathLike | None
+        file_prefix
             Prefix for output filenames. Default is inferred from structure name, or
             chemical formula of the structure.
         """

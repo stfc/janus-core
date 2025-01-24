@@ -14,6 +14,9 @@ authors = [
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
@@ -22,9 +25,9 @@ classifiers = [
 readme = "README.md"
 
 dependencies = [
-    "ase<4.0,>=3.23",
+    "ase<4.0,>=3.24",
     "codecarbon<3.0.0,>=2.5.0",
-    "mace-torch==0.3.8",
+    "mace-torch==0.3.9",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pyyaml<7.0.0,>=6.0.1",
@@ -49,7 +52,7 @@ m3gnet = [
     "dgl == 2.1.0",
 ]
 sevennet = [
-    "sevenn == 0.10.0",
+    "sevenn == 0.10.3",
 ]
 all = [
     "janus-core[alignn]",
@@ -62,8 +65,8 @@ all = [
 janus = "janus_core.cli.janus:app"
 
 [project.urls]
-repository = "https://github.com/stfc/janus-core/"
-documentation = "https://stfc.github.io/janus-core/"
+Repository = "https://github.com/stfc/janus-core/"
+Documentation = "https://stfc.github.io/janus-core/"
 
 [dependency-groups]
 dev = [
@@ -79,10 +82,11 @@ docs = [
     "furo<2025.0.0,>=2024.1.29",
     "markupsafe<2.1",
     "numpydoc<2.0.0,>=1.6.0",
-    "sphinx<8.0.0,>=7.2.6",
+    "sphinx<9.0.0,>=8.0.2",
     "sphinxcontrib-contentui<1.0.0,>=0.2.5",
     "sphinxcontrib-details-directive<1.0,>=0.1",
     "sphinx-copybutton<1.0.0,>=0.5.2",
+    "sphinx-autodoc-typehints<3.0.0,>=2.5.0"
 ]
 
 pre-commit = [
@@ -151,6 +155,7 @@ checks = [
     "EX01",
     "SA01",
     "ES01",
+    "PR04", # Ignore no type (types come from signature as via sphinx_autodoc_typehints)
 ]
 # Don't report on objects that match any of these regex
 exclude = [

@@ -31,42 +31,42 @@ class SinglePoint(BaseCalculation):
 
     Parameters
     ----------
-    struct : MaybeSequence[Atoms] | None
+    struct
         ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
         Default is None.
-    struct_path : PathLike | None
+    struct_path
         Path of structure to simulate. Required if `struct` is None.
         Default is None.
-    arch : Architectures
+    arch
         MLIP architecture to use for single point calculations.
         Default is "mace_mp".
-    device : Devices
+    device
         Device to run model on. Default is "cpu".
-    model_path : PathLike | None
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : ASEReadArgs
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is ":".
-    calc_kwargs : dict[str, Any] | None
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc : bool | None
+    set_calc
         Whether to set (new) calculators for structures. Default is None.
-    attach_logger : bool | None
+    attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
-    log_kwargs : dict[str, Any] | None
+    log_kwargs
             Keyword arguments to pass to `config_logger`. Default is {}.
-    track_carbon : bool | None
+    track_carbon
         Whether to track carbon emissions of calculation. Requires attach_logger.
         Default is True if attach_logger is True, else False.
-    tracker_kwargs : dict[str, Any] | None
+    tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
-    properties : MaybeSequence[Properties]
+    properties
         Physical properties to calculate. If not specified, "energy",
         "forces", and "stress" will be returned.
-    write_results : bool
+    write_results
         True to write out structure with results of calculations. Default is False.
-    write_kwargs : OutputKwargs | None
+    write_kwargs
         Keyword arguments to pass to ase.io.write if saving structure with results of
         calculations. Default is {}.
 
@@ -105,42 +105,42 @@ class SinglePoint(BaseCalculation):
 
         Parameters
         ----------
-        struct : MaybeSequence[Atoms] | None
+        struct
             ASE Atoms structure(s) to simulate. Required if `struct_path`
             is None. Default is None.
-        struct_path : PathLike | None
+        struct_path
             Path of structure to simulate. Required if `struct` is None.
             Default is None.
-        arch : Architectures
+        arch
             MLIP architecture to use for single point calculations.
             Default is "mace_mp".
-        device : Devices
+        device
             Device to run MLIP model on. Default is "cpu".
-        model_path : PathLike | None
+        model_path
             Path to MLIP model. Default is `None`.
-        read_kwargs : ASEReadArgs | None
+        read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
-        calc_kwargs : dict[str, Any] | None
+        calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc : bool | None
+        set_calc
             Whether to set (new) calculators for structures. Default is None.
-        attach_logger : bool | None
+        attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
-        log_kwargs : dict[str, Any] | None
+        log_kwargs
             Keyword arguments to pass to `config_logger`. Default is {}.
-        track_carbon : bool | None
+        track_carbon
             Whether to track carbon emissions of calculation. Requires attach_logger.
             Default is True if attach_logger is True, else False.
-        tracker_kwargs : dict[str, Any] | None
+        tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
-        properties : MaybeSequence[Properties]
+        properties
             Physical properties to calculate. If not specified, "energy",
             "forces", and "stress" will be returned.
-        write_results : bool
+        write_results
             True to write out structure with results of calculations. Default is False.
-        write_kwargs : OutputKwargs | None
+        write_kwargs
             Keyword arguments to pass to ase.io.write if saving structure with results
             of calculations. Default is {}.
         """
@@ -201,7 +201,7 @@ class SinglePoint(BaseCalculation):
 
         Parameters
         ----------
-        value : MaybeSequence[Properties]
+        value
             Physical properties to be calculated.
         """
         if isinstance(value, str):
@@ -276,7 +276,7 @@ class SinglePoint(BaseCalculation):
 
         Parameters
         ----------
-        struct : Atoms
+        struct
             Structure to calculate Hessian for.
 
         Returns

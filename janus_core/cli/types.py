@@ -18,7 +18,7 @@ def parse_dict_class(value: str | ASEReadArgs) -> TyperDict:
 
     Parameters
     ----------
-    value : str | ASEReadArgs
+    value
         String representing dictionary to be parsed.
 
     Returns
@@ -37,7 +37,7 @@ class TyperDict:
 
     Parameters
     ----------
-    value : str
+    value
         Value of string representing a dictionary.
     """
 
@@ -47,7 +47,7 @@ class TyperDict:
 
         Parameters
         ----------
-        value : str
+        value
             Value of string representing a dictionary.
         """
         self.value = value
@@ -79,7 +79,7 @@ ReadKwargsAll = Annotated[
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}". By default,
+            wrapped in quotes, e.g. "{'key': value}". By default,
             read_kwargs['index'] = ':', so all structures are read.
             """
         ),
@@ -94,7 +94,7 @@ ReadKwargsLast = Annotated[
         help=(
             """
             Keyword arguments to pass to ase.io.read. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}". By default,
+            wrapped in quotes, e.g. "{'key': value}". By default,
             read_kwargs['index'] = -1, so only the last structure is read.
             """
         ),
@@ -109,8 +109,8 @@ CalcKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to selected calculator. Must be passed as a
-            dictionary wrapped in quotes, e.g. "{'key' : value}". For the default
-            architecture ('mace_mp'), "{'model':'small'}" is set unless overwritten.
+            dictionary wrapped in quotes, e.g. "{'key': value}". For the default
+            architecture ('mace_mp'), "{'model': 'small'}" is set unless overwritten.
             """
         ),
         metavar="DICT",
@@ -124,7 +124,7 @@ WriteKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to ase.io.write when saving results. Must be
-            passed as a dictionary wrapped in quotes, e.g. "{'key' : value}".
+            passed as a dictionary wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
@@ -138,7 +138,7 @@ OptKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to optimizer. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".
+            wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
@@ -152,7 +152,7 @@ MinimizeKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to optimizer. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".
+            wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
@@ -194,7 +194,7 @@ EnsembleKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to ensemble initialization. Must be passed as a
-            dictionary wrapped in quotes, e.g. "{'key' : value}".
+            dictionary wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
@@ -222,7 +222,7 @@ PostProcessKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to post-processer. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key' : value}".
+            wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",

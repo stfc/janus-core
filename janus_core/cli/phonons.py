@@ -143,89 +143,89 @@ def phonons(
 
     Parameters
     ----------
-    ctx : Context
+    ctx
         Typer (Click) Context. Automatically set.
-    struct : Path
+    struct
         Path of structure to simulate.
-    supercell : str
+    supercell
         Supercell matrix, in the Phonopy style. Must be passed as a string in one of
         three forms: single integer ('2'), which specifies all diagonal elements;
         three integers ('1 2 3'), which specifies each individual diagonal element;
         or nine values ('1 2 3 4 5 6 7 8 9'), which specifies all elements, filling the
         matrix row-wise.
-    displacement : float
+    displacement
         Displacement for force constants calculation, in A. Default is 0.01.
-    displacement_kwargs : Optional[dict[str, Any]]
+    displacement_kwargs
         Keyword arguments to pass to generate_displacements. Default is {}.
-    mesh : tuple[int, int, int]
+    mesh
         Mesh for sampling. Default is (10, 10, 10).
-    bands : bool
+    bands
         Whether to calculate and save the band structure. Default is False.
-    n_qpoints : int
+    n_qpoints
         Number of q-points to sample along generated path, including end points.
         Unused if `qpoint_file` is specified. Default is 51.
-    qpoint_file : Optional[PathLike]
+    qpoint_file
         Path to yaml file with info to generate a path of q-points for band structure.
         Default is None.
-    dos : bool
+    dos
         Whether to calculate and save the DOS. Default is False.
-    dos_kwargs : Optional[dict[str, Any]]
+    dos_kwargs
         Other keyword arguments to pass to run_total_dos. Default is {}.
-    pdos : bool
+    pdos
         Whether to calculate and save the PDOS. Default is False.
-    pdos_kwargs : Optional[dict[str, Any]]
+    pdos_kwargs
         Other keyword arguments to pass to run_projected_dos. Default is {}.
-    thermal : bool
+    thermal
         Whether to calculate thermal properties. Default is False.
-    temp_min : float
+    temp_min
         Start temperature for thermal calculations, in K. Unused if `thermal` is False.
         Default is 0.0.
-    temp_max : float
+    temp_max
         End temperature for thermal calculations, in K. Unused if `thermal` is False.
         Default is 1000.0.
-    temp_step : float
+    temp_step
         Temperature step for thermal calculations, in K. Unused if `thermal` is False.
         Default is 50.0.
-    symmetrize : bool
+    symmetrize
         Whether to symmetrize force constants. Default is False.
-    minimize : bool
+    minimize
         Whether to minimize structure before calculations. Default is False.
-    fmax : float
+    fmax
         Set force convergence criteria for optimizer in units eV/Å.
         Default is 0.1.
-    minimize_kwargs : Optional[dict[str, Any]]
+    minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    hdf5 : bool
+    hdf5
         Whether to save force constants in hdf5 format. Default is True.
-    plot_to_file : bool
+    plot_to_file
         Whether to plot. Default is False.
-    write_full : bool
+    write_full
         Whether to maximize information written in various output files.
         Default is True.
-    arch : Optional[str]
+    arch
         MLIP architecture to use for geometry optimization.
         Default is "mace_mp".
-    device : Optional[str]
+    device
         Device to run model on. Default is "cpu".
-    model_path : Optional[str]
+    model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs : Optional[dict[str, Any]]
+    read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is 0.
-    calc_kwargs : Optional[dict[str, Any]]
+    calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    file_prefix : Optional[PathLike]
+    file_prefix
         Prefix for output filenames. Default is inferred from structure name, or
         chemical formula.
-    log : Optional[Path]
+    log
         Path to write logs to. Default is inferred from the name of the structure file.
-    tracker : bool
+    tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
-    summary : Optional[Path]
+    summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
-    config : Optional[Path]
+    config
         Path to yaml configuration file to define the above options. Default is None.
     """
     from janus_core.calculations.phonons import Phonons

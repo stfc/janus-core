@@ -28,26 +28,4 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest --run-extra-mlips --cov janus_core --cov-append .
-
-      - name: Set Path
-        run: |
-          source ~/.zshrc
-          echo "PATH=$PATH" >> $GITHUB_ENV
-
-      - name: Report coverage to Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel: true
-          flag-name: run-${{ matrix.python-version }}
-          file: coverage.xml
-          base-path: janus_core
-
-  coverage:
-    needs: tests
-    runs-on: self-hosted
-    steps:
-      - name: Close parallel build
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel-finished: true
+        run: uv run pytest --run-extra-mlips
