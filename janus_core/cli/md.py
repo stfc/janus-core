@@ -400,7 +400,9 @@ def md(
             post_process_kwargs,
         ]
     )
-    correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
+
+    if correlation_kwargs:
+        correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
 
     if ensemble not in get_args(Ensembles):
         raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
