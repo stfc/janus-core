@@ -104,7 +104,7 @@ def test_md(ensemble):
                 "--correlation-kwargs",
                 (
                     "{'vaf': {'a': 'Velocity'},"
-                    " 'vaf_x': {'a': 'velocity',"
+                    " 'vaf_x': {'a': 'Velocity',"
                     "'a_kwargs': {'components': ['x']}, 'b_kwargs': '.'}}"
                 ),
             ],
