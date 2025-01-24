@@ -253,13 +253,13 @@ class Correlation:
         Observable for b.
     name
         Name of correlation.
-    blocks
+    blocks : int, default 1
         Number of correlation blocks.
-    points
+    points : int, default 1
         Number of points per block.
-    averaging
+    averaging : int, default 1
         Averaging window per block level.
-    update_frequency
+    update_frequency : int, default 1
         Frequency to update the correlation, md steps.
     """
 
@@ -269,10 +269,10 @@ class Correlation:
         a: Observable,
         b: Observable,
         name: str,
-        blocks: int,
-        points: int,
-        averaging: int,
-        update_frequency: int,
+        blocks: int = 1,
+        points: int = 1,
+        averaging: int = 1,
+        update_frequency: int = 1,
     ) -> None:
         """
         Initialise a correlation.
@@ -285,13 +285,13 @@ class Correlation:
             Observable for b.
         name
             Name of correlation.
-        blocks
+        blocks : int, default 1
             Number of correlation blocks.
-        points
+        points : int, default 1
             Number of points per block.
-        averaging
+        averaging : int, default 1
             Averaging window per block level.
-        update_frequency
+        update_frequency : int, default 1
             Frequency to update the correlation, md steps.
         """
         self.name = name

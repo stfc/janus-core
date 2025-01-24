@@ -341,23 +341,23 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         The parsed correlation_kwargs for md.
     """
     parsed_kwargs = []
-    for name, kwarg in kwargs.value.items():
-        if "a" not in kwarg and "b" not in kwarg:
+    for name, cli_kwargs in kwargs.value.items():
+        if "a" not in cli_kwargs and "b" not in cli_kwargs:
             raise ValueError("At least on observable must be supplied as 'a' or 'b'")
 
         # Accept on Observable to be replicated.
-        if "b" not in kwarg:
-            a = kwarg["a"]
+        if "b" not in cli_kwargs:
+            a = cli_kwargs["a"]
             b = a
-        elif "a" not in kwarg:
-            a = kwarg["b"]
+        elif "a" not in cli_kwargs:
+            a = cli_kwargs["b"]
             b = a
         else:
-            a = kwarg["a"]
-            b = kwarg["b"]
+            a = cli_kwargs["a"]
+            b = cli_kwargs["b"]
 
-        a_kwargs = kwarg["a_kwargs"] if "a_kwargs" in kwarg else {}
-        b_kwargs = kwarg["b_kwargs"] if "b_kwargs" in kwarg else {}
+        a_kwargs = cli_kwargs["a_kwargs"] if "a_kwargs" in cli_kwargs else {}
+        b_kwargs = cli_kwargs["b_kwargs"] if "b_kwargs" in cli_kwargs else {}
 
         # Accept "." in place of one kwargs to repeat.
         if a_kwargs == "." and b_kwargs == ".":
@@ -367,22 +367,15 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         elif b_kwargs and a_kwargs == ".":
             a_kwargs = b_kwargs
 
-        blocks = kwarg["blocks"] if "blocks" in kwarg else 1
-        points = kwarg["points"] if "points" in kwarg else 1
-        averaging = kwarg["averaging"] if "averaging" in kwarg else 1
-        update_frequency = (
-            kwarg["update_frequency"] if "update_frequency" in kwarg else 1
-        )
+        cor_kwargs = {
+            "name": name,
+            "a": getattr(observables, a)(**a_kwargs),
+            "b": getattr(observables, b)(**b_kwargs),
+        }
 
-        parsed_kwargs.append(
-            {
-                "name": name,
-                "a": getattr(observables, a)(**a_kwargs),
-                "b": getattr(observables, b)(**b_kwargs),
-                "blocks": blocks,
-                "points": points,
-                "averaging": averaging,
-                "update_frequency": update_frequency,
-            }
-        )
+        for optional in ["blocks", "points", "averaging", "update_frequency"]:
+            if optional in cli_kwargs:
+                cor_kwargs[optional] = cli_kwargs[optional]
+
+        parsed_kwargs.append(cor_kwargs)
     return parsed_kwargs
