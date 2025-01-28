@@ -42,7 +42,7 @@ from janus_core.helpers.janus_types import (
     PostProcessKwargs,
 )
 from janus_core.helpers.struct_io import input_structs, output_structs
-from janus_core.helpers.utils import none_to_dict, write_table
+from janus_core.helpers.utils import none_to_dict, set_minimize_logging, write_table
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
 
@@ -492,13 +492,9 @@ class MolecularDynamics(BaseCalculation):
             self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
 
         # Use MD logger for geometry optimization
-        if self.logger:
-            self.minimize_kwargs["log_kwargs"] = {
-                "filename": self.log_kwargs["filename"],
-                "name": self.logger.name,
-                "filemode": "a",
-            }
-        self.minimize_kwargs["track_carbon"] = self.track_carbon
+        set_minimize_logging(
+            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+        )
 
         self.dyn: Langevin | VelocityVerlet | ASE_NPT
         self.n_atoms = len(self.struct)
