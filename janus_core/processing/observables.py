@@ -124,7 +124,7 @@ class ComponentMixin:
         """
         if any(components - self._allowed_components.keys()):
             raise ValueError(
-                f"'{components-self._allowed_components.keys()}'"
+                f"'{components - self._allowed_components.keys()}'"
                 f" invalid, must be '{', '.join(self._allowed_components)}'"
             )
 
