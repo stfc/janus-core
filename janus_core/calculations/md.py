@@ -172,13 +172,6 @@ class MolecularDynamics(BaseCalculation):
         Number of previous steps if restarting simulation.
     created_final : bool
         Whether the final structure file has been created.
-
-    Methods
-    -------
-    run()
-        Run molecular dynamics simulation and/or heating ramp.
-    get_stats()
-        Get thermodynamical statistics to be written to file.
     """
 
     def __init__(
@@ -1169,11 +1162,6 @@ class NPT(MolecularDynamics):
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
-
-    Attributes
-    ----------
-    dyn : Dynamics
-        Configured NPT dynamics.
     """
 
     def __init__(
@@ -1316,11 +1304,6 @@ class NVT(MolecularDynamics):
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
-
-    Attributes
-    ----------
-    dyn : Dynamics
-        Configured NVT dynamics.
     """
 
     def __init__(
@@ -1411,11 +1394,6 @@ class NVE(MolecularDynamics):
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
-
-    Attributes
-    ----------
-    dyn : Dynamics
-        Configured NVE dynamics.
     """
 
     def __init__(
@@ -1624,11 +1602,6 @@ class NPH(NPT):
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
         Additional keyword arguments.
-
-    Attributes
-    ----------
-    dyn : Dynamics
-        Configured NVE dynamics.
     """
 
     def __init__(

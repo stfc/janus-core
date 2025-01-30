@@ -41,14 +41,6 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         Default prefix to use.
     *additional
         Components to add to default file_prefix (joined by hyphens).
-
-    Methods
-    -------
-    _get_default_prefix(file_prefix, struct)
-        Return a prefix from the provided file_prefix or from chemical formula of
-        struct.
-    _build_filename(suffix, *additional, filename, prefix_override)
-         Return a standard format filename if filename not provided.
     """
 
     def __init__(

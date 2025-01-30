@@ -68,11 +68,6 @@ class Descriptors(BaseCalculation):
     write_kwargs
         Keyword arguments to pass to ase.io.write if saving structure with
         results of calculations. Default is {}.
-
-    Methods
-    -------
-    run()
-        Calculate descriptors for structure(s)
     """
 
     def __init__(

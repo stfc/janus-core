@@ -100,11 +100,6 @@ class EoS(BaseCalculation):
         List of energies of generated structures.
     lattice_scalars : NDArray[float64]
         Lattice scalars of generated structures.
-
-    Methods
-    -------
-    run()
-        Calculate equation of state.
     """
 
     def __init__(
