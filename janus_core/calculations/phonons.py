@@ -598,9 +598,9 @@ class Phonons(BaseCalculation):
             labels = paths_info["labels"]
             num_q_points = sum(len(q) for q in paths_info["paths"])
             num_labels = len(labels)
-            assert (
-                num_q_points == num_labels
-            ), "Number of labels is different to number of q-points specified"
+            assert num_q_points == num_labels, (
+                "Number of labels is different to number of q-points specified"
+            )
 
             q_points, connections = get_band_qpoints_and_path_connections(
                 band_paths=paths_info["paths"], npoints=paths_info["npoints"]

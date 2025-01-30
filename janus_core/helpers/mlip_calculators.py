@@ -113,8 +113,7 @@ def choose_calculator(
         # No default `model_path`
         if model_path is None:
             raise ValueError(
-                "Please specify `model_path`, as there is no "
-                f"default model for {arch}"
+                f"Please specify `model_path`, as there is no default model for {arch}"
             )
         # Default to float64 precision
         kwargs.setdefault("default_dtype", "float64")

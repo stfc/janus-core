@@ -91,7 +91,7 @@ docs = [
 
 pre-commit = [
     "pre-commit<4.0.0,>=3.6.0",
-    "ruff<1.0.0,>=0.7.4",
+    "ruff<1.0.0,>=0.9.3",
 ]
 
 [build-system]
