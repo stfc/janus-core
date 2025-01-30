@@ -128,31 +128,6 @@ class Phonons(BaseCalculation):
         ASE Calculator attached to structure.
     results : dict
         Results of phonon calculations.
-
-    Methods
-    -------
-    calc_force_constants(write_force_consts)
-        Calculate force constants and optionally write results.
-    write_force_constants(phonopy_file, force_consts_to_hdf5, force_consts_file)
-        Write results of force constants calculations.
-    calc_bands(write_bands)
-        Calculate band structure and optionally write and plot results.
-    write_bands(bands_file, save_plots, plot_file)
-        Write results of band structure calculations.
-    calc_thermal_props(mesh, write_thermal)
-        Calculate thermal properties and optionally write results.
-    write_thermal_props(thermal_file)
-        Write results of thermal properties calculations.
-    calc_dos(mesh, write_dos)
-        Calculate density of states and optionally write results.
-    write_dos(dos_file, plot_to_file, plot_file, plot_bands, plot_bands_file)
-        Write results of DOS calculation.
-    calc_pdos(mesh, write_pdos)
-        Calculate projected density of states and optionally write results.
-    write_pdos(pdos_file, plot_to_file, plot_file)
-        Write results of PDOS calculation.
-    run()
-        Run phonon calculations.
     """
 
     def __init__(

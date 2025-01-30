@@ -74,11 +74,6 @@ class SinglePoint(BaseCalculation):
     ----------
     results : CalcResults
         Dictionary of calculated results, with keys from `properties`.
-
-    Methods
-    -------
-    run()
-        Run single point calculations.
     """
 
     def __init__(

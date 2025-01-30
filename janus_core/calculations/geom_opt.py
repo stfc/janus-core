@@ -91,13 +91,6 @@ class GeomOpt(BaseCalculation):
     traj_kwargs
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
-
-    Methods
-    -------
-    set_optimizer()
-        Set optimizer for geometry optimization.
-    run()
-        Run geometry optimization.
     """
 
     def __init__(
