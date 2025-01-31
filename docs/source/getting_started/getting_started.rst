@@ -10,7 +10,7 @@ Dependencies
 - Python >= 3.10
 - ASE >= 3.24
 - mace-torch = 0.3.10
-- chgnet = 0.3.8 (optional)
+- chgnet = 0.4.0 (optional)
 - matgl = 1.1.3 (optional)
 - sevenn = 0.10.3 (optional)
 - alignn = 2024.5.27 (optional)
