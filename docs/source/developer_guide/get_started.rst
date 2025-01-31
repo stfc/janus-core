@@ -34,6 +34,36 @@ or to install all supported MLIPs::
     uv sync --all-extras
 
 
+Using uv
+++++++++
+
+``uv`` manages a `persistent environment <https://docs.astral.sh/uv/concepts/projects/layout/#the-project-environment>`_
+with the project and its dependencies in a ``.venv`` directory, adjacent to ``pyproject.toml``. This will be created automatically as needed.
+
+``uv`` provides two separate APIs for managing your Python project and environment.
+
+``uv pip`` is designed to resemble the ``pip`` CLI, with similar commands (``uv pip install``,  ``uv pip list``, ``uv pip tree``, etc.),
+and is slightly lower level. `Compared with pip <https://docs.astral.sh/uv/pip/compatibility/>`_,
+``uv`` tends to be stricter, but in most cases ``uv pip`` could be used in place of ``pip``.
+
+``uv add``, ``uv run``, ``uv sync``, and ``uv lock`` are known as "project APIs", and are slightly higher level.
+These commands interact with (and require) ``pyproject.toml``, and ``uv`` will ensure your environment is in-sync when they are called,
+including creating or updating a `lockfile <https://docs.astral.sh/uv/concepts/projects/sync/>`_,
+a universal resolution that is `portable across platforms <https://docs.astral.sh/uv/concepts/resolution/#universal-resolution>`_.
+
+When developing for ``janus-core``, it is usually recommended to use project commands, as described in `Getting started`_
+rather than using ``uv pip install`` to modify the project environment manually.
+
+.. tip::
+
+    ``uv`` will detect and use Python versions available on your system,
+    but can also be used to `install Python automtically <https://docs.astral.sh/uv/guides/install-python/>`_.
+    The desired Python version can be specified when running project commands with the ``--python``/``-p`` option.
+
+
+For further information, please refer to the `documentation <https://docs.astral.sh/uv/>`_
+
+
 Running unit tests
 ++++++++++++++++++
 
