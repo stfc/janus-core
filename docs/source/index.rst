@@ -16,9 +16,9 @@ Welcome to janus-core's documentation!
 
    getting_started/getting_started
    user_guide/index
+   tutorials/index
    developer_guide/index
    API documentation <apidoc/janus_core>
-   tutorials/single_point
 
 ``janus-core`` is released under the `BSD 3-Clause license <https://opensource.org/license/bsd-3-clause/>`_.
 
