@@ -165,7 +165,7 @@ def compute_vaf(
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[int | None]] = ((None),),
+    filter_atoms: MaybeSequence[MaybeSequence[int | str | None]] = ((None),),
     time_step: float = 1.0,
 ) -> tuple[NDArray[float64], list[NDArray[float64]]]:
     """
@@ -202,9 +202,10 @@ def compute_vaf(
 
     Notes
     -----
-    `filter_atoms` is given as a series of sequences of atoms, where
-    each element in the series denotes a VAF subset to calculate and
-    each sequence determines the atoms (by index) to be included in that VAF.
+    `filter_atoms` is given as a series of sequences of atoms or elements,
+    where each value in the series denotes a VAF subset to calculate and
+    each sequence determines the atoms (by index or element)
+    to be included in that VAF.
 
     E.g.
 
@@ -212,7 +213,8 @@ def compute_vaf(
 
         # Species indices in cell
         na = (1, 3, 5, 7)
-        cl = (2, 4, 6, 8)
+        # Species by name
+        cl = ('Cl')
 
         compute_vaf(..., filter_atoms=(na, cl))
 
@@ -221,11 +223,10 @@ def compute_vaf(
     By default, one VAF will be computed for all atoms in the structure.
     """
     # Ensure if passed scalars they are turned into correct dimensionality
-    if not isinstance(filter_atoms, Sequence):
+    if isinstance(filter_atoms, str) or not isinstance(filter_atoms, Sequence):
         filter_atoms = (filter_atoms,)
-    if not isinstance(filter_atoms[0], Sequence):
+    if isinstance(filter_atoms[0], str) or not isinstance(filter_atoms[0], Sequence):
         filter_atoms = (filter_atoms,)
-
     if filenames and not isinstance(filenames, Sequence):
         filenames = (filenames,)
 
@@ -247,12 +248,25 @@ def compute_vaf(
     n_steps = len(momenta)
     n_atoms = len(momenta[0])
 
-    # If filter_atoms not specified use all atoms
-    filter_atoms = [
-        atom if atom[0] is not None else range(n_atoms) for atom in filter_atoms
-    ]
+    filtered_atoms = []
+    symbols = data[0].get_chemical_symbols()
+    for atoms in filter_atoms:
+        if any(atom is None for atom in atoms):
+            # If filter_atoms not specified use all atoms.
+            filtered_atoms.append(range(n_atoms))
+        elif all(isinstance(a, str) for a in atoms):
+            # If all symbols, get the matching indices.
+            filtered_atoms.append(
+                [i for i in range(len(symbols)) if symbols[i] in atoms]
+            )
+        elif all(isinstance(a, int) for a in atoms):
+            filtered_atoms.append(atoms)
+        else:
+            raise ValueError(
+                "Cannot mix element symbols and indices in vaf filter_atoms"
+            )
 
-    used_atoms = {atom for atoms in filter_atoms for atom in atoms}
+    used_atoms = {atom for atoms in filtered_atoms for atom in atoms}
     used_atoms = {j: i for i, j in enumerate(used_atoms)}
 
     vafs = np.sum(
@@ -282,10 +296,9 @@ def compute_vaf(
         lags,
         [
             np.average([vafs[used_atoms[i]] for i in atoms], axis=0)
-            for atoms in filter_atoms
+            for atoms in filtered_atoms
         ],
     )
-
     if filenames:
         for vaf, filename in zip(vafs[1], filenames, strict=True):
             with open(filename, "w", encoding="utf-8") as out_file:

@@ -77,7 +77,7 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_start: int
     vaf_stop: int | None
     vaf_step: int
-    vaf_output_file: PathLike | None
+    vaf_output_files: Sequence[PathLike] | None
 
 
 class CorrelationKwargs(TypedDict, total=True):

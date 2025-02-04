@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 import datetime
 from functools import partial
 from itertools import combinations_with_replacement
@@ -979,13 +980,18 @@ class MolecularDynamics(BaseCalculation):
             compute_rdf(data, ana, filenames=out_paths, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
-            file_name = self.post_process_kwargs.get("vaf_output_file", None)
+            file_names = self.post_process_kwargs.get("vaf_output_files", None)
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
             fft = self.post_process_kwargs.get("vaf_fft", False)
 
-            out_path = self._build_filename(
-                "vaf.dat", self.param_prefix, filename=file_name
-            )
+            if not isinstance(file_names, Sequence):
+                file_names = (file_names,)
+
+            out_paths = [
+                self._build_filename("vaf.dat", self.param_prefix, filename=file_name)
+                for file_name in file_names
+            ]
+
             slice_ = (
                 self.post_process_kwargs.get("vaf_start", 0),
                 self.post_process_kwargs.get("vaf_stop", None),
@@ -994,7 +1000,7 @@ class MolecularDynamics(BaseCalculation):
 
             compute_vaf(
                 data,
-                out_path,
+                out_paths,
                 use_velocities=use_vel,
                 fft=fft,
                 index=slice_,
