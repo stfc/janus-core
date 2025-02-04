@@ -21,17 +21,17 @@ This provides a number of useful features, including:
 
 Dependencies useful for development can then be installed by running::
 
-    uv sync
+    uv sync -p 3.12
     source .venv/bin/activate
 
 
 Extras, such as optional MLIPs, can also be installed by running::
 
-    uv sync --extra alignn --extra sevennet
+    uv sync -p 3.12 --extra alignn --extra sevennet
 
 or to install all supported MLIPs::
 
-    uv sync --all-extras
+    uv sync -p 3.12 --all-extras
 
 
 Using uv
