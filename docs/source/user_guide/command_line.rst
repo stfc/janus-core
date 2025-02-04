@@ -313,7 +313,7 @@ Additional settings for geometry optimization, such as enabling optimization of 
 Post-processing
 -----------------------------
 
-After MD velocity autocorrelation functions (VAFs) and radial distribution functions (RDFs) may be calculated as a post-processing step. It is possible to build partial VAFs and RDFs from arbitrary sequences of atom indices or spieces names
+After MD velocity autocorrelation functions (VAFs) and radial distribution functions (RDFs) may be calculated as a post-processing step. It is possible to build partial VAFs and RDFs from arbitrary sequences of atom indices or species names.
 
 To compute the VAF across all atoms from the command line the following options could be passed:
 
