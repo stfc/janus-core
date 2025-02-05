@@ -80,6 +80,8 @@ class NEB(BaseCalculation):
         Nudged Elastic Band method to use. Default is ase.mep.NEB.
     n_images
         Number of images to use in NEB. Default is 15.
+    write_results
+        Whether to write out results from NEB. Default is True.
     write_images
         Whether to write out all band images after optimization. Default is False.
     write_kwargs
@@ -137,6 +139,7 @@ class NEB(BaseCalculation):
         tracker_kwargs: dict[str, Any] | None = None,
         neb_method: Callable | str = ASE_NEB,
         n_images: int = 15,
+        write_results: bool = True,
         write_images: bool = False,
         write_kwargs: OutputKwargs | None = None,
         neb_kwargs: dict[str, Any] | None = None,
@@ -203,6 +206,8 @@ class NEB(BaseCalculation):
             Nudged Elastic Band method to use. Default is ase.mep.NEB.
         n_images
             Number of images to use in NEB. Default is 15.
+        write_results
+            Whether to write out results from NEB. Default is Trueß.
         write_images
             Whether to write out all band images after optimization. Default is False.
         write_kwargs
@@ -252,6 +257,7 @@ class NEB(BaseCalculation):
 
         self.neb_method = neb_method
         self.n_images = n_images
+        self.write_results = write_results
         self.write_images = write_images
         self.write_kwargs = write_kwargs
         self.neb_kwargs = neb_kwargs
@@ -335,6 +341,7 @@ class NEB(BaseCalculation):
             interpolation_kwargs.setdefault("autosort_tol", 0.5)
 
         # Set output file defaults
+        self.results_file = self._build_filename("neb-results.dat").absolute()
         self.plot_file = self._build_filename("neb-plot.svg").absolute()
 
         self.write_kwargs["filename"] = self._build_filename(
@@ -514,5 +521,10 @@ class NEB(BaseCalculation):
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.stop()
+
+        if self.write_results:
+            with open(self.results_file, "w", encoding="utf8") as out:
+                print("#Barrier [eV] | delta E [eV] | Max force [eV/Å] ", file=out)
+                print(*self.results.values(), file=out)
 
         return self.results
