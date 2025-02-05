@@ -139,6 +139,7 @@ def singlepoint(
         "attach_logger": True,
         "log_kwargs": log_kwargs,
         "track_carbon": tracker,
+        "enable_progress_bar": True,
     }
 
     # Initialise singlepoint structure and calculator
