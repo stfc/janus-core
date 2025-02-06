@@ -61,6 +61,9 @@ def neb(
         Option(help="Name of ASE NEB optimizer to use."),
     ] = "NEBOptimizer",
     fmax: Annotated[float, Option(help="Maximum force for NEB optimizer.")] = 0.1,
+    steps: Annotated[
+        int, Option(help="Maximum number of steps for optimization.")
+    ] = 100,
     optimizer_kwargs: NebOptKwargs = None,
     plot_band: Annotated[
         bool,
@@ -131,6 +134,8 @@ def neb(
         Optimizer to apply to NEB object. Default is NEBOptimizer.
     fmax
         Maximum force for NEB optimizer. Default is 0.1.
+    steps
+        Maximum number of steps to optimize NEB. Default is 100.
     optimizer_kwargs
         Keyword arguments to pass to neb_optimizer. Deault is {}.
     plot_band
@@ -237,6 +242,7 @@ def neb(
         "interpolation_kwargs": interpolation_kwargs,
         "neb_optimizer": neb_optimizer,
         "fmax": fmax,
+        "steps": steps,
         "optimizer_kwargs": optimizer_kwargs,
         "plot_band": plot_band,
         "minimize": minimize,

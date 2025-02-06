@@ -101,6 +101,8 @@ class NEB(BaseCalculation):
         Optimizer to apply to NEB object. Default is NEBOptimizer.
     fmax
         Maximum force for NEB optimizer. Default is 0.1.
+    steps
+        Maximum number of steps to optimize NEB. Default is 100.
     optimizer_kwargs
         Keyword arguments to pass to neb_optimizer. Deault is {}.
     plot_band
@@ -148,6 +150,7 @@ class NEB(BaseCalculation):
         interpolation_kwargs: dict[str, Any] | None = None,
         neb_optimizer: Callable | str = NEBOptimizer,
         fmax: float = 0.1,
+        steps: int = 100,
         optimizer_kwargs: dict[str, Any] | None = None,
         plot_band: bool = False,
         minimize: bool = False,
@@ -227,6 +230,8 @@ class NEB(BaseCalculation):
             Optimizer to apply to NEB object. Default is NEBOptimizer.
         fmax
             Maximum force for NEB optimizer. Default is 0.1.
+        steps
+            Maximum number of steps to optimize NEB. Default is 100.
         optimizer_kwargs
             Keyword arguments to pass to neb_optimizer. Deault is {}.
         plot_band
@@ -266,6 +271,7 @@ class NEB(BaseCalculation):
         self.interpolation_kwargs = interpolation_kwargs
         self.neb_optimizer = neb_optimizer
         self.fmax = fmax
+        self.steps = steps
         self.optimizer_kwargs = optimizer_kwargs
         self.plot_band = plot_band
         self.minimize = minimize
@@ -513,7 +519,7 @@ class NEB(BaseCalculation):
         self.set_interpolator()
 
         optimizer = self.neb_optimizer(self.neb, **self.optimizer_kwargs)
-        optimizer.run(fmax=self.fmax)
+        optimizer.run(fmax=self.fmax, steps=self.steps)
 
         # Optionally write band images to file
         output_structs(
