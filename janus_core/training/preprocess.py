@@ -67,17 +67,7 @@ def preprocess(
     if logger and "foundation_model" in options:
         logger.info("Fine tuning model: %s", options["foundation_model"])
 
-    # Parse options from config, as MACE cannot read config file yet
-    args = []
-    for key, value in options.items():
-        if isinstance(value, bool):
-            if value is True:
-                args.append(f"--{key}")
-        else:
-            args.append(f"--{key}")
-            args.append(f"{value}")
-
-    mlip_args = mace_parser().parse_args(args)
+    mlip_args = mace_parser().parse_args(["--config", str(mlip_config)])
 
     if logger:
         logger.info("Starting preprocessing")

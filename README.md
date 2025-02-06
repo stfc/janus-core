@@ -20,7 +20,7 @@ Tools for machine learnt interatomic potentials
 
 - Python >= 3.10
 - ASE >= 3.24
-- mace-torch = 0.3.9
+- mace-torch = 0.3.10
 - chgnet = 0.3.8 (optional)
 - matgl = 1.1.3 (optional)
 - sevenn = 0.10.3 (optional)
