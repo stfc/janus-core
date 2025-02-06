@@ -12,6 +12,7 @@ from ase.mep import NEB as ASE_NEB
 from ase.mep import DyNEB, NEBTools
 from ase.mep.neb import NEBOptimizer
 from matplotlib.figure import Figure
+from numpy.linalg import LinAlgError
 from pymatgen.io.ase import AseAtomsAdaptor
 
 from janus_core.calculations.base import BaseCalculation
@@ -458,8 +459,14 @@ class NEB(BaseCalculation):
 
             case "pymatgen":
                 # Create band of images and attach calculators
-                py_start_struct = AseAtomsAdaptor.get_structure(self.init_struct)
-                py_final_struct = AseAtomsAdaptor.get_structure(self.final_struct)
+                try:
+                    py_start_struct = AseAtomsAdaptor.get_structure(self.init_struct)
+                    py_final_struct = AseAtomsAdaptor.get_structure(self.final_struct)
+                except LinAlgError as e:
+                    raise ValueError(
+                        "Unable to convert to pymatgen structure. Please use the "
+                        "'ase' interpolator instead"
+                    ) from e
                 py_images = py_start_struct.interpolate(
                     py_final_struct,
                     nimages=self.n_images + 1,
