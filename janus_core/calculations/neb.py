@@ -115,11 +115,6 @@ class NEB(BaseCalculation):
     file_prefix
         Prefix for output filenames. Default is inferred from the intial structure
         name, or chemical formula of the intial structure.
-
-    Methods
-    -------
-    run()
-        Run Nudged Elastic Band method.
     """
 
     def __init__(
