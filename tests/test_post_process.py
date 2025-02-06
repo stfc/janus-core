@@ -199,7 +199,7 @@ def test_vaf(tmp_path):
     assert isinstance(vaf[0], np.ndarray)
 
     lags, vaf = post_process.compute_vaf(
-        data, filter_atoms=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
+        data, atoms_filter=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
     )
 
     assert isinstance(vaf, list)
@@ -224,7 +224,7 @@ def test_vaf_by_symbols(tmp_path):
 
     data = read(DATA_PATH / "NaCl-traj.xyz", index=":")
     lags, vaf = post_process.compute_vaf(
-        data, filter_atoms=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
+        data, atoms_filter=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
     )
     expected = np.loadtxt(tmp_path / "vaf-Na-by-indices.dat")
     actual = np.loadtxt(tmp_path / "vaf-Na-by-element.dat")

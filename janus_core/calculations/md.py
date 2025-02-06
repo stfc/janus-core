@@ -1004,7 +1004,7 @@ class MolecularDynamics(BaseCalculation):
                 use_velocities=use_vel,
                 fft=fft,
                 index=slice_,
-                filter_atoms=self.post_process_kwargs.get("vaf_atoms", None),
+                atoms_filter=self.post_process_kwargs.get("vaf_atoms", None),
             )
 
     def _write_restart(self) -> None:

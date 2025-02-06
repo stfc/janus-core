@@ -165,7 +165,7 @@ def compute_vaf(
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[int | str | None]] = ((None,),),
+    atoms_filter: MaybeSequence[MaybeSequence[int | str | None]] = ((None,),),
     time_step: float = 1.0,
 ) -> tuple[NDArray[float64], list[NDArray[float64]]]:
     """
@@ -186,7 +186,7 @@ def compute_vaf(
     index
         Images to analyze as `start`, `stop`, `step`.
         Default is all images.
-    filter_atoms
+    atoms_filter
         Compute the VAF averaged over subsets of the system.
         Default is all atoms.
     time_step
@@ -202,7 +202,7 @@ def compute_vaf(
 
     Notes
     -----
-    `filter_atoms` is given as a series of sequences of atoms or elements,
+    `atoms_filter` is given as a series of sequences of atoms or elements,
     where each value in the series denotes a VAF subset to calculate and
     each sequence determines the atoms (by index or element)
     to be included in that VAF.
@@ -216,24 +216,24 @@ def compute_vaf(
         # Species by name
         cl = ('Cl')
 
-        compute_vaf(..., filter_atoms=(na, cl))
+        compute_vaf(..., atoms_filter=(na, cl))
 
     Would compute separate VAFs for each species.
 
     By default, one VAF will be computed for all atoms in the structure.
     """
     # Ensure if passed scalars they are turned into correct dimensionality
-    if isinstance(filter_atoms, str) or not isinstance(filter_atoms, Sequence):
-        filter_atoms = (filter_atoms,)
-    if isinstance(filter_atoms[0], str) or not isinstance(filter_atoms[0], Sequence):
-        filter_atoms = (filter_atoms,)
+    if isinstance(atoms_filter, str) or not isinstance(atoms_filter, Sequence):
+        atoms_filter = (atoms_filter,)
+    if isinstance(atoms_filter[0], str) or not isinstance(atoms_filter[0], Sequence):
+        atoms_filter = (atoms_filter,)
     if filenames and not isinstance(filenames, Sequence):
         filenames = (filenames,)
 
-        if len(filenames) != len(filter_atoms):
+        if len(filenames) != len(atoms_filter):
             raise ValueError(
                 f"Different number of file names ({len(filenames)}) "
-                f"to number of samples ({len(filter_atoms)})"
+                f"to number of samples ({len(atoms_filter)})"
             )
 
     # Extract requested data
@@ -250,9 +250,9 @@ def compute_vaf(
 
     filtered_atoms = []
     symbols = data[0].get_chemical_symbols()
-    for atoms in filter_atoms:
+    for atoms in atoms_filter:
         if any(atom is None for atom in atoms):
-            # If filter_atoms not specified use all atoms.
+            # If atoms_filter not specified use all atoms.
             filtered_atoms.append(range(n_atoms))
         elif all(isinstance(a, str) for a in atoms):
             # If all symbols, get the matching indices.
@@ -263,7 +263,7 @@ def compute_vaf(
             filtered_atoms.append(atoms)
         else:
             raise ValueError(
-                "Cannot mix element symbols and indices in vaf filter_atoms"
+                "Cannot mix element symbols and indices in vaf atoms_filter"
             )
 
     used_atoms = {atom for atoms in filtered_atoms for atom in atoms}
