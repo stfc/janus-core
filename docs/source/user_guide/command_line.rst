@@ -272,6 +272,27 @@ running an additional 1000 steps, and appending the statistics and trajectory fi
 
 For all options, run ``janus md --help``.
 
+Post-processing
++++++++++++++++
+
+After MD velocity autocorrelation functions (VAFs) and radial distribution functions (RDFs) may be calculated as a post-processing step. It is possible to build partial VAFs and RDFs from arbitrary sequences of atom indices or species names.
+
+To compute the VAF across all atoms from the command line the following options could be passed:
+
+.. code-block:: bash
+
+   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 1000 --traj-every 10 --post-process-kwargs "{'vaf_compute': True}"
+
+In this case a file ``NaCl-nve-T300.0-vaf.dat`` would be create containing correlation values and lag times. In this case there will be 100 values with an implied time step of 10 fs.
+
+To compute partial VAFs of Na and Cl the following kwargs may be passed:
+
+.. code-block:: bash
+
+   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_atoms': (('Na',), ('Cl',)), 'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat')}"
+
+Where ``'vaf_atoms'`` is a ``Sequence`` of ``Sequence`` of element names (or atom indices) included in each VAF. The output files  must also be specified in the case of multiple VAFs, these are by default relative to the working directory.
+
 
 Heating
 -------
@@ -309,27 +330,6 @@ Additional settings for geometry optimization, such as enabling optimization of 
 
     janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 0 --temp-end 300 --temp-step 10 --temp-time 10 --minimize --minimize-kwargs "{'filter_kwargs': {'hydrostatic_strain' : True}}"
 
-
-Post-processing
----------------
-
-After MD velocity autocorrelation functions (VAFs) and radial distribution functions (RDFs) may be calculated as a post-processing step. It is possible to build partial VAFs and RDFs from arbitrary sequences of atom indices or species names.
-
-To compute the VAF across all atoms from the command line the following options could be passed:
-
-.. code-block:: bash
-
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 1000 --traj-every 10 --post-process-kwargs "{'vaf_compute': True}"
-
-In this case a file ```NaCl-nve-T300.0-vaf.dat`` would be create containing correlation values and lag times. In this case there will be 100 values with an implied time step of 10 fs.
-
-To compute partial VAFs of Na and Cl the following kwargs may be passed:
-
-.. code-block:: bash
-
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_atoms': (('Na',), ('Cl',)), 'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat')}"
-
-Where ```'vaf_atoms'``` is a ```Sequence``` of ```Sequence``` of element names (or atom indices) included in each VAF. The output files  must also be specified in the case of multiple VAFs, these are by default relative to the working directory.
 
 Equation of State
 -----------------
