@@ -987,10 +987,10 @@ class MolecularDynamics(BaseCalculation):
             if not isinstance(file_names, Sequence):
                 file_names = (file_names,)
 
-            out_paths = [
+            out_paths = tuple(
                 self._build_filename("vaf.dat", self.param_prefix, filename=file_name)
                 for file_name in file_names
-            ]
+            )
 
             slice_ = (
                 self.post_process_kwargs.get("vaf_start", 0),

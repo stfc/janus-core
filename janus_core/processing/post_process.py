@@ -165,7 +165,7 @@ def compute_vaf(
     use_velocities: bool = False,
     fft: bool = False,
     index: SliceLike = (0, None, 1),
-    filter_atoms: MaybeSequence[MaybeSequence[int | str | None]] = ((None),),
+    filter_atoms: MaybeSequence[MaybeSequence[int | str | None]] = ((None,),),
     time_step: float = 1.0,
 ) -> tuple[NDArray[float64], list[NDArray[float64]]]:
     """
