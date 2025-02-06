@@ -218,7 +218,7 @@ def neb(
     # Dictionary of inputs for NEB class
     neb_kwargs = {
         "init_struct_path": init_struct,
-        "final_struct_path": init_struct,
+        "final_struct_path": final_struct,
         "band_path": band_structs,
         "arch": arch,
         "device": device,
