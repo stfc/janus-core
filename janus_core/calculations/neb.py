@@ -343,6 +343,7 @@ class NEB(BaseCalculation):
         else:
             if not isinstance(self.struct, Sequence):
                 raise ValueError("`images` must include multiple structures.")
+            self.images = self.struct
 
         # Set default interpolation kwargs
         if self.interpolator == "ase":
@@ -371,6 +372,13 @@ class NEB(BaseCalculation):
             self.minimize_kwargs.setdefault("write_results", True)
 
             # Set minimized file paths
+            self.init_struct_min_path = self._build_filename("init-opt.extxyz")
+            self.final_struct_min_path = self._build_filename(
+                "final-opt.extxyz",
+                prefix_override=self._get_default_prefix(
+                    file_prefix, final_struct, final_struct_path
+                ),
+            )
             if "write_kwargs" in self.minimize_kwargs:
                 if "filename" in self.minimize_kwargs["write_kwargs"]:
                     raise ValueError(
@@ -383,14 +391,6 @@ class NEB(BaseCalculation):
                 self.minimize_kwargs["write_kwargs"] = {
                     "filename": self.init_struct_min_path
                 }
-
-            self.init_struct_min_path = self._build_filename("init-opt.extxyz")
-            self.final_struct_min_path = self._build_filename(
-                "final-opt.extxyz",
-                prefix_override=self._get_default_prefix(
-                    file_prefix, final_struct, final_struct_path
-                ),
-            )
 
         # Set NEB method
         self._set_neb()
@@ -473,6 +473,7 @@ class NEB(BaseCalculation):
 
             case None:
                 # Band already created
+                self.neb = self.neb_method(self.images, **self.neb_kwargs)
                 pass
             case _:
                 raise ValueError("Invalid interpolator selected")
@@ -530,7 +531,11 @@ class NEB(BaseCalculation):
             self.logger.info("Nudged Elastic Band method complete")
         if self.tracker:
             emissions = self.tracker.stop_task().emissions
-            self.struct.info["emissions"] = emissions
+            if isinstance(self.struct, Sequence):
+                for image in self.struct:
+                    image.info["emissions"] = emissions
+            else:
+                self.struct.info["emissions"] = emissions
             self.tracker.stop()
 
         if self.write_results:

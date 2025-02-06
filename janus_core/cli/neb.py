@@ -68,7 +68,7 @@ def neb(
     ] = False,
     minimize: Annotated[
         bool, Option(help=" Whether to minimize initial and final structures.")
-    ] = True,
+    ] = False,
     minimize_kwargs: MinimizeKwargs = None,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
