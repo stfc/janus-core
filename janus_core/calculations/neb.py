@@ -274,20 +274,31 @@ class NEB(BaseCalculation):
         if self.n_images <= 0 or not isinstance(self.n_images, int):
             raise ValueError("`n_images` must be an integer greater than 0.")
 
+        # Identify whether interpolating
         if band_structs or band_path:
+            interpolating = False
             if init_struct or init_struct_path or final_struct or final_struct_path:
                 raise ValueError(
                     "Band cannot be specified in combination with an initial or final "
                     "structure"
                 )
-            if interpolator is not None:
-                raise ValueError("An interpolator cannot when specifying the band")
 
+            if minimize:
+                raise ValueError("Cannot minimize band structures.")
+
+            # Pass band strutures to base class init
             init_struct = band_structs
             init_struct_path = band_path
+
             # Read all image by default for band
             read_kwargs.setdefault("index", ":")
         else:
+            interpolating = True
+            if interpolator is None:
+                raise ValueError(
+                    "An interpolator must be specified when using an initial and final "
+                    "structure"
+                )
             # Read last image by default for init_struct
             read_kwargs.setdefault("index", -1)
 
@@ -310,7 +321,7 @@ class NEB(BaseCalculation):
             file_prefix=file_prefix,
         )
 
-        if interpolator is not None:
+        if interpolating:
             if not isinstance(self.struct, Atoms):
                 raise ValueError("`init_struct` must be a single structure.")
             if not self.struct.calc:
@@ -360,7 +371,6 @@ class NEB(BaseCalculation):
             self.minimize_kwargs.setdefault("write_results", True)
 
             # Set minimized file paths
-            self.init_struct_min_path = self._build_filename("init-opt.extxyz")
             if "write_kwargs" in self.minimize_kwargs:
                 if "filename" in self.minimize_kwargs["write_kwargs"]:
                     raise ValueError(
@@ -374,6 +384,7 @@ class NEB(BaseCalculation):
                     "filename": self.init_struct_min_path
                 }
 
+            self.init_struct_min_path = self._build_filename("init-opt.extxyz")
             self.final_struct_min_path = self._build_filename(
                 "final-opt.extxyz",
                 prefix_override=self._get_default_prefix(
