@@ -173,7 +173,6 @@ def neb(
         end_summary,
         parse_typer_dicts,
         save_struct_calc,
-        set_read_kwargs_index,
         start_summary,
     )
     from janus_core.helpers.janus_types import Interpolators
@@ -201,11 +200,16 @@ def neb(
         ]
     )
 
+    if band_structs:
+        if init_struct or final_struct:
+            raise ValueError(
+                "Initial and final structures cannot be specified in addition to the "
+                "band structures"
+            )
+        interpolator = None
+
     if not band_structs and interpolator not in get_args(Interpolators):
         raise ValueError(f"Fit type must be one of: {get_args(Interpolators)}")
-
-    # Read only first structure by default and ensure only one image is read
-    set_read_kwargs_index(read_kwargs)
 
     log_kwargs = {"filemode": "w"}
     if log:
