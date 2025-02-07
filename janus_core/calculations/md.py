@@ -1206,6 +1206,7 @@ class NPT(MolecularDynamics):
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         self.ttime = thermostat_time * units.fs
+        self.ptime = barostat_time * units.fs if barostat_time is not None else None
 
         if barostat_time:
             pfactor = barostat_time**2 * bulk_modulus
@@ -1649,4 +1650,89 @@ class NPH(NPT):
             file_prefix=file_prefix,
             ensemble_kwargs=ensemble_kwargs,
             **kwargs,
+        )
+
+
+class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
+    """
+    Configure NPT simulation using isotropic (MTK) thermostat and barostat chains.
+
+    Parameters
+    ----------
+    *args
+        Additional arguments.
+    thermostat_chain
+        Length of thermostat chain. Default is 3.
+    barostat_chain
+        Length of barostat chain. Default is 3.
+    thermostat_substeps
+        The number of sub-steps in thermostat integration. Default is 1.
+    barostat_substeps
+        The number of sub-steps in barostat integration. Default is 1.
+    ensemble
+        Name for thermodynamic ensemble. Default is "npt-mtk".
+    ensemble_kwargs
+        Keyword arguments to pass to ensemble initialization. Default is {}.
+    **kwargs
+        Additional keyword arguments.
+    """
+
+    def __init__(
+        self,
+        *args,
+        thermostat_chain: int = 3,
+        barostat_chain: int = 3,
+        thermostat_substeps: int = 1,
+        barostat_substeps: int = 1,
+        ensemble: Ensembles = "npt-mtk",
+        ensemble_kwargs: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
+        """
+        Initialise dynamics for isotropic NPT simulation.
+
+        Parameters
+        ----------
+        *args
+            Additional arguments.
+        thermostat_chain
+            Length of thermostat chain. Default is 3.
+        barostat_chain
+            Length of barostat chain. Default is 3.
+        thermostat_substeps
+            The number of sub-steps in thermostat integration. Default is 1.
+        barostat_substeps
+            The number of sub-steps in barostat integration. Default is 1.
+        ensemble
+            Name for thermodynamic ensemble. Default is "npt-mtk".
+        ensemble_kwargs
+            Keyword arguments to pass to ensemble initialization. Default is {}.
+        **kwargs
+            Additional keyword arguments.
+        """
+        try:
+            from ase.md.nose_hoover_chain import (
+                IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
+            )
+        except ImportError as e:
+            raise NotImplementedError(
+                "Please download the latest ASE commits to use this module"
+            ) from e
+
+        super().__init__(*args, ensemble=ensemble, **kwargs)
+
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
+
+        self.dyn = ASE_NPT_MTK(
+            self.struct,
+            timestep=self.timestep,
+            temperature_K=self.temp,
+            pressure_au=self.pressure * units.GPa,
+            tdamp=self.ttime,
+            pdamp=self.ptime,
+            tchain=thermostat_chain,
+            pchain=barostat_chain,
+            tloop=thermostat_substeps,
+            ploop=barostat_substeps,
+            **ensemble_kwargs,
         )

@@ -61,6 +61,26 @@ def md(
             help="Temperature coupling time constant for NVT CSVR simulation, in fs."
         ),
     ] = 100.0,
+    thermostat_chain: Annotated[
+        float,
+        Option(help="Number of variables in thermostat chain for NPT MTK simulation."),
+    ] = 3,
+    barostat_chain: Annotated[
+        float,
+        Option(help="Number of variables in barostat chain for NPT MTK simulation."),
+    ] = 3,
+    thermostat_substeps: Annotated[
+        float,
+        Option(
+            help="Number of sub-steps in thermostat integration for NPT MTK simulation."
+        ),
+    ] = 1,
+    barostat_substeps: Annotated[
+        float,
+        Option(
+            help="Number of sub-steps in barostat integration for NPT MTK simulation."
+        ),
+    ] = 1,
     ensemble_kwargs: EnsembleKwargs = None,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
@@ -212,6 +232,16 @@ def md(
         Friction coefficient in fs^-1. Default is 0.005.
     taut
         Time constant for CSVR thermostat coupling, in fs. Default is 100.0.
+    thermostat_chain
+        Number of variables in thermostat chain for NPT MTK simulation. Default is 3.
+    barostat_chain
+        Number of variables in barostat chain for NPT MTK simulation. Default is 3.
+    thermostat_substeps
+        Number of sub-steps in thermostat integration for NPT MTK simulation.
+        Default is 1.
+    barostat_substeps
+        Number of sub-steps in barostat integration for NPT MTK simulation.
+        Default is 1.
     ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     arch
@@ -303,7 +333,7 @@ def md(
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
-    from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_CSVR, NVT_NH
+    from janus_core.calculations.md import NPH, NPT, NPT_MTK, NVE, NVT, NVT_CSVR, NVT_NH
     from janus_core.cli.utils import (
         carbon_summary,
         check_config,
@@ -362,6 +392,10 @@ def md(
         "temp": temp,
         "thermostat_time": thermostat_time,
         "barostat_time": barostat_time,
+        "thermostat_chain": thermostat_chain,
+        "barostat_chain": barostat_chain,
+        "thermostat_substeps": thermostat_substeps,
+        "barostat_substeps": barostat_substeps,
         "bulk_modulus": bulk_modulus,
         "pressure": pressure,
         "friction": friction,
@@ -404,15 +438,34 @@ def md(
             "bulk_modulus",
             "pressure",
             "taut",
+            "thermostat_chain",
+            "barostat_chain",
+            "thermostat_substeps",
+            "barostat_substeps",
         ):
             del dyn_kwargs[key]
         dyn = NVT(**dyn_kwargs)
     elif ensemble == "npt":
-        for key in ("friction", "taut"):
+        for key in (
+            "friction",
+            "taut",
+            "thermostat_chain",
+            "barostat_chain",
+            "thermostat_substeps",
+            "barostat_substeps",
+        ):
             del dyn_kwargs[key]
         dyn = NPT(**dyn_kwargs)
     elif ensemble == "nph":
-        for key in ("friction", "barostat_time", "taut"):
+        for key in (
+            "friction",
+            "barostat_time",
+            "taut",
+            "thermostat_chain",
+            "barostat_chain",
+            "thermostat_substeps",
+            "barostat_substeps",
+        ):
             del dyn_kwargs[key]
         dyn = NPH(**dyn_kwargs)
     elif ensemble == "nve":
@@ -423,11 +476,25 @@ def md(
             "pressure",
             "friction",
             "taut",
+            "thermostat_chain",
+            "barostat_chain",
+            "thermostat_substeps",
+            "barostat_substeps",
         ):
             del dyn_kwargs[key]
         dyn = NVE(**dyn_kwargs)
     elif ensemble == "nvt-nh":
-        for key in ("barostat_time", "bulk_modulus", "pressure", "friction", "taut"):
+        for key in (
+            "barostat_time",
+            "bulk_modulus",
+            "pressure",
+            "friction",
+            "taut",
+            "thermostat_chain",
+            "barostat_chain",
+            "thermostat_substeps",
+            "barostat_substeps",
+        ):
             del dyn_kwargs[key]
         dyn = NVT_NH(**dyn_kwargs)
     elif ensemble == "nvt-csvr":
@@ -437,9 +504,17 @@ def md(
             "bulk_modulus",
             "pressure",
             "friction",
+            "thermostat_chain",
+            "barostat_chain",
+            "thermostat_substeps",
+            "barostat_substeps",
         ):
             del dyn_kwargs[key]
         dyn = NVT_CSVR(**dyn_kwargs)
+    elif ensemble == "npt-mtk":
+        for key in ("bulk_modulus", "friction", "taut"):
+            del dyn_kwargs[key]
+        dyn = NPT_MTK(**dyn_kwargs)
     else:
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
 
