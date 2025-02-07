@@ -368,45 +368,44 @@ def _dump_csv(
         print(",".join(map(format, cols, formats)), file=file)
 
 
-def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
+class ProgressBar(Progress):
     """
-    Track the progress of iterating over a sequence.
+    Progress bar with preset formatting.
 
-    This is done by displaying a progress bar in the console using the rich library.
-    The function is an iterator over the sequence, updating the progress bar each
-    iteration.
+    Inherits from `rich.progress.Progress`, providing preset formatting.
 
     Parameters
     ----------
-    sequence
-        The sequence to iterate over. Must support "len".
-    description
-        The text to display to the left of the progress bar.
-
-    Yields
-    ------
-    Iterable
-        An iterable of the values in the sequence.
+        **kwargs
+            Keyword arguments passed on to `rich.progress.Progress`.
     """
-    text_column = TextColumn("{task.description}")
-    bar_column = BarColumn(
-        bar_width=None,
-        complete_style=Style(color="#FBBB10"),
-        finished_style=Style(color="#E38408"),
-    )
-    completion_column = MofNCompleteColumn()
-    time_column = TimeRemainingColumn()
-    progress = Progress(
-        text_column,
-        bar_column,
-        completion_column,
-        time_column,
-        expand=True,
-        auto_refresh=False,
-    )
 
-    with progress:
-        yield from progress.track(sequence, description=description)
+    def __init__(self, **kwargs):
+        """
+        Initialise a `rich` progress bar with preset formatting.
+
+        Parameters
+        ----------
+        **kwargs
+            Keyword arguments passed on to `rich.progress.Progress`.
+        """
+        text_column = TextColumn("{task.description}")
+        bar_column = BarColumn(
+            bar_width=None,
+            complete_style=Style(color="#FBBB10"),
+            finished_style=Style(color="#E38408"),
+        )
+        completion_column = MofNCompleteColumn()
+        time_column = TimeRemainingColumn()
+        super().__init__(
+            text_column,
+            bar_column,
+            completion_column,
+            time_column,
+            expand=True,
+            auto_refresh=False,
+            **kwargs,
+        )
 
 
 def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
