@@ -357,6 +357,17 @@ def md(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
+    enable_progress_bar: Annotated[
+        bool,
+        Option(
+            "--enable-progress-bar/--disable-progress-bar",
+            help="Whether to show progress bar.",
+        ),
+    ] = True,
+    progress_bar_update_every: Annotated[
+        int,
+        Option(help="How many timesteps between progress bar updates. Default is 1."),
+    ] = 1,
 ) -> None:
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -490,6 +501,10 @@ def md(
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
+    enable_progress_bar
+        Whether to show progress bar.
+    progress_bar_update_every
+        How many timesteps between progress bar updates. Default is 1.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -615,6 +630,8 @@ def md(
         "post_process_kwargs": post_process_kwargs,
         "correlation_kwargs": correlation_kwargs,
         "seed": seed,
+        "enable_progress_bar": enable_progress_bar,
+        "progress_bar_update_every": progress_bar_update_every,
     }
 
     # Instantiate MD ensemble

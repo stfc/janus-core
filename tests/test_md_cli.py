@@ -157,6 +157,8 @@ def test_md(ensemble):
 
         check_output_files(summary=summary, output_files=output_files)
 
+        assert "━━ 2/2" in result.output
+
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
@@ -834,6 +836,9 @@ def test_auto_restart(tmp_path):
     # Includes header and steps 0, 3, and steps 5, 6, 7
     assert len(lines) == 6
     assert int(lines[-1].split()[0]) == 7
+
+    # Check progress bar counted restart steps correctly
+    assert "7/7" in result.stdout
 
 
 def test_no_carbon(tmp_path):
