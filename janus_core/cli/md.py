@@ -215,6 +215,13 @@ def md(
     tracker: Annotated[
         bool, Option(help="Whether to save carbon emissions of calculation")
     ] = True,
+    enable_progress_bar: Annotated[
+        bool,
+        Option(
+            "--enable-progress-bar/--disable-progress-bar",
+            help="Whether to show progress bar.",
+        ),
+    ] = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -343,6 +350,8 @@ def md(
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
+    enable_progress_bar
+        Whether to show progress bar.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
@@ -456,6 +465,7 @@ def md(
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
         "seed": seed,
+        "enable_progress_bar": enable_progress_bar,
     }
 
     # Instantiate MD ensemble

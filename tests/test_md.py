@@ -1205,3 +1205,28 @@ def test_set_info(tmp_path):
     final_struct = read(traj_path, index="-1")
     assert npt.struct.info["density"] == pytest.approx(2.120952627887493)
     assert final_struct.info["density"] == pytest.approx(2.120952627887493)
+
+
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_progress_bar_complete(tmp_path, ensemble, tag):
+    """Test progress bar completes in all ensembles."""
+    file_prefix = tmp_path / f"Cl4Na4-{tag}-T300.0"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    md = ensemble(
+        struct=single_point.struct,
+        steps=2,
+        file_prefix=file_prefix,
+        enable_progress_bar=True,
+    )
+
+    md.run()
+
+    # Force 1 extra call to observer functions than expected.
+    # If progress bar already completed, it will raise StopIteration/RuntimeError.
+    with pytest.raises((RuntimeError, StopIteration)):
+        md.dyn.call_observers()

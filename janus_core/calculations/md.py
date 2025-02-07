@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Sequence, Generator
 import datetime
 from functools import partial
 from itertools import combinations_with_replacement
@@ -43,7 +43,7 @@ from janus_core.helpers.janus_types import (
     PostProcessKwargs,
 )
 from janus_core.helpers.struct_io import input_structs, output_structs
-from janus_core.helpers.utils import none_to_dict, write_table
+from janus_core.helpers.utils import none_to_dict, track_progress, write_table
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
 
@@ -160,6 +160,8 @@ class MolecularDynamics(BaseCalculation):
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
+    enable_progress_bar
+        Whether to show a progress bar. Default is False.
 
     Attributes
     ----------
@@ -222,6 +224,7 @@ class MolecularDynamics(BaseCalculation):
         post_process_kwargs: PostProcessKwargs | None = None,
         correlation_kwargs: list[CorrelationKwargs] | None = None,
         seed: int | None = None,
+        enable_progress_bar: bool = False,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -333,6 +336,8 @@ class MolecularDynamics(BaseCalculation):
         seed
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
+        enable_progress_bar
+            Whether to show a progress bar. Default is False.
         """
         (
             read_kwargs,
@@ -380,6 +385,7 @@ class MolecularDynamics(BaseCalculation):
         self.post_process_kwargs = post_process_kwargs
         self.correlation_kwargs = correlation_kwargs
         self.seed = seed
+        self.enable_progress_bar = enable_progress_bar
 
         if "append" in self.write_kwargs:
             raise ValueError("`append` cannot be specified when writing files")
@@ -424,9 +430,18 @@ class MolecularDynamics(BaseCalculation):
                 stacklevel=2,
             )
 
-        # Check validate start and end temperatures
-        if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
-            raise ValueError("Start and end temperatures must be positive")
+        if self.ramp_temp:
+            self.heating_steps_per_temp = int(self.temp_time // self.timestep)
+
+            # Always include start temperature in ramp, and include end temperature
+            # if separated by an integer number of temperature steps
+            self.heating_n_temps = int(
+                1 + abs(self.temp_end - self.temp_start) // self.temp_step
+            )
+
+            # Check validate start and end temperatures
+            if self.temp_start < 0 or self.temp_end < 0:
+                raise ValueError("Start and end temperatures must be positive")
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -1025,6 +1040,31 @@ class MolecularDynamics(BaseCalculation):
                 self.restart_files.append(self._restart_file)
                 self._rotate_restart_files()
 
+    def _progress_bar(self) -> Generator[None, None, None]:
+        """
+        Show and update progress bar of CLI MD run.
+
+        Yields
+        ------
+        None
+        """
+        total_steps = self.steps
+        if self.ramp_temp:
+            total_steps += self.heating_n_temps * self.heating_steps_per_temp
+
+        progress_bar = track_progress(range(total_steps), "Performing MD simulation...")
+
+        # ASE NPT class skips the first call to attached functions. Do it manually.
+        # Will need removing if ASE merge request accepted:
+        # https://gitlab.com/ase/ase/-/merge_requests/3598
+        if isinstance(self.dyn, ASE_NPT):
+            next(progress_bar)
+
+        # Update progress bar each frame
+        for _ in progress_bar:
+            yield None
+        yield None
+
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
         unit_keys = (
@@ -1061,6 +1101,10 @@ class MolecularDynamics(BaseCalculation):
         if self.minimize and self.minimize_every > 0:
             self.dyn.attach(self._optimize_structure, interval=self.minimize_every)
 
+        if self.enable_progress_bar:
+            update_progress_bar = self._progress_bar().__next__
+            self.dyn.attach(update_progress_bar, interval=1)
+
         # Note current time
         self.struct.info["real_time"] = datetime.datetime.now()
         self._run_dynamics()
@@ -1082,16 +1126,11 @@ class MolecularDynamics(BaseCalculation):
 
         # Run temperature ramp
         if self.ramp_temp:
-            heating_steps = int(self.temp_time // self.timestep)
-
-            # Always include start temperature in ramp, and include end temperature
-            # if separated by an integer number of temperature steps
-            n_temps = int(1 + abs(self.temp_end - self.temp_start) // self.temp_step)
-
             # Add or subtract temperatures
             ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
             temps = [
-                self.temp_start + ramp_sign * i * self.temp_step for i in range(n_temps)
+                self.temp_start + ramp_sign * i * self.temp_step
+                for i in range(self.heating_n_temps)
             ]
 
             if self.logger:
@@ -1111,7 +1150,7 @@ class MolecularDynamics(BaseCalculation):
                     continue
                 if not isinstance(self, NVE):
                     self.dyn.set_temperature(temperature_K=self.temp)
-                self.dyn.run(heating_steps)
+                self.dyn.run(self.heating_steps_per_temp)
                 self._write_final_state()
                 self.created_final_file = True
 
