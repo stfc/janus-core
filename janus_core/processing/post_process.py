@@ -249,15 +249,22 @@ def compute_vaf(
     n_atoms = len(momenta[0])
 
     filtered_atoms = []
-    symbols = data[0].get_chemical_symbols()
+    atom_symbols = data[0].get_chemical_symbols()
+    symbols = set(atom_symbols)
     for atoms in atoms_filter:
         if any(atom is None for atom in atoms):
             # If atoms_filter not specified use all atoms.
             filtered_atoms.append(range(n_atoms))
         elif all(isinstance(a, str) for a in atoms):
             # If all symbols, get the matching indices.
+            atoms = set(atoms)
+            if atoms.difference(symbols):
+                raise ValueError(
+                    f"{atoms.difference(symbols)} not allowed in VAF"
+                    f", allowed symbols are {symbols}"
+                )
             filtered_atoms.append(
-                [i for i in range(len(symbols)) if symbols[i] in atoms]
+                [i for i in range(len(atom_symbols)) if atom_symbols[i] in list(atoms)]
             )
         elif all(isinstance(a, int) for a in atoms):
             filtered_atoms.append(atoms)

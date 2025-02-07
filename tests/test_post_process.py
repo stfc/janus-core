@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase.io import read
 import numpy as np
+import pytest
 from pytest import approx
 from typer.testing import CliRunner
 
@@ -220,7 +221,7 @@ def test_vaf(tmp_path):
 def test_vaf_by_symbols(tmp_path):
     """Test vaf using element symbols."""
     vaf_names = ("vaf-Na-by-indices.dat", "vaf-Na-by-element.dat")
-    vaf_filter = ((0, 2, 4, 6), ("Na"))
+    vaf_filter = ((0, 2, 4, 6), ("Na",))
 
     data = read(DATA_PATH / "NaCl-traj.xyz", index=":")
     lags, vaf = post_process.compute_vaf(
@@ -230,3 +231,6 @@ def test_vaf_by_symbols(tmp_path):
     actual = np.loadtxt(tmp_path / "vaf-Na-by-element.dat")
 
     assert expected == approx(actual, rel=1e-9)
+
+    with pytest.raises(ValueError):
+        post_process.compute_vaf(data, atoms_filter=(("C",)))
