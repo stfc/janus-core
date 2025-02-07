@@ -1127,7 +1127,7 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_auto_restart(tmp_path):
+def test_auto_restart(tmp_path, capsys):
     """Test auto restarting simulation."""
     # tmp_path for all files other than restart
     # Include T300.0 to test Path.stem vs Path.name
@@ -1188,6 +1188,7 @@ def test_auto_restart(tmp_path):
             traj_every=1,
             final_file=final_path,
             log_kwargs={"filename": log_file},
+            enable_progress_bar=True,
         )
 
         assert_log_contains(log_file, includes="Auto restart successful")
@@ -1215,6 +1216,9 @@ def test_auto_restart(tmp_path):
 
         final_traj = read(traj_path, index=":")
         assert len(final_traj) == 8
+
+        # Check progress bar has completed.
+        assert "━━ 7/7" in capsys.readouterr().out
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
@@ -1327,3 +1331,26 @@ def test_set_info(tmp_path):
     final_struct = read(traj_path, index="-1")
     assert npt.struct.info["density"] == pytest.approx(2.120952627887493)
     assert final_struct.info["density"] == pytest.approx(2.120952627887493)
+
+
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
+    """Test progress bar completes in all ensembles."""
+    file_prefix = tmp_path / f"Cl4Na4-{tag}-T300.0"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    md = ensemble(
+        struct=single_point.struct,
+        steps=2,
+        file_prefix=file_prefix,
+        enable_progress_bar=True,
+    )
+
+    md.run()
+
+    # Check progress bar has completed.
+    assert "━━ 2/2" in capsys.readouterr().out

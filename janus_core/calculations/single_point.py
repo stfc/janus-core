@@ -22,7 +22,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.mlip_calculators import check_calculator
 from janus_core.helpers.struct_io import output_structs
-from janus_core.helpers.utils import none_to_dict, track_progress
+from janus_core.helpers.utils import ProgressBar, none_to_dict
 
 
 class SinglePoint(BaseCalculation):
@@ -253,8 +253,8 @@ class SinglePoint(BaseCalculation):
         if isinstance(self.struct, Sequence):
             struct_sequence = self.struct
             if self.enable_progress_bar:
-                struct_sequence = track_progress(
-                    struct_sequence, "Computing potential energies..."
+                struct_sequence = ProgressBar().track(
+                    struct_sequence, description="Computing potential energies..."
                 )
             return [struct.get_potential_energy() for struct in struct_sequence]
 
@@ -272,7 +272,9 @@ class SinglePoint(BaseCalculation):
         if isinstance(self.struct, Sequence):
             struct_sequence = self.struct
             if self.enable_progress_bar:
-                struct_sequence = track_progress(struct_sequence, "Computing forces...")
+                struct_sequence = ProgressBar().track(
+                    struct_sequence, description="Computing forces..."
+                )
             return [struct.get_forces() for struct in struct_sequence]
 
         return self.struct.get_forces()
@@ -289,8 +291,8 @@ class SinglePoint(BaseCalculation):
         if isinstance(self.struct, Sequence):
             struct_sequence = self.struct
             if self.enable_progress_bar:
-                struct_sequence = track_progress(
-                    struct_sequence, "Computing stresses..."
+                struct_sequence = ProgressBar().track(
+                    struct_sequence, description="Computing stresses..."
                 )
             return [struct.get_stress() for struct in struct_sequence]
 
@@ -333,8 +335,9 @@ class SinglePoint(BaseCalculation):
         if isinstance(self.struct, Sequence):
             struct_sequence = self.struct
             if self.enable_progress_bar:
-                struct_sequence = track_progress(
-                    struct_sequence, "Computing Hessian..."
+                print("There should be a progress bar...")
+                struct_sequence = ProgressBar().track(
+                    struct_sequence, description="Computing Hessian..."
                 )
             return [self._calc_hessian(struct) for struct in struct_sequence]
 
