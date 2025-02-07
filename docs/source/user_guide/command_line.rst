@@ -275,7 +275,7 @@ For all options, run ``janus md --help``.
 Post-processing
 +++++++++++++++
 
-After MD velocity autocorrelation functions (VAFs) and radial distribution functions (RDFs) may be calculated as a post-processing step. It is possible to build partial VAFs and RDFs from arbitrary sequences of atom indices or species names.
+After MD, velocity autocorrelation functions (VAFs) and radial distribution functions (RDFs) may be calculated as a post-processing step. It is possible to build partial VAFs and RDFs from arbitrary sequences of atom indices or species names.
 
 To compute the VAF across all atoms from the command line the following options could be passed:
 
@@ -291,7 +291,7 @@ To compute partial VAFs of Na and Cl the following kwargs may be passed:
 
    janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_atoms': (('Na',), ('Cl',)), 'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat')}"
 
-Where ``'vaf_atoms'`` is a ``Sequence`` of ``Sequence`` of element names (or atom indices) included in each VAF. The output files  must also be specified in the case of multiple VAFs, these are by default relative to the working directory.
+Where ``'vaf_atoms'`` is a ``Sequence`` of ``Sequence`` of element names (or atom indices) included in each VAF. The output files must also be specified in the case of multiple VAFs, by default defined relative to the working directory.
 
 
 Heating
