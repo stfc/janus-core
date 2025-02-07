@@ -283,7 +283,7 @@ To compute the VAF across all atoms from the command line the following options 
 
    janus md --ensemble nve --struct tests/data/NaCl.cif --steps 1000 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_start': 10, 'vaf_stop': None, 'vaf_step': 2}"
 
-In this case a file ``NaCl-nve-T300.0-vaf.dat`` would be created containing correlation values and lag times. The file will contain correlation 45 values with an implied time step of 20 fs. That is starting at time step 100 and correlating every 20 steps.
+In this case a file ``NaCl-nve-T300.0-vaf.dat`` would be created containing correlation values and lag times. The file will contain 45 correlation values with an implied time step of 20 fs. That is starting at time step 100 and correlating every 20 steps.
 
 The VAF is computed from the trajectory file, therefore ``--traj-every`` controls the correlation possible temporal resolutions. The precise steps used in the VAF may be controlled by the ``vaf_start``, ``vaf_stop``, and ``vaf_step`` options.
 
