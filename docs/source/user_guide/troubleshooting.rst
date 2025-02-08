@@ -5,40 +5,9 @@ Troubleshooting
 Installation
 ------------
 
-When installing ``janus-core``, CMake errors can occur when building ``phonopy``, such as:
+When installing ``janus-core``, CMake errors can occur when building ``phonopy``, often related to the CXX compiler.
 
-.. collapse:: Example CMake error
-
-    .. code-block:: bash
-
-        CMake Error at /tmp/pip-build-env-j2jx9pp5/overlay/lib/python3.11/site-packages/nanobind/cmake/nanobind-config.cmake:243 (target_compile_features):
-            target_compile_features The compiler feature "cxx_std_17" is not known to
-            CXX compiler
-
-            "GNU"
-
-            version 4.8.5.
-        Call Stack (most recent call first):
-            /tmp/pip-build-env-j2jx9pp5/overlay/lib/python3.11/site-packages/nanobind/cmake/nanobind-config.cmake:358 (nanobind_build_library)
-            CMakeLists.txt:108 (nanobind_add_module)
-
-
-        -- Configuring incomplete, errors occurred!
-
-        *** CMake configuration failed
-        [end of output]
-
-        note: This error originates from a subprocess, and is likely not a problem with pip.
-        ERROR: Failed building wheel for phonopy
-        Building wheel for python-hostlist (setup.py) ... done
-        Created wheel for python-hostlist: filename=python_hostlist-2.2.1-py3-none-any.whl size=39604 sha256=44f9f27a42895e61a521cf9129a6a3ad03e633b201390da5ef76d5f59db3b94f
-        Stored in directory: ...
-        Successfully built janus-core python-hostlist
-        Failed to build phonopy
-        ERROR: ERROR: Failed to build installable wheels for some pyproject.toml based projects (phonopy)
-
-
-This can typically be resolved by ensuring your C++ compiler is updated, and that the `CXX <https://cmake.org/cmake/help/latest/envvar/CXX.html>`_ environment variable is set.
+Please refer to their `installation documentation <http://phonopy.github.io/phonopy/install.html#missing-or-unknown-cxx-compiler>`_ for guidance.
 
 
 Carbon tracking
