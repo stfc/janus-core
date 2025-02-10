@@ -42,10 +42,10 @@ def md(
         Option(
             help="Thermostat time for NPT, NVT Nosé-Hoover, or NPH simulation, in fs."
         ),
-    ] = 50.0,
+    ] = None,
     barostat_time: Annotated[
         float, Option(help="Barostat time for NPT simulation, in fs.")
-    ] = 75.0,
+    ] = None,
     bulk_modulus: Annotated[
         float, Option(help="Bulk modulus for NPT or NPH simulation, in GPa.")
     ] = 2.0,
@@ -62,21 +62,21 @@ def md(
         ),
     ] = 100.0,
     thermostat_chain: Annotated[
-        float,
+        int,
         Option(help="Number of variables in thermostat chain for NPT MTK simulation."),
     ] = 3,
     barostat_chain: Annotated[
-        float,
+        int,
         Option(help="Number of variables in barostat chain for NPT MTK simulation."),
     ] = 3,
     thermostat_substeps: Annotated[
-        float,
+        int,
         Option(
             help="Number of sub-steps in thermostat integration for NPT MTK simulation."
         ),
     ] = 1,
     barostat_substeps: Annotated[
-        float,
+        int,
         Option(
             help="Number of sub-steps in barostat integration for NPT MTK simulation."
         ),
@@ -375,6 +375,18 @@ def md(
     log_kwargs = {"filemode": "w"}
     if log:
         log_kwargs["filename"] = log
+
+    # Defaults
+    if thermostat_time is None:
+        if ensemble in ("npt", "nvt-nh"):
+            thermostat_time = 50.0
+        elif ensemble == "npt-mtk":
+            thermostat_time = 100.0
+    if barostat_time is None:
+        if ensemble in ("npt", "nph"):
+            barostat_time = 75.0
+        elif ensemble == "npt-mtk":
+            barostat_time = 1000.0
 
     dyn_kwargs = {
         "struct_path": struct,

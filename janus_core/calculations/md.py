@@ -1206,7 +1206,6 @@ class NPT(MolecularDynamics):
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         self.ttime = thermostat_time * units.fs
-        self.ptime = barostat_time * units.fs if barostat_time is not None else None
 
         if barostat_time:
             pfactor = barostat_time**2 * bulk_modulus
@@ -1653,7 +1652,7 @@ class NPH(NPT):
         )
 
 
-class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
+class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
     """
     Configure NPT simulation using isotropic (MTK) thermostat and barostat chains.
 
@@ -1661,6 +1660,12 @@ class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
     ----------
     *args
         Additional arguments.
+    pressure
+        Pressure, in GPa. Default is 0.0.
+    thermostat_time
+        Thermostat time, in fs. Default is 100 times `timestep`.
+    barostat_time
+        Barostat time, in fs. Default is 1000 times `timestep`.
     thermostat_chain
         Length of thermostat chain. Default is 3.
     barostat_chain
@@ -1680,6 +1685,9 @@ class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
     def __init__(
         self,
         *args,
+        pressure: float = 0.0,
+        thermostat_time: float,
+        barostat_time: float,
         thermostat_chain: int = 3,
         barostat_chain: int = 3,
         thermostat_substeps: int = 1,
@@ -1695,6 +1703,14 @@ class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
         ----------
         *args
             Additional arguments.
+        pressure
+            Pressure, in GPa. Default is 0.0.
+        thermostat_time
+            Thermostat time, in fs. Recommended value is 100 times `timestep`.
+            Default is 100 fs.
+        barostat_time
+            Barostat time, in fs. Recommended value is 1000 times `timestep`.
+            Default is 1000 fs.
         thermostat_chain
             Length of thermostat chain. Default is 3.
         barostat_chain
@@ -1719,6 +1735,8 @@ class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
                 "Please download the latest ASE commits to use this module"
             ) from e
 
+        self.pressure = pressure
+
         super().__init__(*args, ensemble=ensemble, **kwargs)
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
@@ -1728,11 +1746,71 @@ class NPT_MTK(NPT):  # noqa: N801 (invalid-class-name)
             timestep=self.timestep,
             temperature_K=self.temp,
             pressure_au=self.pressure * units.GPa,
-            tdamp=self.ttime,
-            pdamp=self.ptime,
+            tdamp=thermostat_time * units.fs,
+            pdamp=barostat_time * units.fs,
             tchain=thermostat_chain,
             pchain=barostat_chain,
             tloop=thermostat_substeps,
             ploop=barostat_substeps,
             **ensemble_kwargs,
         )
+
+    def _set_param_prefix(self, file_prefix: PathLike | None = None) -> str:
+        """
+        Set ensemble parameters for output files.
+
+        Parameters
+        ----------
+        file_prefix
+            Prefix for output filenames on class init. If not None, param_prefix = "".
+
+        Returns
+        -------
+        str
+           Formatted ensemble parameters, including pressure and temperature(s).
+        """
+        if file_prefix is not None:
+            return ""
+
+        pressure = f"-p{self.pressure}"
+        return f"{super()._set_param_prefix(file_prefix)}{pressure}"
+
+    def get_stats(self) -> dict[str, float]:
+        """
+        Get thermodynamical statistics to be written to file.
+
+        Returns
+        -------
+        dict[str, float]
+            Thermodynamical statistics to be written out.
+        """
+        stats = MolecularDynamics.get_stats(self)
+        stats |= {"Target_P": self.pressure, "Target_T": self.temp}
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Get units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return super().unit_info | {
+            "Target_P": JANUS_UNITS["pressure"],
+            "Target_T": JANUS_UNITS["temperature"],
+        }
+
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return super().default_formats | {"Target_P": ".5f", "Target_T": ".5f"}
