@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
+import ase.md.nose_hoover_chain
 import numpy as np
 import pytest
 from typer.testing import CliRunner
@@ -13,6 +14,11 @@ import yaml
 
 from janus_core.cli.janus import app
 from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+
+if hasattr(ase.md.nose_hoover_chain, "IsotropicMTKNPT"):
+    MTK_IMPORT_FAILED = False
+else:
+    MTK_IMPORT_FAILED = True
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -26,14 +32,7 @@ def test_md_help():
     assert "Usage: janus md [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-test_data = [
-    ("nvt"),
-    ("nve"),
-    ("npt"),
-    ("nvt-nh"),
-    ("nph"),
-    ("nvt-csvr"),
-]
+test_data = [("nvt"), ("nve"), ("npt"), ("nvt-nh"), ("nph"), ("nvt-csvr"), ("npt-mtk")]
 
 
 @pytest.mark.parametrize("ensemble", test_data)
@@ -47,7 +46,11 @@ def test_md(ensemble):
         "nvt-nh": "NaCl-nvt-nh-T300.0-",
         "nph": "NaCl-nph-T300.0-p0.0-",
         "nvt-csvr": "NaCl-nvt-csvr-T300.0-",
+        "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
     }
+
+    if ensemble == "npt-mtk" and MTK_IMPORT_FAILED:
+        pytest.skip(reason="Requires updated version of ASE")
 
     final_path = Path(f"{file_prefix[ensemble]}final.extxyz").absolute()
     restart_path = Path(f"{file_prefix[ensemble]}res-2.extxyz").absolute()

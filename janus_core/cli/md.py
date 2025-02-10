@@ -378,7 +378,7 @@ def md(
 
     # Defaults
     if thermostat_time is None:
-        if ensemble in ("npt", "nvt-nh"):
+        if ensemble in ("npt", "nph", "nvt-nh"):
             thermostat_time = 50.0
         elif ensemble == "npt-mtk":
             thermostat_time = 100.0
