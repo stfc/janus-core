@@ -449,6 +449,8 @@ class NEB(BaseCalculation):
         match self.interpolator:
             case "ase":
                 # Create band of images and attach calculators
+                if self.logger:
+                    self.logger.info("Using ASE interpolator")
                 self.images = [self.init_struct]
                 self.images += [self.init_struct.copy() for i in range(self.n_images)]
                 for image in self.images[1:]:
@@ -460,6 +462,8 @@ class NEB(BaseCalculation):
 
             case "pymatgen":
                 # Create band of images and attach calculators
+                if self.logger:
+                    self.logger.info("Using pymatgen interpolator")
                 try:
                     py_start_struct = AseAtomsAdaptor.get_structure(self.init_struct)
                     py_final_struct = AseAtomsAdaptor.get_structure(self.final_struct)
@@ -481,6 +485,8 @@ class NEB(BaseCalculation):
 
             case None:
                 # Band already created
+                if self.logger:
+                    self.logger.info("Skipping interpolation")
                 self.neb = self.neb_method(self.images, **self.neb_kwargs)
                 pass
             case _:
