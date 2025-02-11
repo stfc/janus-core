@@ -37,12 +37,12 @@ def neb(
     init_struct: StructPath | None = None,
     final_struct: StructPath | None = None,
     band_structs: StructPath | None = None,
-    neb_method: Annotated[
+    neb_class: Annotated[
         str | None,
         Option(help="Name of ASE NEB class to use."),
     ] = "NEB",
     n_images: Annotated[int, Option(help="Number of images to use in NEB.")] = 15,
-    write_images: Annotated[
+    write_band: Annotated[
         bool,
         Option(help="Whether to write out all band images after optimization."),
     ] = False,
@@ -55,8 +55,8 @@ def neb(
             help="Choice of interpolation strategy.",
         ),
     ] = "ase",
-    interpolation_kwargs: InterpolationKwargs = None,
-    neb_optimizer: Annotated[
+    interpolator_kwargs: InterpolationKwargs = None,
+    optimizer: Annotated[
         str | None,
         Option(help="Name of ASE NEB optimizer to use."),
     ] = "NEBOptimizer",
@@ -112,32 +112,32 @@ def neb(
     band_structs
         Path of band images to optimize, skipping interpolation between the
         initial and final structures. Requires interpolator to be None.
-    neb_method
-        Nudged Elastic Band method to use. Default is ase.mep.NEB.
+    neb_class
+        Nudged Elastic Band class to use. Default is ase.mep.NEB.
     n_images
         Number of images to use in NEB. Default is 15.
-    write_images
+    write_band
         Whether to write out all band images after optimization. Default is False.
     write_kwargs
         Keyword arguments to pass to ase.io.write when writing images.
     neb_kwargs
-        Keyword arguments to pass to neb_method. Defaults are
+        Keyword arguments to pass to neb_class. Defaults are
         {"k": 0.1, "climb": True, "method": "string"} for NEB,
         {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2}
         for DynNEB, else {}.
     interpolator
         Choice of interpolation strategy. Default is "ase".
-    interpolation_kwargs
+    interpolator_kwargs
         Keyword arguments to pass to interpolator. Default is
         {"method": "idpp"}.
-    neb_optimizer
+    optimizer
         Optimizer to apply to NEB object. Default is NEBOptimizer.
     fmax
         Maximum force for NEB optimizer. Default is 0.1.
     steps
         Maximum number of steps to optimize NEB. Default is 100.
     optimizer_kwargs
-        Keyword arguments to pass to neb_optimizer. Deault is {}.
+        Keyword arguments to pass to optimizer. Deault is {}.
     plot_band
         Whether to plot and save NEB band. Default is False.
     minimize
@@ -188,7 +188,7 @@ def neb(
     [
         write_kwargs,
         neb_kwargs,
-        interpolation_kwargs,
+        interpolator_kwargs,
         optimizer_kwargs,
         minimize_kwargs,
         read_kwargs,
@@ -197,7 +197,7 @@ def neb(
         [
             write_kwargs,
             neb_kwargs,
-            interpolation_kwargs,
+            interpolator_kwargs,
             optimizer_kwargs,
             minimize_kwargs,
             read_kwargs,
@@ -233,14 +233,14 @@ def neb(
         "attach_logger": True,
         "log_kwargs": log_kwargs,
         "track_carbon": tracker,
-        "neb_method": neb_method,
+        "neb_class": neb_class,
         "n_images": n_images,
-        "write_images": write_images,
+        "write_band": write_band,
         "write_kwargs": write_kwargs,
         "neb_kwargs": neb_kwargs,
         "interpolator": interpolator,
-        "interpolation_kwargs": interpolation_kwargs,
-        "neb_optimizer": neb_optimizer,
+        "interpolator_kwargs": interpolator_kwargs,
+        "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
         "optimizer_kwargs": optimizer_kwargs,

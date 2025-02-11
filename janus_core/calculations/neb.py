@@ -77,34 +77,34 @@ class NEB(BaseCalculation):
         Default is True if attach_logger is True, else False.
     tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
-    neb_method
-        Nudged Elastic Band method to use. Default is ase.mep.NEB.
+    neb_class
+        Nudged Elastic Band class to use. Default is ase.mep.NEB.
+    neb_kwargs
+        Keyword arguments to pass to neb_class. Defaults are
+        {"k": 0.1, "climb": True, "method": "string"} for NEB,
+        {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2} for
+        DynNEB, else {}.
     n_images
         Number of images to use in NEB. Default is 15.
     write_results
         Whether to write out results from NEB. Default is True.
-    write_images
+    write_band
         Whether to write out all band images after optimization. Default is False.
     write_kwargs
         Keyword arguments to pass to ase.io.write when writing images.
-    neb_kwargs
-        Keyword arguments to pass to neb_method. Defaults are
-        {"k": 0.1, "climb": True, "method": "string"} for NEB,
-        {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2} for
-        DynNEB, else {}.
     interpolator
         Choice of interpolation strategy. Default is "ase".
-    interpolation_kwargs
+    interpolator_kwargs
         Keyword arguments to pass to interpolator. Default is
         {"method": "idpp"}.
-    neb_optimizer
+    optimizer
         Optimizer to apply to NEB object. Default is NEBOptimizer.
     fmax
         Maximum force for NEB optimizer. Default is 0.1.
     steps
         Maximum number of steps to optimize NEB. Default is 100.
     optimizer_kwargs
-        Keyword arguments to pass to neb_optimizer. Deault is {}.
+        Keyword arguments to pass to optimizer. Deault is {}.
     plot_band
         Whether to plot and save NEB band. Default is False.
     minimize
@@ -135,15 +135,15 @@ class NEB(BaseCalculation):
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
         tracker_kwargs: dict[str, Any] | None = None,
-        neb_method: Callable | str = ASE_NEB,
+        neb_class: Callable | str = ASE_NEB,
+        neb_kwargs: dict[str, Any] | None = None,
         n_images: int = 15,
         write_results: bool = True,
-        write_images: bool = False,
+        write_band: bool = False,
         write_kwargs: OutputKwargs | None = None,
-        neb_kwargs: dict[str, Any] | None = None,
         interpolator: Interpolators | None = "ase",
-        interpolation_kwargs: dict[str, Any] | None = None,
-        neb_optimizer: Callable | str = NEBOptimizer,
+        interpolator_kwargs: dict[str, Any] | None = None,
+        optimizer: Callable | str = NEBOptimizer,
         fmax: float = 0.1,
         steps: int = 100,
         optimizer_kwargs: dict[str, Any] | None = None,
@@ -201,34 +201,34 @@ class NEB(BaseCalculation):
             Default is True if attach_logger is True, else False.
         tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
-        neb_method
-            Nudged Elastic Band method to use. Default is ase.mep.NEB.
+        neb_class
+            Nudged Elastic Band class to use. Default is ase.mep.NEB.
+        neb_kwargs
+            Keyword arguments to pass to neb_class. Defaults are
+            {"k": 0.1, "climb": True, "method": "string"} for NEB,
+            {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2}
+            for DynNEB, else {}.
         n_images
             Number of images to use in NEB. Default is 15.
         write_results
             Whether to write out results from NEB. Default is Trueß.
-        write_images
+        write_band
             Whether to write out all band images after optimization. Default is False.
         write_kwargs
             Keyword arguments to pass to ase.io.write when writing images.
-        neb_kwargs
-            Keyword arguments to pass to neb_method. Defaults are
-            {"k": 0.1, "climb": True, "method": "string"} for NEB,
-            {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2}
-            for DynNEB, else {}.
         interpolator
             Choice of interpolation strategy. Default is "ase".
-        interpolation_kwargs
+        interpolator_kwargs
             Keyword arguments to pass to interpolator. Default is
             {"method": "idpp"}.
-        neb_optimizer
+        optimizer
             Optimizer to apply to NEB object. Default is NEBOptimizer.
         fmax
             Maximum force for NEB optimizer. Default is 0.1.
         steps
             Maximum number of steps to optimize NEB. Default is 100.
         optimizer_kwargs
-            Keyword arguments to pass to neb_optimizer. Deault is {}.
+            Keyword arguments to pass to optimizer. Deault is {}.
         plot_band
             Whether to plot and save NEB band. Default is False.
         minimize
@@ -244,27 +244,27 @@ class NEB(BaseCalculation):
             read_kwargs,
             write_kwargs,
             neb_kwargs,
-            interpolation_kwargs,
+            interpolator_kwargs,
             optimizer_kwargs,
             minimize_kwargs,
         ) = none_to_dict(
             read_kwargs,
             write_kwargs,
             neb_kwargs,
-            interpolation_kwargs,
+            interpolator_kwargs,
             optimizer_kwargs,
             minimize_kwargs,
         )
 
-        self.neb_method = neb_method
+        self.neb_class = neb_class
         self.n_images = n_images
         self.write_results = write_results
-        self.write_images = write_images
+        self.write_band = write_band
         self.write_kwargs = write_kwargs
         self.neb_kwargs = neb_kwargs
         self.interpolator = interpolator
-        self.interpolation_kwargs = interpolation_kwargs
-        self.neb_optimizer = neb_optimizer
+        self.interpolator_kwargs = interpolator_kwargs
+        self.optimizer = optimizer
         self.fmax = fmax
         self.steps = steps
         self.optimizer_kwargs = optimizer_kwargs
@@ -349,17 +349,17 @@ class NEB(BaseCalculation):
 
         # Set default interpolation kwargs
         if self.interpolator == "ase":
-            interpolation_kwargs.setdefault("method", "idpp")
+            interpolator_kwargs.setdefault("method", "idpp")
         if self.interpolator == "pymatgen":
-            interpolation_kwargs.setdefault("interpolate_lattices", False)
-            interpolation_kwargs.setdefault("autosort_tol", 0.5)
+            interpolator_kwargs.setdefault("interpolate_lattices", False)
+            interpolator_kwargs.setdefault("autosort_tol", 0.5)
 
         # Set output file defaults
         self.results_file = self._build_filename("neb-results.dat").absolute()
         self.plot_file = self._build_filename("neb-plot.svg").absolute()
 
         self.write_kwargs["filename"] = self._build_filename(
-            "neb-images.extxyz"
+            "neb-band.extxyz"
         ).absolute()
 
         if self.minimize:
@@ -400,23 +400,30 @@ class NEB(BaseCalculation):
     def _set_neb(self) -> None:
         """Set NEB method, kwargs and optimizer."""
         # Set NEB method
-        if isinstance(self.neb_method, str):
+        if isinstance(self.neb_class, str):
             try:
-                self.neb_method = getattr(ase.mep, self.neb_method)
+                self.neb_class = getattr(ase.mep, self.neb_class)
             except AttributeError as e:
-                raise AttributeError(f"No such method: {self.neb_method}") from e
+                raise AttributeError(f"No such class: {self.neb_class}") from e
+        if self.logger:
+            self.logger.info("Using NEB class: %s", self.neb_class.__name__)
 
         # Set NEB optimizer
-        if isinstance(self.neb_optimizer, str):
+        if isinstance(self.optimizer, str):
             try:
-                self.neb_optimizer = getattr(ase.mep.neb, self.neb_optimizer)
-            except AttributeError as e:
-                raise AttributeError(f"No such method: {self.neb_optimizer}") from e
+                self.optimizer = getattr(ase.mep.neb, self.optimizer)
+            except AttributeError:
+                try:
+                    self.optimizer = getattr(ase.optimize, self.optimizer)
+                except AttributeError as e:
+                    raise AttributeError(f"No such class: {self.optimizer}") from e
+        if self.logger:
+            self.logger.info("Using optimizer: %s", self.optimizer.__name__)
 
         # Set default neb_kwargs
-        if isinstance(self.neb_method, ASE_NEB):
+        if isinstance(self.neb_class, ASE_NEB):
             neb_defaults = {"k": 0.1, "climb": True, "method": "string"}
-        elif isinstance(self.neb_method, DyNEB):
+        elif isinstance(self.neb_class, DyNEB):
             neb_defaults = {
                 "fmax": 0.1,
                 "dynamic_relaxation": True,
@@ -457,8 +464,8 @@ class NEB(BaseCalculation):
                     image.calc = copy(self.init_struct.calc)
                 self.images += [self.final_struct]
 
-                self.neb = self.neb_method(self.images, **self.neb_kwargs)
-                self.neb.interpolate(**self.interpolation_kwargs)
+                self.neb = self.neb_class(self.images, **self.neb_kwargs)
+                self.neb.interpolate(**self.interpolator_kwargs)
 
             case "pymatgen":
                 # Create band of images and attach calculators
@@ -475,19 +482,19 @@ class NEB(BaseCalculation):
                 py_images = py_start_struct.interpolate(
                     py_final_struct,
                     nimages=self.n_images + 1,
-                    **self.interpolation_kwargs,
+                    **self.interpolator_kwargs,
                 )
                 self.images = [image.to_ase_atoms() for image in py_images]
                 for image in self.images:
                     image.calc = copy(self.init_struct.calc)
 
-                self.neb = self.neb_method(self.images, **self.neb_kwargs)
+                self.neb = self.neb_class(self.images, **self.neb_kwargs)
 
             case None:
                 # Band already created
                 if self.logger:
                     self.logger.info("Skipping interpolation")
-                self.neb = self.neb_method(self.images, **self.neb_kwargs)
+                self.neb = self.neb_class(self.images, **self.neb_kwargs)
                 pass
             case _:
                 raise ValueError("Invalid interpolator selected")
@@ -519,14 +526,16 @@ class NEB(BaseCalculation):
 
         self.set_interpolator()
 
-        optimizer = self.neb_optimizer(self.neb, **self.optimizer_kwargs)
+        optimizer = self.optimizer(self.neb, **self.optimizer_kwargs)
         optimizer.run(fmax=self.fmax, steps=self.steps)
+        if self.logger:
+            self.logger.info("Optimization steps: %s", optimizer.nsteps)
 
         # Optionally write band images to file
         output_structs(
             images=self.images,
             struct_path=self.struct_path,
-            write_results=self.write_images,
+            write_results=self.write_band,
             write_kwargs=self.write_kwargs,
         )
 
