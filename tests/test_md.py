@@ -33,6 +33,8 @@ test_data = [
     (NVT_NH, "nvt-nh"),
     (NPH, "nph"),
 ]
+if not MTK_IMPORT_FAILED:
+    test_data.append((NPT_MTK, "npt-mtk"))
 
 
 @pytest.mark.parametrize("ensemble, expected", test_data)
