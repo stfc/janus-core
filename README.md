@@ -38,10 +38,9 @@ Tools for machine learnt interatomic potentials
 - deepmd-kit = dpa3-alpha (optional)
 - orb-models = 0.4.2 (optional)
 
-All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
+Where possible, we aim to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
-> [!NOTE]
-> Where possible, we expect to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
+All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
 
 ### Installation
@@ -60,13 +59,22 @@ python3 -m pip install git+https://github.com/stfc/janus-core.git
 
 By default, MACE is the only MLIP installed.
 
-Other MLIPs can be installed as `extras`. For example, to install CHGNet and M3GNet, run:
+Other MLIPs can be installed as `extras`. For example, to install CHGNet and SevenNet, run:
 
 ```python
-python3 -m pip install janus-core[chgnet,m3gnet]
+python3 -m pip install janus-core[chgnet,sevennet]
 ```
 
-or to install all supported MLIPs:
+> [!WARNING]
+> `matgl` and `alignn` depend on [dgl](https://github.com/dmlc/dgl?tab=readme-ov-file), which no
+> longer publishes to PyPI. If `janus-core` is installed with either of these extras, PyTorch will
+> automatically be set to 2.2.0 to ensure compatibility. However, this is incompatible with `chgnet`,
+> and may limit the available features in others, including `mace`. To use `matgl` and/or `alignn` with
+> more recent PyTorch release, please refer to the
+> [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html).
+
+
+To install all MLIPs that do not depend on `dgl`:
 
 ```python
 python3 -m pip install janus-core[all]
@@ -308,7 +316,7 @@ We recommend installing uv for dependency management when developing for `janus-
 ```shell
 git clone https://github.com/stfc/janus-core
 cd janus-core
-uv sync --all-extras # Create a virtual environment and install all dependencies
+uv sync --extras all # Create a virtual environment and install dependencies
 source .venv/bin/activate
 pre-commit install  # Install pre-commit hooks
 pytest -v  # Discover and run all tests

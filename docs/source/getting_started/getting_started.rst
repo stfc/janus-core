@@ -18,10 +18,9 @@ Dependencies
 - deepmd-kit = dpa3-alpha (optional)
 - orb-models = 0.4.2 (optional)
 
-All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
+Where possible, we aim to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
-.. note::
-    Where possible, we expect to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
+All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
 
 Installation
@@ -41,13 +40,23 @@ To get all the latest changes, ``janus-core`` can also be installed from GitHub:
 
 By default, MACE is the only MLIP installed.
 
-Other MLIPs can be installed as ``extras``. For example, to install CHGNet and M3GNet, run:
+Other MLIPs can be installed as ``extras``. For example, to install CHGNet and SevenNet, run:
 
 .. code-block:: python
 
-    python3 -m pip install janus-core[chgnet,m3gnet]
+    python3 -m pip install janus-core[chgnet,sevennet]
 
-or to install all supported MLIPs:
+
+.. warning::
+
+    ``matgl`` and ``alignn`` depend on `dgl <https://github.com/dmlc/dgl?tab=readme-ov-file>`_,
+    which no longer publishes to PyPI. If ``janus-core`` is installed with either of these extras,
+    PyTorch will automatically be set to 2.2.0 to ensure compatibility. However, this is incompatible
+    with ``chgnet``, and may limit the available features in others, including ``mace``. To use
+    ``matgl`` and/or ``alignn`` with more recent PyTorch release, please refer to the
+    :doc:`installation documentation </user_guide/installation>`.
+
+To install all MLIPs that do not depend on `dgl`:
 
 .. code-block:: python
 

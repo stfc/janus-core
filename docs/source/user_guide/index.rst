@@ -5,6 +5,7 @@ User guide
 .. toctree::
     :maxdepth: 3
 
-    command_line
+    installation
     python
+    command_line
     troubleshooting
