@@ -46,6 +46,10 @@ chgnet = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
+all = [
+    "janus-core[chgnet]",
+    "janus-core[sevennet]",
+]
 
 # MLIPs with dgl dependency
 alignn = [
@@ -181,4 +185,13 @@ conflicts = [
       { extra = "chgnet" },
       { extra = "m3gnet" },
     ],
+    [
+      { extra = "all" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "all" },
+      { extra = "m3gnet" },
+    ],
+
 ]
