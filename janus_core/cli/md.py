@@ -42,9 +42,10 @@ def md(
         Option(
             help=(
                 """
-            Thermostat time for NPT, NPT-MTK, NVT Nosé-Hoover, or NPH simulation, in fs.
-            Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for NPT-MTK.
-            """
+                Thermostat time for NPT, NPT-MTK, NVT Nosé-Hoover, or NPH simulation,
+                in fs.
+                Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for NPT-MTK.
+                """
             )
         ),
     ] = None,
@@ -53,9 +54,9 @@ def md(
         Option(
             help=(
                 """
-            Barostat time for NPT, NPT-MTK or NPH simulation, in fs.
-            Default is 75 fs for NPT and NPH, or 1000 fs for NPT-MTK.
-            """
+                Barostat time for NPT, NPT-MTK or NPH simulation, in fs.
+                Default is 75 fs for NPT and NPH, or 1000 fs for NPT-MTK.
+                """
             )
         ),
     ] = None,
