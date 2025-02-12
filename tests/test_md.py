@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
+import ase.md.nose_hoover_chain
 import numpy as np
 import pytest
 
@@ -14,6 +15,13 @@ from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.stats import Stats
 from tests.utils import assert_log_contains
+
+if hasattr(ase.md.nose_hoover_chain, "IsotropicMTKNPT"):
+    from janus_core.calculations.md import NPT_MTK
+
+    MTK_IMPORT_FAILED = False
+else:
+    MTK_IMPORT_FAILED = True
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -25,6 +33,8 @@ test_data = [
     (NVT_NH, "nvt-nh"),
     (NPH, "nph"),
 ]
+if not MTK_IMPORT_FAILED:
+    test_data.append((NPT_MTK, "npt-mtk"))
 
 
 @pytest.mark.parametrize("ensemble, expected", test_data)
@@ -268,6 +278,64 @@ def test_nvt_csvr():
             lines = stats_file.readlines()
             assert "Target_T [K]" in lines[0]
             assert len(lines) == 6
+    finally:
+        restart_path_1.unlink(missing_ok=True)
+        restart_path_2.unlink(missing_ok=True)
+        restart_final.unlink(missing_ok=True)
+        traj_path.unlink(missing_ok=True)
+        stats_path.unlink(missing_ok=True)
+
+
+@pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
+def test_npt_mtk():
+    """Test NPT MTK molecular dynamics."""
+    restart_path_1 = Path("NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz")
+    restart_path_2 = Path("NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz")
+    restart_final = Path("NaCl-npt-mtk-T300.0-p0.0001-final.extxyz")
+    traj_path = Path("NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz")
+    stats_path = Path("NaCl-npt-mtk-T300.0-p0.0001-stats.dat")
+
+    assert not restart_path_1.exists()
+    assert not restart_path_2.exists()
+    assert not restart_final.exists()
+    assert not traj_path.exists()
+    assert not stats_path.exists()
+
+    npt_mtk = NPT_MTK(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model_path=MODEL_PATH,
+        temp=300.0,
+        pressure=0.0001,
+        steps=4,
+        traj_every=1,
+        restart_every=2,
+        stats_every=1,
+        thermostat_time=80.0,
+        barostat_time=800.0,
+        thermostat_chain=2,
+        barostat_chain=2,
+        thermostat_substeps=2,
+        barostat_substeps=2,
+    )
+
+    try:
+        npt_mtk.run()
+        restart_atoms_1 = read(restart_path_1)
+        assert isinstance(restart_atoms_1, Atoms)
+        restart_atoms_2 = read(restart_path_2)
+        assert isinstance(restart_atoms_2, Atoms)
+        restart_atoms_final = read(restart_final)
+        assert isinstance(restart_atoms_final, Atoms)
+        traj = read(traj_path, index=":")
+        assert all(isinstance(image, Atoms) for image in traj)
+        assert len(traj) == 5
+
+        with open(stats_path, encoding="utf8") as stats_file:
+            lines = stats_file.readlines()
+            assert "Target_T [K]" in lines[0] and "Target_P [GPa]" in lines[0]
+            assert len(lines) == 6
+
     finally:
         restart_path_1.unlink(missing_ok=True)
         restart_path_2.unlink(missing_ok=True)

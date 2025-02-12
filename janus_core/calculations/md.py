@@ -1650,3 +1650,167 @@ class NPH(NPT):
             ensemble_kwargs=ensemble_kwargs,
             **kwargs,
         )
+
+
+class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
+    """
+    Configure NPT simulation using isotropic (MTK) thermostat and barostat chains.
+
+    Parameters
+    ----------
+    *args
+        Additional arguments.
+    pressure
+        Pressure, in GPa. Default is 0.0.
+    thermostat_time
+        Thermostat time, in fs. Default is 100 times `timestep`.
+    barostat_time
+        Barostat time, in fs. Default is 1000 times `timestep`.
+    thermostat_chain
+        Length of thermostat chain. Default is 3.
+    barostat_chain
+        Length of barostat chain. Default is 3.
+    thermostat_substeps
+        The number of sub-steps in thermostat integration. Default is 1.
+    barostat_substeps
+        The number of sub-steps in barostat integration. Default is 1.
+    ensemble
+        Name for thermodynamic ensemble. Default is "npt-mtk".
+    ensemble_kwargs
+        Keyword arguments to pass to ensemble initialization. Default is {}.
+    **kwargs
+        Additional keyword arguments.
+    """
+
+    def __init__(
+        self,
+        *args,
+        pressure: float = 0.0,
+        thermostat_time: float = 100.0,
+        barostat_time: float = 1000.0,
+        thermostat_chain: int = 3,
+        barostat_chain: int = 3,
+        thermostat_substeps: int = 1,
+        barostat_substeps: int = 1,
+        ensemble: Ensembles = "npt-mtk",
+        ensemble_kwargs: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
+        """
+        Initialise dynamics for isotropic NPT simulation.
+
+        Parameters
+        ----------
+        *args
+            Additional arguments.
+        pressure
+            Pressure, in GPa. Default is 0.0.
+        thermostat_time
+            Thermostat time, in fs. Recommended value is 100 times `timestep`.
+            Default is 100 fs.
+        barostat_time
+            Barostat time, in fs. Recommended value is 1000 times `timestep`.
+            Default is 1000 fs.
+        thermostat_chain
+            Length of thermostat chain. Default is 3.
+        barostat_chain
+            Length of barostat chain. Default is 3.
+        thermostat_substeps
+            The number of sub-steps in thermostat integration. Default is 1.
+        barostat_substeps
+            The number of sub-steps in barostat integration. Default is 1.
+        ensemble
+            Name for thermodynamic ensemble. Default is "npt-mtk".
+        ensemble_kwargs
+            Keyword arguments to pass to ensemble initialization. Default is {}.
+        **kwargs
+            Additional keyword arguments.
+        """
+        try:
+            from ase.md.nose_hoover_chain import (
+                IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
+            )
+        except ImportError as e:
+            raise NotImplementedError(
+                "Please download the latest ASE commits to use this module"
+            ) from e
+
+        self.pressure = pressure
+
+        super().__init__(*args, ensemble=ensemble, **kwargs)
+
+        (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
+
+        self.dyn = ASE_NPT_MTK(
+            self.struct,
+            timestep=self.timestep,
+            temperature_K=self.temp,
+            pressure_au=self.pressure * units.GPa,
+            tdamp=thermostat_time * units.fs,
+            pdamp=barostat_time * units.fs,
+            tchain=thermostat_chain,
+            pchain=barostat_chain,
+            tloop=thermostat_substeps,
+            ploop=barostat_substeps,
+            **ensemble_kwargs,
+        )
+
+    def _set_param_prefix(self, file_prefix: PathLike | None = None) -> str:
+        """
+        Set ensemble parameters for output files.
+
+        Parameters
+        ----------
+        file_prefix
+            Prefix for output filenames on class init. If not None, param_prefix = "".
+
+        Returns
+        -------
+        str
+           Formatted ensemble parameters, including pressure and temperature(s).
+        """
+        if file_prefix is not None:
+            return ""
+
+        pressure = f"-p{self.pressure}"
+        return f"{super()._set_param_prefix(file_prefix)}{pressure}"
+
+    def get_stats(self) -> dict[str, float]:
+        """
+        Get thermodynamical statistics to be written to file.
+
+        Returns
+        -------
+        dict[str, float]
+            Thermodynamical statistics to be written out.
+        """
+        stats = MolecularDynamics.get_stats(self)
+        stats |= {"Target_P": self.pressure, "Target_T": self.temp}
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Get units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return super().unit_info | {
+            "Target_P": JANUS_UNITS["pressure"],
+            "Target_T": JANUS_UNITS["temperature"],
+        }
+
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return super().default_formats | {"Target_P": ".5f", "Target_T": ".5f"}
