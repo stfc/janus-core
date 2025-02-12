@@ -285,7 +285,7 @@ To compute the VAF across all atoms from the command line the following options 
 
 In this case a file ``NaCl-nve-T300.0-vaf.dat`` would be created containing correlation values and lag times. The file will contain 45 correlation values with an implied time step of 20 fs. That is starting at time step 100 and correlating every 20 steps.
 
-The VAF is computed from the trajectory file, therefore ``--traj-every`` controls the correlation possible temporal resolutions. The precise steps used in the VAF may be controlled by the ``vaf_start``, ``vaf_stop``, and ``vaf_step`` options.
+The VAF is computed from the trajectory file, so ``--traj-every`` controls the possible temporal resolution of the VAF. Additionally ``'vaf_start'``, ``'vaf_stop'``, and ``'vaf_step'`` in ``-post-process-kwargs`` control which trajectory frames are used to calculate the VAF.
 
 To compute partial VAFs of Na and Cl the following kwargs may be passed:
 
