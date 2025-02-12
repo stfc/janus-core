@@ -40,11 +40,24 @@ def md(
     thermostat_time: Annotated[
         float,
         Option(
-            help="Thermostat time for NPT, NVT Nosé-Hoover, or NPH simulation, in fs."
+            help=(
+                """
+            Thermostat time for NPT, NPT-MTK, NVT Nosé-Hoover, or NPH simulation, in fs.
+            Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for NPT-MTK.
+            """
+            )
         ),
     ] = None,
     barostat_time: Annotated[
-        float, Option(help="Barostat time for NPT simulation, in fs.")
+        float,
+        Option(
+            help=(
+                """
+            Barostat time for NPT, NPT-MTK or NPH simulation, in fs.
+            Default is 75 fs for NPT and NPH, or 1000 fs for NPT-MTK.
+            """
+            )
+        ),
     ] = None,
     bulk_modulus: Annotated[
         float, Option(help="Bulk modulus for NPT or NPH simulation, in GPa.")
