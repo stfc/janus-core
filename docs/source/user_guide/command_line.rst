@@ -298,6 +298,7 @@ Where ``'vaf_atoms'`` is a ``Sequence`` of ``Sequence`` of element names (or ato
 Computing the RDF is similar, for example:
 
 .. code-block:: bash
+
    janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --traj-every 10 --post-process-kwargs "{'rdf_compute': True, 'rdf_rmax': 2.0, 'rdf_elements': ('Na', 'Cl'), 'rdf_by_elements': True}"
 
 will compute the RDFs for ``Na`` and ``Cl`` atoms. Seperately for each paring, up to a maximum cutoff distance of ``2.0`` Angstroms. These will be written to three seperate files ``NaCl-nve-T300.0-Na_Na-rdf.dat``, ``NaCl-nve-T300.0-Cl_Cl-rdf.dat``, and ``NaCl-nve-T300.0-Na_Cl-rdf.dat``. Setting ``'rdf_by_elements': False`` will generate one RDF of all atoms saved to ``NaCl-nve-T300.0-rdf.dat``.
