@@ -61,14 +61,16 @@ def test_no_optimize(tmp_path):
     )
 
 
-test_data_potentials = [("m3gnet", "cpu"), ("chgnet", "cpu")]
+@pytest.mark.parametrize("arch, device", [("chgnet", "cpu"), ("sevennet", "cpu")])
+def test_extras(arch, device, tmp_path):
+    """Test extra potentials."""
+    if arch == "chgnet":
+        pytest.importorskip("chgnet")
+    if arch == "sevennet":
+        pytest.importorskip("sevenn")
 
-
-@pytest.mark.parametrize("arch, device", test_data_potentials)
-def test_extra_potentials(arch, device, tmp_path):
-    """Test m3gnet and chgnet potentials."""
-    log_file = tmp_path / "eos.log"
     eos_fit_path = tmp_path / "NaCl-eos-fit.dat"
+    log_file = tmp_path / "eos.log"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",

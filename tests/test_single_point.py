@@ -65,6 +65,37 @@ def test_potential_energy(
         assert results_2 == pytest.approx(expected)
 
 
+@pytest.mark.parametrize(
+    "arch, device, expected_energy, kwargs",
+    [
+        ("chgnet", "cpu", -29.331436157226562, {}),
+        ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
+        ("sevennet", "cpu", -27.061979293823242, {}),
+        (
+            "sevennet",
+            "cpu",
+            -27.061979293823242,
+            {"model_path": "SevenNet-0_11July2024"},
+        ),
+    ],
+)
+def test_extras(arch, device, expected_energy, kwargs):
+    """Test single point energy using extra MLIP calculators."""
+    if arch == "chgnet":
+        pytest.importorskip("chgnet")
+    if arch == "sevennet":
+        pytest.importorskip("sevenn")
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch=arch,
+        device=device,
+        properties="energy",
+        **kwargs,
+    )
+    energy = single_point.run()["energy"]
+    assert energy == pytest.approx(expected_energy)
+
+
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
     single_point = SinglePoint(
@@ -257,25 +288,6 @@ def test_invalidate_calc():
     assert "energy" not in single_point.struct.calc.results
 
 
-test_mlips_data = [
-    ("m3gnet", "cpu", -26.729949951171875),
-    ("chgnet", "cpu", -29.331436157226562),
-]
-
-
-@pytest.mark.parametrize("arch, device, expected_energy", test_mlips_data)
-def test_mlips(arch, device, expected_energy):
-    """Test single point energy using CHGNET and M3GNET calculators."""
-    single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
-        arch=arch,
-        device=device,
-        properties="energy",
-    )
-    energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy)
-
-
 test_extra_mlips_data = [
     (
         "alignn",
@@ -372,6 +384,7 @@ def test_hessian_traj():
 @pytest.mark.parametrize("struct", ["NaCl.cif", "benzene-traj.xyz"])
 def test_hessian_not_implemented(struct):
     """Test unimplemented Hessian."""
+    pytest.importorskip("chgnet")
     with pytest.raises(NotImplementedError):
         SinglePoint(
             struct_path=DATA_PATH / struct,
