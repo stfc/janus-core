@@ -26,16 +26,20 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 customdefault:
 	$(SPHINXBUILD) -b html -nW --keep-going $(ALLSPHINXOPTS) $(BUILDDIR)/html
 
-all: html
+all: tutorials
 
 clean:
 	rm -rf $(BUILDDIR)
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html -D nbsphinx_execute=never
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
+tutorials:
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 view:
 	xdg-open $(BUILDDIR)/html/index.html

@@ -109,7 +109,10 @@ The full set of `ruff rules <https://docs.astral.sh/ruff/rules/>`_ are specified
 Building the documentation
 ++++++++++++++++++++++++++
 
-Packages in the ``docs`` dependency group install `Sphinx <https://www.sphinx-doc.org>`_ and other packages required to build ``janus-core``'s documentation.
+Packages in the ``docs`` dependency group install `Sphinx <https://www.sphinx-doc.org>`_
+and other Python packages required to build ``janus-core``'s documentation.
+
+It is also necessary to `install pandoc <https://pandoc.org/installing.html>`_ on your system.
 
 Individual individual documentation pages can be edited directly::
 
@@ -141,6 +144,19 @@ To document a new module, a new block must be added. For example, for the ``janu
 
         cd docs
         make clean; make html
+
+
+Notebook tutorials
+++++++++++++++++++
+
+Jupyter notebooks in ``docs/source/tutorials`` are automatically run by ``Sphinx`` using the
+`nbsphinx <https://nbsphinx.readthedocs.io/en/0.2.15/index.html>`_ extension, creating the :doc:`Tutorials </tutorials/index>`.
+
+
+These are tested before ``janus-core`` is published to PyPI, but can be tested locally by running::
+
+        cd docs
+        make clean; make tutorials
 
 
 Continuous integration

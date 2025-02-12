@@ -12,6 +12,15 @@
 
 Tools for machine learnt interatomic potentials
 
+## Contents
+- [Getting started](#getting-started)
+- [Features](#features)
+- [Python interface](#python-interface)
+- [Command line interface](#command-line-interface)
+- [Development](#development)
+- [License](#license)
+- [Funding](#funding)
+
 ## Getting started
 
 ### Dependencies
@@ -103,6 +112,87 @@ Current and planned features include:
   - MACE
 - [ ] Rare events simulations
   - PLUMED
+
+
+## Python interface
+
+Calculations can also be run through the Python interface. For example, running:
+
+```python
+from janus_core.calculations.single_point import SinglePoint
+
+single_point = SinglePoint(
+    struct_path="tests/data/NaCl.cif",
+    arch="mace_mp",
+    model_path="tests/models/mace_mp_small.model",
+)
+
+results = single_point.run()
+print(results)
+```
+
+will read the NaCl structure file and attach the MACE-MP (medium) calculator, before calculating and printing the energy, forces, and stress.
+
+Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the [tutorials](https://github.com/stfc/janus-core/tree/main/docs/source/tutorials) documentation directory. This currently includes examples for:
+
+- [Single Point](docs/source/tutorials/single_point.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/single_point.ipynb)
+- [Geometry Optimization](docs/source/tutorials/geom_opt.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/geom_opt.ipynb)
+- [Molecular Dynamics](docs/source/tutorials/md.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/md.ipynb)
+- [Equation of State](docs/source/tutorials/eos.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/eos.ipynb)
+- [Phonons](docs/source/tutorials/phonons.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/phonons.ipynb)
+
+
+### Calculation outputs
+
+By default, calculations performed will modify the underlying [ase.Atoms](https://wiki.fysik.dtu.dk/ase/ase/atoms.html) object
+to store information in the `Atoms.info` and `Atoms.arrays` dictionaries about the MLIP used.
+
+Additional dictionary keys include `arch`, corresponding to the MLIP architecture used,
+and `model_path`, corresponding to the model path, name or label.
+
+Results from the MLIP calculator, which are typically stored in `Atoms.calc.results`, will also, by default,
+be copied to these dictionaries, prefixed by the MLIP `arch`.
+
+For example:
+
+```python
+from janus_core.calculations.single_point import SinglePoint
+
+single_point = SinglePoint(
+    struct_path="tests/data/NaCl.cif",
+    arch="mace_mp",
+    model_path="tests/models/mace_mp_small.model",
+)
+
+single_point.run()
+print(single_point.struct.info)
+```
+
+will return
+
+```python
+{
+  'spacegroup': Spacegroup(1, setting=1),
+  'unit_cell': 'conventional',
+  'occupancy': {'0': {'Na': 1.0}, '1': {'Cl': 1.0}, '2': {'Na': 1.0}, '3': {'Cl': 1.0}, '4': {'Na': 1.0}, '5': {'Cl': 1.0}, '6': {'Na': 1.0}, '7': {'Cl': 1.0}},
+  'model_path': 'tests/models/mace_mp_small.model',
+  'arch': 'mace_mp',
+  'mace_mp_energy': -27.035127799332745,
+  'mace_mp_stress': array([-4.78327600e-03, -4.78327600e-03, -4.78327600e-03,  1.08000967e-19, -2.74004242e-19, -2.04504710e-19]),
+  'system_name': 'NaCl',
+}
+```
+
+> [!NOTE]
+> If running calculations with multiple MLIPs, `arch` and `mlip_model` will be overwritten with the most recent MLIP information.
+> Results labelled by the architecture (e.g. `mace_mp_energy`) will be saved between MLIPs,
+> unless the same `arch` is chosen, in which case these values will also be overwritten.
+
+This is also the case the calculations performed using the CLI, with the same information written to extxyz output files.
+
+> [!TIP]
+> For complete provenance tracking, calculations and training can be run using the [aiida-mlip](https://github.com/stfc/aiida-mlip/) AiiDA plugin.
+
 
 ## Command line interface
 
@@ -198,86 +288,6 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 > `properties` must be passed as a Yaml list, as above, not as a string.
 
 Example configurations for all commands can be found in [janus-tutorials](https://github.com/stfc/janus-tutorials/tree/main/configs)
-
-
-## Python interface
-
-Calculations can also be run through the Python interface. For example, running:
-
-```python
-from janus_core.calculations.single_point import SinglePoint
-
-single_point = SinglePoint(
-    struct_path="tests/data/NaCl.cif",
-    arch="mace_mp",
-    model_path="tests/models/mace_mp_small.model",
-)
-
-results = single_point.run()
-print(results)
-```
-
-will read the NaCl structure file and attach the MACE-MP (medium) calculator, before calculating and printing the energy, forces, and stress.
-
-Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the [janus-tutorials](https://github.com/stfc/janus-tutorials) repository. This currently includes examples for:
-
-- [Single Point](https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/single_point.ipynb)
-- [Geometry Optimization](https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/geom_opt.ipynb)
-- [Molecular Dynamics](https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/md.ipynb)
-- [Equation of State](https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/eos.ipynb)
-- [Phonons](https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/phonons.ipynb)
-
-
-## Calculation outputs
-
-By default, calculations performed will modify the underlying [ase.Atoms](https://wiki.fysik.dtu.dk/ase/ase/atoms.html) object
-to store information in the `Atoms.info` and `Atoms.arrays` dictionaries about the MLIP used.
-
-Additional dictionary keys include `arch`, corresponding to the MLIP architecture used,
-and `model_path`, corresponding to the model path, name or label.
-
-Results from the MLIP calculator, which are typically stored in `Atoms.calc.results`, will also, by default,
-be copied to these dictionaries, prefixed by the MLIP `arch`.
-
-For example:
-
-```python
-from janus_core.calculations.single_point import SinglePoint
-
-single_point = SinglePoint(
-    struct_path="tests/data/NaCl.cif",
-    arch="mace_mp",
-    model_path="tests/models/mace_mp_small.model",
-)
-
-single_point.run()
-print(single_point.struct.info)
-```
-
-will return
-
-```python
-{
-  'spacegroup': Spacegroup(1, setting=1),
-  'unit_cell': 'conventional',
-  'occupancy': {'0': {'Na': 1.0}, '1': {'Cl': 1.0}, '2': {'Na': 1.0}, '3': {'Cl': 1.0}, '4': {'Na': 1.0}, '5': {'Cl': 1.0}, '6': {'Na': 1.0}, '7': {'Cl': 1.0}},
-  'model_path': 'tests/models/mace_mp_small.model',
-  'arch': 'mace_mp',
-  'mace_mp_energy': -27.035127799332745,
-  'mace_mp_stress': array([-4.78327600e-03, -4.78327600e-03, -4.78327600e-03,  1.08000967e-19, -2.74004242e-19, -2.04504710e-19]),
-  'system_name': 'NaCl',
-}
-```
-
-> [!NOTE]
-> If running calculations with multiple MLIPs, `arch` and `mlip_model` will be overwritten with the most recent MLIP information.
-> Results labelled by the architecture (e.g. `mace_mp_energy`) will be saved between MLIPs,
-> unless the same `arch` is chosen, in which case these values will also be overwritten.
-
-This is also the case the calculations performed using the CLI, with the same information written to extxyz output files.
-
-> [!TIP]
-> For complete provenance tracking, calculations and training can be run using the [aiida-mlip](https://github.com/stfc/aiida-mlip/) AiiDA plugin.
 
 
 ## Development

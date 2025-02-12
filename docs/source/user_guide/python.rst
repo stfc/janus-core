@@ -2,13 +2,33 @@
 Python interface
 ================
 
-Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the `janus-tutorials <https://github.com/stfc/janus-tutorials>`_ repository. This currently includes examples for:
+Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the `tutorials <https://github.com/stfc/janus-core/tree/main/docs/source/tutorials>`_ documentation directory. This currently includes examples for:
 
-- `Single Point <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/single_point.ipynb>`_
-- `Geometry Optimization <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/geom_opt.ipynb>`_
-- `Molecular Dynamics <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/md.ipynb>`_
-- `Equation of State <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/eos.ipynb>`_
-- `Phonons <https://colab.research.google.com/github/stfc/janus-tutorials/blob/main/phonons.ipynb>`_
+.. |single_point| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/single_point.ipynb
+    :alt: Launch single point Colab
+
+.. |geom_opt| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/geom_opt.ipynb
+    :alt: Launch geometry optimisation Colab
+
+.. |md| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/md.ipynb
+    :alt: Launch molecular dynamics Colab
+
+.. |eos| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/eos.ipynb
+    :alt: Launch equation of state Colab
+
+.. |phonons| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/phonons.ipynb
+    :alt: Launch phonons Colab
+
+- :doc:`Single Point </tutorials/single_point>` |single_point|
+- :doc:`Geometry Optimization </tutorials/geom_opt>` |geom_opt|
+- :doc:`Molecular Dynamics </tutorials/md>` |md|
+- :doc:`Equation of State </tutorials/eos>` |eos|
+- :doc:`Phonons </tutorials/phonons>` |phonons|
 
 
 Calculation outputs

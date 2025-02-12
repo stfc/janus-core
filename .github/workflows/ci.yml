@@ -64,6 +64,9 @@ jobs:
           version: "0.5.7"
           python-version: "3.12"
 
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
       - name: Install dependencies
         run: uv sync
 

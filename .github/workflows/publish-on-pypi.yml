@@ -7,7 +7,50 @@ on:
       - v[0-9]+.[0-9]+.[0-9]+*
 
 jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    if: github.repository == 'stfc/janus-core' && startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.7"
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Build docs with tutorials
+        run: cd docs && uv run make all
+
+      - name: Upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: './docs/build/html/.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
   publish:
+    needs: build-docs
     runs-on: ubuntu-latest
     if: github.repository == 'stfc/janus-core' && startsWith(github.ref, 'refs/tags/v')
     environment:
