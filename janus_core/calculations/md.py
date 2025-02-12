@@ -422,6 +422,10 @@ class MolecularDynamics(BaseCalculation):
                 "heating to run",
                 stacklevel=2,
             )
+        if self.ramp_temp and self.ensemble in ("nve", "nph"):
+            raise ValueError(
+                "Temperature ramp requested for ensemble with no thermostat."
+            )
 
         # Check validate start and end temperatures
         if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
@@ -1034,7 +1038,7 @@ class MolecularDynamics(BaseCalculation):
             self.dyn.temp = self.temp * units.kB
             self.dyn.target_kinetic_energy = 0.5 * self.dyn.temp * self.dyn.ndof
         else:
-            self.logger.warning("Temperature ramp set for ensemble with no thermostat.")
+            raise ValueError("Temperature set for ensemble with no thermostat.")
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
