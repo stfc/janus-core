@@ -232,5 +232,13 @@ def test_vaf_by_symbols(tmp_path):
 
     assert expected == approx(actual, rel=1e-9)
 
+
+def test_vaf_invalid_symbols(tmp_path):
+    """Test vaf using invalid element symbols."""
+    data = read(DATA_PATH / "NaCl-traj.xyz", index=":")
     with pytest.raises(ValueError):
+        # Not atom "C".
         post_process.compute_vaf(data, atoms_filter=(("C",)))
+    with pytest.raises(ValueError):
+        # str is also iterable.
+        post_process.compute_vaf(data, atoms_filter="NOT AN ATOM")
