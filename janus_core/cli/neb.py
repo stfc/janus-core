@@ -152,8 +152,8 @@ def neb(
     model_path
         Path to MLIP model. Default is `None`.
     read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-        read_kwargs["index"] is -1.
+        Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
+        is -1 if using `init_struct` and `final_struct`, or ":" for `band_structs`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
