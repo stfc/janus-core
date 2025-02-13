@@ -55,7 +55,7 @@ sevennet = [
     "sevenn == 0.10.3",
 ]
 fairchem = [ 
-    "fairchem == 1.4.0"
+    "fairchem-core == 1.4.0"
 ]
 all = [
     "janus-core[alignn]",
