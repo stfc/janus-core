@@ -4,12 +4,12 @@ version = "0.7.2"
 description = "Tools for machine learnt interatomic potentials"
 authors = [
     { name = "Elliott Kasoar" },
-    { name = "Federica Zanca" },
-    { name = "Harvey Devereux "},
     { name = "Patrick Austin" },
+    { name = "Harvey Devereux" },
+    { name = "Kieran Harris" },
     { name = "David Mason" },
     { name = "Jacob Wilkins" },
-    { name = "Kieran Harris" },
+    { name = "Federica Zanca" },
     { name = "Alin M. Elena" },
 ]
 requires-python = ">=3.10"

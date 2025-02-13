@@ -6,18 +6,18 @@ authors:
   - family-names: Kasoar
     given-names: Elliott
     orcid: "https://orcid.org/0009-0005-2015-9478"
-  - family-names: Zanca
-    given-names: Federica
-  - family-names: Wilkins
-    given-names: Jacob
-  - family-names: Devereux
-    given-names: Harvey
-  - family-names: Mason
-    given-names: David
   - family-names: Austen
     given-names: Patrick
+  - family-names: Devereux
+    given-names: Harvey
   - family-names: Harris
     given-names: Kieran
+  - family-names: Mason
+    given-names: David
+  - family-names: Wilkins
+    given-names: Jacob
+  - family-names: Zanca
+    given-names: Federica
   - family-names: Elena
     given-names: Alin
 identifiers:
