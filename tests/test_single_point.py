@@ -284,6 +284,7 @@ test_extra_mlips_data = [
     ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
     ("sevennet", "cpu", -27.061979293823242, {}),
     ("sevennet", "cpu", -27.061979293823242, {"model_path": "SevenNet-0_11July2024"}),
+    ("fairchem", "cpu", -27.061979293823242, {"model": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
 ]
 
 
