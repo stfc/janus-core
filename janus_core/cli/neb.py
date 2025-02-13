@@ -121,10 +121,7 @@ def neb(
     write_kwargs
         Keyword arguments to pass to ase.io.write when writing images.
     neb_kwargs
-        Keyword arguments to pass to neb_class. Defaults are
-        {"k": 0.1, "climb": True, "method": "string"} for NEB,
-        {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2}
-        for DynNEB, else {}.
+        Keyword arguments to pass to neb_class. Default is {}.
     interpolator
         Choice of interpolation strategy. Default is "ase".
     interpolator_kwargs
@@ -221,7 +218,7 @@ def neb(
         log_kwargs["filename"] = log
 
     # Dictionary of inputs for NEB class
-    neb_kwargs = {
+    neb_inputs = {
         "init_struct_path": init_struct,
         "final_struct_path": final_struct,
         "band_path": band_structs,
@@ -251,14 +248,14 @@ def neb(
     }
 
     # Initialise NEB
-    neb = NEB(**neb_kwargs)
+    neb = NEB(**neb_inputs)
 
     # Set summary and log files
     summary = neb._build_filename("neb-summary.yml", filename=summary).absolute()
     log = neb.log_kwargs["filename"]
 
     # Store inputs for yaml summary
-    inputs = neb_kwargs.copy()
+    inputs = neb_inputs.copy()
 
     del inputs["init_struct_path"]
     del inputs["final_struct_path"]

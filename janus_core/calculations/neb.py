@@ -9,7 +9,7 @@ from typing import Any
 from ase import Atoms
 import ase.mep
 from ase.mep import NEB as ASE_NEB
-from ase.mep import DyNEB, NEBTools
+from ase.mep import NEBTools
 from ase.mep.neb import NEBOptimizer
 from matplotlib.figure import Figure
 from numpy.linalg import LinAlgError
@@ -80,10 +80,7 @@ class NEB(BaseCalculation):
     neb_class
         Nudged Elastic Band class to use. Default is ase.mep.NEB.
     neb_kwargs
-        Keyword arguments to pass to neb_class. Defaults are
-        {"k": 0.1, "climb": True, "method": "string"} for NEB,
-        {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2} for
-        DynNEB, else {}.
+        Keyword arguments to pass to neb_class. Default is {}.
     n_images
         Number of images to use in NEB. Default is 15.
     write_results
@@ -204,10 +201,7 @@ class NEB(BaseCalculation):
         neb_class
             Nudged Elastic Band class to use. Default is ase.mep.NEB.
         neb_kwargs
-            Keyword arguments to pass to neb_class. Defaults are
-            {"k": 0.1, "climb": True, "method": "string"} for NEB,
-            {"fmax": 0.1, "dynamic_relaxation": True, "climb": True, "scale_fmax": 1.2}
-            for DynNEB, else {}.
+            Keyword arguments to pass to neb_class. Default is {}.
         n_images
             Number of images to use in NEB. Default is 15.
         write_results
@@ -398,7 +392,7 @@ class NEB(BaseCalculation):
         self._set_neb()
 
     def _set_neb(self) -> None:
-        """Set NEB method, kwargs and optimizer."""
+        """Set NEB method and optimizer."""
         # Set NEB method
         if isinstance(self.neb_class, str):
             try:
@@ -419,20 +413,6 @@ class NEB(BaseCalculation):
                     raise AttributeError(f"No such class: {self.optimizer}") from e
         if self.logger:
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)
-
-        # Set default neb_kwargs
-        if isinstance(self.neb_class, ASE_NEB):
-            neb_defaults = {"k": 0.1, "climb": True, "method": "string"}
-        elif isinstance(self.neb_class, DyNEB):
-            neb_defaults = {
-                "fmax": 0.1,
-                "dynamic_relaxation": True,
-                "climb": True,
-                "scale_fmax": 1.2,
-            }
-        else:
-            neb_defaults = {}
-        self.neb_kwargs = neb_defaults | self.neb_kwargs
 
     def plot(self) -> Figure | None:
         """
