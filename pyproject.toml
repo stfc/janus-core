@@ -47,7 +47,7 @@ dpa3 = [
     "deepmd-kit",
 ]
 fairchem = [
-    "fairchem == 1.4.0"
+    "fairchem-core == 1.4.0"
 ]
 grace = [
     "tensorpotential == 0.5.1",
