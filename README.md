@@ -204,6 +204,7 @@ janus geomopt
 janus md
 janus phonons
 janus eos
+janus neb
 janus train
 janus descriptors
 janus preprocess
