@@ -111,7 +111,7 @@ def neb(
         `band_structs` is None. Default is None.
     band_structs
         Path of band images to optimize, skipping interpolation between the
-        initial and final structures. Requires interpolator to be None.
+        initial and final structures. Sets `interpolator` to None.
     neb_class
         Nudged Elastic Band class to use. Default is ase.mep.NEB.
     n_images
@@ -123,10 +123,12 @@ def neb(
     neb_kwargs
         Keyword arguments to pass to neb_class. Default is {}.
     interpolator
-        Choice of interpolation strategy. Default is "ase".
+        Choice of interpolation strategy. Default is "ase" if using `init_struct` and
+        `final_struct`, or None if using `band_structs`.
     interpolator_kwargs
-        Keyword arguments to pass to interpolator. Default is
-        {"method": "idpp"}.
+        Keyword arguments to pass to interpolator. Default is {"method": "idpp"} for
+        "ase" interpolator, or {"interpolate_lattices": False, "autosort_tol", 0.5}
+        for "pymatgen".
     optimizer
         Optimizer to apply to NEB object. Default is NEBOptimizer.
     fmax

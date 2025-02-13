@@ -50,10 +50,10 @@ class NEB(BaseCalculation):
         `final_struct` is None. Default is None.
     band_structs
         Band of ASE Atoms images to optimize, skipping interpolation between the initial
-        and final structures. Requires interpolator to be None.
+        and final structures. sets `interpolator` to None.
     band_path
         Path of band of images to optimize, skipping interpolation between the initial
-        and final structures. Requires interpolator to be None.
+        and final structures. sets `interpolator` to None.
     arch
         MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
     device
@@ -90,10 +90,12 @@ class NEB(BaseCalculation):
     write_kwargs
         Keyword arguments to pass to ase.io.write when writing images.
     interpolator
-        Choice of interpolation strategy. Default is "ase".
+        Choice of interpolation strategy. Default is "ase" if using `init_struct` and
+        `final_struct`, or None if using `band_structs`.
     interpolator_kwargs
         Keyword arguments to pass to interpolator. Default is
-        {"method": "idpp"}.
+        {"method": "idpp"} for "ase" interpolator, or
+        {"interpolate_lattices": False, "autosort_tol", 0.5} for "pymatgen".
     optimizer
         Optimizer to apply to NEB object. Default is NEBOptimizer.
     fmax
@@ -170,10 +172,10 @@ class NEB(BaseCalculation):
             `final_struct` is None. Default is None.
         band_structs
             Band of ASE Atoms images to optimize, skipping interpolation between the
-            initial and final structures. Requires interpolator to be None.
+            initial and final structures. sets `interpolator` to None.
         band_path
             Path of band of images to optimize, skipping interpolation between the
-            initial and final structures. Requires interpolator to be None.
+            initial and final structures. sets `interpolator` to None.
         arch
             MLIP architecture to use for Nudged Elastic Band method. Default is
             "mace_mp".
@@ -211,10 +213,12 @@ class NEB(BaseCalculation):
         write_kwargs
             Keyword arguments to pass to ase.io.write when writing images.
         interpolator
-            Choice of interpolation strategy. Default is "ase".
+            Choice of interpolation strategy. Default is "ase" if using `init_struct`
+            and `final_struct`, or None if using `band_structs`.
         interpolator_kwargs
             Keyword arguments to pass to interpolator. Default is
-            {"method": "idpp"}.
+            {"method": "idpp"} for "ase" interpolator, or
+            {"interpolate_lattices": False, "autosort_tol", 0.5} for "pymatgen".
         optimizer
             Optimizer to apply to NEB object. Default is NEBOptimizer.
         fmax
@@ -272,7 +276,7 @@ class NEB(BaseCalculation):
 
         # Identify whether interpolating
         if band_structs or band_path:
-            interpolating = False
+            self.inerpolator = None
             if init_struct or init_struct_path or final_struct or final_struct_path:
                 raise ValueError(
                     "Band cannot be specified in combination with an initial or final "
@@ -289,7 +293,6 @@ class NEB(BaseCalculation):
             # Read all image by default for band
             read_kwargs.setdefault("index", ":")
         else:
-            interpolating = True
             if interpolator is None:
                 raise ValueError(
                     "An interpolator must be specified when using an initial and final "
@@ -317,7 +320,7 @@ class NEB(BaseCalculation):
             file_prefix=file_prefix,
         )
 
-        if interpolating:
+        if interpolator:
             if not isinstance(self.struct, Atoms):
                 raise ValueError("`init_struct` must be a single structure.")
             if not self.struct.calc:
