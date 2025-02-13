@@ -100,6 +100,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         (
+            "fairchem",
+            "cpu",
+            -27.061979293823242,
+            "NaCl.cif",
+            {"model": "EquiformerV2-31M-S2EF-OC20-All+MD"},
+        ),
+        (
             "alignn",
             "cpu",
             -11.148092269897461,

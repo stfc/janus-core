@@ -46,6 +46,9 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
+fairchem = [
+    "fairchem == 1.4.0"
+]
 grace = [
     "tensorpotential == 0.5.1",
 ]
@@ -68,6 +71,7 @@ visualise = [
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
+    "janus-core[fairchem]",
     "janus-core[grace]",
     "janus-core[mace]",
     "janus-core[nequip]",
