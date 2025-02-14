@@ -265,16 +265,16 @@ def choose_calculator(
 
         if isinstance(model_path, str):
             match model_path:
-                case "orb-v1":
-                    model = orb_ff.orb_v1()
-                case "orb-mptraj-only-v1":
-                    model = orb_ff.orb_v1_mptraj_only()
-                case "orb-d3-v1":
-                    model = orb_ff.orb_d3_v1()
-                case "orb-d3-xs-v1":
-                    model = orb_ff.orb_d3_xs_v1()
-                case "orb-d3-sm-v1":
-                    model = orb_ff.orb_d3_sm_v1()
+                case "orb-v2":
+                    model = orb_ff.orb_v2()
+                case "orb-mptraj-only-v2":
+                    model = orb_ff.orb_v2_mptraj_only()
+                case "orb-d3-v2":
+                    model = orb_ff.orb_d3_v2()
+                case "orb-d3-xs-v2":
+                    model = orb_ff.orb_d3_xs_v2()
+                case "orb-d3-sm-v2":
+                    model = orb_ff.orb_d3_sm_v2()
                 case _:
                     raise ValueError(
                         "Please specify `model_path`, as there is no "
