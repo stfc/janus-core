@@ -57,7 +57,7 @@ sevennet = [
 ]
 nequip = [
     "nequip == 0.6.1",
-],
+]
 all = [
     "janus-core[alignn]",
     "janus-core[chgnet]",

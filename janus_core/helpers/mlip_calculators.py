@@ -225,12 +225,18 @@ def choose_calculator(
         calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
 
     elif arch == "nequip":
+        from nequip import __version__
         from nequip.ase import NequIPCalculator
 
-        model = model_path if model_path else ""
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+        else:
+            raise ValueError(
+                f"Please specify `model_path`, as there is no default model for {arch}"
+            )
 
         calculator = NequIPCalculator.from_deployed_model(
-            model_path=model, device=device, **kwargs
+            model_path=model_path, device=device, **kwargs
         )
 
     else:
