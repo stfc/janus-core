@@ -10,3 +10,4 @@ Tutorials
     md
     eos
     phonons
+    neb
