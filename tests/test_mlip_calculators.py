@@ -138,6 +138,7 @@ def test_invalid_device(arch):
         ("dpa3", "cpu", {"model": DPA3_PATH}),
         ("orb", "cpu", {}),
         ("orb", "cpu", {"model": ORB_MODEL}),
+        ("grace", "", {}),
     ],
 )
 def test_extra_mlips(arch, device, kwargs):

@@ -66,6 +66,10 @@ orb = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
+grace = [
+    "tensorpotential == 0.4.5",
+    "tensorflow == 2.16.2",
+]
 all = [
     "janus-core[alignn]",
     "janus-core[chgnet]",
@@ -74,6 +78,7 @@ all = [
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
+    "janus-core[grace]",
 ]
 
 [project.scripts]
