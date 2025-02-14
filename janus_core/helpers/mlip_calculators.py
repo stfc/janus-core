@@ -224,6 +224,17 @@ def choose_calculator(
         kwargs.setdefault("sevennet_config", None)
         calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
 
+    elif arch == "mattersim":
+        from mattersim.forcefield import MatterSimCalculator
+        from mattersim import __version__
+
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+        elif not isinstance(model_path, str):
+            model_path = "mattersim-v1.0.0-5M"
+
+        calculator = MatterSimCalculator(load_path=model_path, device=device, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "
