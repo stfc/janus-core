@@ -74,6 +74,7 @@ except ImportError:
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
+        ("mattersim", "cpu", {}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),

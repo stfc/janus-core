@@ -68,6 +68,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     [
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
+        ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
         (
             "nequip",
             "cpu",

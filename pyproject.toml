@@ -60,6 +60,9 @@ orb = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
+mattersim = [
+    "mattersim == 1.1.1",
+]
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
@@ -67,6 +70,7 @@ all = [
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
+      "janus-core[mattersim]",
 ]
 
 # MLIPs with dgl dependency
