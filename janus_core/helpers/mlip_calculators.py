@@ -305,6 +305,18 @@ def choose_calculator(
             potential=potential, load_path=model_path, device=device, **kwargs
         )
 
+    elif arch == "grace":
+        from tensorpotential.calculator import grace_fm
+
+        __version__ = "0.4.5"
+
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+        elif not isinstance(model_path, str):
+            model_path = "GRACE_2L_OAM_28Jan25"
+
+        calculator = grace_fm(model_path, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "

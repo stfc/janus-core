@@ -46,6 +46,10 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
+grace = [
+    "tensorpotential == 0.4.5",
+    "tensorflow == 2.16.2",
+]
 mace = [
     "mace-torch==0.3.12",
     "torch-dftd==0.4.0",
@@ -66,6 +70,7 @@ visualise = [
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
+    "janus-core[grace]",
     "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",

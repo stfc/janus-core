@@ -95,6 +95,7 @@ except ImportError:
         ("m3gnet", "cpu", {"model_path": M3GNET_MODEL_PATH}),
         ("m3gnet", "cpu", {"potential": M3GNET_DIR_PATH}),
         ("m3gnet", "cpu", {"potential": M3GNET_POTENTIAL}),
+        ("grace", "", {}),
     ],
 )
 def test_mlips(arch, device, kwargs):
@@ -127,6 +128,7 @@ def test_invalid_arch():
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
         ("sevenn", "/invalid/path"),
+        ("grace", "/invalid/path"),
         ("alignn", "invalid/path"),
         ("m3gnet", "/invalid/path"),
     ],
