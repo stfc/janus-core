@@ -283,7 +283,7 @@ def choose_calculator(
         elif isinstance(model_path, GraphRegressor):
             model = model_path
         else:
-            model = orb_ff.orb_v1_mptraj_only()
+            model = orb_ff.orb_v2()
 
         calculator = ORBCalculator(model=model, device=device, **kwargs)
 
