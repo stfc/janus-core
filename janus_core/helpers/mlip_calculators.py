@@ -306,7 +306,7 @@ def choose_calculator(
         )
 
     elif arch == "fairchem":
-        from fairchem.core import OCPCalculator
+        from fairchem.core import OCPCalculator, __version__
 
         if isinstance(model_path, Path):
             model_path = str(model_path)
