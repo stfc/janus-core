@@ -63,7 +63,7 @@ all = [
     "janus-core[chgnet]",
     "janus-core[m3gnet]",
     "janus-core[sevennet]",
-      "janus-core[mattersim]",
+    "janus-core[mattersim]",
 ]
 
 [project.scripts]
