@@ -23,7 +23,7 @@ or a specific version:
 
 .. code-block:: bash
 
-    python3 -m pip install torch==2.5.1
+    python3 -m pip install -U torch==2.5.1
 
 
 .. tip::
