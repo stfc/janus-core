@@ -55,11 +55,16 @@ m3gnet = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
+grace = [
+    "tensorpotential == 0.4.5",
+    "tensorflow == 2.16.2",
+]
 all = [
     "janus-core[alignn]",
     "janus-core[chgnet]",
     "janus-core[m3gnet]",
     "janus-core[sevennet]",
+    "janus-core[grace]",
 ]
 
 [project.scripts]
