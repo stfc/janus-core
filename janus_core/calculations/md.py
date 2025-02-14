@@ -1030,7 +1030,7 @@ class MolecularDynamics(BaseCalculation):
         Parameters
         ----------
         temperature
-            New target temperature.
+            New target temperature, in K.
         """
         if hasattr(self.dyn, "set_temperature"):
             self.dyn.set_temperature(temperature_K=self.temp)
