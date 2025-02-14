@@ -60,9 +60,6 @@ orb = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
-fairchem = [ 
-    "fairchem-core == 1.4.0"
-]
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
@@ -70,10 +67,16 @@ all = [
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
-    "janus-core[fairchem]",
 ]
 
-# MLIP with updated e3nn
+# MLIPs with updated e3nn
+fairchem = [
+    "fairchem-core == 1.4.0",
+    "torch-geometric == 2.6.1",
+    "torch-scatter==2.1.2",
+    "torch"
+]
+
 mattersim = [
     "mattersim == 1.1.1",
 ]
@@ -231,6 +234,14 @@ conflicts = [
     ],
     [
       { extra = "mattersim" },
+      { extra = "all" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "fairchem" },
       { extra = "all" },
     ],
 ]
