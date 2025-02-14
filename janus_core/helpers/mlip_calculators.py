@@ -226,6 +226,7 @@ def choose_calculator(
 
     elif arch == "grace":
         from tensorpotential.calculator import grace_fm
+
         __version__ = "0.4.5"
 
         if isinstance(model_path, Path):
