@@ -119,6 +119,10 @@ def test_invalid_device(arch):
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
         ("sevennet", "cpu", {"model": "sevennet-0"}),
+        ("fairchem", "cpu", {}),
+        ("fairchem", "cpu", {"model": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
+        ("fairchem", "cpu", {"model_path": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
+        ("fairchem", "cpu", {"path": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
     ],
 )
 def test_extra_mlips(arch, device, kwargs):

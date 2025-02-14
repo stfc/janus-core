@@ -224,6 +224,20 @@ def choose_calculator(
         kwargs.setdefault("sevennet_config", None)
         calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
 
+    elif arch == "fairchem":
+        from fairchem.core import OCPCalculator, __version__
+
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+        elif not isinstance(model_path, str):
+            model_path = "EquiformerV2-31M-S2EF-OC20-All+MD"
+        kwargs.setdefault("local_cache", "pretrained_models")
+        cpu = False
+        if device == 'cpu':
+           cpu = True
+
+        calculator = OCPCalculator(model_name=model_path, cpu=cpu, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "
