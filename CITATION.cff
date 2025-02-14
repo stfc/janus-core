@@ -3,21 +3,24 @@ title: "janus-core"
 message: "If you use this software, please cite it as below."
 type: software
 authors:
-  - family-names: Elliott
-    given-names: Kasoar
+  - family-names: Kasoar
+    given-names: Elliott
     orcid: "https://orcid.org/0009-0005-2015-9478"
-  - family-names: Federica
-    given-names: Zanca
-  - family-names: Jacob
-    given-names: Wilkins
-  - family-names: Harvey
-    given-names: Devereux
-  - family-names: David
-    given-names: Mason
-  - family-names: Patrick
-    given-names: Austen
-  - family-names: Alin
-    given-names: Elena
+  - family-names: Austen
+    given-names: Patrick
+  - family-names: Devereux
+    given-names: Harvey
+  - family-names: Harris
+    given-names: Kieran
+  - family-names: Mason
+    given-names: David
+  - family-names: Wilkins
+    given-names: Jacob
+  - family-names: Zanca
+    given-names: Federica
+  - family-names: Elena
+    given-names: Alin
+    orcid: "https://orcid.org/0000-0002-7013-6670"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.13152495
