@@ -27,20 +27,22 @@ readme = "README.md"
 dependencies = [
     "ase<4.0,>=3.24",
     "codecarbon<3.0.0,>=2.8.3",
-    "mace-torch==0.3.10",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pyyaml<7.0.0,>=6.0.1",
     "rich<14.0.0,>=13.9.1",
     "seekpath<2.0.0,>=1.9.7",
     "spglib<3.0.0,>=2.3.0",
-    "torch<=2.2,>=2.1",
+    "torch<=2.6,>=2.1",
     "torch-dftd==0.4.0",
     "typer<1.0.0,>=0.12.5",
     "typer-config<2.0.0,>=1.4.2",
 ]
 
 [project.optional-dependencies]
+mace = [
+    "mace-torch == 0.3.10",
+]
 alignn = [
     "alignn == 2024.5.27",
 ]
@@ -55,9 +57,13 @@ sevennet = [
     "sevenn == 0.10.3",
 ]
 fairchem = [ 
-    "fairchem-core == 1.4.0"
+    "fairchem-core == 1.4.0",
+    "torch-geometric == 2.6.1",
+    "torch-scatter==2.1.2",
+    "torch"
 ]
 all = [
+    "janus-core[mace]",
     "janus-core[alignn]",
     "janus-core[chgnet]",
     "janus-core[m3gnet]",
