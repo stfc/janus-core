@@ -46,9 +46,6 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
-fairchem = [
-    "fairchem-core == 1.4.0"
-]
 grace = [
     "tensorpotential == 0.5.1",
 ]
@@ -71,7 +68,6 @@ visualise = [
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
-    "janus-core[fairchem]",
     "janus-core[grace]",
     "janus-core[mace]",
     "janus-core[nequip]",
@@ -80,7 +76,14 @@ all = [
     "janus-core[visualise]",
 ]
 
-# MLIP with updated e3nn
+# MLIPs with updated e3nn
+fairchem = [
+    "fairchem-core == 1.4.0",
+    "torch-geometric == 2.6.1",
+    "torch-scatter==2.1.2",
+    "torch"
+]
+
 mattersim = [
     "mattersim == 1.1.2; sys_platform != 'win32'",
 ]
@@ -250,6 +253,14 @@ conflicts = [
     ],
     [
       { extra = "mattersim" },
+      { extra = "all" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "fairchem" },
       { extra = "all" },
     ],
 ]
