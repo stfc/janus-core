@@ -233,7 +233,7 @@ def choose_calculator(
             model_path = "EquiformerV2-31M-S2EF-OC20-All+MD"
         kwargs.setdefault("local_cache", "pretrained_models")
         cpu = False
-        if device == 'cpu'
+        if device == 'cpu':
            cpu = True
 
         calculator = OCPCalculator(model_name=model_path, cpu=cpu, **kwargs)
