@@ -68,7 +68,6 @@ sevennet = [
 ]
 grace = [
     "tensorpotential == 0.4.5",
-    "tensorflow == 2.16.2",
 ]
 all = [
     "janus-core[alignn]",
