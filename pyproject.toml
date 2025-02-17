@@ -55,11 +55,15 @@ m3gnet = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
+nequip = [
+    "nequip == 0.6.1",
+]
 all = [
     "janus-core[alignn]",
     "janus-core[chgnet]",
     "janus-core[m3gnet]",
     "janus-core[sevennet]",
+    "janus-core[nequip]",
 ]
 
 [project.scripts]

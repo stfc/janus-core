@@ -28,6 +28,8 @@ SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 
+NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+
 
 @pytest.mark.parametrize(
     "arch, device, kwargs",
@@ -52,6 +54,8 @@ ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model_path": CHGNET_PATH}),
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
+        ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
+        ("nequip", "cpu", {"model": NEQUIP_PATH}),
     ],
 )
 def test_mlips(arch, device, kwargs):
@@ -75,6 +79,7 @@ def test_invalid_arch():
         ("mace_mp", "/invalid/path"),
         ("m3gnet", "/invalid/path"),
         ("chgnet", "/invalid/path"),
+        ("nequip", "/invalid/path"),
     ],
 )
 def test_invalid_model_path(arch, model_path):
@@ -119,6 +124,8 @@ def test_invalid_device(arch):
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
         ("sevennet", "cpu", {"model": "sevennet-0"}),
+        ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
+        ("nequip", "cpu", {"model": NEQUIP_PATH}),
     ],
 )
 def test_extra_mlips(arch, device, kwargs):
@@ -158,6 +165,16 @@ def test_extra_mlips(arch, device, kwargs):
             "arch": "sevennet",
             "model_path": SEVENNET_PATH,
             "model": SEVENNET_PATH,
+        },
+        {
+            "arch": "nequip",
+            "model_path": NEQUIP_PATH,
+            "model": NEQUIP_PATH,
+        },
+        {
+            "arch": "nequip",
+            "model_path": NEQUIP_PATH,
+            "path": NEQUIP_PATH,
         },
     ],
 )

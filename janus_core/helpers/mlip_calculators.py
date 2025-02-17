@@ -224,6 +224,22 @@ def choose_calculator(
         kwargs.setdefault("sevennet_config", None)
         calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
 
+    elif arch == "nequip":
+        from nequip import __version__
+        from nequip.ase import NequIPCalculator
+
+        # No default `model_path`
+        if model_path is None:
+            raise ValueError(
+                f"Please specify `model_path`, as there is no default model for {arch}"
+            )
+
+        model_path = str(model_path)
+
+        calculator = NequIPCalculator.from_deployed_model(
+            model_path=model_path, device=device, **kwargs
+        )
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "

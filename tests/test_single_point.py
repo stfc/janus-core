@@ -17,6 +17,7 @@ MODEL_PATH = Path(__file__).parent / "models"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
+NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 
 test_data = [
     (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -279,20 +280,30 @@ test_extra_mlips_data = [
         "alignn",
         "cpu",
         -11.148092269897461,
+        "NaCl.cif",
         {"model_path": ALIGNN_PATH / "best_model.pt"},
     ),
-    ("sevennet", "cpu", -27.061979293823242, {"model_path": SEVENNET_PATH}),
-    ("sevennet", "cpu", -27.061979293823242, {}),
-    ("sevennet", "cpu", -27.061979293823242, {"model_path": "SevenNet-0_11July2024"}),
+    ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {"model_path": SEVENNET_PATH}),
+    ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {}),
+    (
+        "sevennet",
+        "cpu",
+        -27.061979293823242,
+        "NaCl.cif",
+        {"model_path": "SevenNet-0_11July2024"},
+    ),
+    ("nequip", "cpu", -169815.1282456301, "toluene.xyz", {"model_path": NEQUIP_PATH}),
 ]
 
 
 @pytest.mark.extra_mlips
-@pytest.mark.parametrize("arch, device, expected_energy, kwargs", test_extra_mlips_data)
-def test_extra_mlips_alignn(arch, device, expected_energy, kwargs):
+@pytest.mark.parametrize(
+    "arch, device, expected_energy, struct, kwargs", test_extra_mlips_data
+)
+def test_extra_mlips_alignn(arch, device, expected_energy, struct, kwargs):
     """Test single point energy using extra mlips calculators."""
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct_path=DATA_PATH / struct,
         arch=arch,
         device=device,
         properties="energy",
