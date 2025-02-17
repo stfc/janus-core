@@ -124,7 +124,7 @@ def test_vaf(tmp_path):
 
     traj = read(traj_path, index=":")
     vaf_post = post_process.compute_vaf(
-        traj, use_velocities=True, filter_atoms=(na, cl)
+        traj, use_velocities=True, atoms_filter=(na, cl)
     )
     with open(cor_path) as cor:
         vaf = safe_load(cor)

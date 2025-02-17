@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase.io import read
 import numpy as np
+import pytest
 from pytest import approx
 from typer.testing import CliRunner
 
@@ -72,8 +73,8 @@ def test_md_pp_cli(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     rdf_path = tmp_path / "nve-T300-rdf.dat"
-    vaf_path = tmp_path / "nve-T300-vaf.dat"
-
+    vaf_na_path = Path("vaf_na.dat")
+    vaf_cl_path = Path("vaf_cl.dat")
     result = runner.invoke(
         app,
         [
@@ -94,6 +95,8 @@ def test_md_pp_cli(tmp_path):
             summary_path,
             "--post-process-kwargs",
             """{'vaf_compute': True,
+              'vaf_atoms': (('Na',),('Cl',)),
+              'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat'),
               'rdf_compute': True,
               'rdf_rmax': 2.5}""",
         ],
@@ -108,7 +111,8 @@ def test_md_pp_cli(tmp_path):
     # Cell too small to really compute RDF
     assert np.all(rdf[:, 1] == 0)
 
-    assert vaf_path.exists()
+    assert vaf_na_path.exists()
+    assert vaf_cl_path.exists()
 
 
 def test_rdf():
@@ -196,7 +200,7 @@ def test_vaf(tmp_path):
     assert isinstance(vaf[0], np.ndarray)
 
     lags, vaf = post_process.compute_vaf(
-        data, filter_atoms=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
+        data, atoms_filter=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
     )
 
     assert isinstance(vaf, list)
@@ -212,3 +216,29 @@ def test_vaf(tmp_path):
         assert vaf[i] == approx(expected, rel=1e-9)
         assert lags == approx(w_lag, rel=1e-9)
         assert vaf[i] == approx(w_vaf, rel=1e-9)
+
+
+def test_vaf_by_symbols(tmp_path):
+    """Test vaf using element symbols."""
+    vaf_names = ("vaf-Na-by-indices.dat", "vaf-Na-by-element.dat")
+    vaf_filter = ((0, 2, 4, 6), ("Na",))
+
+    data = read(DATA_PATH / "NaCl-traj.xyz", index=":")
+    lags, vaf = post_process.compute_vaf(
+        data, atoms_filter=vaf_filter, filenames=[tmp_path / name for name in vaf_names]
+    )
+    expected = np.loadtxt(tmp_path / "vaf-Na-by-indices.dat")
+    actual = np.loadtxt(tmp_path / "vaf-Na-by-element.dat")
+
+    assert expected == approx(actual, rel=1e-9)
+
+
+def test_vaf_invalid_symbols(tmp_path):
+    """Test vaf using invalid element symbols."""
+    data = read(DATA_PATH / "NaCl-traj.xyz", index=":")
+    with pytest.raises(ValueError):
+        # "C" is not an atom in data.
+        post_process.compute_vaf(data, atoms_filter=(("C",)))
+    with pytest.raises(ValueError):
+        # str is also iterable.
+        post_process.compute_vaf(data, atoms_filter="NOT AN ATOM")

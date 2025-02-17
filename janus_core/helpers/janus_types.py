@@ -77,7 +77,7 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_start: int
     vaf_stop: int | None
     vaf_step: int
-    vaf_output_file: PathLike | None
+    vaf_output_files: Sequence[PathLike] | None
 
 
 class CorrelationKwargs(TypedDict, total=True):
@@ -118,7 +118,7 @@ Architectures = Literal[
     "mace", "mace_mp", "mace_off", "m3gnet", "chgnet", "alignn", "sevennet"
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
-Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr"]
+Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]
 Properties = Literal["energy", "stress", "forces", "hessian"]
 PhononCalcs = Literal["bands", "dos", "pdos", "thermal"]
 

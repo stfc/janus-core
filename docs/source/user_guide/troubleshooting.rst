@@ -2,6 +2,14 @@
 Troubleshooting
 ===============
 
+Installation
+------------
+
+When installing ``janus-core``, CMake errors can occur when building ``phonopy``, often related to the CXX compiler.
+
+Please refer to their `installation documentation <http://phonopy.github.io/phonopy/install.html#missing-or-unknown-cxx-compiler>`_ for guidance.
+
+
 Carbon tracking
 ---------------
 
