@@ -244,14 +244,15 @@ def choose_calculator(
         from deepmd import __version__
         from deepmd.calculator import DP
 
-        if isinstance(model_path, Path):
-            model_path = str(model_path)
-        else:
+        # No default `model_path`
+        if model_path is None:
             raise ValueError(
                 "Please specify `model_path`, as there is no "
-                f"default model for {arch}"
-                f"eg https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
+                f"default model for {arch} "
+                "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
             )
+
+        model_path = str(model_path)
 
         calculator = DP(model=model_path, **kwargs)
 
