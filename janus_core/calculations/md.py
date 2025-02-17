@@ -1039,10 +1039,15 @@ class MolecularDynamics(BaseCalculation):
             New target temperature, in K.
         """
         if hasattr(self.dyn, "set_temperature"):
-            self.dyn.set_temperature(temperature_K=self.temp)
+            self.dyn.set_temperature(temperature_K=temperature)
         elif isinstance(self, NVT_CSVR):
-            self.dyn.temp = self.temp * units.kB
+            self.dyn.temp = temperature * units.kB
             self.dyn.target_kinetic_energy = 0.5 * self.dyn.temp * self.dyn.ndof
+        elif isinstance(self, NPT_MTK):
+            kt = temperature * units.kB
+            self.dyn._kT = kt
+            self.dyn._thermostat._kT = kt
+            self.dyn._barostat._kT = kt
         else:
             raise ValueError("Temperature set for ensemble with no thermostat.")
 
