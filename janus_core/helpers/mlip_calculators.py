@@ -263,24 +263,12 @@ def choose_calculator(
         from orb_models.forcefield.graph_regressor import GraphRegressor
         import orb_models.forcefield.pretrained as orb_ff
 
-        if isinstance(model_path, str):
-            match model_path:
-                case "orb-v2":
-                    model = orb_ff.orb_v2()
-                case "orb-mptraj-only-v2":
-                    model = orb_ff.orb_v2_mptraj_only()
-                case "orb-d3-v2":
-                    model = orb_ff.orb_d3_v2()
-                case "orb-d3-xs-v2":
-                    model = orb_ff.orb_d3_xs_v2()
-                case "orb-d3-sm-v2":
-                    model = orb_ff.orb_d3_sm_v2()
-                case _:
-                    raise ValueError(
-                        "Please specify `model_path`, as there is no "
-                        f"default model for {arch}"
-                    )
-        elif isinstance(model_path, GraphRegressor):
+        model = getattr(orb_ff, model_path.sub("-", "_"), None)()
+        if model is None:
+            raise ValueError(
+                f"Please specify `model_path`, as there is no default model for {arch}"
+            )
+        if isinstance(model_path, GraphRegressor):
             model = model_path
         else:
             model = orb_ff.orb_v2()
