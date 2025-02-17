@@ -82,6 +82,7 @@ def test_invalid_arch():
         ("m3gnet", "/invalid/path"),
         ("chgnet", "/invalid/path"),
         ("nequip", "/invalid/path"),
+        ("dpa3", "/invalid/path"),
     ],
 )
 def test_invalid_model_path(arch, model_path):
