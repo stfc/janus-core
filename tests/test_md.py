@@ -7,6 +7,7 @@ from pathlib import Path
 from ase import Atoms
 from ase.io import read
 import ase.md.nose_hoover_chain
+from ase.md.npt import NPT as ASE_NPT
 import numpy as np
 import pytest
 
@@ -32,9 +33,12 @@ test_data = [
     (NPT, "npt"),
     (NVT_NH, "nvt-nh"),
     (NPH, "nph"),
+    (NVT_CSVR, "nvt-csvr"),
 ]
 if not MTK_IMPORT_FAILED:
     test_data.append((NPT_MTK, "npt-mtk"))
+
+no_thermostat = (NVE, NPH)
 
 
 @pytest.mark.parametrize("ensemble, expected", test_data)
@@ -667,11 +671,12 @@ def test_atoms_struct(tmp_path):
         assert len(lines) == 6
 
 
-def test_heating(tmp_path):
-    """Test heating with no MD."""
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_heating(tmp_path, ensemble, tag):
+    """Test heating with no MD. Ensembles with no thermostat should throw errors."""
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
-    log_file = tmp_path / "nvt.log"
+    log_file = tmp_path / tag / ".log"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -679,34 +684,50 @@ def test_heating(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    nvt = NVT(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=0,
-        traj_every=10,
-        stats_every=10,
-        file_prefix=file_prefix,
-        temp_start=0.0,
-        temp_end=20.0,
-        temp_step=20,
-        temp_time=0.5,
-        log_kwargs={"filename": log_file},
-    )
-    nvt.run()
-    assert_log_contains(
-        log_file,
-        includes=[
-            "Beginning temperature ramp at 0.0K",
-            "Temperature ramp complete at 20.0K",
-        ],
-        excludes=["Starting molecular dynamics simulation"],
-    )
-    assert final_file.exists()
+    has_thermostat = ensemble not in no_thermostat
+    try:
+        md = ensemble(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=0,
+            traj_every=10,
+            stats_every=10,
+            file_prefix=file_prefix,
+            temp_start=0.0,
+            temp_end=20.0,
+            temp_step=20,
+            temp_time=0.5,
+            log_kwargs={"filename": log_file},
+        )
+        md.run()
+        assert_log_contains(
+            log_file,
+            includes=[
+                "Beginning temperature ramp at 0.0K",
+                "Temperature ramp complete at 20.0K",
+            ],
+            excludes=["Starting molecular dynamics simulation"],
+        )
+    except ValueError as e:
+        # Ensembles without thermostat cannot perform heating.
+        if has_thermostat:
+            raise e
+        exc = e
+
+    if has_thermostat:
+        assert final_file.exists()
+    else:
+        assert "no thermostat" in str(exc)
+        assert not final_file.exists()
 
 
-def test_noramp_heating(tmp_path):
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_noramp_heating(tmp_path, ensemble, tag):
     """Test ValueError is thrown for invalid temperature ramp."""
     file_prefix = tmp_path / "NaCl-heating"
+
+    if ensemble in no_thermostat:
+        pytest.skip("Ensemble has no thermostat.")
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -715,7 +736,7 @@ def test_noramp_heating(tmp_path):
     )
 
     with pytest.raises(ValueError):
-        NVT(
+        ensemble(
             struct=single_point.struct,
             file_prefix=file_prefix,
             temp_start=10,
@@ -724,18 +745,22 @@ def test_noramp_heating(tmp_path):
         )
 
 
-def test_heating_md(tmp_path):
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_heating_md(tmp_path, ensemble, tag):
     """Test heating followed by MD."""
     file_prefix = tmp_path / "NaCl-heating"
     stats_path = tmp_path / "NaCl-heating-stats.dat"
-    log_file = tmp_path / "nvt.log"
+    log_file = tmp_path / tag / ".log"
+
+    if ensemble in no_thermostat:
+        pytest.skip("Ensemble has no thermostat.")
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
-    nvt = NVT(
+    md = ensemble(
         struct=single_point.struct,
         temp=25.0,
         steps=5,
@@ -748,7 +773,7 @@ def test_heating_md(tmp_path):
         temp_time=2,
         log_kwargs={"filename": log_file},
     )
-    nvt.run()
+    md.run()
     assert_log_contains(
         log_file,
         includes=[
@@ -759,15 +784,23 @@ def test_heating_md(tmp_path):
         ],
     )
     stat_data = Stats(stats_path)
-    assert stat_data.rows == 5
-    assert stat_data.columns == 17
-    assert stat_data.data[0, 16] == pytest.approx(10.0)
-    assert stat_data.data[2, 16] == pytest.approx(20.0)
-    assert stat_data.data[4, 16] == pytest.approx(25.0)
+    target_t_col = stat_data.labels.index("Target_T")
+
+    is_ase_npt = isinstance(md.dyn, ASE_NPT)
+
+    # ASE_NPT skips first row of output - ASE merge request submitted to fix:
+    # https://gitlab.com/ase/ase/-/merge_requests/3598
+    assert stat_data.rows == 4 if is_ase_npt else 5
+    assert stat_data.data[0, target_t_col] == pytest.approx(10.0)
+    if is_ase_npt:
+        assert stat_data.data[1, target_t_col] == pytest.approx(20.0)
+        assert stat_data.data[3, target_t_col] == pytest.approx(25.0)
+    else:
+        assert stat_data.data[2, target_t_col] == pytest.approx(20.0)
+        assert stat_data.data[4, target_t_col] == pytest.approx(25.0)
     assert stat_data.labels[0] == "# Step"
     assert stat_data.units[0] == ""
-    assert stat_data.units[16] == "K"
-    assert stat_data.labels[16] == "Target_T"
+    assert stat_data.units[target_t_col] == "K"
 
 
 def test_heating_files():

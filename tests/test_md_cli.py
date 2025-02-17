@@ -34,6 +34,8 @@ def test_md_help():
 
 test_data = [("nvt"), ("nve"), ("npt"), ("nvt-nh"), ("nph"), ("nvt-csvr"), ("npt-mtk")]
 
+no_thermostat = ("nve", "nph")
+
 
 @pytest.mark.parametrize("ensemble", test_data)
 def test_md(ensemble):
@@ -342,7 +344,8 @@ def test_config(tmp_path):
     assert_log_contains(log_path, includes=["hydrostatic_strain: True"])
 
 
-def test_heating(tmp_path):
+@pytest.mark.parametrize("ensemble", test_data)
+def test_heating(tmp_path, ensemble):
     """Test heating before MD."""
     file_prefix = tmp_path / "nvt-T300"
 
@@ -351,7 +354,7 @@ def test_heating(tmp_path):
         [
             "md",
             "--ensemble",
-            "nvt",
+            ensemble,
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--file-prefix",
@@ -370,7 +373,10 @@ def test_heating(tmp_path):
             0.05,
         ],
     )
-    assert result.exit_code == 0
+    if ensemble in no_thermostat:
+        assert result.exit_code != 0
+    else:
+        assert result.exit_code == 0
 
 
 def test_invalid_config():
