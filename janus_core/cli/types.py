@@ -229,6 +229,21 @@ PostProcessKwargs = Annotated[
     ),
 ]
 
+CorrelationKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to md for on-the-fly correlations. Must be
+            passed as a list of dictionaries wrapped in quotes, e.g.
+            "[{'key' : values}]".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 LogPath = Annotated[
     Path | None,
     Option(
