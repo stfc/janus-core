@@ -667,6 +667,33 @@ def test_atoms_struct(tmp_path):
         assert len(lines) == 6
 
 
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_stats(tmp_path, ensemble, tag):
+    """Test stats file has correct structure and entries for all ensembles."""
+    file_prefix = tmp_path / tag / "NaCl"
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    md = ensemble(
+        struct=single_point.struct,
+        steps=2,
+        stats_every=1,
+        file_prefix=file_prefix,
+    )
+    md.run()
+
+    stat_data = Stats(md.stats_file)
+
+    etot_index = stat_data.labels.index("ETot/N")
+
+    assert stat_data.columns == len(stat_data.labels)
+    assert stat_data.columns == len(stat_data.units)
+    assert stat_data.columns >= 16
+    assert stat_data.units[etot_index] == "eV"
+
+
 def test_heating(tmp_path):
     """Test heating with no MD."""
     file_prefix = tmp_path / "NaCl-heating"
