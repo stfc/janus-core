@@ -36,7 +36,7 @@ Tools for machine learnt interatomic potentials
 - alignn = 2024.5.27 (optional)
 - nequip = 0.6.1 (optional)
 - deepmd-kit = dpa3-alpha (optional)
-- orb-models = 0.4.1 (optional)
+- orb-models = 0.4.2 (optional)
 
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 

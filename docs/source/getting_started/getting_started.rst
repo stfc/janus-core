@@ -16,7 +16,7 @@ Dependencies
 - alignn = 2024.5.27 (optional)
 - nequip = 0.6.1 (optional)
 - deepmd-kit = dpa3-alpha (optional)
-- orb-models = 0.4.1 (optional)
+- orb-models = 0.4.2 (optional)
 
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
