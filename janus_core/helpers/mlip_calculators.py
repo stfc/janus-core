@@ -224,6 +224,39 @@ def choose_calculator(
         kwargs.setdefault("sevennet_config", None)
         calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
 
+    elif arch == "nequip":
+        from nequip import __version__
+        from nequip.ase import NequIPCalculator
+
+        # No default `model_path`
+        if model_path is None:
+            raise ValueError(
+                f"Please specify `model_path`, as there is no default model for {arch}"
+            )
+
+        model_path = str(model_path)
+
+        calculator = NequIPCalculator.from_deployed_model(
+            model_path=model_path, device=device, **kwargs
+        )
+
+    elif arch == "dpa3":
+        from deepmd import __version__
+        from deepmd.calculator import DP
+
+        # No default `model_path`
+        if model_path is None:
+            # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
+            raise ValueError(
+                "Please specify `model_path`, as there is no "
+                f"default model for {arch} "
+                "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
+            )
+
+        model_path = str(model_path)
+
+        calculator = DP(model=model_path, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "

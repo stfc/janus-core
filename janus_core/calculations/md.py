@@ -1274,8 +1274,7 @@ class NPT(MolecularDynamics):
         if file_prefix is not None:
             return ""
 
-        pressure = f"-p{self.pressure}" if not isinstance(self, NVT_NH) else ""
-        return f"{super()._set_param_prefix(file_prefix)}{pressure}"
+        return f"{super()._set_param_prefix(file_prefix)}-p{self.pressure}"
 
     def get_stats(self) -> dict[str, float]:
         """
@@ -1286,7 +1285,7 @@ class NPT(MolecularDynamics):
         dict[str, float]
             Thermodynamical statistics to be written out.
         """
-        stats = MolecularDynamics.get_stats(self)
+        stats = super().get_stats()
         stats |= {"Target_P": self.pressure, "Target_T": self.temp}
         return stats
 
@@ -1458,7 +1457,7 @@ class NVE(MolecularDynamics):
         )
 
 
-class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
+class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
     """
     Configure NVT Nosé-Hoover simulation.
 
@@ -1470,6 +1469,9 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         Thermostat time, in fs. Default is 50.0.
     ensemble
         Name for thermodynamic ensemble. Default is "nvt-nh".
+    file_prefix
+        Prefix for output filenames. Default is inferred from structure, ensemble,
+        temperature, and pressure.
     ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
@@ -1481,6 +1483,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         *args,
         thermostat_time: float = 50.0,
         ensemble: Ensembles = "nvt-nh",
+        file_prefix: PathLike | None = None,
         ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
@@ -1495,19 +1498,26 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
             Thermostat time, in fs. Default is 50.0.
         ensemble
             Name for thermodynamic ensemble. Default is "nvt-nh".
+        file_prefix
+            Prefix for output filenames. Default is inferred from structure, ensemble,
+            temperature, and pressure.
         ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
+        super().__init__(*args, ensemble=ensemble, file_prefix=file_prefix, **kwargs)
+
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
-        super().__init__(
-            *args,
-            ensemble=ensemble,
-            thermostat_time=thermostat_time,
-            barostat_time=None,
-            ensemble_kwargs=ensemble_kwargs,
-            **kwargs,
+        self.ttime = thermostat_time * units.fs
+
+        self.dyn = ASE_NPT(
+            self.struct,
+            timestep=self.timestep,
+            temperature_K=self.temp,
+            ttime=self.ttime,
+            append_trajectory=self.traj_append,
+            **ensemble_kwargs,
         )
 
     def get_stats(self) -> dict[str, float]:
@@ -1519,7 +1529,7 @@ class NVT_NH(NPT):  # noqa: N801 (invalid-class-name)
         dict[str, float]
             Thermodynamical statistics to be written out.
         """
-        stats = MolecularDynamics.get_stats(self)
+        stats = super().get_stats()
         stats |= {"Target_T": self.temp}
         return stats
 
@@ -1609,7 +1619,7 @@ class NVT_CSVR(NVT):  # noqa: N801 (invalid-class-name)
         )
 
 
-class NPH(NPT):
+class NPH(MolecularDynamics):
     """
     Configure NPH simulation.
 
@@ -1617,8 +1627,8 @@ class NPH(NPT):
     ----------
     *args
         Additional arguments.
-    thermostat_time
-        Thermostat time, in fs. Default is 50.0.
+    barostat_time
+        Barostat time, in fs. Default is 75.0.
     bulk_modulus
         Bulk modulus, in GPa. Default is 2.0.
     pressure
@@ -1637,7 +1647,7 @@ class NPH(NPT):
     def __init__(
         self,
         *args,
-        thermostat_time: float = 50.0,
+        barostat_time: float = 75.0,
         bulk_modulus: float = 2.0,
         pressure: float = 0.0,
         ensemble: Ensembles = "nph",
@@ -1652,8 +1662,8 @@ class NPH(NPT):
         ----------
         *args
             Additional arguments.
-        thermostat_time
-            Thermostat time, in fs. Default is 50.0.
+        barostat_time
+            Barostat time, in fs. Default is 75.0.
         bulk_modulus
             Bulk modulus, in GPa. Default is 2.0.
         pressure
@@ -1668,18 +1678,86 @@ class NPH(NPT):
         **kwargs
             Additional keyword arguments.
         """
+        self.pressure = pressure
+        super().__init__(*args, ensemble=ensemble, file_prefix=file_prefix, **kwargs)
+
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
-        super().__init__(
-            *args,
-            thermostat_time=thermostat_time,
-            barostat_time=None,
-            bulk_modulus=bulk_modulus,
-            pressure=pressure,
-            ensemble=ensemble,
-            file_prefix=file_prefix,
-            ensemble_kwargs=ensemble_kwargs,
-            **kwargs,
+
+        pfactor = barostat_time**2 * bulk_modulus
+        if self.logger:
+            self.logger.info("NPT pfactor=%s GPa fs^2", pfactor)
+
+        # convert the pfactor to ASE internal units
+        pfactor *= units.fs**2 * units.GPa
+
+        self.dyn = ASE_NPT(
+            self.struct,
+            timestep=self.timestep,
+            temperature_K=self.temp,
+            ttime=None,
+            pfactor=pfactor,
+            append_trajectory=self.traj_append,
+            externalstress=self.pressure * units.GPa,
+            **ensemble_kwargs,
         )
+
+    def _set_param_prefix(self, file_prefix: PathLike | None = None) -> str:
+        """
+        Set ensemble parameters for output files.
+
+        Parameters
+        ----------
+        file_prefix
+            Prefix for output filenames on class init. If not None, param_prefix = "".
+
+        Returns
+        -------
+        str
+           Formatted ensemble parameters, including pressure and temperature(s).
+        """
+        if file_prefix is not None:
+            return ""
+
+        return f"{super()._set_param_prefix(file_prefix)}-p{self.pressure}"
+
+    def get_stats(self) -> dict[str, float]:
+        """
+        Get thermodynamical statistics to be written to file.
+
+        Returns
+        -------
+        dict[str, float]
+            Thermodynamical statistics to be written out.
+        """
+        stats = super().get_stats()
+        stats |= {"Target_P": self.pressure}
+        return stats
+
+    @property
+    def unit_info(self) -> dict[str, str]:
+        """
+        Get units of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Units attached to statistical properties.
+        """
+        return super().unit_info | {
+            "Target_P": JANUS_UNITS["pressure"],
+        }
+
+    @property
+    def default_formats(self) -> dict[str, str]:
+        """
+        Default format of returned statistics.
+
+        Returns
+        -------
+        dict[str, str]
+            Default formats attached to statistical properties.
+        """
+        return super().default_formats | {"Target_P": ".5f"}
 
 
 class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)

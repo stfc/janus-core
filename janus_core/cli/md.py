@@ -42,7 +42,7 @@ def md(
         Option(
             help=(
                 """
-                Thermostat time for NPT, NPT-MTK, NVT Nosé-Hoover, or NPH simulation,
+                Thermostat time for NPT, NPT-MTK or NVT Nosé-Hoover simulation,
                 in fs. Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for
                 NPT-MTK.
                 """
@@ -235,8 +235,8 @@ def md(
     temp
         Temperature, in K. Default is 300.
     thermostat_time
-        Thermostat time for NPT, NPT-MTK, NVT Nosé-Hoover or NPH simulation,
-        in fs. Default is 50 fs for NPT, NVT Nosé-Hoover and NPH, or 100 fs for NPT-MTK.
+        Thermostat time for NPT, NPT-MTK or NVT Nosé-Hoover simulation,
+        in fs. Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for NPT-MTK.
     barostat_time
         Barostat time for NPT, NPT-MTK or NPH simulation, in fs.
         Default is 75 fs for NPT and NPH, or 1000 fs for NPT-MTK.
@@ -487,7 +487,7 @@ def md(
     elif ensemble == "nph":
         for key in (
             "friction",
-            "barostat_time",
+            "thermostat_time",
             "taut",
             "thermostat_chain",
             "barostat_chain",
