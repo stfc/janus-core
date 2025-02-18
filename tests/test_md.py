@@ -22,6 +22,7 @@ if hasattr(ase.md.nose_hoover_chain, "IsotropicMTKNPT"):
 
     MTK_IMPORT_FAILED = False
 else:
+    NPT_MTK = None
     MTK_IMPORT_FAILED = True
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -34,9 +35,14 @@ test_data = [
     (NVT_NH, "nvt-nh"),
     (NPH, "nph"),
     (NVT_CSVR, "nvt-csvr"),
+    pytest.param(
+        NPT_MTK,
+        "npt-mtk",
+        marks=pytest.mark.skipif(
+            MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
+        ),
+    ),
 ]
-if not MTK_IMPORT_FAILED:
-    test_data.append((NPT_MTK, "npt-mtk"))
 
 no_thermostat = (NVE, NPH)
 
