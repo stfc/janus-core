@@ -18,6 +18,7 @@ MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
 test_data = [
     (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -293,6 +294,7 @@ test_extra_mlips_data = [
         {"model_path": "SevenNet-0_11July2024"},
     ),
     ("nequip", "cpu", -169815.1282456301, "toluene.xyz", {"model_path": NEQUIP_PATH}),
+    ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
 ]
 
 

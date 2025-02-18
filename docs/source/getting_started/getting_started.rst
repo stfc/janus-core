@@ -15,6 +15,7 @@ Dependencies
 - sevenn = 0.10.3 (optional)
 - alignn = 2024.5.27 (optional)
 - nequip = 0.6.1 (optional)
+- deepmd-kit = dpa3-alpha (optional)
 
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
@@ -58,5 +59,6 @@ Currently supported extras are:
 - ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
 - ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
 - ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
+- ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
 
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.

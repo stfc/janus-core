@@ -115,7 +115,15 @@ EoSNames = Literal[
 
 # Janus specific
 Architectures = Literal[
-    "mace", "mace_mp", "mace_off", "m3gnet", "chgnet", "alignn", "sevennet", "nequip"
+    "mace",
+    "mace_mp",
+    "mace_off",
+    "m3gnet",
+    "chgnet",
+    "alignn",
+    "sevennet",
+    "nequip",
+    "dpa3",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]
