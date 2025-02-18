@@ -246,6 +246,7 @@ def choose_calculator(
 
         # No default `model_path`
         if model_path is None:
+            # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
             raise ValueError(
                 "Please specify `model_path`, as there is no "
                 f"default model for {arch} "
