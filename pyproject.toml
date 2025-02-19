@@ -213,6 +213,7 @@ default-groups = [
 constraint-dependencies = [
     "dgl==2.1",
     "torch<2.6",
+    "tensorflow>=2.16.1",
 ]
 conflicts = [
     [
