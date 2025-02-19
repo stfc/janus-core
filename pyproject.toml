@@ -101,7 +101,7 @@ docs = [
     "markupsafe<2.1",
     "nbsphinx>=0.9.6",
     "numpydoc<2.0.0,>=1.6.0",
-    "sphinx<9.0.0,>=8.0.2",
+    "sphinx<8.2.0,>=8.0.2",
     "sphinxcontrib-contentui<1.0.0,>=0.2.5",
     "sphinxcontrib-details-directive<1.0,>=0.1",
     "sphinx-autodoc-typehints<3.0.0,>=2.5.0",
