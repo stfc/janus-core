@@ -46,6 +46,9 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
+grace = [
+    "tensorpotential == 0.4.5",
+]
 mace = [
     "mace-torch==0.3.10",
     "torch-dftd==0.4.0",
@@ -60,17 +63,14 @@ orb = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
-grace = [
-    "tensorpotential == 0.4.5",
-]
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
+    "janus-core[grace]",
     "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
-    "janus-core[grace]",
 ]
 
 # MLIP with updated e3nn
@@ -207,6 +207,7 @@ default-groups = [
 constraint-dependencies = [
     "dgl==2.1",
     "torch<2.6",
+    "tensorflow>=2.16.1",
 ]
 conflicts = [
     [
