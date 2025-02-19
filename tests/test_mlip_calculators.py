@@ -96,6 +96,7 @@ except ImportError:
         ("m3gnet", "cpu", {"potential": M3GNET_DIR_PATH}),
         ("m3gnet", "cpu", {"potential": M3GNET_POTENTIAL}),
         ("grace", "", {}),
+        ("grace", "cpu", {"model_path": "GRACE-1L-OAM_2Feb25"}),
     ],
 )
 def test_mlips(arch, device, kwargs):
@@ -161,6 +162,11 @@ def test_invalid_model_path(arch, model_path):
         {"arch": "orb", "model_path": ORB_MODEL, "path": ORB_MODEL},
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "path": SEVENNET_PATH},
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
+        {
+            "arch": "grace",
+            "model_path": "GRACE-1L-OAM_2Feb25",
+            "model": "GRACE-1L-OAM_2Feb25",
+        },
         {
             "arch": "alignn",
             "model_path": ALIGNN_PATH / "best_model.pt",
