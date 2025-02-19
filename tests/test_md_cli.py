@@ -376,9 +376,9 @@ def test_heating(tmp_path, ensemble):
             "--temp-end",
             20,
             "--temp-step",
-            50,
+            10,
             "--temp-time",
-            0.05,
+            2,
         ],
     )
     if ensemble in ("nve", "nph"):

@@ -739,7 +739,7 @@ def test_heating(tmp_path, ensemble):
         temp_start=0.0,
         temp_end=20.0,
         temp_step=20,
-        temp_time=0.5,
+        temp_time=2,
         log_kwargs={"filename": log_file},
     )
     md.run()
@@ -1010,7 +1010,7 @@ def test_cooling(tmp_path):
         temp_start=20.0,
         temp_end=0.0,
         temp_step=10,
-        temp_time=0.5,
+        temp_time=1,
         log_kwargs={"filename": log_file},
     )
     nvt.run()
@@ -1028,9 +1028,35 @@ def test_cooling(tmp_path):
     assert len(final_atoms) == 3
 
     stats = Stats(source=stats_cooling_path)
-    assert stats.rows == 2
+    assert stats.rows == 3
     assert stats.data[0, 16] == 20.0
-    assert stats.data[1, 16] == 10.0
+    assert stats.data[2, 16] == 10.0
+
+
+def test_heating_too_short(tmp_path):
+    """Test that heating with steps shorter than 1 timestep fails."""
+    file_prefix = tmp_path / "NaCl-heating"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+
+    with pytest.raises(ValueError, match="Temperature ramp step time rounded"):
+        nvt = NVT(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=0,
+            traj_every=10,
+            stats_every=10,
+            file_prefix=file_prefix,
+            temp_start=0.0,
+            temp_end=20.0,
+            temp_step=20,
+            temp_time=0.5,
+        )
+        nvt.run()
 
 
 def test_ensemble_kwargs(tmp_path):
