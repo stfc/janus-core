@@ -146,6 +146,7 @@ Jupyter Notebook tutorials illustrating the use of currently available calculati
 - [Molecular Dynamics](docs/source/tutorials/md.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/md.ipynb)
 - [Equation of State](docs/source/tutorials/eos.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/eos.ipynb)
 - [Phonons](docs/source/tutorials/phonons.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/phonons.ipynb)
+- [Nudged Elastic Band](docs/source/tutorials/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/neb.ipynb)
 
 
 ### Calculation outputs
