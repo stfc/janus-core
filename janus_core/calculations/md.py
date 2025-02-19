@@ -423,6 +423,10 @@ class MolecularDynamics(BaseCalculation):
                 "heating to run",
                 stacklevel=2,
             )
+        if self.ramp_temp and self.ensemble in ("nve", "nph"):
+            raise ValueError(
+                "Temperature ramp requested for ensemble with no thermostat."
+            )
 
         # Check validate start and end temperatures
         if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
@@ -1021,6 +1025,28 @@ class MolecularDynamics(BaseCalculation):
                 self.restart_files.append(self._restart_file)
                 self._rotate_restart_files()
 
+    def _set_target_temperature(self, temperature: float):
+        """
+        Set the target temperature of the thermostat.
+
+        Parameters
+        ----------
+        temperature
+            New target temperature, in K.
+        """
+        if hasattr(self.dyn, "set_temperature"):
+            self.dyn.set_temperature(temperature_K=temperature)
+        elif isinstance(self, NVT_CSVR):
+            self.dyn.temp = temperature * units.kB
+            self.dyn.target_kinetic_energy = 0.5 * self.dyn.temp * self.dyn.ndof
+        elif isinstance(self, NPT_MTK):
+            kt = temperature * units.kB
+            self.dyn._kT = kt
+            self.dyn._thermostat._kT = kt
+            self.dyn._barostat._kT = kt
+        else:
+            raise ValueError("Temperature set for ensemble with no thermostat.")
+
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
         unit_keys = (
@@ -1105,8 +1131,7 @@ class MolecularDynamics(BaseCalculation):
                     self._write_final_state()
                     self.created_final_file = True
                     continue
-                if not isinstance(self, NVE):
-                    self.dyn.set_temperature(temperature_K=self.temp)
+                self._set_target_temperature(temp)
                 self.dyn.run(heating_steps)
                 self._write_final_state()
                 self.created_final_file = True
@@ -1126,8 +1151,7 @@ class MolecularDynamics(BaseCalculation):
             self.temp = md_temp
             if self.ramp_temp:
                 self._set_velocity_distribution()
-                if not isinstance(self, NVE):
-                    self.dyn.set_temperature(temperature_K=self.temp)
+                self._set_target_temperature(self.temp)
             self.dyn.run(self.steps - self.offset)
             self._write_final_state()
             self.created_final_file = True

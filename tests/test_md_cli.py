@@ -32,7 +32,20 @@ def test_md_help():
     assert "Usage: janus md [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-test_data = [("nvt"), ("nve"), ("npt"), ("nvt-nh"), ("nph"), ("nvt-csvr"), ("npt-mtk")]
+test_data = [
+    ("nvt"),
+    ("nve"),
+    ("npt"),
+    ("nvt-nh"),
+    ("nph"),
+    ("nvt-csvr"),
+    pytest.param(
+        "npt-mtk",
+        marks=pytest.mark.skipif(
+            MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
+        ),
+    ),
+]
 
 
 @pytest.mark.parametrize("ensemble", test_data)
@@ -48,9 +61,6 @@ def test_md(ensemble):
         "nvt-csvr": "NaCl-nvt-csvr-T300.0-",
         "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
     }
-
-    if ensemble == "npt-mtk" and MTK_IMPORT_FAILED:
-        pytest.skip(reason="Requires updated version of ASE")
 
     final_path = Path(f"{file_prefix[ensemble]}final.extxyz").absolute()
     restart_path = Path(f"{file_prefix[ensemble]}res-2.extxyz").absolute()
@@ -342,7 +352,8 @@ def test_config(tmp_path):
     assert_log_contains(log_path, includes=["hydrostatic_strain: True"])
 
 
-def test_heating(tmp_path):
+@pytest.mark.parametrize("ensemble", test_data)
+def test_heating(tmp_path, ensemble):
     """Test heating before MD."""
     file_prefix = tmp_path / "nvt-T300"
 
@@ -351,7 +362,7 @@ def test_heating(tmp_path):
         [
             "md",
             "--ensemble",
-            "nvt",
+            ensemble,
             "--struct",
             DATA_PATH / "NaCl.cif",
             "--file-prefix",
@@ -370,7 +381,10 @@ def test_heating(tmp_path):
             0.05,
         ],
     )
-    assert result.exit_code == 0
+    if ensemble in ("nve", "nph"):
+        assert result.exit_code != 0
+    else:
+        assert result.exit_code == 0
 
 
 def test_invalid_config():
