@@ -16,6 +16,7 @@ Dependencies
 - alignn = 2024.5.27 (optional)
 - nequip = 0.6.1 (optional)
 - deepmd-kit = dpa3-alpha (optional)
+- orb-models = 0.4.2 (optional)
 
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
@@ -60,5 +61,6 @@ Currently supported extras are:
 - ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
 - ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
 - ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
+- ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
 
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.

@@ -295,6 +295,8 @@ test_extra_mlips_data = [
     ),
     ("nequip", "cpu", -169815.1282456301, "toluene.xyz", {"model_path": NEQUIP_PATH}),
     ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
+    ("orb", "cpu", -27.088973999023438, "NaCl.cif", {}),
+    ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model_path": "orb-v2"}),
 ]
 
 

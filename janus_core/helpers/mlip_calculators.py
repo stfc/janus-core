@@ -257,6 +257,29 @@ def choose_calculator(
 
         calculator = DP(model=model_path, **kwargs)
 
+    elif arch == "orb":
+        from orb_models import __version__
+        from orb_models.forcefield.calculator import ORBCalculator
+        from orb_models.forcefield.graph_regressor import GraphRegressor
+        import orb_models.forcefield.pretrained as orb_ff
+
+        # Default model
+        model_path = model_path if model_path else "orb_v2"
+
+        if isinstance(model_path, GraphRegressor):
+            model = model_path
+            model_path = "loaded_GraphRegressor"
+        else:
+            try:
+                model = getattr(orb_ff, model_path.replace("-", "_"))()
+            except AttributeError as e:
+                raise ValueError(
+                    "`model_path` must be a `GraphRegressor`, pre-trained model label "
+                    "(e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
+                ) from e
+
+        calculator = ORBCalculator(model=model, device=device, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "

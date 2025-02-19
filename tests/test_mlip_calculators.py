@@ -7,6 +7,7 @@ from zipfile import BadZipFile
 
 from chgnet.model.model import CHGNet
 from matgl import load_model
+from orb_models.forcefield.pretrained import orb_d3_xs_v2
 import pytest
 
 from janus_core.helpers.mlip_calculators import choose_calculator
@@ -31,6 +32,9 @@ ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+
+ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
+ORB_MODEL = orb_d3_xs_v2(weights_path=ORB_WEIGHTS_PATH)
 
 
 @pytest.mark.parametrize(
@@ -83,6 +87,7 @@ def test_invalid_arch():
         ("chgnet", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("dpa3", "/invalid/path"),
+        ("orb", "/invalid/path"),
     ],
 )
 def test_invalid_model_path(arch, model_path):
@@ -131,6 +136,8 @@ def test_invalid_device(arch):
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
+        ("orb", "cpu", {}),
+        ("orb", "cpu", {"model": ORB_MODEL}),
     ],
 )
 def test_extra_mlips(arch, device, kwargs):
@@ -190,6 +197,16 @@ def test_extra_mlips(arch, device, kwargs):
             "arch": "dpa3",
             "model_path": DPA3_PATH,
             "path": DPA3_PATH,
+        },
+        {
+            "arch": "orb",
+            "model_path": ORB_MODEL,
+            "model": ORB_MODEL,
+        },
+        {
+            "arch": "orb",
+            "model_path": ORB_MODEL,
+            "path": ORB_MODEL,
         },
     ],
 )

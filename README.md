@@ -36,6 +36,7 @@ Tools for machine learnt interatomic potentials
 - alignn = 2024.5.27 (optional)
 - nequip = 0.6.1 (optional)
 - deepmd-kit = dpa3-alpha (optional)
+- orb-models = 0.4.2 (optional)
 
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
@@ -96,6 +97,7 @@ Current and planned features include:
   - SevenNet (experimental)
   - NequIP (experimental)
   - DPA3 (experimental)
+  - Orb (experimental)
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
