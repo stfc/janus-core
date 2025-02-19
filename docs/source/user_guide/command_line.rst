@@ -31,6 +31,7 @@ This should return something similar to:
       eos          Calculate equation of state.
       geomopt      Perform geometry optimization and save optimized structure...
       md           Run molecular dynamics simulation, and save trajectory and...
+      neb          Run Nudged Elastic Band method.
       phonons      Calculate phonons and save results.
       singlepoint  Perform single point calculations and save to file.
       train        Running training for an MLIP.
@@ -481,6 +482,36 @@ with 101 sampling points for each path segment.
 .. image::  ../images/NaCl-bands.svg
    :height: 700px
    :align: center
+
+
+Nudged Elastic Band
+-------------------
+
+Run the Nudged Elastic Band method (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field):
+
+.. code-block:: bash
+
+    janus neb --init-struct tests/data/N2.xyz --final-struct tests/data/2N.xyz --minimize
+
+
+This will use ASE's built-in `interpolation <https://wiki.fysik.dtu.dk/ase/ase/neb.html#interpolation>`_
+between the minimized initial and final structures, before applying ASE's ``NEBOptimizer``, an adaptive ODE solver,
+to the NEB.
+
+This will save the energy barrier, delta E of the elementary reaction, and maximum force, to a results file, ``N2-neb-results.dat``,
+in addition to generating a log file, ``N2-neb-log.yml``, and summary of inputs, ``N2-neb-summary.yml``.
+
+If a band has already been generated, such as by adding the ``--write-images`` option to the above command,
+this can be passed instead of the initial and final structures:
+
+.. code-block:: bash
+
+    janus neb  --band-structs tests/data/N2-neb-images.xyz
+
+
+Additional options include using `pymatgen to interpolate <https://pymatgen.org/pymatgen.core.html#pymatgen.core.structure.IStructure.interpolate>`_,
+with the ``--interpolator`` option, using `DyNEB <https://wiki.fysik.dtu.dk/ase/ase/neb.html#ase.mep.dyneb.DyNEB>`_ for scaled and dynamic
+optimizations of images through the ``--neb-method`` option, and changing the optimizer using the ``--neb-optimizer`` option.
 
 
 Training and fine-tuning MLIPs

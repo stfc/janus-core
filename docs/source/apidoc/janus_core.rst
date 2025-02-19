@@ -65,6 +65,17 @@ janus\_core.calculations.md module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.calculations.neb module
+-----------------------------------
+
+.. automodule:: janus_core.calculations.neb
+   :members:
+   :special-members:
+   :private-members:
+   :inherited-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.calculations.phonons module
 ---------------------------------------
 
@@ -130,6 +141,16 @@ janus\_core.cli.md module
 -------------------------
 
 .. automodule:: janus_core.cli.md
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.cli.neb module
+--------------------------
+
+.. automodule:: janus_core.cli.neb
    :members:
    :special-members:
    :private-members:

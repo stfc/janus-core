@@ -31,6 +31,7 @@ dependencies = [
     "mace-torch==0.3.10",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
+    "pymatgen>=2025.1.24",
     "pyyaml<7.0.0,>=6.0.1",
     "rich<14.0.0,>=13.9.1",
     "seekpath<2.0.0,>=1.9.7",

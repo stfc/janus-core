@@ -130,6 +130,7 @@ Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]
 Properties = Literal["energy", "stress", "forces", "hessian"]
 PhononCalcs = Literal["bands", "dos", "pdos", "thermal"]
+Interpolators = Literal["ase", "pymatgen"]
 
 
 class OutputKwargs(ASEWriteArgs, total=False):

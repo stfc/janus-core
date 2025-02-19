@@ -22,7 +22,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
 )
 from janus_core.helpers.struct_io import output_structs
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import none_to_dict, set_minimize_logging
 
 
 class EoS(BaseCalculation):
@@ -257,12 +257,9 @@ class EoS(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         if self.minimize and self.logger:
-            self.minimize_kwargs["log_kwargs"] = {
-                "filename": self.log_kwargs["filename"],
-                "name": self.logger.name,
-                "filemode": "a",
-            }
-        self.minimize_kwargs["track_carbon"] = self.track_carbon
+            set_minimize_logging(
+                self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+            )
 
         # Set output files
         self.write_kwargs.setdefault("filename", None)

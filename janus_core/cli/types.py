@@ -229,6 +229,62 @@ PostProcessKwargs = Annotated[
     ),
 ]
 
+NebKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to neb_method. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key': value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+NebOptKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to neb_optimizer. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key': value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+InterpolationKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to interpolator. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key': value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
+PostProcessKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to post-processer. Must be passed as a dictionary
+            wrapped in quotes, e.g. "{'key': value}".
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 LogPath = Annotated[
     Path | None,
     Option(

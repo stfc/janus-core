@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC
 from collections.abc import Generator, Iterable, Sequence
 from io import StringIO
+from logging import Logger
 from pathlib import Path
 from typing import Any, Literal, TextIO
 
@@ -544,3 +545,32 @@ def set_log_tracker(
         track_carbon = track_carbon if track_carbon is not None else True
 
     return attach_logger, track_carbon
+
+
+def set_minimize_logging(
+    logger: Logger | None,
+    minimize_kwargs: dict[str, Any],
+    log_kwargs: dict[str, Any],
+    track_carbon: bool,
+) -> None:
+    """
+    Set kwargs to be passed to GeomOpt when logging has been set up.
+
+    Parameters
+    ----------
+    logger
+        Logger, which may already be set up.
+    minimize_kwargs
+        Kwargs to set for GeomOpt.
+    log_kwargs
+        Kwargs used in setting up Logger.
+    track_carbon
+        Whether carbon emissions are being tracked.
+    """
+    if logger:
+        minimize_kwargs["log_kwargs"] = {
+            "filename": log_kwargs["filename"],
+            "name": logger.name,
+            "filemode": "a",
+        }
+        minimize_kwargs["track_carbon"] = track_carbon

@@ -11,6 +11,7 @@ from janus_core.cli.descriptors import descriptors
 from janus_core.cli.eos import eos
 from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
+from janus_core.cli.neb import neb
 from janus_core.cli.phonons import phonons
 from janus_core.cli.preprocess import preprocess
 from janus_core.cli.singlepoint import singlepoint
@@ -26,6 +27,7 @@ app.command(
 )(md)
 app.command(help="Calculate phonons and save results.")(phonons)
 app.command(help="Calculate equation of state.")(eos)
+app.command(help="Run Nudged Elastic Band method.")(neb)
 app.command(help="Calculate MLIP descriptors.")(descriptors)
 app.command(help="Running training for an MLIP.")(train)
 app.command(help="Running preprocessing for an MLIP.")(preprocess)
