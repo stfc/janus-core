@@ -37,6 +37,7 @@ Tools for machine learnt interatomic potentials
 - nequip = 0.6.1 (optional)
 - deepmd-kit = dpa3-alpha (optional)
 - orb-models = 0.4.2 (optional)
+- tensorpotential = 0.4.5 (optional)
 
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
@@ -98,6 +99,7 @@ Current and planned features include:
   - NequIP (experimental)
   - DPA3 (experimental)
   - Orb (experimental)
+  - GRACE (experimental)
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
