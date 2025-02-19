@@ -44,7 +44,19 @@ test_data = [
     ),
 ]
 
-no_thermostat = (NVE, NPH)
+ensembles_without_thermostat = (NVE, NPH)
+ensembles_with_thermostat = (
+    NVT,
+    NPT,
+    NVT_NH,
+    NVT_CSVR,
+    pytest.param(
+        NPT_MTK,
+        marks=pytest.mark.skipif(
+            MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
+        ),
+    ),
+)
 
 
 @pytest.mark.parametrize("ensemble, expected", test_data)
@@ -704,15 +716,12 @@ def test_stats(tmp_path, ensemble, tag):
     assert stat_data.units[etot_index] == "eV"
 
 
-@pytest.mark.parametrize("ensemble, tag", test_data)
-def test_heating(tmp_path, ensemble, tag):
+@pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
+def test_heating(tmp_path, ensemble):
     """Test heating with no MD."""
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
-    log_file = tmp_path / tag / ".log"
-
-    if ensemble in no_thermostat:
-        pytest.skip("Ensemble has no thermostat.")
+    log_file = tmp_path / "NaCl.log"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -746,7 +755,7 @@ def test_heating(tmp_path, ensemble, tag):
     assert final_file.exists()
 
 
-@pytest.mark.parametrize("ensemble", no_thermostat)
+@pytest.mark.parametrize("ensemble", ensembles_without_thermostat)
 def test_no_thermostat_heating(tmp_path, ensemble):
     """Test that temperature ramp with no thermostat throws an error."""
     file_prefix = tmp_path / "NaCl-heating"
@@ -776,13 +785,10 @@ def test_no_thermostat_heating(tmp_path, ensemble):
     assert not final_file.exists()
 
 
-@pytest.mark.parametrize("ensemble, tag", test_data)
-def test_noramp_heating(tmp_path, ensemble, tag):
+@pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
+def test_noramp_heating(tmp_path, ensemble):
     """Test ValueError is thrown for invalid temperature ramp."""
     file_prefix = tmp_path / "NaCl-heating"
-
-    if ensemble in no_thermostat:
-        pytest.skip("Ensemble has no thermostat.")
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -800,15 +806,12 @@ def test_noramp_heating(tmp_path, ensemble, tag):
         )
 
 
-@pytest.mark.parametrize("ensemble, tag", test_data)
-def test_heating_md(tmp_path, ensemble, tag):
+@pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
+def test_heating_md(tmp_path, ensemble):
     """Test heating followed by MD."""
     file_prefix = tmp_path / "NaCl-heating"
     stats_path = tmp_path / "NaCl-heating-stats.dat"
-    log_file = tmp_path / tag / ".log"
-
-    if ensemble in no_thermostat:
-        pytest.skip("Ensemble has no thermostat.")
+    log_file = tmp_path / "NaCl.log"
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
