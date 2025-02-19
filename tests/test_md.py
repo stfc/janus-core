@@ -706,10 +706,13 @@ def test_stats(tmp_path, ensemble, tag):
 
 @pytest.mark.parametrize("ensemble, tag", test_data)
 def test_heating(tmp_path, ensemble, tag):
-    """Test heating with no MD. Ensembles with no thermostat should throw errors."""
+    """Test heating with no MD."""
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
     log_file = tmp_path / tag / ".log"
+
+    if ensemble in no_thermostat:
+        pytest.skip("Ensemble has no thermostat.")
 
     single_point = SinglePoint(
         struct_path=DATA_PATH / "NaCl.cif",
@@ -717,8 +720,45 @@ def test_heating(tmp_path, ensemble, tag):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    has_thermostat = ensemble not in no_thermostat
-    try:
+    md = ensemble(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_every=10,
+        stats_every=10,
+        file_prefix=file_prefix,
+        temp_start=0.0,
+        temp_end=20.0,
+        temp_step=20,
+        temp_time=0.5,
+        log_kwargs={"filename": log_file},
+    )
+    md.run()
+    assert_log_contains(
+        log_file,
+        includes=[
+            "Beginning temperature ramp at 0.0K",
+            "Temperature ramp complete at 20.0K",
+        ],
+        excludes=["Starting molecular dynamics simulation"],
+    )
+
+    assert final_file.exists()
+
+
+@pytest.mark.parametrize("ensemble", no_thermostat)
+def test_no_thermostat_heating(tmp_path, ensemble):
+    """Test that temperature ramp with no thermostat throws an error."""
+    file_prefix = tmp_path / "NaCl-heating"
+    final_file = tmp_path / "NaCl-heating-final.extxyz"
+    log_file = tmp_path / "NaCl.log"
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        calc_kwargs={"model": MODEL_PATH},
+    )
+    with pytest.raises(ValueError, match="no thermostat"):
         md = ensemble(
             struct=single_point.struct,
             temp=300.0,
@@ -733,25 +773,7 @@ def test_heating(tmp_path, ensemble, tag):
             log_kwargs={"filename": log_file},
         )
         md.run()
-        assert_log_contains(
-            log_file,
-            includes=[
-                "Beginning temperature ramp at 0.0K",
-                "Temperature ramp complete at 20.0K",
-            ],
-            excludes=["Starting molecular dynamics simulation"],
-        )
-    except ValueError as e:
-        # Ensembles without thermostat cannot perform heating.
-        if has_thermostat:
-            raise e
-        exc = e
-
-    if has_thermostat:
-        assert final_file.exists()
-    else:
-        assert "no thermostat" in str(exc)
-        assert not final_file.exists()
+    assert not final_file.exists()
 
 
 @pytest.mark.parametrize("ensemble, tag", test_data)

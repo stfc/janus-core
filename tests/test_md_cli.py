@@ -47,8 +47,6 @@ test_data = [
     ),
 ]
 
-no_thermostat = ("nve", "nph")
-
 
 @pytest.mark.parametrize("ensemble", test_data)
 def test_md(ensemble):
@@ -383,7 +381,7 @@ def test_heating(tmp_path, ensemble):
             0.05,
         ],
     )
-    if ensemble in no_thermostat:
+    if ensemble in ("nve", "nph"):
         assert result.exit_code != 0
     else:
         assert result.exit_code == 0
