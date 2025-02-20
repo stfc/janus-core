@@ -437,7 +437,7 @@ class NEB(BaseCalculation):
 
         return fig
 
-    def set_interpolator(self) -> None:
+    def interpolate(self) -> None:
         """Interpolate images to create initial band."""
         match self.interpolator:
             case "ase":
@@ -541,7 +541,7 @@ class NEB(BaseCalculation):
             )
             GeomOpt(self.final_struct, **self.minimize_kwargs).run()
 
-        self.set_interpolator()
+        self.interpolate()
         self.optimize()
         self.run_nebtools()
         self.plot()
