@@ -1043,7 +1043,7 @@ def test_heating_too_short(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
 
-    with pytest.raises(ValueError, match="Temperature ramp step time rounded"):
+    with pytest.raises(ValueError, match="Temperature ramp step time"):
         nvt = NVT(
             struct=single_point.struct,
             temp=300.0,
