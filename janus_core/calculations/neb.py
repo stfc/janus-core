@@ -276,7 +276,7 @@ class NEB(BaseCalculation):
 
         # Identify whether interpolating
         if band_structs or band_path:
-            self.inerpolator = None
+            self.interpolator = None
             if init_struct or init_struct_path or final_struct or final_struct_path:
                 raise ValueError(
                     "Band cannot be specified in combination with an initial or final "
@@ -293,7 +293,7 @@ class NEB(BaseCalculation):
             # Read all image by default for band
             read_kwargs.setdefault("index", ":")
         else:
-            if interpolator is None:
+            if self.interpolator is None:
                 raise ValueError(
                     "An interpolator must be specified when using an initial and final "
                     "structure"
@@ -320,7 +320,7 @@ class NEB(BaseCalculation):
             file_prefix=file_prefix,
         )
 
-        if interpolator:
+        if self.interpolator:
             if not isinstance(self.struct, Atoms):
                 raise ValueError("`init_struct` must be a single structure.")
             if not self.struct.calc:
