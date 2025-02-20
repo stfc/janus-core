@@ -117,3 +117,48 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
     assert neb.results["barrier"] == pytest.approx(7817.150960456944)
     assert neb.results["delta_E"] == pytest.approx(78.34034136421758)
     assert neb.results["max_force"] == pytest.approx(148695.846153840771)
+
+
+def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
+    """Test individual NEB functions."""
+    file_prefix = tmp_path / "LFPO"
+
+    neb = NEB(
+        init_struct=LFPO_start_b,
+        final_struct=LFPO_end_b,
+        arch="mace",
+        model_path=MODEL_PATH,
+        n_images=5,
+        interpolator="ase",
+        file_prefix=file_prefix,
+    )
+    neb.interpolate()
+    neb.optimize()
+    neb.run_nebtools()
+
+    assert len(neb.images) == 7
+    assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
+    assert neb.results["barrier"] == pytest.approx(7817.150960456944)
+    assert neb.results["delta_E"] == pytest.approx(78.34034136421758)
+    assert neb.results["max_force"] == pytest.approx(148695.846153840771)
+
+
+def test_neb_plot(tmp_path):
+    """Test plotting NEB before running NEBTools."""
+    file_prefix = tmp_path / "LFPO"
+
+    neb = NEB(
+        band_path=DATA_PATH / "LiFePO4-neb-band.xyz",
+        arch="mace",
+        model_path=MODEL_PATH,
+        steps=2,
+        file_prefix=file_prefix,
+    )
+    neb.optimize()
+    neb.plot()
+
+    assert len(neb.images) == 7
+    assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
+    assert neb.results["barrier"] == pytest.approx(0.67567742247752)
+    assert neb.results["delta_E"] == pytest.approx(5.002693796996027e-07)
+    assert neb.results["max_force"] == pytest.approx(1.5425684122118983)

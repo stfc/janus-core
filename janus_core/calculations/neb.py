@@ -276,7 +276,7 @@ class NEB(BaseCalculation):
 
         # Identify whether interpolating
         if band_structs or band_path:
-            self.inerpolator = None
+            self.interpolator = None
             if init_struct or init_struct_path or final_struct or final_struct_path:
                 raise ValueError(
                     "Band cannot be specified in combination with an initial or final "
@@ -293,7 +293,7 @@ class NEB(BaseCalculation):
             # Read all image by default for band
             read_kwargs.setdefault("index", ":")
         else:
-            if interpolator is None:
+            if self.interpolator is None:
                 raise ValueError(
                     "An interpolator must be specified when using an initial and final "
                     "structure"
@@ -320,7 +320,7 @@ class NEB(BaseCalculation):
             file_prefix=file_prefix,
         )
 
-        if interpolator:
+        if self.interpolator:
             if not isinstance(self.struct, Atoms):
                 raise ValueError("`init_struct` must be a single structure.")
             if not self.struct.calc:
@@ -426,6 +426,9 @@ class NEB(BaseCalculation):
         Figure | None
             Plotted NEB band.
         """
+        if not hasattr(self.neb, "nebtools"):
+            self.run_nebtools()
+
         if self.plot_band:
             fig = self.nebtools.plot_band()
             fig.savefig(self.plot_file)
@@ -434,7 +437,7 @@ class NEB(BaseCalculation):
 
         return fig
 
-    def set_interpolator(self) -> None:
+    def interpolate(self) -> None:
         """Interpolate images to create initial band."""
         match self.interpolator:
             case "ase":
@@ -482,6 +485,40 @@ class NEB(BaseCalculation):
             case _:
                 raise ValueError("Invalid interpolator selected")
 
+    def optimize(self):
+        """Run NEB optimization."""
+        if not hasattr(self, "neb"):
+            self.interpolate()
+
+        optimizer = self.optimizer(self.neb, **self.optimizer_kwargs)
+        optimizer.run(fmax=self.fmax, steps=self.steps)
+        if self.logger:
+            self.logger.info("Optimization steps: %s", optimizer.nsteps)
+
+        # Optionally write band images to file
+        output_structs(
+            images=self.images,
+            struct_path=self.struct_path,
+            write_results=self.write_band,
+            write_kwargs=self.write_kwargs,
+        )
+
+    def run_nebtools(self):
+        """Run NEBTools analysis."""
+        self.nebtools = NEBTools(self.images[1:-1])
+        barrier, delta_E = self.nebtools.get_barrier()  # noqa: N806
+        max_force = self.nebtools.get_fmax()
+        self.results = {
+            "barrier": barrier,
+            "delta_E": delta_E,
+            "max_force": max_force,
+        }
+
+        if self.write_results:
+            with open(self.results_file, "w", encoding="utf8") as out:
+                print("#Barrier [eV] | delta E [eV] | Max force [eV/Å] ", file=out)
+                print(*self.results.values(), file=out)
+
     def run(self) -> dict[str, float]:
         """
         Run Nudged Elastic Band method.
@@ -507,30 +544,9 @@ class NEB(BaseCalculation):
             )
             GeomOpt(self.final_struct, **self.minimize_kwargs).run()
 
-        self.set_interpolator()
-
-        optimizer = self.optimizer(self.neb, **self.optimizer_kwargs)
-        optimizer.run(fmax=self.fmax, steps=self.steps)
-        if self.logger:
-            self.logger.info("Optimization steps: %s", optimizer.nsteps)
-
-        # Optionally write band images to file
-        output_structs(
-            images=self.images,
-            struct_path=self.struct_path,
-            write_results=self.write_band,
-            write_kwargs=self.write_kwargs,
-        )
-
-        self.nebtools = NEBTools(self.images[1:-1])
-        barrier, delta_E = self.nebtools.get_barrier()  # noqa: N806
-        max_force = self.nebtools.get_fmax()
-        self.results = {
-            "barrier": barrier,
-            "delta_E": delta_E,
-            "max_force": max_force,
-        }
-
+        self.interpolate()
+        self.optimize()
+        self.run_nebtools()
         self.plot()
 
         if self.logger:
@@ -543,10 +559,5 @@ class NEB(BaseCalculation):
             else:
                 self.struct.info["emissions"] = emissions
             self.tracker.stop()
-
-        if self.write_results:
-            with open(self.results_file, "w", encoding="utf8") as out:
-                print("#Barrier [eV] | delta E [eV] | Max force [eV/Å] ", file=out)
-                print(*self.results.values(), file=out)
 
         return self.results
