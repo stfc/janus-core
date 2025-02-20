@@ -486,7 +486,10 @@ class NEB(BaseCalculation):
                 raise ValueError("Invalid interpolator selected")
 
     def optimize(self):
-        """Run optimization."""
+        """Run NEB optimization."""
+        if not hasattr(self, "neb"):
+            self.interpolate()
+
         optimizer = self.optimizer(self.neb, **self.optimizer_kwargs)
         optimizer.run(fmax=self.fmax, steps=self.steps)
         if self.logger:
