@@ -28,7 +28,6 @@ readme = "README.md"
 dependencies = [
     "ase<4.0,>=3.24",
     "codecarbon<3.0.0,>=2.8.3",
-    "mace-torch==0.3.10",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pymatgen>=2025.1.24",
@@ -48,6 +47,9 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
+mace = [
+    "mace-torch==0.3.10",
+]
 nequip = [
     "nequip == 0.6.1",
 ]
@@ -61,6 +63,7 @@ sevennet = [
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
+    "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",

@@ -29,16 +29,6 @@ Tools for machine learnt interatomic potentials
 
 - Python >= 3.10
 - ASE >= 3.24
-- mace-torch = 0.3.10
-- chgnet = 0.4.0 (optional)
-- matgl = 1.1.3 (optional)
-- sevenn = 0.10.3 (optional)
-- alignn = 2024.5.27 (optional)
-- nequip = 0.6.1 (optional)
-- deepmd-kit = dpa3-alpha (optional)
-- orb-models = 0.4.2 (optional)
-
-Where possible, we aim to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
@@ -101,11 +91,11 @@ Current and planned features include:
   - MACE
   - M3GNet
   - CHGNet
-  - ALIGNN (experimental)
-  - SevenNet (experimental)
-  - NequIP (experimental)
-  - DPA3 (experimental)
-  - Orb (experimental)
+  - ALIGNN
+  - SevenNet
+  - NequIP
+  - DPA3
+  - Orb
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics

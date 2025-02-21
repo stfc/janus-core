@@ -9,16 +9,6 @@ Dependencies
 
 - Python >= 3.10
 - ASE >= 3.24
-- mace-torch = 0.3.10
-- chgnet = 0.4.0 (optional)
-- matgl = 1.1.3 (optional)
-- sevenn = 0.10.3 (optional)
-- alignn = 2024.5.27 (optional)
-- nequip = 0.6.1 (optional)
-- deepmd-kit = dpa3-alpha (optional)
-- orb-models = 0.4.2 (optional)
-
-Where possible, we aim to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
@@ -66,6 +56,7 @@ Currently supported extras are:
 
 - ``alignn``: `ALIGNN <https://github.com/usnistgov/alignn>`_
 - ``chgnet``: `CHGNet <https://github.com/CederGroupHub/chgnet/>`_
+- ``mace``: `MACE <https://github.com/ACEsuit/mace>`_
 - ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
 - ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
 - ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
