@@ -30,7 +30,9 @@ jobs:
         run: uv run pytest --cov janus_core --cov-append .
 
       - name: Install dgl dependencies
-        run: uv sync --extra m3gnet --extra alignn
+        run: |
+          uv sync --extra m3gnet --extra alignn
+          uv pip install --reinstall pynvml
 
       - name: Run test suite
         env:
