@@ -423,14 +423,20 @@ class MolecularDynamics(BaseCalculation):
                 "heating to run",
                 stacklevel=2,
             )
-        if self.ramp_temp and self.ensemble in ("nve", "nph"):
-            raise ValueError(
-                "Temperature ramp requested for ensemble with no thermostat."
-            )
+        if self.ramp_temp:
+            if self.ensemble in ("nve", "nph"):
+                raise ValueError(
+                    "Temperature ramp requested for ensemble with no thermostat"
+                )
 
-        # Check validate start and end temperatures
-        if self.ramp_temp and (self.temp_start < 0 or self.temp_end < 0):
-            raise ValueError("Start and end temperatures must be positive")
+            # Validate start and end temperatures
+            if self.temp_start < 0 or self.temp_end < 0:
+                raise ValueError("Start and end temperatures must be positive")
+
+            if self.temp_time < self.timestep:
+                raise ValueError(
+                    "Temperature ramp step time cannot be less than 1 timestep"
+                )
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -1105,6 +1111,13 @@ class MolecularDynamics(BaseCalculation):
         # Run temperature ramp
         if self.ramp_temp:
             heating_steps = int(self.temp_time // self.timestep)
+
+            if self.logger and not np.isclose(self.temp_time % self.timestep, 0.0):
+                rounded_temp_step = heating_steps * self.timestep / units.fs
+                self.logger.info(
+                    "Temperature ramp step time rounded to nearest timestep "
+                    f"({rounded_temp_step:.5} fs)"
+                )
 
             # Always include start temperature in ramp, and include end temperature
             # if separated by an integer number of temperature steps
