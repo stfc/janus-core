@@ -429,7 +429,7 @@ class MolecularDynamics(BaseCalculation):
                     "Temperature ramp requested for ensemble with no thermostat"
                 )
 
-            # Check validate start and end temperatures
+            # Validate start and end temperatures
             if self.temp_start < 0 or self.temp_end < 0:
                 raise ValueError("Start and end temperatures must be positive")
 
