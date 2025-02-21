@@ -297,6 +297,7 @@ test_extra_mlips_data = [
     ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
     ("orb", "cpu", -27.088973999023438, "NaCl.cif", {}),
     ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model_path": "orb-v2"}),
+    ("grace", "cpu", -27.084944594400017, "NaCl.cif", {}),
 ]
 
 

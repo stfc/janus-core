@@ -280,6 +280,19 @@ def choose_calculator(
 
         calculator = ORBCalculator(model=model, device=device, **kwargs)
 
+    elif arch == "grace":
+        from tensorpotential.calculator import grace_fm
+
+        __version__ = "0.4.5"
+
+        # Default model
+        model_path = model_path if model_path else "GRACE_2L_OAM_28Jan25"
+
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+
+        calculator = grace_fm(model_path, **kwargs)
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "

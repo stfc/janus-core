@@ -17,6 +17,7 @@ Dependencies
 - nequip = 0.6.1 (optional)
 - deepmd-kit = dpa3-alpha (optional)
 - orb-models = 0.4.2 (optional)
+- tensorpotential = 0.4.5 (optional)
 
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
@@ -62,5 +63,6 @@ Currently supported extras are:
 - ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
 - ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
+- ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
 
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.

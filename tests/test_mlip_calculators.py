@@ -88,11 +88,12 @@ def test_invalid_arch():
         ("nequip", "/invalid/path"),
         ("dpa3", "/invalid/path"),
         ("orb", "/invalid/path"),
+        ("grace", "/invalid/path"),
     ],
 )
 def test_invalid_model_path(arch, model_path):
     """Test error raised for invalid model_path."""
-    with pytest.raises((ValueError, RuntimeError)):
+    with pytest.raises((ValueError, RuntimeError, AssertionError)):
         choose_calculator(arch=arch, model_path=model_path)
 
 
@@ -138,6 +139,8 @@ def test_invalid_device(arch):
         ("dpa3", "cpu", {"model": DPA3_PATH}),
         ("orb", "cpu", {}),
         ("orb", "cpu", {"model": ORB_MODEL}),
+        ("grace", "cpu", {}),
+        ("grace", "cpu", {"model_path": "GRACE-1L-OAM_2Feb25"}),
     ],
 )
 def test_extra_mlips(arch, device, kwargs):

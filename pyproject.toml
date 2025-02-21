@@ -52,6 +52,10 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
+grace = [
+    "tensorpotential == 0.4.5",
+#    "tensorflow == 2.16.2",
+]
 m3gnet = [
     "matgl == 1.1.3",
     "dgl == 2.1.0",
@@ -70,6 +74,7 @@ all = [
     "janus-core[alignn]",
     "janus-core[chgnet]",
     "janus-core[dpa3]",
+    "janus-core[grace]",
     "janus-core[m3gnet]",
     "janus-core[nequip]",
     "janus-core[orb]",
@@ -188,6 +193,10 @@ default-groups = [
     "dev",
     "docs",
     "pre-commit",
+]
+
+constraint-dependencies = [
+    "tensorflow>=2.16.1",
 ]
 
 [tool.uv.sources]
