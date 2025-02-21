@@ -11,7 +11,7 @@ import pytest
 from janus_core.calculations.eos import EoS
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
-from tests.utils import assert_log_contains
+from tests.utils import assert_log_contains, skip_extras
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -61,25 +61,21 @@ def test_no_optimize(tmp_path):
     )
 
 
-@pytest.mark.parametrize("arch, device", [("chgnet", "cpu"), ("sevennet", "cpu")])
+@pytest.mark.parametrize(
+    "arch, device",
+    [("chgnet", "cpu"), ("sevennet", "cpu"), ("m3gnet", "cpu"), ("alignn", "cpu")],
+)
 def test_extras(arch, device, tmp_path):
     """Test extra potentials."""
-    if arch == "chgnet":
-        pytest.importorskip("chgnet")
-    if arch == "sevennet":
-        pytest.importorskip("sevenn")
+    skip_extras(arch)
 
     eos_fit_path = tmp_path / "NaCl-eos-fit.dat"
     log_file = tmp_path / "eos.log"
 
-    single_point = SinglePoint(
+    eos = EoS(
         struct_path=DATA_PATH / "NaCl.cif",
         arch=arch,
         device=device,
-    )
-
-    eos = EoS(
-        single_point.struct,
         minimize=False,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
