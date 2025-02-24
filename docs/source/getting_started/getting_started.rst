@@ -5,11 +5,6 @@ Getting started
 Dependencies
 ------------
 
-``janus-core`` dependencies currently include:
-
-- Python >= 3.10
-- ASE >= 3.24
-
 All required and optional dependencies can be found in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_.
 
 
@@ -22,15 +17,17 @@ The latest stable release of ``janus-core``, including its dependencies, can be 
 
     python3 -m pip install janus-core
 
+
 To get all the latest changes, ``janus-core`` can also be installed from GitHub:
 
 .. code-block:: bash
 
     python3 -m pip install git+https://github.com/stfc/janus-core.git
 
-By default, MACE is the only MLIP installed.
 
-Other MLIPs can be installed as ``extras``. For example, to install CHGNet and SevenNet, run:
+By default, no machine learnt interatomic potentials (MLIPs) will be installed. These can be installed manually, or as ``extras`` with ``janus-core``.
+
+For example, to install MACE, CHGNet, and SevenNet, run:
 
 .. code-block:: python
 
@@ -46,7 +43,7 @@ Other MLIPs can be installed as ``extras``. For example, to install CHGNet and S
     ``matgl`` and/or ``alignn`` with more recent PyTorch release, please refer to the
     :doc:`installation documentation </user_guide/installation>`.
 
-To install all MLIPs that do not depend on `dgl`:
+To install all MLIPs that do not depend on ``dgl``:
 
 .. code-block:: python
 

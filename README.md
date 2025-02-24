@@ -25,11 +25,6 @@ Tools for machine learnt interatomic potentials
 
 ### Dependencies
 
-`janus-core` dependencies currently include:
-
-- Python >= 3.10
-- ASE >= 3.24
-
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
 
 
@@ -47,12 +42,12 @@ To get all the latest changes, `janus-core` can also be installed from GitHub:
 python3 -m pip install git+https://github.com/stfc/janus-core.git
 ```
 
-By default, MACE is the only MLIP installed.
+By default, no machine learnt interatomic potentials (MLIPs) will be installed with `janus-core`. These can be installed separately, or as `extras`.
 
-Other MLIPs can be installed as `extras`. For example, to install CHGNet and SevenNet, run:
+For example, to install MACE, CHGNet, and SevenNet, run:
 
 ```python
-python3 -m pip install janus-core[chgnet,sevennet]
+python3 -m pip install janus-core[mace,chgnet,sevennet]
 ```
 
 > [!WARNING]
