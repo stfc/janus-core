@@ -555,7 +555,7 @@ class MolecularDynamics(BaseCalculation):
                 last_restart = max(poss_restarts, key=getmtime)
 
                 # Read in last structure
-                self.struct = input_structs(
+                self.struct, self.struct_path = input_structs(
                     struct=last_restart,
                     read_kwargs=self.read_kwargs,
                     sequence_allowed=False,
