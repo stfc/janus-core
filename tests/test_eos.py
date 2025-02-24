@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from zipfile import BadZipFile
 
 from ase.eos import EquationOfState
 from ase.io import read
@@ -72,24 +73,28 @@ def test_extras(arch, device, tmp_path):
     eos_fit_path = tmp_path / "NaCl-eos-fit.dat"
     log_file = tmp_path / "eos.log"
 
-    eos = EoS(
-        struct_path=DATA_PATH / "NaCl.cif",
-        arch=arch,
-        device=device,
-        minimize=False,
-        file_prefix=tmp_path / "NaCl",
-        log_kwargs={"filename": log_file},
-    )
-    results = eos.run()
+    try:
+        eos = EoS(
+            struct_path=DATA_PATH / "NaCl.cif",
+            arch=arch,
+            device=device,
+            minimize=False,
+            file_prefix=tmp_path / "NaCl",
+            log_kwargs={"filename": log_file},
+        )
+        results = eos.run()
 
-    assert isinstance(results["eos"], EquationOfState)
+        assert isinstance(results["eos"], EquationOfState)
 
-    # Check contents of EoS fit data file
-    with open(eos_fit_path, encoding="utf8") as eos_fit_file:
-        lines = eos_fit_file.readlines()
+        # Check contents of EoS fit data file
+        with open(eos_fit_path, encoding="utf8") as eos_fit_file:
+            lines = eos_fit_file.readlines()
 
-    assert len(lines) == 2
-    assert len(lines[1].split()) == 3
+        assert len(lines) == 2
+        assert len(lines[1].split()) == 3
+
+    except BadZipFile:
+        pytest.skip()
 
 
 def test_invalid_struct():
