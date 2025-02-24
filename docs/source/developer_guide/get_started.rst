@@ -71,6 +71,11 @@ Packages in the ``dev`` dependency group allow tests to be run locally using ``p
 
     pytest -v
 
+.. note::
+
+    MACE must be installed for tests to run successfully. All other MLIPs are optional.
+
+
 Alternatively, tests can be run in separate virtual environments using ``tox``::
 
     tox run -e ALL
