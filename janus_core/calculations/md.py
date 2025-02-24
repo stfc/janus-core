@@ -556,7 +556,7 @@ class MolecularDynamics(BaseCalculation):
 
                 # Read in last structure
                 self.struct = input_structs(
-                    struct_path=last_restart,
+                    struct=last_restart,
                     read_kwargs=self.read_kwargs,
                     sequence_allowed=False,
                     arch=self.arch,
