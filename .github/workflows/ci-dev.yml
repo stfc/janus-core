@@ -1,0 +1,42 @@
+name: ci-dev
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-dev-versions:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        version: "latest"
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: uv sync --all-extras
+
+    # Full reinstall in case the version number is the same as the last release
+    - name: Uninstall release versions
+      run: uv pip uninstall ase mace-torch
+
+    - name: Install dev versions
+      run: |
+        uv pip install \
+            https://gitlab.com/ase/ase.git \
+            https://github.com/ACEsuit/mace.git
+
+    - name: Run test suite
+      env:
+        # show timings of tests
+        PYTEST_ADDOPTS: "--durations=0"
+      run: uv run pytest .
