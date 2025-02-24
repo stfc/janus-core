@@ -186,7 +186,7 @@ def choose_calculator(
         elif isinstance(model_path, str):
             model = CHGNet.load(model_name=model_path, use_device=device)
         else:
-            model_path = "0.3.0"
+            model_path = __version__
             model = None
 
         calculator = CHGNetCalculator(model=model, use_device=device, **kwargs)
@@ -214,6 +214,10 @@ def choose_calculator(
     elif arch == "sevennet":
         from sevenn import __version__
         from sevenn.sevennet_calculator import SevenNetCalculator
+        import torch
+
+        # Set before loading model to avoid type mismatches
+        torch.set_default_dtype(torch.float32)
 
         if isinstance(model_path, Path):
             model_path = str(model_path)

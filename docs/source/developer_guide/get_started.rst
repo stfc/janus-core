@@ -27,11 +27,11 @@ Dependencies useful for development can then be installed by running::
 
 Extras, such as optional MLIPs, can also be installed by running::
 
-    uv sync -p 3.12 --extra alignn --extra sevennet
+    uv sync -p 3.12 --extra chgnet --extra sevennet
 
-or to install all supported MLIPs::
+or to install all MLIPs that do not depend on ``dgl``::
 
-    uv sync -p 3.12 --all-extras
+    uv sync -p 3.12 --extras all
 
 
 Using uv
@@ -70,6 +70,11 @@ Running unit tests
 Packages in the ``dev`` dependency group allow tests to be run locally using ``pytest``, by running::
 
     pytest -v
+
+.. note::
+
+    MACE must be installed for tests to run successfully. All other MLIPs are optional.
+
 
 Alternatively, tests can be run in separate virtual environments using ``tox``::
 

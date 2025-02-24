@@ -9,7 +9,7 @@ from numpy import isfinite
 import pytest
 
 from janus_core.calculations.single_point import SinglePoint
-from tests.utils import read_atoms
+from tests.utils import read_atoms, skip_extras
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -21,17 +21,17 @@ NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
 test_data = [
-    (DATA_PATH / "benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
+    ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
     (
-        DATA_PATH / "benzene.xyz",
+        "benzene.xyz",
         -76.06057739257812,
         ["energy"],
         "energy",
         {"default_dtype": "float32"},
         None,
     ),
-    (DATA_PATH / "benzene.xyz", -0.0360169762840179, ["forces"], "forces", {}, [0, 1]),
-    (DATA_PATH / "NaCl.cif", -0.004783275999053424, ["stress"], "stress", {}, [0]),
+    ("benzene.xyz", -0.0360169762840179, ["forces"], "forces", {}, [0, 1]),
+    ("NaCl.cif", -0.004783275999053424, ["stress"], "stress", {}, [0]),
 ]
 
 
@@ -44,7 +44,7 @@ def test_potential_energy(
     """Test single point energy using MACE calculators."""
     calc_kwargs["model"] = MACE_PATH
     single_point = SinglePoint(
-        struct_path=struct_path,
+        struct_path=DATA_PATH / struct_path,
         arch="mace",
         calc_kwargs=calc_kwargs,
         properties=properties,
@@ -63,6 +63,67 @@ def test_potential_energy(
         assert results == pytest.approx(expected)
         results_2 = single_point.struct.info["mace_energy"]
         assert results_2 == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    "arch, device, expected_energy, struct, kwargs",
+    [
+        ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
+        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
+        (
+            "nequip",
+            "cpu",
+            -169815.1282456301,
+            "toluene.xyz",
+            {"model_path": NEQUIP_PATH},
+        ),
+        ("orb", "cpu", -27.088973999023438, "NaCl.cif", {}),
+        ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model_path": "orb-v2"}),
+        (
+            "sevennet",
+            "cpu",
+            -27.061979293823242,
+            "NaCl.cif",
+            {"model_path": SEVENNET_PATH},
+        ),
+        ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {}),
+        (
+            "sevennet",
+            "cpu",
+            -27.061979293823242,
+            "NaCl.cif",
+            {"model_path": "SevenNet-0_11July2024"},
+        ),
+        (
+            "alignn",
+            "cpu",
+            -11.148092269897461,
+            "NaCl.cif",
+            {"model_path": ALIGNN_PATH / "best_model.pt"},
+        ),
+        (
+            "alignn",
+            "cpu",
+            -11.148092269897461,
+            "NaCl.cif",
+            {"model_path": ALIGNN_PATH / "best_model.pt"},
+        ),
+        ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
+    ],
+)
+def test_extras(arch, device, expected_energy, struct, kwargs):
+    """Test single point energy using extra MLIP calculators."""
+    skip_extras(arch)
+
+    single_point = SinglePoint(
+        struct_path=DATA_PATH / struct,
+        arch=arch,
+        device=device,
+        properties="energy",
+        **kwargs,
+    )
+    energy = single_point.run()["energy"]
+    assert energy == pytest.approx(expected_energy)
 
 
 def test_single_point_none():
@@ -257,66 +318,6 @@ def test_invalidate_calc():
     assert "energy" not in single_point.struct.calc.results
 
 
-test_mlips_data = [
-    ("m3gnet", "cpu", -26.729949951171875),
-    ("chgnet", "cpu", -29.331436157226562),
-]
-
-
-@pytest.mark.parametrize("arch, device, expected_energy", test_mlips_data)
-def test_mlips(arch, device, expected_energy):
-    """Test single point energy using CHGNET and M3GNET calculators."""
-    single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
-        arch=arch,
-        device=device,
-        properties="energy",
-    )
-    energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy)
-
-
-test_extra_mlips_data = [
-    (
-        "alignn",
-        "cpu",
-        -11.148092269897461,
-        "NaCl.cif",
-        {"model_path": ALIGNN_PATH / "best_model.pt"},
-    ),
-    ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {"model_path": SEVENNET_PATH}),
-    ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {}),
-    (
-        "sevennet",
-        "cpu",
-        -27.061979293823242,
-        "NaCl.cif",
-        {"model_path": "SevenNet-0_11July2024"},
-    ),
-    ("nequip", "cpu", -169815.1282456301, "toluene.xyz", {"model_path": NEQUIP_PATH}),
-    ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
-    ("orb", "cpu", -27.088973999023438, "NaCl.cif", {}),
-    ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model_path": "orb-v2"}),
-]
-
-
-@pytest.mark.extra_mlips
-@pytest.mark.parametrize(
-    "arch, device, expected_energy, struct, kwargs", test_extra_mlips_data
-)
-def test_extra_mlips_alignn(arch, device, expected_energy, struct, kwargs):
-    """Test single point energy using extra mlips calculators."""
-    single_point = SinglePoint(
-        struct_path=DATA_PATH / struct,
-        arch=arch,
-        device=device,
-        properties="energy",
-        **kwargs,
-    )
-    energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy)
-
-
 def test_logging(tmp_path):
     """Test attaching logger to SinglePoint and emissions are saved to info."""
     log_file = tmp_path / "sp.log"
@@ -372,6 +373,7 @@ def test_hessian_traj():
 @pytest.mark.parametrize("struct", ["NaCl.cif", "benzene-traj.xyz"])
 def test_hessian_not_implemented(struct):
     """Test unimplemented Hessian."""
+    skip_extras("chgnet")
     with pytest.raises(NotImplementedError):
         SinglePoint(
             struct_path=DATA_PATH / struct,

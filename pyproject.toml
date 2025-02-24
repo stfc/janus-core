@@ -28,7 +28,6 @@ readme = "README.md"
 dependencies = [
     "ase<4.0,>=3.24",
     "codecarbon<3.0.0,>=2.8.3",
-    "mace-torch==0.3.10",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pymatgen>=2025.1.24",
@@ -36,25 +35,20 @@ dependencies = [
     "rich<14.0.0,>=13.9.1",
     "seekpath<2.0.0,>=1.9.7",
     "spglib<3.0.0,>=2.3.0",
-    "torch<=2.2,>=2.1",
-    "torch-dftd==0.4.0",
     "typer<1.0.0,>=0.12.5",
     "typer-config<2.0.0,>=1.4.2",
 ]
 
 [project.optional-dependencies]
-alignn = [
-    "alignn == 2024.5.27",
-]
 chgnet = [
-    "chgnet == 0.3.8",
+    "chgnet == 0.4.0",
 ]
 dpa3 = [
     "deepmd-kit",
 ]
-m3gnet = [
-    "matgl == 1.1.3",
-    "dgl == 2.1.0",
+mace = [
+    "mace-torch==0.3.10",
+    "torch-dftd==0.4.0",
 ]
 nequip = [
     "nequip == 0.6.1",
@@ -67,13 +61,24 @@ sevennet = [
     "sevenn == 0.10.3",
 ]
 all = [
-    "janus-core[alignn]",
     "janus-core[chgnet]",
     "janus-core[dpa3]",
-    "janus-core[m3gnet]",
+    "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
+]
+
+# MLIPs with dgl dependency
+alignn = [
+    "alignn == 2024.5.27",
+    "torch == 2.2",
+    "torchdata == 0.7.1",
+]
+m3gnet = [
+    "matgl == 1.1.3",
+    "torch == 2.2",
+    "torchdata == 0.7.1",
 ]
 
 [project.scripts]
@@ -188,6 +193,29 @@ default-groups = [
     "dev",
     "docs",
     "pre-commit",
+]
+
+constraint-dependencies = [
+    "dgl==2.1",
+    "torch<2.6",
+]
+conflicts = [
+    [
+      { extra = "chgnet" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "chgnet" },
+      { extra = "m3gnet" },
+    ],
+    [
+      { extra = "all" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "all" },
+      { extra = "m3gnet" },
+    ],
 ]
 
 [tool.uv.sources]
