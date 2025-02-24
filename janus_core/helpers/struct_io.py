@@ -158,7 +158,11 @@ def input_structs(
     if struct_path:
         if logger:
             logger.info("Reading structures from file.")
-        struct = read(struct, **read_kwargs)
+
+        if not Path(struct_path).exists():
+            raise ValueError("`struct` file could not be found")
+
+        struct = read(struct_path, **read_kwargs)
         if logger:
             logger.info("Structures read from file.")
 
