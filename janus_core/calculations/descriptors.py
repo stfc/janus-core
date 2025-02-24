@@ -29,11 +29,7 @@ class Descriptors(BaseCalculation):
     Parameters
     ----------
     struct
-        ASE Atoms structure(s) to calculate descriptors for. Required if `struct_path`
-        is None. Default is None.
-    struct_path
-        Path of structure to calculate descriptors for. Required if `struct` is None.
-        Default is None.
+        ASE Atoms structure(s), or filepath to structure(s) to simulate.
     arch
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
@@ -72,8 +68,7 @@ class Descriptors(BaseCalculation):
 
     def __init__(
         self,
-        struct: MaybeSequence[Atoms] | None = None,
-        struct_path: PathLike | None = None,
+        struct: MaybeSequence[Atoms] | PathLike,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -96,11 +91,7 @@ class Descriptors(BaseCalculation):
         Parameters
         ----------
         struct
-            ASE Atoms structure(s) to calculate descriptors for. Required if
-            `struct_path` is None. Default is None.
-        struct_path
-            Path of structure to calculate descriptors for. Required if `struct` is
-            None. Default is None.
+            ASE Atoms structure(s), or filepath to structure(s) to simulate.
         arch
             MLIP architecture to use for calculations. Default is "mace_mp".
         device
@@ -151,7 +142,6 @@ class Descriptors(BaseCalculation):
         super().__init__(
             calc_name=__name__,
             struct=struct,
-            struct_path=struct_path,
             arch=arch,
             device=device,
             model_path=model_path,

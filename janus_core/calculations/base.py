@@ -42,11 +42,7 @@ class BaseCalculation(FileNameMixin):
     calc_name
         Name of calculation being run, used for name of logger. Default is "base".
     struct
-        ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
-        Default is None.
-    struct_path
-        Path of structure to simulate. Required if `struct` is None.
-        Default is None.
+        ASE Atoms structure(s), or filepath to structure(s) to simulate.
     arch
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
@@ -90,8 +86,7 @@ class BaseCalculation(FileNameMixin):
         self,
         *,
         calc_name: str = "base",
-        struct: MaybeSequence[Atoms] | None = None,
-        struct_path: PathLike | None = None,
+        struct: MaybeSequence[Atoms] | PathLike = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -115,11 +110,7 @@ class BaseCalculation(FileNameMixin):
         calc_name
             Name of calculation being run, used for name of logger. Default is "base".
         struct
-            ASE Atoms structure(s) to simulate. Required if `struct_path` is None.
-            Default is None.
-        struct_path
-            Path of structure to simulate. Required if `struct` is None. Default is
-            None.
+            ASE Atoms structure(s), or filepath to structure(s) to simulate.
         arch
             MLIP architecture to use for calculations. Default is "mace_mp".
         device
@@ -156,8 +147,6 @@ class BaseCalculation(FileNameMixin):
             read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs
         )
 
-        self.struct = struct
-        self.struct_path = struct_path
         self.arch = arch
         self.device = device
         self.model_path = model_path
@@ -175,9 +164,8 @@ class BaseCalculation(FileNameMixin):
 
         # Read structures and/or attach calculators
         # Note: logger not set up so yet so not passed here
-        self.struct = input_structs(
-            struct=self.struct,
-            struct_path=self.struct_path,
+        self.struct, self.struct_path = input_structs(
+            struct=struct,
             read_kwargs=self.read_kwargs,
             sequence_allowed=sequence_allowed,
             arch=self.arch,

@@ -73,7 +73,7 @@ def test_vaf(tmp_path):
     cor_path = tmp_path / "Cl4Na4-nve-T300.0-cor.dat"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -141,7 +141,7 @@ def test_md_correlations(tmp_path):
     cor_path = tmp_path / "Cl4Na4-nve-T300.0-cor.dat"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )

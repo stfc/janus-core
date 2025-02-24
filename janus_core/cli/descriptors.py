@@ -137,7 +137,7 @@ def descriptors(
 
     # Dictionary of inputs for Descriptors class
     descriptors_kwargs = {
-        "struct_path": struct,
+        "struct": struct,
         "arch": arch,
         "device": device,
         "model_path": model_path,

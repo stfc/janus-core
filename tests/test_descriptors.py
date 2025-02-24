@@ -45,7 +45,7 @@ def test_calc_per_element(tmp_path):
     """Test calculating descriptors for each element from SinglePoint object."""
     log_file = tmp_path / "descriptors.log"
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -73,7 +73,7 @@ def test_logging(tmp_path):
     log_file = tmp_path / "descriptors.log"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -95,7 +95,7 @@ def test_logging(tmp_path):
 def test_dispersion():
     """Test using mace_mp with dispersion."""
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"dispersion": False},
     )
@@ -107,7 +107,7 @@ def test_dispersion():
     descriptors.run()
 
     single_point_disp = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"dispersion": True},
     )
@@ -127,7 +127,7 @@ def test_dispersion():
 def test_not_implemented_error():
     """Test correct error raised if descriptors not implemented."""
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="chgnet",
     )
     with pytest.raises(NotImplementedError):

@@ -34,10 +34,7 @@ class GeomOpt(BaseCalculation):
     Parameters
     ----------
     struct
-        ASE Atoms structure to optimize geometry for. Required if `struct_path` is
-        None. Default is None.
-    struct_path
-        Path of structure to optimize. Required if `struct` is None. Default is None.
+        ASE Atoms structure, or filepath to structure to simulate.
     arch
         MLIP architecture to use for optimization. Default is "mace_mp".
     device
@@ -95,8 +92,7 @@ class GeomOpt(BaseCalculation):
 
     def __init__(
         self,
-        struct: Atoms | None = None,
-        struct_path: PathLike | None = None,
+        struct: Atoms | PathLike,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -126,11 +122,7 @@ class GeomOpt(BaseCalculation):
         Parameters
         ----------
         struct
-            ASE Atoms structure to optimize geometry for. Required if `struct_path` is
-            None. Default is None.
-        struct_path
-            Path of structure to optimize. Required if `struct` is None. Default is
-            None.
+            ASE Atoms structure, or filepath to structure to simulate.
         arch
             MLIP architecture to use for optimization. Default is "mace_mp".
         device
@@ -220,7 +212,6 @@ class GeomOpt(BaseCalculation):
         super().__init__(
             calc_name=__name__,
             struct=struct,
-            struct_path=struct_path,
             arch=arch,
             device=device,
             model_path=model_path,

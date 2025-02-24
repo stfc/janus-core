@@ -37,11 +37,7 @@ class Phonons(BaseCalculation):
     Parameters
     ----------
     struct
-        ASE Atoms structure to calculate phonons for. Required if `struct_path` is
-        None. Default is None.
-    struct_path
-        Path of structure to calculate phonons for. Required if `struct` is None.
-        Default is None.
+        ASE Atoms structure, or filepath to structure to simulate.
     arch
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
@@ -132,8 +128,7 @@ class Phonons(BaseCalculation):
 
     def __init__(
         self,
-        struct: Atoms | None = None,
-        struct_path: PathLike | None = None,
+        struct: Atoms | PathLike,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -172,11 +167,7 @@ class Phonons(BaseCalculation):
         Parameters
         ----------
         struct
-            ASE Atoms structure to calculate phonons for. Required if `struct_path` is
-            None. Default is None.
-        struct_path
-            Path of structure to calculate phonons for. Required if `struct` is None.
-            Default is None.
+            ASE Atoms structure, or filepath to structure to simulate.
         arch
             MLIP architecture to use for calculations. Default is "mace_mp".
         device
@@ -305,7 +296,6 @@ class Phonons(BaseCalculation):
         super().__init__(
             calc_name=__name__,
             struct=struct,
-            struct_path=struct_path,
             arch=arch,
             device=device,
             model_path=model_path,

@@ -127,7 +127,7 @@ def singlepoint(
         log_kwargs["filename"] = log
 
     singlepoint_kwargs = {
-        "struct_path": struct,
+        "struct": struct,
         "properties": properties,
         "write_kwargs": write_kwargs,
         "write_results": True,

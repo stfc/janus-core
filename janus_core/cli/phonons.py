@@ -301,7 +301,7 @@ def phonons(
 
     # Dictionary of inputs for Phonons class
     phonons_kwargs = {
-        "struct_path": struct,
+        "struct": struct,
         "arch": arch,
         "device": device,
         "model_path": model_path,

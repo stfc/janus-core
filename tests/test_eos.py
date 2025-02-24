@@ -43,7 +43,7 @@ def test_no_optimize(tmp_path):
     """Test not optimizing structure before calculation."""
     log_file = tmp_path / "eos.log"
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -75,7 +75,7 @@ def test_extras(arch, device, tmp_path):
 
     try:
         eos = EoS(
-            struct_path=DATA_PATH / "NaCl.cif",
+            struct=DATA_PATH / "NaCl.cif",
             arch=arch,
             device=device,
             minimize=False,
@@ -100,7 +100,7 @@ def test_extras(arch, device, tmp_path):
 def test_invalid_struct():
     """Test setting invalid structure."""
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "benzene-traj.xyz",
+        struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -120,7 +120,7 @@ def test_logging(tmp_path):
     log_file = tmp_path / "eos.log"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -144,7 +144,7 @@ def test_plot(tmp_path):
     plot_file = tmp_path / "plot.svg"
 
     eos = EoS(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
         plot_to_file=True,
