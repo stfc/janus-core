@@ -140,8 +140,8 @@ class Descriptors(BaseCalculation):
 
         # Initialise structures and logging
         super().__init__(
-            calc_name=__name__,
             struct=struct,
+            calc_name=__name__,
             arch=arch,
             device=device,
             model_path=model_path,

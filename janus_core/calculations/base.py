@@ -39,10 +39,10 @@ class BaseCalculation(FileNameMixin):
 
     Parameters
     ----------
-    calc_name
-        Name of calculation being run, used for name of logger. Default is "base".
     struct
         ASE Atoms structure(s), or filepath to structure(s) to simulate.
+    calc_name
+        Name of calculation being run, used for name of logger. Default is "base".
     arch
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
@@ -84,9 +84,9 @@ class BaseCalculation(FileNameMixin):
 
     def __init__(
         self,
+        struct: MaybeSequence[Atoms] | PathLike,
         *,
         calc_name: str = "base",
-        struct: MaybeSequence[Atoms] | PathLike = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -107,10 +107,10 @@ class BaseCalculation(FileNameMixin):
 
         Parameters
         ----------
-        calc_name
-            Name of calculation being run, used for name of logger. Default is "base".
         struct
             ASE Atoms structure(s), or filepath to structure(s) to simulate.
+        calc_name
+            Name of calculation being run, used for name of logger. Default is "base".
         arch
             MLIP architecture to use for calculations. Default is "mace_mp".
         device
