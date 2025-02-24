@@ -37,38 +37,6 @@ jobs:
           file: coverage.xml
           base-path: janus_core
 
-  test-dev-versions:
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      matrix:
-        python-version: ["3.12"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "0.5.7"
-          python-version: ${{ matrix.python-version }}
-
-      - name: Target dev versions
-        run: |
-          uv add \
-              https://gitlab.com/ase/ase.git \
-              https://github.com/ACEsuit/mace.git
-
-      - name: Install dependencies
-        run: uv sync --all-extras
-
-      - name: Run test suite
-        env:
-          # show timings of tests
-          PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest .
-
   coverage:
     needs: tests
     runs-on: ubuntu-latest
