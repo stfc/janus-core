@@ -8,6 +8,7 @@ import re
 
 from ase import Atoms
 from ase.io import read
+import pytest
 import yaml
 
 from janus_core.helpers.janus_types import MaybeSequence, PathLike
@@ -113,3 +114,32 @@ def clear_log_handlers():
     logger.handlers = [
         h for h in logger.handlers if not isinstance(h, logging.FileHandler)
     ]
+
+
+def skip_extras(arch: str):
+    """
+    Skip tests if unable to import module for architecture.
+
+    Parameters
+    ----------
+    arch
+        Model architecture.
+    """
+    match arch:
+        case "chgnet":
+            pytest.importorskip("chgnet")
+        case "dpa3":
+            pytest.importorskip("deepmd")
+        case "mace" | "mace_mp" | "mace_off":
+            pytest.importorskip("mace")
+        case "nequip":
+            pytest.importorskip("nequip")
+        case "orb":
+            pytest.importorskip("orb_models")
+        case "sevennet":
+            pytest.importorskip("sevenn")
+        case "alignn":
+            # alignn caches downloaded model in site-packages
+            pytest.importorskip("alignn.ff.ff")
+        case "m3gnet":
+            pytest.importorskip("matgl")

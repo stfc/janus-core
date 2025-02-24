@@ -66,7 +66,7 @@ def test_dict_remove_hyphens():
     assert dictionary["key_2"]["key6"]["key_7"] == "value7"
 
 
-@pytest.mark.parametrize("arch", ["mace_mp", "m3gnet", "chgnet"])
+@pytest.mark.parametrize("arch", ["mace_mp", "chgnet", "sevennet"])
 @pytest.mark.parametrize("write_results", [True, False])
 @pytest.mark.parametrize("properties", [None, ["energy"], ["energy", "forces"]])
 @pytest.mark.parametrize("invalidate_calc", [True, False])
@@ -77,6 +77,11 @@ def test_output_structs(
     arch, write_results, properties, invalidate_calc, write_kwargs, tmp_path
 ):
     """Test output_structs copies/moves results to Atoms.info and writes files."""
+    if arch == "chgnet":
+        pytest.importorskip("chgnet")
+    if arch == "sevennet":
+        pytest.importorskip("sevenn")
+
     struct = read(DATA_PATH)
     struct.calc = choose_calculator(arch=arch)
 
@@ -87,10 +92,10 @@ def test_output_structs(
 
     if arch == "mace_mp":
         model = "small"
-    if arch == "m3gnet":
-        model = "M3GNet-MP-2021.2.8-DIRECT-PES"
     if arch == "chgnet":
-        model = "0.3.0"
+        model = "0.4.0"
+    if arch == "sevennet":
+        model = "SevenNet-0_11July2024"
 
     label_keys = {f"{arch}_{key}" for key in results_keys}
 

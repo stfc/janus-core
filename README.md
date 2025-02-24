@@ -25,23 +25,7 @@ Tools for machine learnt interatomic potentials
 
 ### Dependencies
 
-`janus-core` dependencies currently include:
-
-- Python >= 3.10
-- ASE >= 3.24
-- mace-torch = 0.3.10
-- chgnet = 0.3.8 (optional)
-- matgl = 1.1.3 (optional)
-- sevenn = 0.10.3 (optional)
-- alignn = 2024.5.27 (optional)
-- nequip = 0.6.1 (optional)
-- deepmd-kit = dpa3-alpha (optional)
-- orb-models = 0.4.2 (optional)
-
 All required and optional dependencies can be found in [pyproject.toml](pyproject.toml).
-
-> [!NOTE]
-> Where possible, we expect to update pinned MLIP dependencies to match their latest releases, subject to any required API fixes.
 
 
 ### Installation
@@ -58,15 +42,24 @@ To get all the latest changes, `janus-core` can also be installed from GitHub:
 python3 -m pip install git+https://github.com/stfc/janus-core.git
 ```
 
-By default, MACE is the only MLIP installed.
+By default, no machine learnt interatomic potentials (MLIPs) will be installed with `janus-core`. These can be installed separately, or as `extras`.
 
-Other MLIPs can be installed as `extras`. For example, to install CHGNet and M3GNet, run:
+For example, to install MACE, CHGNet, and SevenNet, run:
 
 ```python
-python3 -m pip install janus-core[chgnet,m3gnet]
+python3 -m pip install janus-core[mace,chgnet,sevennet]
 ```
 
-or to install all supported MLIPs:
+> [!WARNING]
+> `matgl` and `alignn` depend on [dgl](https://github.com/dmlc/dgl?tab=readme-ov-file), which no
+> longer publishes to PyPI. If `janus-core` is installed with either of these extras, PyTorch will
+> automatically be set to 2.2.0 to ensure compatibility. However, this is incompatible with `chgnet`,
+> and may limit the available features in others, including `mace`. To use `matgl` and/or `alignn` with
+> more recent PyTorch release, please refer to the
+> [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html).
+
+
+To install all MLIPs that do not depend on `dgl`:
 
 ```python
 python3 -m pip install janus-core[all]
@@ -93,11 +86,11 @@ Current and planned features include:
   - MACE
   - M3GNet
   - CHGNet
-  - ALIGNN (experimental)
-  - SevenNet (experimental)
-  - NequIP (experimental)
-  - DPA3 (experimental)
-  - Orb (experimental)
+  - ALIGNN
+  - SevenNet
+  - NequIP
+  - DPA3
+  - Orb
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
@@ -308,7 +301,7 @@ We recommend installing uv for dependency management when developing for `janus-
 ```shell
 git clone https://github.com/stfc/janus-core
 cd janus-core
-uv sync --all-extras # Create a virtual environment and install all dependencies
+uv sync --extras all # Create a virtual environment and install dependencies
 source .venv/bin/activate
 pre-commit install  # Install pre-commit hooks
 pytest -v  # Discover and run all tests
