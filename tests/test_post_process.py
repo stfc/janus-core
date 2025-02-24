@@ -29,7 +29,7 @@ def test_md_pp(tmp_path):
     vaf_path = tmp_path / "Cl4Na4-nve-T300.0-vaf.dat"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
