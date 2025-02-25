@@ -59,5 +59,6 @@ Currently supported extras are:
 - ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
 - ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
+- ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
 
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.
