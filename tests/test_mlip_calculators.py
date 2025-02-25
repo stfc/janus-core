@@ -75,6 +75,7 @@ except ImportError:
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
         ("mattersim", "cpu", {}),
+        ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),
@@ -122,6 +123,7 @@ def test_invalid_arch():
         ("mace_mp", "/invalid/path"),
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
+        ("mattersim", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
         ("sevenn", "/invalid/path"),
@@ -132,7 +134,7 @@ def test_invalid_arch():
 def test_invalid_model_path(arch, model_path):
     """Test error raised for invalid model_path."""
     skip_extras(arch)
-    with pytest.raises((ValueError, RuntimeError, KeyError)):
+    with pytest.raises((ValueError, RuntimeError, KeyError, AssertionError)):
         choose_calculator(arch=arch, model_path=model_path)
 
 
@@ -146,6 +148,11 @@ def test_invalid_model_path(arch, model_path):
         {"arch": "chgnet", "model_path": CHGNET_PATH, "path": CHGNET_PATH},
         {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
         {"arch": "dpa3", "model_path": DPA3_PATH, "path": DPA3_PATH},
+        {
+            "arch": "mattersim",
+            "model_path": "mattersim-v1.0.0-1m",
+            "path": "mattersim-v1.0.0-1m",
+        },
         {"arch": "nequip", "model_path": NEQUIP_PATH, "model": NEQUIP_PATH},
         {"arch": "nequip", "model_path": NEQUIP_PATH, "path": NEQUIP_PATH},
         {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
