@@ -257,6 +257,14 @@ conflicts = [
     ],
     [
       { extra = "fairchem" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "m3gnet" },
+    ],
+    [
+      { extra = "fairchem" },
       { extra = "mace" },
     ],
     [
