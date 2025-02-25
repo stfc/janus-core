@@ -95,7 +95,7 @@ except ImportError:
         ("m3gnet", "cpu", {"model_path": M3GNET_MODEL_PATH}),
         ("m3gnet", "cpu", {"potential": M3GNET_DIR_PATH}),
         ("m3gnet", "cpu", {"potential": M3GNET_POTENTIAL}),
-        ("grace", "", {}),
+        ("grace", "cpu", {}),
         ("grace", "cpu", {"model_path": "GRACE-1L-OAM_2Feb25"}),
     ],
 )
