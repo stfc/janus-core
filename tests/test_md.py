@@ -1334,7 +1334,7 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
     file_prefix = tmp_path / f"Cl4Na4-{tag}-T300.0"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
