@@ -221,9 +221,9 @@ def neb(
 
     # Dictionary of inputs for NEB class
     neb_inputs = {
-        "init_struct_path": init_struct,
-        "final_struct_path": final_struct,
-        "band_path": band_structs,
+        "init_struct": init_struct,
+        "final_struct": final_struct,
+        "band_structs": band_structs,
         "arch": arch,
         "device": device,
         "model_path": model_path,
@@ -259,9 +259,9 @@ def neb(
     # Store inputs for yaml summary
     inputs = neb_inputs.copy()
 
-    del inputs["init_struct_path"]
-    del inputs["final_struct_path"]
-    del inputs["band_path"]
+    del inputs["init_struct"]
+    del inputs["final_struct"]
+    del inputs["band_structs"]
 
     # Add structure, MLIP information, and log to inputs
     save_struct_calc(

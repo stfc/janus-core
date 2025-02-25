@@ -19,7 +19,7 @@ MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 def test_init():
     """Test initialising Phonons."""
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -46,7 +46,7 @@ def test_optimize(tmp_path):
     opt_file = tmp_path / "NaCl-opt.extxyz"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -68,7 +68,7 @@ def test_optimize(tmp_path):
 def test_invalid_struct():
     """Test setting invalid structure."""
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "benzene-traj.xyz",
+        struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -88,7 +88,7 @@ def test_logging(tmp_path):
     log_file = tmp_path / "phonons.log"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl.cif",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )
@@ -112,7 +112,7 @@ def test_symmetrize(tmp_path):
     file_prefix = tmp_path / "NaCl"
 
     single_point = SinglePoint(
-        struct_path=DATA_PATH / "NaCl-deformed.cif",
+        struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         calc_kwargs={"model": MODEL_PATH},
     )

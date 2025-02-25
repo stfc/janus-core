@@ -267,7 +267,7 @@ def geomopt(
 
     # Dictionary of inputs for optimize function
     optimize_kwargs = {
-        "struct_path": struct,
+        "struct": struct,
         "arch": arch,
         "device": device,
         "model_path": model_path,

@@ -405,7 +405,7 @@ def md(
             barostat_time = 1000.0
 
     dyn_kwargs = {
-        "struct_path": struct,
+        "struct": struct,
         "arch": arch,
         "device": device,
         "model_path": model_path,

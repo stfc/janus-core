@@ -36,24 +36,15 @@ class NEB(BaseCalculation):
     Parameters
     ----------
     init_struct
-        Initial ASE Atoms structure for Nudged Elastic Band method. Required if
-        `init_struct_path` is None. Default is None.
-    init_struct_path
-        Path of initial structure for Nudged Elastic Band method. Required if
-        `init_struct` is None. Default is None.
+        Initial ASE Atoms structure, or filepath to structure to simulate.
     final_struct
-        Final ASE Atoms structure for Nudged Elastic Band method. Required if
-        `final_struct_path` is None. Any attached calculators will be replaced with a
-        copy matching the one attached to init_struct. Default is None.
-    final_struct_path
-        Path of final structure for Nudged Elastic Band method. Required if
-        `final_struct` is None. Default is None.
+        Final ASE Atoms structure, or filepath to structure to simulate. Any attached
+        calculators will be replaced with a copy matching the one attached to
+        init_struct. Default is None.
     band_structs
-        Band of ASE Atoms images to optimize, skipping interpolation between the initial
-        and final structures. sets `interpolator` to None.
-    band_path
-        Path of band of images to optimize, skipping interpolation between the initial
-        and final structures. sets `interpolator` to None.
+        Band of ASE Atoms images, or filepath to images, to optimize, skipping
+        interpolation between the initial and final structures. Sets `interpolator` to
+        None.
     arch
         MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
     device
@@ -118,12 +109,9 @@ class NEB(BaseCalculation):
 
     def __init__(
         self,
-        init_struct: Atoms | None = None,
-        init_struct_path: PathLike | None = None,
-        final_struct: Atoms | None = None,
-        final_struct_path: PathLike | None = None,
-        band_structs: Sequence[Atoms] | None = None,
-        band_path: PathLike | None = None,
+        init_struct: Atoms | PathLike | None = None,
+        final_struct: Atoms | PathLike | None = None,
+        band_structs: Sequence[Atoms] | PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -157,25 +145,15 @@ class NEB(BaseCalculation):
         Parameters
         ----------
         init_struct
-            Initial ASE Atoms structure for Nudged Elastic Band method. Required if
-            `init_struct_path` is None. Default is None.
-        init_struct_path
-            Path of initial structure for Nudged Elastic Band method. Required if
-            `init_struct` is None. Default is None.
+            Initial ASE Atoms structure, or filepath to structure to simulate.
         final_struct
-            Final ASE Atoms structure for Nudged Elastic Band method. Required if
-            `final_struct_path` is None. Default is None. Any attached calculators will
-            be replaced with a copy matching the one attached to init_struct. Default
-            is None.
-        final_struct_path
-            Path of final structure for Nudged Elastic Band method. Required if
-            `final_struct` is None. Default is None.
+            Final ASE Atoms structure, or filepath to structure to simulate. Any
+            attached calculators will be replaced with a copy matching the one attached
+            to init_struct. Default is None.
         band_structs
-            Band of ASE Atoms images to optimize, skipping interpolation between the
-            initial and final structures. sets `interpolator` to None.
-        band_path
-            Path of band of images to optimize, skipping interpolation between the
-            initial and final structures. sets `interpolator` to None.
+            Band of ASE Atoms images, or filepath to images, to optimize, skipping
+            interpolation between the initial and final structures. Sets `interpolator`
+            to None.
         arch
             MLIP architecture to use for Nudged Elastic Band method. Default is
             "mace_mp".
@@ -275,12 +253,12 @@ class NEB(BaseCalculation):
             raise ValueError("`n_images` must be an integer greater than 0.")
 
         # Identify whether interpolating
-        if band_structs or band_path:
+        if band_structs:
             self.interpolator = None
-            if init_struct or init_struct_path or final_struct or final_struct_path:
+            if init_struct or final_struct:
                 raise ValueError(
-                    "Band cannot be specified in combination with an initial or final "
-                    "structure"
+                    "`band_structs` cannot be specified in combination with "
+                    "`init_struct` or final_struct"
                 )
 
             if minimize:
@@ -288,7 +266,6 @@ class NEB(BaseCalculation):
 
             # Pass band strutures to base class init
             init_struct = band_structs
-            init_struct_path = band_path
 
             # Read all image by default for band
             read_kwargs.setdefault("index", ":")
@@ -303,9 +280,8 @@ class NEB(BaseCalculation):
 
         # Initialise structures and logging
         super().__init__(
-            calc_name=__name__,
             struct=init_struct,
-            struct_path=init_struct_path,
+            calc_name=__name__,
             arch=arch,
             device=device,
             model_path=model_path,
@@ -330,14 +306,12 @@ class NEB(BaseCalculation):
             self.init_struct = self.struct
             self.init_struct_path = self.struct_path
 
-            self.final_struct = input_structs(
+            self.final_struct, self.final_struct_path = input_structs(
                 struct=final_struct,
-                struct_path=final_struct_path,
                 read_kwargs=read_kwargs,
                 sequence_allowed=False,
                 set_calc=False,
             )
-            self.final_struct_path = final_struct_path
             self.final_struct.calc = copy(self.struct.calc)
         else:
             if not isinstance(self.struct, Sequence):
@@ -375,7 +349,7 @@ class NEB(BaseCalculation):
             self.final_struct_min_path = self._build_filename(
                 "final-opt.extxyz",
                 prefix_override=self._get_default_prefix(
-                    file_prefix, final_struct, final_struct_path
+                    file_prefix, self.final_struct, self.final_struct_path
                 ),
             )
             if "write_kwargs" in self.minimize_kwargs:

@@ -55,7 +55,7 @@ For example:
     from janus_core.calculations.single_point import SinglePoint
 
     single_point = SinglePoint(
-        struct_path="tests/data/NaCl.cif",
+        struct="tests/data/NaCl.cif",
         arch="mace_mp",
         model_path="tests/models/mace_mp_small.model",
     )

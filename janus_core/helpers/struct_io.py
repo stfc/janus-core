@@ -109,9 +109,8 @@ def attach_calculator(
 
 
 def input_structs(
-    struct: MaybeSequence[Atoms] | None = None,
+    struct: MaybeSequence[Atoms] | PathLike,
     *,
-    struct_path: PathLike | None = None,
     read_kwargs: ASEReadArgs | None = None,
     sequence_allowed: bool = True,
     arch: Architectures = "mace_mp",
@@ -120,17 +119,14 @@ def input_structs(
     calc_kwargs: dict[str, Any] | None = None,
     set_calc: bool | None = None,
     logger: logging.Logger | None = None,
-) -> MaybeSequence[Atoms]:
+) -> tuple[MaybeSequence[Atoms], PathLike | None]:
     """
     Read input structures and/or attach MLIP calculators.
 
     Parameters
     ----------
     struct
-        ASE Atoms structure(s) to simulate. Required if `struct_path` is None. Default
-        is None.
-    struct_path
-        Path of structure to simulate. Required if `struct` is None. Default is None.
+        ASE Atoms structure(s), or filepath to structure(s) to simulate.
     read_kwargs
         Keyword arguments to pass to ase.io.read. Default is {}.
     sequence_allowed
@@ -144,36 +140,28 @@ def input_structs(
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc
-        Whether to set (new) calculators for structures.  Default is True if
-        `struct_path` is specified or `struct` is missing calculators, else default is
-        False.
+        Whether to set (new) calculators for structures.  Default is True if `struct`
+        is `PathLike` or `struct` is missing calculators, else default is False.
     logger
         Logger if log file has been specified. Default is None.
 
     Returns
     -------
-    MaybeSequence[Atoms]
+    tuple[MaybeSequence[Atoms], PathLike | None]
         Structure(s) with attached MLIP calculators.
     """
     (read_kwargs,) = none_to_dict(read_kwargs)
 
-    # Validate parameters
-    if not struct and not struct_path:
-        raise ValueError(
-            "Please specify either the ASE Atoms structure (`struct`) "
-            "or a path to the structure file (`struct_path`)"
-        )
-
-    if struct and struct_path:
-        raise ValueError(
-            "You cannot specify both the ASE Atoms structure (`struct`) "
-            "and a path to the structure file (`struct_path`)"
-        )
+    struct_path = struct if isinstance(struct, PathLike) else None
 
     # Read from file
     if struct_path:
         if logger:
             logger.info("Reading structures from file.")
+
+        if not Path(struct_path).exists():
+            raise ValueError("`struct` file could not be found")
+
         struct = read(struct_path, **read_kwargs)
         if logger:
             logger.info("Structures read from file.")
@@ -216,7 +204,7 @@ def input_structs(
         if logger:
             logger.info("Calculator attached to structure.")
 
-    return struct
+    return struct, struct_path
 
 
 def output_structs(
@@ -292,7 +280,7 @@ def output_structs(
         )
 
         # write_results is only a valid kwarg for extxyz
-        if write_format in ("xyz", "extxyz"):
+        if write_format in ("extxyz"):
             write_kwargs.setdefault("write_results", not invalidate_calc)
         else:
             write_kwargs.pop("write_results", None)

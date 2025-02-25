@@ -41,14 +41,14 @@ def LFPO_end_b(LFPO):
 def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
     """Test NEB."""
     # Write initial and final structures
-    init_struct_path = tmp_path / "init_struct.cif"
-    final_struct_path = tmp_path / "final_struct.cif"
-    write(init_struct_path, images=LFPO_start_b)
-    write(final_struct_path, images=LFPO_end_b)
+    init_struct = tmp_path / "init_struct.cif"
+    final_struct = tmp_path / "final_struct.cif"
+    write(init_struct, images=LFPO_start_b)
+    write(final_struct, images=LFPO_end_b)
 
     neb = NEB(
-        init_struct_path=init_struct_path,
-        final_struct_path=final_struct_path,
+        init_struct=init_struct,
+        final_struct=final_struct,
         model_path=MODEL_PATH,
         n_images=5,
     )
@@ -148,7 +148,7 @@ def test_neb_plot(tmp_path):
     file_prefix = tmp_path / "LFPO"
 
     neb = NEB(
-        band_path=DATA_PATH / "LiFePO4-neb-band.xyz",
+        band_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
         arch="mace",
         model_path=MODEL_PATH,
         steps=2,

@@ -174,7 +174,7 @@ def eos(
 
     # Dictionary of inputs for EoS class
     eos_kwargs = {
-        "struct_path": struct,
+        "struct": struct,
         "arch": arch,
         "device": device,
         "model_path": model_path,
