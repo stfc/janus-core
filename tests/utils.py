@@ -132,6 +132,8 @@ def skip_extras(arch: str):
             pytest.importorskip("deepmd")
         case "mace" | "mace_mp" | "mace_off":
             pytest.importorskip("mace")
+        case "mattersim":
+            pytest.importorskip("mattersim")
         case "nequip":
             pytest.importorskip("nequip")
         case "orb":
