@@ -15,7 +15,7 @@ from warnings import warn
 
 # Only needed for type hints
 if TYPE_CHECKING:
-    from rich.progress import Progress, TaskID
+    from rich.progress import TaskID
 
 from ase import Atoms
 from ase.geometry.analysis import Analysis
@@ -1173,19 +1173,88 @@ class MolecularDynamics(BaseCalculation):
         else:
             raise ValueError("Temperature set for ensemble with no thermostat.")
 
-    def _update_progress_bar(self, progress_bar: Progress, task_id: TaskID):
+    def _init_progress_bar(self) -> ProgressBar:
+        """
+        Initialise MD progress bar.
+
+        Returns
+        -------
+        progress_bar
+            Object used for managing progress bars.
+        """
+        if not self.enable_progress_bar:
+            self._progress_bar = ProgressBar(disable=True)
+            return self._progress_bar
+        self._progress_bar = ProgressBar()
+        total_steps = self.steps
+
+        # Set total expected MD steps.
+        if self.ramp_temp:
+            total_steps += self.heating_n_temps * self.heating_steps_per_temp
+            # Heating steps at 0 are skipped.
+            if np.isclose(self.temp_start, 0.0):
+                total_steps -= self.heating_steps_per_temp
+
+        total_task_id = self._progress_bar.add_task(
+            "Performing MD simulation...",
+            total=total_steps,
+            completed=self.offset,
+        )
+        ramp_task_id = None
+        if self.ramp_temp:
+            ramp_task_id = self._progress_bar.add_task(
+                "",
+                visible=False,
+            )
+
+        update_func = partial(self._update_progress_bar, total_task_id, ramp_task_id)
+        self.dyn.attach(update_func, interval=self.progress_bar_update_every)
+        # Also ensure progress is updated at the end
+        self.dyn.attach(update_func, interval=-total_steps)
+        return self._progress_bar
+
+    def _update_progress_bar(
+        self, total_task_id: TaskID, ramp_task_id: TaskID | None = None
+    ):
         """
         Update the progress bar for MD run.
 
         Parameters
         ----------
-        progress_bar
-            The progress bar to be updated.
-        task_id
-            The task ID of the task created by `ProgressBar.add_task()`.
+        total_task_id
+            Task ID tracking overall simulation progress.
+        ramp_task_id
+            Task ID tracking progress of individual temperature ramp steps (Optional).
         """
-        progress_bar.update(task_id, completed=self.dyn.nsteps + self.offset)
-        progress_bar.refresh()
+        current_step = self.dyn.nsteps + self.offset
+
+        self._progress_bar.update(total_task_id, completed=current_step)
+
+        if ramp_task_id:
+            current_ramp_step = current_step // self.heating_steps_per_temp
+
+            # Account for MD temperature steps at T=0 K being skipped.
+            heating_n_temps = self.heating_n_temps
+            if np.isclose(self.temp_start, 0.0):
+                heating_n_temps -= 1
+
+            if current_ramp_step < heating_n_temps:
+                description = f"Temperature ramp ({self.temp} K)..."
+                completed = current_step % self.heating_steps_per_temp
+                total = self.heating_steps_per_temp
+            else:
+                description = f"Constant temperature ({self.temp} K)..."
+                completed = current_step - heating_n_temps * self.heating_steps_per_temp
+                total = self.steps
+            self._progress_bar.update(
+                ramp_task_id,
+                description=description,
+                completed=completed,
+                total=total,
+                visible=True,
+            )
+
+        self._progress_bar.refresh()
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
@@ -1212,19 +1281,7 @@ class MolecularDynamics(BaseCalculation):
         if self.minimize and self.minimize_every > 0:
             self.dyn.attach(self._optimize_structure, interval=self.minimize_every)
 
-        with ProgressBar(disable=not self.enable_progress_bar) as progress_bar:
-            if self.enable_progress_bar:
-                total_steps = self.steps
-                if self.ramp_temp:
-                    total_steps += self.heating_n_temps * self.heating_steps_per_temp
-                task_id = progress_bar.add_task(
-                    "Performing MD simulation...",
-                    total=total_steps,
-                    completed=self.offset,
-                )
-                update_func = partial(self._update_progress_bar, progress_bar, task_id)
-                self.dyn.attach(update_func, interval=self.progress_bar_update_every)
-
+        with self._init_progress_bar():
             # Note current time
             self.struct.info["real_time"] = datetime.datetime.now()
             self._run_dynamics()
@@ -1248,7 +1305,9 @@ class MolecularDynamics(BaseCalculation):
         # Run temperature ramp
         if self.ramp_temp:
             if self.logger and not np.isclose(self.temp_time % self.timestep, 0.0):
-                rounded_temp_step = self.heating_n_steps * self.timestep / units.fs
+                rounded_temp_step = (
+                    self.heating_steps_per_temp * self.timestep / units.fs
+                )
                 self.logger.info(
                     "Temperature ramp step time rounded to nearest timestep "
                     f"({rounded_temp_step:.5} fs)"
