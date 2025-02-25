@@ -280,7 +280,7 @@ def output_structs(
         )
 
         # write_results is only a valid kwarg for extxyz
-        if write_format in ("extxyz"):
+        if write_format == "extxyz":
             write_kwargs.setdefault("write_results", not invalidate_calc)
         else:
             write_kwargs.pop("write_results", None)
