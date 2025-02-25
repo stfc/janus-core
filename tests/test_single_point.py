@@ -40,7 +40,10 @@ test_data = [
 )
 def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, idx):
     """Test single point energy using MACE calculators."""
+    skip_extras("mace")
+
     calc_kwargs["model"] = MACE_PATH
+
     single_point = SinglePoint(
         struct=DATA_PATH / struct,
         arch="mace",
@@ -127,6 +130,8 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
 
 def test_single_point_none():
     """Test single point stress using MACE calculator."""
+    skip_extras("mace")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
@@ -140,6 +145,8 @@ def test_single_point_none():
 
 def test_single_point_clean():
     """Test single point stress using MACE calculator."""
+    skip_extras("mace")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "H2O.cif",
         arch="mace",
@@ -154,6 +161,8 @@ def test_single_point_clean():
 
 def test_single_point_traj():
     """Test single point stress using MACE calculator."""
+    skip_extras("mace")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace",
@@ -175,6 +184,8 @@ def test_single_point_traj():
 
 def test_single_point_write():
     """Test writing singlepoint results."""
+    skip_extras("mace")
+
     data_path = DATA_PATH / "NaCl.cif"
     results_path = Path("./NaCl-results.extxyz").absolute()
     assert not results_path.exists()
@@ -209,6 +220,8 @@ def test_single_point_write():
 
 def test_single_point_write_kwargs(tmp_path):
     """Test passing write_kwargs to singlepoint results."""
+    skip_extras("mace")
+
     data_path = DATA_PATH / "NaCl.cif"
     results_path = tmp_path / "NaCl.extxyz"
 
@@ -229,6 +242,8 @@ def test_single_point_write_kwargs(tmp_path):
 
 def test_single_point_molecule(tmp_path):
     """Test singlepoint results for isolated molecule."""
+    skip_extras("mace")
+
     data_path = DATA_PATH / "H2O.cif"
     results_path = tmp_path / "H2O.extxyz"
     single_point = SinglePoint(
@@ -256,6 +271,8 @@ def test_single_point_molecule(tmp_path):
 
 def test_invalid_prop():
     """Test invalid property request."""
+    skip_extras("mace")
+
     with pytest.raises(NotImplementedError):
         SinglePoint(
             struct=DATA_PATH / "H2O.cif",
@@ -267,6 +284,8 @@ def test_invalid_prop():
 
 def test_atoms():
     """Test passing ASE Atoms structure."""
+    skip_extras("mace")
+
     struct = read(DATA_PATH / "NaCl.cif")
     single_point = SinglePoint(
         struct=struct,
@@ -288,7 +307,10 @@ def test_no_atoms_or_path():
 
 def test_invalidate_calc():
     """Test setting invalidate_calc via write_kwargs."""
+    skip_extras("mace")
+
     struct = DATA_PATH / "NaCl.cif"
+
     single_point = SinglePoint(
         struct=struct,
         arch="mace",
@@ -306,6 +328,8 @@ def test_invalidate_calc():
 
 def test_logging(tmp_path):
     """Test attaching logger to SinglePoint and emissions are saved to info."""
+    skip_extras("mace")
+
     log_file = tmp_path / "sp.log"
 
     single_point = SinglePoint(
@@ -327,6 +351,8 @@ def test_logging(tmp_path):
 
 def test_hessian():
     """Test Hessian."""
+    skip_extras("mace")
+
     sp = SinglePoint(
         calc_kwargs={"model": MACE_PATH},
         struct=DATA_PATH / "NaCl.cif",
@@ -341,6 +367,8 @@ def test_hessian():
 
 def test_hessian_traj():
     """Test calculating Hessian for trajectory."""
+    skip_extras("mace")
+
     sp = SinglePoint(
         calc_kwargs={"model": MACE_PATH},
         struct=DATA_PATH / "benzene-traj.xyz",
@@ -360,6 +388,7 @@ def test_hessian_traj():
 def test_hessian_not_implemented(struct):
     """Test unimplemented Hessian."""
     skip_extras("chgnet")
+
     with pytest.raises(NotImplementedError):
         SinglePoint(
             struct=DATA_PATH / struct,
