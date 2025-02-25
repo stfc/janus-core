@@ -60,9 +60,6 @@ orb = [
 sevennet = [
     "sevenn == 0.10.3",
 ]
-mattersim = [
-    "mattersim == 1.1.1",
-]
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
@@ -70,7 +67,11 @@ all = [
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
-    "janus-core[mattersim]",
+]
+
+# MLIP with updated e3nn
+mattersim = [
+    "mattersim == 1.1.1",
 ]
 
 # MLIPs with dgl dependency
@@ -219,6 +220,14 @@ conflicts = [
     [
       { extra = "all" },
       { extra = "m3gnet" },
+    ],
+    [
+      { extra = "mattersim" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "mattersim" },
+      { extra = "all" },
     ],
 ]
 
