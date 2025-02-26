@@ -100,17 +100,18 @@ def test_traj_reformat(tmp_path):
     )
 
     traj_path_binary = tmp_path / "NaCl.traj"
-    traj_path_xyz = tmp_path / "NaCl-traj.extxyz"
+    traj_path_xyz = tmp_path / "NaCl-traj.xyz"
 
     optimizer = GeomOpt(
         single_point.struct,
         opt_kwargs={"trajectory": str(traj_path_binary)},
-        traj_kwargs={"filename": traj_path_xyz},
+        traj_kwargs={"filename": traj_path_xyz, "format": "xyz"},
     )
     optimizer.run()
     traj = read(traj_path_xyz, index=":")
 
     assert len(traj) == 3
+    assert traj[0].info == {}
 
 
 def test_missing_traj_kwarg(tmp_path):
@@ -357,3 +358,14 @@ def test_logging(tmp_path):
     assert log_file.exists()
     assert "emissions" in single_point.struct.info
     assert single_point.struct.info["emissions"] > 0
+
+
+def test_write_xyz(tmp_path):
+    """Test writing a non-extended xyz file."""
+    optimizer = GeomOpt(
+        struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
+        calc_kwargs={"model": MODEL_PATH},
+        fmax=0.1,
+    )
+    optimizer.run()
