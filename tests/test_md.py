@@ -861,6 +861,46 @@ def test_heating_md(tmp_path, ensemble):
     assert stat_data.units[target_t_col] == "K"
 
 
+def test_heating_restart(tmp_path):
+    """Test restarting during temperature ramp."""
+    file_prefix = tmp_path / "NaCl-heating"
+
+    md = NVT(
+        struct=DATA_PATH / "NaCl.cif",
+        temp=10.0,
+        steps=3,
+        traj_every=100,
+        stats_every=1,
+        file_prefix=file_prefix,
+        restart_every=3,
+    )
+    md.run()
+
+    # Restarts 3 steps in - halfway through a temperature step (20 K).
+    # Should perform 1 step at 20K, then 4 at 30K (2 ramp, 2 MD)
+    md_restart = NVT(
+        struct=DATA_PATH / "NaCl.cif",
+        temp=30.0,
+        steps=2,
+        traj_every=100,
+        stats_every=1,
+        file_prefix=file_prefix,
+        temp_start=0,
+        temp_end=30,
+        temp_step=10,
+        temp_time=2,
+        restart=True,
+    )
+    md_restart.run()
+
+    stat_data = Stats(md_restart.stats_file)
+    target_t_col = stat_data.labels.index("Target_T")
+    assert stat_data.rows == 9
+    assert stat_data.data[4, target_t_col] == 20
+    assert stat_data.data[5, target_t_col] == 30
+    assert stat_data.data[8, target_t_col] == 30
+
+
 def test_heating_files():
     """Test default heating file names."""
     traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.extxyz")

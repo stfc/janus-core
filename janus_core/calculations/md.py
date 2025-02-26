@@ -1092,12 +1092,15 @@ class MolecularDynamics(BaseCalculation):
     def _run_dynamics(self) -> None:
         """Run dynamics and/or temperature ramp."""
         # Store temperature for final MD
+        self.dyn.attach(lambda: print(self.dyn.nsteps))
+
         md_temp = self.temp
         if self.ramp_temp:
             self.temp = self.temp_start
 
         # Set velocities to match current temperature
-        self._set_velocity_distribution()
+        if not self.restart:
+            self._set_velocity_distribution()
 
         # Run temperature ramp
         if self.ramp_temp:
@@ -1120,31 +1123,47 @@ class MolecularDynamics(BaseCalculation):
                 self.temp_start + ramp_sign * i * self.temp_step for i in range(n_temps)
             ]
 
-            if self.logger:
-                self.logger.info("Beginning temperature ramp at %sK", temps[0])
-            if self.tracker:
-                self.tracker.start_task("Temperature ramp")
+            if self.restart:
+                ramp_steps_completed = self.offset // heating_steps
+                ramp_steps_completed = min(ramp_steps_completed, len(temps))
+                if np.isclose(self.temp_start, 0.0):
+                    # T~0K steps are skipped, so offset will not include them.
+                    ramp_steps_completed += 1
+                temps = temps[ramp_steps_completed:]
 
-            for temp in temps:
-                self.temp = temp
-                self._set_velocity_distribution()
-                if isclose(temp, 0.0):
-                    # Calculate forces and energies to be output
-                    self.struct.get_potential_energy()
-                    self.struct.get_forces()
+            if len(temps) > 0:
+                if self.logger:
+                    self.logger.info("Beginning temperature ramp at %sK", temps[0])
+                if self.tracker:
+                    self.tracker.start_task("Temperature ramp")
+
+                for temp in temps:
+                    self.temp = temp
+                    steps = heating_steps
+                    if temp == temps[0]:
+                        steps -= self.offset % heating_steps
+                    self._set_velocity_distribution()
+                    if isclose(temp, 0.0):
+                        # Calculate forces and energies to be output
+                        self.struct.get_potential_energy()
+                        self.struct.get_forces()
+                        self._write_final_state()
+                        self.created_final_file = True
+                        continue
+                    self._set_target_temperature(temp)
+                    self.dyn.run(steps)
                     self._write_final_state()
                     self.created_final_file = True
-                    continue
-                self._set_target_temperature(temp)
-                self.dyn.run(heating_steps)
-                self._write_final_state()
-                self.created_final_file = True
 
-            if self.logger:
-                self.logger.info("Temperature ramp complete at %sK", temps[-1])
-            if self.tracker:
-                emissions = self.tracker.stop_task().emissions
-                self.struct.info["emissions"] = emissions
+                if self.logger:
+                    self.logger.info("Temperature ramp complete at %sK", temps[-1])
+                if self.tracker:
+                    emissions = self.tracker.stop_task().emissions
+                    self.struct.info["emissions"] = emissions
+
+        md_offset = self.offset
+        if self.restart and self.ramp_temp:
+            md_offset = max(0, md_offset - heating_steps * n_temps)
 
         # Run MD
         if self.steps > 0:
@@ -1156,7 +1175,7 @@ class MolecularDynamics(BaseCalculation):
             if self.ramp_temp:
                 self._set_velocity_distribution()
                 self._set_target_temperature(self.temp)
-            self.dyn.run(self.steps - self.offset)
+            self.dyn.run(self.steps - md_offset)
             self._write_final_state()
             self.created_final_file = True
             if self.logger:
