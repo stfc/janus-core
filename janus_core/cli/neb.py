@@ -288,8 +288,12 @@ def neb(
     # Convert all paths to strings in inputs nested dictionary
     dict_paths_to_strs(inputs)
 
+    output_files = neb.output_files
+
     # Save summary information before calculations begin
-    start_summary(command="neb", summary=summary, inputs=inputs)
+    start_summary(
+        command="neb", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run equation of state calculations
     neb.run()

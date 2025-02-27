@@ -174,8 +174,12 @@ def singlepoint(
         log=log,
     )
 
+    output_files = s_point.output_files
+
     # Save summary information before singlepoint calculation begins
-    start_summary(command="singlepoint", summary=summary, inputs=inputs)
+    start_summary(
+        command="singlepoint", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run singlepoint calculation
     s_point.run()
