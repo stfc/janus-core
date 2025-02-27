@@ -58,6 +58,8 @@ class GeomOpt(BaseCalculation):
         Default is True if attach_logger is True, else False.
     tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
+    file_prefix
+        Prefix for output filenames. Default is inferred from structure.
     fmax
         Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
     steps
@@ -85,6 +87,8 @@ class GeomOpt(BaseCalculation):
     write_kwargs
         Keyword arguments to pass to ase.io.write to save optimized structure.
         Default is {}.
+    write_trajectory
+        Whether to save a trajectory file of optimization frames.
     traj_kwargs
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         Must include "filename" keyword. Default is {}.
@@ -103,6 +107,7 @@ class GeomOpt(BaseCalculation):
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
         tracker_kwargs: dict[str, Any] | None = None,
+        file_prefix: PathLike | None = None,
         fmax: float = 0.1,
         steps: int = 1000,
         symmetrize: bool = False,
@@ -114,6 +119,7 @@ class GeomOpt(BaseCalculation):
         opt_kwargs: ASEOptArgs | None = None,
         write_results: bool = False,
         write_kwargs: OutputKwargs | None = None,
+        write_trajectory: bool = False,
         traj_kwargs: OutputKwargs | None = None,
     ) -> None:
         """
@@ -146,6 +152,8 @@ class GeomOpt(BaseCalculation):
             Default is True if attach_logger is True, else False.
         tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
+        file_prefix
+            Prefix for output filenames. Default is inferred from structure.
         fmax
             Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
         steps
@@ -173,9 +181,11 @@ class GeomOpt(BaseCalculation):
         write_kwargs
             Keyword arguments to pass to ase.io.write to save optimized structure.
             Default is {}.
+        write_trajectory
+            Whether to save a trajectory file of optimization frames.
         traj_kwargs
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
-            Must include "filename" keyword. Default is {}.
+            "filename" keyword is inferred from file_prefix if not given. Default is {}.
         """
         read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs = (
             none_to_dict(
@@ -194,16 +204,8 @@ class GeomOpt(BaseCalculation):
         self.opt_kwargs = opt_kwargs
         self.write_results = write_results
         self.write_kwargs = write_kwargs
+        self.write_trajectory = write_trajectory
         self.traj_kwargs = traj_kwargs
-
-        # Validate parameters
-        if self.traj_kwargs and "filename" not in self.traj_kwargs:
-            raise ValueError("'filename' must be included in `traj_kwargs`")
-
-        if self.traj_kwargs and "trajectory" not in self.opt_kwargs:
-            raise ValueError(
-                "'trajectory' must be a key in `opt_kwargs` to save the trajectory."
-            )
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -223,16 +225,29 @@ class GeomOpt(BaseCalculation):
             log_kwargs=log_kwargs,
             track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
+            file_prefix=file_prefix,
         )
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
-        # Set output file
+        # Set output files
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
             "opt.extxyz", filename=self.write_kwargs["filename"]
         ).absolute()
+
+        if self.write_trajectory and "filename" not in self.traj_kwargs:
+            self.traj_kwargs["filename"] = self._build_filename(
+                "traj.extxyz"
+            ).absolute()
+
+        if self.write_trajectory and "trajectory" not in self.opt_kwargs:
+            # Overwrite .traj binary with .extxyz by default.
+            self.opt_kwargs["trajectory"] = str(self.traj_kwargs["filename"])
+
+        if self.traj_kwargs and not self.write_trajectory:
+            raise ValueError("traj_kwargs given, but trajectory writing not enabled.")
 
         # Configure optimizer dynamics
         self.set_optimizer()
@@ -342,7 +357,7 @@ class GeomOpt(BaseCalculation):
         )
 
         # Reformat trajectory file from binary
-        if self.traj_kwargs:
+        if self.write_trajectory:
             traj = read(self.opt_kwargs["trajectory"], index=":")
             output_structs(
                 traj,

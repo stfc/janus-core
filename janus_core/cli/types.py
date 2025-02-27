@@ -271,6 +271,21 @@ InterpolationKwargs = Annotated[
     ),
 ]
 
+TrajKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to ase.io.write when saving trajectory. Must be
+            passed as a dictionary wrapped in quotes, e.g. "{'key': value}".
+            If "filename" is not included, it is inferred from --file-prefix.
+            """
+        ),
+        metavar="DICT",
+    ),
+]
+
 PostProcessKwargs = Annotated[
     TyperDict | None,
     Option(

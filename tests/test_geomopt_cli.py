@@ -769,3 +769,45 @@ def test_units(tmp_path):
     assert "units" in atoms.info
     for prop, units in expected_units.items():
         assert atoms.info["units"][prop] == units
+
+
+def test_file_prefix(tmp_path):
+    """Test file prefix creates directories and affects all files."""
+    file_prefix = tmp_path / "test/test"
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--write-trajectory",
+        ],
+    )
+    assert result.exit_code == 0
+    tmp_path_contents = list(tmp_path.glob("*"))
+    assert len(tmp_path_contents) == 1
+    assert tmp_path_contents[0].stem == "test"
+    subdir_contents = list((tmp_path / "test/").glob("*"))
+    assert len(subdir_contents) == 4
+    assert all(file.stem[:4] for file in subdir_contents)
+
+
+def test_traj_kwargs_no_write(tmp_path):
+    """Test traj_kwargs without flag to write traj raises error."""
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--traj-kwargs",
+            f"{{'filename':'{tmp_path / 'traj.extxyz'}'}}",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
+    assert "trajectory writing not enabled." in result.exception.args[0]
