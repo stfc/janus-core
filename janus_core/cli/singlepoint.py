@@ -166,14 +166,22 @@ def singlepoint(
     summary = s_point._build_filename("singlepoint-summary.yml", filename=summary)
     log = s_point.log_kwargs["filename"]
 
-    # Add structure, MLIP information, and log to inputs
+    # Add structure, MLIP information, and log to info
     info = get_struct_info(
         struct=s_point.struct,
         struct_path=struct,
     )
 
-    # Save summary information before calculation begins
-    start_summary(command="singlepoint", summary=summary, config=config, info=info)
+    output_files = s_point.output_files
+
+    # Save summary information before singlepoint calculation begins
+    start_summary(
+        command="singlepoint",
+        summary=summary,
+        info=info,
+        config=config,
+        output_files=output_files,
+    )
 
     # Run singlepoint calculation
     s_point.run()

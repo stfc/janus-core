@@ -260,7 +260,7 @@ def neb(
     summary = neb._build_filename("neb-summary.yml", filename=summary)
     log = neb.log_kwargs["filename"]
 
-    # Add structure, MLIP information, and log to inputs
+    # Add structure, MLIP information, and log to info
     info = get_struct_info(
         struct=neb.struct,
         struct_path=init_struct,
@@ -276,8 +276,16 @@ def neb(
             "formula": neb.final_struct.get_chemical_formula(),
         }
 
+    output_files = neb.output_files
+
     # Save summary information before calculations begin
-    start_summary(command="neb", summary=summary, config=config, info=info)
+    start_summary(
+        command="neb",
+        summary=summary,
+        info=info,
+        config=config,
+        output_files=output_files,
+    )
 
     # Run equation of state calculations
     neb.run()

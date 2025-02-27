@@ -176,14 +176,22 @@ def descriptors(
     summary = descript._build_filename("descriptors-summary.yml", filename=summary)
     log = descript.log_kwargs["filename"]
 
-    # Add structure, MLIP information, and log to inputs
+    # Add structure, MLIP information, and log to info
     info = get_struct_info(
         struct=descript.struct,
         struct_path=struct,
     )
 
+    output_files = descript.output_files
+
     # Save summary information before calculation begins
-    start_summary(command="descriptors", summary=summary, config=config, info=info)
+    start_summary(
+        command="descriptors",
+        summary=summary,
+        info=info,
+        config=config,
+        output_files=output_files,
+    )
 
     # Calculate descriptors
     descript.run()

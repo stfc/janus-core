@@ -554,15 +554,22 @@ def md(
     summary = dyn._build_filename("md-summary.yml", dyn.param_prefix, filename=summary)
     log = dyn.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    # Add structure, MLIP information, and log to inputs
+    # Add structure, MLIP information, and log to info
     info = get_struct_info(
         struct=dyn.struct,
         struct_path=struct,
     )
 
-    # Save summary information before calculation begins
-    start_summary(command="md", summary=summary, config=config, info=info)
+    output_files = dyn.output_files
+
+    # Save summary information before simulation begins
+    start_summary(
+        command="md",
+        summary=summary,
+        info=info,
+        config=config,
+        output_files=output_files,
+    )
 
     # Run molecular dynamics
     dyn.run()
