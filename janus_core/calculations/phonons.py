@@ -267,9 +267,9 @@ class Phonons(BaseCalculation):
         self.displacement = displacement
         self.displacement_kwargs = displacement_kwargs
         self.mesh = mesh
-        self.symmetrize = symmetrize
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
+        self.symmetrize = symmetrize
         self.n_qpoints = n_qpoints
         self.qpoint_file = qpoint_file
         self.dos_kwargs = dos_kwargs
