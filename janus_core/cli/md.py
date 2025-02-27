@@ -364,10 +364,13 @@ def md(
             help="Whether to show progress bar.",
         ),
     ] = True,
-    progress_bar_update_every: Annotated[
+    update_progress_every: Annotated[
         int,
-        Option(help="How many timesteps between progress bar updates. Default is 1."),
-    ] = 1,
+        Option(
+            help="How many timesteps between progress bar updates. "
+            "Default is steps/100, rounded up."
+        ),
+    ] = None,
 ) -> None:
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -503,8 +506,9 @@ def md(
         is inferred from `file_prefix`.
     enable_progress_bar
         Whether to show progress bar.
-    progress_bar_update_every
-        How many timesteps between progress bar updates. Default is 1.
+    update_progress_every
+        How many timesteps between progress bar updates.
+        Default is steps/100, rounded up.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -631,7 +635,7 @@ def md(
         "correlation_kwargs": correlation_kwargs,
         "seed": seed,
         "enable_progress_bar": enable_progress_bar,
-        "progress_bar_update_every": progress_bar_update_every,
+        "update_progress_every": update_progress_every,
     }
 
     # Instantiate MD ensemble

@@ -169,8 +169,9 @@ class MolecularDynamics(BaseCalculation):
         Default is None.
     enable_progress_bar
         Whether to show a progress bar. Default is False.
-    progress_bar_update_every
-        How many timesteps between progress bar updates. Default is 1.
+    update_progress_every
+        How many timesteps between progress bar updates.
+        Default is steps/100, rounded up.
 
     Attributes
     ----------
@@ -233,7 +234,7 @@ class MolecularDynamics(BaseCalculation):
         correlation_kwargs: list[CorrelationKwargs] | None = None,
         seed: int | None = None,
         enable_progress_bar: bool = False,
-        progress_bar_update_every: int = 1,
+        update_progress_every: int | None = None,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -343,8 +344,9 @@ class MolecularDynamics(BaseCalculation):
             Default is None.
         enable_progress_bar
             Whether to show a progress bar. Default is False.
-        progress_bar_update_every
-            How many timesteps between progress bar updates. Default is 1.
+        update_progress_every
+            How many timesteps between progress bar updates.
+            Default is steps/100, rounded up.
         """
         (
             read_kwargs,
@@ -393,7 +395,7 @@ class MolecularDynamics(BaseCalculation):
         self.correlation_kwargs = correlation_kwargs
         self.seed = seed
         self.enable_progress_bar = enable_progress_bar
-        self.progress_bar_update_every = progress_bar_update_every
+        self.update_progress_every = update_progress_every
 
         if "append" in self.write_kwargs:
             raise ValueError("`append` cannot be specified when writing files")
@@ -460,6 +462,9 @@ class MolecularDynamics(BaseCalculation):
                 raise ValueError(
                     "Temperature ramp step time cannot be less than 1 timestep"
                 )
+
+        if self.update_progress_every is None:
+            self.update_progress_every = np.ceil(self.steps / 100)
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -1179,7 +1184,7 @@ class MolecularDynamics(BaseCalculation):
 
         Returns
         -------
-        progress_bar
+        ProgressBar
             Object used for managing progress bars.
         """
         if not self.enable_progress_bar:
@@ -1208,7 +1213,7 @@ class MolecularDynamics(BaseCalculation):
             )
 
         update_func = partial(self._update_progress_bar, total_task_id, ramp_task_id)
-        self.dyn.attach(update_func, interval=self.progress_bar_update_every)
+        self.dyn.attach(update_func, interval=self.update_progress_every)
         # Also ensure progress is updated at the end
         self.dyn.attach(update_func, interval=-total_steps)
         return self._progress_bar
