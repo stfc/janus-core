@@ -486,6 +486,11 @@ class MolecularDynamics(BaseCalculation):
 
         self.write_kwargs.setdefault("columns", default_columns)
 
+        # Use MD logger for geometry optimization
+        set_minimize_logging(
+            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+        )
+
         if "write_kwargs" in self.minimize_kwargs:
             # Use _build_filename even if given filename to ensure directory exists
             self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
@@ -497,11 +502,7 @@ class MolecularDynamics(BaseCalculation):
             self.minimize_kwargs.setdefault("write_results", True)
         else:
             self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
-
-        # Use MD logger for geometry optimization
-        set_minimize_logging(
-            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
-        )
+            self.minimize_kwargs.setdefault("write_results", False)
 
         self.dyn: Langevin | VelocityVerlet | ASE_NPT
         self.n_atoms = len(self.struct)
@@ -520,6 +521,34 @@ class MolecularDynamics(BaseCalculation):
             random.seed(seed)
 
         self._parse_correlations()
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        output_files = {}
+
+        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
+        output_files["stats"] = self.stats_file
+        output_files["trajectory"] = self.traj_file
+        output_files["final_structure"] = self.final_file
+        output_files["restart"] = self._restart_file
+        output_files["correlations"] = (
+            self._correlations_file if self._correlations else None
+        )
+        output_files["minimized_initial_structure"] = (
+            self.minimize_kwargs["write_kwargs"]["filename"]
+            if self.minimize_kwargs["write_results"]
+            else None
+        )
+
+        return output_files
 
     def _set_info(self) -> None:
         """Set time in fs, current dynamics step, density, and temperature to info."""
@@ -710,6 +739,18 @@ class MolecularDynamics(BaseCalculation):
             f"{step}.extxyz", prefix_override=self._restart_stem
         )
 
+    @property
+    def _correlations_file(self) -> str:
+        """
+        Define correlations file name.
+
+        Returns
+        -------
+        str
+           File name for correlations files.
+        """
+        return self._build_filename("cor.dat", self.param_prefix)
+
     def _parse_correlations(self) -> None:
         """Parse correlation kwargs into Correlations."""
         if self.correlation_kwargs:
@@ -728,9 +769,8 @@ class MolecularDynamics(BaseCalculation):
     def _write_correlations(self) -> None:
         """Write out the correlations."""
         if self._correlations:
-            corr_file = self._build_filename("cor.dat", self.param_prefix)
-            build_file_dir(corr_file)
-            with open(corr_file, "w", encoding="utf-8") as out_file:
+            build_file_dir(self._correlations_file)
+            with open(self._correlations_file, "w", encoding="utf-8") as out_file:
                 data = {}
                 for cor in self._correlations:
                     value, lags = cor.get()

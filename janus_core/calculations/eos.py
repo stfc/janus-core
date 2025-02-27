@@ -261,11 +261,37 @@ class EoS(BaseCalculation):
         self.plot_kwargs["filename"] = self._build_filename(
             "eos-plot.svg", filename=self.plot_kwargs["filename"]
         )
+        self.fit_file = self._build_filename("eos-fit.dat")
+        self.raw_file = self._build_filename("eos-raw.dat")
 
         self.results = {}
         self.volumes = []
         self.energies = []
         self.lattice_scalars = empty(0)
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        output_files = {}
+
+        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
+        output_files["generated_structures"] = (
+            self.write_kwargs["filename"] if self.write_structures else None
+        )
+        output_files["plot"] = (
+            self.plot_kwargs["filename"] if self.plot_to_file else None
+        )
+        output_files["fit"] = self.fit_file if self.write_results else None
+        output_files["raw"] = self.raw_file if self.write_results else None
+
+        return output_files
 
     def run(self) -> EoSResults:
         """
@@ -302,9 +328,8 @@ class EoS(BaseCalculation):
         self._calc_volumes_energies()
 
         if self.write_results:
-            eos_raw_file = f"{self.file_prefix}-eos-raw.dat"
-            build_file_dir(eos_raw_file)
-            with open(eos_raw_file, "w", encoding="utf8") as out:
+            build_file_dir(self.raw_file)
+            with open(self.raw_file, "w", encoding="utf8") as out:
                 print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
                 for eos_data in zip(
                     self.lattice_scalars, self.energies, self.volumes, strict=True
@@ -330,9 +355,8 @@ class EoS(BaseCalculation):
             self.tracker.stop()
 
         if self.write_results:
-            eos_fit_file = f"{self.file_prefix}-eos-fit.dat"
-            build_file_dir(eos_fit_file)
-            with open(eos_fit_file, "w", encoding="utf8") as out:
+            build_file_dir(self.fit_file)
+            with open(self.fit_file, "w", encoding="utf8") as out:
                 print("#Bulk modulus [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
                 print(bulk_modulus, e_0, v_0, file=out)
 

@@ -252,6 +252,28 @@ class GeomOpt(BaseCalculation):
         # Configure optimizer dynamics
         self.set_optimizer()
 
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        output_files = {}
+
+        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
+        output_files["optimized_structure"] = (
+            self.write_kwargs["filename"] if self.write_results else None
+        )
+        output_files["trajectory"] = (
+            self.traj_kwargs["filename"] if self.traj_kwargs else None
+        )
+
+        return output_files
+
     def set_optimizer(self) -> None:
         """Set optimizer for geometry optimization."""
         self._set_functions()

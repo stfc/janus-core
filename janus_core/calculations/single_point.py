@@ -227,6 +227,25 @@ class SinglePoint(BaseCalculation):
 
         self._properties = value
 
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        output_files = {}
+
+        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
+        output_files["results"] = (
+            self.write_kwargs["filename"] if self.write_results else None
+        )
+
+        return output_files
+
     def _get_potential_energy(self) -> MaybeList[float]:
         """
         Calculate potential energy using MLIP.
