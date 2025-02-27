@@ -340,7 +340,7 @@ def phonons(
     phonon = Phonons(**phonons_kwargs)
 
     # Set summary and log files
-    summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
+    summary = phonon._build_filename("phonons-summary.yml", filename=summary)
     log = phonon.log_kwargs["filename"]
 
     # Add structure, MLIP information, and log to inputs

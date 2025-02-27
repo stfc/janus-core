@@ -551,9 +551,7 @@ def md(
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
 
     # Set summary and log files
-    summary = dyn._build_filename(
-        "md-summary.yml", dyn.param_prefix, filename=summary
-    ).absolute()
+    summary = dyn._build_filename("md-summary.yml", dyn.param_prefix, filename=summary)
     log = dyn.log_kwargs["filename"]
 
     # Store inputs for yaml summary

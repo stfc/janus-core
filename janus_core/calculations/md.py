@@ -491,7 +491,7 @@ class MolecularDynamics(BaseCalculation):
             self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
             self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
                 "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
-            ).absolute()
+            )
 
             # Assume if write_kwargs are specified that results should be written
             self.minimize_kwargs.setdefault("write_results", True)

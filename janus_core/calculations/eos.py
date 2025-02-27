@@ -255,12 +255,12 @@ class EoS(BaseCalculation):
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
             "generated.extxyz", filename=self.write_kwargs["filename"]
-        ).absolute()
+        )
 
         self.plot_kwargs.setdefault("filename", None)
         self.plot_kwargs["filename"] = self._build_filename(
             "eos-plot.svg", filename=self.plot_kwargs["filename"]
-        ).absolute()
+        )
 
         self.results = {}
         self.volumes = []

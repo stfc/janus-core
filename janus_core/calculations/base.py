@@ -205,7 +205,7 @@ class BaseCalculation(FileNameMixin):
                 log_suffix,
                 param_prefix if file_prefix is None else "",
                 filename=self.log_kwargs["filename"],
-            ).absolute()
+            )
 
         self.log_kwargs.setdefault("name", calc_name)
         self.logger = config_logger(**self.log_kwargs)

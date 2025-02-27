@@ -173,9 +173,7 @@ def descriptors(
     descript = Descriptors(**descriptors_kwargs)
 
     # Set summary and log files
-    summary = descript._build_filename(
-        "descriptors-summary.yml", filename=summary
-    ).absolute()
+    summary = descript._build_filename("descriptors-summary.yml", filename=summary)
     log = descript.log_kwargs["filename"]
 
     # Add structure, MLIP information, and log to inputs

@@ -334,7 +334,7 @@ class Phonons(BaseCalculation):
                 self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
                 self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
                     "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
-                ).absolute()
+                )
             else:
                 self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
 

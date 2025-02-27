@@ -201,9 +201,7 @@ def eos(
     equation_of_state = EoS(**eos_kwargs)
 
     # Set summary and log files
-    summary = equation_of_state._build_filename(
-        "eos-summary.yml", filename=summary
-    ).absolute()
+    summary = equation_of_state._build_filename("eos-summary.yml", filename=summary)
     log = equation_of_state.log_kwargs["filename"]
 
     # Add structure, MLIP information, and log to inputs

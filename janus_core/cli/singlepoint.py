@@ -163,9 +163,7 @@ def singlepoint(
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary
-    summary = s_point._build_filename(
-        "singlepoint-summary.yml", filename=summary
-    ).absolute()
+    summary = s_point._build_filename("singlepoint-summary.yml", filename=summary)
     log = s_point.log_kwargs["filename"]
 
     # Add structure, MLIP information, and log to inputs

@@ -177,7 +177,7 @@ class SinglePoint(BaseCalculation):
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
             "results.extxyz", filename=self.write_kwargs["filename"]
-        ).absolute()
+        )
 
         self.results = {}
 
