@@ -325,46 +325,70 @@ class NEB(BaseCalculation):
             interpolator_kwargs.setdefault("interpolate_lattices", False)
             interpolator_kwargs.setdefault("autosort_tol", 0.5)
 
+        set_minimize_logging(
+            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+        )
+
         # Set output file defaults
         self.results_file = self._build_filename("neb-results.dat")
         self.plot_file = self._build_filename("neb-plot.svg")
 
         self.write_kwargs["filename"] = self._build_filename("neb-band.extxyz")
 
-        if self.minimize:
-            set_minimize_logging(
-                self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
-            )
+        # Variable cell in periodic directions is not implemented yet for NEB
+        self.minimize_kwargs.setdefault("filter_func", None)
 
-            # Variable cell in periodic directions is not implemented yet for NEB
-            self.minimize_kwargs.setdefault("filter_func", None)
+        # Write out file by default if minimizing
+        self.minimize_kwargs.setdefault("write_results", True)
 
-            # Write out file by default
-            self.minimize_kwargs.setdefault("write_results", True)
-
-            # Set minimized file paths
-            self.init_struct_min_path = self._build_filename("init-opt.extxyz")
-            self.final_struct_min_path = self._build_filename(
-                "final-opt.extxyz",
-                prefix_override=self._get_default_prefix(
-                    file_prefix, self.final_struct, self.final_struct_path
-                ),
-            )
-            if "write_kwargs" in self.minimize_kwargs:
-                if "filename" in self.minimize_kwargs["write_kwargs"]:
-                    raise ValueError(
-                        "Filenames for minimized structures cannot currently be set"
-                    )
-                self.minimize_kwargs["write_kwargs"]["filename"] = (
-                    self.init_struct_min_path
+        # Set minimized file paths
+        self.init_struct_min_path = self._build_filename("init-opt.extxyz")
+        self.final_struct_min_path = self._build_filename(
+            "final-opt.extxyz",
+            prefix_override=self._get_default_prefix(
+                file_prefix, self.final_struct, self.final_struct_path
+            ),
+        )
+        if "write_kwargs" in self.minimize_kwargs:
+            if "filename" in self.minimize_kwargs["write_kwargs"]:
+                raise ValueError(
+                    "Filenames for minimized structures cannot currently be set"
                 )
-            else:
-                self.minimize_kwargs["write_kwargs"] = {
-                    "filename": self.init_struct_min_path
-                }
+            self.minimize_kwargs["write_kwargs"]["filename"] = self.init_struct_min_path
+        else:
+            self.minimize_kwargs["write_kwargs"] = {
+                "filename": self.init_struct_min_path
+            }
 
         # Set NEB method
         self._set_neb()
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        output_files = {}
+
+        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
+        output_files["results"] = self.results_file if self.write_results else None
+        output_files["plot"] = self.plot_file if self.plot_band else None
+        output_files["band"] = (
+            self.write_kwargs["filename"] if self.write_band else None
+        )
+        output_files["minimized_initial_structure"] = (
+            self.init_struct_min_path if self.minimize else None
+        )
+        output_files["minimized_final_structure"] = (
+            self.final_struct_min_path if self.minimize else None
+        )
+
+        return output_files
 
     def _set_neb(self) -> None:
         """Set NEB method and optimizer."""

@@ -313,28 +313,40 @@ class Phonons(BaseCalculation):
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
-        if self.minimize:
-            set_minimize_logging(
-                self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+        # Use phonons logger for geometry optimization
+        set_minimize_logging(
+            self.logger, self.minimize_kwargs, self.log_kwargs, self.track_carbon
+        )
+
+        # Write out file by default if minimizing
+        self.minimize_kwargs.setdefault("write_results", True)
+
+        # If not specified otherwise, save optimized structure consistently with
+        # other phonon output files
+        opt_file = self._build_filename("opt.extxyz")
+        if "write_kwargs" in self.minimize_kwargs:
+            # Use _build_filename even if given filename to ensure directory exists
+            self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
+            self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
+                "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
             )
+        else:
+            self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
 
-            # Write out file by default
-            self.minimize_kwargs.setdefault("write_results", True)
-
-            # If not specified otherwise, save optimized structure consistently with
-            # other phonon output files
-            opt_file = self._build_filename("opt.extxyz")
-            if "write_kwargs" in self.minimize_kwargs:
-                # Use _build_filename even if given filename to ensure directory exists
-                self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
-                self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
-                    "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
-                )
-            else:
-                self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
-
-            if self.symmetrize:
-                self.minimize_kwargs.setdefault("symmetrize", True)
+        # Output files
+        self.phonopy_file = self._build_filename("phonopy.yml")
+        self.force_consts_file = self._build_filename("force_constants.hdf5")
+        if self.qpoint_file:
+            self.bands_file = self._build_filename("bands.yml.xz")
+        else:
+            self.bands_file = self._build_filename("auto_bands.yml.xz")
+        self.bands_plot_file = self._build_filename("bands.svg")
+        self.dos_file = self._build_filename("dos.dat")
+        self.dos_plot_file = self._build_filename("dos.svg")
+        self.bands_dos_plot_file = self._build_filename("bs-dos.svg")
+        self.pdos_file = self._build_filename("pdos.dat")
+        self.pdos_plot_file = self._build_filename("pdos.svg")
+        self.thermal_file = self._build_filename("thermal.yml")
 
         self.calc = self.struct.calc
         self.results = {}
@@ -375,6 +387,64 @@ class Phonons(BaseCalculation):
             value = ()
 
         self._calcs = value
+
+    @property
+    def symmetrize(self) -> bool:
+        """
+        Whether to symmetrize structure and force constants after calculation.
+
+        Returns
+        -------
+        bool
+            Whether to symmetrize structure and force constants after calculation.
+        """
+        return self._symmetrize
+
+    @symmetrize.setter
+    def symmetrize(self, value: bool) -> None:
+        """
+        Set symmetrize value and corresponding minimize_kwargs value.
+
+        Parameters
+        ----------
+        value
+            Whether to symmetrize structure and force constants after calculation.
+        """
+        self.minimize_kwargs.setdefault("symmetrize", value)
+        self._symmetrize = value
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        output_files = {}
+
+        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
+        output_files["params"] = self.phonopy_file if self.write_results else None
+        output_files["force_constants"] = (
+            self.force_consts_file if self.force_consts_to_hdf5 else None
+        )
+        output_files["bands"] = self.bands_file if self.write_results else None
+        output_files["bands_plot"] = self.bands_plot_file if self.plot_to_file else None
+        output_files["dos"] = self.dos_file if self.write_results else None
+        output_files["dos_plot"] = self.dos_plot_file if self.plot_to_file else None
+        output_files["band_dos_plot"] = (
+            self.bands_dos_plot_file if self.plot_to_file else None
+        )
+        output_files["pdos"] = self.pdos_file if self.write_results else None
+        output_files["pdos_plot"] = self.pdos_plot_file if self.plot_to_file else None
+        output_files["thermal"] = self.thermal_file if self.write_results else None
+        output_files["minimized_initial_structure"] = (
+            self.minimize_kwargs["write_kwargs"]["filename"] if self.minimize else None
+        )
+
+        return output_files
 
     def calc_force_constants(
         self, write_force_consts: bool | None = None, **kwargs
@@ -483,19 +553,19 @@ class Phonons(BaseCalculation):
         if force_consts_to_hdf5 is None:
             force_consts_to_hdf5 = self.force_consts_to_hdf5
 
-        phonopy_file = self._build_filename("phonopy.yml", filename=phonopy_file)
-        force_consts_file = self._build_filename(
+        self.phonopy_file = self._build_filename("phonopy.yml", filename=phonopy_file)
+        self.force_consts_file = self._build_filename(
             "force_constants.hdf5", filename=force_consts_file
         )
 
         phonon = self.results["phonon"]
 
         save_force_consts = not force_consts_to_hdf5
-        phonon.save(phonopy_file, settings={"force_constants": save_force_consts})
+        phonon.save(self.phonopy_file, settings={"force_constants": save_force_consts})
 
         if force_consts_to_hdf5:
             write_force_constants_to_hdf5(
-                phonon.force_constants, filename=force_consts_file
+                phonon.force_constants, filename=self.force_consts_file
             )
 
     def calc_bands(self, write_bands: bool | None = None, **kwargs) -> None:
@@ -551,7 +621,7 @@ class Phonons(BaseCalculation):
             save_plots = self.plot_to_file
 
         if self.qpoint_file:
-            bands_file = self._build_filename("bands.yml.xz", filename=bands_file)
+            self.bands_file = self._build_filename("bands.yml.xz", filename=bands_file)
 
             with open(self.qpoint_file, encoding="utf8") as file:
                 paths_info = safe_load(file)
@@ -568,7 +638,9 @@ class Phonons(BaseCalculation):
             )
 
         else:
-            bands_file = self._build_filename("auto_bands.yml.xz", filename=bands_file)
+            self.bands_file = self._build_filename(
+                "auto_bands.yml.xz", filename=bands_file
+            )
             q_points, labels, connections = get_band_qpoints_by_seekpath(
                 self.results["phonon"].primitive, self.n_qpoints
             )
@@ -581,14 +653,14 @@ class Phonons(BaseCalculation):
             with_group_velocities=self.write_full,
         )
         self.results["phonon"].write_yaml_band_structure(
-            filename=bands_file,
+            filename=self.bands_file,
             compression="lzma",
         )
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:
-            plot_file = self._build_filename("bands.svg", filename=plot_file)
-            bplt.savefig(plot_file)
+            self.bands_plot_file = self._build_filename("bands.svg", filename=plot_file)
+            bplt.savefig(self.bands_plot_file)
 
     def calc_thermal_props(
         self,
@@ -653,8 +725,8 @@ class Phonons(BaseCalculation):
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        thermal_file = self._build_filename("thermal.yml", filename=thermal_file)
-        self.results["phonon"].write_yaml_thermal_properties(filename=thermal_file)
+        self.thermal_file = self._build_filename("thermal.yml", filename=thermal_file)
+        self.results["phonon"].write_yaml_thermal_properties(filename=self.thermal_file)
 
     def calc_dos(
         self,
@@ -727,7 +799,8 @@ class Phonons(BaseCalculation):
             Name of svg file if saving plot of the DOS. Default is inferred from
             `file_prefix`.
         plot_bands
-            Whether to plot the band structure and DOS together. Default is True.
+            Whether to plot the band structure and DOS together. Default is
+            self.plot_to_file.
         plot_bands_file
             Name of svg file if saving plot of the band structure and DOS.
             Default is inferred from `file_prefix`.
@@ -746,22 +819,24 @@ class Phonons(BaseCalculation):
 
         if plot_to_file is None:
             plot_to_file = self.plot_to_file
+        if plot_bands is None:
+            plot_bands = self.plot_to_file
 
-        dos_file = self._build_filename("dos.dat", filename=dos_file)
-        self.results["phonon"].total_dos.write(dos_file)
+        self.dos_file = self._build_filename("dos.dat", filename=dos_file)
+        self.results["phonon"].total_dos.write(self.dos_file)
 
         bplt = self.results["phonon"].plot_total_dos()
         if plot_to_file:
-            plot_file = self._build_filename("dos.svg", filename=plot_file)
-            bplt.savefig(plot_file)
+            self.dos_plot_file = self._build_filename("dos.svg", filename=plot_file)
+            bplt.savefig(self.dos_plot_file)
 
         if plot_bands:
             bplt = self.results["phonon"].plot_band_structure_and_dos()
             if plot_to_file:
-                plot_bands_file = self._build_filename(
+                self.bands_dos_plot_file = self._build_filename(
                     "bs-dos.svg", filename=plot_bands_file
                 )
-                bplt.savefig(plot_bands_file)
+                bplt.savefig(self.bands_dos_plot_file)
 
     def calc_pdos(
         self,
@@ -843,13 +918,13 @@ class Phonons(BaseCalculation):
         if plot_to_file is None:
             plot_to_file = self.plot_to_file
 
-        pdos_file = self._build_filename("pdos.dat", filename=pdos_file)
-        self.results["phonon"].projected_dos.write(pdos_file)
+        self.pdos_file = self._build_filename("pdos.dat", filename=pdos_file)
+        self.results["phonon"].projected_dos.write(self.pdos_file)
 
         bplt = self.results["phonon"].plot_projected_dos()
         if plot_to_file:
-            plot_file = self._build_filename("pdos.svg", filename=plot_file)
-            bplt.savefig(plot_file)
+            self.pdos_plot_file = self._build_filename("pdos.svg", filename=plot_file)
+            bplt.savefig(self.pdos_plot_file)
 
     # No magnetic moments considered
     # Disable invalid-function-name
