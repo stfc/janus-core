@@ -51,12 +51,16 @@ def preprocess(
 
     inputs = {"mlip_config": str(mlip_config)}
 
-    # Save summary information before preprocessing begins
-    start_summary(command="preprocess", summary=summary, inputs=inputs)
-
     log_kwargs = {"filemode": "w"}
     if log:
         log_kwargs["filename"] = log
+
+    output_files = {"log": log}
+
+    # Save summary information before preprocessing begins
+    start_summary(
+        command="preprocess", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run preprocessing
     run_preprocess(
