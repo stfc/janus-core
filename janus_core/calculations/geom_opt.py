@@ -232,7 +232,7 @@ class GeomOpt(BaseCalculation):
         self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
             "opt.extxyz", filename=self.write_kwargs["filename"]
-        ).absolute()
+        )
 
         # Configure optimizer dynamics
         self.set_optimizer()

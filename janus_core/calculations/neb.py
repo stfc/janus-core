@@ -326,12 +326,10 @@ class NEB(BaseCalculation):
             interpolator_kwargs.setdefault("autosort_tol", 0.5)
 
         # Set output file defaults
-        self.results_file = self._build_filename("neb-results.dat").absolute()
-        self.plot_file = self._build_filename("neb-plot.svg").absolute()
+        self.results_file = self._build_filename("neb-results.dat")
+        self.plot_file = self._build_filename("neb-plot.svg")
 
-        self.write_kwargs["filename"] = self._build_filename(
-            "neb-band.extxyz"
-        ).absolute()
+        self.write_kwargs["filename"] = self._build_filename("neb-band.extxyz")
 
         if self.minimize:
             set_minimize_logging(

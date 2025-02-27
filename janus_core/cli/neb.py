@@ -253,7 +253,7 @@ def neb(
     neb = NEB(**neb_inputs)
 
     # Set summary and log files
-    summary = neb._build_filename("neb-summary.yml", filename=summary).absolute()
+    summary = neb._build_filename("neb-summary.yml", filename=summary)
     log = neb.log_kwargs["filename"]
 
     # Store inputs for yaml summary
