@@ -359,8 +359,12 @@ def phonons(
     # Convert all tuples to list in inputs nested dictionary
     dict_tuples_to_lists(inputs)
 
+    output_files = phonon.output_files
+
     # Save summary information before calculations begin
-    start_summary(command="phonons", summary=summary, inputs=inputs)
+    start_summary(
+        command="phonons", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run phonon calculations
     phonon.run()

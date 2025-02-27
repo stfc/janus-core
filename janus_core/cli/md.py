@@ -566,8 +566,12 @@ def md(
         log=log,
     )
 
+    output_files = dyn.output_files
+
     # Save summary information before simulation begins
-    start_summary(command="md", summary=summary, inputs=inputs)
+    start_summary(
+        command="md", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run molecular dynamics
     dyn.run()
