@@ -246,10 +246,9 @@ class EoS(BaseCalculation):
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
-        if self.minimize and self.logger:
-            set_minimize_logging(
-                self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
-            )
+        set_minimize_logging(
+            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+        )
 
         # Set output files
         self.write_kwargs.setdefault("filename", None)
