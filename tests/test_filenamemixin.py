@@ -122,4 +122,6 @@ def test_file_name_mixin_build(mixin_params, file_args, file_kwargs, file_name):
     """Test building the filename for mixins."""
     file_mix = DummyFileHandler(*mixin_params)
 
-    assert file_mix.build_filename(*file_args, **file_kwargs) == Path(file_name)
+    assert (
+        file_mix.build_filename(*file_args, **file_kwargs) == Path(file_name).absolute()
+    )
