@@ -222,10 +222,13 @@ def md(
             help="Whether to show progress bar.",
         ),
     ] = True,
-    progress_bar_update_every: Annotated[
+    update_progress_every: Annotated[
         int,
-        Option(help="How many timesteps between progress bar updates. Default is 1."),
-    ] = 1,
+        Option(
+            help="How many timesteps between progress bar updates. "
+            "Default is steps/100, rounded up."
+        ),
+    ] = None,
     summary: Summary = None,
 ) -> None:
     """
@@ -356,8 +359,9 @@ def md(
         Default is True.
     enable_progress_bar
         Whether to show progress bar.
-    progress_bar_update_every
-        How many timesteps between progress bar updates. Default is 1.
+    update_progress_every
+        How many timesteps between progress bar updates.
+        Default is steps/100, rounded up.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from the name of the structure file.
@@ -472,7 +476,7 @@ def md(
         "post_process_kwargs": post_process_kwargs,
         "seed": seed,
         "enable_progress_bar": enable_progress_bar,
-        "progress_bar_update_every": progress_bar_update_every,
+        "update_progress_every": update_progress_every,
     }
 
     # Instantiate MD ensemble
