@@ -317,6 +317,8 @@ class NEB(BaseCalculation):
             if not isinstance(self.struct, Sequence):
                 raise ValueError("`images` must include multiple structures.")
             self.images = self.struct
+            self.final_struct = self.struct[-1]
+            self.final_struct_path = None
 
         # Set default interpolation kwargs
         if self.interpolator == "ase":
