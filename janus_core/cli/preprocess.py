@@ -56,12 +56,20 @@ def preprocess(
         "summary": summary,
     }
 
-    # Save summary information before preprocessing begins
-    start_summary(command="preprocess", summary=summary, config=config, info={})
-
     log_kwargs = {"filemode": "w"}
     if log:
         log_kwargs["filename"] = log
+
+    output_files = {"log": log}
+
+    # Save summary information before preprocessing begins
+    start_summary(
+        command="preprocess",
+        summary=summary,
+        config=config,
+        info={},
+        output_files=output_files,
+    )
 
     # Run preprocessing
     run_preprocess(
