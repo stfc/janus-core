@@ -36,6 +36,10 @@ def dict_paths_to_strs(dictionary: dict) -> None:
     for key, value in dictionary.items():
         if isinstance(value, dict):
             dict_paths_to_strs(value)
+        elif isinstance(value, Sequence) and not isinstance(value, str):
+            dictionary[key] = [
+                str(path) if isinstance(path, Path) else path for path in value
+            ]
         elif isinstance(value, Path):
             dictionary[key] = str(value)
 

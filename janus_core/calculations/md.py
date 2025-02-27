@@ -547,6 +547,16 @@ class MolecularDynamics(BaseCalculation):
             if self.minimize_kwargs["write_results"]
             else None
         )
+        output_files["rdfs"] = (
+            self._rdf_files
+            if self.post_process_kwargs.get("rdf_compute", False)
+            else None
+        )
+        output_files["vafs"] = (
+            self._vaf_files
+            if self.post_process_kwargs.get("vaf_compute", False)
+            else None
+        )
 
         return output_files
 
@@ -750,6 +760,70 @@ class MolecularDynamics(BaseCalculation):
            File name for correlations files.
         """
         return self._build_filename("cor.dat", self.param_prefix)
+
+    @property
+    def _rdf_files(self) -> tuple[Path]:
+        """
+        Get RDF filenames.
+
+        Returns
+        -------
+        str
+           Filenames for RDF file.
+        """
+        base_name = self.post_process_kwargs.get("rdf_output_file", None)
+        rdf_args = {
+            name: self.post_process_kwargs.get(key, default)
+            for name, (key, default) in (
+                ("elements", ("rdf_elements", None)),
+                ("by_elements", ("rdf_by_elements", False)),
+            )
+        }
+
+        if rdf_args["by_elements"]:
+            elements = (
+                tuple(sorted(set(self.struct.get_chemical_symbols())))
+                if rdf_args["elements"] is None
+                else rdf_args["elements"]
+            )
+
+            out_paths = tuple(
+                self._build_filename(
+                    "rdf.dat",
+                    self.param_prefix,
+                    "_".join(element),
+                    prefix_override=base_name,
+                )
+                for element in combinations_with_replacement(elements, 2)
+            )
+
+        else:
+            out_paths = (
+                self._build_filename(
+                    "rdf.dat", self.param_prefix, prefix_override=base_name
+                ),
+            )
+
+        return out_paths
+
+    @property
+    def _vaf_files(self) -> str:
+        """
+        Define VAF filenames.
+
+        Returns
+        -------
+        str
+           Filenames for VAF files.
+        """
+        file_names = self.post_process_kwargs.get("vaf_output_files", None)
+        if not isinstance(file_names, Sequence):
+            file_names = (file_names,)
+
+        return tuple(
+            self._build_filename("vaf.dat", self.param_prefix, filename=file_name)
+            for file_name in file_names
+        )
 
     def _parse_correlations(self) -> None:
         """Parse correlation kwargs into Correlations."""
@@ -1001,7 +1075,6 @@ class MolecularDynamics(BaseCalculation):
         ana = Analysis(data)
 
         if self.post_process_kwargs.get("rdf_compute", False):
-            base_name = self.post_process_kwargs.get("rdf_output_file", None)
             rdf_args = {
                 name: self.post_process_kwargs.get(key, default)
                 for name, (key, default) in (
@@ -1018,44 +1091,11 @@ class MolecularDynamics(BaseCalculation):
             )
             rdf_args["index"] = slice_
 
-            if rdf_args["by_elements"]:
-                elements = (
-                    tuple(sorted(set(data[0].get_chemical_symbols())))
-                    if rdf_args["elements"] is None
-                    else rdf_args["elements"]
-                )
-
-                out_paths = [
-                    self._build_filename(
-                        "rdf.dat",
-                        self.param_prefix,
-                        "_".join(element),
-                        prefix_override=base_name,
-                    )
-                    for element in combinations_with_replacement(elements, 2)
-                ]
-
-            else:
-                out_paths = [
-                    self._build_filename(
-                        "rdf.dat", self.param_prefix, prefix_override=base_name
-                    )
-                ]
-
-            compute_rdf(data, ana, filenames=out_paths, **rdf_args)
+            compute_rdf(data, ana, filenames=self._rdf_files, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
-            file_names = self.post_process_kwargs.get("vaf_output_files", None)
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
             fft = self.post_process_kwargs.get("vaf_fft", False)
-
-            if not isinstance(file_names, Sequence):
-                file_names = (file_names,)
-
-            out_paths = tuple(
-                self._build_filename("vaf.dat", self.param_prefix, filename=file_name)
-                for file_name in file_names
-            )
 
             slice_ = (
                 self.post_process_kwargs.get("vaf_start", 0),
@@ -1065,7 +1105,7 @@ class MolecularDynamics(BaseCalculation):
 
             compute_vaf(
                 data,
-                out_paths,
+                self._vaf_files,
                 use_velocities=use_vel,
                 fft=fft,
                 index=slice_,
