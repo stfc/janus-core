@@ -788,12 +788,14 @@ def test_file_prefix(tmp_path):
         ],
     )
     assert result.exit_code == 0
-    tmp_path_contents = list(tmp_path.glob("*"))
-    assert len(tmp_path_contents) == 1
-    assert tmp_path_contents[0].stem == "test"
-    subdir_contents = list((tmp_path / "test/").glob("*"))
-    assert len(subdir_contents) == 4
-    assert all(file.stem[:4] for file in subdir_contents)
+    test_path = tmp_path / "test"
+    assert list(tmp_path.iterdir()) == [test_path]
+    assert set(test_path.iterdir()) == {
+        test_path / "test-opt.extxyz",
+        test_path / "test-traj.extxyz",
+        test_path / "test-geomopt-summary.yml",
+        test_path / "test-geomopt-log.yml",
+    }
 
 
 def test_traj_kwargs_no_write(tmp_path):
