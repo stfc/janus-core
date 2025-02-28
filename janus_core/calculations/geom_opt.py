@@ -239,16 +239,27 @@ class GeomOpt(BaseCalculation):
         )
 
         if self.write_traj:
+            if "trajectory" in self.opt_kwargs:
+                raise ValueError(
+                    "Please use traj_kwargs['filename'] to save the trajectory"
+                )
+
             self.traj_kwargs.setdefault(
                 "filename", self._build_filename("traj.extxyz").absolute()
             )
-            self.opt_kwargs.setdefault("trajectory", str(self.traj_kwargs["filename"]))
+            self.opt_kwargs["trajectory"] = str(self.traj_kwargs["filename"])
+
         elif self.traj_kwargs:
-            raise ValueError("traj_kwargs given, but trajectory writing not enabled.")
+            raise ValueError(
+                "traj_kwargs given, but trajectory writing not enabled via write_traj."
+            )
+
         elif "trajectory" in self.opt_kwargs:
             raise ValueError(
-                '"trajectory" given in opt_kwargs,but trajectory writing not enabled.'
+                "Please use write_traj, and optionally traj_kwargs['filename'] to "
+                "save the trajectory"
             )
+
         # Configure optimizer dynamics
         self.set_optimizer()
 
@@ -268,9 +279,7 @@ class GeomOpt(BaseCalculation):
         output_files["optimized_structure"] = (
             self.write_kwargs["filename"] if self.write_results else None
         )
-        output_files["trajectory"] = (
-            self.traj_kwargs["filename"] if self.traj_kwargs else None
-        )
+        output_files["trajectory"] = self.traj_kwargs.get("filename")
 
         return output_files
 

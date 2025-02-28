@@ -78,56 +78,51 @@ def test_saving_struct(tmp_path):
 
 def test_saving_traj(tmp_path):
     """Test saving optimization trajectory output."""
-    single_point = SinglePoint(
+    optimizer = GeomOpt(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
-    )
-    optimizer = GeomOpt(
-        single_point.struct,
+        model_path=MODEL_PATH,
         write_traj=True,
-        opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")},
-        traj_kwargs={"filename": str(tmp_path / "NaCl.extxyz")},
+        traj_kwargs={"filename": tmp_path / "NaCl.traj"},
     )
     optimizer.run()
     traj = read(tmp_path / "NaCl.traj", index=":")
     assert len(traj) == 3
 
 
-def test_traj_reformat(tmp_path):
-    """Test saving optimization trajectory in different format."""
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH, "dispersion": True},
-    )
-
+def test_traj_opt_kwargs(tmp_path):
+    """Test trajectory file cannot be defined through opt_kwargs."""
     traj_path_binary = tmp_path / "NaCl.traj"
-    traj_path_xyz = tmp_path / "NaCl-traj.xyz"
 
-    optimizer = GeomOpt(
-        single_point.struct,
-        opt_kwargs={"trajectory": str(traj_path_binary)},
-        write_traj=True,
-        traj_kwargs={"filename": traj_path_xyz, "format": "xyz"},
-    )
-    optimizer.run()
-    traj = read(traj_path_xyz, index=":")
-
-    assert len(traj) == 3
-    assert traj[0].info == {}
-
-
-def test_missing_traj_kwarg(tmp_path):
-    """Test error if saving trajectory without opt_kwargs."""
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
-    )
-    traj_path = tmp_path / "NaCl-traj.extxyz"
     with pytest.raises(ValueError):
-        GeomOpt(single_point.struct, traj_kwargs={"filename": traj_path})
+        GeomOpt(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model_path=MODEL_PATH,
+            opt_kwargs={"trajectory": str(traj_path_binary)},
+            write_traj=True,
+        )
+
+    with pytest.raises(ValueError):
+        GeomOpt(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model_path=MODEL_PATH,
+            opt_kwargs={"trajectory": str(traj_path_binary)},
+            write_traj=False,
+        )
+
+
+def test_traj_without_write(tmp_path):
+    """Test trajectory file cannot be defined without write_traj."""
+    with pytest.raises(ValueError):
+        GeomOpt(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model_path=MODEL_PATH,
+            traj_kwargs={"filename": tmp_path / "NaCl.traj"},
+            write_traj=False,
+        )
 
 
 def test_hydrostatic_strain():

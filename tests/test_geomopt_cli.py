@@ -814,4 +814,4 @@ def test_traj_kwargs_no_write(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
-    assert "trajectory writing not enabled." in result.exception.args[0]
+    assert "trajectory writing not enabled" in result.exception.args[0]
