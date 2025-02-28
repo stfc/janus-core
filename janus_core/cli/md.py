@@ -401,6 +401,7 @@ def md(
         ]
     )
 
+    # Handle separately to process short-hands, and Observables.
     if correlation_kwargs:
         correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
 

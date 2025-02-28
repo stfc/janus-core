@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from copy import deepcopy
 import datetime
 import logging
 from pathlib import Path
@@ -348,10 +349,10 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         # Accept on Observable to be replicated.
         if "b" not in cli_kwargs:
             a = cli_kwargs["a"]
-            b = a
+            b = deepcopy(a)
         elif "a" not in cli_kwargs:
             a = cli_kwargs["b"]
-            b = a
+            b = deepcopy(a)
         else:
             a = cli_kwargs["a"]
             b = cli_kwargs["b"]
