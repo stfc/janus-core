@@ -337,7 +337,7 @@ def phonons(
     phonon = Phonons(**phonons_kwargs)
 
     # Set summary and log files
-    summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
+    summary = phonon._build_filename("phonons-summary.yml", filename=summary)
     log = phonon.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -359,8 +359,12 @@ def phonons(
     # Convert all tuples to list in inputs nested dictionary
     dict_tuples_to_lists(inputs)
 
+    output_files = phonon.output_files
+
     # Save summary information before calculations begin
-    start_summary(command="phonons", summary=summary, inputs=inputs)
+    start_summary(
+        command="phonons", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run phonon calculations
     phonon.run()

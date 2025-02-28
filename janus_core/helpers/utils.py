@@ -146,7 +146,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
 
         # Make directory if it does not exist
         built_filename.parent.mkdir(parents=True, exist_ok=True)
-        return built_filename
+        return built_filename.absolute()
 
 
 def none_to_dict(*dictionaries: Sequence[dict | None]) -> Generator[dict, None, None]:

@@ -547,9 +547,7 @@ def md(
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
 
     # Set summary and log files
-    summary = dyn._build_filename(
-        "md-summary.yml", dyn.param_prefix, filename=summary
-    ).absolute()
+    summary = dyn._build_filename("md-summary.yml", dyn.param_prefix, filename=summary)
     log = dyn.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -568,8 +566,12 @@ def md(
         log=log,
     )
 
+    output_files = dyn.output_files
+
     # Save summary information before simulation begins
-    start_summary(command="md", summary=summary, inputs=inputs)
+    start_summary(
+        command="md", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run molecular dynamics
     dyn.run()
