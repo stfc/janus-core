@@ -446,14 +446,6 @@ class MolecularDynamics(BaseCalculation):
                 )
 
         if self.ramp_temp:
-            self.heating_steps_per_temp = int(self.temp_time // self.timestep)
-
-            # Always include start temperature in ramp, and include end temperature
-            # if separated by an integer number of temperature steps
-            self.heating_n_temps = int(
-                1 + abs(self.temp_end - self.temp_start) // self.temp_step
-            )
-
             # Validate start and end temperatures
             if self.temp_start < 0 or self.temp_end < 0:
                 raise ValueError("Start and end temperatures must be positive")
@@ -462,6 +454,21 @@ class MolecularDynamics(BaseCalculation):
                 raise ValueError(
                     "Temperature ramp step time cannot be less than 1 timestep"
                 )
+
+            self.heating_steps_per_temp = int(self.temp_time // self.timestep)
+
+            # Always include start temperature in ramp, and include end temperature
+            # if separated by an integer number of temperature steps
+            self.heating_n_temps = int(
+                1 + abs(self.temp_end - self.temp_start) // self.temp_step
+            )
+
+            # Add or subtract temperatures
+            ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
+            self.ramp_temps = [
+                self.temp_start + ramp_sign * i * self.temp_step
+                for i in range(self.heating_n_temps)
+            ]
 
         if self.update_progress_every is None:
             self.update_progress_every = np.ceil(self.steps / 100)
@@ -1188,9 +1195,8 @@ class MolecularDynamics(BaseCalculation):
             Object used for managing progress bars.
         """
         if not self.enable_progress_bar:
-            self._progress_bar = ProgressBar(disable=True)
-            return self._progress_bar
-        self._progress_bar = ProgressBar()
+            return ProgressBar(disable=True)
+        progress_bar = ProgressBar()
         total_steps = self.steps
 
         # Set total expected MD steps.
@@ -1200,66 +1206,85 @@ class MolecularDynamics(BaseCalculation):
             if np.isclose(self.temp_start, 0.0):
                 total_steps -= self.heating_steps_per_temp
 
-        total_task_id = self._progress_bar.add_task(
+        total_task_id = progress_bar.add_task(
             "Performing MD simulation...",
             total=total_steps,
             completed=self.offset,
         )
-        ramp_task_id = None
+        ramp_task_ids = []
         if self.ramp_temp:
-            ramp_task_id = self._progress_bar.add_task(
-                "",
-                visible=False,
+            for temp in self.ramp_temps:
+                total = 0 if isclose(0.0, temp) else self.heating_steps_per_temp
+                ramp_task_ids.append(
+                    progress_bar.add_task(
+                        f"Temperature ramp ({temp} K)...",
+                        total=total,
+                    )
+                )
+            ramp_task_ids.append(
+                progress_bar.add_task(
+                    f"Constant temperature ({self.temp} K)...",
+                    total=self.steps,
+                )
             )
 
-        update_func = partial(self._update_progress_bar, total_task_id, ramp_task_id)
+        update_func = partial(
+            self._update_progress_bar, progress_bar, total_task_id, ramp_task_ids
+        )
         self.dyn.attach(update_func, interval=self.update_progress_every)
         # Also ensure progress is updated at the end
         self.dyn.attach(update_func, interval=-total_steps)
-        return self._progress_bar
+        return progress_bar
 
     def _update_progress_bar(
-        self, total_task_id: TaskID, ramp_task_id: TaskID | None = None
+        self,
+        progress_bar: ProgressBar,
+        total_task_id: TaskID,
+        ramp_task_ids: Sequence[TaskID] | None = None,
     ):
         """
         Update the progress bar for MD run.
 
         Parameters
         ----------
+        progress_bar
+            Progress bar object tracking all tasks.
         total_task_id
             Task ID tracking overall simulation progress.
-        ramp_task_id
-            Task ID tracking progress of individual temperature ramp steps (Optional).
+        ramp_task_ids
+            Task IDs tracking progress of individual temperature ramp steps
+            and final MD step (Optional).
         """
+        if ramp_task_ids is None:
+            ramp_task_ids = []
         current_step = self.dyn.nsteps + self.offset
 
-        self._progress_bar.update(total_task_id, completed=current_step)
+        # 0th step, no progress yet.
+        if current_step == 0:
+            return
 
-        if ramp_task_id:
-            current_ramp_step = current_step // self.heating_steps_per_temp
+        progress_bar.update(total_task_id, completed=current_step)
 
-            # Account for MD temperature steps at T=0 K being skipped.
-            heating_n_temps = self.heating_n_temps
-            if np.isclose(self.temp_start, 0.0):
-                heating_n_temps -= 1
+        if ramp_task_ids:
+            if isclose(0, self.temp_start):
+                current_step += self.heating_steps_per_temp
 
-            if current_ramp_step < heating_n_temps:
-                description = f"Temperature ramp ({self.temp} K)..."
-                completed = current_step % self.heating_steps_per_temp
-                total = self.heating_steps_per_temp
+            current_ramp_step = (current_step - 1) // self.heating_steps_per_temp
+            # Clamp current_ramp_step between 0 and n_temps
+            current_ramp_step = min(self.heating_n_temps, current_ramp_step)
+
+            if current_ramp_step < self.heating_n_temps:
+                completed = (current_step - 1) % self.heating_steps_per_temp + 1
             else:
-                description = f"Constant temperature ({self.temp} K)..."
-                completed = current_step - heating_n_temps * self.heating_steps_per_temp
-                total = self.steps
-            self._progress_bar.update(
-                ramp_task_id,
-                description=description,
+                total_heating_steps = self.heating_n_temps * self.heating_steps_per_temp
+                completed = current_step - total_heating_steps
+            progress_bar.update(
+                ramp_task_ids[current_ramp_step],
                 completed=completed,
-                total=total,
                 visible=True,
             )
 
-        self._progress_bar.refresh()
+        progress_bar.refresh()
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
@@ -1318,36 +1343,33 @@ class MolecularDynamics(BaseCalculation):
                     f"({rounded_temp_step:.5} fs)"
                 )
 
-            # Add or subtract temperatures
-            ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
-            temps = [
-                self.temp_start + ramp_sign * i * self.temp_step
-                for i in range(self.heating_n_temps)
-            ]
-
             if self.restart:
-                ramp_steps_completed = self.offset // heating_steps
-                ramp_steps_completed = min(ramp_steps_completed, len(temps))
+                ramp_steps_completed = self.offset // self.heating_steps_per_temp
+                ramp_steps_completed = min(ramp_steps_completed, len(self.ramp_temps))
                 if isclose(self.temp_start, 0.0):
                     # T~0K steps do not run any MD, so are not included in the offset.
                     # We have to account for that step manually.
                     ramp_steps_completed += 1
-                temps = temps[ramp_steps_completed:]
+                self.ramp_temps = self.ramp_temps[ramp_steps_completed:]
 
-            if temps:
+            if self.ramp_temps:
                 if self.logger:
-                    self.logger.info("Beginning temperature ramp at %sK", temps[0])
+                    self.logger.info(
+                        "Beginning temperature ramp at %sK", self.ramp_temps[0]
+                    )
                 if self.tracker:
                     self.tracker.start_task("Temperature ramp")
 
             first_step = True
-            for temp in temps:
+            for temp in self.ramp_temps:
                 self.temp = temp
-                steps = heating_steps
+                steps = self.heating_steps_per_temp
+
                 if first_step:
                     first_step = False
-                    steps -= self.offset % heating_steps
+                    steps -= self.offset % self.heating_steps_per_temp
                 self._set_velocity_distribution()
+
                 if isclose(temp, 0.0):
                     # Calculate forces and energies to be output
                     self.struct.get_potential_energy()
@@ -1355,14 +1377,17 @@ class MolecularDynamics(BaseCalculation):
                     self._write_final_state()
                     self.created_final_file = True
                     continue
+
                 self._set_target_temperature(temp)
                 self.dyn.run(self.heating_steps_per_temp)
                 self._write_final_state()
                 self.created_final_file = True
 
-            if temps:
+            if self.ramp_temps:
                 if self.logger:
-                    self.logger.info("Temperature ramp complete at %sK", temps[-1])
+                    self.logger.info(
+                        "Temperature ramp complete at %sK", self.ramp_temps[-1]
+                    )
                 if self.tracker:
                     emissions = self.tracker.stop_task().emissions
                     self.struct.info["emissions"] = emissions
@@ -1371,7 +1396,9 @@ class MolecularDynamics(BaseCalculation):
         if self.restart and self.ramp_temp:
             # Take the ramp time off the offset for MD.
             # If restarting during the ramp, MD has no offset.
-            md_offset = max(0, md_offset - heating_steps * n_temps)
+            md_offset = max(
+                0, md_offset - self.heating_steps_per_temp * self.heating_n_temps
+            )
 
         # Run MD
         if self.steps > 0:
