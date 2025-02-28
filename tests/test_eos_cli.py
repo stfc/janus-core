@@ -11,7 +11,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    check_output_files,
+    clear_log_handlers,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -91,6 +96,16 @@ def test_eos():
 
         assert "emissions" in eos_summary
         assert eos_summary["emissions"] > 0
+
+        output_files = {
+            "raw": eos_raw_path,
+            "plot": None,
+            "generated_structures": None,
+            "fit": eos_fit_path,
+            "log": log_path,
+            "summary": summary_path,
+        }
+        check_output_files(eos_summary, output_files)
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
@@ -187,7 +202,11 @@ def test_minimising_all(tmp_path):
 def test_writing_structs(tmp_path):
     """Test writing out generated structures."""
     file_prefix = tmp_path / "test" / "example"
+    raw_path = tmp_path / "test" / "example-eos-raw.dat"
+    fit_path = tmp_path / "test" / "example-eos-fit.dat"
     generated_path = tmp_path / "test" / "example-generated.extxyz"
+    log_path = tmp_path / "test" / "example-eos-log.yml"
+    summary_path = tmp_path / "test" / "example-eos-summary.yml"
 
     result = runner.invoke(
         app,
@@ -208,6 +227,20 @@ def test_writing_structs(tmp_path):
     assert len(atoms) == 5
     assert "system_name" in atoms[0].info
     assert atoms[0].info["system_name"] == "NaCl"
+
+    # Read eos summary file
+    with open(summary_path, encoding="utf8") as file:
+        eos_summary = yaml.safe_load(file)
+
+    output_files = {
+        "raw": raw_path,
+        "plot": None,
+        "generated_structures": generated_path,
+        "fit": fit_path,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(eos_summary, output_files)
 
 
 def test_error_write_geomopt(tmp_path):
@@ -282,7 +315,11 @@ def test_invalid_traj_input(tmp_path):
 def test_plot(tmp_path):
     """Test plotting equation of state."""
     file_prefix = tmp_path / "NaCl"
+    raw_path = tmp_path / "NaCl-eos-raw.dat"
+    fit_path = tmp_path / "NaCl-eos-fit.dat"
     plot_path = tmp_path / "NaCl-eos-plot.svg"
+    log_path = tmp_path / "NaCl-eos-log.yml"
+    summary_path = tmp_path / "NaCl-eos-summary.yml"
 
     result = runner.invoke(
         app,
@@ -298,7 +335,20 @@ def test_plot(tmp_path):
         ],
     )
     assert result.exit_code == 0
-    assert plot_path.exists()
+
+    # Read eos summary file
+    with open(summary_path, encoding="utf8") as file:
+        eos_summary = yaml.safe_load(file)
+
+    output_files = {
+        "raw": raw_path,
+        "plot": plot_path,
+        "generated_structures": None,
+        "fit": fit_path,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(eos_summary, output_files)
 
 
 def test_no_carbon(tmp_path):

@@ -11,7 +11,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    check_output_files,
+    clear_log_handlers,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -78,6 +83,23 @@ def test_phonons():
 
         assert "emissions" in phonon_summary
         assert phonon_summary["emissions"] > 0
+
+        output_files = {
+            "params": phonopy_path,
+            "force_constants": None,
+            "bands": bands_path,
+            "bands_plot": None,
+            "dos": None,
+            "dos_plot": None,
+            "band_dos_plot": None,
+            "pdos": None,
+            "pdos_plot": None,
+            "thermal": None,
+            "minimized_initial_structure": None,
+            "log": log_path,
+            "summary": summary_path,
+        }
+        check_output_files(summary=phonon_summary, output_files=output_files)
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)

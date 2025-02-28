@@ -12,7 +12,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    check_output_files,
+    clear_log_handlers,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -64,10 +69,6 @@ def test_neb():
         assert log_path.exists()
         assert summary_path.exists()
 
-        # Read NEB summary file
-        with open(summary_path, encoding="utf8") as file:
-            neb_summary = yaml.safe_load(file)
-
         # Check contents of results file
         with open(results_path, encoding="utf8") as results_file:
             lines = results_file.readlines()
@@ -78,6 +79,11 @@ def test_neb():
         assert results == pytest.approx(
             [0.8497755543465928, -3.0149328722473e-07, 4.802233744475505]
         )
+
+        # Read NEB summary file
+        with open(summary_path, encoding="utf8") as file:
+            neb_summary = yaml.safe_load(file)
+
         assert "command" in neb_summary
         assert "janus neb" in neb_summary["command"]
         assert "start_time" in neb_summary
@@ -87,6 +93,17 @@ def test_neb():
 
         assert "emissions" in neb_summary
         assert neb_summary["emissions"] > 0
+
+        output_files = {
+            "results": results_path,
+            "plot": plot_path,
+            "band": band_path,
+            "minimized_initial_structure": None,
+            "minimized_final_structure": None,
+            "log": log_path,
+            "summary": summary_path,
+        }
+        check_output_files(summary=neb_summary, output_files=output_files)
 
         band = read(band_path, index=":")
         assert isinstance(band[0], Atoms)
@@ -101,6 +118,8 @@ def test_minimize(tmp_path):
     """Test minimizing structures before interpolation and optimization."""
     file_prefix = tmp_path / "LFPO"
     results_path = tmp_path / "LFPO-neb-results.dat"
+    min_init_path = tmp_path / "LFPO-init-opt.extxyz"
+    min_final_path = tmp_path / "LFPO-final-opt.extxyz"
     summary_path = tmp_path / "LFPO-neb-summary.yml"
     log_path = tmp_path / "LFPO-neb-log.yml"
 
@@ -120,7 +139,7 @@ def test_minimize(tmp_path):
             "pymatgen",
             "--minimize",
             "--minimize-kwargs",
-            "{'fmax': 1.0}",
+            "{'fmax': 1.0, 'write_results': True}",
             "--no-tracker",
             "--file-prefix",
             file_prefix,
@@ -132,6 +151,17 @@ def test_minimize(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         neb_summary = yaml.safe_load(file)
         assert "emissions" not in neb_summary
+
+    output_files = {
+        "results": results_path,
+        "plot": None,
+        "band": None,
+        "minimized_initial_structure": min_init_path,
+        "minimized_final_structure": min_final_path,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(summary=neb_summary, output_files=output_files)
 
     # Check contents of results file
     with open(results_path, encoding="utf8") as results_file:
