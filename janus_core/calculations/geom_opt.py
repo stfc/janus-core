@@ -233,9 +233,8 @@ class GeomOpt(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output files
-        self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
-            "opt.extxyz", filename=self.write_kwargs["filename"]
+            "opt.extxyz", filename=self.write_kwargs.get("filename")
         )
 
         if self.write_traj:
