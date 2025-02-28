@@ -717,7 +717,7 @@ def test_stats(tmp_path, ensemble, tag):
 
 
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_heating(tmp_path, ensemble):
+def test_heating(tmp_path, capsys, ensemble):
     """Test heating with no MD."""
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
@@ -741,6 +741,7 @@ def test_heating(tmp_path, ensemble):
         temp_step=20,
         temp_time=2,
         log_kwargs={"filename": log_file},
+        enable_progress_bar=True,
     )
     md.run()
     assert_log_contains(
@@ -753,6 +754,9 @@ def test_heating(tmp_path, ensemble):
     )
 
     assert final_file.exists()
+
+    # Check progress bar has completed.
+    assert "━━ 2/2" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("ensemble", ensembles_without_thermostat)
@@ -807,7 +811,7 @@ def test_noramp_heating(tmp_path, ensemble):
 
 
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_heating_md(tmp_path, ensemble):
+def test_heating_md(tmp_path, capsys, ensemble):
     """Test heating followed by MD."""
     file_prefix = tmp_path / "NaCl-heating"
     stats_path = tmp_path / "NaCl-heating-stats.dat"
@@ -830,6 +834,7 @@ def test_heating_md(tmp_path, ensemble):
         temp_step=10,
         temp_time=2,
         log_kwargs={"filename": log_file},
+        enable_progress_bar=True,
     )
     md.run()
     assert_log_contains(
@@ -859,6 +864,11 @@ def test_heating_md(tmp_path, ensemble):
     assert stat_data.labels[0] == "# Step"
     assert stat_data.units[0] == ""
     assert stat_data.units[target_t_col] == "K"
+
+    # Check progress bar has completed.
+    out = capsys.readouterr().out
+    assert "━━ 9/9" in out  # Total progress
+    assert "━━ 5/5" in out  # Const T progress
 
 
 def test_heating_files():
