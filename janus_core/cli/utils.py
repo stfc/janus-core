@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from copy import deepcopy
 import datetime
 import logging
 from pathlib import Path
@@ -15,13 +16,15 @@ if TYPE_CHECKING:
     from ase import Atoms
     from typer import Context
 
-    from janus_core.cli.types import TyperDict
+    from janus_core.cli.types import CorrelationKwargs, TyperDict
     from janus_core.helpers.janus_types import (
         Architectures,
         ASEReadArgs,
         Devices,
         MaybeSequence,
     )
+
+from janus_core.processing import observables
 
 
 def dict_paths_to_strs(dictionary: dict) -> None:
@@ -309,3 +312,58 @@ def check_config(ctx: Context) -> None:
         # Check options individually so can inform user of specific issue
         if option not in ctx.params:
             raise ValueError(f"'{option}' in configuration file is not a valid option")
+
+
+def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
+    """
+    Parse CLI CorrelationKwargs to md correlation_kwargs.
+
+    Parameters
+    ----------
+    kwargs
+        CLI correlation keyword options.
+
+    Returns
+    -------
+    list[dict]
+        The parsed correlation_kwargs for md.
+    """
+    parsed_kwargs = []
+    for name, cli_kwargs in kwargs.value.items():
+        if "a" not in cli_kwargs and "b" not in cli_kwargs:
+            raise ValueError("At least one observable must be supplied as 'a' or 'b'")
+
+        # Accept on Observable to be replicated.
+        if "b" not in cli_kwargs:
+            a = cli_kwargs["a"]
+            b = deepcopy(a)
+        elif "a" not in cli_kwargs:
+            a = cli_kwargs["b"]
+            b = deepcopy(a)
+        else:
+            a = cli_kwargs["a"]
+            b = cli_kwargs["b"]
+
+        a_kwargs = cli_kwargs["a_kwargs"] if "a_kwargs" in cli_kwargs else {}
+        b_kwargs = cli_kwargs["b_kwargs"] if "b_kwargs" in cli_kwargs else {}
+
+        # Accept "." in place of one kwargs to repeat.
+        if a_kwargs == "." and b_kwargs == ".":
+            raise ValueError("a_kwargs and b_kwargs cannot 'ditto' each other")
+        if a_kwargs and b_kwargs == ".":
+            b_kwargs = a_kwargs
+        elif b_kwargs and a_kwargs == ".":
+            a_kwargs = b_kwargs
+
+        cor_kwargs = {
+            "name": name,
+            "a": getattr(observables, a)(**a_kwargs),
+            "b": getattr(observables, b)(**b_kwargs),
+        }
+
+        for optional in ["blocks", "points", "averaging", "update_frequency"]:
+            if optional in cli_kwargs:
+                cor_kwargs[optional] = cli_kwargs[optional]
+
+        parsed_kwargs.append(cor_kwargs)
+    return parsed_kwargs
