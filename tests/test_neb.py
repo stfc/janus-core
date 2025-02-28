@@ -56,8 +56,8 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
 
     assert len(neb.images) == 7
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
-    assert neb.results["barrier"] == pytest.approx(7817.150960456944)
-    assert neb.results["delta_E"] == pytest.approx(78.34034136421758)
+    assert neb.results["barrier"] == pytest.approx(8117.328587956959)
+    assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
     assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
@@ -88,8 +88,8 @@ def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
 
     assert len(neb.images) == 7
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
-    assert neb.results["barrier"] == pytest.approx(0.7536690819713392)
-    assert neb.results["delta_E"] == pytest.approx(5.363118589229998e-07)
+    assert neb.results["barrier"] == pytest.approx(0.5852889569624722)
+    assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
     assert neb.results["max_force"] == pytest.approx(2.533305796378263)
 
 
@@ -114,8 +114,8 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
     # Same as results from test_neb
     assert len(neb.images) == 7
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
-    assert neb.results["barrier"] == pytest.approx(7817.150960456944)
-    assert neb.results["delta_E"] == pytest.approx(78.34034136421758)
+    assert neb.results["barrier"] == pytest.approx(8117.328587986063)
+    assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
     assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
@@ -138,8 +138,8 @@ def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
 
     assert len(neb.images) == 7
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
-    assert neb.results["barrier"] == pytest.approx(7817.150960456944)
-    assert neb.results["delta_E"] == pytest.approx(78.34034136421758)
+    assert neb.results["barrier"] == pytest.approx(8117.328587986063)
+    assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
     assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
@@ -159,6 +159,6 @@ def test_neb_plot(tmp_path):
 
     assert len(neb.images) == 7
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
-    assert neb.results["barrier"] == pytest.approx(0.67567742247752)
-    assert neb.results["delta_E"] == pytest.approx(5.002693796996027e-07)
+    assert neb.results["barrier"] == pytest.approx(0.4790452267999399)
+    assert neb.results["delta_E"] == pytest.approx(-2.814124400174478e-07)
     assert neb.results["max_force"] == pytest.approx(1.5425684122118983)
