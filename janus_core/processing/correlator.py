@@ -253,14 +253,14 @@ class Correlation:
         Observable for b.
     name
         Name of correlation.
-    blocks : int, default 1
-        Number of correlation blocks.
-    points : int, default 1
-        Number of points per block.
-    averaging : int, default 1
-        Averaging window per block level.
-    update_frequency : int, default 1
-        Frequency to update the correlation, md steps.
+    blocks
+        Number of correlation blocks. Default is 1.
+    points
+        Number of points per block. Default is 1.
+    averaging
+        Averaging window per block level. Default is 1.
+    update_frequency
+        Frequency to update the correlation, md steps. Default is 1.
     """
 
     def __init__(
@@ -285,14 +285,14 @@ class Correlation:
             Observable for b.
         name
             Name of correlation.
-        blocks : int, default 1
-            Number of correlation blocks.
-        points : int, default 1
-            Number of points per block.
-        averaging : int, default 1
-            Averaging window per block level.
-        update_frequency : int, default 1
-            Frequency to update the correlation, md steps.
+        blocks
+            Number of correlation blocks. Default is 1.
+        points
+            Number of points per block. Default is 1.
+        averaging
+            Averaging window per block level. Default is 1.
+        update_frequency
+            Frequency to update the correlation, md steps. Default is 1.
         """
         self.name = name
         self.blocks = blocks
