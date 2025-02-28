@@ -91,7 +91,7 @@ class GeomOpt(BaseCalculation):
         Whether to save a trajectory file of optimization frames.
     traj_kwargs
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
-        Must include "filename" keyword. Default is {}.
+        "filename" keyword is inferred from `file_prefix` if not given. Default is {}.
     """
 
     def __init__(
@@ -185,7 +185,8 @@ class GeomOpt(BaseCalculation):
             Whether to save a trajectory file of optimization frames.
         traj_kwargs
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
-            "filename" keyword is inferred from file_prefix if not given. Default is {}.
+            "filename" keyword is inferred from `file_prefix` if not given.
+            Default is {}.
         """
         read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs = (
             none_to_dict(
