@@ -197,7 +197,7 @@ Additional options may be specified. This shares most options with ``singlepoint
 
 .. code-block:: bash
 
-    janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --opt-cell-lengths --traj 'NaCl-traj.extxyz'
+    janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --opt-cell-lengths --write-traj --traj-kwargs "{'filename':'NaCl-traj.extxyz'}"
 
 
 This allows the cell vectors to be optimised, allowing only hydrostatic deformation, and saves the optimization trajectory in addition to the final structure and log.
