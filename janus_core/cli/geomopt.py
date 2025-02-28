@@ -44,11 +44,8 @@ def _set_minimize_kwargs(
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True.
     """
-    if "opt_kwargs" not in minimize_kwargs:
-        minimize_kwargs["opt_kwargs"] = {}
-
-    if "traj_kwargs" not in minimize_kwargs:
-        minimize_kwargs["traj_kwargs"] = {}
+    minimize_kwargs.setdefault("opt_kwargs", {})
+    minimize_kwargs.setdefault("traj_kwargs", {})
 
     # Check hydrostatic_strain and scalar pressure not duplicated
     if "filter_kwargs" in minimize_kwargs:
