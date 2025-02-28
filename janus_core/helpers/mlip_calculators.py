@@ -284,6 +284,27 @@ def choose_calculator(
 
         calculator = ORBCalculator(model=model, device=device, **kwargs)
 
+    elif arch == "mattersim":
+        from mattersim import __version__
+        from mattersim.forcefield import MatterSimCalculator
+        from torch.nn import Module
+
+        # Default model
+        model_path = model_path if model_path else "mattersim-v1.0.0-5M"
+
+        if isinstance(model_path, Module):
+            potential = model_path
+            model_path = "loaded_Module"
+        else:
+            potential = None
+
+        if isinstance(model_path, Path):
+            model_path = str(model_path)
+
+        calculator = MatterSimCalculator(
+            potential=potential, load_path=model_path, device=device, **kwargs
+        )
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "
