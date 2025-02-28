@@ -229,8 +229,10 @@ def geomopt(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs] = parse_typer_dicts(
-        [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
+    [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs, traj_kwargs] = (
+        parse_typer_dicts(
+            [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs, traj_kwargs]
+        )
     )
 
     # Read only first structure by default and ensure only one image is read

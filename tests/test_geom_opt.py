@@ -84,7 +84,9 @@ def test_saving_traj(tmp_path):
         calc_kwargs={"model": MODEL_PATH},
     )
     optimizer = GeomOpt(
-        single_point.struct, opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")}
+        single_point.struct,
+        write_trajectory=True,
+        opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")},
     )
     optimizer.run()
     traj = read(tmp_path / "NaCl.traj", index=":")
@@ -105,6 +107,7 @@ def test_traj_reformat(tmp_path):
     optimizer = GeomOpt(
         single_point.struct,
         opt_kwargs={"trajectory": str(traj_path_binary)},
+        write_trajectory=True,
         traj_kwargs={"filename": traj_path_xyz, "format": "xyz"},
     )
     optimizer.run()

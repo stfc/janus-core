@@ -60,6 +60,7 @@ def test_geomopt():
     finally:
         # Ensure files deleted if command fails
         read_atoms(results_path)
+        results_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
         clear_log_handlers()
@@ -114,8 +115,9 @@ def test_traj(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             results_path,
-            "--traj",
-            traj_path,
+            "--write-trajectory",
+            "--traj-kwargs",
+            f"{{'filename':'{traj_path}'}}",
             "--log",
             log_path,
             "--summary",

@@ -237,17 +237,24 @@ class GeomOpt(BaseCalculation):
             "opt.extxyz", filename=self.write_kwargs["filename"]
         ).absolute()
 
-        if self.write_trajectory and "filename" not in self.traj_kwargs:
-            self.traj_kwargs["filename"] = self._build_filename(
-                "traj.extxyz"
-            ).absolute()
-
-        if self.write_trajectory and "trajectory" not in self.opt_kwargs:
-            # Overwrite .traj binary with .extxyz by default.
-            self.opt_kwargs["trajectory"] = str(self.traj_kwargs["filename"])
-
-        if self.traj_kwargs and not self.write_trajectory:
-            raise ValueError("traj_kwargs given, but trajectory writing not enabled.")
+        if self.write_trajectory:
+            if "filename" not in self.traj_kwargs:
+                self.traj_kwargs["filename"] = self._build_filename(
+                    "traj.extxyz"
+                ).absolute()
+            if "trajectory" not in self.opt_kwargs:
+                # Overwrite .traj binary with .extxyz by default.
+                self.opt_kwargs["trajectory"] = str(self.traj_kwargs["filename"])
+        else:
+            if self.traj_kwargs:
+                raise ValueError(
+                    "traj_kwargs given, but trajectory writing not enabled."
+                )
+            if "trajectory" in self.opt_kwargs:
+                raise ValueError(
+                    '"trajectory" given in opt_kwargs,'
+                    "but trajectory writing not enabled."
+                )
 
         # Configure optimizer dynamics
         self.set_optimizer()
