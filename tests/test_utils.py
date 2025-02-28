@@ -8,7 +8,12 @@ from ase import Atoms
 from ase.io import read
 import pytest
 
-from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
+from janus_core.cli.types import TyperDict
+from janus_core.cli.utils import (
+    dict_paths_to_strs,
+    dict_remove_hyphens,
+    parse_correlation_kwargs,
+)
 from janus_core.helpers.janus_types import SliceLike, StartStopStep
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.struct_io import output_structs
@@ -18,6 +23,7 @@ from janus_core.helpers.utils import (
     slicelike_to_startstopstep,
     validate_slicelike,
 )
+from janus_core.processing.observables import Velocity
 
 DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
 MODEL_PATH = Path(__file__).parent / "models/mace_mp_small.model"
@@ -255,3 +261,26 @@ def test_invalid_slicelikes(slc):
     """Test validate_slicelike on invalid SliceLikes."""
     with pytest.raises(ValueError):
         validate_slicelike(slc)
+
+
+def test_parse_correlation_kwargs():
+    """Test parsing correlation CLI kwargs."""
+    kwargs = {
+        "vaf": {"a": "Velocity", "b_kwargs": {"components": ["x"]}},
+        "vaf_ditto": {
+            "b": "Velocity",
+            "a_kwargs": {"atoms_slice": slice(0, None, 2)},
+            "b_kwargs": ".",
+        },
+    }
+    parsed = parse_correlation_kwargs(TyperDict(kwargs))
+    assert len(parsed) == 2
+    assert parsed[0]["name"] == "vaf"
+    assert type(parsed[0]["a"]) is type(parsed[0]["b"]) is Velocity
+    assert parsed[0]["a"].components == ["x", "y", "z"]
+    assert parsed[0]["b"].components == ["x"]
+
+    assert parsed[1]["name"] == "vaf_ditto"
+    assert type(parsed[1]["a"]) is type(parsed[1]["b"]) is Velocity
+    assert parsed[1]["a"].components == parsed[1]["b"].components == ["x", "y", "z"]
+    assert parsed[1]["a"].atoms_slice == parsed[1]["b"].atoms_slice == slice(0, None, 2)
