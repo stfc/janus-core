@@ -1092,8 +1092,6 @@ class MolecularDynamics(BaseCalculation):
     def _run_dynamics(self) -> None:
         """Run dynamics and/or temperature ramp."""
         # Store temperature for final MD
-        self.dyn.attach(lambda: print(self.dyn.nsteps))
-
         md_temp = self.temp
         if self.ramp_temp:
             self.temp = self.temp_start
@@ -1126,35 +1124,39 @@ class MolecularDynamics(BaseCalculation):
             if self.restart:
                 ramp_steps_completed = self.offset // heating_steps
                 ramp_steps_completed = min(ramp_steps_completed, len(temps))
-                if np.isclose(self.temp_start, 0.0):
-                    # T~0K steps are skipped, so offset will not include them.
+                if isclose(self.temp_start, 0.0):
+                    # T~0K steps do not run any MD, so are not included in the offset.
+                    # We have to account for that step manually.
                     ramp_steps_completed += 1
                 temps = temps[ramp_steps_completed:]
 
-            if len(temps) > 0:
+            if temps:
                 if self.logger:
                     self.logger.info("Beginning temperature ramp at %sK", temps[0])
                 if self.tracker:
                     self.tracker.start_task("Temperature ramp")
 
-                for temp in temps:
-                    self.temp = temp
-                    steps = heating_steps
-                    if temp == temps[0]:
-                        steps -= self.offset % heating_steps
-                    self._set_velocity_distribution()
-                    if isclose(temp, 0.0):
-                        # Calculate forces and energies to be output
-                        self.struct.get_potential_energy()
-                        self.struct.get_forces()
-                        self._write_final_state()
-                        self.created_final_file = True
-                        continue
-                    self._set_target_temperature(temp)
-                    self.dyn.run(steps)
+            first_step = True
+            for temp in temps:
+                self.temp = temp
+                steps = heating_steps
+                if first_step:
+                    first_step = False
+                    steps -= self.offset % heating_steps
+                self._set_velocity_distribution()
+                if isclose(temp, 0.0):
+                    # Calculate forces and energies to be output
+                    self.struct.get_potential_energy()
+                    self.struct.get_forces()
                     self._write_final_state()
                     self.created_final_file = True
+                    continue
+                self._set_target_temperature(temp)
+                self.dyn.run(steps)
+                self._write_final_state()
+                self.created_final_file = True
 
+            if temps:
                 if self.logger:
                     self.logger.info("Temperature ramp complete at %sK", temps[-1])
                 if self.tracker:
@@ -1163,6 +1165,8 @@ class MolecularDynamics(BaseCalculation):
 
         md_offset = self.offset
         if self.restart and self.ramp_temp:
+            # Take the ramp time off the offset for MD.
+            # If restarting during the ramp, MD has no offset.
             md_offset = max(0, md_offset - heating_steps * n_temps)
 
         # Run MD
