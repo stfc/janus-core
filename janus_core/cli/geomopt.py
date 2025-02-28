@@ -193,7 +193,7 @@ def geomopt(
         Whether to save a trajectory file of optimization frames.
     traj_kwargs
         Keyword arguments to pass to ase.io.write when saving trajectory.
-        If "filename" is not included, it is inferred from --file-prefix.
+        If "filename" is not included, it is inferred from `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.

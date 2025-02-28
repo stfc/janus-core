@@ -279,7 +279,7 @@ TrajKwargs = Annotated[
             """
             Keyword arguments to pass to ase.io.write when saving trajectory. Must be
             passed as a dictionary wrapped in quotes, e.g. "{'key': value}".
-            If "filename" is not included, it is inferred from --file-prefix.
+            If "filename" is not included, it is inferred from `file_prefix`.
             """
         ),
         metavar="DICT",
