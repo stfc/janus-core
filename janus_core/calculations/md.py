@@ -10,8 +10,12 @@ from math import isclose
 from os.path import getmtime
 from pathlib import Path
 import random
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from warnings import warn
+
+# Only needed for type hints
+if TYPE_CHECKING:
+    from rich.progress import TaskID
 
 from ase import Atoms
 from ase.geometry.analysis import Analysis
@@ -43,7 +47,12 @@ from janus_core.helpers.janus_types import (
     PostProcessKwargs,
 )
 from janus_core.helpers.struct_io import input_structs, output_structs
-from janus_core.helpers.utils import none_to_dict, set_minimize_logging, write_table
+from janus_core.helpers.utils import (
+    ProgressBar,
+    none_to_dict,
+    set_minimize_logging,
+    write_table,
+)
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
 
@@ -157,6 +166,11 @@ class MolecularDynamics(BaseCalculation):
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
+    enable_progress_bar
+        Whether to show a progress bar. Default is False.
+    update_progress_every
+        How many timesteps between progress bar updates.
+        Default is steps/100, rounded up.
 
     Attributes
     ----------
@@ -218,6 +232,8 @@ class MolecularDynamics(BaseCalculation):
         post_process_kwargs: PostProcessKwargs | None = None,
         correlation_kwargs: list[CorrelationKwargs] | None = None,
         seed: int | None = None,
+        enable_progress_bar: bool = False,
+        update_progress_every: int | None = None,
     ) -> None:
         """
         Initialise molecular dynamics simulation configuration.
@@ -325,6 +341,11 @@ class MolecularDynamics(BaseCalculation):
         seed
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
+        enable_progress_bar
+            Whether to show a progress bar. Default is False.
+        update_progress_every
+            How many timesteps between progress bar updates.
+            Default is steps/100, rounded up.
         """
         (
             read_kwargs,
@@ -372,6 +393,8 @@ class MolecularDynamics(BaseCalculation):
         self.post_process_kwargs = post_process_kwargs
         self.correlation_kwargs = correlation_kwargs
         self.seed = seed
+        self.enable_progress_bar = enable_progress_bar
+        self.update_progress_every = update_progress_every
 
         if "append" in self.write_kwargs:
             raise ValueError("`append` cannot be specified when writing files")
@@ -421,6 +444,7 @@ class MolecularDynamics(BaseCalculation):
                     "Temperature ramp requested for ensemble with no thermostat"
                 )
 
+        if self.ramp_temp:
             # Validate start and end temperatures
             if self.temp_start < 0 or self.temp_end < 0:
                 raise ValueError("Start and end temperatures must be positive")
@@ -429,6 +453,24 @@ class MolecularDynamics(BaseCalculation):
                 raise ValueError(
                     "Temperature ramp step time cannot be less than 1 timestep"
                 )
+
+            self.heating_steps_per_temp = int(self.temp_time // self.timestep)
+
+            # Always include start temperature in ramp, and include end temperature
+            # if separated by an integer number of temperature steps
+            self.heating_n_temps = int(
+                1 + abs(self.temp_end - self.temp_start) // self.temp_step
+            )
+
+            # Add or subtract temperatures
+            ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
+            self.ramp_temps = [
+                self.temp_start + ramp_sign * i * self.temp_step
+                for i in range(self.heating_n_temps)
+            ]
+
+        if self.update_progress_every is None:
+            self.update_progress_every = np.ceil(self.steps / 100)
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -1044,6 +1086,107 @@ class MolecularDynamics(BaseCalculation):
         else:
             raise ValueError("Temperature set for ensemble with no thermostat.")
 
+    def _init_progress_bar(self) -> ProgressBar:
+        """
+        Initialise MD progress bar.
+
+        Returns
+        -------
+        ProgressBar
+            Object used for managing progress bars.
+        """
+        if not self.enable_progress_bar:
+            return ProgressBar(disable=True)
+        progress_bar = ProgressBar()
+        total_steps = self.steps
+
+        # Set total expected MD steps.
+        if self.ramp_temp:
+            total_steps += self.heating_n_temps * self.heating_steps_per_temp
+            # Heating steps at 0 are skipped.
+            if np.isclose(self.temp_start, 0.0):
+                total_steps -= self.heating_steps_per_temp
+
+        total_task_id = progress_bar.add_task(
+            "Performing MD simulation...",
+            total=total_steps,
+            completed=self.offset,
+        )
+        ramp_task_ids = []
+        if self.ramp_temp:
+            for temp in self.ramp_temps:
+                total = 0 if isclose(0.0, temp) else self.heating_steps_per_temp
+                ramp_task_ids.append(
+                    progress_bar.add_task(
+                        f"Temperature ramp ({temp} K)...",
+                        total=total,
+                    )
+                )
+            ramp_task_ids.append(
+                progress_bar.add_task(
+                    f"Constant temperature ({self.temp} K)...",
+                    total=self.steps,
+                )
+            )
+
+        update_func = partial(
+            self._update_progress_bar, progress_bar, total_task_id, ramp_task_ids
+        )
+        self.dyn.attach(update_func, interval=self.update_progress_every)
+        # Also ensure progress is updated at the end
+        self.dyn.attach(update_func, interval=-total_steps)
+        return progress_bar
+
+    def _update_progress_bar(
+        self,
+        progress_bar: ProgressBar,
+        total_task_id: TaskID,
+        ramp_task_ids: Sequence[TaskID] | None = None,
+    ):
+        """
+        Update the progress bar for MD run.
+
+        Parameters
+        ----------
+        progress_bar
+            Progress bar object tracking all tasks.
+        total_task_id
+            Task ID tracking overall simulation progress.
+        ramp_task_ids
+            Task IDs tracking progress of individual temperature ramp steps
+            and final MD step (Optional).
+        """
+        if ramp_task_ids is None:
+            ramp_task_ids = []
+        current_step = self.dyn.nsteps + self.offset
+
+        # 0th step, no progress yet.
+        if current_step == 0:
+            return
+
+        progress_bar.update(total_task_id, completed=current_step)
+
+        if ramp_task_ids:
+            if isclose(0, self.temp_start):
+                current_step += self.heating_steps_per_temp
+
+            current_ramp_step = (current_step - 1) // self.heating_steps_per_temp
+            # Clamp current_ramp_step between 0 and n_temps
+            current_ramp_step = min(self.heating_n_temps, current_ramp_step)
+
+            if current_ramp_step < self.heating_n_temps:
+                completed = (current_step - 1) % self.heating_steps_per_temp + 1
+            else:
+                total_heating_steps = self.heating_n_temps * self.heating_steps_per_temp
+                completed = current_step - total_heating_steps
+            progress_bar.update(
+                ramp_task_ids[current_ramp_step],
+                completed=completed,
+                visible=True,
+            )
+
+        progress_bar.refresh()
+
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
         unit_keys = (
@@ -1080,9 +1223,10 @@ class MolecularDynamics(BaseCalculation):
         if self.minimize and self.minimize_every > 0:
             self.dyn.attach(self._optimize_structure, interval=self.minimize_every)
 
-        # Note current time
-        self.struct.info["real_time"] = datetime.datetime.now()
-        self._run_dynamics()
+        with self._init_progress_bar():
+            # Note current time
+            self.struct.info["real_time"] = datetime.datetime.now()
+            self._run_dynamics()
 
         if self.post_process_kwargs:
             self._post_process()
@@ -1101,31 +1245,23 @@ class MolecularDynamics(BaseCalculation):
 
         # Run temperature ramp
         if self.ramp_temp:
-            heating_steps = int(self.temp_time // self.timestep)
-
             if self.logger and not np.isclose(self.temp_time % self.timestep, 0.0):
-                rounded_temp_step = heating_steps * self.timestep / units.fs
+                rounded_temp_step = (
+                    self.heating_steps_per_temp * self.timestep / units.fs
+                )
                 self.logger.info(
                     "Temperature ramp step time rounded to nearest timestep "
                     f"({rounded_temp_step:.5} fs)"
                 )
 
-            # Always include start temperature in ramp, and include end temperature
-            # if separated by an integer number of temperature steps
-            n_temps = int(1 + abs(self.temp_end - self.temp_start) // self.temp_step)
-
-            # Add or subtract temperatures
-            ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
-            temps = [
-                self.temp_start + ramp_sign * i * self.temp_step for i in range(n_temps)
-            ]
-
             if self.logger:
-                self.logger.info("Beginning temperature ramp at %sK", temps[0])
+                self.logger.info(
+                    "Beginning temperature ramp at %sK", self.ramp_temps[0]
+                )
             if self.tracker:
                 self.tracker.start_task("Temperature ramp")
 
-            for temp in temps:
+            for temp in self.ramp_temps:
                 self.temp = temp
                 self._set_velocity_distribution()
                 if isclose(temp, 0.0):
@@ -1136,12 +1272,14 @@ class MolecularDynamics(BaseCalculation):
                     self.created_final_file = True
                     continue
                 self._set_target_temperature(temp)
-                self.dyn.run(heating_steps)
+                self.dyn.run(self.heating_steps_per_temp)
                 self._write_final_state()
                 self.created_final_file = True
 
             if self.logger:
-                self.logger.info("Temperature ramp complete at %sK", temps[-1])
+                self.logger.info(
+                    "Temperature ramp complete at %sK", self.ramp_temps[-1]
+                )
             if self.tracker:
                 emissions = self.tracker.stop_task().emissions
                 self.struct.info["emissions"] = emissions
