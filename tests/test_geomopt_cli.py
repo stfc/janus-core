@@ -116,8 +116,8 @@ def test_traj(tmp_path):
             "--out",
             results_path,
             "--write-traj",
-            "--traj-kwargs",
-            f"{{'filename':'{traj_path}'}}",
+            "--minimize-kwargs",
+            f"{{'traj_kwargs':{{'filename':'{traj_path}'}}}}",
             "--log",
             log_path,
             "--summary",
@@ -808,8 +808,8 @@ def test_traj_kwargs_no_write(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--file-prefix",
             tmp_path / "NaCl",
-            "--traj-kwargs",
-            f"{{'filename':'{tmp_path / 'traj.extxyz'}'}}",
+            "--minimize-kwargs",
+            f"{{'traj_kwargs':{{'filename':'{tmp_path / 'traj.extxyz'}'}}}}",
         ],
     )
     assert result.exit_code == 1

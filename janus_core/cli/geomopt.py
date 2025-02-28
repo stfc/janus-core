@@ -18,7 +18,6 @@ from janus_core.cli.types import (
     ReadKwargsLast,
     StructPath,
     Summary,
-    TrajKwargs,
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
@@ -47,6 +46,9 @@ def _set_minimize_kwargs(
     """
     if "opt_kwargs" not in minimize_kwargs:
         minimize_kwargs["opt_kwargs"] = {}
+
+    if "traj_kwargs" not in minimize_kwargs:
+        minimize_kwargs["traj_kwargs"] = {}
 
     # Check hydrostatic_strain and scalar pressure not duplicated
     if "filter_kwargs" in minimize_kwargs:
@@ -130,9 +132,15 @@ def geomopt(
         ),
     ] = None,
     write_traj: Annotated[
-        bool, Option(help="Whether to save a trajectory file of optimization frames.")
+        bool,
+        Option(
+            help=(
+                "Whether to save a trajectory file of optimization frames. "
+                'If traj_kwargs["filename"] is not specified, it is inferred '
+                "from `file_prefix`."
+            ),
+        ),
     ] = False,
-    traj_kwargs: TrajKwargs = None,
     read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
@@ -191,9 +199,7 @@ def geomopt(
         converge. Default is inferred from name of structure file.
     write_traj
         Whether to save a trajectory file of optimization frames.
-    traj_kwargs
-        Keyword arguments to pass to ase.io.write when saving trajectory.
-        If "filename" is not included, it is inferred from `file_prefix`.
+        If traj_kwargs["filename"] is not specified, it is inferred from `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -229,10 +235,8 @@ def geomopt(
     # Check options from configuration file are all valid
     check_config(ctx)
 
-    [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs, traj_kwargs] = (
-        parse_typer_dicts(
-            [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs, traj_kwargs]
-        )
+    [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs] = parse_typer_dicts(
+        [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
     )
 
     # Read only first structure by default and ensure only one image is read
@@ -284,7 +288,6 @@ def geomopt(
         "write_results": True,
         "write_kwargs": write_kwargs,
         "write_traj": write_traj,
-        "traj_kwargs": traj_kwargs,
     }
 
     # Set up geometry optimization
