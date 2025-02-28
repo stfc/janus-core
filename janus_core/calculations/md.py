@@ -156,7 +156,7 @@ class MolecularDynamics(BaseCalculation):
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
     post_process_kwargs
-        Keyword arguments to control post-processing operations.
+        Keyword arguments to control post-processing operations. Default is None.
     correlation_kwargs
         Keyword arguments to control on-the-fly correlations. Default is None.
     seed
@@ -324,9 +324,9 @@ class MolecularDynamics(BaseCalculation):
             Keyword arguments to pass to `output_structs` when saving trajectory and
             final files. Default is {}.
         post_process_kwargs
-            Keyword arguments to control post-processing operations.
+            Keyword arguments to control post-processing operations. Default is None.
         correlation_kwargs
-            Keyword arguments to control on-the-fly correlations.
+            Keyword arguments to control on-the-fly correlations. Default is None.
         seed
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
