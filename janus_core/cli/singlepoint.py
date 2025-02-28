@@ -42,6 +42,12 @@ def singlepoint(
             ),
         ),
     ] = None,
+    file_prefix: Annotated[
+        Path | None,
+        Option(
+            help=("Prefix for output filenames. Default is inferred from structure.")
+        ),
+    ] = None,
     out: Annotated[
         Path | None,
         Option(
@@ -78,6 +84,8 @@ def singlepoint(
         Path to MLIP model. Default is `None`.
     properties
         Physical properties to calculate. Default is ("energy", "forces", "stress").
+    file_prefix
+        Prefix for output filenames. Default is inferred from structure.
     out
         Path to save structure with calculated results. Default is inferred from name
         of the structure file.
@@ -133,6 +141,7 @@ def singlepoint(
         "write_results": True,
         "arch": arch,
         "device": device,
+        "file_prefix": file_prefix,
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,

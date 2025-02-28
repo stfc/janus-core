@@ -60,6 +60,7 @@ def test_geomopt():
     finally:
         # Ensure files deleted if command fails
         read_atoms(results_path)
+        results_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
         clear_log_handlers()
@@ -114,8 +115,9 @@ def test_traj(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             results_path,
-            "--traj",
-            traj_path,
+            "--write-traj",
+            "--minimize-kwargs",
+            f"{{'traj_kwargs':{{'filename':'{traj_path}'}}}}",
             "--log",
             log_path,
             "--summary",
@@ -769,3 +771,47 @@ def test_units(tmp_path):
     assert "units" in atoms.info
     for prop, units in expected_units.items():
         assert atoms.info["units"][prop] == units
+
+
+def test_file_prefix(tmp_path):
+    """Test file prefix creates directories and affects all files."""
+    file_prefix = tmp_path / "test/test"
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+            "--write-traj",
+        ],
+    )
+    assert result.exit_code == 0
+    test_path = tmp_path / "test"
+    assert list(tmp_path.iterdir()) == [test_path]
+    assert set(test_path.iterdir()) == {
+        test_path / "test-opt.extxyz",
+        test_path / "test-traj.extxyz",
+        test_path / "test-geomopt-summary.yml",
+        test_path / "test-geomopt-log.yml",
+    }
+
+
+def test_traj_kwargs_no_write(tmp_path):
+    """Test traj_kwargs without flag to write traj raises error."""
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            tmp_path / "NaCl",
+            "--minimize-kwargs",
+            f"{{'traj_kwargs':{{'filename':'{tmp_path / 'traj.extxyz'}'}}}}",
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
+    assert "trajectory writing not enabled." in result.exception.args[0]

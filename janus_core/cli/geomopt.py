@@ -27,7 +27,6 @@ app = Typer()
 
 def _set_minimize_kwargs(
     minimize_kwargs: dict[str, Any],
-    traj: str | None,
     opt_cell_lengths: bool,
     pressure: float,
 ) -> None:
@@ -38,8 +37,6 @@ def _set_minimize_kwargs(
     ----------
     minimize_kwargs
         Other keyword arguments to pass to geometry optimizer.
-    traj
-        Path if saving optimization frames.
     opt_cell_lengths
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function.
@@ -47,20 +44,8 @@ def _set_minimize_kwargs(
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True.
     """
-    if "opt_kwargs" in minimize_kwargs:
-        # Check trajectory path not duplicated
-        if "trajectory" in minimize_kwargs["opt_kwargs"]:
-            raise ValueError("'trajectory' must be passed through the --traj option")
-    else:
-        minimize_kwargs["opt_kwargs"] = {}
-
-    if "traj_kwargs" not in minimize_kwargs:
-        minimize_kwargs["traj_kwargs"] = {}
-
-    # Set same trajectory filenames to overwrite saved binary with xyz
-    if traj:
-        minimize_kwargs["opt_kwargs"]["trajectory"] = traj
-        minimize_kwargs["traj_kwargs"]["filename"] = traj
+    minimize_kwargs.setdefault("opt_kwargs", {})
+    minimize_kwargs.setdefault("traj_kwargs", {})
 
     # Check hydrostatic_strain and scalar pressure not duplicated
     if "filter_kwargs" in minimize_kwargs:
@@ -130,6 +115,10 @@ def geomopt(
             help="Atom displacement tolerance for spglib symmetry determination, in Å."
         ),
     ] = 0.001,
+    file_prefix: Annotated[
+        Path | None,
+        Option(help="Prefix for output filenames. Default is inferred from structure."),
+    ] = None,
     out: Annotated[
         Path | None,
         Option(
@@ -139,10 +128,16 @@ def geomopt(
             ),
         ),
     ] = None,
-    traj: Annotated[
-        str,
-        Option(help="Path if saving optimization frames."),
-    ] = None,
+    write_traj: Annotated[
+        bool,
+        Option(
+            help=(
+                "Whether to save a trajectory file of optimization frames. "
+                'If traj_kwargs["filename"] is not specified, it is inferred '
+                "from `file_prefix`."
+            ),
+        ),
+    ] = False,
     read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
@@ -194,11 +189,14 @@ def geomopt(
     symmetry_tolerance
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
+    file_prefix
+        Prefix for output filenames. Default is inferred from structure.
     out
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
-    traj
-        Path if saving optimization frames. Default is None.
+    write_traj
+        Whether to save a trajectory file of optimization frames.
+        If traj_kwargs["filename"] is not specified, it is inferred from `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -247,7 +245,7 @@ def geomopt(
     if out:
         write_kwargs["filename"] = out
 
-    _set_minimize_kwargs(minimize_kwargs, traj, opt_cell_lengths, pressure)
+    _set_minimize_kwargs(minimize_kwargs, opt_cell_lengths, pressure)
 
     if opt_cell_fully or opt_cell_lengths:
         # Use default filter unless filter function explicitly passed
@@ -281,10 +279,12 @@ def geomopt(
         "steps": steps,
         "symmetrize": symmetrize,
         "symmetry_tolerance": symmetry_tolerance,
+        "file_prefix": file_prefix,
         **opt_cell_fully_dict,
         **minimize_kwargs,
         "write_results": True,
         "write_kwargs": write_kwargs,
+        "write_traj": write_traj,
     }
 
     # Set up geometry optimization
