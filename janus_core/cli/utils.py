@@ -344,7 +344,7 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
     parsed_kwargs = []
     for name, cli_kwargs in kwargs.value.items():
         if "a" not in cli_kwargs and "b" not in cli_kwargs:
-            raise ValueError("At least on3 observable must be supplied as 'a' or 'b'")
+            raise ValueError("At least one observable must be supplied as 'a' or 'b'")
 
         # Accept on Observable to be replicated.
         if "b" not in cli_kwargs:
