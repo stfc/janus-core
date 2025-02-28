@@ -157,8 +157,8 @@ class MolecularDynamics(BaseCalculation):
         files. Default is {}.
     post_process_kwargs
         Keyword arguments to control post-processing operations.
-    correlation_kwargs : list[CorrelationKwargs] | None
-        Keyword arguments to control on-the-fly correlations.
+    correlation_kwargs
+        Keyword arguments to control on-the-fly correlations. Default is None.
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.

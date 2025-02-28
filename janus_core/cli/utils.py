@@ -332,18 +332,18 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
 
     Parameters
     ----------
-    kwargs : CorrelationKwargs
+    kwargs
         CLI correlation keyword options.
 
     Returns
     -------
-    List[dict]
+    list[dict]
         The parsed correlation_kwargs for md.
     """
     parsed_kwargs = []
     for name, cli_kwargs in kwargs.value.items():
         if "a" not in cli_kwargs and "b" not in cli_kwargs:
-            raise ValueError("At least on observable must be supplied as 'a' or 'b'")
+            raise ValueError("At least on3 observable must be supplied as 'a' or 'b'")
 
         # Accept on Observable to be replicated.
         if "b" not in cli_kwargs:
@@ -361,7 +361,7 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
 
         # Accept "." in place of one kwargs to repeat.
         if a_kwargs == "." and b_kwargs == ".":
-            raise ValueError("a_kwargs and b_kwargs cannot 'ditto' eachother")
+            raise ValueError("a_kwargs and b_kwargs cannot 'ditto' each other")
         if a_kwargs and b_kwargs == ".":
             b_kwargs = a_kwargs
         elif b_kwargs and a_kwargs == ".":

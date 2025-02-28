@@ -351,9 +351,9 @@ def md(
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
     post_process_kwargs
-        Kwargs to pass to post-processing.
-    correlation_kwargs : Optional[CorrelationKwargs]
-        Kwrag to pass for on-the-fly correlations.
+        Keyword arguments to pass to post-processing. Default is None.
+    correlation_kwargs
+        Keyword arguments to pass for on-the-fly correlations. Default is None.
     seed : Optional[int]
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
