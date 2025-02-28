@@ -87,7 +87,7 @@ class GeomOpt(BaseCalculation):
     write_kwargs
         Keyword arguments to pass to ase.io.write to save optimized structure.
         Default is {}.
-    write_trajectory
+    write_traj
         Whether to save a trajectory file of optimization frames.
     traj_kwargs
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
@@ -119,7 +119,7 @@ class GeomOpt(BaseCalculation):
         opt_kwargs: ASEOptArgs | None = None,
         write_results: bool = False,
         write_kwargs: OutputKwargs | None = None,
-        write_trajectory: bool = False,
+        write_traj: bool = False,
         traj_kwargs: OutputKwargs | None = None,
     ) -> None:
         """
@@ -181,7 +181,7 @@ class GeomOpt(BaseCalculation):
         write_kwargs
             Keyword arguments to pass to ase.io.write to save optimized structure.
             Default is {}.
-        write_trajectory
+        write_traj
             Whether to save a trajectory file of optimization frames.
         traj_kwargs
             Keyword arguments to pass to ase.io.write to save optimization trajectory.
@@ -204,7 +204,7 @@ class GeomOpt(BaseCalculation):
         self.opt_kwargs = opt_kwargs
         self.write_results = write_results
         self.write_kwargs = write_kwargs
-        self.write_trajectory = write_trajectory
+        self.write_traj = write_traj
         self.traj_kwargs = traj_kwargs
 
         # Read last image by default
@@ -237,7 +237,7 @@ class GeomOpt(BaseCalculation):
             "opt.extxyz", filename=self.write_kwargs["filename"]
         ).absolute()
 
-        if self.write_trajectory:
+        if self.write_traj:
             if "filename" not in self.traj_kwargs:
                 self.traj_kwargs["filename"] = self._build_filename(
                     "traj.extxyz"
@@ -364,7 +364,7 @@ class GeomOpt(BaseCalculation):
         )
 
         # Reformat trajectory file from binary
-        if self.write_trajectory:
+        if self.write_traj:
             traj = read(self.opt_kwargs["trajectory"], index=":")
             output_structs(
                 traj,

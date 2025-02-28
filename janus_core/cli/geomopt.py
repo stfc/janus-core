@@ -129,7 +129,7 @@ def geomopt(
             ),
         ),
     ] = None,
-    write_trajectory: Annotated[
+    write_traj: Annotated[
         bool, Option(help="Whether to save a trajectory file of optimization frames.")
     ] = False,
     traj_kwargs: TrajKwargs = None,
@@ -189,7 +189,7 @@ def geomopt(
     out
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from name of structure file.
-    write_trajectory
+    write_traj
         Whether to save a trajectory file of optimization frames.
     traj_kwargs
         Keyword arguments to pass to ase.io.write when saving trajectory.
@@ -283,7 +283,7 @@ def geomopt(
         **minimize_kwargs,
         "write_results": True,
         "write_kwargs": write_kwargs,
-        "write_trajectory": write_trajectory,
+        "write_traj": write_traj,
         "traj_kwargs": traj_kwargs,
     }
 

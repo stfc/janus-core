@@ -115,7 +115,7 @@ def test_traj(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--out",
             results_path,
-            "--write-trajectory",
+            "--write-traj",
             "--traj-kwargs",
             f"{{'filename':'{traj_path}'}}",
             "--log",
@@ -784,7 +784,7 @@ def test_file_prefix(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--file-prefix",
             file_prefix,
-            "--write-trajectory",
+            "--write-traj",
         ],
     )
     assert result.exit_code == 0
