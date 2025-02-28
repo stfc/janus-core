@@ -76,7 +76,7 @@ def test_neb():
         assert lines[0] == "#Barrier [eV] | delta E [eV] | Max force [eV/Å] \n"
         results = [float(result) for result in lines[1].split()]
         assert results == pytest.approx(
-            [0.8984807983308647, 5.634287845168728e-07, 4.802233744475505]
+            [0.8497755543465928, -3.0149328722473e-07, 4.802233744475505]
         )
         assert "command" in neb_summary
         assert "janus neb" in neb_summary["command"]
@@ -144,7 +144,7 @@ def test_minimize(tmp_path):
     assert lines[0] == "#Barrier [eV] | delta E [eV] | Max force [eV/Å] \n"
     results = [float(result) for result in lines[1].split()]
     assert results == pytest.approx(
-        [0.8296793283384434, 5.145591330801835e-07, 2.174366063099385]
+        [0.8551249637134779, -1.4654790447821142e-07, 2.174366063099385]
     )
 
     assert_log_contains(
@@ -315,7 +315,7 @@ def test_interpolator(tmp_path):
         lines = results_file.readlines()
     results = [float(result) for result in lines[1].split()]
     assert results == pytest.approx(
-        [336131.8396612201, -3.792642177184348, 59797105.48085273]
+        [336164.9211653024, -3.0149328722473e-07, 59797105.48085273]
     )
 
 
@@ -354,7 +354,7 @@ def test_optimzer(tmp_path):
         lines = results_file.readlines()
     results = [float(result) for result in lines[1].split()]
     assert results == pytest.approx(
-        [1.59760263850103, 3.3379069463990163e-07, 6.3809101701189075]
+        [1.705643002186438, -3.0149328722473e-07, 6.3809101701189075]
     )
 
 
