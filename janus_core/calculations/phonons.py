@@ -331,9 +331,8 @@ class Phonons(BaseCalculation):
         opt_file = self._build_filename("opt.extxyz")
         if "write_kwargs" in self.minimize_kwargs:
             # Use _build_filename even if given filename to ensure directory exists
-            self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
             self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
-                "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
+                "", filename=self.minimize_kwargs["write_kwargs"].get("filename")
             )
         else:
             self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}

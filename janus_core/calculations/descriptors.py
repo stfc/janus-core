@@ -183,9 +183,8 @@ class Descriptors(BaseCalculation):
                 check_calculator(image.calc, "get_descriptors")
 
         # Set output file
-        self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
-            "descriptors.extxyz", filename=self.write_kwargs["filename"]
+            "descriptors.extxyz", filename=self.write_kwargs.get("filename")
         )
 
     @property
