@@ -479,7 +479,7 @@ class NEB(BaseCalculation):
 
     def run_nebtools(self):
         """Run NEBTools analysis."""
-        self.nebtools = NEBTools(self.images[1:-1])
+        self.nebtools = NEBTools(self.images)
         barrier, delta_E = self.nebtools.get_barrier()  # noqa: N806
         max_force = self.nebtools.get_fmax()
         self.results = {
