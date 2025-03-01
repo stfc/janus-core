@@ -159,7 +159,20 @@ def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
         Expected output files to compare with summary.
     """
     assert "output_files" in summary
+
     for key, value in output_files.items():
-        if value:
-            assert value.exists()
-        assert summary["output_files"][key] == (str(value) if value else None)
+        output_file = summary["output_files"][key]
+        if isinstance(value, list):
+            for file in value:
+                if not file.exists():
+                    raise ValueError(f"{file} missing")
+
+                if str(file.absolute()) not in output_file:
+                    raise ValueError(f"{file} is inconsistent with {output_file}")
+
+        else:
+            if value and not value.exists():
+                raise ValueError(f"{value} missing")
+
+            if output_file != (str(value.absolute()) if value else None):
+                raise ValueError(f"{value} is inconsistent with {output_file}")
