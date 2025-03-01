@@ -151,6 +151,8 @@ def test_hdf5(tmp_path):
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
     hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
+    summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
+    log_path = tmp_path / "test" / "NaCl-phonons-log.yml"
 
     result = runner.invoke(
         app,
@@ -167,11 +169,33 @@ def test_hdf5(tmp_path):
     assert phonon_results.exists()
     assert hdf5_results.exists()
 
+    # Read phonons summary file
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+
+    output_files = {
+        "params": phonon_results,
+        "force_constants": hdf5_results,
+        "bands": None,
+        "bands_plot": None,
+        "dos": None,
+        "dos_plot": None,
+        "band_dos_plot": None,
+        "pdos": None,
+        "pdos_plot": None,
+        "thermal": None,
+        "minimized_initial_structure": None,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(summary=phonon_summary, output_files=output_files)
+
 
 def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
     file_prefix = tmp_path / "test" / "NaCl"
     thermal_results = tmp_path / "test" / "NaCl-thermal.yml"
+    summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
 
     result = runner.invoke(
         app,
@@ -187,6 +211,15 @@ def test_thermal_props(tmp_path):
     )
     assert result.exit_code == 0
     assert thermal_results.exists()
+
+    # Read phonons summary file
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+
+    output_files = {
+        "thermal": thermal_results,
+    }
+    check_output_files(summary=phonon_summary, output_files=output_files)
 
 
 def test_dos(tmp_path):
@@ -245,10 +278,13 @@ def test_pdos(tmp_path):
 def test_plot(tmp_path):
     """Test for plotting routines."""
     file_prefix = tmp_path / "NaCl"
+    phonon_results = tmp_path / "NaCl-phonopy.yml"
+    bands_path = tmp_path / "NaCl-auto_bands.yml.xz"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
     autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
+    log_path = tmp_path / "NaCl-phonons-log.yml"
     svgs = [
         tmp_path / "NaCl-dos.svg",
         tmp_path / "NaCl-pdos.svg",
@@ -289,6 +325,27 @@ def test_plot(tmp_path):
     assert phonon_summary["config"]["bands"]
     assert phonon_summary["config"]["dos"]
     assert phonon_summary["config"]["pdos"]
+
+    # Read phonons summary file
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+
+    output_files = {
+        "params": phonon_results,
+        "force_constants": None,
+        "bands": bands_path,
+        "bands_plot": svgs[3],
+        "dos": dos_results,
+        "dos_plot": svgs[0],
+        "band_dos_plot": [svgs[2]],
+        "pdos": pdos_results,
+        "pdos_plot": svgs[1],
+        "thermal": None,
+        "minimized_initial_structure": None,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(summary=phonon_summary, output_files=output_files)
 
 
 test_data = [
@@ -386,6 +443,7 @@ def test_minimize_filename(tmp_path):
     """Test minimize filename overwrites default."""
     file_prefix = tmp_path / "test" / "test"
     opt_path = tmp_path / "test" / "geomopt-opt.extxyz"
+    summary_path = tmp_path / "test" / "test-phonons-summary.yml"
 
     # write_results should be set automatically
     minimize_kwargs = f"{{'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"
@@ -406,6 +464,15 @@ def test_minimize_filename(tmp_path):
     )
     assert result.exit_code == 0
     assert opt_path.exists()
+
+    # Read phonons summary file
+    with open(summary_path, encoding="utf8") as file:
+        phonon_summary = yaml.safe_load(file)
+
+    output_files = {
+        "minimized_initial_structure": opt_path,
+    }
+    check_output_files(summary=phonon_summary, output_files=output_files)
 
 
 @pytest.mark.parametrize("read_kwargs", ["{'index': 0}", "{}"])
