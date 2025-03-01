@@ -89,7 +89,7 @@ def train(
     if log:
         log_kwargs["filename"] = log
 
-    output_files = {"log": log}
+    output_files = {"log": log.absolute()}
 
     # Save summary information before training begins
     start_summary(
