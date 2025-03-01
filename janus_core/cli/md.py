@@ -43,7 +43,9 @@ def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
     with open(summary, encoding="utf8") as file:
         summary_info = yaml.safe_load(file)
 
-    summary_info["output_files"]["restarts"] = [str(file) for file in restart_files]
+    summary_info["output_files"]["restarts"] = (
+        [str(file) for file in restart_files] if restart_files else None
+    )
 
     with open(summary, "w", encoding="utf8") as outfile:
         yaml.dump(summary_info, outfile, default_flow_style=False)
