@@ -434,16 +434,32 @@ class Phonons(BaseCalculation):
         output_files["force_constants"] = (
             self.force_consts_file if self.force_consts_to_hdf5 else None
         )
-        output_files["bands"] = self.bands_file if self.write_results else None
-        output_files["bands_plot"] = self.bands_plot_file if self.plot_to_file else None
-        output_files["dos"] = self.dos_file if self.write_results else None
-        output_files["dos_plot"] = self.dos_plot_file if self.plot_to_file else None
-        output_files["band_dos_plot"] = (
-            self.bands_dos_plot_file if self.plot_to_file else None
+        output_files["bands"] = (
+            self.bands_file if self.write_results and "bands" in self.calcs else None
         )
-        output_files["pdos"] = self.pdos_file if self.write_results else None
-        output_files["pdos_plot"] = self.pdos_plot_file if self.plot_to_file else None
-        output_files["thermal"] = self.thermal_file if self.write_results else None
+        output_files["bands_plot"] = self.bands_plot_file if self.plot_to_file else None
+        output_files["dos"] = (
+            self.dos_file if self.write_results and "dos" in self.calcs else None
+        )
+        output_files["dos_plot"] = (
+            self.dos_plot_file if self.plot_to_file and "dos" in self.calcs else None
+        )
+        output_files["band_dos_plot"] = (
+            self.bands_dos_plot_file
+            if self.plot_to_file and "dos" in self.calcs and "bands" in self.calcs
+            else None
+        )
+        output_files["pdos"] = (
+            self.pdos_file if self.write_results and "pdos" in self.calcs else None
+        )
+        output_files["pdos_plot"] = (
+            self.pdos_plot_file if self.plot_to_file and "pdos" in self.calcs else None
+        )
+        output_files["thermal"] = (
+            self.thermal_file
+            if self.write_results and "thermal" in self.calcs
+            else None
+        )
         output_files["minimized_initial_structure"] = (
             self.minimize_kwargs["write_kwargs"]["filename"] if self.minimize else None
         )
