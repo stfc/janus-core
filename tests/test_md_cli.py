@@ -341,7 +341,7 @@ def test_summary(tmp_path):
 
 
 def test_config(tmp_path):
-    """Test passing a config file with ."""
+    """Test passing a config file."""
     file_prefix = tmp_path / "nvt"
     log_path = tmp_path / "nvt-md-log.yml"
     summary_path = tmp_path / "nvt-md-summary.yml"
