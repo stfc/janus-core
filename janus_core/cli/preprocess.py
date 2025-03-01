@@ -60,7 +60,7 @@ def preprocess(
     if log:
         log_kwargs["filename"] = log
 
-    output_files = {"log": log}
+    output_files = {"log": log.absolute()}
 
     # Save summary information before preprocessing begins
     start_summary(
