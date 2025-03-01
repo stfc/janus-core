@@ -7,6 +7,7 @@ from typing import Annotated, get_args
 
 from typer import Context, Option, Typer
 from typer_config import use_config
+import yaml
 
 from janus_core.cli.types import (
     Architecture,
@@ -26,6 +27,26 @@ from janus_core.cli.types import (
 from janus_core.cli.utils import yaml_converter_callback
 
 app = Typer()
+
+
+def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
+    """
+    Update restart files with final list.
+
+    Parameters
+    ----------
+    summary
+        Path to summary file.
+    restart_files
+        Restart files generated.
+    """
+    with open(summary, encoding="utf8") as file:
+        summary_info = yaml.safe_load(file)
+
+    summary_info["output_files"]["restarts"] = [str(file) for file in restart_files]
+
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(summary_info, outfile, default_flow_style=False)
 
 
 @app.command()
@@ -573,6 +594,9 @@ def md(
 
     # Run molecular dynamics
     dyn.run()
+
+    # Replace empty list with final restart files
+    _update_restart_files(summary=summary, restart_files=dyn.restart_files)
 
     # Save carbon summary
     if tracker:

@@ -537,7 +537,7 @@ class MolecularDynamics(BaseCalculation):
         output_files["stats"] = self.stats_file
         output_files["trajectory"] = self.traj_file
         output_files["final_structure"] = self.final_file
-        output_files["restart"] = self._restart_file
+        output_files["restarts"] = self.restart_files if self.restart_files else None
         output_files["correlations"] = (
             self._correlations_file if self._correlations else None
         )
@@ -1125,8 +1125,8 @@ class MolecularDynamics(BaseCalculation):
                 write_results=True,
                 write_kwargs=write_kwargs,
             )
+            self.restart_files.append(self._restart_file)
             if self.rotate_restart:
-                self.restart_files.append(self._restart_file)
                 self._rotate_restart_files()
 
     def _set_target_temperature(self, temperature: float):
