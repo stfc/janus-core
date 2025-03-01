@@ -494,7 +494,7 @@ class MolecularDynamics(BaseCalculation):
         if "write_kwargs" in self.minimize_kwargs:
             # Use _build_filename even if given filename to ensure directory exists
             self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
-                "", filename=self.minimize_kwargs["write_kwargs"].get(["filename"])
+                "", filename=self.minimize_kwargs["write_kwargs"].get("filename")
             )
 
             # Assume if write_kwargs are specified that results should be written
