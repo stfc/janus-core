@@ -30,6 +30,17 @@ jobs:
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run pytest
 
+      - name: Install updated e3nn dependencies
+        run: |
+          uv sync --extra mattersim
+          uv pip install --reinstall pynvml
+
+      - name: Run test suite
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+        run: uv run pytest tests/test_{mlip_calculators,single_point}.py
+
       - name: Install dgl dependencies
         run: |
           uv sync --extra mace --extra m3gnet --extra alignn

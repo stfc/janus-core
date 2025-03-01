@@ -91,6 +91,7 @@ Current and planned features include:
   - NequIP
   - DPA3
   - Orb
+  - MatterSim
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
