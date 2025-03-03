@@ -272,15 +272,13 @@ class GeomOpt(BaseCalculation):
         dict[str, PathLike]
             Output file labels and paths.
         """
-        output_files = {}
-
-        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
-        output_files["optimized_structure"] = (
-            self.write_kwargs["filename"] if self.write_results else None
-        )
-        output_files["trajectory"] = self.traj_kwargs.get("filename")
-
-        return output_files
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "optimized_structure": self.write_kwargs["filename"]
+            if self.write_results
+            else None,
+            "trajectory": self.traj_kwargs.get("filename"),
+        }
 
     def set_optimizer(self) -> None:
         """Set optimizer for geometry optimization."""
