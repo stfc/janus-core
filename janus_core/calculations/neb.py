@@ -375,22 +375,18 @@ class NEB(BaseCalculation):
         dict[str, PathLike]
             Output file labels and paths.
         """
-        output_files = {}
-
-        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
-        output_files["results"] = self.results_file if self.write_results else None
-        output_files["plot"] = self.plot_file if self.plot_band else None
-        output_files["band"] = (
-            self.write_kwargs["filename"] if self.write_band else None
-        )
-        output_files["minimized_initial_structure"] = (
-            self.init_struct_min_path if self.minimize else None
-        )
-        output_files["minimized_final_structure"] = (
-            self.final_struct_min_path if self.minimize else None
-        )
-
-        return output_files
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "results": self.results_file if self.write_results else None,
+            "plot": self.plot_file if self.plot_band else None,
+            "band": (self.write_kwargs["filename"] if self.write_band else None),
+            "minimized_initial_structure": (
+                self.init_struct_min_path if self.minimize else None
+            ),
+            "minimized_final_structure": (
+                self.final_struct_min_path if self.minimize else None
+            ),
+        }
 
     def _set_neb(self) -> None:
         """Set NEB method and optimizer."""
