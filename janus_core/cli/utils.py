@@ -58,6 +58,8 @@ def dict_tuples_to_lists(dictionary: dict) -> None:
             dict_tuples_to_lists(value)
         elif isinstance(value, tuple):
             dictionary[key] = list(value)
+        elif isinstance(value, list):
+            dictionary[key] = [list(x) if isinstance(x, tuple) else x for x in value]
 
 
 def dict_remove_hyphens(dictionary: dict) -> dict:
