@@ -69,6 +69,11 @@ all = [
     "janus-core[sevennet]",
 ]
 
+# MLIP with updated e3nn
+mattersim = [
+    "mattersim == 1.1.1",
+]
+
 # MLIPs with dgl dependency
 alignn = [
     "alignn == 2024.5.27",
@@ -215,6 +220,14 @@ conflicts = [
     [
       { extra = "all" },
       { extra = "m3gnet" },
+    ],
+    [
+      { extra = "mattersim" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "mattersim" },
+      { extra = "all" },
     ],
 ]
 
