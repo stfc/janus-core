@@ -197,14 +197,10 @@ class Descriptors(BaseCalculation):
         dict[str, PathLike]
             Output file labels and paths.
         """
-        output_files = {}
-
-        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
-        output_files["results"] = (
-            self.write_kwargs["filename"] if self.write_results else None
-        )
-
-        return output_files
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "results": self.write_kwargs["filename"] if self.write_results else None,
+        }
 
     def run(self) -> None:
         """Calculate descriptors for structure(s)."""

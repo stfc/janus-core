@@ -276,19 +276,15 @@ class EoS(BaseCalculation):
         dict[str, PathLike]
             Output file labels and paths.
         """
-        output_files = {}
-
-        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
-        output_files["generated_structures"] = (
-            self.write_kwargs["filename"] if self.write_structures else None
-        )
-        output_files["plot"] = (
-            self.plot_kwargs["filename"] if self.plot_to_file else None
-        )
-        output_files["fit"] = self.fit_file if self.write_results else None
-        output_files["raw"] = self.raw_file if self.write_results else None
-
-        return output_files
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "generated_structures": self.write_kwargs["filename"]
+            if self.write_structures
+            else None,
+            "plot": self.plot_kwargs["filename"] if self.plot_to_file else None,
+            "fit": self.fit_file if self.write_results else None,
+            "raw": self.raw_file if self.write_results else None,
+        }
 
     def run(self) -> EoSResults:
         """

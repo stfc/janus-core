@@ -531,33 +531,29 @@ class MolecularDynamics(BaseCalculation):
         dict[str, PathLike]
             Output file labels and paths.
         """
-        output_files = {}
-
-        output_files["log"] = self.log_kwargs["filename"] if self.logger else None
-        output_files["stats"] = self.stats_file
-        output_files["trajectory"] = self.traj_file
-        output_files["final_structure"] = self.final_file
-        output_files["restarts"] = self.restart_files if self.restart_files else None
-        output_files["correlations"] = (
-            self._correlations_file if self._correlations else None
-        )
-        output_files["minimized_initial_structure"] = (
-            self.minimize_kwargs["write_kwargs"]["filename"]
-            if self.minimize_kwargs["write_results"]
-            else None
-        )
-        output_files["rdfs"] = (
-            self._rdf_files
-            if self.post_process_kwargs.get("rdf_compute", False)
-            else None
-        )
-        output_files["vafs"] = (
-            self._vaf_files
-            if self.post_process_kwargs.get("vaf_compute", False)
-            else None
-        )
-
-        return output_files
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "stats": self.stats_file,
+            "trajectory": self.traj_file,
+            "final_structure": self.final_file,
+            "restarts": self.restart_files if self.restart_files else None,
+            "correlations": (self._correlations_file if self._correlations else None),
+            "minimized_initial_structure": (
+                self.minimize_kwargs["write_kwargs"]["filename"]
+                if self.minimize_kwargs["write_results"]
+                else None
+            ),
+            "rdfs": (
+                self._rdf_files
+                if self.post_process_kwargs.get("rdf_compute", False)
+                else None
+            ),
+            "vafs": (
+                self._vaf_files
+                if self.post_process_kwargs.get("vaf_compute", False)
+                else None
+            ),
+        }
 
     def _set_info(self) -> None:
         """Set time in fs, current dynamics step, density, and temperature to info."""
