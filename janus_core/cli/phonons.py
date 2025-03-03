@@ -232,7 +232,6 @@ def phonons(
     from janus_core.cli.utils import (
         carbon_summary,
         check_config,
-        dict_tuples_to_lists,
         end_summary,
         parse_typer_dicts,
         save_struct_calc,
@@ -355,9 +354,6 @@ def phonons(
         calc_kwargs=calc_kwargs,
         log=log,
     )
-
-    # Convert all tuples to list in inputs nested dictionary
-    dict_tuples_to_lists(inputs)
 
     output_files = phonon.output_files
 
