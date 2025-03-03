@@ -77,12 +77,16 @@ def train(
 
     inputs = {"mlip_config": str(mlip_config), "fine_tune": fine_tune}
 
-    # Save summary information before training begins
-    start_summary(command="train", summary=summary, inputs=inputs)
-
     log_kwargs = {"filemode": "w"}
     if log:
         log_kwargs["filename"] = log
+
+    output_files = {"log": log.absolute()}
+
+    # Save summary information before training begins
+    start_summary(
+        command="train", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run training
     run_train(

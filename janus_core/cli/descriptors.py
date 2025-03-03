@@ -157,9 +157,7 @@ def descriptors(
     descript = Descriptors(**descriptors_kwargs)
 
     # Set summary and log files
-    summary = descript._build_filename(
-        "descriptors-summary.yml", filename=summary
-    ).absolute()
+    summary = descript._build_filename("descriptors-summary.yml", filename=summary)
     log = descript.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -178,8 +176,12 @@ def descriptors(
         log=log,
     )
 
+    output_files = descript.output_files
+
     # Save summary information before calculation begins
-    start_summary(command="descriptors", summary=summary, inputs=inputs)
+    start_summary(
+        command="descriptors", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Calculate descriptors
     descript.run()

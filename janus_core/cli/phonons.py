@@ -232,7 +232,6 @@ def phonons(
     from janus_core.cli.utils import (
         carbon_summary,
         check_config,
-        dict_tuples_to_lists,
         end_summary,
         parse_typer_dicts,
         save_struct_calc,
@@ -337,7 +336,7 @@ def phonons(
     phonon = Phonons(**phonons_kwargs)
 
     # Set summary and log files
-    summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
+    summary = phonon._build_filename("phonons-summary.yml", filename=summary)
     log = phonon.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -356,11 +355,12 @@ def phonons(
         log=log,
     )
 
-    # Convert all tuples to list in inputs nested dictionary
-    dict_tuples_to_lists(inputs)
+    output_files = phonon.output_files
 
     # Save summary information before calculations begin
-    start_summary(command="phonons", summary=summary, inputs=inputs)
+    start_summary(
+        command="phonons", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run phonon calculations
     phonon.run()

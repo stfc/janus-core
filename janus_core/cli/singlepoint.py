@@ -155,9 +155,7 @@ def singlepoint(
     s_point = SinglePoint(**singlepoint_kwargs)
 
     # Store inputs for yaml summary
-    summary = s_point._build_filename(
-        "singlepoint-summary.yml", filename=summary
-    ).absolute()
+    summary = s_point._build_filename("singlepoint-summary.yml", filename=summary)
     log = s_point.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -176,8 +174,12 @@ def singlepoint(
         log=log,
     )
 
+    output_files = s_point.output_files
+
     # Save summary information before singlepoint calculation begins
-    start_summary(command="singlepoint", summary=summary, inputs=inputs)
+    start_summary(
+        command="singlepoint", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run singlepoint calculation
     s_point.run()

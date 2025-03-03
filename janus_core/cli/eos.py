@@ -200,9 +200,7 @@ def eos(
     equation_of_state = EoS(**eos_kwargs)
 
     # Set summary and log files
-    summary = equation_of_state._build_filename(
-        "eos-summary.yml", filename=summary
-    ).absolute()
+    summary = equation_of_state._build_filename("eos-summary.yml", filename=summary)
     log = equation_of_state.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -221,8 +219,12 @@ def eos(
         log=log,
     )
 
+    output_files = equation_of_state.output_files
+
     # Save summary information before calculations begin
-    start_summary(command="eos", summary=summary, inputs=inputs)
+    start_summary(
+        command="eos", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run equation of state calculations
     equation_of_state.run()

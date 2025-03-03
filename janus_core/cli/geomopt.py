@@ -291,9 +291,7 @@ def geomopt(
     optimizer = GeomOpt(**optimize_kwargs)
 
     # Set summary and log files
-    summary = optimizer._build_filename(
-        "geomopt-summary.yml", filename=summary
-    ).absolute()
+    summary = optimizer._build_filename("geomopt-summary.yml", filename=summary)
     log = optimizer.log_kwargs["filename"]
 
     # Store inputs for yaml summary
@@ -312,8 +310,12 @@ def geomopt(
         log=log,
     )
 
+    output_files = optimizer.output_files
+
     # Save summary information before optimization begins
-    start_summary(command="geomopt", summary=summary, inputs=inputs)
+    start_summary(
+        command="geomopt", summary=summary, inputs=inputs, output_files=output_files
+    )
 
     # Run geometry optimization and save output structure
     optimizer.run()
