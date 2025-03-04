@@ -67,7 +67,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             Components to add to default file_prefix (joined by hyphens).
         """
         self.file_prefix = Path(
-            self._get_default_prefix(file_prefix, struct, struct_path, *additional)
+            self._get_default_prefix(file_prefix, struct, struct_path, *additional),
         )
 
     @staticmethod
@@ -78,12 +78,12 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         *additional,
     ) -> str:
         """
-        Determine the default prefix from the structure  or provided file_prefix.
+        Determine the default prefix from the structure or provided file_prefix.
 
         Parameters
         ----------
         file_prefix
-            Given file_prefix.
+            File prefix.
         struct
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
@@ -108,7 +108,10 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         else:
             struct_name = struct.get_chemical_formula()
 
-        return "-".join((struct_name, *filter(None, additional)))
+        # Set default output directory
+        prefix = Path("./results") / struct_name
+
+        return "-".join((str(prefix), *filter(None, additional)))
 
     def _build_filename(
         self,
