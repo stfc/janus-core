@@ -331,16 +331,23 @@ def choose_calculator(
     elif arch == "fairchem":
         from fairchem.core import OCPCalculator, __version__
 
-        if isinstance(model_path, Path):
-            model_path = str(model_path)
-        elif not isinstance(model_path, str):
-            model_path = "EquiformerV2-31M-S2EF-OC20-All+MD"
-        kwargs.setdefault("local_cache", "pretrained_models")
-        cpu = False
-        if device == "cpu":
-            cpu = True
+        # Default model
+        model_path = model_path if model_path else "EquiformerV2-31M-S2EF-OC20-All+MD"
 
-        calculator = OCPCalculator(model_name=model_path, cpu=cpu, **kwargs)
+        model_name = None
+        checkpoint_path = None
+
+        if isinstance(model_path, Path) and model_path.exists():
+            checkpoint_path = str(model_path)
+        else:
+            model_name = str(model_path)
+
+        kwargs.setdefault("local_cache", "pretrained_models")
+        cpu = True if device == "cpu" else False
+
+        calculator = OCPCalculator(
+            model_name=model_name, checkpoint_path=checkpoint_path, cpu=cpu, **kwargs
+        )
 
     else:
         raise ValueError(
