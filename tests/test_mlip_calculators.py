@@ -25,13 +25,11 @@ try:
 except ImportError:
     CHGNET_MODEL = None
 
-SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
+FAIRCHEM_MODEL = "EquiformerV2-31M-S2EF-OC20-All+MD"
 
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
-
-DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 
@@ -42,9 +40,11 @@ try:
 except ImportError:
     ORB_MODEL = None
 
+SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+
+ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 M3GNET_DIR_PATH = MODEL_PATH / "M3GNet-MP-2021.2.8-DIRECT-PES"
 M3GNET_MODEL_PATH = M3GNET_DIR_PATH / "model.pt"
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 
 try:
     from matgl import load_model
@@ -74,6 +74,9 @@ except ImportError:
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
+        ("fairchem", "cpu", {}),
+        ("fairchem", "cpu", {"model": FAIRCHEM_MODEL}),
+        ("fairchem", "cpu", {"model_path": FAIRCHEM_MODEL}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
@@ -85,10 +88,6 @@ except ImportError:
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
         ("sevennet", "cpu", {"model": "sevennet-0"}),
-        ("fairchem", "cpu", {}),
-        ("fairchem", "cpu", {"model": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
-        ("fairchem", "cpu", {"model_path": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
-        ("fairchem", "cpu", {"path": "EquiformerV2-31M-S2EF-OC20-All+MD"}),
         ("alignn", "cpu", {}),
         ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
         ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
@@ -127,11 +126,11 @@ def test_invalid_arch():
         ("mace_mp", "/invalid/path"),
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
+        ("fairchem", "/invalid/path"),
         ("mattersim", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
         ("sevenn", "/invalid/path"),
-        ("fairchem", "/invalid/path"),
         ("alignn", "invalid/path"),
         ("m3gnet", "/invalid/path"),
     ],
@@ -154,6 +153,11 @@ def test_invalid_model_path(arch, model_path):
         {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
         {"arch": "dpa3", "model_path": DPA3_PATH, "path": DPA3_PATH},
         {
+            "arch": "fairchem",
+            "model_path": FAIRCHEM_MODEL,
+            "model": FAIRCHEM_MODEL,
+        },
+        {
             "arch": "mattersim",
             "model_path": "mattersim-v1.0.0-1m",
             "path": "mattersim-v1.0.0-1m",
@@ -162,11 +166,6 @@ def test_invalid_model_path(arch, model_path):
         {"arch": "nequip", "model_path": NEQUIP_PATH, "path": NEQUIP_PATH},
         {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
         {"arch": "orb", "model_path": ORB_MODEL, "path": ORB_MODEL},
-        {
-            "arch": "fairchem",
-            "model_path": "EquiformerV2-31M-S2EF-OC20-All+MD",
-            "model": "EquiformerV2-31M-S2EF-OC20-All+MD",
-        },
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "path": SEVENNET_PATH},
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
         {
