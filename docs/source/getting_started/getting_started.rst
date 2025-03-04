@@ -60,5 +60,6 @@ Currently supported extras are:
 - ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
+- ``fairchem``: `eqV2 DeNS <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
 
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.
