@@ -305,6 +305,27 @@ def choose_calculator(
             potential=potential, load_path=model_path, device=device, **kwargs
         )
 
+    elif arch == "fairchem":
+        from fairchem.core import OCPCalculator, __version__
+
+        # Default model
+        model_path = model_path if model_path else "EquiformerV2-31M-S2EF-OC20-All+MD"
+
+        model_name = None
+        checkpoint_path = None
+
+        if isinstance(model_path, Path) and model_path.exists():
+            checkpoint_path = str(model_path)
+        else:
+            model_name = str(model_path)
+
+        kwargs.setdefault("local_cache", "pretrained_models")
+        cpu = True if device == "cpu" else False
+
+        calculator = OCPCalculator(
+            model_name=model_name, checkpoint_path=checkpoint_path, cpu=cpu, **kwargs
+        )
+
     else:
         raise ValueError(
             f"Unrecognized {arch=}. Suported architectures "
