@@ -135,6 +135,8 @@ def skip_extras(arch: str):
             pytest.importorskip("tensorpotential")
         case "mace" | "mace_mp" | "mace_off":
             pytest.importorskip("mace")
+        case "fairchem":
+            pytest.importorskip("fairchem.core")
         case "mattersim":
             pytest.importorskip("mattersim")
         case "nequip":
