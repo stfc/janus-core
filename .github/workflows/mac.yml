@@ -32,7 +32,7 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
-          uv sync --extra mattersim
+          uv sync --extra mattersim --extra fairchem
           uv pip install --reinstall pynvml
 
       - name: Run test suite
