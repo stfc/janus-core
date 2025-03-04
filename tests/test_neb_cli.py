@@ -27,11 +27,11 @@ def test_help():
 
 def test_neb():
     """Test calculating force constants and band structure."""
-    results_path = Path("./LiFePO4_start-neb-results.dat").absolute()
-    band_path = Path("./LiFePO4_start-neb-band.extxyz").absolute()
-    plot_path = Path("./LiFePO4_start-neb-plot.svg").absolute()
-    log_path = Path("./LiFePO4_start-neb-log.yml").absolute()
-    summary_path = Path("./LiFePO4_start-neb-summary.yml").absolute()
+    results_path = Path("./results/LiFePO4_start-neb-results.dat").absolute()
+    band_path = Path("./results/LiFePO4_start-neb-band.extxyz").absolute()
+    plot_path = Path("./results/LiFePO4_start-neb-plot.svg").absolute()
+    log_path = Path("./results/LiFePO4_start-neb-log.yml").absolute()
+    summary_path = Path("./results/LiFePO4_start-neb-summary.yml").absolute()
 
     assert not results_path.exists()
     assert not band_path.exists()
