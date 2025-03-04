@@ -75,44 +75,49 @@ def test_md_pp_cli(tmp_path):
     rdf_path = tmp_path / "nve-T300-rdf.dat"
     vaf_na_path = Path("vaf_na.dat")
     vaf_cl_path = Path("vaf_cl.dat")
-    result = runner.invoke(
-        app,
-        [
-            "md",
-            "--ensemble",
-            "nve",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--file-prefix",
-            file_prefix,
-            "--steps",
-            10,
-            "--traj-every",
-            2,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-            "--post-process-kwargs",
-            """{'vaf_compute': True,
-              'vaf_atoms': (('Na',),('Cl',)),
-              'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat'),
-              'rdf_compute': True,
-              'rdf_rmax': 2.5}""",
-        ],
-    )
 
-    assert result.exit_code == 0
+    try:
+        result = runner.invoke(
+            app,
+            [
+                "md",
+                "--ensemble",
+                "nve",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--file-prefix",
+                file_prefix,
+                "--steps",
+                10,
+                "--traj-every",
+                2,
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+                "--post-process-kwargs",
+                """{'vaf_compute': True,
+                'vaf_atoms': (('Na',),('Cl',)),
+                'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat'),
+                'rdf_compute': True,
+                'rdf_rmax': 2.5}""",
+            ],
+        )
 
-    assert rdf_path.exists()
-    rdf = np.loadtxt(rdf_path)
-    assert len(rdf) == 50
+        assert result.exit_code == 0
 
-    # Cell too small to really compute RDF
-    assert np.all(rdf[:, 1] == 0)
+        assert rdf_path.exists()
+        rdf = np.loadtxt(rdf_path)
+        assert len(rdf) == 50
 
-    assert vaf_na_path.exists()
-    assert vaf_cl_path.exists()
+        # Cell too small to really compute RDF
+        assert np.all(rdf[:, 1] == 0)
+
+        assert vaf_na_path.exists()
+        assert vaf_cl_path.exists()
+    finally:
+        vaf_na_path.unlink(missing_ok=True)
+        vaf_cl_path.unlink(missing_ok=True)
 
 
 def test_rdf():
