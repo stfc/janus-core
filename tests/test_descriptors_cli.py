@@ -77,7 +77,8 @@ def test_descriptors():
         assert "command" in descriptors_summary
         assert "janus descriptors" in descriptors_summary["command"]
         assert "start_time" in descriptors_summary
-        assert "inputs" in descriptors_summary
+        assert "config" in descriptors_summary
+        assert "info" in descriptors_summary
         assert "end_time" in descriptors_summary
 
         assert "emissions" in descriptors_summary

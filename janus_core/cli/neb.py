@@ -24,7 +24,7 @@ from janus_core.cli.types import (
     Summary,
     WriteKwargs,
 )
-from janus_core.cli.utils import dict_paths_to_strs, yaml_converter_callback
+from janus_core.cli.utils import yaml_converter_callback
 
 app = Typer()
 
@@ -175,8 +175,9 @@ def neb(
         carbon_summary,
         check_config,
         end_summary,
+        get_config,
+        get_struct_info,
         parse_typer_dicts,
-        save_struct_calc,
         start_summary,
     )
     from janus_core.helpers.janus_types import Interpolators
@@ -203,6 +204,18 @@ def neb(
             calc_kwargs,
         ]
     )
+
+    # Set initial config
+    all_kwargs = {
+        "write_kwargs": write_kwargs.copy(),
+        "neb_kwargs": neb_kwargs.copy(),
+        "interpolator_kwargs": interpolator_kwargs.copy(),
+        "optimizer_kwargs": optimizer_kwargs.copy(),
+        "minimize_kwargs": minimize_kwargs.copy(),
+        "read_kwargs": read_kwargs.copy(),
+        "calc_kwargs": calc_kwargs.copy(),
+    }
+    config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
     if band_structs:
         if init_struct or final_struct:
@@ -256,40 +269,24 @@ def neb(
     summary = neb._build_filename("neb-summary.yml", filename=summary).absolute()
     log = neb.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    inputs = neb_inputs.copy()
-
-    del inputs["init_struct"]
-    del inputs["final_struct"]
-    del inputs["band_structs"]
-
     # Add structure, MLIP information, and log to inputs
-    save_struct_calc(
-        inputs=inputs,
+    info = get_struct_info(
         struct=neb.struct,
         struct_path=init_struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log=log,
     )
+
     if band_structs:
-        inputs["band_structs"] = inputs.pop("traj")
+        info["band_structs"] = info.pop("traj")
     else:
-        inputs["init_struct"] = inputs.pop("struct")
-        inputs["final_struct"] = {
+        info["init_struct"] = info.pop("struct")
+        info["final_struct"] = {
             "n_atoms": len(neb.final_struct),
             "struct_path": final_struct,
             "formula": neb.final_struct.get_chemical_formula(),
         }
 
-    # Convert all paths to strings in inputs nested dictionary
-    dict_paths_to_strs(inputs)
-
     # Save summary information before calculations begin
-    start_summary(command="neb", summary=summary, inputs=inputs)
+    start_summary(command="neb", summary=summary, config=config, info=info)
 
     # Run equation of state calculations
     neb.run()

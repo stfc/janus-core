@@ -79,8 +79,7 @@ def descriptors(
     calc_per_atom
         Whether to calculate descriptors for each atom. Default is False.
     arch
-        MLIP architecture to use for single point calculations.
-        Default is "mace_mp".
+        MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path
@@ -111,8 +110,9 @@ def descriptors(
         carbon_summary,
         check_config,
         end_summary,
+        get_config,
+        get_struct_info,
         parse_typer_dicts,
-        save_struct_calc,
         start_summary,
     )
 
@@ -126,6 +126,14 @@ def descriptors(
     # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
+
+    # Set initial config
+    all_kwargs = {
+        "read_kwargs": read_kwargs.copy(),
+        "calc_kwargs": calc_kwargs.copy(),
+        "write_kwargs": write_kwargs.copy(),
+    }
+    config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
     # Set default filname for writing structure with descriptors if not specified
     if out:
@@ -162,24 +170,14 @@ def descriptors(
     ).absolute()
     log = descript.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    inputs = descriptors_kwargs.copy()
-
     # Add structure, MLIP information, and log to inputs
-    save_struct_calc(
-        inputs=inputs,
+    info = get_struct_info(
         struct=descript.struct,
         struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log=log,
     )
 
     # Save summary information before calculation begins
-    start_summary(command="descriptors", summary=summary, inputs=inputs)
+    start_summary(command="descriptors", summary=summary, config=config, info=info)
 
     # Calculate descriptors
     descript.run()

@@ -250,14 +250,15 @@ def test_summary(tmp_path):
     assert "command" in sp_summary
     assert "janus singlepoint" in sp_summary["command"]
     assert "start_time" in sp_summary
-    assert "inputs" in sp_summary
+    assert "config" in sp_summary
+    assert "info" in sp_summary
     assert "end_time" in sp_summary
 
-    assert "properties" in sp_summary["inputs"]
-    assert "traj" in sp_summary["inputs"]
-    assert "length" in sp_summary["inputs"]["traj"]
-    assert "struct" in sp_summary["inputs"]["traj"]
-    assert "n_atoms" in sp_summary["inputs"]["traj"]["struct"]
+    assert "properties" in sp_summary["config"]
+    assert "traj" in sp_summary["info"]
+    assert "length" in sp_summary["info"]["traj"]
+    assert "struct" in sp_summary["info"]["traj"]
+    assert "n_atoms" in sp_summary["info"]["traj"]["struct"]
 
     assert "emissions" in sp_summary
     assert sp_summary["emissions"] > 0
@@ -293,8 +294,8 @@ def test_config(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
 
-    assert "index" in sp_summary["inputs"]["calc"]["read_kwargs"]
-    assert sp_summary["inputs"]["calc"]["read_kwargs"]["index"] == 0
+    assert "index" in sp_summary["config"]["read_kwargs"]
+    assert sp_summary["config"]["read_kwargs"]["index"] == 0
 
 
 def test_invalid_config():

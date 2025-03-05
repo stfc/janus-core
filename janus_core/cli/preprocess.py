@@ -49,10 +49,15 @@ def preprocess(
     from janus_core.cli.utils import carbon_summary, end_summary, start_summary
     from janus_core.training.preprocess import preprocess as run_preprocess
 
-    inputs = {"mlip_config": str(mlip_config)}
+    config = {
+        "mlip_config": mlip_config,
+        "log": log,
+        "tracker": tracker,
+        "summary": summary,
+    }
 
     # Save summary information before preprocessing begins
-    start_summary(command="preprocess", summary=summary, inputs=inputs)
+    start_summary(command="preprocess", summary=summary, config=config, info={})
 
     log_kwargs = {"filemode": "w"}
     if log:
