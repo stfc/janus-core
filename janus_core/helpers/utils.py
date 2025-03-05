@@ -109,7 +109,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             struct_name = struct.get_chemical_formula()
 
         # Set default output directory
-        prefix = Path("./results") / struct_name
+        prefix = Path("./janus_results") / struct_name
 
         return "-".join((str(prefix), *filter(None, additional)))
 
