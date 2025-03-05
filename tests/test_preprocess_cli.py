@@ -62,8 +62,8 @@ def test_preprocess(tmp_path):
     val_path = Path("val")
     test_path = Path("test")
     stats_path = Path("./statistics.json")
-    log_path = Path("./preprocess-log.yml").absolute()
-    summary_path = Path("./preprocess-summary.yml").absolute()
+    log_path = Path("./janus_results/preprocess-log.yml")
+    summary_path = Path("./janus_results/preprocess-summary.yml")
 
     assert not train_path.exists()
     assert not val_path.exists()

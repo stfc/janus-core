@@ -70,8 +70,8 @@ def test_train(tmp_path):
     results_path = Path("results")
     checkpoints_path = Path("checkpoints")
     logs_path = Path("logs")
-    log_path = Path("./train-log.yml").absolute()
-    summary_path = Path("./train-summary.yml").absolute()
+    log_path = Path("./janus_results/train-log.yml")
+    summary_path = Path("./janus_results/train-summary.yml")
 
     assert not model.exists()
     assert not compiled_model.exists()
