@@ -83,7 +83,8 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         Parameters
         ----------
         file_prefix
-            File prefix.
+            Name to be given to any result files. May also include path to file
+            directory.
         struct
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
