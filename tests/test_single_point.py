@@ -187,7 +187,7 @@ def test_single_point_write():
     skip_extras("mace")
 
     data_path = DATA_PATH / "NaCl.cif"
-    results_path = Path("./results/NaCl-results.extxyz").absolute()
+    results_path = Path("./janus_results/NaCl-results.extxyz")
     assert not results_path.exists()
 
     single_point = SinglePoint(

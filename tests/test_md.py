@@ -75,11 +75,11 @@ def test_init(ensemble, expected):
 
 def test_npt():
     """Test NPT molecular dynamics."""
-    restart_path_1 = Path("results/Cl4Na4-npt-T300.0-p1.0-res-2.extxyz")
-    restart_path_2 = Path("results/Cl4Na4-npt-T300.0-p1.0-res-4.extxyz")
-    restart_final = Path("results/Cl4Na4-npt-T300.0-p1.0-final.extxyz")
-    traj_path = Path("results/Cl4Na4-npt-T300.0-p1.0-traj.extxyz")
-    stats_path = Path("results/Cl4Na4-npt-T300.0-p1.0-stats.dat")
+    restart_path_1 = Path("./janus_results/Cl4Na4-npt-T300.0-p1.0-res-2.extxyz")
+    restart_path_2 = Path("./janus_results/Cl4Na4-npt-T300.0-p1.0-res-4.extxyz")
+    restart_final = Path("./janus_results/Cl4Na4-npt-T300.0-p1.0-final.extxyz")
+    traj_path = Path("./janus_results/Cl4Na4-npt-T300.0-p1.0-traj.extxyz")
+    stats_path = Path("./janus_results/Cl4Na4-npt-T300.0-p1.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
@@ -128,10 +128,10 @@ def test_npt():
 
 def test_nvt_nh():
     """Test NVT-Nosé–Hoover  molecular dynamics."""
-    restart_path = Path("results/Cl4Na4-nvt-nh-T300.0-res-3.extxyz")
-    restart_final_path = Path("results/Cl4Na4-nvt-nh-T300.0-final.extxyz")
-    traj_path = Path("results/Cl4Na4-nvt-nh-T300.0-traj.extxyz")
-    stats_path = Path("results/Cl4Na4-nvt-nh-T300.0-stats.dat")
+    restart_path = Path("./janus_results/Cl4Na4-nvt-nh-T300.0-res-3.extxyz")
+    restart_final_path = Path("./janus_results/Cl4Na4-nvt-nh-T300.0-final.extxyz")
+    traj_path = Path("./janus_results/Cl4Na4-nvt-nh-T300.0-traj.extxyz")
+    stats_path = Path("./janus_results/Cl4Na4-nvt-nh-T300.0-stats.dat")
 
     assert not restart_path.exists()
     assert not restart_final_path.exists()
@@ -210,10 +210,10 @@ def test_nve(tmp_path):
 
 def test_nph():
     """Test NPH molecular dynamics."""
-    restart_path = Path("results/Cl4Na4-nph-T300.0-p0.0-res-2.extxyz")
-    restart_final_path = Path("results/Cl4Na4-nph-T300.0-p0.0-final.extxyz")
-    traj_path = Path("results/Cl4Na4-nph-T300.0-p0.0-traj.extxyz")
-    stats_path = Path("results/Cl4Na4-nph-T300.0-p0.0-stats.dat")
+    restart_path = Path("./janus_results/Cl4Na4-nph-T300.0-p0.0-res-2.extxyz")
+    restart_final_path = Path("./janus_results/Cl4Na4-nph-T300.0-p0.0-final.extxyz")
+    traj_path = Path("./janus_results/Cl4Na4-nph-T300.0-p0.0-traj.extxyz")
+    stats_path = Path("./janus_results/Cl4Na4-nph-T300.0-p0.0-stats.dat")
 
     assert not restart_path.exists()
     assert not restart_final_path.exists()
@@ -260,11 +260,11 @@ def test_nph():
 
 def test_nvt_csvr():
     """Test NVT CSVR molecular dynamics."""
-    restart_path_1 = Path("results/NaCl-nvt-csvr-T300.0-res-2.extxyz")
-    restart_path_2 = Path("results/NaCl-nvt-csvr-T300.0-res-4.extxyz")
-    restart_final = Path("results/NaCl-nvt-csvr-T300.0-final.extxyz")
-    traj_path = Path("results/NaCl-nvt-csvr-T300.0-traj.extxyz")
-    stats_path = Path("results/NaCl-nvt-csvr-T300.0-stats.dat")
+    restart_path_1 = Path("./janus_results/NaCl-nvt-csvr-T300.0-res-2.extxyz")
+    restart_path_2 = Path("./janus_results/NaCl-nvt-csvr-T300.0-res-4.extxyz")
+    restart_final = Path("./janus_results/NaCl-nvt-csvr-T300.0-final.extxyz")
+    traj_path = Path("./janus_results/NaCl-nvt-csvr-T300.0-traj.extxyz")
+    stats_path = Path("./janus_results/NaCl-nvt-csvr-T300.0-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
@@ -311,11 +311,11 @@ def test_nvt_csvr():
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
 def test_npt_mtk():
     """Test NPT MTK molecular dynamics."""
-    restart_path_1 = Path("results/NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz")
-    restart_path_2 = Path("results/NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz")
-    restart_final = Path("results/NaCl-npt-mtk-T300.0-p0.0001-final.extxyz")
-    traj_path = Path("results/NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz")
-    stats_path = Path("results/NaCl-npt-mtk-T300.0-p0.0001-stats.dat")
+    restart_path_1 = Path("./janus_results/NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz")
+    restart_path_2 = Path("./janus_results/NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz")
+    restart_final = Path("./janus_results/NaCl-npt-mtk-T300.0-p0.0001-final.extxyz")
+    traj_path = Path("./janus_results/NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz")
+    stats_path = Path("./janus_results/NaCl-npt-mtk-T300.0-p0.0001-stats.dat")
 
     assert not restart_path_1.exists()
     assert not restart_path_2.exists()
@@ -903,9 +903,9 @@ def test_heating_restart(tmp_path):
 
 def test_heating_files():
     """Test default heating file names."""
-    traj_heating_path = Path("results/Cl4Na4-nvt-T10-T20-traj.extxyz")
-    stats_heating_path = Path("results/Cl4Na4-nvt-T10-T20-stats.dat")
-    final_path = Path("results/Cl4Na4-nvt-T10-T20-final.extxyz")
+    traj_heating_path = Path("./janus_results/Cl4Na4-nvt-T10-T20-traj.extxyz")
+    stats_heating_path = Path("./janus_results/Cl4Na4-nvt-T10-T20-stats.dat")
+    final_path = Path("./janus_results/Cl4Na4-nvt-T10-T20-final.extxyz")
 
     assert not traj_heating_path.exists()
     assert not stats_heating_path.exists()
@@ -951,9 +951,9 @@ def test_heating_files():
 
 def test_heating_md_files():
     """Test default heating files when also running md."""
-    traj_heating_path = Path("results/Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz")
-    stats_heating_path = Path("results/Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
-    final_path = Path("results/Cl4Na4-nvt-T10-T20-T25.0-final.extxyz")
+    traj_heating_path = Path("./janus_results/Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz")
+    stats_heating_path = Path("./janus_results/Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
+    final_path = Path("./janus_results/Cl4Na4-nvt-T10-T20-T25.0-final.extxyz")
 
     assert not traj_heating_path.exists()
     assert not stats_heating_path.exists()
@@ -1174,7 +1174,7 @@ def test_auto_restart(tmp_path):
     log_file = tmp_path / "md.log"
 
     # Predicted restart file, from defaults
-    restart_path = Path("./results").absolute() / "NaCl-nvt-T300.0-res-4.extxyz"
+    restart_path = Path("./janus_results") / "NaCl-nvt-T300.0-res-4.extxyz"
     assert not restart_path.exists()
 
     try:

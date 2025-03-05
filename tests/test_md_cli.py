@@ -62,14 +62,14 @@ def test_md(ensemble):
         "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
     }
 
-    final_path = Path(f"results/{file_prefix[ensemble]}final.extxyz").absolute()
-    restart_path = Path(f"results/{file_prefix[ensemble]}res-2.extxyz").absolute()
-    stats_path = Path(f"results/{file_prefix[ensemble]}stats.dat").absolute()
-    traj_path = Path(f"results/{file_prefix[ensemble]}traj.extxyz").absolute()
-    rdf_path = Path(f"results/{file_prefix[ensemble]}rdf.dat").absolute()
-    vaf_path = Path(f"results/{file_prefix[ensemble]}vaf.dat").absolute()
-    log_path = Path(f"results/{file_prefix[ensemble]}md-log.yml").absolute()
-    summary_path = Path(f"results/{file_prefix[ensemble]}md-summary.yml").absolute()
+    final_path = Path(f"./janus_results/{file_prefix[ensemble]}final.extxyz")
+    restart_path = Path(f"./janus_results/{file_prefix[ensemble]}res-2.extxyz")
+    stats_path = Path(f"./janus_results/{file_prefix[ensemble]}stats.dat")
+    traj_path = Path(f"./janus_results/{file_prefix[ensemble]}traj.extxyz")
+    rdf_path = Path(f"./janus_results/{file_prefix[ensemble]}rdf.dat")
+    vaf_path = Path(f"./janus_results/{file_prefix[ensemble]}vaf.dat")
+    log_path = Path(f"./janus_results/{file_prefix[ensemble]}md-log.yml")
+    summary_path = Path(f"./janus_results/{file_prefix[ensemble]}md-summary.yml")
 
     assert not final_path.exists()
     assert not restart_path.exists()

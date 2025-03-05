@@ -26,10 +26,10 @@ def test_help():
 
 def test_phonons():
     """Test calculating force constants and band structure."""
-    phonopy_path = Path("./results/NaCl-phonopy.yml").absolute()
-    bands_path = Path("./results/NaCl-auto_bands.yml.xz").absolute()
-    log_path = Path("./results/NaCl-phonons-log.yml").absolute()
-    summary_path = Path("./results/NaCl-phonons-summary.yml").absolute()
+    phonopy_path = Path("./janus_results/NaCl-phonopy.yml")
+    bands_path = Path("./janus_results/NaCl-auto_bands.yml.xz")
+    log_path = Path("./janus_results/NaCl-phonons-log.yml")
+    summary_path = Path("./janus_results/NaCl-phonons-summary.yml")
 
     assert not phonopy_path.exists()
     assert not bands_path.exists()
