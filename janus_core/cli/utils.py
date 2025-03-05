@@ -164,7 +164,7 @@ def start_summary(
     info
         Extra information to save.
     """
-    del config["config"]
+    config.pop("config", None)
 
     summary_contents = {
         "command": f"janus {command}",
