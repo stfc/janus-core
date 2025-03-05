@@ -81,7 +81,8 @@ def test_neb():
         assert "command" in neb_summary
         assert "janus neb" in neb_summary["command"]
         assert "start_time" in neb_summary
-        assert "inputs" in neb_summary
+        assert "config" in neb_summary
+        assert "info" in neb_summary
         assert "end_time" in neb_summary
 
         assert "emissions" in neb_summary

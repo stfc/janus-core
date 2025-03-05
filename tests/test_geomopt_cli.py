@@ -381,10 +381,13 @@ def test_summary(tmp_path):
     assert "start_time" in geomopt_summary
     assert "end_time" in geomopt_summary
 
-    assert "inputs" in geomopt_summary
-    assert "opt_kwargs" in geomopt_summary["inputs"]
-    assert "struct" in geomopt_summary["inputs"]
-    assert "n_atoms" in geomopt_summary["inputs"]["struct"]
+    assert "config" in geomopt_summary
+    assert "minimize_kwargs" in geomopt_summary["config"]
+    assert "opt_kwargs" in geomopt_summary["config"]["minimize_kwargs"]
+
+    assert "info" in geomopt_summary
+    assert "struct" in geomopt_summary["info"]
+    assert "n_atoms" in geomopt_summary["info"]["struct"]
 
     assert "emissions" in geomopt_summary
     assert geomopt_summary["emissions"] > 0
@@ -418,8 +421,8 @@ def test_config(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         geomopt_summary = yaml.safe_load(file)
 
-    assert "alpha" in geomopt_summary["inputs"]["opt_kwargs"]
-    assert geomopt_summary["inputs"]["opt_kwargs"]["alpha"] == 100
+    assert "alpha" in geomopt_summary["config"]["minimize_kwargs"]["opt_kwargs"]
+    assert geomopt_summary["config"]["minimize_kwargs"]["opt_kwargs"]["alpha"] == 100
 
 
 def test_invalid_config():

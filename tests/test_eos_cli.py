@@ -86,7 +86,8 @@ def test_eos():
         assert "command" in eos_summary
         assert "janus eos" in eos_summary["command"]
         assert "start_time" in eos_summary
-        assert "inputs" in eos_summary
+        assert "config" in eos_summary
+        assert "info" in eos_summary
         assert "end_time" in eos_summary
 
         assert "emissions" in eos_summary

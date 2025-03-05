@@ -298,12 +298,13 @@ def test_summary(tmp_path):
     assert "command" in summary
     assert "janus md" in summary["command"]
     assert "start_time" in summary
-    assert "inputs" in summary
+    assert "config" in summary
+    assert "info" in summary
     assert "end_time" in summary
 
-    assert "ensemble" in summary["inputs"]
-    assert "struct" in summary["inputs"]
-    assert "n_atoms" in summary["inputs"]["struct"]
+    assert "ensemble" in summary["config"]
+    assert "struct" in summary["info"]
+    assert "n_atoms" in summary["info"]["struct"]
 
     assert "emissions" in summary
     assert summary["emissions"] > 0
@@ -339,12 +340,12 @@ def test_config(tmp_path):
         md_summary = yaml.safe_load(file)
 
     # Check temperature is passed correctly
-    assert md_summary["inputs"]["temp"] == 200
+    assert md_summary["config"]["temp"] == 200
     # Check explicit option overwrites config
-    assert md_summary["inputs"]["ensemble"] == "nve"
+    assert md_summary["config"]["ensemble"] == "nve"
     # Check nested dictionary
     assert (
-        md_summary["inputs"]["minimize_kwargs"]["filter_kwargs"]["hydrostatic_strain"]
+        md_summary["config"]["minimize_kwargs"]["filter_kwargs"]["hydrostatic_strain"]
         is True
     )
 
