@@ -112,8 +112,9 @@ def singlepoint(
         carbon_summary,
         check_config,
         end_summary,
+        get_config,
+        get_struct_info,
         parse_typer_dicts,
-        save_struct_calc,
         start_summary,
     )
 
@@ -127,6 +128,15 @@ def singlepoint(
     # Check filename for results not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
+
+    # Set initial config
+    all_kwargs = {
+        "read_kwargs": read_kwargs.copy(),
+        "calc_kwargs": calc_kwargs.copy(),
+        "write_kwargs": write_kwargs.copy(),
+    }
+    config = get_config(params=ctx.params, all_kwargs=all_kwargs)
+
     if out:
         write_kwargs["filename"] = out
 
@@ -160,24 +170,14 @@ def singlepoint(
     ).absolute()
     log = s_point.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    inputs = singlepoint_kwargs.copy()
-
     # Add structure, MLIP information, and log to inputs
-    save_struct_calc(
-        inputs=inputs,
+    info = get_struct_info(
         struct=s_point.struct,
         struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log=log,
     )
 
     # Save summary information before singlepoint calculation begins
-    start_summary(command="singlepoint", summary=summary, inputs=inputs)
+    start_summary(command="singlepoint", summary=summary, config=config, info=info)
 
     # Run singlepoint calculation
     s_point.run()
