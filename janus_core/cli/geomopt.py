@@ -12,6 +12,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    FilePrefix,
     LogPath,
     MinimizeKwargs,
     ModelPath,
@@ -115,16 +116,12 @@ def geomopt(
             help="Atom displacement tolerance for spglib symmetry determination, in Å."
         ),
     ] = 0.001,
-    file_prefix: Annotated[
-        Path | None,
-        Option(help="Prefix for output filenames. Default is inferred from structure."),
-    ] = None,
+    file_prefix: FilePrefix = None,
     out: Annotated[
         Path | None,
         Option(
             help=(
-                "Path to save optimized structure. Default is inferred from name "
-                "of structure file."
+                "Path to save optimized structure. Default is inferred `file_prefix`."
             ),
         ),
     ] = None,
@@ -190,10 +187,12 @@ def geomopt(
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
     file_prefix
-        Prefix for output filenames. Default is inferred from structure.
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
     out
         Path to save optimized structure, or last structure if optimization did not
-        converge. Default is inferred from name of structure file.
+        converge. Default is inferred from `file_prefix`.
     write_traj
         Whether to save a trajectory file of optimization frames.
         If traj_kwargs["filename"] is not specified, it is inferred from `file_prefix`.
@@ -208,13 +207,13 @@ def geomopt(
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.
     log
-        Path to write logs to. Default is inferred from the name of the structure file.
+        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
-        is inferred from the name of the structure file.
+        is inferred from `file_prefix`.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
