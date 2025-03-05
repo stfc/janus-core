@@ -383,7 +383,6 @@ def test_summary(tmp_path):
 
     assert "config" in geomopt_summary
     assert "minimize_kwargs" in geomopt_summary["config"]
-    assert "opt_kwargs" in geomopt_summary["config"]["minimize_kwargs"]
 
     assert "info" in geomopt_summary
     assert "struct" in geomopt_summary["info"]

@@ -125,8 +125,7 @@ def test_bands_simple(tmp_path):
     assert "command" in phonon_summary
     assert "janus phonons" in phonon_summary["command"]
     assert "config" in phonon_summary
-    assert "calcs" in phonon_summary["config"]
-    assert phonon_summary["config"]["calcs"][0] == "bands"
+    assert phonon_summary["config"]["bands"]
 
 
 def test_hdf5(tmp_path):
@@ -269,9 +268,9 @@ def test_plot(tmp_path):
     assert summary_path.exists()
     with open(summary_path, encoding="utf8") as file:
         phonon_summary = yaml.safe_load(file)
-    assert phonon_summary["config"]["calcs"][0] == "bands"
-    assert phonon_summary["config"]["calcs"][1] == "dos"
-    assert phonon_summary["config"]["calcs"][2] == "pdos"
+    assert phonon_summary["config"]["bands"]
+    assert phonon_summary["config"]["dos"]
+    assert phonon_summary["config"]["pdos"]
 
 
 test_data = [
