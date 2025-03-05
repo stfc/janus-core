@@ -75,10 +75,16 @@ def train(
     elif "foundation_model" in config:
         raise ValueError("Please include the `--fine-tune` option for fine-tuning")
 
-    inputs = {"mlip_config": str(mlip_config), "fine_tune": fine_tune}
+    config = {
+        "mlip_config": mlip_config,
+        "fine_tune": fine_tune,
+        "log": log,
+        "tracker": tracker,
+        "summary": summary,
+    }
 
     # Save summary information before training begins
-    start_summary(command="train", summary=summary, inputs=inputs)
+    start_summary(command="train", summary=summary, config=config, info={})
 
     log_kwargs = {"filemode": "w"}
     if log:

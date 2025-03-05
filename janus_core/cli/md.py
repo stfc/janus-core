@@ -354,8 +354,9 @@ def md(
         carbon_summary,
         check_config,
         end_summary,
+        get_config,
+        get_struct_info,
         parse_typer_dicts,
-        save_struct_calc,
         set_read_kwargs_index,
         start_summary,
     )
@@ -384,6 +385,17 @@ def md(
 
     if ensemble not in get_args(Ensembles):
         raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
+
+    # Set initial config
+    all_kwargs = {
+        "read_kwargs": read_kwargs.copy(),
+        "calc_kwargs": calc_kwargs.copy(),
+        "minimize_kwargs": minimize_kwargs.copy(),
+        "ensemble_kwargs": ensemble_kwargs.copy(),
+        "write_kwargs": write_kwargs.copy(),
+        "post_process_kwargs": post_process_kwargs.copy(),
+    }
+    config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
@@ -553,23 +565,14 @@ def md(
     log = dyn.log_kwargs["filename"]
 
     # Store inputs for yaml summary
-    inputs = dyn_kwargs | {"ensemble": ensemble}
-
     # Add structure, MLIP information, and log to inputs
-    save_struct_calc(
-        inputs=inputs,
+    info = get_struct_info(
         struct=dyn.struct,
         struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log=log,
     )
 
-    # Save summary information before simulation begins
-    start_summary(command="md", summary=summary, inputs=inputs)
+    # Save summary information before calculation begins
+    start_summary(command="md", summary=summary, config=config, info=info)
 
     # Run molecular dynamics
     dyn.run()

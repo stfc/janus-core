@@ -176,7 +176,7 @@ def singlepoint(
         struct_path=struct,
     )
 
-    # Save summary information before singlepoint calculation begins
+    # Save summary information before calculation begins
     start_summary(command="singlepoint", summary=summary, config=config, info=info)
 
     # Run singlepoint calculation

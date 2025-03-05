@@ -232,10 +232,10 @@ def phonons(
     from janus_core.cli.utils import (
         carbon_summary,
         check_config,
-        dict_tuples_to_lists,
         end_summary,
+        get_config,
+        get_struct_info,
         parse_typer_dicts,
-        save_struct_calc,
         set_read_kwargs_index,
         start_summary,
     )
@@ -260,6 +260,17 @@ def phonons(
             pdos_kwargs,
         ]
     )
+
+    # Set initial config
+    all_kwargs = {
+        "displacement_kwargs": displacement_kwargs.copy(),
+        "read_kwargs": read_kwargs.copy(),
+        "calc_kwargs": calc_kwargs.copy(),
+        "minimize_kwargs": minimize_kwargs.copy(),
+        "dos_kwargs": dos_kwargs.copy(),
+        "pdos_kwargs": pdos_kwargs.copy(),
+    }
+    config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
@@ -340,27 +351,14 @@ def phonons(
     summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
     log = phonon.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    inputs = phonons_kwargs.copy()
-
     # Add structure, MLIP information, and log to inputs
-    save_struct_calc(
-        inputs=inputs,
+    info = get_struct_info(
         struct=phonon.struct,
         struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log=log,
     )
 
-    # Convert all tuples to list in inputs nested dictionary
-    dict_tuples_to_lists(inputs)
-
-    # Save summary information before calculations begin
-    start_summary(command="phonons", summary=summary, inputs=inputs)
+    # Save summary information before calculation begins
+    start_summary(command="phonons", summary=summary, config=config, info=info)
 
     # Run phonon calculations
     phonon.run()
