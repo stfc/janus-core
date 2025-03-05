@@ -31,9 +31,9 @@ def test_singlepoint_help():
 
 def test_singlepoint():
     """Test singlepoint calculation."""
-    results_path = Path("./NaCl-results.extxyz").absolute()
-    log_path = Path("./NaCl-singlepoint-log.yml").absolute()
-    summary_path = Path("./NaCl-singlepoint-summary.yml").absolute()
+    results_path = Path("./janus_results/NaCl-results.extxyz")
+    log_path = Path("./janus_results/NaCl-singlepoint-log.yml")
+    summary_path = Path("./janus_results/NaCl-singlepoint-summary.yml")
 
     assert not results_path.exists()
     assert not log_path.exists()
@@ -436,3 +436,26 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         sp_summary = yaml.safe_load(file)
     assert "emissions" not in sp_summary
+
+
+def test_file_prefix(tmp_path):
+    """Test file prefix creates directories and affects all files."""
+    file_prefix = tmp_path / "test/test"
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+    test_path = tmp_path / "test"
+    assert list(tmp_path.iterdir()) == [test_path]
+    assert set(test_path.iterdir()) == {
+        test_path / "test-results.extxyz",
+        test_path / "test-singlepoint-summary.yml",
+        test_path / "test-singlepoint-log.yml",
+    }
