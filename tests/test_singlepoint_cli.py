@@ -31,9 +31,9 @@ def test_singlepoint_help():
 
 def test_singlepoint():
     """Test singlepoint calculation."""
-    results_path = Path("./results/NaCl-results.extxyz").absolute()
-    log_path = Path("./results/NaCl-singlepoint-log.yml").absolute()
-    summary_path = Path("./results/NaCl-singlepoint-summary.yml").absolute()
+    results_path = Path("./janus_results/NaCl-results.extxyz")
+    log_path = Path("./janus_results/NaCl-singlepoint-log.yml")
+    summary_path = Path("./janus_results/NaCl-singlepoint-summary.yml")
 
     assert not results_path.exists()
     assert not log_path.exists()

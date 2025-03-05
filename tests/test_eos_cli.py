@@ -26,10 +26,10 @@ def test_help():
 
 def test_eos():
     """Test calculating the equation of state."""
-    eos_raw_path = Path("./results/NaCl-eos-raw.dat").absolute()
-    eos_fit_path = Path("./results/NaCl-eos-fit.dat").absolute()
-    log_path = Path("./results/NaCl-eos-log.yml").absolute()
-    summary_path = Path("./results/NaCl-eos-summary.yml").absolute()
+    eos_raw_path = Path("./janus_results/NaCl-eos-raw.dat")
+    eos_fit_path = Path("./janus_results/NaCl-eos-fit.dat")
+    log_path = Path("./janus_results/NaCl-eos-log.yml")
+    summary_path = Path("./janus_results/NaCl-eos-summary.yml")
 
     assert not eos_raw_path.exists()
     assert not eos_fit_path.exists()

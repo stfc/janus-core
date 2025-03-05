@@ -32,9 +32,9 @@ def test_help():
 
 def test_geomopt():
     """Test geomopt calculation."""
-    results_path = Path("./results/NaCl-opt.extxyz").absolute()
-    log_path = Path("./results/NaCl-geomopt-log.yml").absolute()
-    summary_path = Path("./results/NaCl-geomopt-summary.yml").absolute()
+    results_path = Path("./janus_results/NaCl-opt.extxyz")
+    log_path = Path("./janus_results/NaCl-geomopt-log.yml")
+    summary_path = Path("./janus_results/NaCl-geomopt-summary.yml")
 
     assert not results_path.exists()
     assert not log_path.exists()

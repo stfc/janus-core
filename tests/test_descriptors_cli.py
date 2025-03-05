@@ -26,9 +26,9 @@ def test_help():
 
 def test_descriptors():
     """Test calculating MLIP descriptors."""
-    out_path = Path("./results/NaCl-descriptors.extxyz").absolute()
-    log_path = Path("./results/NaCl-descriptors-log.yml").absolute()
-    summary_path = Path("./results/NaCl-descriptors-summary.yml").absolute()
+    out_path = Path("./janus_results/NaCl-descriptors.extxyz")
+    log_path = Path("./janus_results/NaCl-descriptors-log.yml")
+    summary_path = Path("./janus_results/NaCl-descriptors-summary.yml")
 
     assert not out_path.exists()
     assert not log_path.exists()
