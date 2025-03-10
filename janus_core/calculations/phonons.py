@@ -596,8 +596,8 @@ class Phonons(BaseCalculation):
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:
-            build_file_dir(plot_file)
             plot_file = self._build_filename("bands.svg", filename=plot_file)
+            build_file_dir(plot_file)
             bplt.savefig(plot_file)
 
     def calc_thermal_props(
@@ -764,17 +764,17 @@ class Phonons(BaseCalculation):
 
         bplt = self.results["phonon"].plot_total_dos()
         if plot_to_file:
-            build_file_dir(plot_file)
             plot_file = self._build_filename("dos.svg", filename=plot_file)
+            build_file_dir(plot_file)
             bplt.savefig(plot_file)
 
         if plot_bands:
             bplt = self.results["phonon"].plot_band_structure_and_dos()
             if plot_to_file:
-                build_file_dir(plot_bands_file)
                 plot_bands_file = self._build_filename(
                     "bs-dos.svg", filename=plot_bands_file
                 )
+                build_file_dir(plot_bands_file)
                 bplt.savefig(plot_bands_file)
 
     def calc_pdos(
@@ -863,8 +863,8 @@ class Phonons(BaseCalculation):
 
         bplt = self.results["phonon"].plot_projected_dos()
         if plot_to_file:
-            build_file_dir(plot_file)
             plot_file = self._build_filename("pdos.svg", filename=plot_file)
+            build_file_dir(plot_file)
             bplt.savefig(plot_file)
 
     # No magnetic moments considered
