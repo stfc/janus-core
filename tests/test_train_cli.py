@@ -70,14 +70,16 @@ def test_train(tmp_path):
     results_path = Path("results")
     checkpoints_path = Path("checkpoints")
     logs_path = Path("logs")
-    log_path = Path("./janus_results/train-log.yml")
-    summary_path = Path("./janus_results/train-summary.yml")
+    results_dir = Path("./janus_results")
+    log_path = results_dir / "train-log.yml"
+    summary_path = results_dir / "train-summary.yml"
 
     assert not model.exists()
     assert not compiled_model.exists()
     assert not logs_path.exists()
     assert not results_path.exists()
     assert not checkpoints_path.exists()
+    assert not results_dir.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
 
@@ -131,6 +133,7 @@ def test_train(tmp_path):
 
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
         clear_log_handlers()
 
