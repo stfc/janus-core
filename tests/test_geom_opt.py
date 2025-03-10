@@ -87,6 +87,7 @@ def test_saving_traj(tmp_path):
         single_point.struct,
         write_traj=True,
         opt_kwargs={"trajectory": str(tmp_path / "NaCl.traj")},
+        traj_kwargs={"filename": str(tmp_path / "NaCl.extxyz")},
     )
     optimizer.run()
     traj = read(tmp_path / "NaCl.traj", index=":")
