@@ -185,7 +185,7 @@ class NEB(BaseCalculation):
         n_images
             Number of images to use in NEB. Default is 15.
         write_results
-            Whether to write out results from NEB. Default is Trueß.
+            Whether to write out results from NEB. Default is True.
         write_band
             Whether to write out all band images after optimization. Default is False.
         write_kwargs
