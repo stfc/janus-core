@@ -51,6 +51,7 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
         final_struct=final_struct,
         model_path=MODEL_PATH,
         n_images=5,
+        file_prefix=tmp_path / "LFPO",
     )
     neb.run()
 
