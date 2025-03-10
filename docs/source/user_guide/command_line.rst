@@ -53,36 +53,38 @@ prints the following:
 
     Usage: janus singlepoint [OPTIONS]
 
-      Perform single point calculations and save to file.
+    Perform single point calculations and save to file.
 
-    Options:
-      --struct PATH        Path of structure to simulate.  [required]
-      --arch TEXT          MLIP architecture to use for calculations.  [default:
-                           mace_mp]
-      --device TEXT        Device to run calculations on.  [default: cpu]
-      --model-path TEXT    Path to MLIP model.  [default: None]
-      --properties TEXT    Properties to calculate. If not specified, 'energy',
-                       'forces' and 'stress' will be returned.
-      --out PATH           Path to save structure with calculated results. Default
-                           is inferred from name of structure file.
-      --read-kwargs DICT   Keyword arguments to pass to ase.io.read. Must be
-                           passed as a dictionary wrapped in quotes, e.g. "{'key'
-                           : value}".  [default: "{}"]
-      --calc-kwargs DICT   Keyword arguments to pass to selected calculator. Must
-                           be passed as a dictionary wrapped in quotes, e.g.
-                           "{'key' : value}". For the default architecture
-                           ('mace_mp'), "{'model':'small'}" is set unless
-                           overwritten.
-      --write-kwargs DICT  Keyword arguments to pass to ase.io.write when saving
-                           results. Must be passed as a dictionary wrapped in
-                           quotes, e.g. "{'key' : value}".  [default: "{}"]
-      --log PATH           Path to save logs to. Default is inferred from the name
-                           of the structure file.
-      --summary PATH       Path to save summary of inputs, start/end time, and
-                           carbon emissions. Default is inferred from the name of
-                           the structure file.
-      --config TEXT        Configuration file.
-      --help               Show this message and exit.
+       Options:
+      *  --struct                          PATH  Path of structure to simulate. [default: None] [required]
+         --arch                            TEXT  MLIP architecture to use for calculations. [default: mace_mp]
+         --device                          TEXT  Device to run calculations on. [default:]
+         --model-path                      TEXT  Path to MLIP model. [default: None]
+         --properties                      TEXT  Properties to calculate. If not specified, 'energy', 'forces' and
+                                                 'stress' will be returned. [default: None]
+         --file-prefix                     PATH  Prefix for output files, including directories. Default directory is
+                                                 ./janus_results, and default filename prefix is inferred from the
+                                                 input stucture filename.
+         --out                             PATH  Path to save structure with calculated results. Default is inferred
+                                                 from name of structure file. [default: None]
+         --read-kwargs                     DICT  Keyword arguments to pass to ase.io.read. Must be passed as a
+                                                 dictionary wrapped in quotes, e.g. "{'key': value}".
+                                                 By default, read_kwargs['index'] = ':', so all structures are read.
+                                                 [default: None]
+         --calc-kwargs                     DICT  Keyword arguments to pass to selected calculator. Must be passed as a
+                                                 dictionary wrapped in quotes, e.g. "{'key': value}".
+                                                 For the default architecture ('mace_mp'), "{'model': 'small'}" is set
+                                                 unless overwritten. [default: None]
+         --write-kwargs                    DICT  Keyword arguments to pass to ase.io.write when saving results. Must be
+                                                 passed as a dictionary wrapped in quotes, e.g. "{'key': value}".
+                                                 [default: None]
+         --log                             PATH  Path to save logs to. Default is inferred from the name of the
+                                                 structure file. [default: None]
+         --tracker         --no-tracker          Whether to save carbon emissions of calculation [default: tracker]
+         --summary                         PATH  Path to save summary of inputs, start/end time, and carbon emissions.
+                                                 Default is inferred from the name of the structure file. [default: None]
+         --config                          TEXT  Configuration file.
+         --help                                  Show this message and exit.
 
 
 Using configuration files
@@ -121,6 +123,30 @@ Example configurations for all commands can be found in `janus-tutorials <https:
 
 Output files
 ------------
+
+Filenames
++++++++++
+
+The names and locations of output files from calculations are controlled by ``--file-prefix``.
+By default, files will be saved to the ``./janus_results`` directory, creating it if is does not already exist.
+
+The prefix for files saved within this directory defaults to the name of the input structure file.
+For example, an input structure from ``NaCl.cif`` will lead to results being saved in ``./janus_results/NaCl-[suffix]``,
+where suffix depends on the output file.
+
+If both ``--file-prefix`` and a specific output file are specified, the latter will take precedence. For example:
+
+.. code-block:: bash
+
+    janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --out results/NaCl.extxyz --file-prefix other_results/NaCl
+
+
+will save the main output file to ``./results/NaCl.extxyz``, but the summary and log files to
+``./other_results/NaCl-singlepoint-log.yml`` and ``./other_results/NaCl-singlepoint-summary.yml``.
+
+
+Data saved
+++++++++++
 
 By default, calculations performed will modify the underlying `ase.Atoms <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_ object
 to store information in the ``Atoms.info`` and ``Atoms.arrays`` dictionaries about the MLIP used.

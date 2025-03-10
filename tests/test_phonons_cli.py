@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import lzma
 from pathlib import Path
+import shutil
 
 import pytest
 from typer.testing import CliRunner
@@ -26,11 +27,13 @@ def test_help():
 
 def test_phonons():
     """Test calculating force constants and band structure."""
-    phonopy_path = Path("./NaCl-phonopy.yml").absolute()
-    bands_path = Path("./NaCl-auto_bands.yml.xz").absolute()
-    log_path = Path("./NaCl-phonons-log.yml").absolute()
-    summary_path = Path("./NaCl-phonons-summary.yml").absolute()
+    results_dir = Path("./janus_results")
+    phonopy_path = results_dir / "NaCl-phonopy.yml"
+    bands_path = results_dir / "NaCl-auto_bands.yml.xz"
+    log_path = results_dir / "NaCl-phonons-log.yml"
+    summary_path = results_dir / "NaCl-phonons-summary.yml"
 
+    assert not results_dir.exists()
     assert not phonopy_path.exists()
     assert not bands_path.exists()
     assert not log_path.exists()
@@ -84,6 +87,7 @@ def test_phonons():
         bands_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 
