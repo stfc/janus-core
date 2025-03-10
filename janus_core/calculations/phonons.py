@@ -27,7 +27,12 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
-from janus_core.helpers.utils import none_to_dict, set_minimize_logging, track_progress
+from janus_core.helpers.utils import (
+    build_file_dir,
+    none_to_dict,
+    set_minimize_logging,
+    track_progress,
+)
 
 
 class Phonons(BaseCalculation):
@@ -491,9 +496,11 @@ class Phonons(BaseCalculation):
         phonon = self.results["phonon"]
 
         save_force_consts = not force_consts_to_hdf5
+        build_file_dir(phonopy_file)
         phonon.save(phonopy_file, settings={"force_constants": save_force_consts})
 
         if force_consts_to_hdf5:
+            build_file_dir(force_consts_file)
             write_force_constants_to_hdf5(
                 phonon.force_constants, filename=force_consts_file
             )
@@ -580,6 +587,8 @@ class Phonons(BaseCalculation):
             with_eigenvectors=self.write_full,
             with_group_velocities=self.write_full,
         )
+
+        build_file_dir(bands_file)
         self.results["phonon"].write_yaml_band_structure(
             filename=bands_file,
             compression="lzma",
@@ -587,6 +596,7 @@ class Phonons(BaseCalculation):
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:
+            build_file_dir(plot_file)
             plot_file = self._build_filename("bands.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
@@ -654,6 +664,7 @@ class Phonons(BaseCalculation):
             `file_prefix`.
         """
         thermal_file = self._build_filename("thermal.yml", filename=thermal_file)
+        build_file_dir(thermal_file)
         self.results["phonon"].write_yaml_thermal_properties(filename=thermal_file)
 
     def calc_dos(
@@ -748,16 +759,19 @@ class Phonons(BaseCalculation):
             plot_to_file = self.plot_to_file
 
         dos_file = self._build_filename("dos.dat", filename=dos_file)
+        build_file_dir(dos_file)
         self.results["phonon"].total_dos.write(dos_file)
 
         bplt = self.results["phonon"].plot_total_dos()
         if plot_to_file:
+            build_file_dir(plot_file)
             plot_file = self._build_filename("dos.svg", filename=plot_file)
             bplt.savefig(plot_file)
 
         if plot_bands:
             bplt = self.results["phonon"].plot_band_structure_and_dos()
             if plot_to_file:
+                build_file_dir(plot_bands_file)
                 plot_bands_file = self._build_filename(
                     "bs-dos.svg", filename=plot_bands_file
                 )
@@ -844,10 +858,12 @@ class Phonons(BaseCalculation):
             plot_to_file = self.plot_to_file
 
         pdos_file = self._build_filename("pdos.dat", filename=pdos_file)
+        build_file_dir(pdos_file)
         self.results["phonon"].projected_dos.write(pdos_file)
 
         bplt = self.results["phonon"].plot_projected_dos()
         if plot_to_file:
+            build_file_dir(plot_file)
             plot_file = self._build_filename("pdos.svg", filename=plot_file)
             bplt.savefig(plot_file)
 

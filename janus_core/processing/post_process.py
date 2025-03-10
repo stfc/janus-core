@@ -16,7 +16,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     SliceLike,
 )
-from janus_core.helpers.utils import slicelike_to_startstopstep
+from janus_core.helpers.utils import build_file_dir, slicelike_to_startstopstep
 
 
 def compute_rdf(
@@ -123,6 +123,7 @@ def compute_rdf(
                 )
 
             for (dists, rdfs), out_path in zip(rdf.values(), filenames, strict=True):
+                build_file_dir(out_path)
                 with open(out_path, "w", encoding="utf-8") as out_file:
                     for dist, rdf_i in zip(dists, rdfs, strict=True):
                         print(dist, rdf_i, file=out_file)
@@ -151,6 +152,7 @@ def compute_rdf(
                     )
                 filenames = filenames[0]
 
+            build_file_dir(filenames)
             with open(filenames, "w", encoding="utf-8") as out_file:
                 for dist, rdf_i in zip(*rdf, strict=True):
                     print(dist, rdf_i, file=out_file)
@@ -308,6 +310,7 @@ def compute_vaf(
     )
     if filenames:
         for vaf, filename in zip(vafs[1], filenames, strict=True):
+            build_file_dir(filename)
             with open(filename, "w", encoding="utf-8") as out_file:
                 for lag, dat in zip(lags, vaf, strict=True):
                     print(lag, dat, file=out_file)
