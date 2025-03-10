@@ -148,8 +148,6 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             )
             built_filename = Path("-".join((prefix, *filter(None, additional), suffix)))
 
-        # Make directory if it does not exist
-        built_filename.parent.mkdir(parents=True, exist_ok=True)
         return built_filename
 
 
@@ -578,3 +576,15 @@ def set_minimize_logging(
             "filemode": "a",
         }
         minimize_kwargs["track_carbon"] = track_carbon
+
+
+def build_file_dir(filepath: PathLike) -> None:
+    """
+    Make any missing parent directories of a file.
+
+    Parameters
+    ----------
+    filepath
+        Path to file being written.
+    """
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)

@@ -10,6 +10,7 @@ from codecarbon import OfflineEmissionsTracker
 from codecarbon.output import LoggerOutput
 
 from janus_core.helpers.janus_types import LogLevel
+from janus_core.helpers.utils import build_file_dir
 
 
 class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
@@ -127,6 +128,7 @@ def config_logger(
         Configured logger if `filename` has been specified.
     """
     if filename:
+        build_file_dir(filename)
         logger = logging.getLogger(name)
 
         handler = logging.FileHandler(

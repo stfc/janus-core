@@ -22,7 +22,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
 )
 from janus_core.helpers.struct_io import output_structs
-from janus_core.helpers.utils import none_to_dict, set_minimize_logging
+from janus_core.helpers.utils import build_file_dir, none_to_dict, set_minimize_logging
 
 
 class EoS(BaseCalculation):
@@ -302,7 +302,9 @@ class EoS(BaseCalculation):
         self._calc_volumes_energies()
 
         if self.write_results:
-            with open(f"{self.file_prefix}-eos-raw.dat", "w", encoding="utf8") as out:
+            eos_raw_file = f"{self.file_prefix}-eos-raw.dat"
+            build_file_dir(eos_raw_file)
+            with open(eos_raw_file, "w", encoding="utf8") as out:
                 print("#Lattice Scalar | Energy [eV] | Volume [Å^3] ", file=out)
                 for eos_data in zip(
                     self.lattice_scalars, self.energies, self.volumes, strict=True
@@ -328,7 +330,9 @@ class EoS(BaseCalculation):
             self.tracker.stop()
 
         if self.write_results:
-            with open(f"{self.file_prefix}-eos-fit.dat", "w", encoding="utf8") as out:
+            eos_fit_file = f"{self.file_prefix}-eos-fit.dat"
+            build_file_dir(eos_fit_file)
+            with open(eos_fit_file, "w", encoding="utf8") as out:
                 print("#Bulk modulus [GPa] | Energy [eV] | Volume [Å^3] ", file=out)
                 print(bulk_modulus, e_0, v_0, file=out)
 
@@ -340,6 +344,7 @@ class EoS(BaseCalculation):
         }
 
         if self.plot_to_file:
+            build_file_dir(self.plot_kwargs["filename"])
             eos.plot(**self.plot_kwargs)
 
         return self.results

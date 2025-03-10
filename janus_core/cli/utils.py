@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 from typer_config import conf_callback_factory, yaml_loader
 import yaml
 
+from janus_core.helpers.utils import build_file_dir
+
 if TYPE_CHECKING:
     from ase import Atoms
     from typer import Context
@@ -168,6 +170,7 @@ def start_summary(*, command: str, summary: Path, inputs: dict) -> None:
         "start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
         "inputs": inputs,
     }
+    build_file_dir(summary)
     with open(summary, "w", encoding="utf8") as outfile:
         yaml.dump(save_info, outfile, default_flow_style=False)
 
