@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -31,10 +32,12 @@ def test_singlepoint_help():
 
 def test_singlepoint():
     """Test singlepoint calculation."""
-    results_path = Path("./janus_results/NaCl-results.extxyz")
-    log_path = Path("./janus_results/NaCl-singlepoint-log.yml")
-    summary_path = Path("./janus_results/NaCl-singlepoint-summary.yml")
+    results_dir = Path("./janus_results")
+    results_path = results_dir / "NaCl-results.extxyz"
+    log_path = results_dir / "NaCl-singlepoint-log.yml"
+    summary_path = results_dir / "NaCl-singlepoint-summary.yml"
 
+    assert not results_dir.exists()
     assert not results_path.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
@@ -54,13 +57,8 @@ def test_singlepoint():
         assert log_path.exists()
         assert summary_path.exists
 
-    finally:
-        # Ensure files deleted if command fails
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
-
-        # Check atoms file can be read, then delete
         atoms = read_atoms(results_path)
+
         assert "mace_mp_energy" in atoms.info
 
         assert "arch" in atoms.info
@@ -76,6 +74,13 @@ def test_singlepoint():
         assert "units" in atoms.info
         for prop, units in expected_units.items():
             assert atoms.info["units"][prop] == units
+
+    finally:
+        # Ensure files deleted if command fails
+        results_path.unlink(missing_ok=True)
+        log_path.unlink(missing_ok=True)
+        summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
         clear_log_handlers()
 

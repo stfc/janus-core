@@ -62,13 +62,15 @@ def test_preprocess(tmp_path):
     val_path = Path("val")
     test_path = Path("test")
     stats_path = Path("./statistics.json")
-    log_path = Path("./janus_results/preprocess-log.yml")
-    summary_path = Path("./janus_results/preprocess-summary.yml")
+    results_dir = Path("./janus_results")
+    log_path = results_dir / "preprocess-log.yml"
+    summary_path = results_dir / "preprocess-summary.yml"
 
     assert not train_path.exists()
     assert not val_path.exists()
     assert not test_path.exists()
     assert not stats_path.exists()
+    assert not results_dir.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
 
@@ -114,6 +116,7 @@ def test_preprocess(tmp_path):
         shutil.rmtree(train_path, ignore_errors=True)
         shutil.rmtree(val_path, ignore_errors=True)
         shutil.rmtree(test_path, ignore_errors=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)

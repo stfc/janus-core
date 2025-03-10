@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -32,10 +33,12 @@ def test_help():
 
 def test_geomopt():
     """Test geomopt calculation."""
-    results_path = Path("./janus_results/NaCl-opt.extxyz")
-    log_path = Path("./janus_results/NaCl-geomopt-log.yml")
-    summary_path = Path("./janus_results/NaCl-geomopt-summary.yml")
+    results_dir = Path("./janus_results")
+    results_path = results_dir / "NaCl-opt.extxyz"
+    log_path = results_dir / "NaCl-geomopt-log.yml"
+    summary_path = results_dir / "NaCl-geomopt-summary.yml"
 
+    assert not results_dir.exists()
     assert not results_path.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
@@ -56,13 +59,14 @@ def test_geomopt():
         assert results_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
+        read_atoms(results_path)
 
     finally:
         # Ensure files deleted if command fails
-        read_atoms(results_path)
         results_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -62,15 +63,17 @@ def test_md(ensemble):
         "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
     }
 
-    final_path = Path(f"./janus_results/{file_prefix[ensemble]}final.extxyz")
-    restart_path = Path(f"./janus_results/{file_prefix[ensemble]}res-2.extxyz")
-    stats_path = Path(f"./janus_results/{file_prefix[ensemble]}stats.dat")
-    traj_path = Path(f"./janus_results/{file_prefix[ensemble]}traj.extxyz")
-    rdf_path = Path(f"./janus_results/{file_prefix[ensemble]}rdf.dat")
-    vaf_path = Path(f"./janus_results/{file_prefix[ensemble]}vaf.dat")
-    log_path = Path(f"./janus_results/{file_prefix[ensemble]}md-log.yml")
-    summary_path = Path(f"./janus_results/{file_prefix[ensemble]}md-summary.yml")
+    results_dir = Path("./janus_results")
+    final_path = results_dir / f"{file_prefix[ensemble]}final.extxyz"
+    restart_path = results_dir / f"{file_prefix[ensemble]}res-2.extxyz"
+    stats_path = results_dir / f"{file_prefix[ensemble]}stats.dat"
+    traj_path = results_dir / f"{file_prefix[ensemble]}traj.extxyz"
+    rdf_path = results_dir / f"{file_prefix[ensemble]}rdf.dat"
+    vaf_path = results_dir / f"{file_prefix[ensemble]}vaf.dat"
+    log_path = results_dir / f"{file_prefix[ensemble]}md-log.yml"
+    summary_path = results_dir / f"{file_prefix[ensemble]}md-summary.yml"
 
+    assert not results_dir.exists()
     assert not final_path.exists()
     assert not restart_path.exists()
     assert not stats_path.exists()
@@ -149,6 +152,7 @@ def test_md(ensemble):
         vaf_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 

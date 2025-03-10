@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase.io import read
 from numpy import isfinite
@@ -187,35 +188,41 @@ def test_single_point_write():
     skip_extras("mace")
 
     data_path = DATA_PATH / "NaCl.cif"
-    results_path = Path("./janus_results/NaCl-results.extxyz")
+    results_dir = Path("./janus_results")
+    results_path = results_dir / "NaCl-results.extxyz"
+
+    assert not results_dir.exists()
     assert not results_path.exists()
 
-    single_point = SinglePoint(
-        struct=data_path,
-        arch="mace",
-        calc_kwargs={"model": MACE_PATH},
-        write_results=True,
-    )
-    assert "mace_forces" not in single_point.struct.arrays
+    try:
+        single_point = SinglePoint(
+            struct=data_path,
+            arch="mace",
+            calc_kwargs={"model": MACE_PATH},
+            write_results=True,
+        )
+        assert "mace_forces" not in single_point.struct.arrays
 
-    single_point.run()
-    atoms = read_atoms(results_path)
-    assert "mace_forces" in atoms.arrays
-    assert atoms.info["mace_energy"] == pytest.approx(-27.035127799332745)
-    assert "mace_stress" in atoms.info
-    assert atoms.info["mace_stress"] == pytest.approx(
-        [
-            -0.004783275999053391,
-            -0.004783275999053417,
-            -0.004783275999053412,
-            -2.3858882876234007e-19,
-            -5.02032761017409e-19,
-            -2.29070171362209e-19,
-        ]
-    )
-    assert atoms.arrays["mace_forces"][0] == pytest.approx(
-        [4.11996826e-18, 1.79977561e-17, 1.80139537e-17]
-    )
+        single_point.run()
+        atoms = read_atoms(results_path)
+        assert "mace_forces" in atoms.arrays
+        assert atoms.info["mace_energy"] == pytest.approx(-27.035127799332745)
+        assert "mace_stress" in atoms.info
+        assert atoms.info["mace_stress"] == pytest.approx(
+            [
+                -0.004783275999053391,
+                -0.004783275999053417,
+                -0.004783275999053412,
+                -2.3858882876234007e-19,
+                -5.02032761017409e-19,
+                -2.29070171362209e-19,
+            ]
+        )
+        assert atoms.arrays["mace_forces"][0] == pytest.approx(
+            [4.11996826e-18, 1.79977561e-17, 1.80139537e-17]
+        )
+    finally:
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_single_point_write_kwargs(tmp_path):
