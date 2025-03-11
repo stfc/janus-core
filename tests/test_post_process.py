@@ -23,8 +23,6 @@ runner = CliRunner()
 def test_md_pp(tmp_path):
     """Test post-processing as part of MD cycle."""
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
-    traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
-    stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
     rdf_path = tmp_path / "Cl4Na4-nve-T300.0-rdf.dat"
     vaf_path = tmp_path / "Cl4Na4-nve-T300.0-vaf.dat"
 
@@ -48,23 +46,16 @@ def test_md_pp(tmp_path):
         },
     )
 
-    try:
-        nve.run()
+    nve.run()
 
-        assert rdf_path.exists()
-        rdf = np.loadtxt(rdf_path)
-        assert len(rdf) == 50
+    assert rdf_path.exists()
+    rdf = np.loadtxt(rdf_path)
+    assert len(rdf) == 50
 
-        # Cell too small to really compute RDF
-        assert np.all(rdf[:, 1] == 0)
+    # Cell too small to really compute RDF
+    assert np.all(rdf[:, 1] == 0)
 
-        assert vaf_path.exists()
-
-    finally:
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
-        rdf_path.unlink(missing_ok=True)
-        vaf_path.unlink(missing_ok=True)
+    assert vaf_path.exists()
 
 
 def test_md_pp_cli(tmp_path):

@@ -80,8 +80,6 @@ def test_train(tmp_path):
     assert not results_path.exists()
     assert not checkpoints_path.exists()
     assert not results_dir.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
 
@@ -130,9 +128,6 @@ def test_train(tmp_path):
         shutil.rmtree(logs_path, ignore_errors=True)
         shutil.rmtree(results_path, ignore_errors=True)
         shutil.rmtree(checkpoints_path, ignore_errors=True)
-
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
 
         clear_log_handlers()

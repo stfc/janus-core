@@ -34,10 +34,6 @@ def test_phonons():
     summary_path = results_dir / "NaCl-phonons-summary.yml"
 
     assert not results_dir.exists()
-    assert not phonopy_path.exists()
-    assert not bands_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     try:
         result = runner.invoke(
@@ -84,10 +80,6 @@ def test_phonons():
         assert phonon_summary["emissions"] > 0
 
     finally:
-        phonopy_path.unlink(missing_ok=True)
-        bands_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 

@@ -33,9 +33,6 @@ def test_descriptors():
     summary_path = results_dir / "NaCl-descriptors-summary.yml"
 
     assert not results_dir.exists()
-    assert not out_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     try:
         result = runner.invoke(
@@ -88,9 +85,6 @@ def test_descriptors():
         assert descriptors_summary["emissions"] > 0
 
     finally:
-        out_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 

@@ -192,7 +192,6 @@ def test_single_point_write():
     results_path = results_dir / "NaCl-results.extxyz"
 
     assert not results_dir.exists()
-    assert not results_path.exists()
 
     try:
         single_point = SinglePoint(

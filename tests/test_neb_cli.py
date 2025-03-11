@@ -36,11 +36,6 @@ def test_neb():
     summary_path = results_dir / "LiFePO4_start-neb-summary.yml"
 
     assert not results_dir.exists()
-    assert not results_path.exists()
-    assert not band_path.exists()
-    assert not plot_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     try:
         result = runner.invoke(
@@ -64,6 +59,8 @@ def test_neb():
         assert result.exit_code == 0
 
         assert results_path.exists()
+        assert band_path.exists()
+        assert plot_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
 
@@ -96,11 +93,6 @@ def test_neb():
         assert len(band) == 7
 
     finally:
-        results_path.unlink(missing_ok=True)
-        band_path.unlink(missing_ok=True)
-        plot_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 

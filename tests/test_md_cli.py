@@ -74,14 +74,6 @@ def test_md(ensemble):
     summary_path = results_dir / f"{file_prefix[ensemble]}md-summary.yml"
 
     assert not results_dir.exists()
-    assert not final_path.exists()
-    assert not restart_path.exists()
-    assert not stats_path.exists()
-    assert not traj_path.exists()
-    assert not rdf_path.exists()
-    assert not vaf_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     try:
         result = runner.invoke(
@@ -144,14 +136,6 @@ def test_md(ensemble):
             assert atoms.info["units"][prop] == units
 
     finally:
-        final_path.unlink(missing_ok=True)
-        restart_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
-        traj_path.unlink(missing_ok=True)
-        rdf_path.unlink(missing_ok=True)
-        vaf_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 

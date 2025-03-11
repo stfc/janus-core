@@ -34,10 +34,6 @@ def test_eos():
     summary_path = results_dir / "NaCl-eos-summary.yml"
 
     assert not results_dir.exists()
-    assert not eos_raw_path.exists()
-    assert not eos_fit_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     try:
         result = runner.invoke(
@@ -97,10 +93,6 @@ def test_eos():
         assert eos_summary["emissions"] > 0
 
     finally:
-        eos_raw_path.unlink(missing_ok=True)
-        eos_fit_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 

@@ -39,9 +39,6 @@ def test_geomopt():
     summary_path = results_dir / "NaCl-geomopt-summary.yml"
 
     assert not results_dir.exists()
-    assert not results_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
 
     try:
         result = runner.invoke(
@@ -63,9 +60,6 @@ def test_geomopt():
 
     finally:
         # Ensure files deleted if command fails
-        results_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
         shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
