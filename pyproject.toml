@@ -47,7 +47,7 @@ dpa3 = [
     "deepmd-kit",
 ]
 grace = [
-    "tensorpotential == 0.4.5",
+    "tensorpotential == 0.5.1",
     "tensorflow == 2.16.2",
 ]
 mace = [

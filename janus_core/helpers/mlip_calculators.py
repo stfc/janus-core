@@ -308,10 +308,10 @@ def choose_calculator(
     elif arch == "grace":
         from tensorpotential.calculator import grace_fm
 
-        __version__ = "0.4.5"
+        __version__ = "0.5.1"
 
         # Default model
-        model_path = model_path if model_path else "GRACE_2L_OAM_28Jan25"
+        model_path = model_path if model_path else "GRACE-2L-OMAT"
 
         if isinstance(model_path, Path):
             model_path = str(model_path)
