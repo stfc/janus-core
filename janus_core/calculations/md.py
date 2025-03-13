@@ -784,7 +784,7 @@ class MolecularDynamics(BaseCalculation):
         }
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -847,8 +847,8 @@ class MolecularDynamics(BaseCalculation):
             write_table(
                 "ascii",
                 file=stats_file,
-                units=self.unit_info,
-                **{key: () for key in self.unit_info},
+                units=self.stats_units,
+                **{key: () for key in self.stats_units},
             )
 
     def _write_stats_file(self) -> None:
@@ -863,7 +863,7 @@ class MolecularDynamics(BaseCalculation):
             write_table(
                 "ascii",
                 file=stats_file,
-                units=self.unit_info,
+                units=self.stats_units,
                 formats=self.default_formats,
                 print_header=False,
                 **stats,
@@ -1313,7 +1313,7 @@ class NPT(MolecularDynamics):
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1322,7 +1322,7 @@ class NPT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {
+        return super().stats_units | {
             "Target_P": JANUS_UNITS["pressure"],
             "Target_T": JANUS_UNITS["temperature"],
         }
@@ -1408,7 +1408,7 @@ class NVT(MolecularDynamics):
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1417,7 +1417,7 @@ class NVT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
+        return super().stats_units | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1557,7 +1557,7 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1566,7 +1566,7 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
+        return super().stats_units | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1757,7 +1757,7 @@ class NPH(MolecularDynamics):
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1766,7 +1766,7 @@ class NPH(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {
+        return super().stats_units | {
             "Target_P": JANUS_UNITS["pressure"],
         }
 
@@ -1920,7 +1920,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1929,7 +1929,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {
+        return super().stats_units | {
             "Target_P": JANUS_UNITS["pressure"],
             "Target_T": JANUS_UNITS["temperature"],
         }
