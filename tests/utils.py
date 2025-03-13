@@ -131,6 +131,8 @@ def skip_extras(arch: str):
             pytest.importorskip("chgnet")
         case "dpa3":
             pytest.importorskip("deepmd")
+        case "grace":
+            pytest.importorskip("tensorpotential")
         case "mace" | "mace_mp" | "mace_off":
             pytest.importorskip("mace")
         case "mattersim":
