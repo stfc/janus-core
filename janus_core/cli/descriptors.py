@@ -151,6 +151,7 @@ def descriptors(
         "calc_per_atom": calc_per_atom,
         "write_results": True,
         "write_kwargs": write_kwargs,
+        "enable_progress_bar": True,
     }
 
     # Initialise descriptors

@@ -19,7 +19,7 @@ from janus_core.helpers.janus_types import (
 )
 from janus_core.helpers.mlip_calculators import check_calculator
 from janus_core.helpers.struct_io import output_structs
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import none_to_dict, track_progress
 
 
 class Descriptors(BaseCalculation):
@@ -64,6 +64,9 @@ class Descriptors(BaseCalculation):
     write_kwargs
         Keyword arguments to pass to ase.io.write if saving structure with
         results of calculations. Default is {}.
+    enable_progress_bar
+        Whether to show a progress bar when applied to a file containing many
+        structures. Default is False.
     """
 
     def __init__(
@@ -84,6 +87,7 @@ class Descriptors(BaseCalculation):
         calc_per_atom: bool = False,
         write_results: bool = False,
         write_kwargs: ASEWriteArgs | None = None,
+        enable_progress_bar: bool = False,
     ) -> None:
         """
         Initialise class.
@@ -126,6 +130,9 @@ class Descriptors(BaseCalculation):
         write_kwargs
             Keyword arguments to pass to ase.io.write if saving structure with
             results of calculations. Default is {}.
+        enable_progress_bar
+            Whether to show a progress bar when applied to a file containing many
+            structures. Default is False.
         """
         read_kwargs, write_kwargs = none_to_dict(read_kwargs, write_kwargs)
 
@@ -134,6 +141,7 @@ class Descriptors(BaseCalculation):
         self.calc_per_atom = calc_per_atom
         self.write_results = write_results
         self.write_kwargs = write_kwargs
+        self.enable_progress_bar = enable_progress_bar
 
         # Read last image by default
         read_kwargs.setdefault("index", ":")
@@ -185,8 +193,16 @@ class Descriptors(BaseCalculation):
             self.tracker.start_task("Descriptors")
 
         if isinstance(self.struct, Sequence):
-            for struct in self.struct:
+            struct_sequence = self.struct
+
+            if self.enable_progress_bar:
+                struct_sequence = track_progress(
+                    struct_sequence, "Calculating descriptors..."
+                )
+
+            for struct in struct_sequence:
                 self._calc_descriptors(struct)
+
         else:
             self._calc_descriptors(self.struct)
 
