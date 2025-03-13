@@ -113,7 +113,7 @@ def test_train(tmp_path):
         assert "command" in train_summary
         assert "janus train" in train_summary["command"]
         assert "start_time" in train_summary
-        assert "inputs" in train_summary
+        assert "config" in train_summary
         assert "end_time" in train_summary
 
         assert "emissions" in train_summary

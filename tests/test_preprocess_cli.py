@@ -103,7 +103,7 @@ def test_preprocess(tmp_path):
         assert "command" in preprocess_summary
         assert "janus preprocess" in preprocess_summary["command"]
         assert "start_time" in preprocess_summary
-        assert "inputs" in preprocess_summary
+        assert "config" in preprocess_summary
         assert "end_time" in preprocess_summary
 
         assert "emissions" in preprocess_summary

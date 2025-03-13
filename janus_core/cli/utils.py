@@ -17,9 +17,6 @@ if TYPE_CHECKING:
 
     from janus_core.cli.types import TyperDict
     from janus_core.helpers.janus_types import (
-        Architectures,
-        ASEReadArgs,
-        Devices,
         MaybeSequence,
     )
 
@@ -51,7 +48,7 @@ def dict_tuples_to_lists(dictionary: dict) -> None:
     """
     for key, value in dictionary.items():
         if isinstance(value, dict):
-            dict_paths_to_strs(value)
+            dict_tuples_to_lists(value)
         elif isinstance(value, tuple):
             dictionary[key] = list(value)
 
@@ -150,7 +147,9 @@ def yaml_converter_loader(config_file: str) -> dict[str, Any]:
 yaml_converter_callback = conf_callback_factory(yaml_converter_loader)
 
 
-def start_summary(*, command: str, summary: Path, inputs: dict) -> None:
+def start_summary(
+    *, command: str, summary: Path, config: dict[str, Any], info: dict[str, Any]
+) -> None:
     """
     Write initial summary contents.
 
@@ -160,16 +159,26 @@ def start_summary(*, command: str, summary: Path, inputs: dict) -> None:
         Name of CLI command being used.
     summary
         Path to summary file being saved.
-    inputs
+    config
         Inputs to CLI command to save.
+    info
+        Extra information to save.
     """
-    save_info = {
+    config.pop("config", None)
+
+    summary_contents = {
         "command": f"janus {command}",
         "start_time": datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
-        "inputs": inputs,
+        "config": config,
+        "info": info,
     }
+
+    # Convert all paths to strings in inputs nested dictionary
+    dict_paths_to_strs(summary_contents)
+    dict_tuples_to_lists(summary_contents)
+
     with open(summary, "w", encoding="utf8") as outfile:
-        yaml.dump(save_info, outfile, default_flow_style=False)
+        yaml.dump(summary_contents, outfile, default_flow_style=False)
 
 
 def carbon_summary(*, summary: Path, log: Path) -> None:
@@ -214,65 +223,38 @@ def end_summary(summary: Path) -> None:
     logging.shutdown()
 
 
-def save_struct_calc(
+def get_struct_info(
     *,
-    inputs: dict,
     struct: MaybeSequence[Atoms],
     struct_path: Path,
-    arch: Architectures,
-    device: Devices,
-    model_path: str,
-    read_kwargs: ASEReadArgs,
-    calc_kwargs: dict[str, Any],
-    log: Path,
-) -> None:
+) -> dict[str, Any]:
     """
-    Add structure and calculator input information to a dictionary.
+    Add structure information to a dictionary.
 
     Parameters
     ----------
-    inputs
-        Inputs dictionary to add information to.
     struct
         Structure to be simulated.
     struct_path
         Path of structure file.
-    arch
-        MLIP architecture.
-    device
-        Device to run calculations on.
-    model_path
-        Path to MLIP model.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read.
-    calc_kwargs
-        Keyword arguments to pass to the calculator.
-    log
-        Path to log file.
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary with structure information.
     """
     from ase import Atoms
 
-    # Clean up duplicate parameters
-    for key in (
-        "struct",
-        "struct_path",
-        "arch",
-        "device",
-        "model_path",
-        "read_kwargs",
-        "calc_kwargs",
-        "log_kwargs",
-    ):
-        inputs.pop(key, None)
+    info = {}
 
     if isinstance(struct, Atoms):
-        inputs["struct"] = {
+        info["struct"] = {
             "n_atoms": len(struct),
             "struct_path": struct_path,
             "formula": struct.get_chemical_formula(),
         }
     elif isinstance(struct, Sequence):
-        inputs["traj"] = {
+        info["traj"] = {
             "length": len(struct),
             "struct_path": struct_path,
             "struct": {
@@ -281,18 +263,30 @@ def save_struct_calc(
             },
         }
 
-    inputs["calc"] = {
-        "arch": arch,
-        "device": device,
-        "model_path": model_path,
-        "read_kwargs": read_kwargs,
-        "calc_kwargs": calc_kwargs,
-    }
+    return info
 
-    inputs["log"] = log
 
-    # Convert all paths to strings in inputs nested dictionary
-    dict_paths_to_strs(inputs)
+def get_config(*, params: dict[str, Any], all_kwargs: dict[str, Any]) -> dict[str, Any]:
+    """
+    Get configuration and set kwargs dictionaries.
+
+    Parameters
+    ----------
+    params
+        CLI input parameters from ctx.
+    all_kwargs
+        Name and contents of all kwargs dictionaries.
+
+    Returns
+    -------
+    dict[str, Any]
+        Input parameters with parsed kwargs dictionaries substituted in.
+    """
+    for param in params:
+        if param in all_kwargs:
+            params[param] = all_kwargs[param]
+
+    return params
 
 
 def check_config(ctx: Context) -> None:

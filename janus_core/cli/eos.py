@@ -143,8 +143,9 @@ def eos(
         carbon_summary,
         check_config,
         end_summary,
+        get_config,
+        get_struct_info,
         parse_typer_dicts,
-        save_struct_calc,
         set_read_kwargs_index,
         start_summary,
     )
@@ -159,6 +160,15 @@ def eos(
 
     if eos_type not in get_args(EoSNames):
         raise ValueError(f"Fit type must be one of: {get_args(EoSNames)}")
+
+    # Set initial config
+    all_kwargs = {
+        "read_kwargs": read_kwargs.copy(),
+        "calc_kwargs": calc_kwargs.copy(),
+        "minimize_kwargs": minimize_kwargs.copy(),
+        "write_kwargs": write_kwargs.copy(),
+    }
+    config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
@@ -205,24 +215,14 @@ def eos(
     ).absolute()
     log = equation_of_state.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    inputs = eos_kwargs.copy()
-
     # Add structure, MLIP information, and log to inputs
-    save_struct_calc(
-        inputs=inputs,
+    info = get_struct_info(
         struct=equation_of_state.struct,
         struct_path=struct,
-        arch=arch,
-        device=device,
-        model_path=model_path,
-        read_kwargs=read_kwargs,
-        calc_kwargs=calc_kwargs,
-        log=log,
     )
 
-    # Save summary information before calculations begin
-    start_summary(command="eos", summary=summary, inputs=inputs)
+    # Save summary information before calculation begins
+    start_summary(command="eos", summary=summary, config=config, info=info)
 
     # Run equation of state calculations
     equation_of_state.run()
