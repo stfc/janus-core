@@ -843,7 +843,7 @@ class MolecularDynamics(BaseCalculation):
 
     def _write_header(self) -> None:
         """Write header for stats file."""
-        with open(self.stats_file, "a", encoding="utf-8") as stats_file:
+        with open(self.stats_file, "w", encoding="utf-8") as stats_file:
             write_table(
                 "ascii",
                 file=stats_file,
