@@ -26,6 +26,7 @@ UNITS = {
     "time": "fs",
     "real_time": "s",
     "temperature": "K",
+    "target_temperature": "K",
     "pressure": "GPa",
     "momenta": "(eV*u)^0.5",
     "density": "g/cm^3",
