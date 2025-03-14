@@ -69,7 +69,14 @@ all = [
     "janus-core[sevennet]",
 ]
 
-# MLIP with updated e3nn
+# MLIPs with updated e3nn
+fairchem = [
+    "fairchem-core == 1.5.0",
+    "torch-geometric == 2.6.1",
+    "torch-scatter == 2.1.2",
+    "torch-sparse == 0.6.18",
+]
+
 mattersim = [
     "mattersim == 1.1.1",
 ]
@@ -204,6 +211,9 @@ constraint-dependencies = [
     "dgl==2.1",
     "torch<2.6",
 ]
+
+no-build-isolation-package = ["torch-scatter", "torch-sparse"]
+
 conflicts = [
     [
       { extra = "chgnet" },
@@ -227,6 +237,22 @@ conflicts = [
     ],
     [
       { extra = "mattersim" },
+      { extra = "all" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "m3gnet" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "fairchem" },
       { extra = "all" },
     ],
 ]

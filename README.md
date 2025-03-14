@@ -58,6 +58,10 @@ python3 -m pip install janus-core[mace,chgnet,sevennet]
 > more recent PyTorch release, please refer to the
 > [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html).
 
+> [!WARNING]
+> `fairchem-core` and `mattersim` both require a different version of `e3nn` to `mace-torch`,
+> so it is not currently possible to use MACE with MatterSim or eqV2 DeNS models.
+
 
 To install all MLIPs that do not depend on `dgl`:
 
@@ -92,6 +96,7 @@ Current and planned features include:
   - DPA3
   - Orb
   - MatterSim
+  - eqV2 DeNS
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
