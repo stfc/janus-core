@@ -68,6 +68,7 @@ def test_md(ensemble):
     traj_path = Path(f"{file_prefix[ensemble]}traj.extxyz").absolute()
     rdf_path = Path(f"{file_prefix[ensemble]}rdf.dat").absolute()
     vaf_path = Path(f"{file_prefix[ensemble]}vaf.dat").absolute()
+    cor_path = Path(f"{file_prefix[ensemble]}cor.dat").absolute()
     log_path = Path(f"{file_prefix[ensemble]}md-log.yml").absolute()
     summary_path = Path(f"{file_prefix[ensemble]}md-summary.yml").absolute()
 
@@ -77,6 +78,7 @@ def test_md(ensemble):
     assert not traj_path.exists()
     assert not rdf_path.exists()
     assert not vaf_path.exists()
+    assert not cor_path.exists()
     assert not log_path.exists()
     assert not summary_path.exists()
 
@@ -99,6 +101,12 @@ def test_md(ensemble):
                 2,
                 "--post-process-kwargs",
                 "{'rdf_compute': True, 'vaf_compute': True}",
+                "--correlation-kwargs",
+                (
+                    "{'vaf': {'a': 'Velocity'},"
+                    " 'vaf_x': {'a': 'Velocity',"
+                    "'a_kwargs': {'components': ['x']}, 'b_kwargs': '.'}}"
+                ),
             ],
         )
 
@@ -110,6 +118,7 @@ def test_md(ensemble):
         assert traj_path.exists()
         assert rdf_path.exists()
         assert vaf_path.exists()
+        assert cor_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
 
@@ -147,6 +156,7 @@ def test_md(ensemble):
         traj_path.unlink(missing_ok=True)
         rdf_path.unlink(missing_ok=True)
         vaf_path.unlink(missing_ok=True)
+        cor_path.unlink(missing_ok=True)
         log_path.unlink(missing_ok=True)
         summary_path.unlink(missing_ok=True)
         clear_log_handlers()
