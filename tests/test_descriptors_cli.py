@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase.io import read
 import pytest
@@ -26,13 +27,12 @@ def test_help():
 
 def test_descriptors():
     """Test calculating MLIP descriptors."""
-    out_path = Path("./NaCl-descriptors.extxyz").absolute()
-    log_path = Path("./NaCl-descriptors-log.yml").absolute()
-    summary_path = Path("./NaCl-descriptors-summary.yml").absolute()
+    results_dir = Path("./janus_results")
+    out_path = results_dir / "NaCl-descriptors.extxyz"
+    log_path = results_dir / "NaCl-descriptors-log.yml"
+    summary_path = results_dir / "NaCl-descriptors-summary.yml"
 
-    assert not out_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
+    assert not results_dir.exists()
 
     try:
         result = runner.invoke(
@@ -85,9 +85,7 @@ def test_descriptors():
         assert descriptors_summary["emissions"] > 0
 
     finally:
-        out_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 
@@ -271,3 +269,26 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         descriptors_summary = yaml.safe_load(file)
     assert "emissions" not in descriptors_summary
+
+
+def test_file_prefix(tmp_path):
+    """Test file prefix creates directories and affects all files."""
+    file_prefix = tmp_path / "test/test"
+    result = runner.invoke(
+        app,
+        [
+            "descriptors",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 0
+    test_path = tmp_path / "test"
+    assert list(tmp_path.iterdir()) == [test_path]
+    assert set(test_path.iterdir()) == {
+        test_path / "test-descriptors.extxyz",
+        test_path / "test-descriptors-summary.yml",
+        test_path / "test-descriptors-log.yml",
+    }

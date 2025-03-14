@@ -13,6 +13,7 @@ from janus_core.cli.types import (
     CalcKwargs,
     Device,
     EnsembleKwargs,
+    FilePrefix,
     LogPath,
     MinimizeKwargs,
     ModelPath,
@@ -131,17 +132,7 @@ def md(
     rescale_every: Annotated[
         int, Option(help="Frequency to rescale velocities during equilibration.")
     ] = 10,
-    file_prefix: Annotated[
-        Path | None,
-        Option(
-            help=(
-                """
-                Prefix for output filenames. Default is inferred from structure,
-                ensemble, and temperature.
-                """
-            ),
-        ),
-    ] = None,
+    file_prefix: FilePrefix = None,
     restart: Annotated[bool, Option(help="Whether restarting dynamics.")] = False,
     restart_auto: Annotated[
         bool, Option(help="Whether to infer restart file if restarting dynamics.")
@@ -289,8 +280,9 @@ def md(
     rescale_every
         Frequency to rescale velocities. Default is 10.
     file_prefix
-        Prefix for output filenames. Default is inferred from structure, ensemble,
-        and temperature.
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
     restart
         Whether restarting dynamics. Default is False.
     restart_auto
@@ -339,13 +331,13 @@ def md(
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
     log
-        Path to write logs to. Default is inferred from the name of the structure file.
+        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
-        is inferred from the name of the structure file.
+        is inferred from `file_prefix`.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """

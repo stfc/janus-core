@@ -19,7 +19,9 @@ def train(
     fine_tune: Annotated[
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
-    log: Annotated[Path, Option(help="Path to save logs to.")] = Path("train-log.yml"),
+    log: Annotated[Path, Option(help="Path to save logs to.")] = Path(
+        "./janus_results/train-log.yml"
+    ),
     tracker: Annotated[
         bool, Option(help="Whether to save carbon emissions of calculation")
     ] = True,
@@ -30,7 +32,7 @@ def train(
                 "Path to save summary of inputs, start/end time, and carbon emissions."
             )
         ),
-    ] = Path("train-summary.yml"),
+    ] = Path("./janus_results/train-summary.yml"),
 ) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.

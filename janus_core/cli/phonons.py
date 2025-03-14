@@ -14,6 +14,7 @@ from janus_core.cli.types import (
     Device,
     DisplacementKwargs,
     DoSKwargs,
+    FilePrefix,
     LogPath,
     MinimizeKwargs,
     ModelPath,
@@ -121,17 +122,7 @@ def phonons(
     model_path: ModelPath = None,
     read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
-    file_prefix: Annotated[
-        Path | None,
-        Option(
-            help=(
-                """
-                Prefix for output filenames. Default is inferred from structure name,
-                or chemical formula.
-                """
-            ),
-        ),
-    ] = None,
+    file_prefix: FilePrefix = None,
     log: LogPath = None,
     tracker: Annotated[
         bool, Option(help="Whether to save carbon emissions of calculation")
@@ -215,16 +206,17 @@ def phonons(
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
-        Prefix for output filenames. Default is inferred from structure name, or
-        chemical formula.
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
     log
-        Path to write logs to. Default is inferred from the name of the structure file.
+        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
-        is inferred from the name of the structure file.
+        is inferred from `file_prefix`.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """

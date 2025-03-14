@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -75,17 +76,14 @@ def test_init(ensemble, expected):
 
 def test_npt():
     """Test NPT molecular dynamics."""
-    restart_path_1 = Path("Cl4Na4-npt-T300.0-p1.0-res-2.extxyz")
-    restart_path_2 = Path("Cl4Na4-npt-T300.0-p1.0-res-4.extxyz")
-    restart_final = Path("Cl4Na4-npt-T300.0-p1.0-final.extxyz")
-    traj_path = Path("Cl4Na4-npt-T300.0-p1.0-traj.extxyz")
-    stats_path = Path("Cl4Na4-npt-T300.0-p1.0-stats.dat")
+    results_dir = Path("./janus_results")
+    restart_path_1 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-2.extxyz"
+    restart_path_2 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-4.extxyz"
+    restart_final = results_dir / "Cl4Na4-npt-T300.0-p1.0-final.extxyz"
+    traj_path = results_dir / "Cl4Na4-npt-T300.0-p1.0-traj.extxyz"
+    stats_path = results_dir / "Cl4Na4-npt-T300.0-p1.0-stats.dat"
 
-    assert not restart_path_1.exists()
-    assert not restart_path_2.exists()
-    assert not restart_final.exists()
-    assert not traj_path.exists()
-    assert not stats_path.exists()
+    assert not results_dir.exists()
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
@@ -119,24 +117,18 @@ def test_npt():
             assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
             assert len(lines) == 5
     finally:
-        restart_path_1.unlink(missing_ok=True)
-        restart_path_2.unlink(missing_ok=True)
-        restart_final.unlink(missing_ok=True)
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_nvt_nh():
     """Test NVT-Nosé–Hoover  molecular dynamics."""
-    restart_path = Path("Cl4Na4-nvt-nh-T300.0-res-3.extxyz")
-    restart_final_path = Path("Cl4Na4-nvt-nh-T300.0-final.extxyz")
-    traj_path = Path("Cl4Na4-nvt-nh-T300.0-traj.extxyz")
-    stats_path = Path("Cl4Na4-nvt-nh-T300.0-stats.dat")
+    results_dir = Path("./janus_results")
+    restart_path = results_dir / "Cl4Na4-nvt-nh-T300.0-res-3.extxyz"
+    restart_final_path = results_dir / "Cl4Na4-nvt-nh-T300.0-final.extxyz"
+    traj_path = results_dir / "Cl4Na4-nvt-nh-T300.0-traj.extxyz"
+    stats_path = results_dir / "Cl4Na4-nvt-nh-T300.0-stats.dat"
 
-    assert not restart_path.exists()
-    assert not restart_final_path.exists()
-    assert not traj_path.exists()
-    assert not stats_path.exists()
+    assert not results_dir.exists()
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
@@ -170,10 +162,7 @@ def test_nvt_nh():
             assert " | T [K]" in lines[0]
             assert len(lines) == 4
     finally:
-        restart_path.unlink(missing_ok=True)
-        restart_final_path.unlink(missing_ok=True)
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_nve(tmp_path):
@@ -210,15 +199,13 @@ def test_nve(tmp_path):
 
 def test_nph():
     """Test NPH molecular dynamics."""
-    restart_path = Path("Cl4Na4-nph-T300.0-p0.0-res-2.extxyz")
-    restart_final_path = Path("Cl4Na4-nph-T300.0-p0.0-final.extxyz")
-    traj_path = Path("Cl4Na4-nph-T300.0-p0.0-traj.extxyz")
-    stats_path = Path("Cl4Na4-nph-T300.0-p0.0-stats.dat")
+    results_dir = Path("./janus_results")
+    restart_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-res-2.extxyz"
+    restart_final_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-final.extxyz"
+    traj_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-traj.extxyz"
+    stats_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-stats.dat"
 
-    assert not restart_path.exists()
-    assert not restart_final_path.exists()
-    assert not traj_path.exists()
-    assert not stats_path.exists()
+    assert not results_dir.exists()
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
@@ -252,25 +239,19 @@ def test_nph():
             assert " | Epot/N [eV]" in lines[0]
             assert len(lines) == 2
     finally:
-        restart_path.unlink(missing_ok=True)
-        restart_final_path.unlink(missing_ok=True)
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_nvt_csvr():
     """Test NVT CSVR molecular dynamics."""
-    restart_path_1 = Path("NaCl-nvt-csvr-T300.0-res-2.extxyz")
-    restart_path_2 = Path("NaCl-nvt-csvr-T300.0-res-4.extxyz")
-    restart_final = Path("NaCl-nvt-csvr-T300.0-final.extxyz")
-    traj_path = Path("NaCl-nvt-csvr-T300.0-traj.extxyz")
-    stats_path = Path("NaCl-nvt-csvr-T300.0-stats.dat")
+    results_dir = Path("./janus_results")
+    restart_path_1 = results_dir / "NaCl-nvt-csvr-T300.0-res-2.extxyz"
+    restart_path_2 = results_dir / "NaCl-nvt-csvr-T300.0-res-4.extxyz"
+    restart_final = results_dir / "NaCl-nvt-csvr-T300.0-final.extxyz"
+    traj_path = results_dir / "NaCl-nvt-csvr-T300.0-traj.extxyz"
+    stats_path = results_dir / "NaCl-nvt-csvr-T300.0-stats.dat"
 
-    assert not restart_path_1.exists()
-    assert not restart_path_2.exists()
-    assert not restart_final.exists()
-    assert not traj_path.exists()
-    assert not stats_path.exists()
+    assert not results_dir.exists()
 
     csvr = NVT_CSVR(
         struct=DATA_PATH / "NaCl.cif",
@@ -301,27 +282,20 @@ def test_nvt_csvr():
             assert "Target_T [K]" in lines[0]
             assert len(lines) == 6
     finally:
-        restart_path_1.unlink(missing_ok=True)
-        restart_path_2.unlink(missing_ok=True)
-        restart_final.unlink(missing_ok=True)
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
 def test_npt_mtk():
     """Test NPT MTK molecular dynamics."""
-    restart_path_1 = Path("NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz")
-    restart_path_2 = Path("NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz")
-    restart_final = Path("NaCl-npt-mtk-T300.0-p0.0001-final.extxyz")
-    traj_path = Path("NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz")
-    stats_path = Path("NaCl-npt-mtk-T300.0-p0.0001-stats.dat")
+    results_dir = Path("./janus_results")
+    restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
+    restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz"
+    restart_final = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-final.extxyz"
+    traj_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz"
+    stats_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-stats.dat"
 
-    assert not restart_path_1.exists()
-    assert not restart_path_2.exists()
-    assert not restart_final.exists()
-    assert not traj_path.exists()
-    assert not stats_path.exists()
+    assert not results_dir.exists()
 
     npt_mtk = NPT_MTK(
         struct=DATA_PATH / "NaCl.cif",
@@ -359,11 +333,7 @@ def test_npt_mtk():
             assert len(lines) == 6
 
     finally:
-        restart_path_1.unlink(missing_ok=True)
-        restart_path_2.unlink(missing_ok=True)
-        restart_final.unlink(missing_ok=True)
-        traj_path.unlink(missing_ok=True)
-        stats_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_restart(tmp_path):
@@ -903,13 +873,12 @@ def test_heating_restart(tmp_path):
 
 def test_heating_files():
     """Test default heating file names."""
-    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-traj.extxyz")
-    stats_heating_path = Path("Cl4Na4-nvt-T10-T20-stats.dat")
-    final_path = Path("Cl4Na4-nvt-T10-T20-final.extxyz")
+    results_dir = Path("./janus_results")
+    traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-traj.extxyz"
+    stats_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-stats.dat"
+    final_path = results_dir / "Cl4Na4-nvt-T10-T20-final.extxyz"
 
-    assert not traj_heating_path.exists()
-    assert not stats_heating_path.exists()
-    assert not final_path.exists()
+    assert not results_dir.exists()
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
@@ -944,20 +913,17 @@ def test_heating_files():
         assert stats.data[2, 16] == 20.0
 
     finally:
-        traj_heating_path.unlink(missing_ok=True)
-        stats_heating_path.unlink(missing_ok=True)
-        final_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_heating_md_files():
     """Test default heating files when also running md."""
-    traj_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz")
-    stats_heating_path = Path("Cl4Na4-nvt-T10-T20-T25.0-stats.dat")
-    final_path = Path("Cl4Na4-nvt-T10-T20-T25.0-final.extxyz")
+    results_dir = Path("./janus_results")
+    traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz"
+    stats_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-stats.dat"
+    final_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-final.extxyz"
 
-    assert not traj_heating_path.exists()
-    assert not stats_heating_path.exists()
-    assert not final_path.exists()
+    assert not results_dir.exists()
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
@@ -992,9 +958,7 @@ def test_heating_md_files():
         assert stats.data[3, 16] == 25
 
     finally:
-        traj_heating_path.unlink(missing_ok=True)
-        stats_heating_path.unlink(missing_ok=True)
-        final_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_ramp_negative(tmp_path):
@@ -1174,8 +1138,10 @@ def test_auto_restart(tmp_path):
     log_file = tmp_path / "md.log"
 
     # Predicted restart file, from defaults
-    restart_path = Path(".").absolute() / "NaCl-nvt-T300.0-res-4.extxyz"
-    assert not restart_path.exists()
+    results_dir = Path("./janus_results")
+    restart_path = results_dir / "NaCl-nvt-T300.0-res-4.extxyz"
+
+    assert not results_dir.exists()
 
     try:
         nvt = NVT(
@@ -1252,7 +1218,7 @@ def test_auto_restart(tmp_path):
         assert len(final_traj) == 8
 
     finally:
-        restart_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_auto_restart_restart_stem(tmp_path):

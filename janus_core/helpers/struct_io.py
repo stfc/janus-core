@@ -22,7 +22,7 @@ from janus_core.helpers.janus_types import (
     Properties,
 )
 from janus_core.helpers.mlip_calculators import choose_calculator
-from janus_core.helpers.utils import none_to_dict
+from janus_core.helpers.utils import build_file_dir, none_to_dict
 
 
 def results_to_info(
@@ -284,4 +284,6 @@ def output_structs(
             write_kwargs.setdefault("write_results", not invalidate_calc)
         else:
             write_kwargs.pop("write_results", None)
+
+        build_file_dir(write_kwargs["filename"])
         write(images=images, **write_kwargs)

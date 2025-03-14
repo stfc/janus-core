@@ -12,6 +12,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    FilePrefix,
     LogPath,
     ModelPath,
     ReadKwargsAll,
@@ -45,6 +46,7 @@ def descriptors(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
+    file_prefix: FilePrefix = None,
     out: Annotated[
         Path | None,
         Option(
@@ -84,9 +86,13 @@ def descriptors(
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
+    file_prefix
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
     out
-        Path to save structure with calculated results. Default is inferred from name
-        of the structure file.
+        Path to save structure with calculated results. Default is inferred
+        `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
@@ -95,13 +101,13 @@ def descriptors(
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log
-        Path to write logs to. Default is inferred from the name of the structure file.
+        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
-        is inferred from the name of the structure file.
+        is inferred from `file_prefix`.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -159,6 +165,7 @@ def descriptors(
         "calc_per_atom": calc_per_atom,
         "write_results": True,
         "write_kwargs": write_kwargs,
+        "file_prefix": file_prefix,
         "enable_progress_bar": True,
     }
 

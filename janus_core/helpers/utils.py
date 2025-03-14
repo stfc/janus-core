@@ -67,7 +67,7 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             Components to add to default file_prefix (joined by hyphens).
         """
         self.file_prefix = Path(
-            self._get_default_prefix(file_prefix, struct, struct_path, *additional)
+            self._get_default_prefix(file_prefix, struct, struct_path, *additional),
         )
 
     @staticmethod
@@ -78,12 +78,13 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         *additional,
     ) -> str:
         """
-        Determine the default prefix from the structure  or provided file_prefix.
+        Determine the default prefix from the structure or provided file_prefix.
 
         Parameters
         ----------
         file_prefix
-            Given file_prefix.
+            Name to be given to any result files. May also include path to file
+            directory.
         struct
             Structure(s) from which to derive the default name. If `struct` is a
             sequence, the first structure will be used.
@@ -108,7 +109,10 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
         else:
             struct_name = struct.get_chemical_formula()
 
-        return "-".join((struct_name, *filter(None, additional)))
+        # Set default output directory
+        prefix = Path("./janus_results") / struct_name
+
+        return "-".join((str(prefix), *filter(None, additional)))
 
     def _build_filename(
         self,
@@ -144,8 +148,6 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             )
             built_filename = Path("-".join((prefix, *filter(None, additional), suffix)))
 
-        # Make directory if it does not exist
-        built_filename.parent.mkdir(parents=True, exist_ok=True)
         return built_filename
 
 
@@ -574,3 +576,15 @@ def set_minimize_logging(
             "filemode": "a",
         }
         minimize_kwargs["track_carbon"] = track_carbon
+
+
+def build_file_dir(filepath: PathLike) -> None:
+    """
+    Make any missing parent directories of a file.
+
+    Parameters
+    ----------
+    filepath
+        Path to file being written.
+    """
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)

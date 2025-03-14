@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -27,17 +28,14 @@ def test_help():
 
 def test_neb():
     """Test calculating force constants and band structure."""
-    results_path = Path("./LiFePO4_start-neb-results.dat").absolute()
-    band_path = Path("./LiFePO4_start-neb-band.extxyz").absolute()
-    plot_path = Path("./LiFePO4_start-neb-plot.svg").absolute()
-    log_path = Path("./LiFePO4_start-neb-log.yml").absolute()
-    summary_path = Path("./LiFePO4_start-neb-summary.yml").absolute()
+    results_dir = Path("./janus_results")
+    results_path = results_dir / "LiFePO4_start-neb-results.dat"
+    band_path = results_dir / "LiFePO4_start-neb-band.extxyz"
+    plot_path = results_dir / "LiFePO4_start-neb-plot.svg"
+    log_path = results_dir / "LiFePO4_start-neb-log.yml"
+    summary_path = results_dir / "LiFePO4_start-neb-summary.yml"
 
-    assert not results_path.exists()
-    assert not band_path.exists()
-    assert not plot_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
+    assert not results_dir.exists()
 
     try:
         result = runner.invoke(
@@ -61,6 +59,8 @@ def test_neb():
         assert result.exit_code == 0
 
         assert results_path.exists()
+        assert band_path.exists()
+        assert plot_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
 
@@ -93,11 +93,7 @@ def test_neb():
         assert len(band) == 7
 
     finally:
-        results_path.unlink(missing_ok=True)
-        band_path.unlink(missing_ok=True)
-        plot_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 
