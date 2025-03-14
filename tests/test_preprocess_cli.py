@@ -9,7 +9,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    check_output_files,
+    clear_log_handlers,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -108,6 +113,12 @@ def test_preprocess(tmp_path):
 
         assert "emissions" in preprocess_summary
         assert preprocess_summary["emissions"] > 0
+
+        output_files = {
+            "log": log_path,
+            "summary": summary_path,
+        }
+        check_output_files(preprocess_summary, output_files)
 
     finally:
         # Tidy up directories
