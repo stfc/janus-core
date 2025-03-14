@@ -13,6 +13,7 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
+from janus_core.helpers.stats import Stats
 from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
 
 if hasattr(ase.md.nose_hoover_chain, "IsotropicMTKNPT"):
@@ -815,3 +816,64 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         summary = yaml.safe_load(file)
     assert "emissions" not in summary
+
+
+@pytest.mark.parametrize("ensemble", ("nvt", "npt", "nvt-csvr"))
+@pytest.mark.parametrize("output_every", (1, 2))
+@pytest.mark.parametrize("heating", (True, False))
+def test_consistent_stats_traj(tmp_path, ensemble, output_every, heating):
+    """Test data saved to statistics is consistent with trajectory info."""
+    file_prefix = tmp_path / ensemble
+    stats_path = tmp_path / f"{ensemble}-stats.dat"
+    traj_path = tmp_path / f"{ensemble}-traj.extxyz"
+
+    inputs = [
+        "md",
+        "--ensemble",
+        "nvt",
+        "--struct",
+        DATA_PATH / "NaCl.cif",
+        "--no-tracker",
+        "--file-prefix",
+        file_prefix,
+        "--steps",
+        4,
+        "--stats-every",
+        output_every,
+        "--traj-every",
+        output_every,
+    ]
+
+    if heating:
+        inputs = inputs + [
+            "--temp-start",
+            10,
+            "--temp-end",
+            20,
+            "--temp-step",
+            10,
+            "--temp-time",
+            2,
+        ]
+
+    result = runner.invoke(app, inputs)
+    assert result.exit_code == 0
+
+    atoms = read(traj_path, index=":")
+    temps = [a.info["temperature"] for a in atoms]
+
+    data = Stats(stats_path)
+    temp_col = data.labels.index("T")
+    stats_temps = data.data[:, temp_col]
+
+    assert len(temps) == len(stats_temps)
+    assert temps == pytest.approx(stats_temps, rel=1e5)
+
+    if ensemble in ("nvt", "npt"):
+        target_temps = [a.info["target_temperature"] for a in atoms]
+
+        target_temp_col = data.labels.index("Target_T")
+        stats_target_temps = data.data[:, target_temp_col]
+
+        assert len(target_temps) == len(stats_target_temps)
+        assert target_temps == pytest.approx(stats_target_temps, rel=1e5)
