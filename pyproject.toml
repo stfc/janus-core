@@ -46,6 +46,9 @@ chgnet = [
 dpa3 = [
     "deepmd-kit",
 ]
+grace = [
+    "tensorpotential == 0.5.1",
+]
 mace = [
     "mace-torch==0.3.10",
     "torch-dftd==0.4.0",
@@ -63,6 +66,7 @@ sevennet = [
 all = [
     "janus-core[chgnet]",
     "janus-core[dpa3]",
+    "janus-core[grace]",
     "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
@@ -203,6 +207,7 @@ default-groups = [
 constraint-dependencies = [
     "dgl==2.1",
     "torch<2.6",
+    "tensorflow>=2.16.1",
 ]
 conflicts = [
     [
