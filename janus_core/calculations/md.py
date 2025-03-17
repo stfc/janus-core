@@ -1202,8 +1202,10 @@ class MolecularDynamics(BaseCalculation):
         # Set total expected MD steps.
         if self.ramp_temp:
             total_steps += self.heating_n_temps * self.heating_steps_per_temp
-            # Heating steps at 0 are skipped.
+            # Heating steps at 0K are skipped.
             if np.isclose(self.temp_start, 0.0):
+                total_steps -= self.heating_steps_per_temp
+            if np.isclose(self.temp_end, 0.0):
                 total_steps -= self.heating_steps_per_temp
 
         total_task_id = progress_bar.add_task(
@@ -1266,12 +1268,17 @@ class MolecularDynamics(BaseCalculation):
         progress_bar.update(total_task_id, completed=current_step)
 
         if ramp_task_ids:
+            #  Treat 0K at start (no steps) as if it completed heating steps
             if isclose(0, self.temp_start):
                 current_step += self.heating_steps_per_temp
 
             current_ramp_step = (current_step - 1) // self.heating_steps_per_temp
             # Clamp current_ramp_step between 0 and n_temps
             current_ramp_step = min(self.heating_n_temps, current_ramp_step)
+
+            #  Treat 0K at end (no steps) as if it completed heating steps
+            if isclose(0, self.temp_end) and current_ramp_step == self.heating_n_temps:
+                current_step += self.heating_steps_per_temp
 
             if current_ramp_step < self.heating_n_temps:
                 completed = (current_step - 1) % self.heating_steps_per_temp + 1
