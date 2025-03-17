@@ -517,7 +517,7 @@ class MolecularDynamics(BaseCalculation):
         self._parse_correlations()
 
     def _set_info(self) -> None:
-        """Set time in fs, current dynamics step, and density to info."""
+        """Set time in fs, current dynamics step, density, and temperature to info."""
         time = (self.offset * self.timestep + self.dyn.get_time()) / units.fs
         step = self.offset + self.dyn.nsteps
         self.dyn.atoms.info["time"] = time
@@ -531,6 +531,13 @@ class MolecularDynamics(BaseCalculation):
             self.dyn.atoms.info["density"] = density
         except ValueError:
             self.dyn.atoms.info["density"] = 0.0
+
+        e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
+        current_temp = e_kin / (1.5 * units.kB)
+        self.struct.info["temperature"] = current_temp
+
+        if hasattr(self.dyn, "set_temperature") or isinstance(self, NVT_CSVR | NPT_MTK):
+            self.struct.info["target_temperature"] = self.temp
 
     def _prepare_restart(self) -> None:
         """Prepare restart files, structure and offset."""
@@ -727,6 +734,28 @@ class MolecularDynamics(BaseCalculation):
                     data[str(cor)] = {"value": value.tolist(), "lags": lags.tolist()}
                 yaml.dump(data, out_file, default_flow_style=None)
 
+    @property
+    def info_unit_keys(self) -> tuple[str]:
+        """
+        Get Atoms.info keys to save units for.
+
+        Returns
+        -------
+        tuple[str]
+            Keys of Atoms.info.
+        """
+        return (
+            "energy",
+            "forces",
+            "stress",
+            "time",
+            "real_time",
+            "temperature",
+            "pressure",
+            "density",
+            "momenta",
+        )
+
     def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
@@ -738,7 +767,6 @@ class MolecularDynamics(BaseCalculation):
         """
         e_pot = self.dyn.atoms.get_potential_energy() / self.n_atoms
         e_kin = self.dyn.atoms.get_kinetic_energy() / self.n_atoms
-        current_temp = e_kin / (1.5 * units.kB)
 
         self._set_info()
 
@@ -770,7 +798,7 @@ class MolecularDynamics(BaseCalculation):
             "Time": self.dyn.atoms.info["time"],
             "Epot/N": e_pot,
             "EKin/N": e_kin,
-            "T": current_temp,
+            "T": self.dyn.atoms.info["temperature"],
             "ETot/N": e_pot + e_kin,
             "Density": self.dyn.atoms.info["density"],
             "Volume": volume,
@@ -784,7 +812,7 @@ class MolecularDynamics(BaseCalculation):
         }
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -847,8 +875,8 @@ class MolecularDynamics(BaseCalculation):
             write_table(
                 "ascii",
                 file=stats_file,
-                units=self.unit_info,
-                **{key: () for key in self.unit_info},
+                units=self.stats_units,
+                **{key: () for key in self.stats_units},
             )
 
     def _write_stats_file(self) -> None:
@@ -863,7 +891,7 @@ class MolecularDynamics(BaseCalculation):
             write_table(
                 "ascii",
                 file=stats_file,
-                units=self.unit_info,
+                units=self.stats_units,
                 formats=self.default_formats,
                 print_header=False,
                 **stats,
@@ -895,10 +923,6 @@ class MolecularDynamics(BaseCalculation):
 
     def _write_final_state(self) -> None:
         """Write the final system state."""
-        self.struct.info["temperature"] = self.temp
-        if isinstance(self, NPT) and not isinstance(self, NVT_NH):
-            self.struct.info["pressure"] = self.pressure
-
         # Append if final file has been created
         append = self.created_final_file
 
@@ -1046,18 +1070,7 @@ class MolecularDynamics(BaseCalculation):
 
     def run(self) -> None:
         """Run molecular dynamics simulation and/or temperature ramp."""
-        unit_keys = (
-            "energy",
-            "forces",
-            "stress",
-            "time",
-            "real_time",
-            "temperature",
-            "pressure",
-            "density",
-            "momenta",
-        )
-        self._set_info_units(unit_keys)
+        self._set_info_units(self.info_unit_keys)
 
         if not self.restart:
             if self.minimize:
@@ -1299,6 +1312,18 @@ class NPT(MolecularDynamics):
 
         return f"{super()._set_param_prefix(file_prefix)}-p{self.pressure}"
 
+    @property
+    def info_unit_keys(self) -> tuple[str]:
+        """
+        Get Atoms.info keys to save units for.
+
+        Returns
+        -------
+        tuple[str]
+            Keys of Atoms.info.
+        """
+        return super().info_unit_keys + ("target_temperature",)
+
     def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
@@ -1313,7 +1338,7 @@ class NPT(MolecularDynamics):
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1322,7 +1347,7 @@ class NPT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {
+        return super().stats_units | {
             "Target_P": JANUS_UNITS["pressure"],
             "Target_T": JANUS_UNITS["temperature"],
         }
@@ -1394,6 +1419,18 @@ class NVT(MolecularDynamics):
             **ensemble_kwargs,
         )
 
+    @property
+    def info_unit_keys(self) -> tuple[str]:
+        """
+        Get Atoms.info keys to save units for.
+
+        Returns
+        -------
+        tuple[str]
+            Keys of Atoms.info.
+        """
+        return super().info_unit_keys + ("target_temperature",)
+
     def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
@@ -1408,7 +1445,7 @@ class NVT(MolecularDynamics):
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1417,7 +1454,7 @@ class NVT(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
+        return super().stats_units | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1543,6 +1580,18 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
             **ensemble_kwargs,
         )
 
+    @property
+    def info_unit_keys(self) -> tuple[str]:
+        """
+        Get Atoms.info keys to save units for.
+
+        Returns
+        -------
+        tuple[str]
+            Keys of Atoms.info.
+        """
+        return super().info_unit_keys + ("target_temperature",)
+
     def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
@@ -1557,7 +1606,7 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1566,7 +1615,7 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {"Target_T": JANUS_UNITS["temperature"]}
+        return super().stats_units | {"Target_T": JANUS_UNITS["temperature"]}
 
     @property
     def default_formats(self) -> dict[str, str]:
@@ -1757,7 +1806,7 @@ class NPH(MolecularDynamics):
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1766,7 +1815,7 @@ class NPH(MolecularDynamics):
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {
+        return super().stats_units | {
             "Target_P": JANUS_UNITS["pressure"],
         }
 
@@ -1906,6 +1955,18 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         pressure = f"-p{self.pressure}"
         return f"{super()._set_param_prefix(file_prefix)}{pressure}"
 
+    @property
+    def info_unit_keys(self) -> tuple[str]:
+        """
+        Get Atoms.info keys to save units for.
+
+        Returns
+        -------
+        tuple[str]
+            Keys of Atoms.info.
+        """
+        return super().info_unit_keys + ("target_temperature",)
+
     def get_stats(self) -> dict[str, float]:
         """
         Get thermodynamical statistics to be written to file.
@@ -1920,7 +1981,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         return stats
 
     @property
-    def unit_info(self) -> dict[str, str]:
+    def stats_units(self) -> dict[str, str]:
         """
         Get units of returned statistics.
 
@@ -1929,7 +1990,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         dict[str, str]
             Units attached to statistical properties.
         """
-        return super().unit_info | {
+        return super().stats_units | {
             "Target_P": JANUS_UNITS["pressure"],
             "Target_T": JANUS_UNITS["temperature"],
         }
