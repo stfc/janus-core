@@ -166,12 +166,12 @@ def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
             for file in value:
                 assert file.exists(), f"{file} missing"
 
-                if str(file.absolute()) not in output_file:
-                    raise ValueError(f"{file} is inconsistent with {output_file}")
-
+                assert str(file.absolute()) in output_file, (
+                    f"{file} is inconsistent with {output_file}"
+                )
         else:
-            if value and not value.exists():
-                raise ValueError(f"{value} missing")
+            assert value.exists() if value else True, f"{value} missing"
 
-            if output_file != (str(value.absolute()) if value else None):
-                raise ValueError(f"{value} is inconsistent with {output_file}")
+            assert output_file == (str(value.absolute()) if value else None), (
+                f"{value} is inconsistent with {output_file}"
+            )
