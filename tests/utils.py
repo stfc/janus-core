@@ -164,8 +164,7 @@ def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
         output_file = summary["output_files"][key]
         if isinstance(value, list):
             for file in value:
-                if not file.exists():
-                    raise ValueError(f"{file} missing")
+                assert file.exists(), f"{file} missing"
 
                 if str(file.absolute()) not in output_file:
                     raise ValueError(f"{file} is inconsistent with {output_file}")
