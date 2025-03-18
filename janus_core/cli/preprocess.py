@@ -16,7 +16,7 @@ def preprocess(
         Path, Option(help="Configuration file to pass to MLIP CLI.")
     ],
     log: Annotated[Path, Option(help="Path to save logs to.")] = Path(
-        "preprocess-log.yml"
+        "./janus_results/preprocess-log.yml"
     ),
     tracker: Annotated[
         bool, Option(help="Whether to save carbon emissions of calculation")
@@ -28,7 +28,7 @@ def preprocess(
                 "Path to save summary of inputs, start/end time, and carbon emissions."
             )
         ),
-    ] = Path("preprocess-summary.yml"),
+    ] = Path("./janus_results/preprocess-summary.yml"),
 ):
     """
     Convert training data to hdf5 by passing a configuration file to the MLIP's CLI.

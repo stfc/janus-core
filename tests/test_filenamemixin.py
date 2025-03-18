@@ -25,17 +25,17 @@ class DummyFileHandler(FileNameMixin):
     "params,file_prefix",
     (
         # Defaults to structure atoms from ASE
-        ((STRUCT, None, None), "C6H6"),
+        ((STRUCT, None, None), "janus_results/C6H6"),
         # Defaults to stem over ASE structure
-        ((STRUCT, "mybenzene", None), "mybenzene"),
+        ((STRUCT, "mybenzene", None), "janus_results/mybenzene"),
         # file_prefix just sets itself
         ((STRUCT, "mybenzene", "benzene"), "benzene"),
         # file_prefix ignores additional
         ((STRUCT, None, "benzene", "wowzers"), "benzene"),
         # Additional only applies where no file_prefix
-        ((STRUCT, None, None, "wowzers"), "C6H6-wowzers"),
+        ((STRUCT, None, None, "wowzers"), "janus_results/C6H6-wowzers"),
         # Additional only applies where no file_prefix
-        ((STRUCT, "mybenzene", None, "wowzers"), "mybenzene-wowzers"),
+        ((STRUCT, "mybenzene", None, "wowzers"), "janus_results/mybenzene-wowzers"),
     ),
 )
 def test_file_name_mixin_init(params, file_prefix):
@@ -48,22 +48,27 @@ def test_file_name_mixin_init(params, file_prefix):
 @pytest.mark.parametrize(
     "mixin_params,file_args,file_kwargs,file_name",
     (
-        ((STRUCT, None, None), ("data.xyz",), {}, "C6H6-data.xyz"),
+        ((STRUCT, None, None), ("data.xyz",), {}, "janus_results/C6H6-data.xyz"),
         ((STRUCT, None, "benzene"), ("data.xyz",), {}, "benzene-data.xyz"),
         ((STRUCT, None, "benzene", "wowzers"), ("data.xyz",), {}, "benzene-data.xyz"),
-        ((STRUCT, None, None, "wowzers"), ("data.xyz",), {}, "C6H6-wowzers-data.xyz"),
+        (
+            (STRUCT, None, None, "wowzers"),
+            ("data.xyz",),
+            {},
+            "janus_results/C6H6-wowzers-data.xyz",
+        ),
         # Additional stacks with base
         (
             (STRUCT, None, None, "wowzers"),
             ("data.xyz", "beef"),
             {},
-            "C6H6-wowzers-beef-data.xyz",
+            "janus_results/C6H6-wowzers-beef-data.xyz",
         ),
         (
             (STRUCT, "mybenzene", None, "wowzers"),
             ("data.xyz", "beef"),
             {},
-            "mybenzene-wowzers-beef-data.xyz",
+            "janus_results/mybenzene-wowzers-beef-data.xyz",
         ),
         # but not file_prefix
         (

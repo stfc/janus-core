@@ -72,6 +72,19 @@ Architecture = Annotated[
 Device = Annotated[str | None, Option(help="Device to run calculations on.")]
 ModelPath = Annotated[str | None, Option(help="Path to MLIP model.")]
 
+FilePrefix = Annotated[
+    Path | None,
+    Option(
+        help=(
+            """
+                Prefix for output files, including directories. Default directory is
+                ./janus_results, and default filename prefix is inferred from the
+                input stucture filename.
+                """
+        )
+    ),
+]
+
 ReadKwargsAll = Annotated[
     TyperDict | None,
     Option(
@@ -287,12 +300,7 @@ PostProcessKwargs = Annotated[
 
 LogPath = Annotated[
     Path | None,
-    Option(
-        help=(
-            "Path to save logs to. Default is inferred from the name of the structure "
-            "file."
-        )
-    ),
+    Option(help=("Path to save logs to. Default is inferred from `file_prefix`")),
 ]
 
 Summary = Annotated[
@@ -300,7 +308,7 @@ Summary = Annotated[
     Option(
         help=(
             "Path to save summary of inputs, start/end time, and carbon emissions. "
-            "Default is inferred from the name of the structure file."
+            "Default is inferred from `file_prefix`."
         )
     ),
 ]

@@ -26,7 +26,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
 )
 from janus_core.helpers.struct_io import input_structs, output_structs
-from janus_core.helpers.utils import none_to_dict, set_minimize_logging
+from janus_core.helpers.utils import build_file_dir, none_to_dict, set_minimize_logging
 
 
 class NEB(BaseCalculation):
@@ -404,6 +404,7 @@ class NEB(BaseCalculation):
             self.run_nebtools()
 
         if self.plot_band:
+            build_file_dir(self.plot_file)
             fig = self.nebtools.plot_band()
             fig.savefig(self.plot_file)
         else:
@@ -489,6 +490,7 @@ class NEB(BaseCalculation):
         }
 
         if self.write_results:
+            build_file_dir(self.results_file)
             with open(self.results_file, "w", encoding="utf8") as out:
                 print("#Barrier [eV] | delta E [eV] | Max force [eV/Å] ", file=out)
                 print(*self.results.values(), file=out)

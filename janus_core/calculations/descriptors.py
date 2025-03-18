@@ -36,6 +36,8 @@ class Descriptors(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
+    file_prefix
+        Prefix for output filenames. Default is inferred from structure.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -75,6 +77,7 @@ class Descriptors(BaseCalculation):
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
+        file_prefix: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         set_calc: bool | None = None,
@@ -102,6 +105,8 @@ class Descriptors(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model_path
             Path to MLIP model. Default is `None`.
+        file_prefix
+            Prefix for output filenames. Default is inferred from structure.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -161,6 +166,7 @@ class Descriptors(BaseCalculation):
             log_kwargs=log_kwargs,
             track_carbon=track_carbon,
             tracker_kwargs=tracker_kwargs,
+            file_prefix=file_prefix,
         )
 
         if isinstance(self.struct, Atoms) and not self.struct.calc:

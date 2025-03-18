@@ -24,7 +24,7 @@ def test_init():
         calc_kwargs={"model": MODEL_PATH},
     )
     phonons = Phonons(struct=single_point.struct)
-    assert str(phonons.file_prefix) == "Cl4Na4"
+    assert str(phonons.file_prefix) == "janus_results/Cl4Na4"
 
 
 def test_calc_phonons():

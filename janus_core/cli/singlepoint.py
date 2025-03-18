@@ -12,6 +12,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    FilePrefix,
     LogPath,
     ModelPath,
     ReadKwargsAll,
@@ -42,18 +43,13 @@ def singlepoint(
             ),
         ),
     ] = None,
-    file_prefix: Annotated[
-        Path | None,
-        Option(
-            help=("Prefix for output filenames. Default is inferred from structure.")
-        ),
-    ] = None,
+    file_prefix: FilePrefix = None,
     out: Annotated[
         Path | None,
         Option(
             help=(
                 "Path to save structure with calculated results. Default is inferred "
-                "from name of structure file."
+                "from `file_prefix`."
             ),
         ),
     ] = None,
@@ -85,10 +81,12 @@ def singlepoint(
     properties
         Physical properties to calculate. Default is ("energy", "forces", "stress").
     file_prefix
-        Prefix for output filenames. Default is inferred from structure.
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
     out
-        Path to save structure with calculated results. Default is inferred from name
-        of the structure file.
+        Path to save structure with calculated results. Default is inferred from
+        `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
@@ -97,13 +95,13 @@ def singlepoint(
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log
-        Path to write logs to. Default is inferred from the name of the structure file.
+        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
-        is inferred from the name of the structure file.
+        is inferred from `file_prefix`.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """

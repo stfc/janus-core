@@ -43,7 +43,12 @@ from janus_core.helpers.janus_types import (
     PostProcessKwargs,
 )
 from janus_core.helpers.struct_io import input_structs, output_structs
-from janus_core.helpers.utils import none_to_dict, set_minimize_logging, write_table
+from janus_core.helpers.utils import (
+    build_file_dir,
+    none_to_dict,
+    set_minimize_logging,
+    write_table,
+)
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
 
@@ -723,11 +728,9 @@ class MolecularDynamics(BaseCalculation):
     def _write_correlations(self) -> None:
         """Write out the correlations."""
         if self._correlations:
-            with open(
-                self._build_filename("cor.dat", self.param_prefix),
-                "w",
-                encoding="utf-8",
-            ) as out_file:
+            corr_file = self._build_filename("cor.dat", self.param_prefix)
+            build_file_dir(corr_file)
+            with open(corr_file, "w", encoding="utf-8") as out_file:
                 data = {}
                 for cor in self._correlations:
                     value, lags = cor.get()
@@ -871,6 +874,7 @@ class MolecularDynamics(BaseCalculation):
 
     def _write_header(self) -> None:
         """Write header for stats file."""
+        build_file_dir(self.stats_file)
         with open(self.stats_file, "w", encoding="utf-8") as stats_file:
             write_table(
                 "ascii",

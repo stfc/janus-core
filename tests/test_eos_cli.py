@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 from ase.io import read
 import pytest
@@ -26,15 +27,13 @@ def test_help():
 
 def test_eos():
     """Test calculating the equation of state."""
-    eos_raw_path = Path("./NaCl-eos-raw.dat").absolute()
-    eos_fit_path = Path("./NaCl-eos-fit.dat").absolute()
-    log_path = Path("./NaCl-eos-log.yml").absolute()
-    summary_path = Path("./NaCl-eos-summary.yml").absolute()
+    results_dir = Path("./janus_results")
+    eos_raw_path = results_dir / "NaCl-eos-raw.dat"
+    eos_fit_path = results_dir / "NaCl-eos-fit.dat"
+    log_path = results_dir / "NaCl-eos-log.yml"
+    summary_path = results_dir / "NaCl-eos-summary.yml"
 
-    assert not eos_raw_path.exists()
-    assert not eos_fit_path.exists()
-    assert not log_path.exists()
-    assert not summary_path.exists()
+    assert not results_dir.exists()
 
     try:
         result = runner.invoke(
@@ -94,10 +93,7 @@ def test_eos():
         assert eos_summary["emissions"] > 0
 
     finally:
-        eos_raw_path.unlink(missing_ok=True)
-        eos_fit_path.unlink(missing_ok=True)
-        log_path.unlink(missing_ok=True)
-        summary_path.unlink(missing_ok=True)
+        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 
