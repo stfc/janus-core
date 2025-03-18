@@ -579,10 +579,10 @@ class Phonons(BaseCalculation):
         if force_consts_to_hdf5 is None:
             force_consts_to_hdf5 = self.force_consts_to_hdf5
 
-        self.phonopy_file = self._build_filename("phonopy.yml", filename=phonopy_file)
-        self.force_consts_file = self._build_filename(
-            "force_constants.hdf5", filename=force_consts_file
-        )
+        if phonopy_file:
+            self.phonopy_file = phonopy_file
+        if force_consts_file:
+            self.force_consts_file = force_consts_file
 
         phonon = self.results["phonon"]
 
@@ -591,7 +591,7 @@ class Phonons(BaseCalculation):
         phonon.save(self.phonopy_file, settings={"force_constants": save_force_consts})
 
         if force_consts_to_hdf5:
-            build_file_dir(force_consts_file)
+            build_file_dir(self.force_consts_file)
             write_force_constants_to_hdf5(
                 phonon.force_constants, filename=self.force_consts_file
             )
@@ -648,9 +648,12 @@ class Phonons(BaseCalculation):
         if save_plots is None:
             save_plots = self.plot_to_file
 
-        if self.qpoint_file:
-            self.bands_file = self._build_filename("bands.yml.xz", filename=bands_file)
+        if bands_file:
+            self.bands_file = bands_file
+        if plot_file:
+            self.bands_plot_file = plot_file
 
+        if self.qpoint_file:
             with open(self.qpoint_file, encoding="utf8") as file:
                 paths_info = safe_load(file)
 
@@ -666,9 +669,6 @@ class Phonons(BaseCalculation):
             )
 
         else:
-            self.bands_file = self._build_filename(
-                "auto_bands.yml.xz", filename=bands_file
-            )
             q_points, labels, connections = get_band_qpoints_by_seekpath(
                 self.results["phonon"].primitive, self.n_qpoints
             )
@@ -681,7 +681,7 @@ class Phonons(BaseCalculation):
             with_group_velocities=self.write_full,
         )
 
-        build_file_dir(bands_file)
+        build_file_dir(self.bands_file)
         self.results["phonon"].write_yaml_band_structure(
             filename=self.bands_file,
             compression="lzma",
@@ -689,7 +689,6 @@ class Phonons(BaseCalculation):
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:
-            self.bands_plot_file = self._build_filename("bands.svg", filename=plot_file)
             build_file_dir(self.bands_plot_file)
             bplt.savefig(self.bands_plot_file)
 
@@ -756,9 +755,11 @@ class Phonons(BaseCalculation):
             Name of data file to save thermal properties. Default is inferred from
             `file_prefix`.
         """
-        self.thermal_file = self._build_filename("thermal.yml", filename=thermal_file)
+        if thermal_file:
+            self.thermal_file = thermal_file
+
         build_file_dir(self.thermal_file)
-        self.results["phonon"].write_yaml_thermal_properties(filename=self.thermal_file)
+        self.results["phonon"].write_yaml_thermal_properties(self.thermal_file)
 
     def calc_dos(
         self,
@@ -854,22 +855,24 @@ class Phonons(BaseCalculation):
         if plot_bands is None:
             plot_bands = self.plot_to_file
 
-        self.dos_file = self._build_filename("dos.dat", filename=dos_file)
+        if dos_file:
+            self.dos_file = dos_file
+        if plot_file:
+            self.dos_plot_file = plot_file
+        if plot_bands_file:
+            self.bands_dos_plot_file = plot_bands_file
+
         build_file_dir(self.dos_file)
         self.results["phonon"].total_dos.write(self.dos_file)
 
         bplt = self.results["phonon"].plot_total_dos()
         if plot_to_file:
-            self.dos_plot_file = self._build_filename("dos.svg", filename=plot_file)
             build_file_dir(self.dos_plot_file)
             bplt.savefig(self.dos_plot_file)
 
         if plot_bands:
             bplt = self.results["phonon"].plot_band_structure_and_dos()
             if plot_to_file:
-                self.bands_dos_plot_file = self._build_filename(
-                    "bs-dos.svg", filename=plot_bands_file
-                )
                 build_file_dir(self.bands_dos_plot_file)
                 bplt.savefig(self.bands_dos_plot_file)
 
@@ -953,13 +956,16 @@ class Phonons(BaseCalculation):
         if plot_to_file is None:
             plot_to_file = self.plot_to_file
 
-        self.pdos_file = self._build_filename("pdos.dat", filename=pdos_file)
+        if pdos_file:
+            self.pdos_file = pdos_file
+        if plot_file:
+            self.pdos_plot_file = plot_file
+
         build_file_dir(self.pdos_file)
         self.results["phonon"].projected_dos.write(self.pdos_file)
 
         bplt = self.results["phonon"].plot_projected_dos()
         if plot_to_file:
-            self.pdos_plot_file = self._build_filename("pdos.svg", filename=plot_file)
             build_file_dir(self.pdos_plot_file)
             bplt.savefig(self.pdos_plot_file)
 
