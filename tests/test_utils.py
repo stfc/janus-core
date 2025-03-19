@@ -266,9 +266,10 @@ def test_invalid_slicelikes(slc):
 def test_parse_correlation_kwargs():
     """Test parsing correlation CLI kwargs."""
     kwargs = {
-        "vaf": {"a": "Velocity", "b_kwargs": {"components": ["x"]}},
+        "vaf": {"a": "Velocity", "points": 100, "b_kwargs": {"components": ["x"]}},
         "vaf_ditto": {
             "b": "Velocity",
+            "points": 314,
             "a_kwargs": {"atoms_slice": slice(0, None, 2)},
             "b_kwargs": ".",
         },
@@ -279,8 +280,10 @@ def test_parse_correlation_kwargs():
     assert type(parsed[0]["a"]) is type(parsed[0]["b"]) is Velocity
     assert parsed[0]["a"].components == ["x", "y", "z"]
     assert parsed[0]["b"].components == ["x"]
+    assert parsed[0]["points"] == 100
 
     assert parsed[1]["name"] == "vaf_ditto"
     assert type(parsed[1]["a"]) is type(parsed[1]["b"]) is Velocity
     assert parsed[1]["a"].components == parsed[1]["b"].components == ["x", "y", "z"]
     assert parsed[1]["a"].atoms_slice == parsed[1]["b"].atoms_slice == slice(0, None, 2)
+    assert parsed[1]["points"] == 314

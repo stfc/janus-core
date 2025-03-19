@@ -116,6 +116,7 @@ def test_vaf(tmp_path):
             {
                 "a": Velocity(),
                 "b": Velocity(),
+                "points": 1,
                 "name": "vaf_default",
             },
         ],
