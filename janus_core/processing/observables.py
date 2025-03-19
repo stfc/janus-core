@@ -245,9 +245,9 @@ class Velocity(Observable, ComponentMixin):
 
         Parameters
         ----------
-        components : list[str] | None
+        components
             Symbols for returned velocity components, x, y, and z (default is all).
-        atoms_slice : Union[list[int], SliceLike, None]
+        atoms_slice
             List or slice of atoms to observe velocities from.
         """
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})

@@ -354,7 +354,7 @@ def md(
         Keyword arguments to pass to post-processing. Default is None.
     correlation_kwargs
         Keyword arguments to pass for on-the-fly correlations. Default is None.
-    seed : Optional[int]
+    seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
     log
