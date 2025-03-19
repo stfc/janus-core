@@ -70,15 +70,20 @@ def test_md(ensemble):
     }
 
     results_dir = Path("./janus_results")
-    final_path = results_dir / f"{file_prefix[ensemble]}final.extxyz"
-    restart_path = results_dir / f"{file_prefix[ensemble]}res-2.extxyz"
-    stats_path = results_dir / f"{file_prefix[ensemble]}stats.dat"
-    traj_path = results_dir / f"{file_prefix[ensemble]}traj.extxyz"
-    rdf_path = results_dir / f"{file_prefix[ensemble]}rdf.dat"
-    vaf_path = results_dir / f"{file_prefix[ensemble]}vaf.dat"
-    cor_path = results_dir / f"{file_prefix[ensemble]}cor.dat"
-    log_path = results_dir / f"{file_prefix[ensemble]}md-log.yml"
-    summary_path = results_dir / f"{file_prefix[ensemble]}md-summary.yml"
+    paths = {
+        key: results_dir / (file_prefix[ensemble] + name)
+        for key, name in [
+            ("final", "final.extxyz"),
+            ("res-2", "res-2.extxyz"),
+            ("stats", "stats.dat"),
+            ("traj", "traj.extxyz"),
+            ("rdf", "rdf.dat"),
+            ("vaf", "vaf.dat"),
+            ("cor", "cor.dat"),
+            ("md-log", "md-log.yml"),
+            ("md-summary", "md-summary.yml"),
+        ]
+    }
 
     assert not results_dir.exists()
 
@@ -103,8 +108,8 @@ def test_md(ensemble):
                 "{'rdf_compute': True, 'vaf_compute': True}",
                 "--correlation-kwargs",
                 (
-                    "{'vaf': {'a': 'Velocity'},"
-                    " 'vaf_x': {'a': 'Velocity',"
+                    "{'vaf': {'a': 'Velocity', 'points': 10},"
+                    " 'vaf_x': {'a': 'Velocity', 'points': 10,"
                     "'a_kwargs': {'components': ['x']}, 'b_kwargs': '.'}}"
                 ),
             ],
@@ -112,18 +117,11 @@ def test_md(ensemble):
 
         assert result.exit_code == 0
 
-        assert final_path.exists()
-        assert restart_path.exists()
-        assert stats_path.exists()
-        assert traj_path.exists()
-        assert rdf_path.exists()
-        assert vaf_path.exists()
-        assert cor_path.exists()
-        assert log_path.exists()
-        assert summary_path.exists()
+        for file in paths.values():
+            assert file.exists()
 
         # Check at least one image has been saved in trajectory
-        atoms = read(traj_path)
+        atoms = read(paths["traj"])
         assert isinstance(atoms, Atoms)
         assert "energy" in atoms.calc.results
         assert "mace_mp_energy" in atoms.info

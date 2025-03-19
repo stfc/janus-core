@@ -346,13 +346,21 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
         if "a" not in cli_kwargs and "b" not in cli_kwargs:
             raise ValueError("At least one observable must be supplied as 'a' or 'b'")
 
-        # Accept on Observable to be replicated.
+        if "points" not in cli_kwargs:
+            raise ValueError("Correlation keyword argument points must be specified")
+
+        # Accept an Observable to be replicated.
         if "b" not in cli_kwargs:
             a = cli_kwargs["a"]
             b = deepcopy(a)
+            # Copying Observable, so can copy kwargs as well.
+            if "b_kwargs" not in cli_kwargs and "a_kwargs" in cli_kwargs:
+                cli_kwargs["b_kwargs"] = cli_kwargs["a_kwargs"]
         elif "a" not in cli_kwargs:
-            a = cli_kwargs["b"]
-            b = deepcopy(a)
+            b = cli_kwargs["b"]
+            a = deepcopy(b)
+            if "a_kwargs" not in cli_kwargs and "b_kwargs" in cli_kwargs:
+                cli_kwargs["a_kwargs"] = cli_kwargs["b_kwargs"]
         else:
             a = cli_kwargs["a"]
             b = cli_kwargs["b"]
@@ -370,13 +378,13 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
 
         cor_kwargs = {
             "name": name,
+            "points": cli_kwargs["points"],
             "a": getattr(observables, a)(**a_kwargs),
             "b": getattr(observables, b)(**b_kwargs),
         }
 
-        for optional in ["blocks", "points", "averaging", "update_frequency"]:
-            if optional in cli_kwargs:
-                cor_kwargs[optional] = cli_kwargs[optional]
+        for optional in cli_kwargs.keys() & {"blocks", "averaging", "update_frequency"}:
+            cor_kwargs[optional] = cli_kwargs[optional]
 
         parsed_kwargs.append(cor_kwargs)
     return parsed_kwargs

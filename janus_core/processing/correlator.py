@@ -253,10 +253,10 @@ class Correlation:
         Observable for b.
     name
         Name of correlation.
+    points
+        Number of points per block.
     blocks
         Number of correlation blocks. Default is 1.
-    points
-        Number of points per block. Default is 1.
     averaging
         Averaging window per block level. Default is 1.
     update_frequency
@@ -269,8 +269,8 @@ class Correlation:
         a: Observable,
         b: Observable,
         name: str,
+        points: int,
         blocks: int = 1,
-        points: int = 1,
         averaging: int = 1,
         update_frequency: int = 1,
     ) -> None:
@@ -285,10 +285,10 @@ class Correlation:
             Observable for b.
         name
             Name of correlation.
+        points
+            Number of points per block.
         blocks
             Number of correlation blocks. Default is 1.
-        points
-            Number of points per block. Default is 1.
         averaging
             Averaging window per block level. Default is 1.
         update_frequency
