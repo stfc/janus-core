@@ -237,7 +237,7 @@ class Velocity(Observable, ComponentMixin):
     def __init__(
         self,
         *,
-        components: list[str],
+        components: list[str] | None = None,
         atoms_slice: list[int] | SliceLike | None = None,
     ):
         """
@@ -246,12 +246,12 @@ class Velocity(Observable, ComponentMixin):
         Parameters
         ----------
         components
-            Symbols for tensor components, x, y, and z.
+            Symbols for returned velocity components, x, y, and z (default is all).
         atoms_slice
             List or slice of atoms to observe velocities from.
         """
         ComponentMixin.__init__(self, components={"x": 0, "y": 1, "z": 2})
-        self.components = components
+        self.components = components if components else ["x", "y", "z"]
 
         Observable.__init__(self, atoms_slice)
 

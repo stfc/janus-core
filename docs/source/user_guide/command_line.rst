@@ -332,6 +332,33 @@ will compute the RDFs for ``Na`` and ``Cl`` atoms. Seperately for each paring, u
 
 The RDF is also computed from the trajectory file and the options ``rdf_start``, ``rdf_stop``, and ``rdf_step`` may be used to control which trajectory frames are utilised.
 
+On-the-fly Processing
++++++++++++++++++++++
+
+Alongside post-processing, correlations may be calculated during MD. This means that, for example, the VAF may be computed without storing trajectory data. To compute the VAF at runtime the following options can be passed:
+
+.. code-block:: bash
+
+   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'correlation_frequency': 2}}"
+
+This would result in the file ```janus_results/NaCl-nve-T300.0-cor.dat``` containing the combined VAF for Na and Cl atoms correlated every other step, meaning 50 correlation lag times.
+
+The option ``a`` specifies the Observable to be correlated. Possible values are ``Velocity``, ``Stress``, ``StressHydrostatic``, and ``StressShear``. The latter two stresses combine the diagonal and off-diagonal components of the stress tensor. When ``b`` is not specified it is set to a copy of ``a`` to form an auto-correlation.
+
+Correlation observables may also specify their own keyword arguments. For example to specify the components of stress to correlated over (with the correlations averaged) the following options may be passed:
+
+.. code-block:: bash
+
+   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --correlation-kwargs "{'saf': {'a': 'Stress', 'points': 100, 'a_kwargs': {'components': ['xy', 'yz', 'zx']}}}"
+
+Resulting in the stress auto-correlation function :math:`\frac{1}{3}(\langle\sigma_{xy}\sigma_{xy}\rangle+\langle\sigma_{yz}\sigma_{yz}\rangle+\langle\sigma_{zx}\sigma_{zx}\rangle)`, calculated every step for 100 correlation lag times.
+
+The Velocity observable may also be computed over specific components (it defaults to all) and atom slices. To compute over odd indexed atoms (Na here) the following options may be passed:
+
+.. code-block:: bash
+
+   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'a_kwargs': {'atoms_slice': (0, None, 2)}}}"
+
 Heating
 -------
 

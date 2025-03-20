@@ -70,14 +70,20 @@ def test_md(ensemble):
     }
 
     results_dir = Path("./janus_results")
-    final_path = results_dir / f"{file_prefix[ensemble]}final.extxyz"
-    restart_path = results_dir / f"{file_prefix[ensemble]}res-2.extxyz"
-    stats_path = results_dir / f"{file_prefix[ensemble]}stats.dat"
-    traj_path = results_dir / f"{file_prefix[ensemble]}traj.extxyz"
-    rdf_path = results_dir / f"{file_prefix[ensemble]}rdf.dat"
-    vaf_path = results_dir / f"{file_prefix[ensemble]}vaf.dat"
-    log_path = results_dir / f"{file_prefix[ensemble]}md-log.yml"
-    summary_path = results_dir / f"{file_prefix[ensemble]}md-summary.yml"
+    output_files = {
+        key: results_dir / (file_prefix[ensemble] + name)
+        for key, name in [
+            ("final_structure", "final.extxyz"),
+            ("restarts", "res-2.extxyz"),
+            ("stats", "stats.dat"),
+            ("trajectory", "traj.extxyz"),
+            ("rdfs", "rdf.dat"),
+            ("vafs", "vaf.dat"),
+            ("correlations", "cor.dat"),
+            ("log", "md-log.yml"),
+            ("summary", "md-summary.yml"),
+        ]
+    }
 
     assert not results_dir.exists()
 
@@ -100,22 +106,22 @@ def test_md(ensemble):
                 2,
                 "--post-process-kwargs",
                 "{'rdf_compute': True, 'vaf_compute': True}",
+                "--correlation-kwargs",
+                (
+                    "{'vaf': {'a': 'Velocity', 'points': 10},"
+                    " 'vaf_x': {'a': 'Velocity', 'points': 10,"
+                    "'a_kwargs': {'components': ['x']}, 'b_kwargs': '.'}}"
+                ),
             ],
         )
 
         assert result.exit_code == 0
 
-        assert final_path.exists()
-        assert restart_path.exists()
-        assert stats_path.exists()
-        assert traj_path.exists()
-        assert rdf_path.exists()
-        assert vaf_path.exists()
-        assert log_path.exists()
-        assert summary_path.exists()
+        for file in output_files.values():
+            assert file.exists()
 
         # Check at least one image has been saved in trajectory
-        atoms = read(traj_path)
+        atoms = read(output_files["trajectory"])
         assert isinstance(atoms, Atoms)
         assert "energy" in atoms.calc.results
         assert "mace_mp_energy" in atoms.info
@@ -142,21 +148,13 @@ def test_md(ensemble):
             assert atoms.info["units"][prop] == units
 
         # Read summary
-        with open(summary_path, encoding="utf8") as file:
+        with open(output_files["summary"], encoding="utf8") as file:
             summary = yaml.safe_load(file)
 
-        output_files = {
-            "stats": stats_path,
-            "trajectory": traj_path,
-            "final_structure": final_path,
-            "restarts": [restart_path],
-            "minimized_initial_structure": None,
-            "rdfs": [rdf_path],
-            "vafs": [vaf_path],
-            "correlations": None,
-            "log": log_path,
-            "summary": summary_path,
-        }
+        for path in ("restarts", "rdfs", "vafs"):
+            output_files[path] = [output_files[path]]
+        output_files["minimized_initial_structure"] = None
+
         check_output_files(summary=summary, output_files=output_files)
 
     finally:

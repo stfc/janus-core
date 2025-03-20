@@ -113,6 +113,12 @@ def test_vaf(tmp_path):
                 "averaging": 1,
                 "update_frequency": 1,
             },
+            {
+                "a": Velocity(),
+                "b": Velocity(),
+                "points": 1,
+                "name": "vaf_default",
+            },
         ],
         write_kwargs={"invalidate_calc": False},
     )
@@ -132,6 +138,12 @@ def test_vaf(tmp_path):
     vaf_cl = np.array(vaf["vaf_Cl"]["value"])
     assert vaf_na * 3 == approx(vaf_post[1][0], rel=1e-5)
     assert vaf_cl * 3 == approx(vaf_post[1][1], rel=1e-5)
+
+    # Default arguments are equivalent to mean square velocities.
+    v = np.mean([np.mean(atoms.get_velocities() ** 2) for atoms in traj])
+    vaf_default = vaf["vaf_default"]
+    assert len(vaf_default["value"]) == 1
+    assert v == approx(vaf_default["value"][0], rel=1e-5)
 
 
 def test_md_correlations(tmp_path):

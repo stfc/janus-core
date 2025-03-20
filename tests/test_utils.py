@@ -8,7 +8,11 @@ from ase import Atoms
 from ase.io import read
 import pytest
 
-from janus_core.cli.utils import dict_paths_to_strs, dict_remove_hyphens
+from janus_core.cli.utils import (
+    dict_paths_to_strs,
+    dict_remove_hyphens,
+    parse_correlation_kwargs,
+)
 from janus_core.helpers.janus_types import SliceLike, StartStopStep
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.struct_io import output_structs
@@ -18,6 +22,7 @@ from janus_core.helpers.utils import (
     slicelike_to_startstopstep,
     validate_slicelike,
 )
+from janus_core.processing.observables import Stress, Velocity
 
 DATA_PATH = Path(__file__).parent / "data/NaCl.cif"
 MODEL_PATH = Path(__file__).parent / "models/mace_mp_small.model"
@@ -255,3 +260,96 @@ def test_invalid_slicelikes(slc):
     """Test validate_slicelike on invalid SliceLikes."""
     with pytest.raises(ValueError):
         validate_slicelike(slc)
+
+
+@pytest.mark.parametrize(
+    "kwargs, message",
+    [
+        ({"vaf": {"a": "Velocity"}}, "Correlation keyword argument 'points'"),
+        ({"vaf": {"points": 10}}, "At least one observable"),
+        (
+            {"vaf": {"points": 10, "a": "Velocity", "a_kwargs": ".", "b_kwargs": "."}},
+            "cannot 'ditto' each other",
+        ),
+        (
+            {"vaf": {"points": 10, "a": "Velocity", "a_kwarg": {}}},
+            "correlation_kwargs got unexpected argument",
+        ),
+    ],
+)
+def test_parse_correlation_kwargs_errors(kwargs, message):
+    """Test parsing of correlation CLI kwargs with ValueErrors."""
+    with pytest.raises(ValueError, match=message):
+        parse_correlation_kwargs(kwargs)
+
+
+def test_parse_correlation_kwargs_unsupported_observable():
+    """Test parsing of correlation CLI kwargs with a unsupported Observable."""
+    with pytest.raises(
+        AttributeError, match="'janus_core.processing.observables' has no attribute"
+    ):
+        parse_correlation_kwargs({"noa": {"a": "NOT_AN_OBSERVABLE", "points": 10}})
+
+
+def test_parse_correlation_kwargs():
+    """Test parsing correlation CLI kwargs."""
+    kwargs = {
+        "vaf": {"a": "Velocity", "points": 100, "b_kwargs": {"components": ["x"]}},
+        "vaf_ditto": {
+            "b": "Velocity",
+            "points": 314,
+            "a_kwargs": {"atoms_slice": slice(0, None, 2)},
+            "b_kwargs": ".",
+        },
+        "saf": {"a": "Stress", "points": 10, "a_kwargs": {"components": ["xy"]}},
+        "vcross": {
+            "a": "Velocity",
+            "b": "Velocity",
+            "points": 10,
+            "a_kwargs": {"components": ["x"]},
+        },
+        "vcross_ditto": {
+            "a": "Velocity",
+            "b": "Velocity",
+            "points": 10,
+            "a_kwargs": {"components": ["x"]},
+            "b_kwargs": ".",
+        },
+    }
+    parsed = parse_correlation_kwargs(kwargs)
+    assert len(parsed) == 5
+
+    assert parsed[0]["name"] == "vaf"
+    # b copies a.
+    assert type(parsed[0]["a"]) is type(parsed[0]["b"]) is Velocity
+    # a does not copy b's kwargs.
+    assert parsed[0]["a"].components == ["x", "y", "z"]
+    assert parsed[0]["b"].components == ["x"]
+    assert parsed[0]["points"] == 100
+
+    assert parsed[1]["name"] == "vaf_ditto"
+    # a copies b.
+    assert type(parsed[1]["a"]) is type(parsed[1]["b"]) is Velocity
+    assert parsed[1]["a"].components == parsed[1]["b"].components == ["x", "y", "z"]
+    # b copies a's kwargs
+    assert parsed[1]["a"].atoms_slice == parsed[1]["b"].atoms_slice == slice(0, None, 2)
+    assert parsed[1]["points"] == 314
+
+    assert parsed[2]["name"] == "saf"
+    # b copies a.
+    assert type(parsed[2]["a"]) is type(parsed[2]["b"]) is Stress
+    assert parsed[2]["points"] == 10
+    # b copies a's kwargs (same Observable type).
+    assert parsed[2]["a"].components == parsed[2]["b"].components == ["xy"]
+
+    assert parsed[3]["name"] == "vcross"
+    assert type(parsed[3]["a"]) is type(parsed[3]["b"]) is Velocity
+    assert parsed[3]["points"] == 10
+    assert parsed[3]["a"].components == ["x"]
+    # b's kwargs were not copied from a.
+    assert parsed[3]["b"].components == ["x", "y", "z"]
+
+    assert parsed[4]["name"] == "vcross_ditto"
+    assert type(parsed[4]["a"]) is type(parsed[4]["b"]) is Velocity
+    assert parsed[4]["points"] == 10
+    assert parsed[4]["a"].components == parsed[4]["b"].components == ["x"]

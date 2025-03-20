@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 from typing import Annotated, get_args
 
@@ -12,6 +13,7 @@ import yaml
 from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
+    CorrelationKwargs,
     Device,
     EnsembleKwargs,
     FilePrefix,
@@ -24,7 +26,7 @@ from janus_core.cli.types import (
     Summary,
     WriteKwargs,
 )
-from janus_core.cli.utils import yaml_converter_callback
+from janus_core.cli.utils import parse_correlation_kwargs, yaml_converter_callback
 
 app = Typer()
 
@@ -221,6 +223,7 @@ def md(
     ] = None,
     write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
+    correlation_kwargs: CorrelationKwargs = None,
     seed: Annotated[
         int | None,
         Option(help="Random seed for numpy.random and random functions."),
@@ -349,7 +352,9 @@ def md(
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
     post_process_kwargs
-        Kwargs to pass to post-processing.
+        Keyword arguments to pass to post-processing. Default is None.
+    correlation_kwargs
+        Keyword arguments to pass for on-the-fly correlations. Default is None.
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
@@ -379,7 +384,6 @@ def md(
 
     # Check options from configuration file are all valid
     check_config(ctx)
-
     [
         read_kwargs,
         calc_kwargs,
@@ -387,6 +391,7 @@ def md(
         ensemble_kwargs,
         write_kwargs,
         post_process_kwargs,
+        correlation_kwargs,
     ] = parse_typer_dicts(
         [
             read_kwargs,
@@ -395,6 +400,7 @@ def md(
             ensemble_kwargs,
             write_kwargs,
             post_process_kwargs,
+            correlation_kwargs,
         ]
     )
 
@@ -409,8 +415,13 @@ def md(
         "ensemble_kwargs": ensemble_kwargs.copy(),
         "write_kwargs": write_kwargs.copy(),
         "post_process_kwargs": post_process_kwargs.copy(),
+        "correlation_kwargs": deepcopy(correlation_kwargs),
     }
     config = get_config(params=ctx.params, all_kwargs=all_kwargs)
+
+    # Handle separately to process short-hands, and Observables.
+    if correlation_kwargs:
+        correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
 
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
@@ -482,6 +493,7 @@ def md(
         "temp_time": temp_time,
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
+        "correlation_kwargs": correlation_kwargs,
         "seed": seed,
     }
 
