@@ -35,6 +35,20 @@ Jupyter Notebook tutorials illustrating the use of currently available calculati
 - :doc:`Phonons </tutorials/phonons>` |phonons|
 - :doc:`Nudged Elastic Band </tutorials/neb>` |neb|
 
+These make use of `WEAS Widget <https://weas-widget.readthedocs.io/en/latest/index.html>`_ for visualisation,
+which can be installed using ``janus-core``'s ``visualise`` extra. For example:
+
+.. code-block:: bash
+
+    pip install janus-core[mace,visualise]
+
+or
+
+
+.. code-block:: bash
+
+    pip install janus-core[all]
+
 
 Calculation outputs
 ===================
