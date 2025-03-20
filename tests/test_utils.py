@@ -8,7 +8,6 @@ from ase import Atoms
 from ase.io import read
 import pytest
 
-from janus_core.cli.types import TyperDict
 from janus_core.cli.utils import (
     dict_paths_to_strs,
     dict_remove_hyphens,
@@ -281,7 +280,7 @@ def test_invalid_slicelikes(slc):
 def test_parse_correlation_kwargs_errors(kwargs, message):
     """Test parsing of correlation CLI kwargs with ValueErrors."""
     with pytest.raises(ValueError, match=message):
-        parse_correlation_kwargs(TyperDict(kwargs))
+        parse_correlation_kwargs(kwargs)
 
 
 def test_parse_correlation_kwargs_unsupported_observable():
@@ -289,9 +288,7 @@ def test_parse_correlation_kwargs_unsupported_observable():
     with pytest.raises(
         AttributeError, match="'janus_core.processing.observables' has no attribute"
     ):
-        parse_correlation_kwargs(
-            TyperDict({"noa": {"a": "NOT_AN_OBSERVABLE", "points": 10}})
-        )
+        parse_correlation_kwargs({"noa": {"a": "NOT_AN_OBSERVABLE", "points": 10}})
 
 
 def test_parse_correlation_kwargs():
@@ -319,7 +316,7 @@ def test_parse_correlation_kwargs():
             "b_kwargs": ".",
         },
     }
-    parsed = parse_correlation_kwargs(TyperDict(kwargs))
+    parsed = parse_correlation_kwargs(kwargs)
     assert len(parsed) == 5
 
     assert parsed[0]["name"] == "vaf"
