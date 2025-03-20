@@ -70,18 +70,18 @@ def test_md(ensemble):
     }
 
     results_dir = Path("./janus_results")
-    paths = {
+    output_files = {
         key: results_dir / (file_prefix[ensemble] + name)
         for key, name in [
-            ("final", "final.extxyz"),
-            ("res-2", "res-2.extxyz"),
+            ("final_structure", "final.extxyz"),
+            ("restarts", "res-2.extxyz"),
             ("stats", "stats.dat"),
-            ("traj", "traj.extxyz"),
-            ("rdf", "rdf.dat"),
-            ("vaf", "vaf.dat"),
-            ("cor", "cor.dat"),
-            ("md-log", "md-log.yml"),
-            ("md-summary", "md-summary.yml"),
+            ("trajectory", "traj.extxyz"),
+            ("rdfs", "rdf.dat"),
+            ("vafs", "vaf.dat"),
+            ("correlations", "cor.dat"),
+            ("log", "md-log.yml"),
+            ("summary", "md-summary.yml"),
         ]
     }
 
@@ -117,11 +117,11 @@ def test_md(ensemble):
 
         assert result.exit_code == 0
 
-        for file in paths.values():
+        for file in output_files.values():
             assert file.exists()
 
         # Check at least one image has been saved in trajectory
-        atoms = read(paths["traj"])
+        atoms = read(output_files["trajectory"])
         assert isinstance(atoms, Atoms)
         assert "energy" in atoms.calc.results
         assert "mace_mp_energy" in atoms.info
@@ -148,21 +148,13 @@ def test_md(ensemble):
             assert atoms.info["units"][prop] == units
 
         # Read summary
-        with open(summary_path, encoding="utf8") as file:
+        with open(output_files["summary"], encoding="utf8") as file:
             summary = yaml.safe_load(file)
 
-        output_files = {
-            "stats": stats_path,
-            "trajectory": traj_path,
-            "final_structure": final_path,
-            "restarts": [restart_path],
-            "minimized_initial_structure": None,
-            "rdfs": [rdf_path],
-            "vafs": [vaf_path],
-            "correlations": None,
-            "log": log_path,
-            "summary": summary_path,
-        }
+        for path in ("restarts", "rdfs", "vafs"):
+            output_files[path] = [output_files[path]]
+        output_files["minimized_initial_structure"] = None
+
         check_output_files(summary=summary, output_files=output_files)
 
     finally:
