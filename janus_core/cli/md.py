@@ -412,7 +412,7 @@ def md(
         "ensemble_kwargs": ensemble_kwargs.copy(),
         "write_kwargs": write_kwargs.copy(),
         "post_process_kwargs": post_process_kwargs.copy(),
-        "correlation_kwargs": correlation_kwargs.value.copy(),
+        "correlation_kwargs": correlation_kwargs.copy(),
     }
     config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
