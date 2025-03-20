@@ -266,11 +266,15 @@ def test_invalid_slicelikes(slc):
 @pytest.mark.parametrize(
     "kwargs, message",
     [
-        ({"vaf": {"a": "Velocity"}}, "Correlation keyword argument points"),
+        ({"vaf": {"a": "Velocity"}}, "Correlation keyword argument 'points'"),
         ({"vaf": {"points": 10}}, "At least one observable"),
         (
             {"vaf": {"points": 10, "a": "Velocity", "a_kwargs": ".", "b_kwargs": "."}},
             "cannot 'ditto' each other",
+        ),
+        (
+            {"vaf": {"points": 10, "a": "Velocity", "a_kwarg": {}}},
+            "correlation_kwargs got unexpected argument",
         ),
     ],
 )

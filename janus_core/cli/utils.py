@@ -343,6 +343,22 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
     """
     parsed_kwargs = []
     for name, cli_kwargs in kwargs.value.items():
+        arguments = {
+            "blocks",
+            "points",
+            "averaging",
+            "update_frequency",
+            "a_kwargs",
+            "b_kwargs",
+            "a",
+            "b",
+        }
+        if not (set(cli_kwargs.keys()) <= arguments):
+            raise ValueError(
+                "correlation_kwargs got unexpected argument(s)"
+                f"{set(cli_kwargs.keys()).difference(arguments)}"
+            )
+
         if "a" not in cli_kwargs and "b" not in cli_kwargs:
             raise ValueError("At least one observable must be supplied as 'a' or 'b'")
 

@@ -401,10 +401,6 @@ def md(
         ]
     )
 
-    # Handle separately to process short-hands, and Observables.
-    if correlation_kwargs:
-        correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
-
     if ensemble not in get_args(Ensembles):
         raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
 
@@ -416,8 +412,13 @@ def md(
         "ensemble_kwargs": ensemble_kwargs.copy(),
         "write_kwargs": write_kwargs.copy(),
         "post_process_kwargs": post_process_kwargs.copy(),
+        "correlation_kwargs": correlation_kwargs.value.copy(),
     }
     config = get_config(params=ctx.params, all_kwargs=all_kwargs)
+
+    # Handle separately to process short-hands, and Observables.
+    if correlation_kwargs:
+        correlation_kwargs = parse_correlation_kwargs(correlation_kwargs)
 
     # Read only first structure by default and ensure only one image is read
     set_read_kwargs_index(read_kwargs)
