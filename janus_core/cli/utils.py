@@ -342,7 +342,7 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
     from janus_core.processing import observables
 
     parsed_kwargs = []
-    for name, cli_kwargs in kwargs.value.items():
+    for name, cli_kwargs in kwargs.items():
         arguments = {
             "blocks",
             "points",

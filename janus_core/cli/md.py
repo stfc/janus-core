@@ -390,6 +390,7 @@ def md(
         ensemble_kwargs,
         write_kwargs,
         post_process_kwargs,
+        correlation_kwargs,
     ] = parse_typer_dicts(
         [
             read_kwargs,
@@ -398,6 +399,7 @@ def md(
             ensemble_kwargs,
             write_kwargs,
             post_process_kwargs,
+            correlation_kwargs,
         ]
     )
 
