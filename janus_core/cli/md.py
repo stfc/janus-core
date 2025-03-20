@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 from typing import Annotated, get_args
 
@@ -414,7 +415,7 @@ def md(
         "ensemble_kwargs": ensemble_kwargs.copy(),
         "write_kwargs": write_kwargs.copy(),
         "post_process_kwargs": post_process_kwargs.copy(),
-        "correlation_kwargs": correlation_kwargs.copy(),
+        "correlation_kwargs": deepcopy(correlation_kwargs),
     }
     config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
