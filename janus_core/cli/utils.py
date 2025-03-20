@@ -24,8 +24,6 @@ if TYPE_CHECKING:
         PathLike,
     )
 
-from janus_core.processing import observables
-
 
 def dict_paths_to_strs(dictionary: dict) -> None:
     """
@@ -341,6 +339,8 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
     list[dict]
         The parsed correlation_kwargs for md.
     """
+    from janus_core.processing import observables
+
     parsed_kwargs = []
     for name, cli_kwargs in kwargs.value.items():
         arguments = {
