@@ -335,7 +335,7 @@ The RDF is also computed from the trajectory file and the options ``rdf_start``,
 On-the-fly Processing
 +++++++++++++++++++++
 
-Alongside post-processing correlations may be calculate during MD. This means that, for example, the VAF may be computed without storing trajectory data. To compute the VAF at runtime the following options can be passed:
+Alongside post-processing, correlations may be calculated during MD. This means that, for example, the VAF may be computed without storing trajectory data. To compute the VAF at runtime the following options can be passed:
 
 .. code-block:: bash
 

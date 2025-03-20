@@ -347,7 +347,7 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
             raise ValueError("At least one observable must be supplied as 'a' or 'b'")
 
         if "points" not in cli_kwargs:
-            raise ValueError("Correlation keyword argument points must be specified")
+            raise ValueError("Correlation keyword argument 'points' must be specified")
 
         # Accept an Observable to be replicated.
         if "b" not in cli_kwargs:
