@@ -70,6 +70,7 @@ all = [
     "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[sevennet]",
+    "janus-core[visualise]",
 ]
 
 # MLIP with updated e3nn
