@@ -7,6 +7,7 @@ from typing import Annotated, get_args
 
 from typer import Context, Option, Typer
 from typer_config import use_config
+import yaml
 
 from janus_core.cli.types import (
     Architecture,
@@ -26,6 +27,28 @@ from janus_core.cli.types import (
 from janus_core.cli.utils import yaml_converter_callback
 
 app = Typer()
+
+
+def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
+    """
+    Update restart files with final list.
+
+    Parameters
+    ----------
+    summary
+        Path to summary file.
+    restart_files
+        Restart files generated.
+    """
+    with open(summary, encoding="utf8") as file:
+        summary_info = yaml.safe_load(file)
+
+    summary_info["output_files"]["restarts"] = (
+        [str(file) for file in restart_files] if restart_files else None
+    )
+
+    with open(summary, "w", encoding="utf8") as outfile:
+        yaml.dump(summary_info, outfile, default_flow_style=False)
 
 
 @app.command()
@@ -551,23 +574,31 @@ def md(
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
 
     # Set summary and log files
-    summary = dyn._build_filename(
-        "md-summary.yml", dyn.param_prefix, filename=summary
-    ).absolute()
+    summary = dyn._build_filename("md-summary.yml", dyn.param_prefix, filename=summary)
     log = dyn.log_kwargs["filename"]
 
-    # Store inputs for yaml summary
-    # Add structure, MLIP information, and log to inputs
+    # Add structure, MLIP information, and log to info
     info = get_struct_info(
         struct=dyn.struct,
         struct_path=struct,
     )
 
-    # Save summary information before calculation begins
-    start_summary(command="md", summary=summary, config=config, info=info)
+    output_files = dyn.output_files
+
+    # Save summary information before simulation begins
+    start_summary(
+        command="md",
+        summary=summary,
+        info=info,
+        config=config,
+        output_files=output_files,
+    )
 
     # Run molecular dynamics
     dyn.run()
+
+    # Replace empty list with final restart files
+    _update_restart_files(summary=summary, restart_files=dyn.restart_files)
 
     # Save carbon summary
     if tracker:

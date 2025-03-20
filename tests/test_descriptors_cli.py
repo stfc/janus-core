@@ -11,7 +11,12 @@ from typer.testing import CliRunner
 import yaml
 
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    check_output_files,
+    clear_log_handlers,
+    strip_ansi_codes,
+)
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -83,6 +88,13 @@ def test_descriptors():
 
         assert "emissions" in descriptors_summary
         assert descriptors_summary["emissions"] > 0
+
+        output_files = {
+            "results": out_path,
+            "log": log_path,
+            "summary": summary_path,
+        }
+        check_output_files(descriptors_summary, output_files)
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)

@@ -85,12 +85,20 @@ def train(
         "summary": summary,
     }
 
-    # Save summary information before training begins
-    start_summary(command="train", summary=summary, config=config, info={})
-
     log_kwargs = {"filemode": "w"}
     if log:
         log_kwargs["filename"] = log
+
+    output_files = {"log": log.absolute()}
+
+    # Save summary information before training begins
+    start_summary(
+        command="train",
+        summary=summary,
+        info={},
+        config=config,
+        output_files=output_files,
+    )
 
     # Run training
     run_train(

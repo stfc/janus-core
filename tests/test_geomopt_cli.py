@@ -14,6 +14,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    check_output_files,
     clear_log_handlers,
     read_atoms,
     strip_ansi_codes,
@@ -101,7 +102,7 @@ def test_log(tmp_path):
 def test_traj(tmp_path):
     """Test trajectory correctly written for geomopt."""
     results_path = tmp_path / "NaCl-opt.extxyz"
-    traj_path = f"{tmp_path}/test.extxyz"
+    traj_path = tmp_path / "test.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -127,6 +128,18 @@ def test_traj(tmp_path):
     assert "mace_mp_forces" in atoms.arrays
     assert "system_name" in atoms.info
     assert atoms.info["system_name"] == "NaCl"
+
+    # Read geomopt summary file
+    with open(summary_path, encoding="utf8") as file:
+        geomopt_summary = yaml.safe_load(file)
+
+    output_files = {
+        "optimized_structure": results_path,
+        "log": log_path,
+        "summary": summary_path,
+        "trajectory": traj_path,
+    }
+    check_output_files(geomopt_summary, output_files)
 
 
 def test_opt_fully(tmp_path):
@@ -266,8 +279,8 @@ def test_scalar_pressure(option, tmp_path):
     assert_log_contains(log_path, includes=["scalar_pressure: 0.01 GPa"])
 
 
-def test_duplicate_traj(tmp_path):
-    """Test trajectory file cannot be not passed via traj_kwargs."""
+def test_opt_kwargs_traj(tmp_path):
+    """Test trajectory file cannot be not passed via opt_kwargs."""
     traj_path = tmp_path / "NaCl-traj.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -388,6 +401,14 @@ def test_summary(tmp_path):
 
     assert "emissions" in geomopt_summary
     assert geomopt_summary["emissions"] > 0
+
+    output_files = {
+        "optimized_structure": results_path,
+        "log": log_path,
+        "summary": summary_path,
+        "trajectory": None,
+    }
+    check_output_files(geomopt_summary, output_files)
 
 
 def test_config(tmp_path):
@@ -814,4 +835,4 @@ def test_traj_kwargs_no_write(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
-    assert "trajectory writing not enabled." in result.exception.args[0]
+    assert "trajectory writing not enabled" in result.exception.args[0]

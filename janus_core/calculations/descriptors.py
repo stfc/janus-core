@@ -183,10 +183,24 @@ class Descriptors(BaseCalculation):
                 check_calculator(image.calc, "get_descriptors")
 
         # Set output file
-        self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
-            "descriptors.extxyz", filename=self.write_kwargs["filename"]
-        ).absolute()
+            "descriptors.extxyz", filename=self.write_kwargs.get("filename")
+        )
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "results": self.write_kwargs["filename"] if self.write_results else None,
+        }
 
     def run(self) -> None:
         """Calculate descriptors for structure(s)."""

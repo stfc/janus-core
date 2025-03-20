@@ -15,7 +15,12 @@ import yaml
 
 from janus_core.cli.janus import app
 from janus_core.helpers.stats import Stats
-from tests.utils import assert_log_contains, clear_log_handlers, strip_ansi_codes
+from tests.utils import (
+    assert_log_contains,
+    check_output_files,
+    clear_log_handlers,
+    strip_ansi_codes,
+)
 
 if hasattr(ase.md.nose_hoover_chain, "IsotropicMTKNPT"):
     MTK_IMPORT_FAILED = False
@@ -135,6 +140,24 @@ def test_md(ensemble):
         assert "units" in atoms.info
         for prop, units in expected_units.items():
             assert atoms.info["units"][prop] == units
+
+        # Read summary
+        with open(summary_path, encoding="utf8") as file:
+            summary = yaml.safe_load(file)
+
+        output_files = {
+            "stats": stats_path,
+            "trajectory": traj_path,
+            "final_structure": final_path,
+            "restarts": [restart_path],
+            "minimized_initial_structure": None,
+            "rdfs": [rdf_path],
+            "vafs": [vaf_path],
+            "correlations": None,
+            "log": log_path,
+            "summary": summary_path,
+        }
+        check_output_files(summary=summary, output_files=output_files)
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
@@ -258,8 +281,12 @@ def test_seed(tmp_path):
 
 def test_summary(tmp_path):
     """Test summary file can be read correctly."""
-    file_prefix = tmp_path / "nvt"
-    summary_path = tmp_path / "nvt-md-summary.yml"
+    file_prefix = tmp_path / "nve"
+    stats_path = tmp_path / "nve-stats.dat"
+    traj_path = tmp_path / "nve-traj.extxyz"
+    final_path = tmp_path / "nve-final.extxyz"
+    log_path = tmp_path / "nve-md-log.yml"
+    summary_path = tmp_path / "nve-md-summary.yml"
 
     result = runner.invoke(
         app,
@@ -298,9 +325,23 @@ def test_summary(tmp_path):
     assert "emissions" in summary
     assert summary["emissions"] > 0
 
+    output_files = {
+        "stats": stats_path,
+        "trajectory": traj_path,
+        "final_structure": final_path,
+        "restarts": None,
+        "minimized_initial_structure": None,
+        "rdfs": None,
+        "vafs": None,
+        "correlations": None,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(summary=summary, output_files=output_files)
+
 
 def test_config(tmp_path):
-    """Test passing a config file with ."""
+    """Test passing a config file."""
     file_prefix = tmp_path / "nvt"
     log_path = tmp_path / "nvt-md-log.yml"
     summary_path = tmp_path / "nvt-md-summary.yml"
@@ -613,6 +654,8 @@ def test_minimize_kwargs_filename(tmp_path):
     traj_path = tmp_path / "test" / "md-traj.extxyz"
     stats_path = tmp_path / "test" / "md-stats.dat"
     final_path = tmp_path / "test" / "md-final.extxyz"
+    log_path = tmp_path / "test" / "md-md-log.yml"
+    summary_path = tmp_path / "test" / "md-md-summary.yml"
 
     result = runner.invoke(
         app,
@@ -644,6 +687,24 @@ def test_minimize_kwargs_filename(tmp_path):
 
     atoms = read(opt_path)
     assert isinstance(atoms, Atoms)
+
+    # Read summary
+    with open(summary_path, encoding="utf8") as file:
+        summary = yaml.safe_load(file)
+
+    output_files = {
+        "stats": stats_path,
+        "trajectory": traj_path,
+        "final_structure": final_path,
+        "restarts": None,
+        "minimized_initial_structure": opt_path,
+        "rdfs": None,
+        "vafs": None,
+        "correlations": None,
+        "log": log_path,
+        "summary": summary_path,
+    }
+    check_output_files(summary=summary, output_files=output_files)
 
 
 def test_minimize_kwargs_write_results(tmp_path):

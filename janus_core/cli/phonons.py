@@ -340,17 +340,25 @@ def phonons(
     phonon = Phonons(**phonons_kwargs)
 
     # Set summary and log files
-    summary = phonon._build_filename("phonons-summary.yml", filename=summary).absolute()
+    summary = phonon._build_filename("phonons-summary.yml", filename=summary)
     log = phonon.log_kwargs["filename"]
 
-    # Add structure, MLIP information, and log to inputs
+    # Add structure, MLIP information, and log to info
     info = get_struct_info(
         struct=phonon.struct,
         struct_path=struct,
     )
 
-    # Save summary information before calculation begins
-    start_summary(command="phonons", summary=summary, config=config, info=info)
+    output_files = phonon.output_files
+
+    # Save summary information before calculations begin
+    start_summary(
+        command="phonons",
+        summary=summary,
+        info=info,
+        config=config,
+        output_files=output_files,
+    )
 
     # Run phonon calculations
     phonon.run()

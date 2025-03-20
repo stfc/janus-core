@@ -233,24 +233,52 @@ class GeomOpt(BaseCalculation):
             raise ValueError("Please attach a calculator to `struct`.")
 
         # Set output files
-        self.write_kwargs.setdefault("filename", None)
         self.write_kwargs["filename"] = self._build_filename(
-            "opt.extxyz", filename=self.write_kwargs["filename"]
-        ).absolute()
+            "opt.extxyz", filename=self.write_kwargs.get("filename")
+        )
 
         if self.write_traj:
+            if "trajectory" in self.opt_kwargs:
+                raise ValueError(
+                    "Please use traj_kwargs['filename'] to save the trajectory"
+                )
+
             self.traj_kwargs.setdefault(
                 "filename", self._build_filename("traj.extxyz").absolute()
             )
-            self.opt_kwargs.setdefault("trajectory", str(self.traj_kwargs["filename"]))
+            self.opt_kwargs["trajectory"] = str(self.traj_kwargs["filename"])
+
         elif self.traj_kwargs:
-            raise ValueError("traj_kwargs given, but trajectory writing not enabled.")
+            raise ValueError(
+                "traj_kwargs given, but trajectory writing not enabled via write_traj."
+            )
+
         elif "trajectory" in self.opt_kwargs:
             raise ValueError(
-                '"trajectory" given in opt_kwargs,but trajectory writing not enabled.'
+                "Please use write_traj, and optionally traj_kwargs['filename'] to "
+                "save the trajectory"
             )
+
         # Configure optimizer dynamics
         self.set_optimizer()
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "optimized_structure": self.write_kwargs["filename"]
+            if self.write_results
+            else None,
+            "trajectory": self.traj_kwargs.get("filename"),
+        }
 
     def set_optimizer(self) -> None:
         """Set optimizer for geometry optimization."""

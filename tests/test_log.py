@@ -36,9 +36,6 @@ def test_multiline_log(tmp_path):
 
 def test_tracker(tmp_path):
     """Test tracker can be correctly set up."""
-    from pathlib import Path
-
-    tmp_path = Path(".")
     log_path = tmp_path / "test.log"
 
     logger = config_logger(name=__name__, filename=log_path)

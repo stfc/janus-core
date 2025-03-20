@@ -145,3 +145,33 @@ def skip_extras(arch: str):
             pytest.importorskip("alignn.ff.ff")
         case "m3gnet":
             pytest.importorskip("matgl")
+
+
+def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
+    """
+    Check output files in summary match expected and created files.
+
+    Parameters
+    ----------
+    summary
+        Path to summary file with outputs from calculation class.
+    output_files
+        Expected output files to compare with summary.
+    """
+    assert "output_files" in summary
+
+    for key, value in output_files.items():
+        output_file = summary["output_files"][key]
+        if isinstance(value, list):
+            for file in value:
+                assert file.exists(), f"{file} missing"
+
+                assert str(file.absolute()) in output_file, (
+                    f"{file} is inconsistent with {output_file}"
+                )
+        else:
+            assert value.exists() if value else True, f"{value} missing"
+
+            assert output_file == (str(value.absolute()) if value else None), (
+                f"{value} is inconsistent with {output_file}"
+            )

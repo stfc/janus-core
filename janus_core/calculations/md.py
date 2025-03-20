@@ -486,22 +486,22 @@ class MolecularDynamics(BaseCalculation):
 
         self.write_kwargs.setdefault("columns", default_columns)
 
+        # Use MD logger for geometry optimization
+        set_minimize_logging(
+            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
+        )
+
         if "write_kwargs" in self.minimize_kwargs:
             # Use _build_filename even if given filename to ensure directory exists
-            self.minimize_kwargs["write_kwargs"].setdefault("filename", None)
             self.minimize_kwargs["write_kwargs"]["filename"] = self._build_filename(
-                "", filename=self.minimize_kwargs["write_kwargs"]["filename"]
-            ).absolute()
+                "", filename=self.minimize_kwargs["write_kwargs"].get("filename")
+            )
 
             # Assume if write_kwargs are specified that results should be written
             self.minimize_kwargs.setdefault("write_results", True)
         else:
             self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
-
-        # Use MD logger for geometry optimization
-        set_minimize_logging(
-            self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
-        )
+            self.minimize_kwargs.setdefault("write_results", False)
 
         self.dyn: Langevin | VelocityVerlet | ASE_NPT
         self.n_atoms = len(self.struct)
@@ -520,6 +520,40 @@ class MolecularDynamics(BaseCalculation):
             random.seed(seed)
 
         self._parse_correlations()
+
+    @property
+    def output_files(self) -> None:
+        """
+        Dictionary of output file labels and paths.
+
+        Returns
+        -------
+        dict[str, PathLike]
+            Output file labels and paths.
+        """
+        return {
+            "log": self.log_kwargs["filename"] if self.logger else None,
+            "stats": self.stats_file,
+            "trajectory": self.traj_file,
+            "final_structure": self.final_file,
+            "restarts": self.restart_files if self.restart_files else None,
+            "correlations": (self._correlations_file if self._correlations else None),
+            "minimized_initial_structure": (
+                self.minimize_kwargs["write_kwargs"]["filename"]
+                if self.minimize_kwargs["write_results"]
+                else None
+            ),
+            "rdfs": (
+                self._rdf_files
+                if self.post_process_kwargs.get("rdf_compute", False)
+                else None
+            ),
+            "vafs": (
+                self._vaf_files
+                if self.post_process_kwargs.get("vaf_compute", False)
+                else None
+            ),
+        }
 
     def _set_info(self) -> None:
         """Set time in fs, current dynamics step, density, and temperature to info."""
@@ -710,6 +744,82 @@ class MolecularDynamics(BaseCalculation):
             f"{step}.extxyz", prefix_override=self._restart_stem
         )
 
+    @property
+    def _correlations_file(self) -> str:
+        """
+        Define correlations file name.
+
+        Returns
+        -------
+        str
+           File name for correlations files.
+        """
+        return self._build_filename("cor.dat", self.param_prefix)
+
+    @property
+    def _rdf_files(self) -> tuple[Path]:
+        """
+        Get RDF filenames.
+
+        Returns
+        -------
+        str
+           Filenames for RDF file.
+        """
+        base_name = self.post_process_kwargs.get("rdf_output_file", None)
+        rdf_args = {
+            name: self.post_process_kwargs.get(key, default)
+            for name, (key, default) in (
+                ("elements", ("rdf_elements", None)),
+                ("by_elements", ("rdf_by_elements", False)),
+            )
+        }
+
+        if rdf_args["by_elements"]:
+            elements = (
+                tuple(sorted(set(self.struct.get_chemical_symbols())))
+                if rdf_args["elements"] is None
+                else rdf_args["elements"]
+            )
+
+            out_paths = tuple(
+                self._build_filename(
+                    "rdf.dat",
+                    self.param_prefix,
+                    "_".join(element),
+                    prefix_override=base_name,
+                )
+                for element in combinations_with_replacement(elements, 2)
+            )
+
+        else:
+            out_paths = (
+                self._build_filename(
+                    "rdf.dat", self.param_prefix, prefix_override=base_name
+                ),
+            )
+
+        return out_paths
+
+    @property
+    def _vaf_files(self) -> str:
+        """
+        Define VAF filenames.
+
+        Returns
+        -------
+        str
+           Filenames for VAF files.
+        """
+        file_names = self.post_process_kwargs.get("vaf_output_files", None)
+        if not isinstance(file_names, Sequence):
+            file_names = (file_names,)
+
+        return tuple(
+            self._build_filename("vaf.dat", self.param_prefix, filename=file_name)
+            for file_name in file_names
+        )
+
     def _parse_correlations(self) -> None:
         """Parse correlation kwargs into Correlations."""
         if self.correlation_kwargs:
@@ -728,9 +838,8 @@ class MolecularDynamics(BaseCalculation):
     def _write_correlations(self) -> None:
         """Write out the correlations."""
         if self._correlations:
-            corr_file = self._build_filename("cor.dat", self.param_prefix)
-            build_file_dir(corr_file)
-            with open(corr_file, "w", encoding="utf-8") as out_file:
+            build_file_dir(self._correlations_file)
+            with open(self._correlations_file, "w", encoding="utf-8") as out_file:
                 data = {}
                 for cor in self._correlations:
                     value, lags = cor.get()
@@ -961,7 +1070,6 @@ class MolecularDynamics(BaseCalculation):
         ana = Analysis(data)
 
         if self.post_process_kwargs.get("rdf_compute", False):
-            base_name = self.post_process_kwargs.get("rdf_output_file", None)
             rdf_args = {
                 name: self.post_process_kwargs.get(key, default)
                 for name, (key, default) in (
@@ -978,44 +1086,11 @@ class MolecularDynamics(BaseCalculation):
             )
             rdf_args["index"] = slice_
 
-            if rdf_args["by_elements"]:
-                elements = (
-                    tuple(sorted(set(data[0].get_chemical_symbols())))
-                    if rdf_args["elements"] is None
-                    else rdf_args["elements"]
-                )
-
-                out_paths = [
-                    self._build_filename(
-                        "rdf.dat",
-                        self.param_prefix,
-                        "_".join(element),
-                        prefix_override=base_name,
-                    )
-                    for element in combinations_with_replacement(elements, 2)
-                ]
-
-            else:
-                out_paths = [
-                    self._build_filename(
-                        "rdf.dat", self.param_prefix, prefix_override=base_name
-                    )
-                ]
-
-            compute_rdf(data, ana, filenames=out_paths, **rdf_args)
+            compute_rdf(data, ana, filenames=self._rdf_files, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
-            file_names = self.post_process_kwargs.get("vaf_output_files", None)
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
             fft = self.post_process_kwargs.get("vaf_fft", False)
-
-            if not isinstance(file_names, Sequence):
-                file_names = (file_names,)
-
-            out_paths = tuple(
-                self._build_filename("vaf.dat", self.param_prefix, filename=file_name)
-                for file_name in file_names
-            )
 
             slice_ = (
                 self.post_process_kwargs.get("vaf_start", 0),
@@ -1025,7 +1100,7 @@ class MolecularDynamics(BaseCalculation):
 
             compute_vaf(
                 data,
-                out_paths,
+                self._vaf_files,
                 use_velocities=use_vel,
                 fft=fft,
                 index=slice_,
@@ -1046,8 +1121,8 @@ class MolecularDynamics(BaseCalculation):
                 write_results=True,
                 write_kwargs=write_kwargs,
             )
+            self.restart_files.append(self._restart_file)
             if self.rotate_restart:
-                self.restart_files.append(self._restart_file)
                 self._rotate_restart_files()
 
     def _set_target_temperature(self, temperature: float):

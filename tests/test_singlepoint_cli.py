@@ -13,6 +13,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    check_output_files,
     clear_log_handlers,
     read_atoms,
     strip_ansi_codes,
@@ -261,6 +262,14 @@ def test_summary(tmp_path):
 
     assert "emissions" in sp_summary
     assert sp_summary["emissions"] > 0
+
+    output_files = {
+        "results": results_path,
+        "log": log_path,
+        "summary": summary_path,
+    }
+
+    check_output_files(summary=sp_summary, output_files=output_files)
 
 
 def test_config(tmp_path):
