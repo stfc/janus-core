@@ -47,7 +47,7 @@ dpa3 = [
     "deepmd-kit",
 ]
 mace = [
-    "mace-torch==0.3.10",
+    "mace-torch==0.3.12",
     "torch-dftd==0.4.0",
 ]
 nequip = [
