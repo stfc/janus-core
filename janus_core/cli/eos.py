@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated, get_args
 
+from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -21,6 +22,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
+from janus_core.helpers.janus_types import EoSNames
 
 app = Typer()
 
@@ -35,7 +37,11 @@ def eos(
     max_volume: Annotated[float, Option(help="Maximum volume scale factor.")] = 1.05,
     n_volumes: Annotated[int, Option(help="Number of volumes.")] = 7,
     eos_type: Annotated[
-        str, Option(help="Type of fit for equation of state.")
+        str,
+        Option(
+            click_type=Choice(get_args(EoSNames)),
+            help="Type of fit for equation of state.",
+        ),
     ] = "birchmurnaghan",
     minimize: Annotated[
         bool, Option(help="Whether to minimize initial structure before calculations.")
@@ -140,7 +146,6 @@ def eos(
         set_read_kwargs_index,
         start_summary,
     )
-    from janus_core.helpers.janus_types import EoSNames
 
     # Check options from configuration file are all valid
     check_config(ctx)
@@ -148,9 +153,6 @@ def eos(
     [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, minimize_kwargs, write_kwargs]
     )
-
-    if eos_type not in get_args(EoSNames):
-        raise ValueError(f"Fit type must be one of: {get_args(EoSNames)}")
 
     # Set initial config
     all_kwargs = {

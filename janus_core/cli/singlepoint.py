@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, get_args
 
+from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -21,6 +22,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
+from janus_core.helpers.janus_types import Properties
 
 app = Typer()
 
@@ -37,6 +39,7 @@ def singlepoint(
     properties: Annotated[
         list[str] | None,
         Option(
+            click_type=Choice(get_args(Properties)),
             help=(
                 "Properties to calculate. If not specified, 'energy', 'forces' "
                 "and 'stress' will be returned."

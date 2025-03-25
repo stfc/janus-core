@@ -6,6 +6,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Annotated, get_args
 
+from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 import yaml
@@ -27,6 +28,7 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import parse_correlation_kwargs, yaml_converter_callback
+from janus_core.helpers.janus_types import Ensembles
 
 app = Typer()
 
@@ -58,7 +60,13 @@ def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
 def md(
     # numpydoc ignore=PR02
     ctx: Context,
-    ensemble: Annotated[str, Option(help="Name of thermodynamic ensemble.")],
+    ensemble: Annotated[
+        str,
+        Option(
+            click_type=Choice(get_args(Ensembles)),
+            help="Name of thermodynamic ensemble.",
+        ),
+    ],
     struct: StructPath,
     steps: Annotated[int, Option(help="Number of steps in simulation.")] = 0,
     timestep: Annotated[float, Option(help="Timestep for integrator, in fs.")] = 1.0,
@@ -380,7 +388,6 @@ def md(
         set_read_kwargs_index,
         start_summary,
     )
-    from janus_core.helpers.janus_types import Ensembles
 
     # Check options from configuration file are all valid
     check_config(ctx)
@@ -403,9 +410,6 @@ def md(
             correlation_kwargs,
         ]
     )
-
-    if ensemble not in get_args(Ensembles):
-        raise ValueError(f"ensemble must be in {get_args(Ensembles)}")
 
     # Set initial config
     all_kwargs = {

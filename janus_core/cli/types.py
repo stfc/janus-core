@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, get_args
 
+from click import Choice
 from typer import Option
+
+from janus_core.helpers.janus_types import Architectures, Devices
 
 if TYPE_CHECKING:
     from janus_core.helpers.janus_types import ASEReadArgs
@@ -67,9 +70,19 @@ class TyperDict:
 StructPath = Annotated[Path, Option(help="Path of structure to simulate.")]
 
 Architecture = Annotated[
-    str | None, Option(help="MLIP architecture to use for calculations.")
+    str | None,
+    Option(
+        click_type=Choice(get_args(Architectures)),
+        help="MLIP architecture to use for calculations.",
+    ),
 ]
-Device = Annotated[str | None, Option(help="Device to run calculations on.")]
+Device = Annotated[
+    str | None,
+    Option(
+        click_type=Choice(get_args(Devices)),
+        help="Device to run calculations on.",
+    ),
+]
 ModelPath = Annotated[str | None, Option(help="Path to MLIP model.")]
 
 FilePrefix = Annotated[
