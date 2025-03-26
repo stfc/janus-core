@@ -74,6 +74,7 @@ Architecture = Annotated[
     Option(
         click_type=Choice(get_args(Architectures)),
         help="MLIP architecture to use for calculations.",
+        rich_help_panel="MLIP calculator",
     ),
 ]
 Device = Annotated[
@@ -81,9 +82,13 @@ Device = Annotated[
     Option(
         click_type=Choice(get_args(Devices)),
         help="Device to run calculations on.",
+        rich_help_panel="MLIP calculator",
     ),
 ]
-ModelPath = Annotated[str | None, Option(help="Path to MLIP model.")]
+ModelPath = Annotated[
+    str | None,
+    Option(help="Path to MLIP model.", rich_help_panel="MLIP calculator"),
+]
 
 FilePrefix = Annotated[
     Path | None,
@@ -328,7 +333,18 @@ CorrelationKwargs = Annotated[
 
 LogPath = Annotated[
     Path | None,
-    Option(help=("Path to save logs to. Default is inferred from `file_prefix`")),
+    Option(
+        help="Path to save logs to. Default is inferred from `file_prefix`",
+        rich_help_panel="Logging",
+    ),
+]
+
+Tracker = Annotated[
+    bool,
+    Option(
+        help="Whether to save carbon emissions of calculation",
+        rich_help_panel="Logging",
+    ),
 ]
 
 Summary = Annotated[
