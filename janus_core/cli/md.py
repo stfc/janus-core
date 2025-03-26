@@ -25,6 +25,7 @@ from janus_core.cli.types import (
     ReadKwargsLast,
     StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import parse_correlation_kwargs, yaml_converter_callback
@@ -237,9 +238,7 @@ def md(
         Option(help="Random seed for numpy.random and random functions."),
     ] = None,
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
