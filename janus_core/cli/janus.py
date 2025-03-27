@@ -51,11 +51,11 @@ app.command(
     rich_help_panel="Calculations",
 )(descriptors)
 app.command(
-    help="Running training for an MLIP.",
+    help="Train or fine-tune an MLIP.",
     rich_help_panel="Training",
 )(train)
 app.command(
-    help="Running preprocessing for an MLIP.",
+    help="Preprocess data before training.",
     rich_help_panel="Training",
 )(preprocess)
 
