@@ -8,31 +8,22 @@ from typing import Annotated
 from typer import Option, Typer
 import yaml
 
+from janus_core.cli.types import LogPath, Summary, Tracker
+
 app = Typer()
 
 
 @app.command()
 def train(
     mlip_config: Annotated[
-        Path, Option(help="Configuration file to pass to MLIP CLI.")
+        Path, Option(help="Configuration file to pass to MLIP CLI.", show_default=False)
     ],
     fine_tune: Annotated[
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
-    log: Annotated[Path, Option(help="Path to save logs to.")] = Path(
-        "./janus_results/train-log.yml"
-    ),
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
-    summary: Annotated[
-        Path,
-        Option(
-            help=(
-                "Path to save summary of inputs, start/end time, and carbon emissions."
-            )
-        ),
-    ] = Path("./janus_results/train-summary.yml"),
+    log: LogPath = Path("./janus_results/train-log.yml"),
+    tracker: Tracker = True,
+    summary: Summary = Path("./janus_results/train-summary.yml"),
 ) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.

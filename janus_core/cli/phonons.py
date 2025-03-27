@@ -22,6 +22,7 @@ from janus_core.cli.types import (
     ReadKwargsLast,
     StructPath,
     Summary,
+    Tracker,
 )
 from janus_core.cli.utils import yaml_converter_callback
 
@@ -41,19 +42,27 @@ def phonons(
             "in one of three forms: single integer ('2'), which specifies all "
             "diagonal elements; three integers ('1 2 3'), which specifies each "
             "individual diagonal element; or nine values ('1 2 3 4 5 6 7 8 9'), "
-            "which specifies all elements, filling the matrix row-wise."
+            "which specifies all elements, filling the matrix row-wise.",
+            rich_help_panel="Calculation",
         ),
     ] = "2 2 2",
     displacement: Annotated[
-        float, Option(help="Displacement for force constants calculation, in A.")
+        float,
+        Option(
+            help="Displacement for force constants calculation, in A.",
+            rich_help_panel="Calculation",
+        ),
     ] = 0.01,
     displacement_kwargs: DisplacementKwargs = None,
     mesh: Annotated[
-        tuple[int, int, int], Option(help="Mesh numbers along a, b, c axes.")
+        tuple[int, int, int],
+        Option(help="Mesh numbers along a, b, c axes.", rich_help_panel="Calculation"),
     ] = (10, 10, 10),
     bands: Annotated[
         bool,
-        Option(help="Whether to compute band structure."),
+        Option(
+            help="Whether to compute band structure.", rich_help_panel="Calculation"
+        ),
     ] = False,
     n_qpoints: Annotated[
         int,
@@ -61,7 +70,8 @@ def phonons(
             help=(
                 "Number of q-points to sample along generated path, including end "
                 "points. Unused if `qpoint_file` is specified"
-            )
+            ),
+            rich_help_panel="Calculation",
         ),
     ] = 51,
     qpoint_file: Annotated[
@@ -70,44 +80,82 @@ def phonons(
             help=(
                 "Path to yaml file with info to generate a path of q-points for band "
                 "structure."
-            )
+            ),
+            rich_help_panel="Calculation",
         ),
     ] = None,
-    dos: Annotated[bool, Option(help="Whether to calculate the DOS.")] = False,
+    dos: Annotated[
+        bool,
+        Option(help="Whether to calculate the DOS.", rich_help_panel="DOS"),
+    ] = False,
     dos_kwargs: DoSKwargs = None,
-    pdos: Annotated[bool, Option(help="Whether to calculate the PDOS.")] = False,
+    pdos: Annotated[
+        bool,
+        Option(help="Whether to calculate the PDOS.", rich_help_panel="PDOS"),
+    ] = False,
     pdos_kwargs: PDoSKwargs = None,
     thermal: Annotated[
-        bool, Option(help="Whether to calculate thermal properties.")
+        bool,
+        Option(
+            help="Whether to calculate thermal properties.",
+            rich_help_panel="Thermal Properties",
+        ),
     ] = False,
     temp_min: Annotated[
         float,
-        Option(help="Start temperature for thermal properties calculations, in K."),
+        Option(
+            help="Start temperature for thermal properties calculations, in K.",
+            rich_help_panel="Thermal Properties",
+        ),
     ] = 0.0,
     temp_max: Annotated[
         float,
-        Option(help="End temperature for thermal properties calculations, in K."),
+        Option(
+            help="End temperature for thermal properties calculations, in K.",
+            rich_help_panel="Thermal Properties",
+        ),
     ] = 1000.0,
     temp_step: Annotated[
         float,
-        Option(help="Temperature step for thermal properties calculations, in K."),
+        Option(
+            help="Temperature step for thermal properties calculations, in K.",
+            rich_help_panel="Thermal Properties",
+        ),
     ] = 50,
     symmetrize: Annotated[
-        bool, Option(help="Whether to symmetrize force constants.")
+        bool,
+        Option(
+            help="Whether to symmetrize force constants.", rich_help_panel="Calculation"
+        ),
     ] = False,
     minimize: Annotated[
-        bool, Option(help="Whether to minimize structure before calculations.")
+        bool,
+        Option(
+            help="Whether to minimize structure before calculations.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     fmax: Annotated[
-        float, Option(help="Maximum force for optimization convergence.")
+        float,
+        Option(
+            help="Maximum force for optimization convergence.",
+            rich_help_panel="Calculation",
+        ),
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
     hdf5: Annotated[
-        bool, Option(help="Whether to save force constants in hdf5.")
+        bool,
+        Option(
+            help="Whether to save force constants in hdf5.",
+            rich_help_panel="Calculation",
+        ),
     ] = True,
     plot_to_file: Annotated[
         bool,
-        Option(help="Whether to plot band structure and/or dos/pdos when calculated."),
+        Option(
+            help="Whether to plot band structure and/or dos/pdos when calculated.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     write_full: Annotated[
         bool,
@@ -115,18 +163,17 @@ def phonons(
             help=(
                 "Whether to write eigenvectors, group velocities, etc. to bands file."
             ),
+            rich_help_panel="Calculation",
         ),
     ] = True,
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
     file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsLast = None,
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -200,15 +247,15 @@ def phonons(
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is 0.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is 0.
     log
         Path to write logs to. Default is inferred from `file_prefix`.
     tracker

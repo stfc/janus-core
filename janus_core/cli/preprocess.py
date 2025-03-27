@@ -7,26 +7,27 @@ from typing import Annotated
 
 from typer import Option, Typer
 
+from janus_core.cli.types import Tracker
+
 app = Typer()
 
 
 @app.command()
 def preprocess(
     mlip_config: Annotated[
-        Path, Option(help="Configuration file to pass to MLIP CLI.")
+        Path, Option(help="Configuration file to pass to MLIP CLI.", show_default=False)
     ],
-    log: Annotated[Path, Option(help="Path to save logs to.")] = Path(
-        "./janus_results/preprocess-log.yml"
-    ),
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    log: Annotated[
+        Path, Option(help="Path to save logs to.", rich_help_panel="Logging/summary")
+    ] = Path("./janus_results/preprocess-log.yml"),
+    tracker: Tracker = True,
     summary: Annotated[
         Path,
         Option(
             help=(
                 "Path to save summary of inputs, start/end time, and carbon emissions."
-            )
+            ),
+            rich_help_panel="Logging/summary",
         ),
     ] = Path("./janus_results/preprocess-summary.yml"),
 ):
