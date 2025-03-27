@@ -17,7 +17,11 @@ from janus_core.cli.preprocess import preprocess
 from janus_core.cli.singlepoint import singlepoint
 from janus_core.cli.train import train
 
-app = Typer(name="janus", no_args_is_help=True)
+app = Typer(
+    name="janus",
+    no_args_is_help=True,
+    epilog="Try 'janus COMMAND --help' for subcommand options",
+)
 app.command(
     help="Perform single point calculations and save to file.",
     rich_help_panel="Calculations",
