@@ -29,7 +29,7 @@ app = Typer()
 
 
 @app.command()
-@use_config(yaml_converter_callback)
+@use_config(yaml_converter_callback, param_help="Path to configuration file.")
 def phonons(
     # numpydoc ignore=PR02
     ctx: Context,
