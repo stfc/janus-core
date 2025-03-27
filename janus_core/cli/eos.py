@@ -19,6 +19,7 @@ from janus_core.cli.types import (
     ReadKwargsLast,
     StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
@@ -33,46 +34,73 @@ def eos(
     # numpydoc ignore=PR02
     ctx: Context,
     struct: StructPath,
-    min_volume: Annotated[float, Option(help="Minimum volume scale factor.")] = 0.95,
-    max_volume: Annotated[float, Option(help="Maximum volume scale factor.")] = 1.05,
-    n_volumes: Annotated[int, Option(help="Number of volumes.")] = 7,
+    min_volume: Annotated[
+        float,
+        Option(help="Minimum volume scale factor.", rich_help_panel="Calculation"),
+    ] = 0.95,
+    max_volume: Annotated[
+        float,
+        Option(help="Maximum volume scale factor.", rich_help_panel="Calculation"),
+    ] = 1.05,
+    n_volumes: Annotated[
+        int, Option(help="Number of volumes.", rich_help_panel="Calculation")
+    ] = 7,
     eos_type: Annotated[
         str,
         Option(
             click_type=Choice(get_args(EoSNames)),
             help="Type of fit for equation of state.",
+            rich_help_panel="Calculation",
         ),
     ] = "birchmurnaghan",
     minimize: Annotated[
-        bool, Option(help="Whether to minimize initial structure before calculations.")
+        bool,
+        Option(
+            help="Whether to minimize initial structure before calculations.",
+            rich_help_panel="Calculation",
+        ),
     ] = True,
     minimize_all: Annotated[
         bool,
-        Option(help="Whether to minimize all generated structures for calculations."),
+        Option(
+            help="Whether to minimize all generated structures for calculations.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     fmax: Annotated[
-        float, Option(help="Maximum force for optimization convergence.")
+        float,
+        Option(
+            help="Maximum force for optimization convergence.",
+            rich_help_panel="Calculation",
+        ),
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
     write_structures: Annotated[
         bool,
-        Option(help="Whether to write out all genereated structures."),
+        Option(
+            help="Whether to write out all genereated structures.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
-    write_kwargs: WriteKwargs = None,
     plot_to_file: Annotated[
         bool,
-        Option(help="Whether to plot equation of state."),
+        Option(
+            help="Whether to plot equation of state.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
+    # MLIP Calculator
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
+    # Structure I/O
     file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsLast = None,
+    write_kwargs: WriteKwargs = None,
+    # Logging/summary
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -103,9 +131,6 @@ def eos(
         Other keyword arguments to pass to geometry optimizer. Default is {}.
     write_structures
         True to write out all genereated structures. Default is False.
-    write_kwargs
-        Keyword arguments to pass to ase.io.write to save generated structures.
-        Default is {}.
     plot_to_file
         Whether to save plot equation of state to svg. Default is False.
     arch
@@ -115,15 +140,18 @@ def eos(
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is -1.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is -1.
+    write_kwargs
+        Keyword arguments to pass to ase.io.write to save generated structures.
+        Default is {}.
     log
         Path to write logs to. Default is inferred from `file_prefix`.
     tracker

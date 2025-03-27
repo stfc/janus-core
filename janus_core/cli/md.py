@@ -66,12 +66,21 @@ def md(
         Option(
             click_type=Choice(get_args(Ensembles)),
             help="Name of thermodynamic ensemble.",
+            rich_help_panel="Calculation",
+            show_default=False,
         ),
     ],
     struct: StructPath,
-    steps: Annotated[int, Option(help="Number of steps in simulation.")] = 0,
-    timestep: Annotated[float, Option(help="Timestep for integrator, in fs.")] = 1.0,
-    temp: Annotated[float, Option(help="Temperature, in K.")] = 300.0,
+    steps: Annotated[
+        int, Option(help="Number of steps in MD simulation.", rich_help_panel="MD")
+    ] = 0,
+    timestep: Annotated[
+        float,
+        Option(help="Timestep for integrator, in fs.", rich_help_panel="Calculation"),
+    ] = 1.0,
+    temp: Annotated[
+        float, Option(help="Temperature, in K.", rich_help_panel="MD")
+    ] = 300.0,
     thermostat_time: Annotated[
         float,
         Option(
@@ -81,7 +90,8 @@ def md(
                 in fs. Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for
                 NPT-MTK.
                 """
-            )
+            ),
+            rich_help_panel="Ensemble configuration",
         ),
     ] = None,
     barostat_time: Annotated[
@@ -92,58 +102,82 @@ def md(
                 Barostat time for NPT, NPT-MTK or NPH simulation, in fs.
                 Default is 75 fs for NPT and NPH, or 1000 fs for NPT-MTK.
                 """
-            )
+            ),
+            rich_help_panel="Ensemble configuration",
         ),
     ] = None,
     bulk_modulus: Annotated[
-        float, Option(help="Bulk modulus for NPT or NPH simulation, in GPa.")
+        float,
+        Option(
+            help="Bulk modulus for NPT or NPH simulation, in GPa.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 2.0,
     pressure: Annotated[
-        float, Option(help="Pressure for NPT or NPH simulation, in GPa.")
+        float,
+        Option(
+            help="Pressure for NPT or NPH simulation, in GPa.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 0.0,
     friction: Annotated[
-        float, Option(help="Friction coefficient for NVT simulation, in fs^-1.")
+        float,
+        Option(
+            help="Friction coefficient for NVT simulation, in fs^-1.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 0.005,
     taut: Annotated[
         float,
         Option(
-            help="Temperature coupling time constant for NVT CSVR simulation, in fs."
+            help="Temperature coupling time constant for NVT CSVR simulation, in fs.",
+            rich_help_panel="Ensemble configuration",
         ),
     ] = 100.0,
     thermostat_chain: Annotated[
         int,
-        Option(help="Number of variables in thermostat chain for NPT MTK simulation."),
+        Option(
+            help="Number of variables in thermostat chain for NPT MTK simulation.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 3,
     barostat_chain: Annotated[
         int,
-        Option(help="Number of variables in barostat chain for NPT MTK simulation."),
+        Option(
+            help="Number of variables in barostat chain for NPT MTK simulation.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 3,
     thermostat_substeps: Annotated[
         int,
         Option(
-            help="Number of sub-steps in thermostat integration for NPT MTK simulation."
+            help=(
+                "Number of sub-steps in thermostat integration for NPT MTK simulation."
+            ),
+            rich_help_panel="Ensemble configuration",
         ),
     ] = 1,
     barostat_substeps: Annotated[
         int,
         Option(
-            help="Number of sub-steps in barostat integration for NPT MTK simulation."
+            help="Number of sub-steps in barostat integration for NPT MTK simulation.",
+            rich_help_panel="Ensemble configuration",
         ),
     ] = 1,
     ensemble_kwargs: EnsembleKwargs = None,
-    arch: Architecture = "mace_mp",
-    device: Device = "cpu",
-    model_path: ModelPath = None,
-    read_kwargs: ReadKwargsLast = None,
-    calc_kwargs: CalcKwargs = None,
     equil_steps: Annotated[
         int,
         Option(
-            help=("Maximum number of steps at which to perform optimization and reset")
+            help="Maximum number of steps at which to perform optimization and reset",
+            rich_help_panel="Calculation",
         ),
     ] = 0,
     minimize: Annotated[
-        bool, Option(help="Whether to minimize structure during equilibration.")
+        bool,
+        Option(
+            help="Whether to minimize structure during equilibration.",
+            rich_help_panel=("Calculation"),
+        ),
     ] = False,
     minimize_every: Annotated[
         int,
@@ -153,36 +187,68 @@ def md(
                 Frequency of minimizations. Default disables minimization after
                 beginning dynamics.
                 """
-            )
+            ),
+            rich_help_panel="Calculation",
         ),
     ] = -1,
     minimize_kwargs: MinimizeKwargs = None,
     rescale_velocities: Annotated[
-        bool, Option(help="Whether to rescale velocities during equilibration.")
+        bool,
+        Option(
+            help="Whether to rescale velocities during equilibration.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     remove_rot: Annotated[
-        bool, Option(help="Whether to remove rotation during equilibration.")
+        bool,
+        Option(
+            help="Whether to remove rotation during equilibration.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     rescale_every: Annotated[
-        int, Option(help="Frequency to rescale velocities during equilibration.")
+        int,
+        Option(
+            help="Frequency to rescale velocities during equilibration.",
+            rich_help_panel="Calculation",
+        ),
     ] = 10,
-    file_prefix: FilePrefix = None,
-    restart: Annotated[bool, Option(help="Whether restarting dynamics.")] = False,
+    restart: Annotated[
+        bool,
+        Option(help="Whether restarting dynamics.", rich_help_panel="Restart files"),
+    ] = False,
     restart_auto: Annotated[
-        bool, Option(help="Whether to infer restart file if restarting dynamics.")
+        bool,
+        Option(
+            help="Whether to infer restart file if restarting dynamics.",
+            rich_help_panel="Restart files",
+        ),
     ] = True,
     restart_stem: Annotated[
         Path | None,
-        Option(help="Stem for restart file name. Default inferred from `file_prefix`."),
+        Option(
+            help="Stem for restart file name. Default inferred from `file_prefix`.",
+            rich_help_panel="Restart files",
+        ),
     ] = None,
     restart_every: Annotated[
-        int, Option(help="Frequency of steps to save restart info.")
+        int,
+        Option(
+            help="Frequency of steps to save restart info.",
+            rich_help_panel="Restart files",
+        ),
     ] = 1000,
     rotate_restart: Annotated[
-        bool, Option(help="Whether to rotate restart files.")
+        bool,
+        Option(
+            help="Whether to rotate restart files.", rich_help_panel="Restart files"
+        ),
     ] = False,
     restarts_to_keep: Annotated[
-        int, Option(help="Restart files to keep if rotating.")
+        int,
+        Option(
+            help="Restart files to keep if rotating.", rich_help_panel="Restart files"
+        ),
     ] = 4,
     final_file: Annotated[
         Path | None,
@@ -192,7 +258,8 @@ def md(
                 File to save final configuration at each temperature of similation.
                 Default inferred from `file_prefix`.
                 """
-            )
+            ),
+            rich_help_panel="Final file",
         ),
     ] = None,
     stats_file: Annotated[
@@ -203,40 +270,87 @@ def md(
                 File to save thermodynamical statistics. Default inferred from
                 `file_prefix`.
                 """
-            )
+            ),
+            rich_help_panel="Statistics file",
         ),
     ] = None,
-    stats_every: Annotated[int, Option(help="Frequency to output statistics.")] = 100,
+    stats_every: Annotated[
+        int,
+        Option(
+            help="Frequency to output statistics.", rich_help_panel="Statistics file"
+        ),
+    ] = 100,
     traj_file: Annotated[
         Path | None,
-        Option(help="File to save trajectory. Default inferred from `file_prefix`."),
+        Option(
+            help="File to save trajectory. Default inferred from `file_prefix`.",
+            rich_help_panel="Trajectory file",
+        ),
     ] = None,
-    traj_append: Annotated[bool, Option(help="Whether to append trajectory.")] = False,
-    traj_start: Annotated[int, Option(help="Step to start saving trajectory.")] = 0,
+    traj_append: Annotated[
+        bool,
+        Option(help="Whether to append trajectory.", rich_help_panel="Trajectory file"),
+    ] = False,
+    traj_start: Annotated[
+        int,
+        Option(
+            help="Step to start saving trajectory.", rich_help_panel="Trajectory file"
+        ),
+    ] = 0,
     traj_every: Annotated[
-        int, Option(help="Frequency of steps to save trajectory.")
+        int,
+        Option(
+            help="Frequency of steps to save trajectory.",
+            rich_help_panel="Trajectory file",
+        ),
     ] = 100,
     temp_start: Annotated[
         float | None,
-        Option(help="Temperature to start heating, in K."),
+        Option(
+            help="Temperature to start heating, in K.",
+            rich_help_panel="Temperature ramp",
+        ),
     ] = None,
     temp_end: Annotated[
         float | None,
-        Option(help="Maximum temperature for heating, in K."),
+        Option(
+            help="Maximum temperature for heating, in K.",
+            rich_help_panel="Temperature ramp",
+        ),
     ] = None,
     temp_step: Annotated[
-        float | None, Option(help="Size of temperature steps when heating, in K.")
+        float | None,
+        Option(
+            help="Size of temperature steps when heating, in K.",
+            rich_help_panel="Temperature ramp",
+        ),
     ] = None,
     temp_time: Annotated[
-        float | None, Option(help="Time between heating steps, in fs.")
+        float | None,
+        Option(
+            help="Time between heating steps, in fs.",
+            rich_help_panel="Temperature ramp",
+        ),
     ] = None,
-    write_kwargs: WriteKwargs = None,
     post_process_kwargs: PostProcessKwargs = None,
     correlation_kwargs: CorrelationKwargs = None,
     seed: Annotated[
         int | None,
-        Option(help="Random seed for numpy.random and random functions."),
+        Option(
+            help="Random seed for numpy.random and random functions.",
+            rich_help_panel="Calculation",
+        ),
     ] = None,
+    # MLIP Calculator
+    arch: Architecture = "mace_mp",
+    device: Device = "cpu",
+    model_path: ModelPath = None,
+    calc_kwargs: CalcKwargs = None,
+    # Structure I/O
+    file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsLast = None,
+    write_kwargs: WriteKwargs = None,
+    # Logging/summary
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
@@ -253,7 +367,7 @@ def md(
     struct
         Path of structure to simulate.
     steps
-        Number of steps in simulation. Default is 0.
+        Number of steps in MD simulation. Default is 0.
     timestep
         Timestep for integrator, in fs. Default is 1.0.
     temp

@@ -18,6 +18,7 @@ from janus_core.cli.types import (
     ReadKwargsAll,
     StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
@@ -33,20 +34,23 @@ def descriptors(
     struct: StructPath,
     invariants_only: Annotated[
         bool,
-        Option(help="Only calculate invariant descriptors."),
+        Option(
+            help="Only calculate invariant descriptors.", rich_help_panel="Calculation"
+        ),
     ] = True,
     calc_per_element: Annotated[
         bool,
-        Option(help="Calculate mean descriptors for each element."),
+        Option(
+            help="Calculate mean descriptors for each element.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     calc_per_atom: Annotated[
         bool,
-        Option(help="Calculate descriptors for each atom."),
+        Option(
+            help="Calculate descriptors for each atom.", rich_help_panel="Calculation"
+        ),
     ] = False,
-    arch: Architecture = "mace_mp",
-    device: Device = "cpu",
-    model_path: ModelPath = None,
-    file_prefix: FilePrefix = None,
     out: Annotated[
         Path | None,
         Option(
@@ -54,15 +58,21 @@ def descriptors(
                 "Path to save structure with calculated descriptors. Default is "
                 "inferred from name of structure file."
             ),
+            rich_help_panel="Calculation",
         ),
     ] = None,
-    read_kwargs: ReadKwargsAll = None,
+    # MLIP Calculator
+    arch: Architecture = "mace_mp",
+    device: Device = "cpu",
+    model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
+    # Structure I/O
+    file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsAll = None,
     write_kwargs: WriteKwargs = None,
+    # Logging/summary
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -80,24 +90,24 @@ def descriptors(
         Whether to calculate mean descriptors for each element. Default is False.
     calc_per_atom
         Whether to calculate descriptors for each atom. Default is False.
+    out
+        Path to save structure with calculated results. Default is inferred
+        `file_prefix`.
     arch
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
+    calc_kwargs
+        Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
-    out
-        Path to save structure with calculated results. Default is inferred
-        `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
-    calc_kwargs
-        Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
     log

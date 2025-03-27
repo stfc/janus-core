@@ -67,7 +67,14 @@ class TyperDict:
         return f"<TyperDict: value={self.value}>"
 
 
-StructPath = Annotated[Path, Option(help="Path of structure to simulate.")]
+StructPath = Annotated[
+    Path,
+    Option(
+        help="Path of structure to simulate.",
+        show_default=False,
+        rich_help_panel="Calculation",
+    ),
+]
 
 Architecture = Annotated[
     str | None,
@@ -87,7 +94,9 @@ Device = Annotated[
 ]
 ModelPath = Annotated[
     str | None,
-    Option(help="Path to MLIP model.", rich_help_panel="MLIP calculator"),
+    Option(
+        help="MLIP model name, or path to model.", rich_help_panel="MLIP calculator"
+    ),
 ]
 
 FilePrefix = Annotated[
@@ -99,7 +108,8 @@ FilePrefix = Annotated[
                 ./janus_results, and default filename prefix is inferred from the
                 input stucture filename.
                 """
-        )
+        ),
+        rich_help_panel="Structure I/O",
     ),
 ]
 
@@ -115,6 +125,7 @@ ReadKwargsAll = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Structure I/O",
     ),
 ]
 
@@ -130,6 +141,7 @@ ReadKwargsLast = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Structure I/O",
     ),
 ]
 
@@ -140,11 +152,11 @@ CalcKwargs = Annotated[
         help=(
             """
             Keyword arguments to pass to selected calculator. Must be passed as a
-            dictionary wrapped in quotes, e.g. "{'key': value}". For the default
-            architecture ('mace_mp'), "{'model': 'small'}" is set unless overwritten.
+            dictionary wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
+        rich_help_panel="MLIP calculator",
     ),
 ]
 
@@ -154,25 +166,12 @@ WriteKwargs = Annotated[
         parser=parse_dict_class,
         help=(
             """
-            Keyword arguments to pass to ase.io.write when saving results. Must be
-            passed as a dictionary wrapped in quotes, e.g. "{'key': value}".
+            Keyword arguments to pass to ase.io.write when saving any structures. Must
+            be passed as a dictionary wrapped in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
-    ),
-]
-
-OptKwargs = Annotated[
-    TyperDict | None,
-    Option(
-        parser=parse_dict_class,
-        help=(
-            """
-            Keyword arguments to pass to optimizer. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key': value}".
-            """
-        ),
-        metavar="DICT",
+        rich_help_panel="Structure I/O",
     ),
 ]
 
@@ -187,6 +186,7 @@ MinimizeKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -196,11 +196,12 @@ DoSKwargs = Annotated[
         parser=parse_dict_class,
         help=(
             """
-            Keyword arguments to pass to run_total_dos. Must be passed as a dictionary
+            Keyword arguments to pass to `run_total_dos`. Must be passed as a dictionary
             wrapped in quotes, e.g. "{'key' : value}".
             """
         ),
         metavar="DICT",
+        rich_help_panel="DOS",
     ),
 ]
 
@@ -210,11 +211,12 @@ PDoSKwargs = Annotated[
         parser=parse_dict_class,
         help=(
             """
-            Keyword arguments to pass to run_projected_dos. Must be passed as a
+            Keyword arguments to pass to `run_projected_dos`. Must be passed as a
             dictionary wrapped in quotes, e.g. "{'key' : value}".
             """
         ),
         metavar="DICT",
+        rich_help_panel="PDOS",
     ),
 ]
 
@@ -229,6 +231,7 @@ EnsembleKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Ensemble configuration",
     ),
 ]
 
@@ -243,6 +246,7 @@ DisplacementKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -257,6 +261,7 @@ PostProcessKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -271,6 +276,7 @@ NebKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -285,6 +291,7 @@ NebOptKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -299,6 +306,7 @@ InterpolationKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -313,6 +321,7 @@ PostProcessKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -328,6 +337,7 @@ CorrelationKwargs = Annotated[
             """
         ),
         metavar="DICT",
+        rich_help_panel="Calculation",
     ),
 ]
 
@@ -335,7 +345,7 @@ LogPath = Annotated[
     Path | None,
     Option(
         help="Path to save logs to. Default is inferred from `file_prefix`",
-        rich_help_panel="Logging",
+        rich_help_panel="Logging/summary",
     ),
 ]
 
@@ -343,7 +353,7 @@ Tracker = Annotated[
     bool,
     Option(
         help="Whether to save carbon emissions of calculation",
-        rich_help_panel="Logging",
+        rich_help_panel="Logging/summary",
     ),
 ]
 
@@ -353,6 +363,7 @@ Summary = Annotated[
         help=(
             "Path to save summary of inputs, start/end time, and carbon emissions. "
             "Default is inferred from `file_prefix`."
-        )
+        ),
+        rich_help_panel="Logging/summary",
     ),
 ]
