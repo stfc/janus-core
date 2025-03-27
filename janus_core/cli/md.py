@@ -57,7 +57,7 @@ def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
 
 
 @app.command()
-@use_config(yaml_converter_callback)
+@use_config(yaml_converter_callback, param_help="Path to configuration file.")
 def md(
     # numpydoc ignore=PR02
     ctx: Context,
