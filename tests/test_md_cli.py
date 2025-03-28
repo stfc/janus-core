@@ -673,7 +673,7 @@ def test_minimize_kwargs_filename(tmp_path):
             1,
             "--minimize",
             "--minimize-kwargs",
-            f"{{'write_kwargs': {{'filename': '{opt_path}'}}}}",
+            f"{{'write_kwargs': {{'filename': '{opt_path.as_posix()}'}}}}",
         ],
     )
     assert result.exit_code == 0

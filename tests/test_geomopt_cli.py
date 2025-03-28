@@ -116,7 +116,7 @@ def test_traj(tmp_path):
             results_path,
             "--write-traj",
             "--minimize-kwargs",
-            f"{{'traj_kwargs':{{'filename':'{traj_path}'}}}}",
+            f"{{'traj_kwargs':{{'filename':'{traj_path.as_posix()}'}}}}",
             "--log",
             log_path,
             "--summary",
@@ -285,7 +285,7 @@ def test_opt_kwargs_traj(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    minimize_kwargs = f"{{'opt_kwargs': {{'trajectory' : '{str(traj_path)}'}}}}"
+    minimize_kwargs = f"{{'opt_kwargs': {{'trajectory' : '{traj_path.as_posix()}'}}}}"
 
     result = runner.invoke(
         app,
@@ -313,7 +313,7 @@ def test_restart(tmp_path):
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
-    minimize_kwargs = f"{{'opt_kwargs': {{'restart': '{str(restart_path)}'}}}}"
+    minimize_kwargs = f"{{'opt_kwargs': {{'restart': '{restart_path.as_posix()}'}}}}"
 
     result = runner.invoke(
         app,
@@ -821,6 +821,8 @@ def test_file_prefix(tmp_path):
 
 def test_traj_kwargs_no_write(tmp_path):
     """Test traj_kwargs without flag to write traj raises error."""
+    traj_path = tmp_path / "traj.extxyz"
+
     result = runner.invoke(
         app,
         [
@@ -830,7 +832,7 @@ def test_traj_kwargs_no_write(tmp_path):
             "--file-prefix",
             tmp_path / "NaCl",
             "--minimize-kwargs",
-            f"{{'traj_kwargs':{{'filename':'{tmp_path / 'traj.extxyz'}'}}}}",
+            f"{{'traj_kwargs':{{'filename':'{traj_path.as_posix()}'}}}}",
         ],
     )
     assert result.exit_code == 1
