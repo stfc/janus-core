@@ -446,7 +446,7 @@ def test_minimize_filename(tmp_path):
     summary_path = tmp_path / "test" / "test-phonons-summary.yml"
 
     # write_results should be set automatically
-    minimize_kwargs = f"{{'write_kwargs': {{'filename': '{str(opt_path)}'}}}}"
+    minimize_kwargs = f"{{'write_kwargs': {{'filename': '{opt_path.as_posix()}'}}}}"
 
     result = runner.invoke(
         app,

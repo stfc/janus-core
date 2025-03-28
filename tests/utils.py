@@ -161,17 +161,17 @@ def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
     assert "output_files" in summary
 
     for key, value in output_files.items():
-        output_file = summary["output_files"][key]
+        output_file = Path(summary["output_files"][key]).absolute().as_posix()
         if isinstance(value, list):
             for file in value:
                 assert file.exists(), f"{file} missing"
 
-                assert str(file.absolute()) in output_file, (
+                assert str(file.absolute().as_posix()) == output_file, (
                     f"{file} is inconsistent with {output_file}"
                 )
         else:
             assert value.exists() if value else True, f"{value} missing"
 
-            assert output_file == (str(value.absolute()) if value else None), (
-                f"{value} is inconsistent with {output_file}"
-            )
+            assert output_file == (
+                str(value.absolute().as_posix()) if value else None
+            ), f"{value} is inconsistent with {output_file}"
