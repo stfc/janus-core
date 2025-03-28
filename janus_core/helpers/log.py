@@ -86,6 +86,9 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
             # Replace "" with '' to prevent invalid wrapping
             record.msg = record.msg.replace('"', "'")
 
+            # Replace \ with / to prevent unreadable paths in log
+            record.msg = record.msg.replace('"', "'")
+
             # Convert new lines into yaml list
             record.msg = "\n" + "\n".join(
                 f'    - "{line.strip()}"'
