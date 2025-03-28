@@ -337,7 +337,7 @@ def test_plot(tmp_path):
         "bands_plot": svgs[3],
         "dos": dos_results,
         "dos_plot": svgs[0],
-        "band_dos_plot": [svgs[2]],
+        "band_dos_plot": svgs[2],
         "pdos": pdos_results,
         "pdos_plot": svgs[1],
         "thermal": None,
