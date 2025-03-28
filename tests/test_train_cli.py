@@ -88,15 +88,15 @@ def test_train(tmp_path):
 
     config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
 
-    result = runner.invoke(
-        app,
-        [
-            "train",
-            "--mlip-config",
-            config,
-        ],
-    )
     try:
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "--mlip-config",
+                config,
+            ],
+        )
         assert result.exit_code == 0
 
         assert model.exists()
@@ -185,20 +185,22 @@ def test_fine_tune(tmp_path):
 
     config = write_tmp_config(DATA_PATH / "mlip_fine_tune.yml", tmp_path)
 
-    result = runner.invoke(
-        app,
-        [
-            "train",
-            "--mlip-config",
-            config,
-            "--fine-tune",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
     try:
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "--mlip-config",
+                config,
+                "--fine-tune",
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+        assert result.exit_code == 0
+
         assert model.exists()
         assert compiled_model.exists()
         assert logs_path.is_dir()
@@ -219,8 +221,6 @@ def test_fine_tune(tmp_path):
         logger.handlers = [
             h for h in logger.handlers if not isinstance(h, logging.FileHandler)
         ]
-
-        assert result.exit_code == 0
 
 
 def test_fine_tune_no_foundation(tmp_path):
@@ -288,20 +288,20 @@ def test_no_carbon(tmp_path):
 
     config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
 
-    result = runner.invoke(
-        app,
-        [
-            "train",
-            "--mlip-config",
-            config,
-            "--no-tracker",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
     try:
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "--mlip-config",
+                config,
+                "--no-tracker",
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
         assert result.exit_code == 0
 
         with open(summary_path, encoding="utf8") as file:
