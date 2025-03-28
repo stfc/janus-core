@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 import re
+from typing import Any
 
 from ase import Atoms
 from ase.io import read
@@ -147,14 +148,14 @@ def skip_extras(arch: str):
             pytest.importorskip("matgl")
 
 
-def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
+def check_output_files(summary: dict[str, Any], output_files: dict[str, Path]) -> None:
     """
     Check output files in summary match expected and created files.
 
     Parameters
     ----------
     summary
-        Path to summary file with outputs from calculation class.
+        Summary file dictionary.
     output_files
         Expected output files to compare with summary.
     """
