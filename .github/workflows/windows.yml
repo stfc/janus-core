@@ -38,7 +38,7 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest tests/test_{mlip_calculators,single_point}.py
+        run: uv run pytest tests/test_mlip_calculators.py tests/test_single_point.py
 
       - name: Install dgl dependencies
         run: |
@@ -49,4 +49,4 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest tests/test_{mlip_calculators,single_point,eos}.py
+        run: uv run pytest tests/test_mlip_calculators.py tests/test_single_point.py tests/test_eos.py
