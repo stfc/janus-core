@@ -19,6 +19,7 @@ jobs:
         with:
           version: "0.6.2"
           python-version: ${{ matrix.python-version }}
+          prune-cache: false
 
       - name: Install "all" dependencies
         run: uv sync --extra all
