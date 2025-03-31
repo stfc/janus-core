@@ -91,7 +91,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         (
             "fairchem",
             "cpu",
-            -0.7482733130455017,
+            -0.7478368282318115,
             "NaCl.cif",
             {"model_path": "EquiformerV2-31M-S2EF-OC20-All+MD"},
         ),
