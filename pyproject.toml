@@ -48,7 +48,6 @@ dpa3 = [
 ]
 grace = [
     "tensorpotential == 0.5.1",
-    "tensorflow == 2.16.2",
 ]
 mace = [
     "mace-torch==0.3.12",
