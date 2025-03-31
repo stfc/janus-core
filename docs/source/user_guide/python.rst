@@ -5,35 +5,35 @@ Python interface
 Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the `tutorials <https://github.com/stfc/janus-core/tree/main/docs/source/tutorials>`_ documentation directory. This currently includes examples for:
 
 .. |single_point| image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/single_point.ipynb
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/single_point.ipynb
     :alt: Launch single point Colab
 
 .. |geom_opt| image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/geom_opt.ipynb
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/geom_opt.ipynb
     :alt: Launch geometry optimisation Colab
 
 .. |md| image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/md.ipynb
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/md.ipynb
     :alt: Launch molecular dynamics Colab
 
 .. |eos| image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/eos.ipynb
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/eos.ipynb
     :alt: Launch equation of state Colab
 
 .. |phonons| image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/phonons.ipynb
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/phonons.ipynb
     :alt: Launch phonons Colab
 
 .. |neb| image:: https://colab.research.google.com/assets/colab-badge.svg
-    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/neb.ipynb
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/neb.ipynb
     :alt: Launch NEB Colab
 
-- :doc:`Single Point </tutorials/single_point>` |single_point|
-- :doc:`Geometry Optimization </tutorials/geom_opt>` |geom_opt|
-- :doc:`Molecular Dynamics </tutorials/md>` |md|
-- :doc:`Equation of State </tutorials/eos>` |eos|
-- :doc:`Phonons </tutorials/phonons>` |phonons|
-- :doc:`Nudged Elastic Band </tutorials/neb>` |neb|
+- :doc:`Single Point </tutorials/python/single_point>` |single_point|
+- :doc:`Geometry Optimization </tutorials/python/geom_opt>` |geom_opt|
+- :doc:`Molecular Dynamics </tutorials/python/md>` |md|
+- :doc:`Equation of State </tutorials/python/eos>` |eos|
+- :doc:`Phonons </tutorials/python/phonons>` |phonons|
+- :doc:`Nudged Elastic Band </tutorials/python/neb>` |neb|
 
 These make use of `WEAS Widget <https://weas-widget.readthedocs.io/en/latest/index.html>`_ for visualisation,
 which can be installed using ``janus-core``'s ``visualise`` extra. For example:
