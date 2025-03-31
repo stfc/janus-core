@@ -42,26 +42,30 @@ def test_neb():
 
     assert not results_dir.exists()
 
+    import subprocess
+
     try:
-        result = runner.invoke(
-            app,
+        result = subprocess.run(
             [
+                "janus",
                 "neb",
                 "--init-struct",
-                DATA_PATH / "LiFePO4_start.cif",
+                str(DATA_PATH / "LiFePO4_start.cif"),
                 "--final-struct",
-                DATA_PATH / "LiFePO4_end.cif",
+                str(DATA_PATH / "LiFePO4_end.cif"),
                 "--interpolator",
                 "pymatgen",
                 "--fmax",
-                5,
+                str(5),
                 "--n-images",
-                5,
+                str(5),
                 "--plot-band",
                 "--write-band",
             ],
+            capture_output=True,
+            check=True,
         )
-        assert result.exit_code == 0
+        assert result.returncode == 0
 
         assert results_path.exists()
         assert band_path.exists()
