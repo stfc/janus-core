@@ -5,6 +5,8 @@ Based on https://docs.pytest.org/en/latest/example/simple.html.
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 
@@ -34,3 +36,11 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "extra_mlips" in item.keywords:
             item.add_marker(skip_extra_mlips)
+
+
+@pytest.fixture(autouse=True)
+def capture_wrap():
+    """Block closure of stderr and stdout."""
+    sys.stderr.close = lambda *args, **kwargs: None
+    sys.stdout.close = lambda *args, **kwargs: None
+    yield
