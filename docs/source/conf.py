@@ -10,6 +10,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from importlib import metadata
 import time
 
 import janus_core
@@ -73,7 +74,7 @@ master_doc = "index"
 # General information about the project.
 project = "janus-core"
 copyright_first_year = "2024"
-copyright_owners = "Elliott Kasoar, Federica Zanca, Patrick Austin, David Mason, Jacob Wilkins, Alin M. Elena"
+copyright_owners = metadata.metadata("janus-core")["author"]
 
 current_year = str(time.localtime().tm_year)
 copyright_year_string = (
