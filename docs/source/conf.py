@@ -109,7 +109,6 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # exclude_patterns = ['doc.rst']
-exclude_patterns = ["tutorials/cli/*.ipynb"]
 # ~ exclude_patterns = ['index.rst']
 
 # If true, sectionauthor and moduleauthor directives will be shown in the

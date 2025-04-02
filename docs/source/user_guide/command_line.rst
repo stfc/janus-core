@@ -2,6 +2,48 @@
 Command line interface
 ======================
 
+Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the `tutorials <https://github.com/stfc/janus-core/tree/main/docs/source/tutorials/cli>`_ documentation directory. This currently includes examples for:
+
+.. |singlepoint| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/singlepoint.ipynb
+    :alt: Launch single point Colab
+
+.. |geomopt| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/geomopt.ipynb
+    :alt: Launch geometry optimisation Colab
+
+.. |md| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/md.ipynb
+    :alt: Launch molecular dynamics Colab
+
+.. |phonons| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/phonons.ipynb
+    :alt: Launch phonons Colab
+
+.. |neb| image:: https://colab.research.google.com/assets/colab-badge.svg
+    :target: https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/neb.ipynb
+    :alt: Launch NEB Colab
+
+- :doc:`Single Point </tutorials/cli/singlepoint>` |singlepoint|
+- :doc:`Geometry Optimization </tutorials/cli/geomopt>` |geomopt|
+- :doc:`Molecular Dynamics </tutorials/cli/md>` |md|
+- :doc:`Phonons </tutorials/cli/phonons>` |phonons|
+- :doc:`Nudged Elastic Band </tutorials/cli/neb>` |neb|
+
+These make use of `WEAS Widget <https://weas-widget.readthedocs.io/en/latest/index.html>`_ for visualisation,
+which can be installed using ``janus-core``'s ``visualise`` extra. For example:
+
+.. code-block:: bash
+
+    pip install janus-core[mace,visualise]
+
+or
+
+.. code-block:: bash
+
+    pip install janus-core[all]
+
+
 Basic usage
 -----------
 
