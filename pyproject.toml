@@ -75,7 +75,7 @@ all = [
 
 # MLIP with updated e3nn
 mattersim = [
-    "mattersim == 1.1.1",
+    "mattersim == 1.1.2",
 ]
 
 # MLIPs with dgl dependency
