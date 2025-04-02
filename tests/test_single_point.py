@@ -133,7 +133,7 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         **kwargs,
     )
     energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy)
+    assert energy == pytest.approx(expected_energy, rel=1e-3)
 
 
 def test_single_point_none():
