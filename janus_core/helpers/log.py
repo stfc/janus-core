@@ -77,6 +77,7 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         """
         # Parse JSON dump from codecarbon
         record.msg = str(record.msg)
+        record.args = tuple(str(arg).replace("\\", "/") for arg in record.args)
         if len(record.msg) > 1 and (record.msg[0] == "{" and record.msg[-1] == "}"):
             msg_dict = json.loads(record.msg)
             record.msg = ""
@@ -85,6 +86,9 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         else:
             # Replace "" with '' to prevent invalid wrapping
             record.msg = record.msg.replace('"', "'")
+
+            # Replace \ with / to prevent unreadable paths in log
+            record.msg = record.msg.replace("\\", "/")
 
             # Convert new lines into yaml list
             record.msg = "\n" + "\n".join(

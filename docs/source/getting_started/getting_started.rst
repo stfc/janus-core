@@ -61,4 +61,10 @@ Currently supported extras are:
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
 
+.. note::
+
+    ``orb`` and ``mattersim`` are not currently compatible with Windows natively,
+    but can be installed and run via Windows Subsystem for Linux.
+
+
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.

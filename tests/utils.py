@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 import re
+from typing import Any
 
 from ase import Atoms
 from ase.io import read
@@ -147,14 +148,14 @@ def skip_extras(arch: str):
             pytest.importorskip("matgl")
 
 
-def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
+def check_output_files(summary: dict[str, Any], output_files: dict[str, Path]) -> None:
     """
     Check output files in summary match expected and created files.
 
     Parameters
     ----------
     summary
-        Path to summary file with outputs from calculation class.
+        Summary file dictionary.
     output_files
         Expected output files to compare with summary.
     """
@@ -163,15 +164,20 @@ def check_output_files(summary: Path, output_files: dict[str, Path]) -> None:
     for key, value in output_files.items():
         output_file = summary["output_files"][key]
         if isinstance(value, list):
+            output_file = [
+                Path(file).absolute().as_posix() if file else None
+                for file in output_file
+            ]
             for file in value:
                 assert file.exists(), f"{file} missing"
 
-                assert str(file.absolute()) in output_file, (
+                assert str(file.absolute().as_posix()) in output_file, (
                     f"{file} is inconsistent with {output_file}"
                 )
-        else:
-            assert value.exists() if value else True, f"{value} missing"
+        elif value:
+            assert value.exists(), f"{value} missing"
 
-            assert output_file == (str(value.absolute()) if value else None), (
+            output_file = Path(output_file).absolute().as_posix()
+            assert output_file == str(value.absolute().as_posix()), (
                 f"{value} is inconsistent with {output_file}"
             )

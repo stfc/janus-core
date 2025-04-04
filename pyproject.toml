@@ -54,8 +54,8 @@ nequip = [
     "nequip == 0.6.1",
 ]
 orb = [
-    "orb-models == 0.4.2",
-    "pynanoflann",
+    "orb-models == 0.4.2; sys_platform != 'win32'",
+    "pynanoflann; sys_platform != 'win32'",
 ]
 sevennet = [
     "sevenn == 0.10.3",
@@ -75,7 +75,7 @@ all = [
 
 # MLIP with updated e3nn
 mattersim = [
-    "mattersim == 1.1.2",
+    "mattersim == 1.1.2; sys_platform != 'win32'",
 ]
 
 # MLIPs with dgl dependency
