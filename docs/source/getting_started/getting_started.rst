@@ -60,6 +60,7 @@ Currently supported extras are:
 - ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
+- ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
 
 .. note::
 

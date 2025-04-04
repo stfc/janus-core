@@ -97,6 +97,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             "NaCl.cif",
             {"model_path": "SevenNet-0_11July2024"},
         ),
+        ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         (
             "alignn",
             "cpu",
