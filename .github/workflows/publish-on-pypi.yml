@@ -94,6 +94,7 @@ jobs:
           draft: false
           prerelease: steps.check-prerelease.outputs.prerelease == 'true'
           skipIfReleaseExists: true
+          generateReleaseNotes: true
 
       - name: Publish to PyPI
         run: uv publish
