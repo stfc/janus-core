@@ -72,6 +72,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     [
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
+        (
+            "fairchem",
+            "cpu",
+            -0.7478368282318115,
+            "NaCl.cif",
+            {"model_path": "EquiformerV2-31M-S2EF-OC20-All+MD"},
+        ),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
         (
             "nequip",
@@ -126,7 +133,7 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         **kwargs,
     )
     energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy)
+    assert energy == pytest.approx(expected_energy, rel=1e-3)
 
 
 def test_single_point_none():

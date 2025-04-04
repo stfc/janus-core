@@ -73,7 +73,11 @@ all = [
     "janus-core[visualise]",
 ]
 
-# MLIP with updated e3nn
+# MLIPs with updated e3nn
+fairchem = [
+    "fairchem-core == 1.9.0",
+]
+
 mattersim = [
     "mattersim == 1.1.2; sys_platform != 'win32'",
 ]
@@ -209,6 +213,7 @@ constraint-dependencies = [
     "dgl==2.1",
     "torch<2.6",
 ]
+
 conflicts = [
     [
       { extra = "chgnet" },
@@ -232,6 +237,22 @@ conflicts = [
     ],
     [
       { extra = "mattersim" },
+      { extra = "all" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "m3gnet" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "fairchem" },
       { extra = "all" },
     ],
 ]
