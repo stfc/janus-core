@@ -41,6 +41,8 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def capture_wrap():
     """Block closure of stderr and stdout."""
+    # Prevent `ValueError: I/O operation on closed file` during testing
+    # See discussion in https://github.com/stfc/janus-core/pull/426
     sys.stderr.close = lambda *args, **kwargs: None
     sys.stdout.close = lambda *args, **kwargs: None
     yield
