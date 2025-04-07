@@ -71,17 +71,21 @@ class Stats:
 
     @_getind.register
     def _(self, lab: str) -> int:  # numpydoc ignore=GL08
-        # Case-insensitive fuzzy match, only has to be `in` the labels
-        index = next(
-            (
-                index
-                for index, label in enumerate(self.labels)
-                if lab.lower() in label.lower()
-            ),
-            None,
-        )
-        if index is None:
-            raise IndexError(f"{lab} not found in labels")
+        fuzzy_matches = []
+        for index, label in enumerate(self.labels):
+            # Exact (case-insensitive) match.
+            if lab.lower() == label.lower():
+                return index
+            if lab.lower() in label.lower():
+                fuzzy_matches.append((index, label.lower()))
+        # Case-insensitive fuzzy match, only has to be `in` the labels.
+        if len(fuzzy_matches) == 1:
+            # A unique fuzzy match.
+            return fuzzy_matches[0][0]
+        if len(fuzzy_matches) > 1:
+            # Fuzzy match to the shortest label (e.g. 'Time' vs. 'Real_time').
+            return sorted(fuzzy_matches, key=lambda x: len(x[1]))[0][0]
+        raise IndexError(f"{lab} not found in labels")
         return index
 
     @singledispatchmethod
