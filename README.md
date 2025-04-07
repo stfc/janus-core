@@ -92,6 +92,7 @@ Current and planned features include:
   - DPA3
   - Orb
   - MatterSim
+  - GRACE
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics

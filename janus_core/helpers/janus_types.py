@@ -128,6 +128,7 @@ Architectures = Literal[
     "dpa3",
     "orb",
     "mattersim",
+    "grace",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]
