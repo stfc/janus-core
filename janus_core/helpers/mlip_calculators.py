@@ -268,7 +268,7 @@ def choose_calculator(
         import orb_models.forcefield.pretrained as orb_ff
 
         # Default model
-        model_path = model_path if model_path else "orb_v2"
+        model_path = model_path if model_path else "orb_v3_conservative_20_omat"
 
         if isinstance(model_path, DirectForcefieldRegressor):
             model = model_path
