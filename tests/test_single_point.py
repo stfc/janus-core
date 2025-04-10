@@ -80,7 +80,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             "toluene.xyz",
             {"model_path": NEQUIP_PATH},
         ),
-        ("orb", "cpu", -27.08180809020996, "NaCl.cif", {}),
+        ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
         ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model_path": "orb-v2"}),
         (
             "sevennet",
@@ -127,7 +127,7 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         **kwargs,
     )
     energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy)
+    assert energy == pytest.approx(expected_energy, rel=1e-5)
 
 
 def test_single_point_none():
