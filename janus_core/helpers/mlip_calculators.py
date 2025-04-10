@@ -69,6 +69,13 @@ def _set_model_path(
     return model_path
 
 
+def _set_no_weights_only_load():
+    """Set environment variable to fix models for torch 2.6."""
+    import os
+
+    os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
+
+
 def choose_calculator(
     arch: Architectures = "mace",
     device: Devices = "cpu",
@@ -105,6 +112,9 @@ def choose_calculator(
 
     if device not in get_args(Devices):
         raise ValueError(f"`device` must be one of: {get_args(Devices)}")
+
+    # Fix torch 2.6 (must be before MLIP modules are loaded)
+    _set_no_weights_only_load()
 
     if arch == "mace":
         from mace import __version__
