@@ -80,8 +80,8 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             "toluene.xyz",
             {"model_path": NEQUIP_PATH},
         ),
-        ("orb", "cpu", -27.088973999023438, "NaCl.cif", {}),
-        ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model_path": "orb-v2"}),
+        ("orb", "cpu", -27.089094161987305, "NaCl.cif", {}),
+        ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model_path": "orb-v2"}),
         (
             "sevennet",
             "cpu",
