@@ -8,7 +8,6 @@ import shutil
 from ase import Atoms
 from ase.io import read
 import ase.md.nose_hoover_chain
-from ase.md.npt import NPT as ASE_NPT
 import numpy as np
 import pytest
 
@@ -110,12 +109,14 @@ def test_npt():
         assert isinstance(restart_atoms_final, Atoms)
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
-        assert len(traj) == 4
+        # Includes step 0
+        assert len(traj) == 5
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
             assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
-            assert len(lines) == 5
+            # Includes step 0
+            assert len(lines) == 6
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
 
@@ -155,12 +156,14 @@ def test_nvt_nh():
 
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
-        assert len(traj) == 3
+        # Includes step 0
+        assert len(traj) == 4
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
             assert " | T [K]" in lines[0]
-            assert len(lines) == 4
+            # Includes step 0
+            assert len(lines) == 5
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
 
@@ -232,12 +235,14 @@ def test_nph():
 
         traj = read(traj_path, index=":")
         assert all(isinstance(image, Atoms) for image in traj)
-        assert len(traj) == 1
+        # Includes step 0
+        assert len(traj) == 2
 
         with open(stats_path, encoding="utf8") as stats_file:
             lines = stats_file.readlines()
             assert " | Epot/N [eV]" in lines[0]
-            assert len(lines) == 2
+            # Includes step 0
+            assert len(lines) == 3
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
 
@@ -814,18 +819,12 @@ def test_heating_md(tmp_path, ensemble):
     stat_data = Stats(stats_path)
     target_t_col = stat_data.labels.index("Target_T")
 
-    is_ase_npt = isinstance(md.dyn, ASE_NPT)
-
     # ASE_NPT skips first row of output - ASE merge request submitted to fix:
     # https://gitlab.com/ase/ase/-/merge_requests/3598
-    assert stat_data.rows == 4 if is_ase_npt else 5
+    assert stat_data.rows == 5
     assert stat_data.data[0, target_t_col] == pytest.approx(10.0)
-    if is_ase_npt:
-        assert stat_data.data[1, target_t_col] == pytest.approx(20.0)
-        assert stat_data.data[3, target_t_col] == pytest.approx(25.0)
-    else:
-        assert stat_data.data[2, target_t_col] == pytest.approx(20.0)
-        assert stat_data.data[4, target_t_col] == pytest.approx(25.0)
+    assert stat_data.data[2, target_t_col] == pytest.approx(20.0)
+    assert stat_data.data[4, target_t_col] == pytest.approx(25.0)
     assert stat_data.labels[0] == "# Step"
     assert stat_data.units[0] == ""
     assert stat_data.units[target_t_col] == "K"
@@ -1254,13 +1253,13 @@ def test_auto_restart_restart_stem(tmp_path):
 
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
-    # Header and steps 3, 6 only in stats
-    assert len(lines) == 3
+    # Header and steps 0, 3, 6 only in stats
+    assert len(lines) == 4
     assert int(lines[-1].split()[0]) == 6
 
     restart_struct = read(restart_path)
-    # Initial structure not saved by npt, so 4th structure from traj
-    traj_struct = read(traj_path, index=3)
+    # 4th structure from trajectory, which includes step 0
+    traj_struct = read(traj_path, index=4)
 
     # Prepare with auto restart from step 4
     npt_restart = NPT(
@@ -1296,11 +1295,11 @@ def test_auto_restart_restart_stem(tmp_path):
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
     # Header and steps 0, 3, 6 and 5, 6 and 7
-    assert len(lines) == 6
+    assert len(lines) == 7
     assert int(lines[-1].split()[0]) == 7
 
     final_traj = read(traj_path, index=":")
-    assert len(final_traj) == 9
+    assert len(final_traj) == 10
 
 
 def test_set_info(tmp_path):
