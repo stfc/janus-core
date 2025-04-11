@@ -8,6 +8,7 @@ Similar in spirit to matcalc and quacc approaches
 
 from __future__ import annotations
 
+from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, get_args
 
@@ -71,9 +72,7 @@ def _set_model_path(
 
 def _set_no_weights_only_load():
     """Set environment variable to fix models for torch 2.6."""
-    import os
-
-    os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
+    environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")
 
 
 def choose_calculator(
