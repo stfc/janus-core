@@ -469,7 +469,7 @@ def test_ensemble_kwargs(tmp_path):
     with open(stats_path, encoding="utf8") as stats_file:
         lines = stats_file.readlines()
         # Includes step 0
-        assert len(lines) == 3
+        assert len(lines) == 4
 
     init_atoms = read(struct_path)
     final_atoms = read(final_path)
