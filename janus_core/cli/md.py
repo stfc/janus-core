@@ -215,39 +215,40 @@ def md(
     ] = 10,
     restart: Annotated[
         bool,
-        Option(help="Whether restarting dynamics.", rich_help_panel="Restart files"),
+        Option(help="Whether restarting dynamics.", rich_help_panel="Restart settings"),
     ] = False,
     restart_auto: Annotated[
         bool,
         Option(
             help="Whether to infer restart file if restarting dynamics.",
-            rich_help_panel="Restart files",
+            rich_help_panel="Restart settings",
         ),
     ] = True,
     restart_stem: Annotated[
         Path | None,
         Option(
             help="Stem for restart file name. Default inferred from `file_prefix`.",
-            rich_help_panel="Restart files",
+            rich_help_panel="Restart settings",
         ),
     ] = None,
     restart_every: Annotated[
         int,
         Option(
             help="Frequency of steps to save restart info.",
-            rich_help_panel="Restart files",
+            rich_help_panel="Restart settings",
         ),
     ] = 1000,
     rotate_restart: Annotated[
         bool,
         Option(
-            help="Whether to rotate restart files.", rich_help_panel="Restart files"
+            help="Whether to rotate restart files.", rich_help_panel="Restart settings"
         ),
     ] = False,
     restarts_to_keep: Annotated[
         int,
         Option(
-            help="Restart files to keep if rotating.", rich_help_panel="Restart files"
+            help="Restart files to keep if rotating.",
+            rich_help_panel="Restart settings",
         ),
     ] = 4,
     final_file: Annotated[
@@ -259,7 +260,7 @@ def md(
                 Default inferred from `file_prefix`.
                 """
             ),
-            rich_help_panel="Final file",
+            rich_help_panel="Output files",
         ),
     ] = None,
     stats_file: Annotated[
@@ -271,65 +272,61 @@ def md(
                 `file_prefix`.
                 """
             ),
-            rich_help_panel="Statistics file",
+            rich_help_panel="Output files",
         ),
     ] = None,
     stats_every: Annotated[
         int,
-        Option(
-            help="Frequency to output statistics.", rich_help_panel="Statistics file"
-        ),
+        Option(help="Frequency to output statistics.", rich_help_panel="Output files"),
     ] = 100,
     traj_file: Annotated[
         Path | None,
         Option(
             help="File to save trajectory. Default inferred from `file_prefix`.",
-            rich_help_panel="Trajectory file",
+            rich_help_panel="Output files",
         ),
     ] = None,
     traj_append: Annotated[
         bool,
-        Option(help="Whether to append trajectory.", rich_help_panel="Trajectory file"),
+        Option(help="Whether to append trajectory.", rich_help_panel="Output files"),
     ] = False,
     traj_start: Annotated[
         int,
-        Option(
-            help="Step to start saving trajectory.", rich_help_panel="Trajectory file"
-        ),
+        Option(help="Step to start saving trajectory.", rich_help_panel="Output files"),
     ] = 0,
     traj_every: Annotated[
         int,
         Option(
             help="Frequency of steps to save trajectory.",
-            rich_help_panel="Trajectory file",
+            rich_help_panel="Output files",
         ),
     ] = 100,
     temp_start: Annotated[
         float | None,
         Option(
             help="Temperature to start heating, in K.",
-            rich_help_panel="Temperature ramp",
+            rich_help_panel="Heating/cooling ramp",
         ),
     ] = None,
     temp_end: Annotated[
         float | None,
         Option(
             help="Maximum temperature for heating, in K.",
-            rich_help_panel="Temperature ramp",
+            rich_help_panel="Heating/cooling ramp",
         ),
     ] = None,
     temp_step: Annotated[
         float | None,
         Option(
             help="Size of temperature steps when heating, in K.",
-            rich_help_panel="Temperature ramp",
+            rich_help_panel="Heating/cooling ramp",
         ),
     ] = None,
     temp_time: Annotated[
         float | None,
         Option(
             help="Time between heating steps, in fs.",
-            rich_help_panel="Temperature ramp",
+            rich_help_panel="Heating/cooling ramp",
         ),
     ] = None,
     post_process_kwargs: PostProcessKwargs = None,
