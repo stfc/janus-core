@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from urllib.error import URLError
 from zipfile import BadZipFile
 
 import pytest
@@ -107,8 +108,11 @@ def test_mlips(arch, device, kwargs):
         calculator = choose_calculator(arch=arch, device=device, **kwargs)
         assert calculator.parameters["version"] is not None
         assert calculator.parameters["model_path"] is not None
-    except BadZipFile:
-        pytest.skip()
+    except (BadZipFile, URLError) as e:
+        if "Connection timed out" in e.msg or "File is not a zip file" in e.msg:
+            pytest.skip("Model download failed")
+        else:
+            raise e
 
 
 def test_invalid_arch():
