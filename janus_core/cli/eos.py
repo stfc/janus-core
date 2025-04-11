@@ -33,6 +33,7 @@ app = Typer()
 def eos(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     struct: StructPath,
     min_volume: Annotated[
         float,
@@ -134,8 +135,7 @@ def eos(
     plot_to_file
         Whether to save plot equation of state to svg. Default is False.
     arch
-        MLIP architecture to use for geometry optimization.
-        Default is "mace_mp".
+        MLIP architecture to use for geometry optimization. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path

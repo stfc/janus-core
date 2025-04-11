@@ -31,6 +31,7 @@ app = Typer()
 def descriptors(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     struct: StructPath,
     invariants_only: Annotated[
         bool,

@@ -73,6 +73,7 @@ def _set_minimize_kwargs(
 def geomopt(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     struct: StructPath,
     optimizer: Annotated[
         str | None,
@@ -219,21 +220,20 @@ def geomopt(
     minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
     arch
-        MLIP architecture to use for geometry optimization.
-        Default is "mace_mp".
+        MLIP architecture to use for geometry optimization. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-        read_kwargs["index"] is -1.
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is -1.
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.

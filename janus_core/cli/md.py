@@ -365,7 +365,6 @@ def md(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
-
     ensemble
         Name of thermodynamic ensemble.
     struct
@@ -399,7 +398,6 @@ def md(
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
-
     thermostat_time
         Thermostat time for NPT, NPT-MTK or NVT Nosé-Hoover simulation,
         in fs. Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for NPT-MTK.
@@ -426,7 +424,6 @@ def md(
         Default is 1.
     ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
-
     temp_start
         Temperature to start heating, in K. Default is None, which disables
         heating.
@@ -439,7 +436,6 @@ def md(
     temp_time
         Time between heating steps, in fs. Default is None, which disables
         heating.
-
     restart
         Whether restarting dynamics. Default is False.
     restart_auto
@@ -452,7 +448,6 @@ def md(
         Whether to rotate restart files. Default is False.
     restarts_to_keep
         Restart files to keep if rotating. Default is 4.
-
     final_file
         File to save final configuration at each temperature of similation. Default
         inferred from `file_prefix`.
@@ -468,7 +463,6 @@ def md(
         Step to start saving trajectory. Default is 0.
     traj_every
         Frequency of steps to save trajectory. Default is 100.
-
     arch
         MLIP architecture to use for molecular dynamics.
         Default is "mace_mp".
@@ -478,7 +472,6 @@ def md(
         Path to MLIP model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
@@ -489,7 +482,6 @@ def md(
     write_kwargs
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
-
     log
         Path to write logs to. Default is inferred from `file_prefix`.
     tracker

@@ -34,6 +34,7 @@ app = Typer()
 def phonons(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     struct: StructPath,
     supercell: Annotated[
         str,
@@ -84,44 +85,6 @@ def phonons(
             rich_help_panel="Calculation",
         ),
     ] = None,
-    dos: Annotated[
-        bool,
-        Option(help="Whether to calculate the DOS.", rich_help_panel="DOS"),
-    ] = False,
-    dos_kwargs: DoSKwargs = None,
-    pdos: Annotated[
-        bool,
-        Option(help="Whether to calculate the PDOS.", rich_help_panel="PDOS"),
-    ] = False,
-    pdos_kwargs: PDoSKwargs = None,
-    thermal: Annotated[
-        bool,
-        Option(
-            help="Whether to calculate thermal properties.",
-            rich_help_panel="Thermal Properties",
-        ),
-    ] = False,
-    temp_min: Annotated[
-        float,
-        Option(
-            help="Start temperature for thermal properties calculations, in K.",
-            rich_help_panel="Thermal Properties",
-        ),
-    ] = 0.0,
-    temp_max: Annotated[
-        float,
-        Option(
-            help="End temperature for thermal properties calculations, in K.",
-            rich_help_panel="Thermal Properties",
-        ),
-    ] = 1000.0,
-    temp_step: Annotated[
-        float,
-        Option(
-            help="Temperature step for thermal properties calculations, in K.",
-            rich_help_panel="Thermal Properties",
-        ),
-    ] = 50,
     symmetrize: Annotated[
         bool,
         Option(
@@ -166,12 +129,56 @@ def phonons(
             rich_help_panel="Calculation",
         ),
     ] = True,
+    # DOS
+    dos: Annotated[
+        bool,
+        Option(help="Whether to calculate the DOS.", rich_help_panel="DOS"),
+    ] = False,
+    dos_kwargs: DoSKwargs = None,
+    # PDOS
+    pdos: Annotated[
+        bool,
+        Option(help="Whether to calculate the PDOS.", rich_help_panel="PDOS"),
+    ] = False,
+    pdos_kwargs: PDoSKwargs = None,
+    # Thermal properties
+    thermal: Annotated[
+        bool,
+        Option(
+            help="Whether to calculate thermal properties.",
+            rich_help_panel="Thermal properties",
+        ),
+    ] = False,
+    temp_min: Annotated[
+        float,
+        Option(
+            help="Start temperature for thermal properties calculations, in K.",
+            rich_help_panel="Thermal properties",
+        ),
+    ] = 0.0,
+    temp_max: Annotated[
+        float,
+        Option(
+            help="End temperature for thermal properties calculations, in K.",
+            rich_help_panel="Thermal properties",
+        ),
+    ] = 1000.0,
+    temp_step: Annotated[
+        float,
+        Option(
+            help="Temperature step for thermal properties calculations, in K.",
+            rich_help_panel="Thermal properties",
+        ),
+    ] = 50,
+    # MLIP Calculator
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
+    # Strucuture I/O
     file_prefix: FilePrefix = None,
     read_kwargs: ReadKwargsLast = None,
+    # Logging/summary
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
@@ -205,6 +212,22 @@ def phonons(
     qpoint_file
         Path to yaml file with info to generate a path of q-points for band structure.
         Default is None.
+    symmetrize
+        Whether to symmetrize force constants. Default is False.
+    minimize
+        Whether to minimize structure before calculations. Default is False.
+    fmax
+        Set force convergence criteria for optimizer in units eV/Å.
+        Default is 0.1.
+    minimize_kwargs
+        Other keyword arguments to pass to geometry optimizer. Default is {}.
+    hdf5
+        Whether to save force constants in hdf5 format. Default is True.
+    plot_to_file
+        Whether to plot. Default is False.
+    write_full
+        Whether to maximize information written in various output files.
+        Default is True.
     dos
         Whether to calculate and save the DOS. Default is False.
     dos_kwargs
@@ -224,25 +247,8 @@ def phonons(
     temp_step
         Temperature step for thermal calculations, in K. Unused if `thermal` is False.
         Default is 50.0.
-    symmetrize
-        Whether to symmetrize force constants. Default is False.
-    minimize
-        Whether to minimize structure before calculations. Default is False.
-    fmax
-        Set force convergence criteria for optimizer in units eV/Å.
-        Default is 0.1.
-    minimize_kwargs
-        Other keyword arguments to pass to geometry optimizer. Default is {}.
-    hdf5
-        Whether to save force constants in hdf5 format. Default is True.
-    plot_to_file
-        Whether to plot. Default is False.
-    write_full
-        Whether to maximize information written in various output files.
-        Default is True.
     arch
-        MLIP architecture to use for geometry optimization.
-        Default is "mace_mp".
+        MLIP architecture to use for phonon calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path

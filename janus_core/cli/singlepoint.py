@@ -85,28 +85,27 @@ def singlepoint(
         Path to save structure with calculated results. Default is inferred from
         `file_prefix`.
     arch
-        MLIP architecture to use for single point calculations.
-        Default is "mace_mp".
+        MLIP architecture to use for single point calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is ":".
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is ":".
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
-    log
-        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
+    log
+        Path to write logs to. Default is inferred from `file_prefix`.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
