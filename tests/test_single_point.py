@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import shutil
+from urllib.error import URLError
 
 from ase.io import read
 from numpy import isfinite
@@ -119,15 +120,21 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
     """Test single point energy using extra MLIP calculators."""
     skip_extras(arch)
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / struct,
-        arch=arch,
-        device=device,
-        properties="energy",
-        **kwargs,
-    )
-    energy = single_point.run()["energy"]
-    assert energy == pytest.approx(expected_energy, rel=1e-5)
+    try:
+        single_point = SinglePoint(
+            struct=DATA_PATH / struct,
+            arch=arch,
+            device=device,
+            properties="energy",
+            **kwargs,
+        )
+        energy = single_point.run()["energy"]
+        assert energy == pytest.approx(expected_energy, rel=1e-5)
+    except URLError as e:
+        if "Connection timed out" in e.msg:
+            pytest.skip("Model download failed")
+        else:
+            raise e
 
 
 def test_single_point_none():
