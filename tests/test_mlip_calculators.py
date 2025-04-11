@@ -109,7 +109,7 @@ def test_mlips(arch, device, kwargs):
         assert calculator.parameters["version"] is not None
         assert calculator.parameters["model_path"] is not None
     except (BadZipFile, URLError) as e:
-        if "Connection timed out" in e.msg or "File is not a zip file" in e.msg:
+        if "Connection timed out" in e.msg or isinstance(e, BadZipFile):
             pytest.skip("Model download failed")
         else:
             raise e
