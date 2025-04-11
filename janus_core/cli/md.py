@@ -72,14 +72,15 @@ def md(
     ],
     struct: StructPath,
     steps: Annotated[
-        int, Option(help="Number of steps in MD simulation.", rich_help_panel="MD")
+        int,
+        Option(help="Number of steps in MD simulation.", rich_help_panel="Calculation"),
     ] = 0,
     timestep: Annotated[
         float,
         Option(help="Timestep for integrator, in fs.", rich_help_panel="Calculation"),
     ] = 1.0,
     temp: Annotated[
-        float, Option(help="Temperature, in K.", rich_help_panel="MD")
+        float, Option(help="Temperature, in K.", rich_help_panel="Calculation")
     ] = 300.0,
     thermostat_time: Annotated[
         float,
