@@ -25,6 +25,7 @@ from janus_core.cli.types import (
     ReadKwargsLast,
     StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import parse_correlation_kwargs, yaml_converter_callback
@@ -56,21 +57,90 @@ def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
 
 
 @app.command()
-@use_config(yaml_converter_callback)
+@use_config(yaml_converter_callback, param_help="Path to configuration file.")
 def md(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     ensemble: Annotated[
         str,
         Option(
             click_type=Choice(get_args(Ensembles)),
             help="Name of thermodynamic ensemble.",
+            rich_help_panel="Calculation",
+            show_default=False,
         ),
     ],
     struct: StructPath,
-    steps: Annotated[int, Option(help="Number of steps in simulation.")] = 0,
-    timestep: Annotated[float, Option(help="Timestep for integrator, in fs.")] = 1.0,
-    temp: Annotated[float, Option(help="Temperature, in K.")] = 300.0,
+    steps: Annotated[
+        int,
+        Option(help="Number of steps in MD simulation.", rich_help_panel="Calculation"),
+    ] = 0,
+    timestep: Annotated[
+        float,
+        Option(help="Timestep for integrator, in fs.", rich_help_panel="Calculation"),
+    ] = 1.0,
+    temp: Annotated[
+        float, Option(help="Temperature, in K.", rich_help_panel="Calculation")
+    ] = 300.0,
+    equil_steps: Annotated[
+        int,
+        Option(
+            help="Maximum number of steps at which to perform optimization and reset",
+            rich_help_panel="Calculation",
+        ),
+    ] = 0,
+    minimize: Annotated[
+        bool,
+        Option(
+            help="Whether to minimize structure during equilibration.",
+            rich_help_panel=("Calculation"),
+        ),
+    ] = False,
+    minimize_every: Annotated[
+        int,
+        Option(
+            help=(
+                """
+                Frequency of minimizations. Default disables minimization after
+                beginning dynamics.
+                """
+            ),
+            rich_help_panel="Calculation",
+        ),
+    ] = -1,
+    minimize_kwargs: MinimizeKwargs = None,
+    rescale_velocities: Annotated[
+        bool,
+        Option(
+            help="Whether to rescale velocities during equilibration.",
+            rich_help_panel="Calculation",
+        ),
+    ] = False,
+    remove_rot: Annotated[
+        bool,
+        Option(
+            help="Whether to remove rotation during equilibration.",
+            rich_help_panel="Calculation",
+        ),
+    ] = False,
+    rescale_every: Annotated[
+        int,
+        Option(
+            help="Frequency to rescale velocities during equilibration.",
+            rich_help_panel="Calculation",
+        ),
+    ] = 10,
+    post_process_kwargs: PostProcessKwargs = None,
+    correlation_kwargs: CorrelationKwargs = None,
+    seed: Annotated[
+        int | None,
+        Option(
+            help="Random seed for numpy.random and random functions.",
+            rich_help_panel="Calculation",
+        ),
+    ] = None,
+    # Ensemble configuration
     thermostat_time: Annotated[
         float,
         Option(
@@ -80,7 +150,8 @@ def md(
                 in fs. Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for
                 NPT-MTK.
                 """
-            )
+            ),
+            rich_help_panel="Ensemble configuration",
         ),
     ] = None,
     barostat_time: Annotated[
@@ -91,98 +162,138 @@ def md(
                 Barostat time for NPT, NPT-MTK or NPH simulation, in fs.
                 Default is 75 fs for NPT and NPH, or 1000 fs for NPT-MTK.
                 """
-            )
+            ),
+            rich_help_panel="Ensemble configuration",
         ),
     ] = None,
     bulk_modulus: Annotated[
-        float, Option(help="Bulk modulus for NPT or NPH simulation, in GPa.")
+        float,
+        Option(
+            help="Bulk modulus for NPT or NPH simulation, in GPa.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 2.0,
     pressure: Annotated[
-        float, Option(help="Pressure for NPT or NPH simulation, in GPa.")
+        float,
+        Option(
+            help="Pressure for NPT or NPH simulation, in GPa.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 0.0,
     friction: Annotated[
-        float, Option(help="Friction coefficient for NVT simulation, in fs^-1.")
+        float,
+        Option(
+            help="Friction coefficient for NVT simulation, in fs^-1.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 0.005,
     taut: Annotated[
         float,
         Option(
-            help="Temperature coupling time constant for NVT CSVR simulation, in fs."
+            help="Temperature coupling time constant for NVT CSVR simulation, in fs.",
+            rich_help_panel="Ensemble configuration",
         ),
     ] = 100.0,
     thermostat_chain: Annotated[
         int,
-        Option(help="Number of variables in thermostat chain for NPT MTK simulation."),
+        Option(
+            help="Number of variables in thermostat chain for NPT MTK simulation.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 3,
     barostat_chain: Annotated[
         int,
-        Option(help="Number of variables in barostat chain for NPT MTK simulation."),
+        Option(
+            help="Number of variables in barostat chain for NPT MTK simulation.",
+            rich_help_panel="Ensemble configuration",
+        ),
     ] = 3,
     thermostat_substeps: Annotated[
         int,
         Option(
-            help="Number of sub-steps in thermostat integration for NPT MTK simulation."
+            help=(
+                "Number of sub-steps in thermostat integration for NPT MTK simulation."
+            ),
+            rich_help_panel="Ensemble configuration",
         ),
     ] = 1,
     barostat_substeps: Annotated[
         int,
         Option(
-            help="Number of sub-steps in barostat integration for NPT MTK simulation."
+            help="Number of sub-steps in barostat integration for NPT MTK simulation.",
+            rich_help_panel="Ensemble configuration",
         ),
     ] = 1,
     ensemble_kwargs: EnsembleKwargs = None,
-    arch: Architecture = "mace_mp",
-    device: Device = "cpu",
-    model_path: ModelPath = None,
-    read_kwargs: ReadKwargsLast = None,
-    calc_kwargs: CalcKwargs = None,
-    equil_steps: Annotated[
-        int,
+    # Heating/cooling ramp
+    temp_start: Annotated[
+        float | None,
         Option(
-            help=("Maximum number of steps at which to perform optimization and reset")
+            help="Temperature to start heating, in K.",
+            rich_help_panel="Heating/cooling ramp",
         ),
-    ] = 0,
-    minimize: Annotated[
-        bool, Option(help="Whether to minimize structure during equilibration.")
-    ] = False,
-    minimize_every: Annotated[
-        int,
+    ] = None,
+    temp_end: Annotated[
+        float | None,
         Option(
-            help=(
-                """
-                Frequency of minimizations. Default disables minimization after
-                beginning dynamics.
-                """
-            )
+            help="Maximum temperature for heating, in K.",
+            rich_help_panel="Heating/cooling ramp",
         ),
-    ] = -1,
-    minimize_kwargs: MinimizeKwargs = None,
-    rescale_velocities: Annotated[
-        bool, Option(help="Whether to rescale velocities during equilibration.")
+    ] = None,
+    temp_step: Annotated[
+        float | None,
+        Option(
+            help="Size of temperature steps when heating, in K.",
+            rich_help_panel="Heating/cooling ramp",
+        ),
+    ] = None,
+    temp_time: Annotated[
+        float | None,
+        Option(
+            help="Time between heating steps, in fs.",
+            rich_help_panel="Heating/cooling ramp",
+        ),
+    ] = None,
+    # Restart settings
+    restart: Annotated[
+        bool,
+        Option(help="Whether restarting dynamics.", rich_help_panel="Restart settings"),
     ] = False,
-    remove_rot: Annotated[
-        bool, Option(help="Whether to remove rotation during equilibration.")
-    ] = False,
-    rescale_every: Annotated[
-        int, Option(help="Frequency to rescale velocities during equilibration.")
-    ] = 10,
-    file_prefix: FilePrefix = None,
-    restart: Annotated[bool, Option(help="Whether restarting dynamics.")] = False,
     restart_auto: Annotated[
-        bool, Option(help="Whether to infer restart file if restarting dynamics.")
+        bool,
+        Option(
+            help="Whether to infer restart file if restarting dynamics.",
+            rich_help_panel="Restart settings",
+        ),
     ] = True,
     restart_stem: Annotated[
         Path | None,
-        Option(help="Stem for restart file name. Default inferred from `file_prefix`."),
+        Option(
+            help="Stem for restart file name. Default inferred from `file_prefix`.",
+            rich_help_panel="Restart settings",
+        ),
     ] = None,
     restart_every: Annotated[
-        int, Option(help="Frequency of steps to save restart info.")
+        int,
+        Option(
+            help="Frequency of steps to save restart info.",
+            rich_help_panel="Restart settings",
+        ),
     ] = 1000,
     rotate_restart: Annotated[
-        bool, Option(help="Whether to rotate restart files.")
+        bool,
+        Option(
+            help="Whether to rotate restart files.", rich_help_panel="Restart settings"
+        ),
     ] = False,
     restarts_to_keep: Annotated[
-        int, Option(help="Restart files to keep if rotating.")
+        int,
+        Option(
+            help="Restart files to keep if rotating.",
+            rich_help_panel="Restart settings",
+        ),
     ] = 4,
+    # Output files
     final_file: Annotated[
         Path | None,
         Option(
@@ -191,7 +302,8 @@ def md(
                 File to save final configuration at each temperature of similation.
                 Default inferred from `file_prefix`.
                 """
-            )
+            ),
+            rich_help_panel="Output files",
         ),
     ] = None,
     stats_file: Annotated[
@@ -202,44 +314,48 @@ def md(
                 File to save thermodynamical statistics. Default inferred from
                 `file_prefix`.
                 """
-            )
+            ),
+            rich_help_panel="Output files",
         ),
     ] = None,
-    stats_every: Annotated[int, Option(help="Frequency to output statistics.")] = 100,
+    stats_every: Annotated[
+        int,
+        Option(help="Frequency to output statistics.", rich_help_panel="Output files"),
+    ] = 100,
     traj_file: Annotated[
         Path | None,
-        Option(help="File to save trajectory. Default inferred from `file_prefix`."),
+        Option(
+            help="File to save trajectory. Default inferred from `file_prefix`.",
+            rich_help_panel="Output files",
+        ),
     ] = None,
-    traj_append: Annotated[bool, Option(help="Whether to append trajectory.")] = False,
-    traj_start: Annotated[int, Option(help="Step to start saving trajectory.")] = 0,
+    traj_append: Annotated[
+        bool,
+        Option(help="Whether to append trajectory.", rich_help_panel="Output files"),
+    ] = False,
+    traj_start: Annotated[
+        int,
+        Option(help="Step to start saving trajectory.", rich_help_panel="Output files"),
+    ] = 0,
     traj_every: Annotated[
-        int, Option(help="Frequency of steps to save trajectory.")
+        int,
+        Option(
+            help="Frequency of steps to save trajectory.",
+            rich_help_panel="Output files",
+        ),
     ] = 100,
-    temp_start: Annotated[
-        float | None,
-        Option(help="Temperature to start heating, in K."),
-    ] = None,
-    temp_end: Annotated[
-        float | None,
-        Option(help="Maximum temperature for heating, in K."),
-    ] = None,
-    temp_step: Annotated[
-        float | None, Option(help="Size of temperature steps when heating, in K.")
-    ] = None,
-    temp_time: Annotated[
-        float | None, Option(help="Time between heating steps, in fs.")
-    ] = None,
+    # MLIP Calculator
+    arch: Architecture = "mace_mp",
+    device: Device = "cpu",
+    model_path: ModelPath = None,
+    calc_kwargs: CalcKwargs = None,
+    # Structure I/O
+    file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsLast = None,
     write_kwargs: WriteKwargs = None,
-    post_process_kwargs: PostProcessKwargs = None,
-    correlation_kwargs: CorrelationKwargs = None,
-    seed: Annotated[
-        int | None,
-        Option(help="Random seed for numpy.random and random functions."),
-    ] = None,
+    # Logging/summary
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -254,11 +370,34 @@ def md(
     struct
         Path of structure to simulate.
     steps
-        Number of steps in simulation. Default is 0.
+        Number of steps in MD simulation. Default is 0.
     timestep
         Timestep for integrator, in fs. Default is 1.0.
     temp
         Temperature, in K. Default is 300.
+    equil_steps
+        Maximum number of steps at which to perform optimization and reset velocities.
+        Default is 0.
+    minimize
+        Whether to minimize structure during equilibration. Default is False.
+    minimize_every
+        Frequency of minimizations. Default is -1, which disables minimization after
+        beginning dynamics.
+    minimize_kwargs
+        Keyword arguments to pass to geometry optimizer. Default is {}.
+    rescale_velocities
+        Whether to rescale velocities. Default is False.
+    remove_rot
+        Whether to remove rotation. Default is False.
+    rescale_every
+        Frequency to rescale velocities. Default is 10.
+    post_process_kwargs
+        Keyword arguments to pass to post-processing. Default is None.
+    correlation_kwargs
+        Keyword arguments to pass for on-the-fly correlations. Default is None.
+    seed
+        Random seed used by numpy.random and random functions, such as in Langevin.
+        Default is None.
     thermostat_time
         Thermostat time for NPT, NPT-MTK or NVT Nosé-Hoover simulation,
         in fs. Default is 50 fs for NPT and NVT Nosé-Hoover, or 100 fs for NPT-MTK.
@@ -285,38 +424,18 @@ def md(
         Default is 1.
     ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
-    arch
-        MLIP architecture to use for molecular dynamics.
-        Default is "mace_mp".
-    device
-        Device to run model on. Default is "cpu".
-    model_path
-        Path to MLIP model. Default is `None`.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is -1.
-    calc_kwargs
-        Keyword arguments to pass to the selected calculator. Default is {}.
-    equil_steps
-        Maximum number of steps at which to perform optimization and reset velocities.
-        Default is 0.
-    minimize
-        Whether to minimize structure during equilibration. Default is False.
-    minimize_every
-        Frequency of minimizations. Default is -1, which disables minimization after
-        beginning dynamics.
-    minimize_kwargs
-        Keyword arguments to pass to geometry optimizer. Default is {}.
-    rescale_velocities
-        Whether to rescale velocities. Default is False.
-    remove_rot
-        Whether to remove rotation. Default is False.
-    rescale_every
-        Frequency to rescale velocities. Default is 10.
-    file_prefix
-        Prefix for output files, including directories. Default directory is
-        ./janus_results, and default filename prefix is inferred from the input
-        stucture filename.
+    temp_start
+        Temperature to start heating, in K. Default is None, which disables
+        heating.
+    temp_end
+        Maximum temperature for heating, in K. Default is None, which disables
+        heating.
+    temp_step
+        Size of temperature steps when heating, in K. Default is None, which disables
+        heating.
+    temp_time
+        Time between heating steps, in fs. Default is None, which disables
+        heating.
     restart
         Whether restarting dynamics. Default is False.
     restart_auto
@@ -344,28 +463,25 @@ def md(
         Step to start saving trajectory. Default is 0.
     traj_every
         Frequency of steps to save trajectory. Default is 100.
-    temp_start
-        Temperature to start heating, in K. Default is None, which disables
-        heating.
-    temp_end
-        Maximum temperature for heating, in K. Default is None, which disables
-        heating.
-    temp_step
-        Size of temperature steps when heating, in K. Default is None, which disables
-        heating.
-    temp_time
-        Time between heating steps, in fs. Default is None, which disables
-        heating.
+    arch
+        MLIP architecture to use for molecular dynamics.
+        Default is "mace_mp".
+    device
+        Device to run model on. Default is "cpu".
+    model_path
+        Path to MLIP model. Default is `None`.
+    calc_kwargs
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    file_prefix
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default,
+            read_kwargs["index"] is -1.
     write_kwargs
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
-    post_process_kwargs
-        Keyword arguments to pass to post-processing. Default is None.
-    correlation_kwargs
-        Keyword arguments to pass for on-the-fly correlations. Default is None.
-    seed
-        Random seed used by numpy.random and random functions, such as in Langevin.
-        Default is None.
     log
         Path to write logs to. Default is inferred from `file_prefix`.
     tracker

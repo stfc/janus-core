@@ -19,6 +19,7 @@ from janus_core.cli.types import (
     ReadKwargsLast,
     StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
@@ -68,30 +69,45 @@ def _set_minimize_kwargs(
 
 
 @app.command()
-@use_config(yaml_converter_callback)
+@use_config(yaml_converter_callback, param_help="Path to configuration file.")
 def geomopt(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     struct: StructPath,
     optimizer: Annotated[
         str | None,
-        Option(help="Name of ASE optimizer function to use."),
+        Option(
+            help="Name of ASE optimizer function to use.",
+            rich_help_panel="Calculation",
+        ),
     ] = "LBFGS",
     fmax: Annotated[
-        float, Option(help="Maximum force for convergence, in eV/Å.")
+        float,
+        Option(
+            help="Maximum force for convergence, in eV/Å.",
+            rich_help_panel="Calculation",
+        ),
     ] = 0.1,
-    steps: Annotated[int, Option(help="Maximum number of optimization steps.")] = 1000,
-    arch: Architecture = "mace_mp",
-    device: Device = "cpu",
-    model_path: ModelPath = None,
+    steps: Annotated[
+        int,
+        Option(
+            help="Maximum number of optimization steps.",
+            rich_help_panel="Calculation",
+        ),
+    ] = 1000,
     opt_cell_lengths: Annotated[
         bool,
-        Option(help="Optimize cell vectors, as well as atomic positions."),
+        Option(
+            help="Optimize cell vectors, as well as atomic positions.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     opt_cell_fully: Annotated[
         bool,
         Option(
             help="Fully optimize the cell vectors, angles, and atomic positions.",
+            rich_help_panel="Calculation",
         ),
     ] = False,
     filter_func: Annotated[
@@ -100,29 +116,39 @@ def geomopt(
             help=(
                 "Name of ASE filter/constraint function to use. If using "
                 "--opt-cell-lengths or --opt-cell-fully, defaults to "
-                "`FrechetCellFilter` if available, otherwise `ExpCellFilter`."
-            )
+                "`FrechetCellFilter`."
+            ),
+            rich_help_panel="Calculation",
         ),
     ] = None,
     pressure: Annotated[
-        float, Option(help="Scalar pressure when optimizing cell geometry, in GPa.")
+        float,
+        Option(
+            help="Scalar pressure when optimizing cell geometry, in GPa.",
+            rich_help_panel="Calculation",
+        ),
     ] = 0.0,
     symmetrize: Annotated[
-        bool, Option(help="Whether to refine symmetry after geometry optimization.")
+        bool,
+        Option(
+            help="Whether to refine symmetry after geometry optimization.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     symmetry_tolerance: Annotated[
         float,
         Option(
-            help="Atom displacement tolerance for spglib symmetry determination, in Å."
+            help="Atom displacement tolerance for spglib symmetry determination, in Å.",
+            rich_help_panel="Calculation",
         ),
     ] = 0.001,
-    file_prefix: FilePrefix = None,
     out: Annotated[
         Path | None,
         Option(
             help=(
                 "Path to save optimized structure. Default is inferred `file_prefix`."
             ),
+            rich_help_panel="Calculation",
         ),
     ] = None,
     write_traj: Annotated[
@@ -133,16 +159,22 @@ def geomopt(
                 'If traj_kwargs["filename"] is not specified, it is inferred '
                 "from `file_prefix`."
             ),
+            rich_help_panel="Calculation",
         ),
     ] = False,
-    read_kwargs: ReadKwargsLast = None,
-    calc_kwargs: CalcKwargs = None,
     minimize_kwargs: MinimizeKwargs = None,
+    # MLIP Calculator
+    arch: Architecture = "mace_mp",
+    device: Device = "cpu",
+    model_path: ModelPath = None,
+    calc_kwargs: CalcKwargs = None,
+    # Structure I/O
+    file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsLast = None,
     write_kwargs: WriteKwargs = None,
+    # Logging/summary
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -160,13 +192,6 @@ def geomopt(
         Set force convergence criteria for optimizer, in eV/Å. Default is 0.1.
     steps
         Set maximum number of optimization steps to run. Default is 1000.
-    arch
-        MLIP architecture to use for geometry optimization.
-        Default is "mace_mp".
-    device
-        Device to run model on. Default is "cpu".
-    model_path
-        Path to MLIP model. Default is `None`.
     opt_cell_lengths
         Whether to optimize cell vectors, as well as atomic positions, by setting
         `hydrostatic_strain` in the filter function. Default is False.
@@ -186,23 +211,29 @@ def geomopt(
     symmetry_tolerance
         Atom displacement tolerance for spglib symmetry determination, in Å.
         Default is 0.001.
-    file_prefix
-        Prefix for output files, including directories. Default directory is
-        ./janus_results, and default filename prefix is inferred from the input
-        stucture filename.
     out
         Path to save optimized structure, or last structure if optimization did not
         converge. Default is inferred from `file_prefix`.
     write_traj
         Whether to save a trajectory file of optimization frames.
         If traj_kwargs["filename"] is not specified, it is inferred from `file_prefix`.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default,
-            read_kwargs["index"] is -1.
-    calc_kwargs
-        Keyword arguments to pass to the selected calculator. Default is {}.
     minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
+    arch
+        MLIP architecture to use for geometry optimization. Default is "mace_mp".
+    device
+        Device to run model on. Default is "cpu".
+    model_path
+        Path to MLIP model. Default is `None`.
+    calc_kwargs
+        Keyword arguments to pass to the selected calculator. Default is {}.
+    file_prefix
+        Prefix for output files, including directories. Default directory is
+        ./janus_results, and default filename prefix is inferred from the input
+        stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default,
+        read_kwargs["index"] is -1.
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving optimized structure.
         Default is {}.

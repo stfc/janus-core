@@ -17,20 +17,47 @@ from janus_core.cli.preprocess import preprocess
 from janus_core.cli.singlepoint import singlepoint
 from janus_core.cli.train import train
 
-app = Typer(name="janus", no_args_is_help=True)
-app.command(help="Perform single point calculations and save to file.")(singlepoint)
-app.command(help="Perform geometry optimization and save optimized structure to file.")(
-    geomopt
+app = Typer(
+    name="janus",
+    no_args_is_help=True,
+    epilog="Try 'janus COMMAND --help' for subcommand options",
 )
 app.command(
-    help="Run molecular dynamics simulation, and save trajectory and statistics."
+    help="Perform single point calculations and save to file.",
+    rich_help_panel="Calculations",
+)(singlepoint)
+app.command(
+    help="Perform geometry optimization and save optimized structure to file.",
+    rich_help_panel="Calculations",
+)(geomopt)
+app.command(
+    help="Run molecular dynamics simulation, and save trajectory and statistics.",
+    rich_help_panel="Calculations",
 )(md)
-app.command(help="Calculate phonons and save results.")(phonons)
-app.command(help="Calculate equation of state.")(eos)
-app.command(help="Run Nudged Elastic Band method.")(neb)
-app.command(help="Calculate MLIP descriptors.")(descriptors)
-app.command(help="Running training for an MLIP.")(train)
-app.command(help="Running preprocessing for an MLIP.")(preprocess)
+app.command(
+    help="Calculate phonons and save results.",
+    rich_help_panel="Calculations",
+)(phonons)
+app.command(
+    help="Calculate equation of state.",
+    rich_help_panel="Calculations",
+)(eos)
+app.command(
+    help="Run Nudged Elastic Band method.",
+    rich_help_panel="Calculations",
+)(neb)
+app.command(
+    help="Calculate MLIP descriptors.",
+    rich_help_panel="Calculations",
+)(descriptors)
+app.command(
+    help="Train or fine-tune an MLIP.",
+    rich_help_panel="Training",
+)(train)
+app.command(
+    help="Preprocess data before training.",
+    rich_help_panel="Training",
+)(preprocess)
 
 
 @app.callback(invoke_without_command=True, help="")

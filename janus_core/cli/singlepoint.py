@@ -19,6 +19,7 @@ from janus_core.cli.types import (
     ReadKwargsAll,
     StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
@@ -28,14 +29,12 @@ app = Typer()
 
 
 @app.command()
-@use_config(yaml_converter_callback)
+@use_config(yaml_converter_callback, param_help="Path to configuration file.")
 def singlepoint(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Calculation
     struct: StructPath,
-    arch: Architecture = "mace_mp",
-    device: Device = "cpu",
-    model_path: ModelPath = None,
     properties: Annotated[
         list[str] | None,
         Option(
@@ -44,9 +43,9 @@ def singlepoint(
                 "Properties to calculate. If not specified, 'energy', 'forces' "
                 "and 'stress' will be returned."
             ),
+            rich_help_panel="Calculation",
         ),
     ] = None,
-    file_prefix: FilePrefix = None,
     out: Annotated[
         Path | None,
         Option(
@@ -54,15 +53,21 @@ def singlepoint(
                 "Path to save structure with calculated results. Default is inferred "
                 "from `file_prefix`."
             ),
+            rich_help_panel="Calculation",
         ),
     ] = None,
-    read_kwargs: ReadKwargsAll = None,
+    # MLIP Calculator
+    arch: Architecture = "mace_mp",
+    device: Device = "cpu",
+    model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
+    # Structure I/O
+    file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsAll = None,
     write_kwargs: WriteKwargs = None,
+    # Logging and summary
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -74,34 +79,33 @@ def singlepoint(
         Typer (Click) Context. Automatically set.
     struct
         Path of structure to simulate.
+    properties
+        Physical properties to calculate. Default is ("energy", "forces", "stress").
+    out
+        Path to save structure with calculated results. Default is inferred from
+        `file_prefix`.
     arch
-        MLIP architecture to use for single point calculations.
-        Default is "mace_mp".
+        MLIP architecture to use for single point calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
-    properties
-        Physical properties to calculate. Default is ("energy", "forces", "stress").
+    calc_kwargs
+        Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
-    out
-        Path to save structure with calculated results. Default is inferred from
-        `file_prefix`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is ":".
-    calc_kwargs
-        Keyword arguments to pass to the selected calculator. Default is {}.
     write_kwargs
         Keyword arguments to pass to ase.io.write when saving results. Default is {}.
-    log
-        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
+    log
+        Path to write logs to. Default is inferred from `file_prefix`.
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.

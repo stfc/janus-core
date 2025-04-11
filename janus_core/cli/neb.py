@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated, get_args
 
 from click import Choice
@@ -20,8 +21,8 @@ from janus_core.cli.types import (
     NebKwargs,
     NebOptKwargs,
     ReadKwargsLast,
-    StructPath,
     Summary,
+    Tracker,
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
@@ -30,59 +31,92 @@ app = Typer()
 
 
 @app.command()
-@use_config(yaml_converter_callback)
+@use_config(yaml_converter_callback, param_help="Path to configuration file.")
 def neb(
     # numpydoc ignore=PR02
     ctx: Context,
-    init_struct: StructPath | None = None,
-    final_struct: StructPath | None = None,
-    band_structs: StructPath | None = None,
+    # Calculation
+    init_struct: Annotated[
+        Path | None,
+        Option(
+            help="Path of initial structure in band.", rich_help_panel="Calculation"
+        ),
+    ] = None,
+    final_struct: Annotated[
+        Path | None,
+        Option(help="Path of final structure in band.", rich_help_panel="Calculation"),
+    ] = None,
+    band_structs: Annotated[
+        Path | None,
+        Option(help="Path of all band images.", rich_help_panel="Calculation"),
+    ] = None,
     neb_class: Annotated[
         str | None,
-        Option(help="Name of ASE NEB class to use."),
+        Option(help="Name of ASE NEB class to use.", rich_help_panel="Calculation"),
     ] = "NEB",
-    n_images: Annotated[int, Option(help="Number of images to use in NEB.")] = 15,
+    n_images: Annotated[
+        int,
+        Option(help="Number of images to use in NEB.", rich_help_panel="Calculation"),
+    ] = 15,
     write_band: Annotated[
         bool,
-        Option(help="Whether to write out all band images after optimization."),
+        Option(
+            help="Whether to write out all band images after optimization.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
-    write_kwargs: WriteKwargs = None,
     neb_kwargs: NebKwargs = None,
     interpolator: Annotated[
         str | None,
         Option(
             click_type=Choice(["ase", "pymatgen"]),
             help="Choice of interpolation strategy.",
+            rich_help_panel="Calculation",
         ),
     ] = "ase",
     interpolator_kwargs: InterpolationKwargs = None,
     optimizer: Annotated[
         str | None,
-        Option(help="Name of ASE NEB optimizer to use."),
+        Option(help="Name of ASE NEB optimizer to use.", rich_help_panel="Calculation"),
     ] = "NEBOptimizer",
-    fmax: Annotated[float, Option(help="Maximum force for NEB optimizer.")] = 0.1,
+    fmax: Annotated[
+        float,
+        Option(help="Maximum force for NEB optimizer.", rich_help_panel="Calculation"),
+    ] = 0.1,
     steps: Annotated[
-        int, Option(help="Maximum number of steps for optimization.")
+        int,
+        Option(
+            help="Maximum number of steps for optimization.",
+            rich_help_panel="Calculation",
+        ),
     ] = 100,
     optimizer_kwargs: NebOptKwargs = None,
     plot_band: Annotated[
         bool,
-        Option(help="Whether to plot and save NEB band."),
+        Option(
+            help="Whether to plot and save NEB band.", rich_help_panel="Calculation"
+        ),
     ] = False,
     minimize: Annotated[
-        bool, Option(help=" Whether to minimize initial and final structures.")
+        bool,
+        Option(
+            help=" Whether to minimize initial and final structures.",
+            rich_help_panel="Calculation",
+        ),
     ] = False,
     minimize_kwargs: MinimizeKwargs = None,
+    # MLIP Calculator
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model_path: ModelPath = None,
-    read_kwargs: ReadKwargsLast = None,
     calc_kwargs: CalcKwargs = None,
+    # Structure I/O
     file_prefix: FilePrefix = None,
+    read_kwargs: ReadKwargsLast = None,
+    write_kwargs: WriteKwargs = None,
+    # Logging/summary
     log: LogPath = None,
-    tracker: Annotated[
-        bool, Option(help="Whether to save carbon emissions of calculation")
-    ] = True,
+    tracker: Tracker = True,
     summary: Summary = None,
 ) -> None:
     """
@@ -108,8 +142,6 @@ def neb(
         Number of images to use in NEB. Default is 15.
     write_band
         Whether to write out all band images after optimization. Default is False.
-    write_kwargs
-        Keyword arguments to pass to ase.io.write when writing images.
     neb_kwargs
         Keyword arguments to pass to neb_class. Default is {}.
     interpolator
@@ -135,21 +167,22 @@ def neb(
     minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
     arch
-        MLIP architecture to use for Nudged Elastic Band method. Default is
-        "mace_mp".
+        MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
     device
         Device to run MLIP model on. Default is "cpu".
     model_path
         Path to MLIP model. Default is `None`.
-    read_kwargs
-        Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
-        is -1 if using `init_struct` and `final_struct`, or ":" for `band_structs`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
         Prefix for output files, including directories. Default directory is
         ./janus_results, and default filename prefix is inferred from the input
         stucture filename.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
+        is -1 if using `init_struct` and `final_struct`, or ":" for `band_structs`.
+    write_kwargs
+        Keyword arguments to pass to ase.io.write when writing images.
     log
         Path to write logs to. Default is inferred from `file_prefix`.
     tracker
