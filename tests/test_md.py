@@ -836,7 +836,7 @@ def test_heating_md(tmp_path, capsys, ensemble):
 
     # Check progress bar has completed.
     out = capsys.readouterr().out
-    assert "━━ 9/9" in out  # Total progress
+    assert "━━ 2/2" in out  # Ramp progress
     assert "━━ 5/5" in out  # Const T progress
 
 
