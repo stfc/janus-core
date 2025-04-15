@@ -1262,7 +1262,7 @@ class MolecularDynamics(BaseCalculation):
             if self.enable_progress_bar:
                 irun = track_progress(
                     irun,
-                    description=f"Simulating at {temp} K",
+                    description=f"Simulating at {temp} K...",
                     total=steps,
                 )
             # Run steps
@@ -1309,7 +1309,7 @@ class MolecularDynamics(BaseCalculation):
         if self.enable_progress_bar:
             irun = track_progress(
                 irun,
-                description=f"Simulating at {self.temp} K",
+                description=f"Simulating at {self.temp} K...",
                 total=steps,
             )
         # Run steps
