@@ -28,10 +28,10 @@ from janus_core.helpers.janus_types import (
     PhononCalcs,
 )
 from janus_core.helpers.utils import (
-    ProgressBar,
     build_file_dir,
     none_to_dict,
     set_minimize_logging,
+    track_progress,
 )
 
 
@@ -522,7 +522,7 @@ class Phonons(BaseCalculation):
         disp_supercells = phonon.supercells_with_displacements
 
         if self.enable_progress_bar:
-            disp_supercells = ProgressBar().track(
+            disp_supercells = track_progress(
                 disp_supercells, description="Computing displacements..."
             )
 

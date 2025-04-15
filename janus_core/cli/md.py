@@ -16,13 +16,13 @@ from janus_core.cli.types import (
     CalcKwargs,
     CorrelationKwargs,
     Device,
-    EnableProgressBar,
     EnsembleKwargs,
     FilePrefix,
     LogPath,
     MinimizeKwargs,
     ModelPath,
     PostProcessKwargs,
+    ProgressBar,
     ReadKwargsLast,
     StructPath,
     Summary,
@@ -358,7 +358,7 @@ def md(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
-    enable_progress_bar: EnableProgressBar = True,
+    progress_bar: ProgressBar = True,
     update_progress_every: Annotated[
         int,
         Option(
@@ -500,7 +500,7 @@ def md(
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
-    enable_progress_bar
+    progress_bar
         Whether to show progress bar.
     update_progress_every
         Number of timesteps between progress bar updates. Default is steps / 100,
@@ -630,7 +630,7 @@ def md(
         "post_process_kwargs": post_process_kwargs,
         "correlation_kwargs": correlation_kwargs,
         "seed": seed,
-        "enable_progress_bar": enable_progress_bar,
+        "enable_progress_bar": progress_bar,
         "update_progress_every": update_progress_every,
     }
 
