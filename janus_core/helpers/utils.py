@@ -371,7 +371,11 @@ def _dump_csv(
 
 
 def track_progress(
-    sequence: Sequence | Iterable, description: str, total: int | None = None
+    sequence: Sequence | Iterable,
+    description: str,
+    total: int | None = None,
+    completed: int = 0,
+    update_period: float = 0.1,
 ) -> Iterable:
     """
     Track the progress of iterating over a sequence.
@@ -388,6 +392,10 @@ def track_progress(
         The text to display to the left of the progress bar.
     total
         Total number of iteration steps. Defaults to length of sequence.
+    completed
+        Total number of iterations already completed. Default is 0.
+    update_period
+        Minimum time (in seconds) between calls to update(). Default is 0.1.
 
     Yields
     ------
@@ -412,7 +420,13 @@ def track_progress(
     )
 
     with progress:
-        yield from progress.track(sequence, description=description, total=total)
+        yield from progress.track(
+            sequence=sequence,
+            total=total,
+            completed=completed,
+            description=description,
+            update_period=update_period,
+        )
 
 
 def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
