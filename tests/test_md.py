@@ -1348,13 +1348,10 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
     """Test progress bar completes in all ensembles."""
     file_prefix = tmp_path / f"Cl4Na4-{tag}-T300.0"
 
-    single_point = SinglePoint(
+    md = ensemble(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
-    )
-    md = ensemble(
-        struct=single_point.struct,
+        model_path=MODEL_PATH,
         steps=2,
         file_prefix=file_prefix,
         enable_progress_bar=True,

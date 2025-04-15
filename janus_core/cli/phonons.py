@@ -14,12 +14,12 @@ from janus_core.cli.types import (
     Device,
     DisplacementKwargs,
     DoSKwargs,
-    EnableProgressBar,
     FilePrefix,
     LogPath,
     MinimizeKwargs,
     ModelPath,
     PDoSKwargs,
+    ProgressBar,
     ReadKwargsLast,
     StructPath,
     Summary,
@@ -183,7 +183,7 @@ def phonons(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
-    enable_progress_bar: EnableProgressBar = True,
+    progress_bar: ProgressBar = True,
 ) -> None:
     """
     Perform phonon calculations and write out results.
@@ -272,7 +272,7 @@ def phonons(
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
-    enable_progress_bar
+    progress_bar
         Whether to show progress bar.
     config
         Path to yaml configuration file to define the above options. Default is None.
@@ -390,7 +390,7 @@ def phonons(
         "write_results": True,
         "write_full": write_full,
         "file_prefix": file_prefix,
-        "enable_progress_bar": enable_progress_bar,
+        "enable_progress_bar": progress_bar,
     }
 
     # Initialise phonons
