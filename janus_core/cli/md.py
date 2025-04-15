@@ -16,6 +16,7 @@ from janus_core.cli.types import (
     CalcKwargs,
     CorrelationKwargs,
     Device,
+    EnableProgressBar,
     EnsembleKwargs,
     FilePrefix,
     LogPath,
@@ -357,18 +358,13 @@ def md(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
-    enable_progress_bar: Annotated[
-        bool,
-        Option(
-            "--enable-progress-bar/--disable-progress-bar",
-            help="Whether to show progress bar.",
-        ),
-    ] = True,
+    enable_progress_bar: EnableProgressBar = True,
     update_progress_every: Annotated[
         int,
         Option(
-            help="How many timesteps between progress bar updates. "
-            "Default is steps/100, rounded up."
+            help="Number of timesteps between progress bar updates. "
+            "Default is steps / 100, rounded up.",
+            rich_help_panel="Logging/summary",
         ),
     ] = None,
 ) -> None:
@@ -507,8 +503,8 @@ def md(
     enable_progress_bar
         Whether to show progress bar.
     update_progress_every
-        How many timesteps between progress bar updates.
-        Default is steps/100, rounded up.
+        Number of timesteps between progress bar updates. Default is steps / 100,
+        rounded up.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """

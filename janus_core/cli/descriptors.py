@@ -12,6 +12,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    EnableProgressBar,
     FilePrefix,
     LogPath,
     ModelPath,
@@ -75,6 +76,7 @@ def descriptors(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
+    enable_progress_bar: EnableProgressBar = True,
 ) -> None:
     """
     Calculate MLIP descriptors for the given structure(s).
@@ -119,6 +121,8 @@ def descriptors(
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
+    enable_progress_bar
+        Whether to show progress bar.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -177,7 +181,7 @@ def descriptors(
         "write_results": True,
         "write_kwargs": write_kwargs,
         "file_prefix": file_prefix,
-        "enable_progress_bar": True,
+        "enable_progress_bar": enable_progress_bar,
     }
 
     # Initialise descriptors
