@@ -1256,14 +1256,17 @@ class MolecularDynamics(BaseCalculation):
 
             self._set_target_temperature(temp)
 
-            irun = self.dyn.irun(heating_steps_per_temp)
+            irun = self.dyn.irun(steps)
             # Step 0
             next(irun)
+
             if self.enable_progress_bar:
+                completed = steps - heating_steps_per_temp
                 irun = track_progress(
                     irun,
                     description=f"Simulating at {temp} K...",
-                    total=steps,
+                    total=heating_steps_per_temp,
+                    completed=completed,
                 )
             # Run steps
             for _ in irun:
@@ -1310,7 +1313,8 @@ class MolecularDynamics(BaseCalculation):
             irun = track_progress(
                 irun,
                 description=f"Simulating at {self.temp} K...",
-                total=steps,
+                total=self.steps,
+                completed=md_offset,
             )
         # Run steps
         for _ in irun:
