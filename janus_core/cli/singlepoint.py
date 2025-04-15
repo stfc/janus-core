@@ -13,6 +13,7 @@ from janus_core.cli.types import (
     Architecture,
     CalcKwargs,
     Device,
+    EnableProgressBar,
     FilePrefix,
     LogPath,
     ModelPath,
@@ -69,6 +70,7 @@ def singlepoint(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
+    enable_progress_bar: EnableProgressBar = True,
 ) -> None:
     """
     Perform single point calculations and save to file.
@@ -109,6 +111,8 @@ def singlepoint(
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
+    enable_progress_bar
+        Whether to show progress bar.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -163,7 +167,7 @@ def singlepoint(
         "attach_logger": True,
         "log_kwargs": log_kwargs,
         "track_carbon": tracker,
-        "enable_progress_bar": True,
+        "enable_progress_bar": enable_progress_bar,
     }
 
     # Initialise singlepoint structure and calculator
