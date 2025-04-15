@@ -371,7 +371,7 @@ def _dump_csv(
 
 
 def track_progress(
-    sequence: Sequence | Iterable, description: str, total: int | None
+    sequence: Sequence | Iterable, description: str, total: int | None = None
 ) -> Iterable:
     """
     Track the progress of iterating over a sequence.
