@@ -835,9 +835,7 @@ def test_heating_md(tmp_path, capsys, ensemble):
     assert stat_data.units[target_t_col] == "K"
 
     # Check progress bar has completed.
-    out = capsys.readouterr().out
-    assert "━━ 2/2" in out  # Ramp progress
-    assert "━━ 5/5" in out  # Const T progress
+    assert "━━ 9/9" in capsys.readouterr().out
 
 
 def test_heating_restart(tmp_path):

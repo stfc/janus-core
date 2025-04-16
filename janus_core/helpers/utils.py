@@ -370,6 +370,33 @@ def _dump_csv(
         print(",".join(map(format, cols, formats)), file=file)
 
 
+def get_progress() -> Progress:
+    """
+    Set up rich progress bar.
+
+    Returns
+    -------
+    Progress
+        Initialised progress bar.
+    """
+    text_column = TextColumn("{task.description}")
+    bar_column = BarColumn(
+        bar_width=None,
+        complete_style=Style(color="#FBBB10"),
+        finished_style=Style(color="#E38408"),
+    )
+    completion_column = MofNCompleteColumn()
+    time_column = TimeRemainingColumn()
+    return Progress(
+        text_column,
+        bar_column,
+        completion_column,
+        time_column,
+        expand=True,
+        auto_refresh=False,
+    )
+
+
 def track_progress(
     sequence: Sequence | Iterable,
     description: str,
@@ -402,22 +429,7 @@ def track_progress(
     Iterable
         An iterable of the values in the sequence.
     """
-    text_column = TextColumn("{task.description}")
-    bar_column = BarColumn(
-        bar_width=None,
-        complete_style=Style(color="#FBBB10"),
-        finished_style=Style(color="#E38408"),
-    )
-    completion_column = MofNCompleteColumn()
-    time_column = TimeRemainingColumn()
-    progress = Progress(
-        text_column,
-        bar_column,
-        completion_column,
-        time_column,
-        expand=True,
-        auto_refresh=False,
-    )
+    progress = get_progress()
 
     with progress:
         yield from progress.track(
