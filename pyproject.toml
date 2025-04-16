@@ -27,7 +27,7 @@ readme = "README.md"
 
 dependencies = [
     "ase<4.0,>=3.25",
-    "codecarbon<3.0.0,>=2.8.3",
+    "codecarbon<3.0.0,>=2.8.4",
     "numpy<2.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pymatgen>=2025.1.24",

@@ -49,4 +49,4 @@ def test_tracker_error(tmp_path):
 
     logger = config_logger(name=__name__, filename=log_path)
     with pytest.raises(ValueError):
-        config_tracker(janus_logger=logger, country_iso_code="TEST")
+        config_tracker(janus_logger=logger, country_2letter_iso_code=123)
