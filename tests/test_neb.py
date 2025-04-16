@@ -68,7 +68,7 @@ def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
     single_point_start = SinglePoint(
         struct=LFPO_start_b,
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
     single_point_end = SinglePoint(
         struct=LFPO_end_b,

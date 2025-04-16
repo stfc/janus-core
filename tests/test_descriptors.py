@@ -47,7 +47,7 @@ def test_calc_per_element(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     descriptors = Descriptors(
@@ -75,7 +75,7 @@ def test_logging(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     descriptors = Descriptors(
