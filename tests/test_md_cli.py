@@ -929,3 +929,29 @@ def test_consistent_stats_traj(tmp_path, ensemble, output_every, heating):
 
         assert len(target_temps) == len(stats_target_temps)
         assert target_temps == pytest.approx(stats_target_temps, rel=1e5)
+
+
+def test_no_progress(tmp_path):
+    """Test disabling progress bar."""
+    file_prefix = tmp_path / "nvt"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--no-tracker",
+            "--file-prefix",
+            file_prefix,
+            "--steps",
+            2,
+            "--no-progress-bar",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    assert "2/2" not in result.output

@@ -838,7 +838,7 @@ def test_heating_md(tmp_path, capsys, ensemble):
     assert "━━ 9/9" in capsys.readouterr().out
 
 
-def test_heating_restart(tmp_path):
+def test_heating_restart(tmp_path, capsys):
     """Test restarting during temperature ramp."""
     file_prefix = tmp_path / "NaCl-heating"
 
@@ -867,6 +867,7 @@ def test_heating_restart(tmp_path):
         temp_step=10,
         temp_time=2,
         restart=True,
+        enable_progress_bar=True,
     )
     md_restart.run()
 
@@ -876,6 +877,9 @@ def test_heating_restart(tmp_path):
     assert stat_data.data[4, target_t_col] == 20
     assert stat_data.data[5, target_t_col] == 30
     assert stat_data.data[8, target_t_col] == 30
+
+    # Check progress bar is correct.
+    assert "━━ 8/8" in capsys.readouterr().out
 
 
 def test_heating_files():
@@ -998,7 +1002,7 @@ def test_ramp_negative(tmp_path):
         )
 
 
-def test_cooling(tmp_path):
+def test_cooling(tmp_path, capsys):
     """Test cooling with no MD."""
     file_prefix = tmp_path / "NaCl-cooling"
     final_path = tmp_path / "NaCl-cooling-final.extxyz"
@@ -1023,6 +1027,7 @@ def test_cooling(tmp_path):
         temp_step=10,
         temp_time=1,
         log_kwargs={"filename": log_file},
+        enable_progress_bar=True,
     )
     nvt.run()
     assert_log_contains(
@@ -1042,6 +1047,9 @@ def test_cooling(tmp_path):
     assert stats.rows == 3
     assert stats.data[0, 16] == 20.0
     assert stats.data[2, 16] == 10.0
+
+    # Check progress bar
+    assert "━━ 2/2" in capsys.readouterr().out
 
 
 def test_heating_too_short(tmp_path):
