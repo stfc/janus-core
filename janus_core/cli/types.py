@@ -92,7 +92,7 @@ Device = Annotated[
         rich_help_panel="MLIP calculator",
     ),
 ]
-ModelPath = Annotated[
+Model = Annotated[
     str | None,
     Option(
         help="MLIP model name, or path to model.", rich_help_panel="MLIP calculator"

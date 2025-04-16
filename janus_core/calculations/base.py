@@ -48,8 +48,8 @@ class BaseCalculation(FileNameMixin):
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
-    model_path
-        Path to MLIP model. Default is `None`.
+    model
+        Path to MLIP model or name of model. Default is `None`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. Default is {}.
     sequence_allowed
@@ -90,7 +90,7 @@ class BaseCalculation(FileNameMixin):
         calc_name: str = "base",
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
-        model_path: PathLike | None = None,
+        model: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         sequence_allowed: bool = True,
         calc_kwargs: dict[str, Any] | None = None,
@@ -116,8 +116,8 @@ class BaseCalculation(FileNameMixin):
             MLIP architecture to use for calculations. Default is "mace_mp".
         device
             Device to run MLIP model on. Default is "cpu".
-        model_path
-            Path to MLIP model. Default is `None`.
+        model
+            Path to MLIP model or name of model. Default is `None`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. Default is {}.
         sequence_allowed
@@ -150,14 +150,18 @@ class BaseCalculation(FileNameMixin):
 
         self.arch = arch
         self.device = device
-        self.model_path = model_path
+        self.model = model
         self.read_kwargs = read_kwargs
         self.calc_kwargs = calc_kwargs
         self.log_kwargs = log_kwargs
         self.tracker_kwargs = tracker_kwargs
 
-        if not self.model_path and "model_path" in self.calc_kwargs:
-            raise ValueError("`model_path` must be passed explicitly")
+        if (
+            not self.model
+            and "model" in self.calc_kwargs
+            or "model_path" in self.calc_kwargs
+        ):
+            raise ValueError("`model` must be passed explicitly")
 
         attach_logger, self.track_carbon = set_log_tracker(
             attach_logger, log_kwargs, track_carbon
@@ -171,7 +175,7 @@ class BaseCalculation(FileNameMixin):
             sequence_allowed=sequence_allowed,
             arch=self.arch,
             device=self.device,
-            model_path=self.model_path,
+            model=self.model,
             calc_kwargs=self.calc_kwargs,
             set_calc=set_calc,
         )

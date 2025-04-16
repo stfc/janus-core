@@ -15,7 +15,7 @@ from janus_core.cli.types import (
     FilePrefix,
     LogPath,
     MinimizeKwargs,
-    ModelPath,
+    Model,
     ReadKwargsLast,
     StructPath,
     Summary,
@@ -166,7 +166,7 @@ def geomopt(
     # MLIP Calculator
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
-    model_path: ModelPath = None,
+    model: Model = None,
     calc_kwargs: CalcKwargs = None,
     # Structure I/O
     file_prefix: FilePrefix = None,
@@ -223,8 +223,8 @@ def geomopt(
         MLIP architecture to use for geometry optimization. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
-    model_path
-        Path to MLIP model. Default is `None`.
+    model
+        Path to MLIP model or name of model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
@@ -308,7 +308,7 @@ def geomopt(
         "struct": struct,
         "arch": arch,
         "device": device,
-        "model_path": model_path,
+        "model": model,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,

@@ -17,7 +17,7 @@ from janus_core.cli.types import (
     FilePrefix,
     LogPath,
     MinimizeKwargs,
-    ModelPath,
+    Model,
     PDoSKwargs,
     ProgressBar,
     ReadKwargsLast,
@@ -174,7 +174,7 @@ def phonons(
     # MLIP Calculator
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
-    model_path: ModelPath = None,
+    model: Model = None,
     calc_kwargs: CalcKwargs = None,
     # Strucuture I/O
     file_prefix: FilePrefix = None,
@@ -253,7 +253,7 @@ def phonons(
         MLIP architecture to use for phonon calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
-    model_path
+    model
         Path to MLIP model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
@@ -364,7 +364,7 @@ def phonons(
         "struct": struct,
         "arch": arch,
         "device": device,
-        "model_path": model_path,
+        "model": model,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,
