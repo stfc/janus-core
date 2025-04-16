@@ -101,7 +101,7 @@ prints the following:
       *  --struct                          PATH  Path of structure to simulate. [default: None] [required]
          --arch                            TEXT  MLIP architecture to use for calculations. [default: mace_mp]
          --device                          TEXT  Device to run calculations on. [default:]
-         --model-path                      TEXT  Path to MLIP model. [default: None]
+         --model                      TEXT  Path to MLIP model. [default: None]
          --properties                      TEXT  Properties to calculate. If not specified, 'energy', 'forces' and
                                                  'stress' will be returned. [default: None]
          --file-prefix                     PATH  Prefix for output files, including directories. Default directory is
@@ -144,7 +144,7 @@ For example, with the following configuration file and command:
     - "energy"
     out: "NaCl-results.extxyz"
     arch: mace_mp
-    model-path: medium
+    model: medium
     calc-kwargs:
       dispersion: True
 
@@ -194,7 +194,7 @@ By default, calculations performed will modify the underlying `ase.Atoms <https:
 to store information in the ``Atoms.info`` and ``Atoms.arrays`` dictionaries about the MLIP used.
 
 Additional dictionary keys include ``arch``, corresponding to the MLIP architecture used,
-and ``model_path``, corresponding to the model path, name or label.
+and ``model``, corresponding to the model path, name or label.
 
 Results from the MLIP calculator, which are typically stored in ``Atoms.calc.results``, will also, by default,
 be copied to these dictionaries, prefixed by the MLIP ``arch``.
@@ -203,10 +203,10 @@ This information is then saved when extxyz files are written. For example:
 
 .. code-block:: bash
 
-    janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path /path/to/mace/model
+    janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model /path/to/mace/model
 
 
-Generates an output file, ``NaCl-results.extxyz``, with ``arch``, ``model_path``, ``mace_mp_energy``, ``mace_mp_forces``, and ``mace_mp_stress``.
+Generates an output file, ``NaCl-results.extxyz``, with ``arch``, ``model``, ``mace_mp_energy``, ``mace_mp_forces``, and ``mace_mp_stress``.
 
 .. note::
     If running calculations with multiple MLIPs, ``arch`` and ``mlip_model`` will be overwritten with the most recent MLIP information.
@@ -221,7 +221,7 @@ Perform a single point calcuation (using the `MACE-MP <https://github.com/ACEsui
 
 .. code-block:: bash
 
-    janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path small
+    janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model small
 
 
 This will calculate the energy, stress and forces and save this in ``NaCl-results.extxyz``, in addition to generating a log file, ``NaCl-singlepoint-log.yml``, and summary of inputs, ``NaCl-singlepoint-summary.yml``.
@@ -230,7 +230,7 @@ Additional options may be specified. For example:
 
 .. code-block:: bash
 
-    janus singlepoint --struct tests/data/NaCl.cif --arch mace --model-path /path/to/your/ml.model --properties energy --properties forces --log ./example.log --out ./example.extxyz
+    janus singlepoint --struct tests/data/NaCl.cif --arch mace --model /path/to/your/ml.model --properties energy --properties forces --log ./example.log --out ./example.extxyz
 
 
 This calculates both forces and energies, defines the MLIP architecture and path to your locally saved model, and changes where the log and results files are saved.
@@ -256,7 +256,7 @@ Perform geometry optimization (using the `MACE-MP <https://github.com/ACEsuit/ma
 
 .. code-block:: bash
 
-    janus geomopt --struct tests/data/H2O.cif --arch mace_mp --model-path small
+    janus geomopt --struct tests/data/H2O.cif --arch mace_mp --model small
 
 
 This will optimize the atomic positions and save the resulting structure in ``H2O-opt.extxyz``, in addition to generating a log file, ``H20-geomopt-log.yml``, and summary of inputs, ``H20-geomopt-summary.yml``.
@@ -265,7 +265,7 @@ Additional options may be specified. This shares most options with ``singlepoint
 
 .. code-block:: bash
 
-    janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --opt-cell-lengths --write-traj --minimize-kwargs "{'traj_kwargs':{'filename':'NaCl-traj.extxyz'}}"
+    janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model small --opt-cell-lengths --write-traj --minimize-kwargs "{'traj_kwargs':{'filename':'NaCl-traj.extxyz'}}"
 
 
 This allows the cell vectors to be optimised, allowing only hydrostatic deformation, and saves the optimization trajectory in addition to the final structure and log.
@@ -274,7 +274,7 @@ Further options for the optimizer and filter can be specified using the ``--mini
 
 .. code-block:: bash
 
-    janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --opt-cell-fully --minimize-kwargs "{'filter_kwargs': {'constant_volume' : True}, 'opt_kwargs': {'alpha': 100}}"
+    janus geomopt --struct tests/data/NaCl.cif --arch mace_mp --model small --opt-cell-fully --minimize-kwargs "{'filter_kwargs': {'constant_volume' : True}, 'opt_kwargs': {'alpha': 100}}"
 
 
 This allows the cell vectors and angles to be optimized, as well as the atomic positions, at constant volume, and sets the ``alpha``, the initial guess for the Hessian, to 100 for the optimizer function.
@@ -289,7 +289,7 @@ Run an NPT molecular dynamics simulation (using the `MACE-MP <https://github.com
 
 .. code-block:: bash
 
-    janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --model-path small --temp 300 --steps 1000 --pressure 1.0
+    janus md --ensemble npt --struct tests/data/NaCl.cif --arch mace_mp --model small --temp 300 --steps 1000 --pressure 1.0
 
 
 This will generate several output files:
@@ -445,7 +445,7 @@ Fit the equation of state for a structure (using the `MACE-MP <https://github.co
 
 .. code-block:: bash
 
-    janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --model-path small
+    janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --model small
 
 
 This will save the energies and volumes for nine lattice constants in ``NaCl-eos-raw.dat``, and the fitted minimum energy, volume, and bulk modulus in ``NaCl-eos-fit.dat``,
@@ -469,7 +469,7 @@ Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the
 
 .. code-block:: bash
 
-    janus phonons --struct tests/data/NaCl.cif --supercell "2 2 2" --minimize --arch mace_mp --model-path small
+    janus phonons --struct tests/data/NaCl.cif --supercell "2 2 2" --minimize --arch mace_mp --model small
 
 
 This will save the Phonopy parameters, including displacements and force constants, to ``NaCl-phonopy.yml`` and ``NaCl-force_constants.hdf5``,
@@ -480,7 +480,7 @@ and save the results to a compressed yaml file, ``NaCl-auto_bands.yml.xz``:
 
 .. code-block:: bash
 
-    janus phonons --struct tests/data/NaCl.cif --supercell "2 2 2" --minimize --arch mace_mp --model-path small --bands
+    janus phonons --struct tests/data/NaCl.cif --supercell "2 2 2" --minimize --arch mace_mp --model small --bands
 
 
 If you need eigenvectors and group velocities written, add the ``--write-full`` option. This will generate a much larger file, but can be used to visualise phonon modes.
@@ -662,7 +662,7 @@ Descriptors of a structure can be calculated (using the `MACE-MP <https://github
 
 .. code-block:: bash
 
-    janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --model-path small
+    janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --model small
 
 
 This will calculate the mean descriptor for this structure and save this as attached information (``mace_mp_descriptors``) in ``NaCl-descriptors.extxyz``,

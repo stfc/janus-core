@@ -138,52 +138,53 @@ This is done within the ``janus_core.helpers.mlip_calculators`` module, if ``arc
     elif arch == "orb":
         from orb_models import __version__
         from orb_models.forcefield.calculator import ORBCalculator
-        from orb_models.forcefield.graph_regressor import GraphRegressor
+        from orb_models.forcefield.direct_regressor import DirectForcefieldRegressor
         import orb_models.forcefield.pretrained as orb_ff
 
         # Default model
-        model_path = model_path if model_path else "orb_v2"
+        model = model if model else "orb_v3_conservative_20_omat"
 
-        if isinstance(model_path, GraphRegressor):
-            model = model_path
-            model_path = "loaded_GraphRegressor"
+        if isinstance(model, DirectForcefieldRegressor):
+            loaded_model = model
+            model = "loaded_DirectForcefieldRegressor"
         else:
             try:
-                model = getattr(orb_ff, model_path.replace("-", "_"))()
+                loaded_model = getattr(orb_ff, model.replace("-", "_"))()
             except AttributeError as e:
                 raise ValueError(
-                    "`model_path` must be a `GraphRegressor`, pre-trained model label "
-                    "(e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
+                    "`model` must be a `DirectForcefieldRegressor`, pre-trained "
+                    "model label (e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
                 ) from e
 
-        calculator = ORBCalculator(model=model, device=device, **kwargs)
+        calculator = ORBCalculator(model=loaded_model, device=device, **kwargs)
 
 
 Most options are unique to the MLIP calculator, so are passed through ``kwargs``.
 
-However, ``device``, referring to the device on which inference should be run, and ``model_path``, referring to the path of an MLIP model, are parameters of ``choose_calculator``, so must be handled explicitly.
+However, ``device``, referring to the device on which inference should be run, and ``model``, referring to the name or path of an MLIP model, are parameters of ``choose_calculator``, so must be handled explicitly.
 
 In this case, ``device`` is also a parameter of ``ORBCalculator``, so can be passed through immediately.
 
-``model_path`` requires more care, as ``ORBCalculator`` does not have a directly corresponding parameter, with ``model`` instead referring to the loaded ``GraphRegressor`` model.
+``model`` requires more care, as ``ORBCalculator`` does not have a directly corresponding parameter, with ``model`` instead referring to the loaded ``GraphRegressor`` model.
 
-Converting ``model_path`` into ``model`` is a minimum requirement, but we also aim to facilitate options native to the MLIP, including a default model, where possible:
+Converting ``model`` into the form expected by ``ORBCalculator`` is a minimum requirement,
+but we also aim to facilitate options native to the MLIP, including a default model, where possible:
 
-- If ``model_path`` is ``None``, we use a default ORB model, ``orb_v2``
-- If ``model_path`` is a loaded ``GraphRegressor``, we pass it through to ``ORBCalculator``, while renaming ``model_path`` for labelling purposes
-- If ``model_path`` refers to a model label, similar to the MACE ``"small"`` models, we try loading the model using ORB's ``orb_ff`` load functions
+- If ``model`` is ``None``, we use a default ORB model, ``orb_v2``
+- If ``model`` is a loaded ``GraphRegressor``, we pass it through to ``ORBCalculator``, while renaming ``model`` for labelling purposes
+- If ``model`` refers to a model label, similar to the MACE ``"small"`` models, we try loading the model using ORB's ``orb_ff`` load functions
 
 .. note::
 
-    ``model_path`` will already be a ``pathlib.Path`` object, if the path exists.
-    Some MLIPs do not support this, so you may be required to cast it back to a string (``str(model_path)``).
+    ``model`` will already be a ``pathlib.Path`` object, if the path exists.
+    Some MLIPs do not support this, so you may be required to cast it back to a string (``str(model)``).
 
 
-To ensure that the calculator does not receive multiple versions of keywords, it's also necessary to set ``model_path = path``, and remove ``path`` from ``kwargs``.
+To ensure that the calculator does not receive multiple versions of keywords, it's also necessary to set ``model = path``, and remove ``path`` from ``kwargs``.
 
-If the keyword is used by other calculators, this should be done within the ``elif`` branch, but in most cases it can be done automatically by appending ``model_path_kwargs`` within ``_set_model_path``::
+If the keyword is used by other calculators, this should be done within the ``elif`` branch, but in most cases it can be done automatically by appending ``model_kwargs`` within ``_set_model``::
 
-    model_path_kwargs = ("model", "model_paths", "potential", "path")
+    model_kwargs = {"model_path", "model_paths", "potential", "path"}
 
 In addition to setting the calculator, ``__version__`` must also imported here, providing a check on the package independent of the calculator itself.
 
@@ -219,7 +220,7 @@ This is done using the ``skip_extras`` function, defined in ``tests/utils.py``. 
 Load models - success
 ^^^^^^^^^^^^^^^^^^^^^
 
-For ``tests.test_mlip_calculators``, ``arch``, ``device`` and accepted forms of ``model_path`` should be tested, ensuring that the calculator and its version are correctly set:
+For ``tests.test_mlip_calculators``, ``arch``, ``device`` and accepted forms of ``model`` should be tested, ensuring that the calculator and its version are correctly set:
 
 .. code-block:: python
 
@@ -247,15 +248,15 @@ It is also useful to test that invalid model paths are handled as expected:
 .. code-block:: python
 
     @pytest.mark.parametrize(
-        "arch, model_path",
+        "arch, model",
         [
             ("orb", "/invalid/path"),
         ],
     )
-    def test_invalid_model_path(arch, model_path):
+    def test_invalid_model(arch, model):
 
 
-and that ``model_path``, and ``model`` or the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously:
+and that ``model``, and ``model_path`` or the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously:
 
 .. code-block:: python
 
@@ -264,7 +265,7 @@ and that ``model_path``, and ``model`` or the "standard" MLIP calculator paramet
         [
             {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
             {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
-            {"arch": "orb", "model_path": ORB_MODEL, "path": ORB_MODEL},
+            {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
         ],
     )
     def test_model_model_paths(kwargs):
@@ -282,7 +283,7 @@ ensuring that calculations can be performed:
         "arch, device, expected_energy, struct, kwargs",
         [
             ("orb", "cpu", -27.088973999023438, "NaCl.cif", {}),
-            ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model_path": "orb-v2"}),
+            ("orb", "cpu", -27.088973999023438, "NaCl.cif", {"model": "orb-v2"}),
         ],
     )
     def test_extras(arch, device, expected_energy, struct, kwargs):
