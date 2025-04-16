@@ -663,7 +663,7 @@ class MolecularDynamics(BaseCalculation):
         progress_bar = get_progress()
 
         task_id = progress_bar.add_task(
-            "Performing MD simulation...",
+            "Initialising MD simulation...",
             total=self.total_steps,
             completed=self.offset,
         )
@@ -696,7 +696,11 @@ class MolecularDynamics(BaseCalculation):
         if current_step == 0:
             return
 
-        progress_bar.update(task_id, completed=current_step)
+        progress_bar.update(
+            task_id,
+            completed=current_step,
+            description=f"Simulating at {self.temp} K...",
+        )
         progress_bar.refresh()
 
     def _set_info(self) -> None:
