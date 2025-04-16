@@ -50,7 +50,7 @@ class NEB(BaseCalculation):
     device
         Device to run MLIP model on. Default is "cpu".
     model
-        Path to MLIP model or name of model. Default is `None`.
+        MLIP model label, path to model, or loaded model. Default is `None`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
         is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.
@@ -160,7 +160,7 @@ class NEB(BaseCalculation):
         device
             Device to run MLIP model on. Default is "cpu".
         model
-            Path to MLIP model or name of model. Default is `None`.
+            MLIP model label, path to model, or loaded model. Default is `None`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
             is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.

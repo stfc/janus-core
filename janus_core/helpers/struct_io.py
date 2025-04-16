@@ -88,7 +88,7 @@ def attach_calculator(
     device
         Device to run model on. Default is "cpu".
     model
-        Path to MLIP model or name of model. Default is `None`.
+        MLIP model label, path to model, or loaded model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     """
@@ -136,7 +136,7 @@ def input_structs(
     device
         Device to run model on. Default is "cpu".
     model
-        Path to MLIP model or name of model. Default is `None`.
+        MLIP model label, path to model, or loaded model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc

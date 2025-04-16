@@ -39,7 +39,7 @@ class SinglePoint(BaseCalculation):
     device
         Device to run model on. Default is "cpu".
     model
-        Path to MLIP model or name of model. Default is `None`.
+        MLIP model label, path to model, or loaded model. Default is `None`.
     file_prefix
         Prefix for output filenames. Default is inferred from structure.
     read_kwargs
@@ -110,7 +110,7 @@ class SinglePoint(BaseCalculation):
         device
             Device to run MLIP model on. Default is "cpu".
         model
-            Path to MLIP model or name of model. Default is `None`.
+            MLIP model label, path to model, or loaded model. Default is `None`.
         file_prefix
             Prefix for output filenames. Default is inferred from structure.
         read_kwargs

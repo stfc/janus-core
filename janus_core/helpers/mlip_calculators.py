@@ -92,7 +92,7 @@ def choose_calculator(
     device
         Device to run calculator on. Default is "cpu".
     model
-        Path to MLIP model or name of model. Default is `None`.
+        MLIP model label, path to model, or loaded model. Default is `None`.
     **kwargs
         Additional keyword arguments passed to the selected calculator.
 
