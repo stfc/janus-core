@@ -699,7 +699,7 @@ class MolecularDynamics(BaseCalculation):
         progress_bar.update(
             task_id,
             completed=current_step,
-            description=f"Simulating at {self.temp} K...",
+            description=f"Simulating at {self.temp:.1f} K...",
         )
         progress_bar.refresh()
 
