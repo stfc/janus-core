@@ -81,7 +81,7 @@ def test_saving_traj(tmp_path):
     optimizer = GeomOpt(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         write_traj=True,
         traj_kwargs={"filename": tmp_path / "NaCl.traj"},
     )
@@ -98,7 +98,7 @@ def test_traj_opt_kwargs(tmp_path):
         GeomOpt(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
-            model_path=MODEL_PATH,
+            model=MODEL_PATH,
             opt_kwargs={"trajectory": str(traj_path_binary)},
             write_traj=True,
         )
@@ -107,7 +107,7 @@ def test_traj_opt_kwargs(tmp_path):
         GeomOpt(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
-            model_path=MODEL_PATH,
+            model=MODEL_PATH,
             opt_kwargs={"trajectory": str(traj_path_binary)},
             write_traj=False,
         )
@@ -119,7 +119,7 @@ def test_traj_without_write(tmp_path):
         GeomOpt(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
-            model_path=MODEL_PATH,
+            model=MODEL_PATH,
             traj_kwargs={"filename": tmp_path / "NaCl.traj"},
             write_traj=False,
         )

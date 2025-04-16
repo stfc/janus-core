@@ -261,7 +261,7 @@ def test_nvt_csvr():
     csvr = NVT_CSVR(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         temp=300.0,
         steps=4,
         traj_every=1,
@@ -305,7 +305,7 @@ def test_npt_mtk():
     npt_mtk = NPT_MTK(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         temp=300.0,
         pressure=0.0001,
         steps=4,
