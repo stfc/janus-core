@@ -370,7 +370,40 @@ def _dump_csv(
         print(",".join(map(format, cols, formats)), file=file)
 
 
-def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
+def get_progress() -> Progress:
+    """
+    Set up rich progress bar.
+
+    Returns
+    -------
+    Progress
+        Initialised progress bar.
+    """
+    text_column = TextColumn("{task.description}")
+    bar_column = BarColumn(
+        bar_width=None,
+        complete_style=Style(color="#FBBB10"),
+        finished_style=Style(color="#E38408"),
+    )
+    completion_column = MofNCompleteColumn()
+    time_column = TimeRemainingColumn()
+    return Progress(
+        text_column,
+        bar_column,
+        completion_column,
+        time_column,
+        expand=True,
+        auto_refresh=False,
+    )
+
+
+def track_progress(
+    sequence: Sequence | Iterable,
+    description: str,
+    total: int | None = None,
+    completed: int = 0,
+    update_period: float = 0.1,
+) -> Iterable:
     """
     Track the progress of iterating over a sequence.
 
@@ -384,31 +417,28 @@ def track_progress(sequence: Sequence | Iterable, description: str) -> Iterable:
         The sequence to iterate over. Must support "len".
     description
         The text to display to the left of the progress bar.
+    total
+        Total number of iteration steps. Defaults to length of sequence.
+    completed
+        Total number of iterations already completed. Default is 0.
+    update_period
+        Minimum time (in seconds) between calls to update(). Default is 0.1.
 
     Yields
     ------
     Iterable
         An iterable of the values in the sequence.
     """
-    text_column = TextColumn("{task.description}")
-    bar_column = BarColumn(
-        bar_width=None,
-        complete_style=Style(color="#FBBB10"),
-        finished_style=Style(color="#E38408"),
-    )
-    completion_column = MofNCompleteColumn()
-    time_column = TimeRemainingColumn()
-    progress = Progress(
-        text_column,
-        bar_column,
-        completion_column,
-        time_column,
-        expand=True,
-        auto_refresh=False,
-    )
+    progress = get_progress()
 
     with progress:
-        yield from progress.track(sequence, description=description)
+        yield from progress.track(
+            sequence=sequence,
+            total=total,
+            completed=completed,
+            description=description,
+            update_period=update_period,
+        )
 
 
 def check_files_exist(config: dict, req_file_keys: Sequence[PathLike]) -> None:
