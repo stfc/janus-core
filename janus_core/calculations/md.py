@@ -27,6 +27,7 @@ from ase.md.velocitydistribution import (
 from ase.md.verlet import VelocityVerlet
 from ase.units import create_units
 import numpy as np
+from rich.progress import Progress, TaskID
 import yaml
 
 from janus_core.calculations.base import UNITS as JANUS_UNITS
@@ -45,9 +46,9 @@ from janus_core.helpers.janus_types import (
 from janus_core.helpers.struct_io import input_structs, output_structs
 from janus_core.helpers.utils import (
     build_file_dir,
+    get_progress,
     none_to_dict,
     set_minimize_logging,
-    track_progress,
     write_table,
 )
 from janus_core.processing.correlator import Correlation
@@ -166,8 +167,8 @@ class MolecularDynamics(BaseCalculation):
     enable_progress_bar
         Whether to show a progress bar. Default is False.
     update_progress_every
-        How many timesteps between progress bar updates.
-        Default is steps/100, rounded up.
+        Number of timesteps between progress bar updates. Default is steps / 100,
+        rounded up.
 
     Attributes
     ----------
@@ -341,8 +342,8 @@ class MolecularDynamics(BaseCalculation):
         enable_progress_bar
             Whether to show a progress bar. Default is False.
         update_progress_every
-            How many timesteps between progress bar updates.
-            Default is steps/100, rounded up.
+            Number of timesteps between progress bar updates. Default is steps / 100,
+            rounded up.
         """
         (
             read_kwargs,
@@ -450,9 +451,6 @@ class MolecularDynamics(BaseCalculation):
                     "Temperature ramp step time cannot be less than 1 timestep"
                 )
 
-        if self.update_progress_every is None:
-            self.update_progress_every = np.ceil(self.steps / 100)
-
         # Read last image by default
         read_kwargs.setdefault("index", -1)
 
@@ -537,6 +535,9 @@ class MolecularDynamics(BaseCalculation):
             np.random.seed(seed)
             random.seed(seed)
 
+        if self.update_progress_every is None:
+            self.update_progress_every = np.ceil(self.total_steps / 100)
+
         self._parse_correlations()
 
     @property
@@ -572,6 +573,131 @@ class MolecularDynamics(BaseCalculation):
                 else None
             ),
         }
+
+    @property
+    def ramp_temps(self) -> list[float]:
+        """
+        Get list of temperatures in heating/cooling ramp.
+
+        Returns
+        -------
+        list[float]
+            Temperatures in heating/cooling ramp.
+        """
+        ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
+        ramp_temps = [
+            self.temp_start + ramp_sign * i * self.temp_step
+            for i in range(self.heating_n_temps)
+        ]
+
+        if self.restart:
+            ramp_steps_completed = self.offset // self.heating_steps_per_temp
+            ramp_steps_completed = min(ramp_steps_completed, len(ramp_temps))
+            if isclose(self.temp_start, 0.0):
+                # T~0K steps do not run any MD, so are not included in the offset.
+                # We have to account for that step manually.
+                ramp_steps_completed += 1
+            ramp_temps = ramp_temps[ramp_steps_completed:]
+
+        return ramp_temps
+
+    @property
+    def heating_n_temps(self) -> int:
+        """
+        Get number of temperatures in heating/cooling ramp.
+
+        Returns
+        -------
+        int
+            Number of temperatures in heating/cooling ramp.
+        """
+        # Always include start temperature in ramp, and include end temperature
+        # if separated by an integer number of temperature steps
+        return int(1 + abs(self.temp_end - self.temp_start) // self.temp_step)
+
+    @property
+    def heating_steps_per_temp(self) -> int:
+        """
+        Get number of steps to be run at each temperature in heating/cooling ramp.
+
+        Returns
+        -------
+        int
+            Number of steps to be run at each temperature in heating/cooling ramp.
+        """
+        return int(self.temp_time // self.timestep)
+
+    @property
+    def total_steps(self) -> int:
+        """
+        Get combined temperature ramp and constant temperature MD steps.
+
+        Returns
+        -------
+        int
+           Total number of steps in simulation.
+        """
+        total_steps = self.steps
+
+        if self.ramp_temp:
+            total_steps += self.heating_n_temps * self.heating_steps_per_temp
+            # Heating steps at 0 K are skipped
+            if np.isclose(self.temp_start, 0.0):
+                total_steps -= self.heating_steps_per_temp
+            if np.isclose(self.temp_end, 0.0):
+                total_steps -= self.heating_steps_per_temp
+
+        return total_steps
+
+    def _init_progress_bar(self) -> Progress:
+        """
+        Initialise MD progress bar.
+
+        Returns
+        -------
+        ProgressBar
+            Object used for managing progress bars.
+        """
+        if not self.enable_progress_bar:
+            return Progress(disable=True)
+        progress_bar = get_progress()
+
+        task_id = progress_bar.add_task(
+            "Performing MD simulation...",
+            total=self.total_steps,
+            completed=self.offset,
+        )
+
+        update_func = partial(self._update_progress_bar, progress_bar, task_id)
+        self.dyn.attach(update_func, interval=self.update_progress_every)
+
+        # Also ensure progress is updated at the end
+        self.dyn.attach(update_func, interval=-self.total_steps)
+        return progress_bar
+
+    def _update_progress_bar(
+        self,
+        progress_bar: Progress,
+        task_id: TaskID,
+    ):
+        """
+        Update the progress bar.
+
+        Parameters
+        ----------
+        progress_bar
+            Progress bar object tracking all tasks.
+        task_id
+            Task ID tracking overall simulation progress.
+        """
+        current_step = self.dyn.nsteps + self.offset
+
+        # 0th step, no progress yet.
+        if current_step == 0:
+            return
+
+        progress_bar.update(task_id, completed=current_step)
+        progress_bar.refresh()
 
     def _set_info(self) -> None:
         """Set time in fs, current dynamics step, density, and temperature to info."""
@@ -1192,148 +1318,18 @@ class MolecularDynamics(BaseCalculation):
 
         # Note current time
         self.struct.info["real_time"] = datetime.datetime.now()
-        self._run_dynamics()
+        with self._init_progress_bar():
+            self._run_dynamics()
 
         if self.post_process_kwargs:
             self._post_process()
 
         self._write_correlations()
 
-    def _run_temp_ramp(self) -> None:
-        """Run temperature ramp."""
-        heating_steps_per_temp = int(self.temp_time // self.timestep)
-
-        self.heating_n_temps = int(
-            1 + abs(self.temp_end - self.temp_start) // self.temp_step
-        )
-
-        # Add or subtract temperatures
-        ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
-        ramp_temps = [
-            self.temp_start + ramp_sign * i * self.temp_step
-            for i in range(self.heating_n_temps)
-        ]
-
-        if self.logger and not np.isclose(self.temp_time % self.timestep, 0.0):
-            rounded_temp_step = heating_steps_per_temp * self.timestep / units.fs
-            self.logger.info(
-                "Temperature ramp step time rounded to nearest timestep "
-                f"({rounded_temp_step:.5} fs)"
-            )
-
-        if self.restart:
-            ramp_steps_completed = self.offset // heating_steps_per_temp
-            ramp_steps_completed = min(ramp_steps_completed, len(ramp_temps))
-            if isclose(self.temp_start, 0.0):
-                # T~0K steps do not run any MD, so are not included in the offset.
-                # We have to account for that step manually.
-                ramp_steps_completed += 1
-            ramp_temps = ramp_temps[ramp_steps_completed:]
-
-        if ramp_temps:
-            if self.logger:
-                self.logger.info("Beginning temperature ramp at %sK", ramp_temps[0])
-            if self.tracker:
-                self.tracker.start_task("Temperature ramp")
-
-        first_step = True
-        for temp in ramp_temps:
-            self.temp = temp
-            steps = heating_steps_per_temp
-
-            if first_step:
-                first_step = False
-                steps -= self.offset % heating_steps_per_temp
-            self._set_velocity_distribution()
-
-            if isclose(temp, 0.0):
-                # Calculate forces and energies to be output
-                self.struct.get_potential_energy()
-                self.struct.get_forces()
-                self._write_final_state()
-                self.created_final_file = True
-                continue
-
-            self._set_target_temperature(temp)
-
-            irun = self.dyn.irun(steps)
-            # Step 0
-            next(irun)
-
-            if self.enable_progress_bar:
-                completed = steps - heating_steps_per_temp
-                irun = track_progress(
-                    irun,
-                    description=f"Simulating at {temp} K...",
-                    total=heating_steps_per_temp,
-                    completed=completed,
-                )
-            # Run steps
-            for _ in irun:
-                pass
-
-            self._write_final_state()
-            self.created_final_file = True
-
-        if ramp_temps:
-            if self.logger:
-                self.logger.info("Temperature ramp complete at %sK", ramp_temps[-1])
-            if self.tracker:
-                emissions = self.tracker.stop_task().emissions
-                self.struct.info["emissions"] = emissions
-
-    def _run_md(self) -> None:
-        """Run molecular dynamics at constant temperature."""
-        md_offset = self.offset
-
-        # Take the ramp time off the offset for MD.
-        # If restarting during the ramp, MD has no offset.
-        if self.restart and self.ramp_temp:
-            # Always include start temperature in ramp, and include end temperature
-            # if separated by an integer number of temperature steps
-
-            md_offset = max(
-                0, md_offset - self.heating_steps_per_temp * self.heating_n_temps
-            )
-
-        if self.logger:
-            self.logger.info("Starting molecular dynamics simulation")
-        if self.tracker:
-            self.tracker.start_task("Molecular dynamics")
-        self.temp = self.md_temp
-        if self.ramp_temp:
-            self._set_velocity_distribution()
-            self._set_target_temperature(self.temp)
-
-        steps = self.steps - md_offset
-        irun = self.dyn.irun(steps)
-        # Step 0
-        next(irun)
-        if self.enable_progress_bar:
-            irun = track_progress(
-                irun,
-                description=f"Simulating at {self.temp} K...",
-                total=self.steps,
-                completed=md_offset,
-            )
-        # Run steps
-        for _ in irun:
-            pass
-
-        self._write_final_state()
-        self.created_final_file = True
-        if self.logger:
-            self.logger.info("Molecular dynamics simulation complete")
-        if self.tracker:
-            emissions = self.tracker.stop_task().emissions
-            self.struct.info["emissions"] = emissions
-            self.tracker.stop()
-
     def _run_dynamics(self) -> None:
-        """Run all parts of molecular dynamics simulation."""
+        """Run dynamics and/or temperature ramp."""
         # Store temperature for final MD
-        self.md_temp = self.temp
-
+        md_temp = self.temp
         if self.ramp_temp:
             self.temp = self.temp_start
 
@@ -1343,10 +1339,79 @@ class MolecularDynamics(BaseCalculation):
 
         # Run temperature ramp
         if self.ramp_temp:
-            self._run_temp_ramp()
+            if self.logger and not np.isclose(self.temp_time % self.timestep, 0.0):
+                rounded_temp_step = (
+                    self.heating_steps_per_temp * self.timestep / units.fs
+                )
+                self.logger.info(
+                    "Temperature ramp step time rounded to nearest timestep "
+                    f"({rounded_temp_step:.5} fs)"
+                )
 
+            if self.ramp_temps:
+                if self.logger:
+                    self.logger.info(
+                        "Beginning temperature ramp at %sK", self.ramp_temps[0]
+                    )
+                if self.tracker:
+                    self.tracker.start_task("Temperature ramp")
+
+            first_step = True
+            for temp in self.ramp_temps:
+                self.temp = temp
+                steps = self.heating_steps_per_temp
+                if first_step:
+                    first_step = False
+                    steps -= self.offset % self.heating_steps_per_temp
+                self._set_velocity_distribution()
+                if isclose(temp, 0.0):
+                    # Calculate forces and energies to be output
+                    self.struct.get_potential_energy()
+                    self.struct.get_forces()
+                    self._write_final_state()
+                    self.created_final_file = True
+                    continue
+                self._set_target_temperature(temp)
+                self.dyn.run(steps)
+                self._write_final_state()
+                self.created_final_file = True
+
+            if self.ramp_temps:
+                if self.logger:
+                    self.logger.info(
+                        "Temperature ramp complete at %sK", self.ramp_temps[-1]
+                    )
+                if self.tracker:
+                    emissions = self.tracker.stop_task().emissions
+                    self.struct.info["emissions"] = emissions
+
+        md_offset = self.offset
+        if self.restart and self.ramp_temp:
+            # Take the ramp time off the offset for MD.
+            # If restarting during the ramp, MD has no offset.
+            md_offset = max(
+                0, md_offset - self.heating_steps_per_temp * self.heating_n_temps
+            )
+
+        # Run MD
         if self.steps > 0:
-            self._run_md()
+            if self.logger:
+                self.logger.info("Starting molecular dynamics simulation")
+            if self.tracker:
+                self.tracker.start_task("Molecular dynamics")
+            self.temp = md_temp
+            if self.ramp_temp:
+                self._set_velocity_distribution()
+                self._set_target_temperature(self.temp)
+            self.dyn.run(self.steps - md_offset)
+            self._write_final_state()
+            self.created_final_file = True
+            if self.logger:
+                self.logger.info("Molecular dynamics simulation complete")
+            if self.tracker:
+                emissions = self.tracker.stop_task().emissions
+                self.struct.info["emissions"] = emissions
+                self.tracker.stop()
 
 
 class NPT(MolecularDynamics):
