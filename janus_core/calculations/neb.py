@@ -42,9 +42,9 @@ class NEB(BaseCalculation):
         calculators will be replaced with a copy matching the one attached to
         init_struct. Default is None.
     neb_structs
-        Band of ASE Atoms images, or filepath to images, to optimize, skipping
-        interpolation between the initial and final structures. Sets `interpolator` to
-        None.
+        ASE Atoms structures in NEB path, or filepath to structures, to optimize,
+        skipping interpolation between the initial and final structures. Sets
+        `interpolator` to None.
     arch
         MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
     device
@@ -151,9 +151,9 @@ class NEB(BaseCalculation):
             attached calculators will be replaced with a copy matching the one attached
             to init_struct. Default is None.
         neb_structs
-            Band of ASE Atoms images, or filepath to images, to optimize, skipping
-            interpolation between the initial and final structures. Sets `interpolator`
-            to None.
+            ASE Atoms structures in NEB path, or filepath to structures, to optimize,
+            skipping interpolation between the initial and final structures. Sets
+            `interpolator` to None.
         arch
             MLIP architecture to use for Nudged Elastic Band method. Default is
             "mace_mp".

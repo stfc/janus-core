@@ -48,7 +48,7 @@ def neb(
     ] = None,
     neb_structs: Annotated[
         Path | None,
-        Option(help="Path of all band images.", rich_help_panel="Calculation"),
+        Option(help="Path of all NEB images.", rich_help_panel="Calculation"),
     ] = None,
     neb_class: Annotated[
         str | None,
@@ -134,7 +134,7 @@ def neb(
         Path of final structure for Nudged Elastic Band method. Required if
         `neb_structs` is None. Default is None.
     neb_structs
-        Path of band images to optimize, skipping interpolation between the
+        Filepath of NEB images to optimize, skipping interpolation between the
         initial and final structures. Sets `interpolator` to None.
     neb_class
         Nudged Elastic Band class to use. Default is ase.mep.NEB.
