@@ -235,7 +235,7 @@ class MolecularDynamics(BaseCalculation):
         write_kwargs: OutputKwargs | None = None,
         post_process_kwargs: PostProcessKwargs | None = None,
         correlation_kwargs: list[CorrelationKwargs] | None = None,
-        plumed_input: str | PathLike | None = None,
+        plumed_input: PathLike | None = None,
         plumed_log: PathLike | None = None,
         seed: int | None = None,
         enable_progress_bar: bool = False,
