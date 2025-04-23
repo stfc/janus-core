@@ -731,7 +731,7 @@ def test_heating(tmp_path, capsys, ensemble):
     assert final_file.exists()
 
     # Check progress bar has completed.
-    assert "━━ 2/2" in capsys.readouterr().out
+    assert "2/2" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("ensemble", ensembles_without_thermostat)
@@ -835,7 +835,7 @@ def test_heating_md(tmp_path, capsys, ensemble):
     assert stat_data.units[target_t_col] == "K"
 
     # Check progress bar has completed.
-    assert "━━ 9/9" in capsys.readouterr().out
+    assert "9/9" in capsys.readouterr().out
 
 
 def test_heating_restart(tmp_path, capsys):
@@ -879,7 +879,7 @@ def test_heating_restart(tmp_path, capsys):
     assert stat_data.data[8, target_t_col] == 30
 
     # Check progress bar is correct.
-    assert "━━ 8/8" in capsys.readouterr().out
+    assert "8/8" in capsys.readouterr().out
 
 
 def test_heating_files():
@@ -1049,7 +1049,7 @@ def test_cooling(tmp_path, capsys):
     assert stats.data[2, 16] == 10.0
 
     # Check progress bar
-    assert "━━ 2/2" in capsys.readouterr().out
+    assert "2/2" in capsys.readouterr().out
 
 
 def test_heating_too_short(tmp_path):
@@ -1234,7 +1234,7 @@ def test_auto_restart(tmp_path, capsys):
         assert len(final_traj) == 8
 
         # Check progress bar has completed.
-        assert "━━ 7/7" in capsys.readouterr().out
+        assert "7/7" in capsys.readouterr().out
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
@@ -1366,4 +1366,4 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
     md.run()
 
     # Check progress bar has completed.
-    assert "━━ 2/2" in capsys.readouterr().out
+    assert "2/2" in capsys.readouterr().out

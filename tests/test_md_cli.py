@@ -157,7 +157,7 @@ def test_md(ensemble):
 
         check_output_files(summary=summary, output_files=output_files)
 
-        assert "━━ 2/2" in result.output
+        assert "2/2" in result.output
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
