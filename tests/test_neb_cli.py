@@ -193,7 +193,7 @@ def test_bands(tmp_path):
         app,
         [
             "neb",
-            "--band-structs",
+            "--neb-structs",
             DATA_PATH / "LiFePO4-neb-band.xyz",
             "--steps",
             2,
@@ -242,7 +242,7 @@ def test_interpolate_and_band(tmp_path):
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
             DATA_PATH / "LiFePO4_end.cif",
-            "--band-structs",
+            "--neb-structs",
             DATA_PATH / "LiFePO4-neb-band.xyz",
             "--no-tracker",
             "--file-prefix",
