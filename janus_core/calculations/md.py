@@ -497,22 +497,23 @@ class MolecularDynamics(BaseCalculation):
         # Wrap calculator with Plumed if input is provided
         if self.plumed_input:
             try:
+                import plumed
                 from ase.calculators.plumed import Plumed
             except ImportError:
                 raise ImportError(
-                    "ASE Plumed calculator not found. Install janus-core with "
-                    "'plumed' extra: pip install janus-core[plumed]"
+                    "PLUMED Python package not found. Please install PLUMED with its "
+                    "Python interface to use this feature."
                 )
 
             # Read input script from file if it's a path
             plumed_input_path = Path(self.plumed_input)
-            if plumed_input_path.is_file():
-                with open(plumed_input_path, "r", encoding="utf-8") as f:
-                    plumed_script = f.read()
-                plumed_input_source = str(plumed_input_path.resolve())
-            else:
-                plumed_script = self.plumed_input
-                plumed_input_source = "string"
+            if not plumed_input_path.is_file():
+                raise FileNotFoundError(
+                    f"PLUMED input file not found or is not a file: {plumed_input_path}"
+                )
+            with open(plumed_input_path, "r", encoding="utf-8") as f:
+                plumed_script = f.read()
+            plumed_input_source = str(plumed_input_path.resolve())
 
             # Calculate kT in ASE units (eV)
             kT = self.temp * units.kB
@@ -530,11 +531,8 @@ class MolecularDynamics(BaseCalculation):
                 atoms=self.struct,
                 kT=kT,
                 log=str(self.plumed_log),
+                restart=self.restart,
             )
-            if self.logger:
-                self.logger.info("Wrapped calculator with ASE Plumed interface.")
-                self.logger.info("PLUMED input source: %s", plumed_input_source)
-                self.logger.info("PLUMED log file: %s", self.plumed_log)
 
         # Set output file names
         self.final_file = self._build_filename(
@@ -629,6 +627,7 @@ class MolecularDynamics(BaseCalculation):
                 if self.post_process_kwargs.get("vaf_compute", False)
                 else None
             ),
+            "plumed_log": self.plumed_log if self.plumed_input else None,
         }
 
     @property

@@ -138,7 +138,7 @@ def md(
     post_process_kwargs: PostProcessKwargs = None,
     correlation_kwargs: CorrelationKwargs = None,
     plumed_input: Annotated[
-        str | None,
+        Path | None,
         Option(
             help="PLUMED input script content or path to PLUMED input file.",
             rich_help_panel="Calculation",
