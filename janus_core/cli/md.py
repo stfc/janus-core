@@ -137,6 +137,20 @@ def md(
     ] = 10,
     post_process_kwargs: PostProcessKwargs = None,
     correlation_kwargs: CorrelationKwargs = None,
+    plumed_input: Annotated[
+        str | None,
+        Option(
+            help="PLUMED input script content or path to PLUMED input file.",
+            rich_help_panel="Calculation",
+        ),
+    ] = None,
+    plumed_log: Annotated[
+        Path | None,
+        Option(
+            help="Path for the PLUMED log file.",
+            rich_help_panel="Calculation",
+        ),
+    ] = None,
     seed: Annotated[
         int | None,
         Option(
@@ -634,6 +648,8 @@ def md(
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
         "correlation_kwargs": correlation_kwargs,
+        "plumed_input": plumed_input,
+        "plumed_log": plumed_log,
         "seed": seed,
         "enable_progress_bar": progress_bar,
         "update_progress_every": update_progress_every,
