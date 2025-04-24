@@ -130,11 +130,10 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         )
         energy = single_point.run()["energy"]
         assert energy == pytest.approx(expected_energy, rel=1e-5)
-    except URLError as e:
-        if "Connection timed out" in e.msg:
+    except URLError as err:
+        if "Connection timed out" in err.reason:
             pytest.skip("Model download failed")
-        else:
-            raise e
+        raise err
 
 
 def test_single_point_none():

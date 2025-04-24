@@ -108,11 +108,12 @@ def test_mlips(arch, device, kwargs):
         calculator = choose_calculator(arch=arch, device=device, **kwargs)
         assert calculator.parameters["version"] is not None
         assert calculator.parameters["model_path"] is not None
-    except (BadZipFile, URLError) as e:
-        if isinstance(e, BadZipFile) or "Connection timed out" in e.msg:
+    except BadZipFile:
+        pytest.skip("Model download failed")
+    except URLError as err:
+        if "Connection timed out" in err.reason:
             pytest.skip("Model download failed")
-        else:
-            raise e
+        raise err
 
 
 def test_invalid_arch():
