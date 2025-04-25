@@ -82,6 +82,7 @@ Architecture = Annotated[
         click_type=Choice(get_args(Architectures)),
         help="MLIP architecture to use for calculations.",
         rich_help_panel="MLIP calculator",
+        show_default=False,
     ),
 ]
 Device = Annotated[

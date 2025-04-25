@@ -33,8 +33,10 @@ app = Typer()
 def descriptors(
     # numpydoc ignore=PR02
     ctx: Context,
-    # Calculation
+    # Required
+    arch: Architecture,
     struct: StructPath,
+    # Calculation
     invariants_only: Annotated[
         bool,
         Option(
@@ -65,7 +67,6 @@ def descriptors(
         ),
     ] = None,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -87,6 +88,8 @@ def descriptors(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
+    arch
+        MLIP architecture to use for calculations.
     struct
         Path of structure to simulate.
     invariants_only
@@ -98,8 +101,6 @@ def descriptors(
     out
         Path to save structure with calculated results. Default is inferred
         `file_prefix`.
-    arch
-        MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model

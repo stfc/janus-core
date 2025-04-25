@@ -63,7 +63,8 @@ def _update_restart_files(summary: Path, restart_files: list[Path]) -> None:
 def md(
     # numpydoc ignore=PR02
     ctx: Context,
-    # Calculation
+    # Required
+    arch: Architecture,
     ensemble: Annotated[
         str,
         Option(
@@ -74,6 +75,7 @@ def md(
         ),
     ],
     struct: StructPath,
+    # Calculation
     steps: Annotated[
         int,
         Option(help="Number of steps in MD simulation.", rich_help_panel="Calculation"),
@@ -347,7 +349,6 @@ def md(
         ),
     ] = 100,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -377,6 +378,8 @@ def md(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
+    arch
+        MLIP architecture to use for molecular dynamics.
     ensemble
         Name of thermodynamic ensemble.
     struct
@@ -475,9 +478,6 @@ def md(
         Step to start saving trajectory. Default is 0.
     traj_every
         Frequency of steps to save trajectory. Default is 100.
-    arch
-        MLIP architecture to use for molecular dynamics.
-        Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model

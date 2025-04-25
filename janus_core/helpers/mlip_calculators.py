@@ -77,7 +77,7 @@ def _set_no_weights_only_load():
 
 
 def choose_calculator(
-    arch: Architectures = "mace",
+    arch: Architectures,
     device: Devices = "cpu",
     model: PathLike | None = None,
     **kwargs,
@@ -88,7 +88,7 @@ def choose_calculator(
     Parameters
     ----------
     arch
-        MLIP architecture. Default is "mace".
+        MLIP architecture.
     device
         Device to run calculator on. Default is "cpu".
     model

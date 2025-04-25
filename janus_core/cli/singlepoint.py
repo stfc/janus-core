@@ -35,8 +35,10 @@ app = Typer()
 def singlepoint(
     # numpydoc ignore=PR02
     ctx: Context,
-    # Calculation
+    # Required
+    arch: Architecture,
     struct: StructPath,
+    # Calculation
     properties: Annotated[
         list[str] | None,
         Option(
@@ -59,7 +61,6 @@ def singlepoint(
         ),
     ] = None,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -81,6 +82,8 @@ def singlepoint(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
+    arch
+        MLIP architecture to use for single point calculations.
     struct
         Path of structure to simulate.
     properties
@@ -88,8 +91,6 @@ def singlepoint(
     out
         Path to save structure with calculated results. Default is inferred from
         `file_prefix`.
-    arch
-        MLIP architecture to use for single point calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model

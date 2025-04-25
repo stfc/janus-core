@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, get_args
 
 from ase import Atoms
+from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read, write
 from ase.io.formats import filetype
 
@@ -70,8 +71,8 @@ def results_to_info(
 
 def attach_calculator(
     struct: MaybeSequence[Atoms],
+    arch: Architectures,
     *,
-    arch: Architectures = "mace_mp",
     device: Devices = "cpu",
     model: PathLike | None = None,
     calc_kwargs: dict[str, Any] | None = None,
@@ -84,7 +85,7 @@ def attach_calculator(
     struct
         ASE Atoms structure(s) to attach calculators to.
     arch
-        MLIP architecture to use for calculations. Default is "mace_mp".
+        MLIP architecture to use for calculations.
     device
         Device to run model on. Default is "cpu".
     model
@@ -113,11 +114,10 @@ def input_structs(
     *,
     read_kwargs: ASEReadArgs | None = None,
     sequence_allowed: bool = True,
-    arch: Architectures = "mace_mp",
+    arch: Architectures | None = None,
     device: Devices = "cpu",
     model: PathLike | None = None,
     calc_kwargs: dict[str, Any] | None = None,
-    set_calc: bool | None = None,
     logger: logging.Logger | None = None,
 ) -> tuple[MaybeSequence[Atoms], PathLike | None]:
     """
@@ -132,16 +132,13 @@ def input_structs(
     sequence_allowed
         Whether a sequence of Atoms objects is allowed. Default is True.
     arch
-        MLIP architecture to use for calculations. Default is "mace_mp".
+        MLIP architecture to use for calculations. Default is None.
     device
         Device to run model on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc
-        Whether to set (new) calculators for structures.  Default is True if `struct`
-        is `PathLike` or `struct` is missing calculators, else default is False.
     logger
         Logger if log file has been specified. Default is None.
 
@@ -180,18 +177,7 @@ def input_structs(
             "Only one Atoms object at a time can be used for this calculation"
         )
 
-    # If set_calc not specified, set to True if reading file or calculators not attached
-    if set_calc is None:
-        if struct_path:
-            set_calc = True
-
-        elif isinstance(struct, Atoms):
-            set_calc = struct.calc is None
-
-        elif isinstance(struct, Sequence):
-            set_calc = any(image.calc is None for image in struct)
-
-    if set_calc:
+    if arch:
         if logger:
             logger.info("Attaching calculator to structure.")
         attach_calculator(
@@ -203,6 +189,13 @@ def input_structs(
         )
         if logger:
             logger.info("Calculator attached to structure.")
+    else:
+        if struct.calc is None:
+            raise ValueError("A calculator must be attached to `struct`")
+        if isinstance(struct.calc, SinglePointCalculator):
+            raise ValueError(
+                "The attached calculator cannot be used for new calculations."
+            )
 
     return struct, struct_path
 

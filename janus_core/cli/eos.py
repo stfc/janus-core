@@ -34,8 +34,10 @@ app = Typer()
 def eos(
     # numpydoc ignore=PR02
     ctx: Context,
-    # Calculation
+    # Required
+    arch: Architecture,
     struct: StructPath,
+    # Calculation
     min_volume: Annotated[
         float,
         Option(help="Minimum volume scale factor.", rich_help_panel="Calculation"),
@@ -92,7 +94,6 @@ def eos(
         ),
     ] = False,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -113,6 +114,8 @@ def eos(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
+    arch
+        MLIP architecture to use for calculations.
     struct
         Path of structure to simulate.
     min_volume
@@ -136,8 +139,6 @@ def eos(
         True to write out all genereated structures. Default is False.
     plot_to_file
         Whether to save plot equation of state to svg. Default is False.
-    arch
-        MLIP architecture to use for geometry optimization. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model

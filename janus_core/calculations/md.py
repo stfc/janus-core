@@ -67,7 +67,7 @@ class MolecularDynamics(BaseCalculation):
     struct
         ASE Atoms structure, or filepath to structure to simulate.
     arch
-        MLIP architecture to use for simulation. Default is "mace_mp".
+        MLIP architecture to use for simulation. Default is `None`.
     device
         Device to run MLIP model on. Default is "cpu".
     model
@@ -79,8 +79,6 @@ class MolecularDynamics(BaseCalculation):
         read_kwargs["index"] is -1.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc
-        Whether to set (new) calculators for structures. Default is None.
     attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
@@ -94,7 +92,7 @@ class MolecularDynamics(BaseCalculation):
     struct
         Structure to simulate.
     ensemble
-        Name for thermodynamic ensemble. Default is None.
+        Name for thermodynamic ensemble. Default is `None`.
     steps
         Number of steps in simulation. Default is 0.
     timestep
@@ -160,12 +158,12 @@ class MolecularDynamics(BaseCalculation):
         Keyword arguments to pass to `output_structs` when saving trajectory and final
         files. Default is {}.
     post_process_kwargs
-        Keyword arguments to control post-processing operations. Default is None.
+        Keyword arguments to control post-processing operations. Default is `None`.
     correlation_kwargs
-        Keyword arguments to control on-the-fly correlations. Default is None.
+        Keyword arguments to control on-the-fly correlations. Default is `None`.
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
-        Default is None.
+        Default is `None`.
     enable_progress_bar
         Whether to show a progress bar. Default is False.
     update_progress_every
@@ -189,13 +187,12 @@ class MolecularDynamics(BaseCalculation):
     def __init__(
         self,
         struct: Atoms | PathLike,
-        arch: Architectures = "mace_mp",
+        arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
         model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
-        set_calc: bool | None = None,
         attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
@@ -244,7 +241,7 @@ class MolecularDynamics(BaseCalculation):
         struct
             ASE Atoms structure, or filepath to structure to simulate.
         arch
-            MLIP architecture to use for simulation. Default is "mace_mp".
+            MLIP architecture to use for simulation. Default is `None`.
         device
             Device to run MLIP model on. Default is "cpu".
         model
@@ -256,8 +253,6 @@ class MolecularDynamics(BaseCalculation):
             read_kwargs["index"] is -1.
         calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc
-            Whether to set (new) calculators for structures. Default is None.
         attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
@@ -269,7 +264,7 @@ class MolecularDynamics(BaseCalculation):
         tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
         ensemble
-            Name for thermodynamic ensemble. Default is None.
+            Name for thermodynamic ensemble. Default is `None`.
         steps
             Number of steps in simulation. Default is 0.
         timestep
@@ -338,12 +333,12 @@ class MolecularDynamics(BaseCalculation):
             Keyword arguments to pass to `output_structs` when saving trajectory and
             final files. Default is {}.
         post_process_kwargs
-            Keyword arguments to control post-processing operations. Default is None.
+            Keyword arguments to control post-processing operations. Default is `None`.
         correlation_kwargs
-            Keyword arguments to control on-the-fly correlations. Default is None.
+            Keyword arguments to control on-the-fly correlations. Default is `None`.
         seed
             Random seed used by numpy.random and random functions, such as in Langevin.
-            Default is None.
+            Default is `None`.
         enable_progress_bar
             Whether to show a progress bar. Default is False.
         update_progress_every
@@ -472,7 +467,6 @@ class MolecularDynamics(BaseCalculation):
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
-            set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
             track_carbon=track_carbon,
@@ -763,7 +757,6 @@ class MolecularDynamics(BaseCalculation):
                     device=self.device,
                     model=self.model,
                     calc_kwargs=self.calc_kwargs,
-                    set_calc=True,
                     logger=self.logger,
                 )
 
