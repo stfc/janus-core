@@ -163,3 +163,54 @@ def test_neb_plot(tmp_path):
     assert neb.results["barrier"] == pytest.approx(0.4790452267999399)
     assert neb.results["delta_E"] == pytest.approx(-2.814124400174478e-07)
     assert neb.results["max_force"] == pytest.approx(1.5425684122118983)
+
+
+@pytest.mark.parametrize("n_images", (-5, 0, 1.5))
+def test_invalid_n_images(LFPO_start_b, LFPO_end_b, n_images):
+    """Test setting invalid invalid n_images."""
+    with pytest.raises(ValueError):
+        NEB(
+            init_struct=LFPO_start_b,
+            final_struct=LFPO_end_b,
+            n_images=n_images,
+        )
+
+
+def test_invalid_interpolator(LFPO_start_b, LFPO_end_b):
+    """Test setting invalid interpolator."""
+    with pytest.raises(ValueError):
+        NEB(
+            init_struct=LFPO_start_b,
+            final_struct=LFPO_end_b,
+            interpolator="invalid",
+        )
+
+
+def test_missing_interpolator(LFPO_start_b, LFPO_end_b):
+    """Test setting missing interpolator."""
+    with pytest.raises(ValueError):
+        NEB(
+            init_struct=LFPO_start_b,
+            final_struct=LFPO_end_b,
+            interpolator=None,
+        )
+
+
+def test_invalid_structs(LFPO_start_b, LFPO_end_b):
+    """Test error raised if init_struct/final_struct are passed with neb_structs."""
+    with pytest.raises(ValueError):
+        NEB(
+            init_struct=LFPO_start_b,
+            neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
+        )
+    with pytest.raises(ValueError):
+        NEB(
+            final_struct=LFPO_end_b,
+            neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
+        )
+    with pytest.raises(ValueError):
+        NEB(
+            init_struct=LFPO_start_b,
+            final_struct=LFPO_end_b,
+            neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
+        )

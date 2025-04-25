@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, get_args
+from typing import Annotated
 
 from click import Choice
 from typer import Context, Option, Typer
@@ -204,7 +204,6 @@ def neb(
         parse_typer_dicts,
         start_summary,
     )
-    from janus_core.helpers.janus_types import Interpolators
 
     # Check options from configuration file are all valid
     check_config(ctx)
@@ -240,17 +239,6 @@ def neb(
         "calc_kwargs": calc_kwargs.copy(),
     }
     config = get_config(params=ctx.params, all_kwargs=all_kwargs)
-
-    if neb_structs:
-        if init_struct or final_struct:
-            raise ValueError(
-                "Initial and final structures cannot be specified in addition to the "
-                "band structures"
-            )
-        interpolator = None
-
-    if not neb_structs and interpolator not in get_args(Interpolators):
-        raise ValueError(f"Fit type must be one of: {get_args(Interpolators)}")
 
     log_kwargs = {"filemode": "w"}
     if log:

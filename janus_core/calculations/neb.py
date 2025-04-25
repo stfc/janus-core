@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from copy import copy
-from typing import Any
+from typing import Any, get_args
 
 from ase import Atoms
 import ase.mep
@@ -297,6 +297,9 @@ class NEB(BaseCalculation):
         )
 
         if self.interpolator:
+            if interpolator not in get_args(Interpolators):
+                raise ValueError(f"Fit type must be one of: {get_args(Interpolators)}")
+
             if not isinstance(self.struct, Atoms):
                 raise ValueError("`init_struct` must be a single structure.")
             if not self.struct.calc:
