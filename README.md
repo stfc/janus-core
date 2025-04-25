@@ -282,7 +282,7 @@ calc-kwargs:
 ```
 
 ```shell
-janus singlepoint --struct KCl.cif --out KCl-results.cif --config config.yml
+janus singlepoint --arch mace_mp --struct KCl.cif --out KCl-results.cif --config config.yml
 ```
 
 This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "medium" force-field, saving the results to `KCl-results.cif`.
