@@ -18,6 +18,7 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     Model,
+    ModelPath,
     PDoSKwargs,
     ProgressBar,
     ReadKwargsLast,
@@ -175,6 +176,7 @@ def phonons(
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
+    model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
     # Strucuture I/O
     file_prefix: FilePrefix = None,
@@ -254,7 +256,9 @@ def phonons(
     device
         Device to run model on. Default is "cpu".
     model
-        Path to MLIP model. Default is `None`.
+        Path to MLIP model or name of model. Default is `None`.
+    model_path
+        Deprecated. Please use `model`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
@@ -365,6 +369,7 @@ def phonons(
         "arch": arch,
         "device": device,
         "model": model,
+        "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,

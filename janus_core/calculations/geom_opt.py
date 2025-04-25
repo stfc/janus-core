@@ -41,6 +41,8 @@ class GeomOpt(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
+    model_path
+        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -100,6 +102,7 @@ class GeomOpt(BaseCalculation):
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model: PathLike | None = None,
+        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         set_calc: bool | None = None,
@@ -135,6 +138,8 @@ class GeomOpt(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model
             MLIP model label, path to model, or loaded model. Default is `None`.
+        model_path
+            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -218,6 +223,7 @@ class GeomOpt(BaseCalculation):
             arch=arch,
             device=device,
             model=model,
+            model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,

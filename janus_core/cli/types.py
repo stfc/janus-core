@@ -98,6 +98,10 @@ Model = Annotated[
         help="MLIP model name, or path to model.", rich_help_panel="MLIP calculator"
     ),
 ]
+ModelPath = Annotated[
+    str | None,
+    Option(help="Deprecated. Please use --model", rich_help_panel="MLIP calculator"),
+]
 
 FilePrefix = Annotated[
     Path | None,
