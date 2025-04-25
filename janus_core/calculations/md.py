@@ -1102,7 +1102,7 @@ class MolecularDynamics(BaseCalculation):
                 -self.dyn.atoms.get_stress(include_ideal_gas=True, voigt=True)
                 / units.GPa
             )
-        except ValueError:
+        except (ValueError, NotImplementedError):
             volume = 0.0
             pressure = 0.0
             pressure_tensor = np.zeros(6)
