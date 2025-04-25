@@ -109,6 +109,65 @@ def attach_calculator(
         struct.calc = calculator
 
 
+def read_structs(
+    struct: MaybeSequence[Atoms] | PathLike,
+    *,
+    read_kwargs: ASEReadArgs | None = None,
+    sequence_allowed: bool = True,
+    logger: logging.Logger | None = None,
+) -> tuple[MaybeSequence[Atoms], PathLike | None]:
+    """
+    Read input structures.
+
+    Parameters
+    ----------
+    struct
+        ASE Atoms structure(s), or filepath to structure(s) to simulate.
+    read_kwargs
+        Keyword arguments to pass to ase.io.read. Default is {}.
+    sequence_allowed
+        Whether a sequence of Atoms objects is allowed. Default is True.
+    logger
+        Logger if log file has been specified. Default is None.
+
+    Returns
+    -------
+    tuple[MaybeSequence[Atoms], PathLike | None]
+        Loaded structure(s) and filepath.
+    """
+    (read_kwargs,) = none_to_dict(read_kwargs)
+
+    struct_path = struct if isinstance(struct, PathLike) else None
+
+    # Read from file
+    if struct_path:
+        if logger:
+            logger.info("Reading structures from file.")
+
+        if not Path(struct_path).exists():
+            raise ValueError("`struct` file could not be found")
+
+        struct = read(struct_path, **read_kwargs)
+        if logger:
+            logger.info("Structures read from file.")
+
+        # Return single Atoms object if reading only one image
+        if len(struct) == 1:
+            struct = struct[0]
+
+    # Check struct is valid type
+    if not isinstance(struct, Atoms | Sequence) or isinstance(struct, str):
+        raise ValueError("`struct` must be an ASE Atoms object or sequence of Atoms")
+
+    # Check struct is valid length
+    if not sequence_allowed and isinstance(struct, Sequence):
+        raise NotImplementedError(
+            "Only one Atoms object at a time can be used for this calculation"
+        )
+
+    return struct, struct_path
+
+
 def input_structs(
     struct: MaybeSequence[Atoms] | PathLike,
     *,
@@ -149,33 +208,12 @@ def input_structs(
     """
     (read_kwargs,) = none_to_dict(read_kwargs)
 
-    struct_path = struct if isinstance(struct, PathLike) else None
-
-    # Read from file
-    if struct_path:
-        if logger:
-            logger.info("Reading structures from file.")
-
-        if not Path(struct_path).exists():
-            raise ValueError("`struct` file could not be found")
-
-        struct = read(struct_path, **read_kwargs)
-        if logger:
-            logger.info("Structures read from file.")
-
-        # Return single Atoms object if reading only one image
-        if len(struct) == 1:
-            struct = struct[0]
-
-    # Check struct is valid type
-    if not isinstance(struct, Atoms | Sequence) or isinstance(struct, str):
-        raise ValueError("`struct` must be an ASE Atoms object or sequence of Atoms")
-
-    # Check struct is valid length
-    if not sequence_allowed and isinstance(struct, Sequence):
-        raise NotImplementedError(
-            "Only one Atoms object at a time can be used for this calculation"
-        )
+    struct, struct_path = read_structs(
+        struct=struct,
+        read_kwargs=read_kwargs,
+        sequence_allowed=sequence_allowed,
+        logger=logger,
+    )
 
     if arch:
         if logger:

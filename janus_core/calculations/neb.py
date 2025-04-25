@@ -25,7 +25,7 @@ from janus_core.helpers.janus_types import (
     OutputKwargs,
     PathLike,
 )
-from janus_core.helpers.struct_io import input_structs, output_structs
+from janus_core.helpers.struct_io import output_structs, read_structs
 from janus_core.helpers.utils import build_file_dir, none_to_dict, set_minimize_logging
 
 
@@ -308,7 +308,7 @@ class NEB(BaseCalculation):
             self.init_struct = self.struct
             self.init_struct_path = self.struct_path
 
-            self.final_struct, self.final_struct_path = input_structs(
+            self.final_struct, self.final_struct_path = read_structs(
                 struct=final_struct,
                 read_kwargs=read_kwargs,
                 sequence_allowed=False,
