@@ -76,6 +76,8 @@ def test_md_pp_cli(tmp_path):
                 "nve",
                 "--struct",
                 DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
                 "--file-prefix",
                 file_prefix,
                 "--steps",

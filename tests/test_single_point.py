@@ -479,7 +479,7 @@ def test_deprecation_model_calc_kwargs():
 
 def test_fake_calc_error():
     """Test an error is raised if SinglePointCalculator is set."""
-    struct = read(DATA_PATH / "2N.xyz")
+    struct = read(DATA_PATH / "NaCl-results.extxyz")
     assert isinstance(struct.calc, SinglePointCalculator)
 
     with pytest.raises(ValueError):

@@ -858,6 +858,7 @@ def test_heating_restart(tmp_path, capsys):
     # Should perform 1 step at 20K, then 4 at 30K (2 ramp, 2 MD)
     md_restart = NVT(
         struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
         temp=30.0,
         steps=2,
         traj_every=100,
