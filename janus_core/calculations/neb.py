@@ -41,10 +41,10 @@ class NEB(BaseCalculation):
         Final ASE Atoms structure, or filepath to structure to simulate. Any attached
         calculators will be replaced with a copy matching the one attached to
         init_struct. Default is None.
-    band_structs
-        Band of ASE Atoms images, or filepath to images, to optimize, skipping
-        interpolation between the initial and final structures. Sets `interpolator` to
-        None.
+    neb_structs
+        ASE Atoms structures in NEB path, or filepath to structures, to optimize,
+        skipping interpolation between the initial and final structures. Sets
+        `interpolator` to None.
     arch
         MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
     device
@@ -53,7 +53,7 @@ class NEB(BaseCalculation):
         Path to MLIP model. Default is `None`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
-        is -1 if using `init_struct` and `final_struct`, or ":" for `band_structs`.
+        is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc
@@ -82,7 +82,7 @@ class NEB(BaseCalculation):
         Keyword arguments to pass to ase.io.write when writing images.
     interpolator
         Choice of interpolation strategy. Default is "ase" if using `init_struct` and
-        `final_struct`, or None if using `band_structs`.
+        `final_struct`, or None if using `neb_structs`.
     interpolator_kwargs
         Keyword arguments to pass to interpolator. Default is
         {"method": "idpp"} for "ase" interpolator, or
@@ -111,7 +111,7 @@ class NEB(BaseCalculation):
         self,
         init_struct: Atoms | PathLike | None = None,
         final_struct: Atoms | PathLike | None = None,
-        band_structs: Sequence[Atoms] | PathLike | None = None,
+        neb_structs: Sequence[Atoms] | PathLike | None = None,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
         model_path: PathLike | None = None,
@@ -150,10 +150,10 @@ class NEB(BaseCalculation):
             Final ASE Atoms structure, or filepath to structure to simulate. Any
             attached calculators will be replaced with a copy matching the one attached
             to init_struct. Default is None.
-        band_structs
-            Band of ASE Atoms images, or filepath to images, to optimize, skipping
-            interpolation between the initial and final structures. Sets `interpolator`
-            to None.
+        neb_structs
+            ASE Atoms structures in NEB path, or filepath to structures, to optimize,
+            skipping interpolation between the initial and final structures. Sets
+            `interpolator` to None.
         arch
             MLIP architecture to use for Nudged Elastic Band method. Default is
             "mace_mp".
@@ -163,7 +163,7 @@ class NEB(BaseCalculation):
             Path to MLIP model. Default is `None`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
-            is -1 if using `init_struct` and `final_struct`, or ":" for `band_structs`.
+            is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.
         calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
         set_calc
@@ -192,7 +192,7 @@ class NEB(BaseCalculation):
             Keyword arguments to pass to ase.io.write when writing images.
         interpolator
             Choice of interpolation strategy. Default is "ase" if using `init_struct`
-            and `final_struct`, or None if using `band_structs`.
+            and `final_struct`, or None if using `neb_structs`.
         interpolator_kwargs
             Keyword arguments to pass to interpolator. Default is
             {"method": "idpp"} for "ase" interpolator, or
@@ -253,11 +253,11 @@ class NEB(BaseCalculation):
             raise ValueError("`n_images` must be an integer greater than 0.")
 
         # Identify whether interpolating
-        if band_structs:
+        if neb_structs:
             self.interpolator = None
             if init_struct or final_struct:
                 raise ValueError(
-                    "`band_structs` cannot be specified in combination with "
+                    "`neb_structs` cannot be specified in combination with "
                     "`init_struct` or final_struct"
                 )
 
@@ -265,7 +265,7 @@ class NEB(BaseCalculation):
                 raise ValueError("Cannot minimize band structures.")
 
             # Pass band strutures to base class init
-            init_struct = band_structs
+            init_struct = neb_structs
 
             # Read all image by default for band
             read_kwargs.setdefault("index", ":")
