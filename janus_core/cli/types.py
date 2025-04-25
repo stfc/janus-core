@@ -367,3 +367,8 @@ Summary = Annotated[
         rich_help_panel="Logging/summary",
     ),
 ]
+
+ProgressBar = Annotated[
+    bool,
+    Option(help="Whether to show progress bar.", rich_help_panel="Logging/summary"),
+]

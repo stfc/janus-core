@@ -22,6 +22,7 @@ from janus_core.cli.types import (
     MinimizeKwargs,
     ModelPath,
     PostProcessKwargs,
+    ProgressBar,
     ReadKwargsLast,
     StructPath,
     Summary,
@@ -357,6 +358,15 @@ def md(
     log: LogPath = None,
     tracker: Tracker = True,
     summary: Summary = None,
+    progress_bar: ProgressBar = True,
+    update_progress_every: Annotated[
+        int,
+        Option(
+            help="Number of timesteps between progress bar updates. "
+            "Default is steps / 100, rounded up.",
+            rich_help_panel="Logging/summary",
+        ),
+    ] = None,
 ) -> None:
     """
     Run molecular dynamics simulation, and save trajectory and statistics.
@@ -490,6 +500,11 @@ def md(
     summary
         Path to save summary of inputs, start/end time, and carbon emissions. Default
         is inferred from `file_prefix`.
+    progress_bar
+        Whether to show progress bar.
+    update_progress_every
+        Number of timesteps between progress bar updates. Default is steps / 100,
+        rounded up.
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
@@ -615,6 +630,8 @@ def md(
         "post_process_kwargs": post_process_kwargs,
         "correlation_kwargs": correlation_kwargs,
         "seed": seed,
+        "enable_progress_bar": progress_bar,
+        "update_progress_every": update_progress_every,
     }
 
     # Instantiate MD ensemble

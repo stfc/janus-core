@@ -523,7 +523,7 @@ class Phonons(BaseCalculation):
 
         if self.enable_progress_bar:
             disp_supercells = track_progress(
-                disp_supercells, "Computing displacements..."
+                disp_supercells, description="Computing displacements..."
             )
 
         phonon.forces = [

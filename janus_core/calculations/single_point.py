@@ -254,7 +254,7 @@ class SinglePoint(BaseCalculation):
             struct_sequence = self.struct
             if self.enable_progress_bar:
                 struct_sequence = track_progress(
-                    struct_sequence, "Computing potential energies..."
+                    struct_sequence, description="Computing potential energies..."
                 )
             return [struct.get_potential_energy() for struct in struct_sequence]
 
@@ -272,7 +272,9 @@ class SinglePoint(BaseCalculation):
         if isinstance(self.struct, Sequence):
             struct_sequence = self.struct
             if self.enable_progress_bar:
-                struct_sequence = track_progress(struct_sequence, "Computing forces...")
+                struct_sequence = track_progress(
+                    struct_sequence, description="Computing forces..."
+                )
             return [struct.get_forces() for struct in struct_sequence]
 
         return self.struct.get_forces()
@@ -290,7 +292,7 @@ class SinglePoint(BaseCalculation):
             struct_sequence = self.struct
             if self.enable_progress_bar:
                 struct_sequence = track_progress(
-                    struct_sequence, "Computing stresses..."
+                    struct_sequence, description="Computing stresses..."
                 )
             return [struct.get_stress() for struct in struct_sequence]
 
@@ -333,8 +335,9 @@ class SinglePoint(BaseCalculation):
         if isinstance(self.struct, Sequence):
             struct_sequence = self.struct
             if self.enable_progress_bar:
+                print("There should be a progress bar...")
                 struct_sequence = track_progress(
-                    struct_sequence, "Computing Hessian..."
+                    struct_sequence, description="Computing Hessian..."
                 )
             return [self._calc_hessian(struct) for struct in struct_sequence]
 
