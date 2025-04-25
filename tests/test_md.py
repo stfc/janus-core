@@ -844,6 +844,7 @@ def test_heating_restart(tmp_path, capsys):
 
     md = NVT(
         struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
         temp=10.0,
         steps=3,
         traj_every=100,

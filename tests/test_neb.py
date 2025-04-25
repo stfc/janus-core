@@ -49,6 +49,7 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=init_struct,
         final_struct=final_struct,
+        arch="mace_mp",
         model=MODEL_PATH,
         n_images=5,
         file_prefix=tmp_path / "LFPO",
@@ -79,6 +80,7 @@ def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=single_point_start.struct,
         final_struct=single_point_end.struct,
+        arch="mace_mp",
         model=MODEL_PATH,
         n_images=5,
         interpolator="pymatgen",
@@ -105,6 +107,7 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=start_struct,
         final_struct=end_struct,
+        arch="mace_mp",
         n_images=5,
         interpolator="ase",
         fmax=4,

@@ -184,6 +184,7 @@ def test_converge_warning():
     """Test warning raised if not converged."""
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
         model=MODEL_PATH,
     )
     optimizer = GeomOpt(single_point.struct, steps=1)
@@ -196,6 +197,7 @@ def test_restart(tmp_path):
     """Test restarting geometry optimization."""
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
         model=MODEL_PATH,
         properties="energy",
     )

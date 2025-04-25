@@ -48,6 +48,8 @@ def test_neb():
             app,
             [
                 "neb",
+                "--arch",
+                "mace_mp",
                 "--init-struct",
                 DATA_PATH / "LiFePO4_start.cif",
                 "--final-struct",
@@ -128,6 +130,8 @@ def test_minimize(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -194,6 +198,8 @@ def test_bands(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--neb-structs",
             DATA_PATH / "LiFePO4-neb-band.xyz",
             "--steps",
@@ -216,6 +222,8 @@ def test_invalid_interpolator(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -239,6 +247,8 @@ def test_interpolate_and_band(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -262,6 +272,8 @@ def test_invalid_n_images(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -286,6 +298,8 @@ def test_neb_class(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -319,6 +333,8 @@ def test_interpolator(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -357,6 +373,8 @@ def test_optimzer(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -394,6 +412,8 @@ def test_invalid_neb(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",
@@ -423,6 +443,8 @@ def test_invalid_opt(tmp_path):
         app,
         [
             "neb",
+            "--arch",
+            "mace_mp",
             "--init-struct",
             DATA_PATH / "LiFePO4_start.cif",
             "--final-struct",

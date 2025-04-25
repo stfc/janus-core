@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 from urllib.error import URLError
 
+from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
 from numpy import isfinite
 import pytest
@@ -474,3 +475,12 @@ def test_deprecation_model_calc_kwargs():
         )
 
     assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
+
+
+def test_fake_calc_error():
+    """Test an error is raised if SinglePointCalculator is set."""
+    struct = read(DATA_PATH / "2N.xyz")
+    assert isinstance(struct.calc, SinglePointCalculator)
+
+    with pytest.raises(ValueError):
+        SinglePoint(struct=struct)
