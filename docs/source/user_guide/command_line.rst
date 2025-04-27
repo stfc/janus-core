@@ -601,7 +601,7 @@ this can be passed instead of the initial and final structures:
 
 .. code-block:: bash
 
-    janus neb  --band-structs tests/data/N2-neb-images.xyz
+    janus neb  --neb-structs tests/data/N2-neb-images.xyz
 
 
 Additional options include using `pymatgen to interpolate <https://pymatgen.org/pymatgen.core.html#pymatgen.core.structure.IStructure.interpolate>`_,

@@ -692,7 +692,7 @@ def test_stats(tmp_path, ensemble, tag):
 
 
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_heating(tmp_path, ensemble):
+def test_heating(tmp_path, capsys, ensemble):
     """Test heating with no MD."""
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
@@ -716,6 +716,7 @@ def test_heating(tmp_path, ensemble):
         temp_step=20,
         temp_time=2,
         log_kwargs={"filename": log_file},
+        enable_progress_bar=True,
     )
     md.run()
     assert_log_contains(
@@ -728,6 +729,9 @@ def test_heating(tmp_path, ensemble):
     )
 
     assert final_file.exists()
+
+    # Check progress bar has completed.
+    assert "2/2" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("ensemble", ensembles_without_thermostat)
@@ -782,7 +786,7 @@ def test_noramp_heating(tmp_path, ensemble):
 
 
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_heating_md(tmp_path, ensemble):
+def test_heating_md(tmp_path, capsys, ensemble):
     """Test heating followed by MD."""
     file_prefix = tmp_path / "NaCl-heating"
     stats_path = tmp_path / "NaCl-heating-stats.dat"
@@ -805,6 +809,7 @@ def test_heating_md(tmp_path, ensemble):
         temp_step=10,
         temp_time=2,
         log_kwargs={"filename": log_file},
+        enable_progress_bar=True,
     )
     md.run()
     assert_log_contains(
@@ -829,8 +834,11 @@ def test_heating_md(tmp_path, ensemble):
     assert stat_data.units[0] == ""
     assert stat_data.units[target_t_col] == "K"
 
+    # Check progress bar has completed.
+    assert "9/9" in capsys.readouterr().out
 
-def test_heating_restart(tmp_path):
+
+def test_heating_restart(tmp_path, capsys):
     """Test restarting during temperature ramp."""
     file_prefix = tmp_path / "NaCl-heating"
 
@@ -859,6 +867,7 @@ def test_heating_restart(tmp_path):
         temp_step=10,
         temp_time=2,
         restart=True,
+        enable_progress_bar=True,
     )
     md_restart.run()
 
@@ -868,6 +877,9 @@ def test_heating_restart(tmp_path):
     assert stat_data.data[4, target_t_col] == 20
     assert stat_data.data[5, target_t_col] == 30
     assert stat_data.data[8, target_t_col] == 30
+
+    # Check progress bar is correct.
+    assert "8/8" in capsys.readouterr().out
 
 
 def test_heating_files():
@@ -990,7 +1002,7 @@ def test_ramp_negative(tmp_path):
         )
 
 
-def test_cooling(tmp_path):
+def test_cooling(tmp_path, capsys):
     """Test cooling with no MD."""
     file_prefix = tmp_path / "NaCl-cooling"
     final_path = tmp_path / "NaCl-cooling-final.extxyz"
@@ -1015,6 +1027,7 @@ def test_cooling(tmp_path):
         temp_step=10,
         temp_time=1,
         log_kwargs={"filename": log_file},
+        enable_progress_bar=True,
     )
     nvt.run()
     assert_log_contains(
@@ -1034,6 +1047,9 @@ def test_cooling(tmp_path):
     assert stats.rows == 3
     assert stats.data[0, 16] == 20.0
     assert stats.data[2, 16] == 10.0
+
+    # Check progress bar
+    assert "2/2" in capsys.readouterr().out
 
 
 def test_heating_too_short(tmp_path):
@@ -1127,7 +1143,7 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_auto_restart(tmp_path):
+def test_auto_restart(tmp_path, capsys):
     """Test auto restarting simulation."""
     # tmp_path for all files other than restart
     # Include T300.0 to test Path.stem vs Path.name
@@ -1188,6 +1204,7 @@ def test_auto_restart(tmp_path):
             traj_every=1,
             final_file=final_path,
             log_kwargs={"filename": log_file},
+            enable_progress_bar=True,
         )
 
         assert_log_contains(log_file, includes="Auto restart successful")
@@ -1215,6 +1232,9 @@ def test_auto_restart(tmp_path):
 
         final_traj = read(traj_path, index=":")
         assert len(final_traj) == 8
+
+        # Check progress bar has completed.
+        assert "7/7" in capsys.readouterr().out
 
     finally:
         shutil.rmtree(results_dir, ignore_errors=True)
@@ -1327,3 +1347,23 @@ def test_set_info(tmp_path):
     final_struct = read(traj_path, index="-1")
     assert npt.struct.info["density"] == pytest.approx(2.120952627887493)
     assert final_struct.info["density"] == pytest.approx(2.120952627887493)
+
+
+@pytest.mark.parametrize("ensemble, tag", test_data)
+def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
+    """Test progress bar completes in all ensembles."""
+    file_prefix = tmp_path / f"Cl4Na4-{tag}-T300.0"
+
+    md = ensemble(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model_path=MODEL_PATH,
+        steps=2,
+        file_prefix=file_prefix,
+        enable_progress_bar=True,
+    )
+
+    md.run()
+
+    # Check progress bar has completed.
+    assert "2/2" in capsys.readouterr().out

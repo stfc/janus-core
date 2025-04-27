@@ -149,7 +149,7 @@ def test_neb_plot(tmp_path):
     file_prefix = tmp_path / "LFPO"
 
     neb = NEB(
-        band_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
+        neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
         arch="mace",
         model_path=MODEL_PATH,
         steps=2,

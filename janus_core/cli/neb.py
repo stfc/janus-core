@@ -46,9 +46,9 @@ def neb(
         Path | None,
         Option(help="Path of final structure in band.", rich_help_panel="Calculation"),
     ] = None,
-    band_structs: Annotated[
+    neb_structs: Annotated[
         Path | None,
-        Option(help="Path of all band images.", rich_help_panel="Calculation"),
+        Option(help="Path of all NEB images.", rich_help_panel="Calculation"),
     ] = None,
     neb_class: Annotated[
         str | None,
@@ -129,12 +129,12 @@ def neb(
 
     init_struct
         Path of initial structure for Nudged Elastic Band method. Required if
-        `band_structs` is None. Default is None.
+        `neb_structs` is None. Default is None.
     final_struct
         Path of final structure for Nudged Elastic Band method. Required if
-        `band_structs` is None. Default is None.
-    band_structs
-        Path of band images to optimize, skipping interpolation between the
+        `neb_structs` is None. Default is None.
+    neb_structs
+        Filepath of NEB images to optimize, skipping interpolation between the
         initial and final structures. Sets `interpolator` to None.
     neb_class
         Nudged Elastic Band class to use. Default is ase.mep.NEB.
@@ -146,7 +146,7 @@ def neb(
         Keyword arguments to pass to neb_class. Default is {}.
     interpolator
         Choice of interpolation strategy. Default is "ase" if using `init_struct` and
-        `final_struct`, or None if using `band_structs`.
+        `final_struct`, or None if using `neb_structs`.
     interpolator_kwargs
         Keyword arguments to pass to interpolator. Default is {"method": "idpp"} for
         "ase" interpolator, or {"interpolate_lattices": False, "autosort_tol", 0.5}
@@ -180,7 +180,7 @@ def neb(
         stucture filename.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default, read_kwargs["index"]
-        is -1 if using `init_struct` and `final_struct`, or ":" for `band_structs`.
+        is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.
     write_kwargs
         Keyword arguments to pass to ase.io.write when writing images.
     log
@@ -241,7 +241,7 @@ def neb(
     }
     config = get_config(params=ctx.params, all_kwargs=all_kwargs)
 
-    if band_structs:
+    if neb_structs:
         if init_struct or final_struct:
             raise ValueError(
                 "Initial and final structures cannot be specified in addition to the "
@@ -249,7 +249,7 @@ def neb(
             )
         interpolator = None
 
-    if not band_structs and interpolator not in get_args(Interpolators):
+    if not neb_structs and interpolator not in get_args(Interpolators):
         raise ValueError(f"Fit type must be one of: {get_args(Interpolators)}")
 
     log_kwargs = {"filemode": "w"}
@@ -260,7 +260,7 @@ def neb(
     neb_inputs = {
         "init_struct": init_struct,
         "final_struct": final_struct,
-        "band_structs": band_structs,
+        "neb_structs": neb_structs,
         "arch": arch,
         "device": device,
         "model_path": model_path,
@@ -299,8 +299,8 @@ def neb(
         struct_path=init_struct,
     )
 
-    if band_structs:
-        info["band_structs"] = info.pop("traj")
+    if neb_structs:
+        info["neb_structs"] = info.pop("traj")
     else:
         info["init_struct"] = info.pop("struct")
         info["final_struct"] = {

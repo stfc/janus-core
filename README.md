@@ -136,12 +136,12 @@ will read the NaCl structure file and attach the MACE-MP (medium) calculator, be
 
 Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the [tutorials](https://github.com/stfc/janus-core/tree/main/docs/source/tutorials) documentation directory. This currently includes examples for:
 
-- [Single Point](docs/source/tutorials/single_point.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/single_point.ipynb)
-- [Geometry Optimization](docs/source/tutorials/geom_opt.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/geom_opt.ipynb)
-- [Molecular Dynamics](docs/source/tutorials/md.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/md.ipynb)
-- [Equation of State](docs/source/tutorials/eos.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/eos.ipynb)
-- [Phonons](docs/source/tutorials/phonons.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/phonons.ipynb)
-- [Nudged Elastic Band](docs/source/tutorials/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/neb.ipynb)
+- [Single Point](docs/source/tutorials/python/single_point.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/single_point.ipynb)
+- [Geometry Optimization](docs/source/tutorials/python/geom_opt.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/geom_opt.ipynb)
+- [Molecular Dynamics](docs/source/tutorials/python/md.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/md.ipynb)
+- [Equation of State](docs/source/tutorials/python/eos.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/eos.ipynb)
+- [Phonons](docs/source/tutorials/python/phonons.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/phonons.ipynb)
+- [Nudged Elastic Band](docs/source/tutorials/python/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/neb.ipynb)
 
 
 ### Calculation outputs
