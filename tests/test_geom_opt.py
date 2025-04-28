@@ -370,3 +370,12 @@ def test_write_xyz(tmp_path):
         fmax=0.1,
     )
     optimizer.run()
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        GeomOpt(struct=struct)

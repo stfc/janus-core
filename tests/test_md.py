@@ -1369,3 +1369,12 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
 
     # Check progress bar has completed.
     assert "2/2" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        NVT(struct=struct)

@@ -139,3 +139,12 @@ def test_symmetrize(tmp_path):
     assert phonons_1.results["phonon"].forces != pytest.approx(
         phonons_2.results["phonon"].forces
     )
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        Phonons(struct=struct)

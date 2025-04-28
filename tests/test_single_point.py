@@ -484,3 +484,14 @@ def test_fake_calc_error():
 
     with pytest.raises(ValueError):
         SinglePoint(struct=struct)
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    skip_extras("mace")
+
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        SinglePoint(struct=struct)
