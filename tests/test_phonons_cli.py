@@ -659,7 +659,7 @@ def test_model(tmp_path):
     # Use minimized structure to check Atoms.info
     atoms = read(results_path)
     assert "model" in atoms.info
-    assert atoms.info["model"] == str(MACE_PATH)
+    assert atoms.info["model"] == str(MACE_PATH.as_posix())
 
 
 def test_model_path_deprecated(tmp_path):
@@ -690,4 +690,4 @@ def test_model_path_deprecated(tmp_path):
     # Use minimized structure to check Atoms.info
     atoms = read(results_path)
     assert "model" in atoms.info
-    assert atoms.info["model"] == str(MACE_PATH)
+    assert atoms.info["model"] == str(MACE_PATH.as_posix())

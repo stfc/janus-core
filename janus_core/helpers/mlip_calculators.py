@@ -334,6 +334,8 @@ def choose_calculator(
             f"are {', '.join(Architectures.__args__)}"
         )
 
+    if isinstance(model, Path):
+        model = model.as_posix()
     calculator.parameters["version"] = __version__
     calculator.parameters["arch"] = arch
     calculator.parameters["model"] = str(model)
