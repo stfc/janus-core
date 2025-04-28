@@ -450,6 +450,8 @@ def test_invalid_model_path_calc_kwargs():
 
 def test_deprecation_model_path():
     """Test FutureWarning raised for model_path."""
+    skip_extras("mace")
+
     with pytest.warns(FutureWarning, match="`model_path` has been deprecated"):
         sp = SinglePoint(
             arch="mace_mp",
@@ -462,6 +464,8 @@ def test_deprecation_model_path():
 
 def test_deprecation_model_calc_kwargs():
     """Test FutureWarning raised for model in calc_kwargs."""
+    skip_extras("mace")
+
     with pytest.warns(FutureWarning, match="Please pass `model` explicitly"):
         sp = SinglePoint(
             arch="mace_mp",
