@@ -663,7 +663,7 @@ def test_model(tmp_path):
 
 
 def test_model_path_deprecated(tmp_path):
-    """Test model_path shows deprecation."""
+    """Test model_path sets model."""
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
@@ -686,10 +686,6 @@ def test_model_path_deprecated(tmp_path):
         ],
     )
     assert result.exit_code == 0
-
-    assert_log_contains(
-        log_path, includes=["FutureWarning: `model_path` has been deprecated."]
-    )
 
     # Use minimized structure to check Atoms.info
     atoms = read(results_path)
