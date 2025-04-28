@@ -459,7 +459,7 @@ def test_deprecation_model_path():
             struct=DATA_PATH / "NaCl.cif",
         )
 
-    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.absolute())
+    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
 
 
 def test_deprecation_model_calc_kwargs():
@@ -473,4 +473,4 @@ def test_deprecation_model_calc_kwargs():
             struct=DATA_PATH / "NaCl.cif",
         )
 
-    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.absolute())
+    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
