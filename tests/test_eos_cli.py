@@ -410,6 +410,8 @@ def test_model(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model",
             MACE_PATH,
             "--n-volumes",
@@ -450,6 +452,8 @@ def test_model_path_deprecated(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model-path",
             MACE_PATH,
             "--n-volumes",
@@ -468,3 +472,21 @@ def test_model_path_deprecated(tmp_path):
     atoms = read(generated_path)
     assert "model" in atoms.info
     assert atoms.info["model"] == str(MACE_PATH.as_posix())
+
+
+def test_missing_arch(tmp_path):
+    """Test no architecture specified."""
+    file_prefix = tmp_path / "NaCl"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Missing option '--arch'" in result.stdout
