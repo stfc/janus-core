@@ -19,6 +19,7 @@ from tests.utils import (
 )
 
 DATA_PATH = Path(__file__).parent / "data"
+MACE_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 runner = CliRunner()
 
@@ -375,3 +376,79 @@ def test_no_carbon(tmp_path):
     with open(summary_path, encoding="utf8") as file:
         eos_summary = yaml.safe_load(file)
     assert "emissions" not in eos_summary
+
+
+def test_model(tmp_path):
+    """Test model passed correctly."""
+    file_prefix = tmp_path / "NaCl"
+    generated_path = tmp_path / "NaCl-generated.extxyz"
+    log_path = tmp_path / "test.log"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--model",
+            MACE_PATH,
+            "--n-volumes",
+            5,
+            "--no-minimize",
+            "--log",
+            log_path,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+            "--write-structures",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path,
+        excludes=[
+            "Minimising initial structure",
+            "FutureWarning: `model_path` has been deprecated.",
+        ],
+    )
+
+    atoms = read(generated_path)
+    assert "model" in atoms.info
+    assert atoms.info["model"] == str(MACE_PATH)
+
+
+def test_model_path_deprecated(tmp_path):
+    """Test model_path shows deprecation."""
+    file_prefix = tmp_path / "NaCl"
+    generated_path = tmp_path / "NaCl-generated.extxyz"
+    log_path = tmp_path / "test.log"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--model-path",
+            MACE_PATH,
+            "--n-volumes",
+            5,
+            "--no-minimize",
+            "--log",
+            log_path,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+            "--write-structures",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path, includes=["FutureWarning: `model_path` has been deprecated."]
+    )
+
+    atoms = read(generated_path)
+    assert "model" in atoms.info
+    assert atoms.info["model"] == str(MACE_PATH)

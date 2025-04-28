@@ -21,6 +21,7 @@ from tests.utils import (
 )
 
 DATA_PATH = Path(__file__).parent / "data"
+MACE_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 runner = CliRunner()
 
@@ -838,3 +839,67 @@ def test_traj_kwargs_no_write(tmp_path):
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
     assert "trajectory writing not enabled" in result.exception.args[0]
+
+
+def test_model(tmp_path):
+    """Test model passed correctly."""
+    file_prefix = tmp_path / "NaCl"
+    results_path = tmp_path / "NaCl-opt.extxyz"
+    log_path = tmp_path / "test.log"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--model",
+            MACE_PATH,
+            "--log",
+            log_path,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path, excludes=["FutureWarning: `model_path` has been deprecated."]
+    )
+
+    atoms = read(results_path)
+    assert "model" in atoms.info
+    assert atoms.info["model"] == str(MACE_PATH)
+
+
+def test_model_path_deprecated(tmp_path):
+    """Test model_path shows deprecation."""
+    file_prefix = tmp_path / "NaCl"
+    results_path = tmp_path / "NaCl-opt.extxyz"
+    log_path = tmp_path / "test.log"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--model-path",
+            MACE_PATH,
+            "--log",
+            log_path,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path, includes=["FutureWarning: `model_path` has been deprecated."]
+    )
+
+    atoms = read(results_path)
+    assert "model" in atoms.info
+    assert atoms.info["model"] == str(MACE_PATH)
