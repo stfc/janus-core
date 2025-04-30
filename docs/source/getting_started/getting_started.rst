@@ -59,7 +59,7 @@ Currently supported extras are:
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
-- ``fairchem``: `eqV2 DeNS <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
+- ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
 
 .. note::
 
