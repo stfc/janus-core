@@ -34,7 +34,7 @@ jobs:
         run: |
           uv sync --extra mattersim --extra fairchem
           uv pip install --reinstall pynvml
-          uv pip install "fairchem-core[torch-extras]" --no-build-isolation
+          uv pip install "fairchem-core[torch-extras]" --no-build-isolation --no-cache
 
       - name: Run test suite
         env:
