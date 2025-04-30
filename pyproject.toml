@@ -78,7 +78,7 @@ all = [
 
 # MLIPs with updated e3nn
 fairchem = [
-    "fairchem-core == 1.9.0",
+    "fairchem-core == 1.10.0",
 ]
 
 mattersim = [
@@ -264,6 +264,10 @@ conflicts = [
     [
       { extra = "fairchem" },
       { extra = "mace" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "orb" },
     ],
     [
       { extra = "fairchem" },
