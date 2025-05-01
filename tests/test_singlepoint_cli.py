@@ -20,6 +20,7 @@ from tests.utils import (
 )
 
 DATA_PATH = Path(__file__).parent / "data"
+MACE_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 runner = CliRunner()
 
@@ -60,9 +61,9 @@ def test_singlepoint():
         assert "mace_mp_energy" in atoms.info
 
         assert "arch" in atoms.info
-        assert "model_path" in atoms.info
+        assert "model" in atoms.info
         assert atoms.info["arch"] == "mace_mp"
-        assert atoms.info["model_path"] == "small"
+        assert atoms.info["model"] == "small"
 
         assert "mace_mp_forces" in atoms.arrays
         assert "system_name" in atoms.info
@@ -468,3 +469,63 @@ def test_file_prefix(tmp_path):
         test_path / "test-singlepoint-summary.yml",
         test_path / "test-singlepoint-log.yml",
     }
+
+
+def test_model(tmp_path):
+    """Test model passed correctly."""
+    file_prefix = tmp_path / "NaCl"
+    results_path = tmp_path / "NaCl-results.extxyz"
+    log_path = tmp_path / "test.log"
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--model",
+            MACE_PATH,
+            "--log",
+            log_path,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path, excludes=["FutureWarning: `model_path` has been deprecated."]
+    )
+
+    atoms = read(results_path)
+    assert "model" in atoms.info
+    assert atoms.info["model"] == str(MACE_PATH.as_posix())
+
+
+def test_model_path_deprecated(tmp_path):
+    """Test model_path sets model."""
+    file_prefix = tmp_path / "NaCl"
+    results_path = tmp_path / "NaCl-results.extxyz"
+    log_path = tmp_path / "test.log"
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--model-path",
+            MACE_PATH,
+            "--log",
+            log_path,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    atoms = read(results_path)
+    assert "model" in atoms.info
+    assert atoms.info["model"] == str(MACE_PATH.as_posix())

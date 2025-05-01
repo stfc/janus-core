@@ -2,7 +2,6 @@ struct: "NaCl.cif"
 properties:
   - "energy"
 out: "NaCl-results.extxyz"
-calc-kwargs:
-  model: "small"
+model: "small"
 read-kwargs:
   index: 0

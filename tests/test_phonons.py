@@ -21,7 +21,7 @@ def test_init():
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
     phonons = Phonons(struct=single_point.struct)
     assert str(phonons.file_prefix) == str(Path("janus_results") / "Cl4Na4")
@@ -48,7 +48,7 @@ def test_optimize(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
     phonons = Phonons(
         struct=single_point.struct,
@@ -70,7 +70,7 @@ def test_invalid_struct():
     single_point = SinglePoint(
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     with pytest.raises(NotImplementedError):
@@ -90,7 +90,7 @@ def test_logging(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     phonons = Phonons(
@@ -114,7 +114,7 @@ def test_symmetrize(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     phonons_1 = Phonons(

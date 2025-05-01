@@ -38,8 +38,10 @@ class SinglePoint(BaseCalculation):
         Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
+    model
+        MLIP model label, path to model, or loaded model. Default is `None`.
     model_path
-        Path to MLIP model. Default is `None`.
+        Deprecated. Please use `model`.
     file_prefix
         Prefix for output filenames. Default is inferred from structure.
     read_kwargs
@@ -83,6 +85,7 @@ class SinglePoint(BaseCalculation):
         struct: MaybeSequence[Atoms] | PathLike,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
+        model: PathLike | None = None,
         model_path: PathLike | None = None,
         file_prefix: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
@@ -109,8 +112,10 @@ class SinglePoint(BaseCalculation):
             Default is "mace_mp".
         device
             Device to run MLIP model on. Default is "cpu".
+        model
+            MLIP model label, path to model, or loaded model. Default is `None`.
         model_path
-            Path to MLIP model. Default is `None`.
+            Deprecated. Please use `model`.
         file_prefix
             Prefix for output filenames. Default is inferred from structure.
         read_kwargs
@@ -158,6 +163,7 @@ class SinglePoint(BaseCalculation):
             calc_name=__name__,
             arch=arch,
             device=device,
+            model=model,
             model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=True,

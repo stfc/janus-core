@@ -107,7 +107,7 @@ def test_mlips(arch, device, kwargs):
     try:
         calculator = choose_calculator(arch=arch, device=device, **kwargs)
         assert calculator.parameters["version"] is not None
-        assert calculator.parameters["model_path"] is not None
+        assert calculator.parameters["model"] is not None
     except BadZipFile:
         pytest.skip("Model download failed")
     except URLError as err:
@@ -123,7 +123,7 @@ def test_invalid_arch():
 
 
 @pytest.mark.parametrize(
-    "arch, model_path",
+    "arch, model",
     [
         ("mace", "/invalid/path"),
         ("mace_off", "/invalid/path"),
@@ -139,33 +139,33 @@ def test_invalid_arch():
         ("m3gnet", "/invalid/path"),
     ],
 )
-def test_invalid_model_path(arch, model_path):
-    """Test error raised for invalid model_path."""
+def test_invalid_model(arch, model):
+    """Test error raised for invalid model."""
     skip_extras(arch)
     with pytest.raises((ValueError, RuntimeError, KeyError, AssertionError)):
-        choose_calculator(arch=arch, model_path=model_path)
+        choose_calculator(arch=arch, model=model)
 
 
 @pytest.mark.parametrize(
     "kwargs",
     [
         {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
-        {"arch": "mace", "model_path": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
         {"arch": "mace", "model_path": MACE_MP_PATH, "model": MACE_MP_PATH},
-        {"arch": "mace", "model_path": MACE_MP_PATH, "potential": MACE_MP_PATH},
-        {"arch": "chgnet", "model_path": CHGNET_PATH, "path": CHGNET_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "potential": MACE_MP_PATH},
+        {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
         {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
-        {"arch": "dpa3", "model_path": DPA3_PATH, "path": DPA3_PATH},
+        {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
         {
             "arch": "mattersim",
-            "model_path": "mattersim-v1.0.0-1m",
+            "model": "mattersim-v1.0.0-1m",
             "path": "mattersim-v1.0.0-1m",
         },
         {"arch": "nequip", "model_path": NEQUIP_PATH, "model": NEQUIP_PATH},
-        {"arch": "nequip", "model_path": NEQUIP_PATH, "path": NEQUIP_PATH},
+        {"arch": "nequip", "model": NEQUIP_PATH, "path": NEQUIP_PATH},
         {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
-        {"arch": "orb", "model_path": ORB_MODEL, "path": ORB_MODEL},
-        {"arch": "sevennet", "model_path": SEVENNET_PATH, "path": SEVENNET_PATH},
+        {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
+        {"arch": "sevennet", "model": SEVENNET_PATH, "path": SEVENNET_PATH},
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
         {
             "arch": "grace",
@@ -179,7 +179,7 @@ def test_invalid_model_path(arch, model_path):
         },
         {
             "arch": "alignn",
-            "model_path": ALIGNN_PATH / "best_model.pt",
+            "model": ALIGNN_PATH / "best_model.pt",
             "path": ALIGNN_PATH / "best_model.pt",
         },
     ],

@@ -75,7 +75,7 @@ def test_vaf(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     na = list(range(0, len(single_point.struct), 2))
@@ -155,7 +155,7 @@ def test_md_correlations(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     nve = NVE(

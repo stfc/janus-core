@@ -44,11 +44,10 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     """Test single point energy using MACE calculators."""
     skip_extras("mace")
 
-    calc_kwargs["model"] = MACE_PATH
-
     single_point = SinglePoint(
         struct=DATA_PATH / struct,
         arch="mace",
+        model=MACE_PATH,
         calc_kwargs=calc_kwargs,
         properties=properties,
     )
@@ -72,23 +71,23 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     "arch, device, expected_energy, struct, kwargs",
     [
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
-        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
+        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
         (
             "nequip",
             "cpu",
             -169815.1282456301,
             "toluene.xyz",
-            {"model_path": NEQUIP_PATH},
+            {"model": NEQUIP_PATH},
         ),
         ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
-        ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model_path": "orb-v2"}),
+        ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
         (
             "sevennet",
             "cpu",
             -27.061979293823242,
             "NaCl.cif",
-            {"model_path": SEVENNET_PATH},
+            {"model": SEVENNET_PATH},
         ),
         ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {}),
         (
@@ -96,7 +95,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             "cpu",
             -27.061979293823242,
             "NaCl.cif",
-            {"model_path": "SevenNet-0_11July2024"},
+            {"model": "SevenNet-0_11July2024"},
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         (
@@ -104,14 +103,14 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             "cpu",
             -11.148092269897461,
             "NaCl.cif",
-            {"model_path": ALIGNN_PATH / "best_model.pt"},
+            {"model": ALIGNN_PATH / "best_model.pt"},
         ),
         (
             "alignn",
             "cpu",
             -11.148092269897461,
             "NaCl.cif",
-            {"model_path": ALIGNN_PATH / "best_model.pt"},
+            {"model": ALIGNN_PATH / "best_model.pt"},
         ),
         ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
     ],
@@ -143,7 +142,7 @@ def test_single_point_none():
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
     )
 
     results = single_point.run()
@@ -158,7 +157,7 @@ def test_single_point_clean():
     single_point = SinglePoint(
         struct=DATA_PATH / "H2O.cif",
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
     )
 
     results = single_point.run()
@@ -174,7 +173,7 @@ def test_single_point_traj():
     single_point = SinglePoint(
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         properties="energy",
     )
 
@@ -204,7 +203,7 @@ def test_single_point_write():
         single_point = SinglePoint(
             struct=data_path,
             arch="mace",
-            calc_kwargs={"model": MACE_PATH},
+            model=MACE_PATH,
             write_results=True,
         )
         assert "mace_forces" not in single_point.struct.arrays
@@ -241,7 +240,7 @@ def test_single_point_write_kwargs(tmp_path):
     single_point = SinglePoint(
         struct=data_path,
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         write_results=True,
         write_kwargs={"filename": results_path},
     )
@@ -262,7 +261,7 @@ def test_single_point_molecule(tmp_path):
     single_point = SinglePoint(
         struct=data_path,
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         properties="energy",
     )
 
@@ -290,7 +289,7 @@ def test_invalid_prop():
         SinglePoint(
             struct=DATA_PATH / "H2O.cif",
             arch="mace",
-            calc_kwargs={"model": MACE_PATH},
+            model=MACE_PATH,
             properties="invalid",
         )
 
@@ -303,7 +302,7 @@ def test_atoms():
     single_point = SinglePoint(
         struct=struct,
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         properties="energy",
     )
     assert single_point.run()["energy"] < 0
@@ -314,7 +313,7 @@ def test_no_atoms_or_path():
     with pytest.raises(TypeError):
         SinglePoint(
             arch="mace",
-            calc_kwargs={"model": MACE_PATH},
+            model=MACE_PATH,
         )
 
 
@@ -327,7 +326,7 @@ def test_invalidate_calc():
     single_point = SinglePoint(
         struct=struct,
         arch="mace",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         write_kwargs={"invalidate_calc": False},
     )
 
@@ -348,7 +347,7 @@ def test_logging(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         properties="energy",
         log_kwargs={"filename": log_file},
     )
@@ -367,7 +366,7 @@ def test_hessian():
     skip_extras("mace")
 
     sp = SinglePoint(
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         properties="hessian",
@@ -383,7 +382,7 @@ def test_hessian_traj():
     skip_extras("mace")
 
     sp = SinglePoint(
-        calc_kwargs={"model": MACE_PATH},
+        model=MACE_PATH,
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
         properties="hessian",
@@ -408,3 +407,70 @@ def test_hessian_not_implemented(struct):
             arch="chgnet",
             properties="hessian",
         )
+
+
+def test_invalid_model_model_path():
+    """Test error is raised when model and model_path are passed."""
+    skip_extras("mace")
+
+    with pytest.raises(ValueError):
+        SinglePoint(
+            arch="mace_mp",
+            model=MACE_PATH,
+            model_path=MACE_PATH,
+            struct=DATA_PATH / "NaCl.cif",
+        )
+
+
+@pytest.mark.parametrize("keyword", ("model", "model_path"))
+def test_invalid_model_calc_kwargs(keyword):
+    """Test error is raised when model and model via calc_kwargs are passed."""
+    skip_extras("mace")
+
+    with pytest.raises(ValueError):
+        SinglePoint(
+            arch="mace_mp",
+            model=MACE_PATH,
+            calc_kwargs={keyword: MACE_PATH},
+            struct=DATA_PATH / "NaCl.cif",
+        )
+
+
+def test_invalid_model_path_calc_kwargs():
+    """Test error is raised when model_path is passed via calc_kwargs."""
+    skip_extras("mace")
+
+    with pytest.raises(ValueError):
+        SinglePoint(
+            arch="mace_mp",
+            calc_kwargs={"model_path": MACE_PATH},
+            struct=DATA_PATH / "NaCl.cif",
+        )
+
+
+def test_deprecation_model_path():
+    """Test FutureWarning raised for model_path."""
+    skip_extras("mace")
+
+    with pytest.warns(FutureWarning, match="`model_path` has been deprecated"):
+        sp = SinglePoint(
+            arch="mace_mp",
+            model_path=MACE_PATH,
+            struct=DATA_PATH / "NaCl.cif",
+        )
+
+    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
+
+
+def test_deprecation_model_calc_kwargs():
+    """Test FutureWarning raised for model in calc_kwargs."""
+    skip_extras("mace")
+
+    with pytest.warns(FutureWarning, match="Please pass `model` explicitly"):
+        sp = SinglePoint(
+            arch="mace_mp",
+            calc_kwargs={"model": MACE_PATH},
+            struct=DATA_PATH / "NaCl.cif",
+        )
+
+    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())

@@ -49,7 +49,7 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=init_struct,
         final_struct=final_struct,
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         n_images=5,
         file_prefix=tmp_path / "LFPO",
     )
@@ -68,18 +68,18 @@ def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
     single_point_start = SinglePoint(
         struct=LFPO_start_b,
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
     single_point_end = SinglePoint(
         struct=LFPO_end_b,
         arch="mace_mp",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
     )
 
     neb = NEB(
         init_struct=single_point_start.struct,
         final_struct=single_point_end.struct,
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         n_images=5,
         interpolator="pymatgen",
         fmax=4,
@@ -99,8 +99,8 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
     file_prefix = tmp_path / "LFPO"
     start_struct = LFPO_start_b
     end_struct = LFPO_end_b
-    start_struct.calc = choose_calculator(arch="mace_mp", model_path=MODEL_PATH)
-    end_struct.calc = choose_calculator(arch="mace_mp", model_path=MODEL_PATH)
+    start_struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    end_struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     neb = NEB(
         init_struct=start_struct,
@@ -128,7 +128,7 @@ def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
         init_struct=LFPO_start_b,
         final_struct=LFPO_end_b,
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         n_images=5,
         interpolator="ase",
         file_prefix=file_prefix,
@@ -151,7 +151,7 @@ def test_neb_plot(tmp_path):
     neb = NEB(
         neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         steps=2,
         file_prefix=file_prefix,
     )

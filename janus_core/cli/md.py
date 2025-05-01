@@ -20,6 +20,7 @@ from janus_core.cli.types import (
     FilePrefix,
     LogPath,
     MinimizeKwargs,
+    Model,
     ModelPath,
     PostProcessKwargs,
     ProgressBar,
@@ -348,6 +349,7 @@ def md(
     # MLIP Calculator
     arch: Architecture = "mace_mp",
     device: Device = "cpu",
+    model: Model = None,
     model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
     # Structure I/O
@@ -478,8 +480,10 @@ def md(
         Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
+    model
+        Path to MLIP model or name of model. Default is `None`.
     model_path
-        Path to MLIP model. Default is `None`.
+        Deprecated. Please use `model`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
@@ -581,6 +585,7 @@ def md(
         "struct": struct,
         "arch": arch,
         "device": device,
+        "model": model,
         "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,

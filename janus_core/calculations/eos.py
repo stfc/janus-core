@@ -37,8 +37,10 @@ class EoS(BaseCalculation):
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run MLIP model on. Default is "cpu".
+    model
+        MLIP model label, path to model, or loaded model. Default is `None`.
     model_path
-        Path to MLIP model. Default is `None`.
+        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -103,6 +105,7 @@ class EoS(BaseCalculation):
         struct: Atoms | PathLike,
         arch: Architectures = "mace_mp",
         device: Devices = "cpu",
+        model: PathLike | None = None,
         model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
@@ -136,8 +139,10 @@ class EoS(BaseCalculation):
             MLIP architecture to use for optimization. Default is "mace_mp".
         device
             Device to run MLIP model on. Default is "cpu".
+        model
+            MLIP model label, path to model, or loaded model. Default is `None`.
         model_path
-            Path to MLIP model. Default is `None`.
+            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -231,6 +236,7 @@ class EoS(BaseCalculation):
             calc_name=__name__,
             arch=arch,
             device=device,
+            model=model,
             model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,

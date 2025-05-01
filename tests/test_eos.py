@@ -45,7 +45,7 @@ def test_no_optimize(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
     eos = EoS(
         single_point.struct,
@@ -102,7 +102,7 @@ def test_invalid_struct():
     single_point = SinglePoint(
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     with pytest.raises(NotImplementedError):
@@ -122,7 +122,7 @@ def test_logging(tmp_path):
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
     )
 
     eos = EoS(
@@ -146,7 +146,7 @@ def test_plot(tmp_path):
     eos = EoS(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
-        calc_kwargs={"model": MODEL_PATH},
+        model=MODEL_PATH,
         plot_to_file=True,
         plot_kwargs={"filename": plot_file},
         file_prefix=tmp_path / "NaCl",

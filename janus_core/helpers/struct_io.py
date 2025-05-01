@@ -47,8 +47,8 @@ def results_to_info(
     if not properties:
         properties = get_args(Properties)
 
-    if struct.calc and "model_path" in struct.calc.parameters:
-        struct.info["model_path"] = struct.calc.parameters["model_path"]
+    if struct.calc and "model" in struct.calc.parameters:
+        struct.info["model"] = struct.calc.parameters["model"]
 
     # Only add to info if MLIP calculator with "arch" parameter set
     if struct.calc and "arch" in struct.calc.parameters:
@@ -73,7 +73,7 @@ def attach_calculator(
     *,
     arch: Architectures = "mace_mp",
     device: Devices = "cpu",
-    model_path: PathLike | None = None,
+    model: PathLike | None = None,
     calc_kwargs: dict[str, Any] | None = None,
 ) -> None:
     """
@@ -87,8 +87,8 @@ def attach_calculator(
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
-    model_path
-        Path to MLIP model. Default is `None`.
+    model
+        MLIP model label, path to model, or loaded model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     """
@@ -97,7 +97,7 @@ def attach_calculator(
     calculator = choose_calculator(
         arch=arch,
         device=device,
-        model_path=model_path,
+        model=model,
         **calc_kwargs,
     )
 
@@ -115,7 +115,7 @@ def input_structs(
     sequence_allowed: bool = True,
     arch: Architectures = "mace_mp",
     device: Devices = "cpu",
-    model_path: PathLike | None = None,
+    model: PathLike | None = None,
     calc_kwargs: dict[str, Any] | None = None,
     set_calc: bool | None = None,
     logger: logging.Logger | None = None,
@@ -135,8 +135,8 @@ def input_structs(
         MLIP architecture to use for calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
-    model_path
-        Path to MLIP model. Default is `None`.
+    model
+        MLIP model label, path to model, or loaded model. Default is `None`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     set_calc
@@ -198,7 +198,7 @@ def input_structs(
             struct=struct,
             arch=arch,
             device=device,
-            model_path=model_path,
+            model=model,
             calc_kwargs=calc_kwargs,
         )
         if logger:
@@ -259,8 +259,8 @@ def output_structs(
         for image in images:
             if image.calc and "arch" in image.calc.parameters:
                 image.info["arch"] = image.calc.parameters["arch"]
-            if image.calc and "model_path" in image.calc.parameters:
-                image.info["model_path"] = image.calc.parameters["model_path"]
+            if image.calc and "model" in image.calc.parameters:
+                image.info["model"] = image.calc.parameters["model"]
 
     # Add label for system
     for image in images:

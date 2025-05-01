@@ -22,16 +22,16 @@ if TYPE_CHECKING:
     import torch
 
 
-def _set_model_path(
-    model_path: PathLike | None = None,
+def _set_model(
+    model: PathLike | None = None,
     kwargs: dict[str, Any] | None = None,
 ) -> PathLike | torch.nn.Module | None:
     """
-    Set `model_path`.
+    Set `model`.
 
     Parameters
     ----------
-    model_path
+    model
         Path to MLIP file.
     kwargs
         Dictionary of additional keyword arguments passed to the selected calculator.
@@ -39,35 +39,36 @@ def _set_model_path(
     Returns
     -------
     PathLike | torch.nn.Module | None
-        Path to MLIP model file, loaded model, or None.
+        Name of MLIP model, or path to MLIP model file or loaded model.
     """
     (kwargs,) = none_to_dict(kwargs)
 
-    # kwargs that may be used for `model_path`` for different MLIPs
+    # kwargs that may be used for `model` for different MLIPs
     # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
     # to loaded PyTorch models
-    present = kwargs.keys() & {"model", "model_paths", "potential", "path"}
+    model_kwargs = {"model_path", "model_paths", "potential", "path"}
+    present = kwargs.keys() & model_kwargs
 
-    # Use model_path if specified, but check not also specified via kwargs
-    if model_path and present:
+    # Use model if specified, but check not also specified via kwargs
+    if model and present:
         raise ValueError(
-            "`model_path` cannot be used in combination with 'model', "
+            "`model` cannot be used in combination with 'model_path', "
             "'model_paths', 'potential', or 'path'"
         )
     if len(present) > 1:
         # Check at most one suitable kwarg is specified
         raise ValueError(
-            "Only one of 'model', 'model_paths', 'potential', and 'path' can be "
+            "Only one of 'model_path', 'model_paths', 'potential', and 'path' can be "
             "specified"
         )
     if present:
-        # Set model_path from kwargs if any are specified
-        model_path = kwargs.pop(present.pop())
+        # Set model from kwargs if any are specified
+        model = kwargs.pop(present.pop())
 
     # Convert to path if file/directory exists
-    if isinstance(model_path, Path | str) and Path(model_path).expanduser().exists():
-        return Path(model_path).expanduser()
-    return model_path
+    if isinstance(model, Path | str) and Path(model).expanduser().exists():
+        return Path(model).expanduser()
+    return model
 
 
 def _set_no_weights_only_load():
@@ -78,7 +79,7 @@ def _set_no_weights_only_load():
 def choose_calculator(
     arch: Architectures = "mace",
     device: Devices = "cpu",
-    model_path: PathLike | None = None,
+    model: PathLike | None = None,
     **kwargs,
 ) -> Calculator:
     """
@@ -90,8 +91,8 @@ def choose_calculator(
         MLIP architecture. Default is "mace".
     device
         Device to run calculator on. Default is "cpu".
-    model_path
-        Path to MLIP file.
+    model
+        MLIP model label, path to model, or loaded model. Default is `None`.
     **kwargs
         Additional keyword arguments passed to the selected calculator.
 
@@ -107,7 +108,7 @@ def choose_calculator(
     ValueError
         Invalid architecture specified.
     """
-    model_path = _set_model_path(model_path, kwargs)
+    model = _set_model(model, kwargs)
 
     if device not in get_args(Devices):
         raise ValueError(f"`device` must be one of: {get_args(Devices)}")
@@ -119,35 +120,35 @@ def choose_calculator(
         from mace import __version__
         from mace.calculators import MACECalculator
 
-        # No default `model_path`
-        if model_path is None:
+        # No default `model`
+        if model is None:
             raise ValueError(
-                f"Please specify `model_path`, as there is no default model for {arch}"
+                f"Please specify `model`, as there is no default model for {arch}"
             )
         # Default to float64 precision
         kwargs.setdefault("default_dtype", "float64")
 
-        calculator = MACECalculator(model_paths=model_path, device=device, **kwargs)
+        calculator = MACECalculator(model_paths=model, device=device, **kwargs)
 
     elif arch == "mace_mp":
         from mace import __version__
         from mace.calculators import mace_mp
 
         # Default to "small" model and float64 precision
-        model_path = model_path if model_path else "small"
+        model = model if model else "small"
         kwargs.setdefault("default_dtype", "float64")
 
-        calculator = mace_mp(model=model_path, device=device, **kwargs)
+        calculator = mace_mp(model=model, device=device, **kwargs)
 
     elif arch == "mace_off":
         from mace import __version__
         from mace.calculators import mace_off
 
         # Default to "small" model and float64 precision
-        model_path = model_path if model_path else "small"
+        model = model if model else "small"
         kwargs.setdefault("default_dtype", "float64")
 
-        calculator = mace_off(model=model_path, device=device, **kwargs)
+        calculator = mace_off(model=model, device=device, **kwargs)
 
     elif arch == "m3gnet":
         from matgl import __version__, load_model
@@ -161,18 +162,18 @@ def choose_calculator(
 
         # Use potential (from kwargs) if specified
         # Otherwise, load the model if given a path, else use a default model
-        if isinstance(model_path, Potential):
-            potential = model_path
-            model_path = "loaded_Potential"
-        elif isinstance(model_path, Path):
-            if model_path.is_file():
-                model_path = model_path.parent
-            potential = load_model(model_path)
-        elif isinstance(model_path, str):
-            potential = load_model(model_path)
+        if isinstance(model, Potential):
+            potential = model
+            model = "loaded_Potential"
+        elif isinstance(model, Path):
+            if model.is_file():
+                model = model.parent
+            potential = load_model(model)
+        elif isinstance(model, str):
+            potential = load_model(model)
         else:
-            model_path = "M3GNet-MP-2021.2.8-DIRECT-PES"
-            potential = load_model(model_path)
+            model = "M3GNet-MP-2021.2.8-DIRECT-PES"
+            potential = load_model(model)
 
         calculator = M3GNetCalculator(potential=potential, **kwargs)
 
@@ -187,18 +188,18 @@ def choose_calculator(
 
         # Use loaded model (from kwargs) if specified
         # Otherwise, load the model if given a path, else use a default model
-        if isinstance(model_path, CHGNet):
-            model = model_path
-            model_path = "loaded_CHGNet"
-        elif isinstance(model_path, Path):
-            model = CHGNet.from_file(model_path)
-        elif isinstance(model_path, str):
-            model = CHGNet.load(model_name=model_path, use_device=device)
+        if isinstance(model, CHGNet):
+            loaded_model = model
+            model = "loaded_CHGNet"
+        elif isinstance(model, Path):
+            loaded_model = CHGNet.from_file(model)
+        elif isinstance(model, str):
+            loaded_model = CHGNet.load(model_name=model, use_device=device)
         else:
-            model_path = __version__
-            model = None
+            model = __version__
+            loaded_model = None
 
-        calculator = CHGNetCalculator(model=model, use_device=device, **kwargs)
+        calculator = CHGNetCalculator(model=loaded_model, use_device=device, **kwargs)
 
     elif arch == "alignn":
         from alignn import __version__
@@ -209,16 +210,16 @@ def choose_calculator(
         )
 
         # Set default path to directory containing config and model location
-        if isinstance(model_path, Path):
-            if model_path.is_file():
-                model_path = model_path.parent
+        if isinstance(model, Path):
+            if model.is_file():
+                model = model.parent
         # If a string, assume referring to model_name e.g. "v5.27.2024"
-        elif isinstance(model_path, str):
-            model_path = get_figshare_model_ff(model_name=model_path)
+        elif isinstance(model, str):
+            model = get_figshare_model_ff(model_name=model)
         else:
-            model_path = default_path()
+            model = default_path()
 
-        calculator = AlignnAtomwiseCalculator(path=model_path, device=device, **kwargs)
+        calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
 
     elif arch == "sevennet":
         from sevenn import __version__
@@ -228,47 +229,47 @@ def choose_calculator(
         # Set before loading model to avoid type mismatches
         torch.set_default_dtype(torch.float32)
 
-        if isinstance(model_path, Path):
-            model_path = str(model_path)
-        elif not isinstance(model_path, str):
-            model_path = "SevenNet-0_11July2024"
+        if isinstance(model, Path):
+            model = str(model)
+        elif not isinstance(model, str):
+            model = "SevenNet-0_11July2024"
 
         kwargs.setdefault("file_type", "checkpoint")
         kwargs.setdefault("sevennet_config", None)
-        calculator = SevenNetCalculator(model=model_path, device=device, **kwargs)
+        calculator = SevenNetCalculator(model=model, device=device, **kwargs)
 
     elif arch == "nequip":
         from nequip import __version__
         from nequip.ase import NequIPCalculator
 
-        # No default `model_path`
-        if model_path is None:
+        # No default `model`
+        if model is None:
             raise ValueError(
-                f"Please specify `model_path`, as there is no default model for {arch}"
+                f"Please specify `model`, as there is no default model for {arch}"
             )
 
-        model_path = str(model_path)
+        model = str(model)
 
         calculator = NequIPCalculator.from_deployed_model(
-            model_path=model_path, device=device, **kwargs
+            model_path=model, device=device, **kwargs
         )
 
     elif arch == "dpa3":
         from deepmd import __version__
         from deepmd.calculator import DP
 
-        # No default `model_path`
-        if model_path is None:
+        # No default `model`
+        if model is None:
             # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
             raise ValueError(
-                "Please specify `model_path`, as there is no "
+                "Please specify `model`, as there is no "
                 f"default model for {arch} "
                 "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
             )
 
-        model_path = str(model_path)
+        model = str(model)
 
-        calculator = DP(model=model_path, **kwargs)
+        calculator = DP(model=model, **kwargs)
 
     elif arch == "orb":
         from orb_models import __version__
@@ -277,21 +278,21 @@ def choose_calculator(
         import orb_models.forcefield.pretrained as orb_ff
 
         # Default model
-        model_path = model_path if model_path else "orb_v3_conservative_20_omat"
+        model = model if model else "orb_v3_conservative_20_omat"
 
-        if isinstance(model_path, DirectForcefieldRegressor):
-            model = model_path
-            model_path = "loaded_DirectForcefieldRegressor"
+        if isinstance(model, DirectForcefieldRegressor):
+            loaded_model = model
+            model = "loaded_DirectForcefieldRegressor"
         else:
             try:
-                model = getattr(orb_ff, model_path.replace("-", "_"))()
+                loaded_model = getattr(orb_ff, model.replace("-", "_"))()
             except AttributeError as e:
                 raise ValueError(
-                    "`model_path` must be a `DirectForcefieldRegressor`, pre-trained "
+                    "`model` must be a `DirectForcefieldRegressor`, pre-trained "
                     "model label (e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
                 ) from e
 
-        calculator = ORBCalculator(model=model, device=device, **kwargs)
+        calculator = ORBCalculator(model=loaded_model, device=device, **kwargs)
 
     elif arch == "mattersim":
         from mattersim import __version__
@@ -299,19 +300,19 @@ def choose_calculator(
         from torch.nn import Module
 
         # Default model
-        model_path = model_path if model_path else "mattersim-v1.0.0-5M"
+        model = model if model else "mattersim-v1.0.0-5M"
 
-        if isinstance(model_path, Module):
-            potential = model_path
-            model_path = "loaded_Module"
+        if isinstance(model, Module):
+            potential = model
+            model = "loaded_Module"
         else:
             potential = None
 
-        if isinstance(model_path, Path):
-            model_path = str(model_path)
+        if isinstance(model, Path):
+            model = str(model)
 
         calculator = MatterSimCalculator(
-            potential=potential, load_path=model_path, device=device, **kwargs
+            potential=potential, load_path=model, device=device, **kwargs
         )
 
     elif arch == "grace":
@@ -320,12 +321,12 @@ def choose_calculator(
         __version__ = "0.5.1"
 
         # Default model
-        model_path = model_path if model_path else "GRACE-2L-OMAT"
+        model = model if model else "GRACE-2L-OMAT"
 
-        if isinstance(model_path, Path):
-            model_path = str(model_path)
+        if isinstance(model, Path):
+            model = str(model)
 
-        calculator = grace_fm(model_path, **kwargs)
+        calculator = grace_fm(model, **kwargs)
 
     else:
         raise ValueError(
@@ -333,9 +334,11 @@ def choose_calculator(
             f"are {', '.join(Architectures.__args__)}"
         )
 
+    if isinstance(model, Path):
+        model = model.as_posix()
     calculator.parameters["version"] = __version__
     calculator.parameters["arch"] = arch
-    calculator.parameters["model_path"] = str(model_path)
+    calculator.parameters["model"] = str(model)
 
     return calculator
 
