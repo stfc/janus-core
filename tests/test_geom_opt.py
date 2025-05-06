@@ -379,3 +379,40 @@ def test_missing_arch(struct):
     """Test missing arch."""
     with pytest.raises(ValueError, match="A calculator must be attached"):
         GeomOpt(struct=struct)
+
+
+def test_traj_new_dir(tmp_path):
+    """Test writing trajectory extxyz in new directory via file_prefix."""
+    new_dir = tmp_path / "test" / "test"
+    traj_path = new_dir / "NaCl-traj.extxyz"
+
+    optimizer = GeomOpt(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        write_traj=True,
+        file_prefix=new_dir / "NaCl",
+    )
+    optimizer.run()
+    assert traj_path.exists()
+    traj = read(traj_path, index=":")
+    assert len(traj) == 3
+
+
+def test_traj_kwargs_new_dir(tmp_path):
+    """Test writing trajectory in new directory via traj_kwargs."""
+    new_dir = tmp_path / "test" / "test"
+    traj_path = new_dir / "NaCl-traj.traj"
+
+    optimizer = GeomOpt(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        write_traj=True,
+        file_prefix=tmp_path / "NaCl",
+        traj_kwargs={"filename": traj_path},
+    )
+    optimizer.run()
+    assert traj_path.exists()
+    traj = read(traj_path, index=":")
+    assert len(traj) == 3
