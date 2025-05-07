@@ -163,6 +163,12 @@ class MolecularDynamics(BaseCalculation):
         Keyword arguments to control post-processing operations. Default is None.
     correlation_kwargs
         Keyword arguments to control on-the-fly correlations. Default is None.
+    plumed_input
+        PLUMED input or path to a PLUMED input file. If provided,
+        the ASE Plumed calculator will be used to wrap the MLIP calculator.
+        Requires the 'plumed' extra to be installed. Default is None.
+    plumed_log
+        Path for the PLUMED log file. Default is inferred from `file_prefix`.
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
@@ -232,6 +238,8 @@ class MolecularDynamics(BaseCalculation):
         write_kwargs: OutputKwargs | None = None,
         post_process_kwargs: PostProcessKwargs | None = None,
         correlation_kwargs: list[CorrelationKwargs] | None = None,
+        plumed_input: PathLike | None = None,
+        plumed_log: PathLike | None = None,
         seed: int | None = None,
         enable_progress_bar: bool = False,
         update_progress_every: int | None = None,
@@ -341,6 +349,11 @@ class MolecularDynamics(BaseCalculation):
             Keyword arguments to control post-processing operations. Default is None.
         correlation_kwargs
             Keyword arguments to control on-the-fly correlations. Default is None.
+        plumed_input
+            PLUMED input script content or path to a PLUMED input file.
+            Default is None.
+        plumed_log
+            Path for the PLUMED log file. Default is inferred from `file_prefix`.
         seed
             Random seed used by numpy.random and random functions, such as in Langevin.
             Default is None.
@@ -395,6 +408,8 @@ class MolecularDynamics(BaseCalculation):
         self.write_kwargs = write_kwargs
         self.post_process_kwargs = post_process_kwargs
         self.correlation_kwargs = correlation_kwargs
+        self.plumed_input = plumed_input
+        self.plumed_log = plumed_log
         self.seed = seed
         self.enable_progress_bar = enable_progress_bar
         self.update_progress_every = update_progress_every
@@ -484,6 +499,46 @@ class MolecularDynamics(BaseCalculation):
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
+
+        # Wrap calculator with Plumed if input is provided
+        if self.plumed_input:
+            try:
+                import plumed
+                from ase.calculators.plumed import Plumed
+            except ImportError:
+                raise ImportError(
+                    "PLUMED Python package not found. Please install PLUMED with its "
+                    "Python interface to use this feature."
+                )
+
+            # Read input script from file if it's a path
+            plumed_input_path = Path(self.plumed_input)
+            if not plumed_input_path.is_file():
+                raise FileNotFoundError(
+                    f"PLUMED input file not found or is not a file: {plumed_input_path}"
+                )
+            with open(plumed_input_path, "r", encoding="utf-8") as f:
+                plumed_script = f.read()
+            plumed_input_source = str(plumed_input_path.resolve())
+
+            # Calculate kT in ASE units (eV)
+            kT = self.temp * units.kB
+
+            self.plumed_log = self._build_filename(
+                "plumed.log", self.param_prefix, filename=self.plumed_log
+            )
+
+            build_file_dir(self.plumed_log)
+
+            self.struct.calc = Plumed(
+                calc=self.struct.calc,
+                input=plumed_script.splitlines(),
+                timestep=self.timestep,
+                atoms=self.struct,
+                kT=kT,
+                log=str(self.plumed_log),
+                restart=self.restart,
+            )
 
         # Set output file names
         self.final_file = self._build_filename(
@@ -578,6 +633,7 @@ class MolecularDynamics(BaseCalculation):
                 if self.post_process_kwargs.get("vaf_compute", False)
                 else None
             ),
+            "plumed_log": self.plumed_log if self.plumed_input else None,
         }
 
     @property
@@ -1053,7 +1109,7 @@ class MolecularDynamics(BaseCalculation):
                 -self.dyn.atoms.get_stress(include_ideal_gas=True, voigt=True)
                 / units.GPa
             )
-        except ValueError:
+        except (ValueError, NotImplementedError):
             volume = 0.0
             pressure = 0.0
             pressure_tensor = np.zeros(6)
