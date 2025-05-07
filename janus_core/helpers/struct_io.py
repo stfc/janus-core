@@ -227,13 +227,10 @@ def input_structs(
         )
         if logger:
             logger.info("Calculator attached to structure.")
-    else:
-        if struct.calc is None:
-            raise ValueError("A calculator must be attached to `struct`")
-        if isinstance(struct.calc, SinglePointCalculator):
-            raise ValueError(
-                "The attached calculator cannot be used for new calculations."
-            )
+    elif struct.calc is None:
+        raise ValueError("A calculator must be attached to `struct`")
+    elif isinstance(struct.calc, SinglePointCalculator):
+        raise ValueError("The attached calculator cannot be used for new calculations.")
 
     return struct, struct_path
 
