@@ -89,7 +89,7 @@ class BaseCalculation(FileNameMixin):
         struct: MaybeSequence[Atoms] | PathLike,
         *,
         calc_name: str = "base",
-        arch: Architectures | None = "None",
+        arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
         model_path: PathLike | None = None,
