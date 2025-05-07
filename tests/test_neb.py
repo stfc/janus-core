@@ -49,6 +49,7 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=init_struct,
         final_struct=final_struct,
+        arch="mace_mp",
         model=MODEL_PATH,
         n_images=5,
         file_prefix=tmp_path / "LFPO",
@@ -79,6 +80,7 @@ def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=single_point_start.struct,
         final_struct=single_point_end.struct,
+        arch="mace_mp",
         model=MODEL_PATH,
         n_images=5,
         interpolator="pymatgen",
@@ -105,6 +107,7 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
     neb = NEB(
         init_struct=start_struct,
         final_struct=end_struct,
+        arch="mace_mp",
         n_images=5,
         interpolator="ase",
         fmax=4,
@@ -170,6 +173,7 @@ def test_invalid_n_images(LFPO_start_b, LFPO_end_b, n_images):
     """Test setting invalid invalid n_images."""
     with pytest.raises(ValueError):
         NEB(
+            arch="mace_mp",
             init_struct=LFPO_start_b,
             final_struct=LFPO_end_b,
             n_images=n_images,
@@ -180,6 +184,7 @@ def test_invalid_interpolator(LFPO_start_b, LFPO_end_b):
     """Test setting invalid interpolator."""
     with pytest.raises(ValueError):
         NEB(
+            arch="mace_mp",
             init_struct=LFPO_start_b,
             final_struct=LFPO_end_b,
             interpolator="invalid",
@@ -190,6 +195,7 @@ def test_missing_interpolator(LFPO_start_b, LFPO_end_b):
     """Test setting missing interpolator."""
     with pytest.raises(ValueError):
         NEB(
+            arch="mace_mp",
             init_struct=LFPO_start_b,
             final_struct=LFPO_end_b,
             interpolator=None,
@@ -200,17 +206,29 @@ def test_invalid_structs(LFPO_start_b, LFPO_end_b):
     """Test error raised if init_struct/final_struct are passed with neb_structs."""
     with pytest.raises(ValueError):
         NEB(
+            arch="mace_mp",
             init_struct=LFPO_start_b,
             neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
         )
     with pytest.raises(ValueError):
         NEB(
+            arch="mace_mp",
             final_struct=LFPO_end_b,
             neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
         )
     with pytest.raises(ValueError):
         NEB(
+            arch="mace_mp",
             init_struct=LFPO_start_b,
             final_struct=LFPO_end_b,
             neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
         )
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        NEB(neb_structs=struct)

@@ -48,6 +48,8 @@ def test_eos():
                 "eos",
                 "--struct",
                 DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
             ],
         )
         assert result.exit_code == 0
@@ -124,6 +126,8 @@ def test_setting_lattice(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--min-volume",
             0.8,
             "--max-volume",
@@ -159,6 +163,8 @@ def test_invalid_lattice(option, value, tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             option,
             value,
             "--file-prefix",
@@ -180,6 +186,8 @@ def test_minimising_all(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--n-volumes",
             4,
             "--minimize-all",
@@ -215,6 +223,8 @@ def test_writing_structs(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--n-volumes",
             4,
             "--file-prefix",
@@ -256,6 +266,8 @@ def test_error_write_geomopt(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--n-volumes",
             4,
             "--file-prefix",
@@ -282,6 +294,8 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--read-kwargs",
             read_kwargs,
             "--file-prefix",
@@ -303,6 +317,8 @@ def test_invalid_traj_input(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--read-kwargs",
             "{'index': ':'}",
             "--file-prefix",
@@ -328,6 +344,8 @@ def test_plot(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--n-volumes",
             4,
             "--plot-to-file",
@@ -363,6 +381,8 @@ def test_no_carbon(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--n-volumes",
             4,
             "--no-tracker",
@@ -390,6 +410,8 @@ def test_model(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model",
             MACE_PATH,
             "--n-volumes",
@@ -430,6 +452,8 @@ def test_model_path_deprecated(tmp_path):
             "eos",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model-path",
             MACE_PATH,
             "--n-volumes",
@@ -448,3 +472,21 @@ def test_model_path_deprecated(tmp_path):
     atoms = read(generated_path)
     assert "model" in atoms.info
     assert atoms.info["model"] == str(MACE_PATH.as_posix())
+
+
+def test_missing_arch(tmp_path):
+    """Test no architecture specified."""
+    file_prefix = tmp_path / "NaCl"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Missing option" in result.stdout

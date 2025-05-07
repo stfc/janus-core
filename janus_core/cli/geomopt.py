@@ -74,8 +74,10 @@ def _set_minimize_kwargs(
 def geomopt(
     # numpydoc ignore=PR02
     ctx: Context,
-    # Calculation
+    # Required
+    arch: Architecture,
     struct: StructPath,
+    # Calculation
     optimizer: Annotated[
         str | None,
         Option(
@@ -165,7 +167,6 @@ def geomopt(
     ] = False,
     minimize_kwargs: MinimizeKwargs = None,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -186,6 +187,8 @@ def geomopt(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
+    arch
+        MLIP architecture to use for geometry optimization.
     struct
         Path of structure to simulate.
     optimizer
@@ -221,8 +224,6 @@ def geomopt(
         If traj_kwargs["filename"] is not specified, it is inferred from `file_prefix`.
     minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    arch
-        MLIP architecture to use for geometry optimization. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model

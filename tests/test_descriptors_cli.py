@@ -47,6 +47,8 @@ def test_descriptors():
                 "descriptors",
                 "--struct",
                 DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
             ],
         )
         assert result.exit_code == 0
@@ -114,6 +116,8 @@ def test_calc_per_element(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--out",
             out_path,
             "--calc-per-element",
@@ -154,6 +158,8 @@ def test_invariant(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--out",
             out_path,
             "--no-invariants-only",
@@ -194,6 +200,8 @@ def test_traj(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "benzene-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--out",
             out_path,
             "--read-kwargs",
@@ -225,6 +233,8 @@ def test_per_atom(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--out",
             out_path,
             "--calc-per-atom",
@@ -267,6 +277,8 @@ def test_no_carbon(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--out",
             out_path,
             "--log",
@@ -293,6 +305,8 @@ def test_file_prefix(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--file-prefix",
             file_prefix,
         ],
@@ -319,6 +333,8 @@ def test_model(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model",
             MACE_PATH,
             "--log",
@@ -351,6 +367,8 @@ def test_model_path_deprecated(tmp_path):
             "descriptors",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model-path",
             MACE_PATH,
             "--log",
@@ -365,3 +383,21 @@ def test_model_path_deprecated(tmp_path):
     atoms = read(results_path)
     assert "model" in atoms.info
     assert atoms.info["model"] == str(MACE_PATH.as_posix())
+
+
+def test_missing_arch(tmp_path):
+    """Test no architecture specified."""
+    file_prefix = tmp_path / "NaCl"
+
+    result = runner.invoke(
+        app,
+        [
+            "descriptors",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Missing option" in result.stdout

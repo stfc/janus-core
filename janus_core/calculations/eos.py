@@ -34,7 +34,7 @@ class EoS(BaseCalculation):
     struct
         ASE Atoms structure, or filepath to structure to simulate.
     arch
-        MLIP architecture to use for calculations. Default is "mace_mp".
+        MLIP architecture to use for calculations. Default is `None`.
     device
         Device to run MLIP model on. Default is "cpu".
     model
@@ -46,8 +46,6 @@ class EoS(BaseCalculation):
         read_kwargs["index"] is -1.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc
-        Whether to set (new) calculators for structures. Default is None.
     attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
@@ -71,7 +69,7 @@ class EoS(BaseCalculation):
     minimize_all
         Whether to optimize geometry for all generated structures. Default is False.
     minimize_kwargs
-        Keyword arguments to pass to optimize. Default is None.
+        Keyword arguments to pass to optimize. Default is `None`.
     write_results
         True to write out results of equation of state calculations. Default is True.
     write_structures
@@ -103,13 +101,12 @@ class EoS(BaseCalculation):
     def __init__(
         self,
         struct: Atoms | PathLike,
-        arch: Architectures = "mace_mp",
+        arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
         model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
-        set_calc: bool | None = None,
         attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
@@ -136,7 +133,7 @@ class EoS(BaseCalculation):
         struct
             ASE Atoms structure, or filepath to structure to simulate.
         arch
-            MLIP architecture to use for optimization. Default is "mace_mp".
+            MLIP architecture to use for optimization. Default is `None`.
         device
             Device to run MLIP model on. Default is "cpu".
         model
@@ -148,8 +145,6 @@ class EoS(BaseCalculation):
             read_kwargs["index"] is -1.
         calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc
-            Whether to set (new) calculators for structures. Default is None.
         attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
@@ -174,7 +169,7 @@ class EoS(BaseCalculation):
             Whether to optimize geometry for all generated structures. Default is
             False.
         minimize_kwargs
-            Keyword arguments to pass to optimize. Default is None.
+            Keyword arguments to pass to optimize. Default is `None`.
         write_results
             True to write out results of equation of state calculations. Default is
             True.
@@ -241,7 +236,6 @@ class EoS(BaseCalculation):
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
-            set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
             track_carbon=track_carbon,

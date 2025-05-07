@@ -48,6 +48,8 @@ def test_singlepoint():
                 "singlepoint",
                 "--struct",
                 DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
             ],
         )
         assert result.exit_code == 0
@@ -95,6 +97,8 @@ def test_properties(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "H2O.cif",
+            "--arch",
+            "mace_mp",
             "--properties",
             "energy",
             "--out",
@@ -117,6 +121,8 @@ def test_properties(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "H2O.cif",
+            "--arch",
+            "mace_mp",
             "--properties",
             "stress",
             "--out",
@@ -146,6 +152,8 @@ def test_read_kwargs(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "benzene-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--read-kwargs",
             "{'index': ':'}",
             "--out",
@@ -176,6 +184,8 @@ def test_calc_kwargs(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--calc-kwargs",
             "{'default_dtype': 'float32'}",
             "--out",
@@ -204,6 +214,8 @@ def test_log(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--out",
             results_path,
             "--properties",
@@ -231,6 +243,8 @@ def test_summary(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "benzene-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--read-kwargs",
             "{'index': ':'}",
             "--out",
@@ -285,6 +299,8 @@ def test_config(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "benzene-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--out",
             results_path,
             "--log",
@@ -315,6 +331,8 @@ def test_invalid_config():
             "singlepoint",
             "--struct",
             DATA_PATH / "benzene-traj.xyz",
+            "--arch",
+            "mace_mp",
             "--config",
             DATA_PATH / "invalid.yml",
         ],
@@ -335,6 +353,8 @@ def test_write_kwargs(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--write-kwargs",
             "{'invalidate_calc': False}",
             "--out",
@@ -365,6 +385,8 @@ def test_write_cif(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--write-kwargs",
             "{'invalidate_calc': False, 'write_results': True}",
             "--out",
@@ -393,6 +415,8 @@ def test_hessian(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--properties",
             "hessian",
             "--properties",
@@ -429,6 +453,8 @@ def test_no_carbon(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--properties",
             "energy",
             "--out",
@@ -457,6 +483,8 @@ def test_file_prefix(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--file-prefix",
             file_prefix,
         ],
@@ -483,6 +511,8 @@ def test_model(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model",
             MACE_PATH,
             "--log",
@@ -515,6 +545,8 @@ def test_model_path_deprecated(tmp_path):
             "singlepoint",
             "--struct",
             DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
             "--model-path",
             MACE_PATH,
             "--log",
@@ -529,3 +561,21 @@ def test_model_path_deprecated(tmp_path):
     atoms = read(results_path)
     assert "model" in atoms.info
     assert atoms.info["model"] == str(MACE_PATH.as_posix())
+
+
+def test_missing_arch(tmp_path):
+    """Test no architecture specified."""
+    file_prefix = tmp_path / "NaCl"
+
+    result = runner.invoke(
+        app,
+        [
+            "singlepoint",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--file-prefix",
+            file_prefix,
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Missing option" in result.stdout

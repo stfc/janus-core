@@ -135,3 +135,12 @@ def test_not_implemented_error():
             single_point.struct,
             calc_per_element=True,
         )
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        Descriptors(struct=struct)

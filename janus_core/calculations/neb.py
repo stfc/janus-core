@@ -25,7 +25,7 @@ from janus_core.helpers.janus_types import (
     OutputKwargs,
     PathLike,
 )
-from janus_core.helpers.struct_io import input_structs, output_structs
+from janus_core.helpers.struct_io import output_structs, read_structs
 from janus_core.helpers.utils import build_file_dir, none_to_dict, set_minimize_logging
 
 
@@ -40,13 +40,13 @@ class NEB(BaseCalculation):
     final_struct
         Final ASE Atoms structure, or filepath to structure to simulate. Any attached
         calculators will be replaced with a copy matching the one attached to
-        init_struct. Default is None.
+        init_struct. Default is `None`.
     neb_structs
         ASE Atoms structures in NEB path, or filepath to structures, to optimize,
         skipping interpolation between the initial and final structures. Sets
         `interpolator` to None.
     arch
-        MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
+        MLIP architecture to use for Nudged Elastic Band method. Default is `None`.
     device
         Device to run MLIP model on. Default is "cpu".
     model
@@ -58,8 +58,6 @@ class NEB(BaseCalculation):
         is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc
-        Whether to set (new) calculators for structures. Default is None.
     attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
@@ -114,13 +112,12 @@ class NEB(BaseCalculation):
         init_struct: Atoms | PathLike | None = None,
         final_struct: Atoms | PathLike | None = None,
         neb_structs: Sequence[Atoms] | PathLike | None = None,
-        arch: Architectures = "mace_mp",
+        arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
         model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
-        set_calc: bool | None = None,
         attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
@@ -152,14 +149,13 @@ class NEB(BaseCalculation):
         final_struct
             Final ASE Atoms structure, or filepath to structure to simulate. Any
             attached calculators will be replaced with a copy matching the one attached
-            to init_struct. Default is None.
+            to init_struct. Default is `None`.
         neb_structs
             ASE Atoms structures in NEB path, or filepath to structures, to optimize,
             skipping interpolation between the initial and final structures. Sets
             `interpolator` to None.
         arch
-            MLIP architecture to use for Nudged Elastic Band method. Default is
-            "mace_mp".
+            MLIP architecture to use for Nudged Elastic Band method. Default is `None`.
         device
             Device to run MLIP model on. Default is "cpu".
         model
@@ -171,8 +167,6 @@ class NEB(BaseCalculation):
             is -1 if using `init_struct` and `final_struct`, or ":" for `neb_structs`.
         calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc
-            Whether to set (new) calculators for structures. Default is None.
         attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
@@ -294,7 +288,6 @@ class NEB(BaseCalculation):
             read_kwargs=read_kwargs,
             sequence_allowed=True,
             calc_kwargs=calc_kwargs,
-            set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
             track_carbon=track_carbon,
@@ -315,11 +308,10 @@ class NEB(BaseCalculation):
             self.init_struct = self.struct
             self.init_struct_path = self.struct_path
 
-            self.final_struct, self.final_struct_path = input_structs(
+            self.final_struct, self.final_struct_path = read_structs(
                 struct=final_struct,
                 read_kwargs=read_kwargs,
                 sequence_allowed=False,
-                set_calc=False,
             )
             self.final_struct.calc = copy(self.struct.calc)
         else:

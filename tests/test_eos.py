@@ -155,3 +155,12 @@ def test_plot(tmp_path):
     results = eos.run()
     assert all(key in results for key in ("eos", "bulk_modulus", "e_0", "v_0"))
     assert plot_file.exists()
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        EoS(struct=struct)

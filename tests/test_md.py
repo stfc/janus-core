@@ -844,6 +844,7 @@ def test_heating_restart(tmp_path, capsys):
 
     md = NVT(
         struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
         temp=10.0,
         steps=3,
         traj_every=100,
@@ -857,6 +858,7 @@ def test_heating_restart(tmp_path, capsys):
     # Should perform 1 step at 20K, then 4 at 30K (2 ramp, 2 MD)
     md_restart = NVT(
         struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
         temp=30.0,
         steps=2,
         traj_every=100,
@@ -1367,3 +1369,12 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
 
     # Check progress bar has completed.
     assert "2/2" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        NVT(struct=struct)

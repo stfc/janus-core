@@ -34,8 +34,7 @@ class SinglePoint(BaseCalculation):
     struct
         ASE Atoms structure(s), or filepath to structure(s) to simulate.
     arch
-        MLIP architecture to use for single point calculations.
-        Default is "mace_mp".
+        MLIP architecture to use for single point calculations. Default is `None`.
     device
         Device to run model on. Default is "cpu".
     model
@@ -49,8 +48,6 @@ class SinglePoint(BaseCalculation):
         read_kwargs["index"] is ":".
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc
-        Whether to set (new) calculators for structures. Default is None.
     attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
@@ -83,14 +80,13 @@ class SinglePoint(BaseCalculation):
         self,
         *,
         struct: MaybeSequence[Atoms] | PathLike,
-        arch: Architectures = "mace_mp",
+        arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
         model_path: PathLike | None = None,
         file_prefix: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
-        set_calc: bool | None = None,
         attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
@@ -108,8 +104,7 @@ class SinglePoint(BaseCalculation):
         struct
             ASE Atoms structure(s), or filepath to structure(s) to simulate.
         arch
-            MLIP architecture to use for single point calculations.
-            Default is "mace_mp".
+            MLIP architecture to use for single point calculations. Default is `None`.
         device
             Device to run MLIP model on. Default is "cpu".
         model
@@ -123,8 +118,6 @@ class SinglePoint(BaseCalculation):
             read_kwargs["index"] is ":".
         calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc
-            Whether to set (new) calculators for structures. Default is None.
         attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
@@ -168,7 +161,6 @@ class SinglePoint(BaseCalculation):
             read_kwargs=read_kwargs,
             sequence_allowed=True,
             calc_kwargs=calc_kwargs,
-            set_calc=set_calc,
             attach_logger=attach_logger,
             log_kwargs=log_kwargs,
             track_carbon=track_carbon,

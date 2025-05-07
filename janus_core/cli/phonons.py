@@ -36,8 +36,10 @@ app = Typer()
 def phonons(
     # numpydoc ignore=PR02
     ctx: Context,
-    # Calculation
+    # Required
+    arch: Architecture,
     struct: StructPath,
+    # Calculation
     supercell: Annotated[
         str,
         Option(
@@ -173,7 +175,6 @@ def phonons(
         ),
     ] = 50,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -194,6 +195,8 @@ def phonons(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
+    arch
+        MLIP architecture to use for phonon calculations.
     struct
         Path of structure to simulate.
     supercell
@@ -251,8 +254,6 @@ def phonons(
     temp_step
         Temperature step for thermal calculations, in K. Unused if `thermal` is False.
         Default is 50.0.
-    arch
-        MLIP architecture to use for phonon calculations. Default is "mace_mp".
     device
         Device to run model on. Default is "cpu".
     model

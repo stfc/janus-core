@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 from urllib.error import URLError
 
+from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
 from numpy import isfinite
 import pytest
@@ -474,3 +475,23 @@ def test_deprecation_model_calc_kwargs():
         )
 
     assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
+
+
+def test_fake_calc_error():
+    """Test an error is raised if SinglePointCalculator is set."""
+    struct = read(DATA_PATH / "NaCl-results.extxyz")
+    assert isinstance(struct.calc, SinglePointCalculator)
+
+    with pytest.raises(ValueError):
+        SinglePoint(struct=struct)
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    skip_extras("mace")
+
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        SinglePoint(struct=struct)

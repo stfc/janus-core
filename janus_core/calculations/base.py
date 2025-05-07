@@ -46,7 +46,7 @@ class BaseCalculation(FileNameMixin):
     calc_name
         Name of calculation being run, used for name of logger. Default is "base".
     arch
-        MLIP architecture to use for calculations. Default is "mace_mp".
+        MLIP architecture to use for calculations. Default is `None`.
     device
         Device to run model on. Default is "cpu".
     model
@@ -59,8 +59,6 @@ class BaseCalculation(FileNameMixin):
         Whether a sequence of Atoms objects is allowed. Default is True.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
-    set_calc
-        Whether to set (new) calculators for structures. Default is None.
     attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
@@ -72,11 +70,11 @@ class BaseCalculation(FileNameMixin):
     tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
     file_prefix
-        Prefix for output filenames. Default is None.
+        Prefix for output filenames. Default is `None`.
     additional_prefix
-        Component to add to default file_prefix (joined by hyphens). Default is None.
+        Component to add to default file_prefix (joined by hyphens). Default is `None`.
     param_prefix
-        Additional parameters to add to default file_prefix. Default is None.
+        Additional parameters to add to default file_prefix. Default is `None`.
 
     Attributes
     ----------
@@ -91,14 +89,13 @@ class BaseCalculation(FileNameMixin):
         struct: MaybeSequence[Atoms] | PathLike,
         *,
         calc_name: str = "base",
-        arch: Architectures = "mace_mp",
+        arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
         model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         sequence_allowed: bool = True,
         calc_kwargs: dict[str, Any] | None = None,
-        set_calc: bool | None = None,
         attach_logger: bool | None = None,
         log_kwargs: dict[str, Any] | None = None,
         track_carbon: bool | None = None,
@@ -117,7 +114,7 @@ class BaseCalculation(FileNameMixin):
         calc_name
             Name of calculation being run, used for name of logger. Default is "base".
         arch
-            MLIP architecture to use for calculations. Default is "mace_mp".
+            MLIP architecture to use for calculations. Default is `None`.
         device
             Device to run MLIP model on. Default is "cpu".
         model
@@ -130,8 +127,6 @@ class BaseCalculation(FileNameMixin):
             Whether a sequence of Atoms objects is allowed. Default is True.
         calc_kwargs
             Keyword arguments to pass to the selected calculator. Default is {}.
-        set_calc
-            Whether to set (new) calculators for structures. Default is None.
         attach_logger
             Whether to attach a logger. Default is True if "filename" is passed in
             log_kwargs, else False.
@@ -143,12 +138,12 @@ class BaseCalculation(FileNameMixin):
         tracker_kwargs
             Keyword arguments to pass to `config_tracker`. Default is {}.
         file_prefix
-            Prefix for output filenames. Default is None.
+            Prefix for output filenames. Default is `None`.
         additional_prefix
             Component to add to default file_prefix (joined by hyphens). Default is
             None.
         param_prefix
-            Additional parameters to add to default file_prefix. Default is None.
+            Additional parameters to add to default file_prefix. Default is `None`.
         """
         read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs = none_to_dict(
             read_kwargs, calc_kwargs, log_kwargs, tracker_kwargs
@@ -198,7 +193,6 @@ class BaseCalculation(FileNameMixin):
             device=self.device,
             model=self.model,
             calc_kwargs=self.calc_kwargs,
-            set_calc=set_calc,
         )
 
         # Set architecture to match calculator architecture

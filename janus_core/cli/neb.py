@@ -36,6 +36,8 @@ app = Typer()
 def neb(
     # numpydoc ignore=PR02
     ctx: Context,
+    # Required
+    arch: Architecture,
     # Calculation
     init_struct: Annotated[
         Path | None,
@@ -107,7 +109,6 @@ def neb(
     ] = False,
     minimize_kwargs: MinimizeKwargs = None,
     # MLIP Calculator
-    arch: Architecture = "mace_mp",
     device: Device = "cpu",
     model: Model = None,
     model_path: ModelPath = None,
@@ -128,7 +129,8 @@ def neb(
     ----------
     ctx
         Typer (Click) Context. Automatically set.
-
+    arch
+        MLIP architecture to use for Nudged Elastic Band method.
     init_struct
         Path of initial structure for Nudged Elastic Band method. Required if
         `neb_structs` is None. Default is None.
@@ -168,8 +170,6 @@ def neb(
         Default is False.
     minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
-    arch
-        MLIP architecture to use for Nudged Elastic Band method. Default is "mace_mp".
     device
         Device to run MLIP model on. Default is "cpu".
     model

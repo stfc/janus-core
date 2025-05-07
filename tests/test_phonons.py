@@ -111,14 +111,10 @@ def test_symmetrize(tmp_path):
     """Test symmetrize."""
     file_prefix = tmp_path / "NaCl"
 
-    single_point = SinglePoint(
+    phonons_1 = Phonons(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         model=MODEL_PATH,
-    )
-
-    phonons_1 = Phonons(
-        struct=single_point.struct.copy(),
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
@@ -128,7 +124,9 @@ def test_symmetrize(tmp_path):
     phonons_1.calc_force_constants()
 
     phonons_2 = Phonons(
-        struct=phonons_1.struct.copy(),
+        struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
+        model_path=MODEL_PATH,
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
@@ -141,3 +139,12 @@ def test_symmetrize(tmp_path):
     assert phonons_1.results["phonon"].forces != pytest.approx(
         phonons_2.results["phonon"].forces
     )
+
+
+@pytest.mark.parametrize(
+    "struct", (DATA_PATH / "NaCl.cif", read(DATA_PATH / "NaCl.cif"))
+)
+def test_missing_arch(struct):
+    """Test missing arch."""
+    with pytest.raises(ValueError, match="A calculator must be attached"):
+        Phonons(struct=struct)
