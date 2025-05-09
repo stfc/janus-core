@@ -31,6 +31,8 @@ jobs:
         run: uv run pytest
 
       - name: Install updated e3nn dependencies
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           uv sync --extra mattersim --extra fairchem
           uv pip install --reinstall pynvml
