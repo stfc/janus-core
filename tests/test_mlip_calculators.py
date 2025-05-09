@@ -6,8 +6,6 @@ from pathlib import Path
 from urllib.error import URLError
 from zipfile import BadZipFile
 
-from fairchem.core.models.model_registry import model_name_to_local_file
-from huggingface_hub.utils._auth import get_token
 import pytest
 
 from janus_core.helpers.mlip_calculators import choose_calculator
@@ -32,10 +30,17 @@ DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
 FAIRCHEM_EQUIFORMER = "EquiformerV2-31M-S2EF-OC20-All+MD"
 FAIRCHEM_ESEN = "eSEN-30M-OMAT24"
-FAIRCHEM_MODEL = model_name_to_local_file(
-    FAIRCHEM_EQUIFORMER,
-    local_cache="pretrained_models",
-)
+
+try:
+    from fairchem.core.models.model_registry import model_name_to_local_file
+    from huggingface_hub.utils._auth import get_token
+
+    FAIRCHEM_MODEL = model_name_to_local_file(
+        FAIRCHEM_EQUIFORMER,
+        local_cache="pretrained_models",
+    )
+except ImportError:
+    FAIRCHEM_MODEL = None
 
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 

@@ -8,7 +8,6 @@ from urllib.error import URLError
 
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
-from huggingface_hub.utils._auth import get_token
 from numpy import isfinite
 import pytest
 
@@ -25,6 +24,11 @@ FAIRCHEM_ESEN = "eSEN-30M-OMAT24"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+
+try:
+    from huggingface_hub.utils._auth import get_token
+except ImportError:
+    pass
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
