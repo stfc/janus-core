@@ -349,7 +349,7 @@ def choose_calculator(
         else:
             model_name = str(model)
 
-        kwargs.setdefault("local_cache", "pretrained_models")
+        kwargs.setdefault("local_cache", "~/.cache/fairchem")
         cpu = True if device == "cpu" else False
 
         calculator = OCPCalculator(

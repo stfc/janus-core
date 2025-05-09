@@ -37,7 +37,7 @@ try:
 
     FAIRCHEM_MODEL = model_name_to_local_file(
         FAIRCHEM_EQUIFORMER,
-        local_cache="pretrained_models",
+        local_cache="~/.cache/fairchem",
     )
 except ImportError:
     FAIRCHEM_MODEL = None
