@@ -6,6 +6,8 @@ from pathlib import Path
 from urllib.error import URLError
 from zipfile import BadZipFile
 
+from fairchem.core.models.model_registry import model_name_to_local_file
+from huggingface_hub.utils._auth import get_token
 import pytest
 
 from janus_core.helpers.mlip_calculators import choose_calculator
@@ -28,7 +30,12 @@ except ImportError:
 
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
-FAIRCHEM_MODEL = "EquiformerV2-31M-S2EF-OC20-All+MD"
+FAIRCHEM_EQUIFORMER = "EquiformerV2-31M-S2EF-OC20-All+MD"
+FAIRCHEM_ESEN = "eSEN-30M-OMAT24"
+FAIRCHEM_MODEL = model_name_to_local_file(
+    FAIRCHEM_EQUIFORMER,
+    local_cache="pretrained_models",
+)
 
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 
@@ -76,8 +83,12 @@ except ImportError:
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
         ("fairchem", "cpu", {}),
-        ("fairchem", "cpu", {"model": FAIRCHEM_MODEL}),
-        ("fairchem", "cpu", {"model_path": FAIRCHEM_MODEL}),
+        ("fairchem", "cpu", {"model": FAIRCHEM_EQUIFORMER}),
+        ("fairchem", "cpu", {"model_path": FAIRCHEM_EQUIFORMER}),
+        ("fairchem", "cpu", {"model_name": FAIRCHEM_EQUIFORMER}),
+        ("fairchem", "cpu", {"model_name": FAIRCHEM_MODEL}),
+        ("fairchem", "cpu", {"checkpoint_path": FAIRCHEM_MODEL}),
+        ("fairchem", "cpu", {"model": FAIRCHEM_ESEN}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
@@ -106,6 +117,13 @@ except ImportError:
 def test_mlips(arch, device, kwargs):
     """Test calculators can be configured."""
     skip_extras(arch)
+    # Skip fairchem eSEN if unable to download
+    if (
+        arch == "fairchem"
+        and kwargs.get("model", None) == FAIRCHEM_ESEN
+        and not get_token()
+    ):
+        pytest.skip("Unable to download model")
 
     try:
         calculator = choose_calculator(arch=arch, device=device, **kwargs)
@@ -172,8 +190,8 @@ def test_invalid_model(arch, model):
         {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
         {
             "arch": "fairchem",
-            "model_path": FAIRCHEM_MODEL,
-            "model": FAIRCHEM_MODEL,
+            "model_path": FAIRCHEM_EQUIFORMER,
+            "model": FAIRCHEM_EQUIFORMER,
         },
         {
             "arch": "grace",

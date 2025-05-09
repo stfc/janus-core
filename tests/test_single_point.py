@@ -8,6 +8,7 @@ from urllib.error import URLError
 
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
+from huggingface_hub.utils._auth import get_token
 from numpy import isfinite
 import pytest
 
@@ -17,11 +18,13 @@ from tests.utils import read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
-MACE_PATH = MODEL_PATH / "mace_mp_small.model"
-SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
-NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+FAIRCHEM_EQUIFORMER = "EquiformerV2-31M-S2EF-OC20-All+MD"
+FAIRCHEM_ESEN = "eSEN-30M-OMAT24"
+MACE_PATH = MODEL_PATH / "mace_mp_small.model"
+NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -91,9 +94,23 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         (
             "fairchem",
             "cpu",
-            -0.7478368282318115,
+            -0.7482733,
             "NaCl.cif",
-            {"model_path": "EquiformerV2-31M-S2EF-OC20-All+MD"},
+            {"model": FAIRCHEM_EQUIFORMER},
+        ),
+        (
+            "fairchem",
+            "cpu",
+            -0.7482733,
+            "NaCl.cif",
+            {},
+        ),
+        (
+            "fairchem",
+            "cpu",
+            -27.0977497,
+            "NaCl.cif",
+            {"model": FAIRCHEM_ESEN},
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
@@ -127,6 +144,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
 def test_extras(arch, device, expected_energy, struct, kwargs):
     """Test single point energy using extra MLIP calculators."""
     skip_extras(arch)
+    # Skip fairchem eSEN if unable to download
+    if (
+        arch == "fairchem"
+        and kwargs.get("model", None) == FAIRCHEM_ESEN
+        and not get_token()
+    ):
+        pytest.skip("Unable to download model")
 
     try:
         single_point = SinglePoint(
