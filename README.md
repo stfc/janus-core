@@ -51,15 +51,11 @@ python3 -m pip install janus-core[mace,chgnet,sevennet]
 ```
 
 > [!WARNING]
-> `matgl` and `alignn` depend on [dgl](https://github.com/dmlc/dgl?tab=readme-ov-file), which no
-> longer publishes to PyPI. If `janus-core` is installed with either of these extras, PyTorch will
-> automatically be set to 2.2.0 to ensure compatibility. However, this is incompatible with `chgnet`,
-> and may limit the available features in others, including `mace`. To use `matgl` and/or `alignn` with
-> more recent PyTorch release, please refer to the
-> [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html).
+> We are unable to support for automatic installation of all combinations of MLIPs, or MLIPs on all platforms.
+> Please refer to the [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html)
+> for more details.
 
-
-To install all MLIPs that do not depend on `dgl`:
+To install all MLIPs currently compatible with MACE, run:
 
 ```python
 python3 -m pip install janus-core[all]
