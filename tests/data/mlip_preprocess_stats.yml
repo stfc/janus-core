@@ -1,6 +1,6 @@
 train_file: "tests/data/mlip_train.xyz"
 valid_file: "tests/data/mlip_valid.xyz"
-test_file: "tests/data/mlip_test.xyz"
+#test_file: "tests/data/mlip_test.xyz"
 energy_key: 'dft_energy'
 forces_key: 'dft_forces'
 stress_key: 'dft_stress'
