@@ -135,8 +135,14 @@ def skip_extras(arch: str):
             pytest.importorskip("tensorpotential")
         case "mace" | "mace_mp" | "mace_off":
             pytest.importorskip("mace")
-        case "fairchem":
+        case "equiformer":
             pytest.importorskip("fairchem.core")
+        case "esen":
+            pytest.importorskip("fairchem.core")
+            from huggingface_hub.utils._auth import get_token
+
+            if not get_token():
+                pytest.skip("Unable to download model")
         case "mattersim":
             pytest.importorskip("mattersim")
         case "nequip":

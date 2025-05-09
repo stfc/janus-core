@@ -19,16 +19,12 @@ MODEL_PATH = Path(__file__).parent / "models"
 
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
-FAIRCHEM_EQUIFORMER = "EquiformerV2-31M-S2EF-OC20-All+MD"
-FAIRCHEM_ESEN = "eSEN-30M-OMAT24"
+EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
+ESEN_LABEL = "eSEN-30M-MP"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
-try:
-    from huggingface_hub.utils._auth import get_token
-except ImportError:
-    pass
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -96,25 +92,32 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
         (
-            "fairchem",
-            "cpu",
-            -0.7482733,
-            "NaCl.cif",
-            {"model": FAIRCHEM_EQUIFORMER},
-        ),
-        (
-            "fairchem",
+            "equiformer",
             "cpu",
             -0.7482733,
             "NaCl.cif",
             {},
         ),
         (
-            "fairchem",
+            "equiformer",
+            "cpu",
+            -0.7586595,
+            "NaCl.cif",
+            {"model": EQUIFORMER_LABEL},
+        ),
+        (
+            "esen",
             "cpu",
             -27.0977497,
             "NaCl.cif",
-            {"model": FAIRCHEM_ESEN},
+            {},
+        ),
+        (
+            "esen",
+            "cpu",
+            -27.07935905,
+            "NaCl.cif",
+            {"model": ESEN_LABEL},
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
@@ -148,13 +151,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
 def test_extras(arch, device, expected_energy, struct, kwargs):
     """Test single point energy using extra MLIP calculators."""
     skip_extras(arch)
-    # Skip fairchem eSEN if unable to download
-    if (
-        arch == "fairchem"
-        and kwargs.get("model", None) == FAIRCHEM_ESEN
-        and not get_token()
-    ):
-        pytest.skip("Unable to download model")
 
     try:
         single_point = SinglePoint(

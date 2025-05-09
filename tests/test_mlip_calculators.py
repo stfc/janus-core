@@ -28,19 +28,23 @@ except ImportError:
 
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
-FAIRCHEM_EQUIFORMER = "EquiformerV2-31M-S2EF-OC20-All+MD"
-FAIRCHEM_ESEN = "eSEN-30M-OMAT24"
+EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
+ESEN_LABEL = "eSEN-30M-MP"
 
 try:
     from fairchem.core.models.model_registry import model_name_to_local_file
-    from huggingface_hub.utils._auth import get_token
 
-    FAIRCHEM_MODEL = model_name_to_local_file(
-        FAIRCHEM_EQUIFORMER,
+    EQUIFORMER_PATH = model_name_to_local_file(
+        EQUIFORMER_LABEL,
+        local_cache="~/.cache/fairchem",
+    )
+    ESEN_PATH = model_name_to_local_file(
+        EQUIFORMER_LABEL,
         local_cache="~/.cache/fairchem",
     )
 except ImportError:
-    FAIRCHEM_MODEL = None
+    EQUIFORMER_PATH = None
+    ESEN_PATH = None
 
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 
@@ -87,13 +91,18 @@ except ImportError:
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
-        ("fairchem", "cpu", {}),
-        ("fairchem", "cpu", {"model": FAIRCHEM_EQUIFORMER}),
-        ("fairchem", "cpu", {"model_path": FAIRCHEM_EQUIFORMER}),
-        ("fairchem", "cpu", {"model_name": FAIRCHEM_EQUIFORMER}),
-        ("fairchem", "cpu", {"model_name": FAIRCHEM_MODEL}),
-        ("fairchem", "cpu", {"checkpoint_path": FAIRCHEM_MODEL}),
-        ("fairchem", "cpu", {"model": FAIRCHEM_ESEN}),
+        ("equiformer", "cpu", {}),
+        ("equiformer", "cpu", {"model": EQUIFORMER_LABEL}),
+        ("equiformer", "cpu", {"model_path": EQUIFORMER_LABEL}),
+        ("equiformer", "cpu", {"model_name": EQUIFORMER_LABEL}),
+        ("equiformer", "cpu", {"model_name": EQUIFORMER_PATH}),
+        ("equiformer", "cpu", {"checkpoint_path": EQUIFORMER_PATH}),
+        ("esen", "cpu", {}),
+        ("esen", "cpu", {"model": ESEN_LABEL}),
+        ("esen", "cpu", {"model_path": ESEN_LABEL}),
+        ("esen", "cpu", {"model_name": ESEN_LABEL}),
+        ("esen", "cpu", {"model_name": ESEN_PATH}),
+        ("esen", "cpu", {"checkpoint_path": ESEN_PATH}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
@@ -122,13 +131,6 @@ except ImportError:
 def test_mlips(arch, device, kwargs):
     """Test calculators can be configured."""
     skip_extras(arch)
-    # Skip fairchem eSEN if unable to download
-    if (
-        arch == "fairchem"
-        and kwargs.get("model", None) == FAIRCHEM_ESEN
-        and not get_token()
-    ):
-        pytest.skip("Unable to download model")
 
     try:
         calculator = choose_calculator(arch=arch, device=device, **kwargs)
@@ -194,9 +196,14 @@ def test_invalid_model(arch, model):
         {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
         {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
         {
-            "arch": "fairchem",
-            "model_path": FAIRCHEM_EQUIFORMER,
-            "model": FAIRCHEM_EQUIFORMER,
+            "arch": "esen",
+            "model_path": ESEN_LABEL,
+            "model": ESEN_LABEL,
+        },
+        {
+            "arch": "equiformer",
+            "model_path": EQUIFORMER_LABEL,
+            "model": EQUIFORMER_LABEL,
         },
         {
             "arch": "grace",
