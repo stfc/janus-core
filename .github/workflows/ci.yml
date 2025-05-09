@@ -30,17 +30,16 @@ jobs:
         run: uv run pytest --cov janus_core --cov-append .
 
       - name: Install updated e3nn dependencies
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           uv sync --extra mattersim --extra fairchem
           uv pip install --reinstall pynvml
           uv pip install fairchem-core[torch-extras] --no-build-isolation
 
-      - name: Run test suite
+      - name: Run test suite for updated e3nn dependencies
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: uv run pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install dgl dependencies
@@ -48,7 +47,7 @@ jobs:
           uv sync --extra mace --extra m3gnet --extra alignn
           uv pip install --reinstall pynvml
 
-      - name: Run test suite
+      - name: Run test suite for dgl dependencies
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
