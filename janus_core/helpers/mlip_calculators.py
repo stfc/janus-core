@@ -46,7 +46,14 @@ def _set_model(
     # kwargs that may be used for `model` for different MLIPs
     # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
     # to loaded PyTorch models
-    model_kwargs = {"model_path", "model_paths", "potential", "path"}
+    model_kwargs = {
+        "model_path",
+        "model_paths",
+        "potential",
+        "path",
+        "model_name",
+        "checkpoint_path",
+    }
     present = kwargs.keys() & model_kwargs
 
     # Use model if specified, but check not also specified via kwargs
