@@ -36,7 +36,7 @@ try:
 
     EQUIFORMER_PATH = model_name_to_local_file(
         EQUIFORMER_LABEL,
-        local_cache="~/.cache/fairchem",
+        local_cache=Path("~/.cache/fairchem").expanduser(),
     )
     ESEN_PATH = model_name_to_local_file(
         EQUIFORMER_LABEL,
