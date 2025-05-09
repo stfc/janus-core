@@ -90,7 +90,8 @@ Current and planned features include:
   - Orb
   - MatterSim
   - GRACE
-  - fairchem
+  - EquiformerV2
+  - eSEN
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
