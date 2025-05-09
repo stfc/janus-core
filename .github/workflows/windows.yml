@@ -29,3 +29,18 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run pytest
+
+      - name: Install updated e3nn dependencies
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          uv sync --extra fairchem
+          uv pip install --reinstall pynvml
+          uv pip install "fairchem-core[torch-extras]" --no-build-isolation --no-cache
+
+      - name: Run test suite for updated e3nn dependencies
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run pytest tests/test_mlip_calculators.py tests/test_single_point.py
