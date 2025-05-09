@@ -55,7 +55,8 @@ intersphinx_mapping = {
     "phonopy": ("https://phonopy.github.io/phonopy/", None),
     "codecarbon": ("https://mlco2.github.io/codecarbon/", None),
     "torch": ("https://pytorch.org/docs/stable", None),
-    "matplotlib": ("https://matplotlib.org/stable/", None,)
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "rich": ("https://rich.readthedocs.io/en/stable/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -228,4 +229,6 @@ nitpick_ignore = [
     ("py:class", "Context"),
     ("py:class", "Path"),
     ("py:class", "Figure"),
+    ("py:class", "Progress"),
+    ("py:class", "ProgressBar"),
 ]
