@@ -123,244 +123,253 @@ def choose_calculator(
     # Fix torch 2.6 (must be before MLIP modules are loaded)
     _set_no_weights_only_load()
 
-    if arch == "mace":
-        from mace import __version__
-        from mace.calculators import MACECalculator
+    match arch:
+        case "mace":
+            from mace import __version__
+            from mace.calculators import MACECalculator
 
-        # No default `model`
-        if model is None:
-            raise ValueError(
-                f"Please specify `model`, as there is no default model for {arch}"
-            )
-        # Default to float64 precision
-        kwargs.setdefault("default_dtype", "float64")
-
-        calculator = MACECalculator(model_paths=model, device=device, **kwargs)
-
-    elif arch == "mace_mp":
-        from mace import __version__
-        from mace.calculators import mace_mp
-
-        # Default to "small" model and float64 precision
-        model = model if model else "small"
-        kwargs.setdefault("default_dtype", "float64")
-
-        calculator = mace_mp(model=model, device=device, **kwargs)
-
-    elif arch == "mace_off":
-        from mace import __version__
-        from mace.calculators import mace_off
-
-        # Default to "small" model and float64 precision
-        model = model if model else "small"
-        kwargs.setdefault("default_dtype", "float64")
-
-        calculator = mace_off(model=model, device=device, **kwargs)
-
-    elif arch == "m3gnet":
-        from matgl import __version__, load_model
-        from matgl.apps.pes import Potential
-        from matgl.ext.ase import M3GNetCalculator
-        import torch
-
-        # Set before loading model to avoid type mismatches
-        torch.set_default_dtype(torch.float32)
-        kwargs.setdefault("stress_weight", 1.0 / 160.21766208)
-
-        # Use potential (from kwargs) if specified
-        # Otherwise, load the model if given a path, else use a default model
-        if isinstance(model, Potential):
-            potential = model
-            model = "loaded_Potential"
-        elif isinstance(model, Path):
-            if model.is_file():
-                model = model.parent
-            potential = load_model(model)
-        elif isinstance(model, str):
-            potential = load_model(model)
-        else:
-            model = "M3GNet-MP-2021.2.8-DIRECT-PES"
-            potential = load_model(model)
-
-        calculator = M3GNetCalculator(potential=potential, **kwargs)
-
-    elif arch == "chgnet":
-        from chgnet import __version__
-        from chgnet.model.dynamics import CHGNetCalculator
-        from chgnet.model.model import CHGNet
-        import torch
-
-        # Set before loading to avoid type mismatches
-        torch.set_default_dtype(torch.float32)
-
-        # Use loaded model (from kwargs) if specified
-        # Otherwise, load the model if given a path, else use a default model
-        if isinstance(model, CHGNet):
-            loaded_model = model
-            model = "loaded_CHGNet"
-        elif isinstance(model, Path):
-            loaded_model = CHGNet.from_file(model)
-        elif isinstance(model, str):
-            loaded_model = CHGNet.load(model_name=model, use_device=device)
-        else:
-            model = __version__
-            loaded_model = None
-
-        calculator = CHGNetCalculator(model=loaded_model, use_device=device, **kwargs)
-
-    elif arch == "alignn":
-        from alignn import __version__
-        from alignn.ff.ff import (
-            AlignnAtomwiseCalculator,
-            default_path,
-            get_figshare_model_ff,
-        )
-
-        # Set default path to directory containing config and model location
-        if isinstance(model, Path):
-            if model.is_file():
-                model = model.parent
-        # If a string, assume referring to model_name e.g. "v5.27.2024"
-        elif isinstance(model, str):
-            model = get_figshare_model_ff(model_name=model)
-        else:
-            model = default_path()
-
-        calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
-
-    elif arch == "sevennet":
-        from sevenn import __version__
-        from sevenn.sevennet_calculator import SevenNetCalculator
-        import torch
-
-        # Set before loading model to avoid type mismatches
-        torch.set_default_dtype(torch.float32)
-
-        if isinstance(model, Path):
-            model = str(model)
-        elif not isinstance(model, str):
-            model = "SevenNet-0_11July2024"
-
-        kwargs.setdefault("file_type", "checkpoint")
-        kwargs.setdefault("sevennet_config", None)
-        calculator = SevenNetCalculator(model=model, device=device, **kwargs)
-
-    elif arch == "nequip":
-        from nequip import __version__
-        from nequip.ase import NequIPCalculator
-
-        # No default `model`
-        if model is None:
-            raise ValueError(
-                f"Please specify `model`, as there is no default model for {arch}"
-            )
-
-        model = str(model)
-
-        calculator = NequIPCalculator.from_deployed_model(
-            model_path=model, device=device, **kwargs
-        )
-
-    elif arch == "dpa3":
-        from deepmd import __version__
-        from deepmd.calculator import DP
-
-        # No default `model`
-        if model is None:
-            # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
-            raise ValueError(
-                "Please specify `model`, as there is no "
-                f"default model for {arch} "
-                "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
-            )
-
-        model = str(model)
-
-        calculator = DP(model=model, **kwargs)
-
-    elif arch == "orb":
-        from orb_models import __version__
-        from orb_models.forcefield.calculator import ORBCalculator
-        from orb_models.forcefield.direct_regressor import DirectForcefieldRegressor
-        import orb_models.forcefield.pretrained as orb_ff
-
-        # Default model
-        model = model if model else "orb_v3_conservative_20_omat"
-
-        if isinstance(model, DirectForcefieldRegressor):
-            loaded_model = model
-            model = "loaded_DirectForcefieldRegressor"
-        else:
-            try:
-                loaded_model = getattr(orb_ff, model.replace("-", "_"))()
-            except AttributeError as e:
+            # No default `model`
+            if model is None:
                 raise ValueError(
-                    "`model` must be a `DirectForcefieldRegressor`, pre-trained "
-                    "model label (e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
-                ) from e
+                    f"Please specify `model`, as there is no default model for {arch}"
+                )
+            # Default to float64 precision
+            kwargs.setdefault("default_dtype", "float64")
 
-        calculator = ORBCalculator(model=loaded_model, device=device, **kwargs)
+            calculator = MACECalculator(model_paths=model, device=device, **kwargs)
 
-    elif arch == "mattersim":
-        from mattersim import __version__
-        from mattersim.forcefield import MatterSimCalculator
-        from torch.nn import Module
+        case "mace_mp":
+            from mace import __version__
+            from mace.calculators import mace_mp
 
-        # Default model
-        model = model if model else "mattersim-v1.0.0-5M"
+            # Default to "small" model and float64 precision
+            model = model if model else "small"
+            kwargs.setdefault("default_dtype", "float64")
 
-        if isinstance(model, Module):
-            potential = model
-            model = "loaded_Module"
-        else:
-            potential = None
+            calculator = mace_mp(model=model, device=device, **kwargs)
 
-        if isinstance(model, Path):
+        case "mace_off":
+            from mace import __version__
+            from mace.calculators import mace_off
+
+            # Default to "small" model and float64 precision
+            model = model if model else "small"
+            kwargs.setdefault("default_dtype", "float64")
+
+            calculator = mace_off(model=model, device=device, **kwargs)
+
+        case "m3gnet":
+            from matgl import __version__, load_model
+            from matgl.apps.pes import Potential
+            from matgl.ext.ase import M3GNetCalculator
+            import torch
+
+            # Set before loading model to avoid type mismatches
+            torch.set_default_dtype(torch.float32)
+            kwargs.setdefault("stress_weight", 1.0 / 160.21766208)
+
+            # Use potential (from kwargs) if specified
+            # Otherwise, load the model if given a path, else use a default model
+            if isinstance(model, Potential):
+                potential = model
+                model = "loaded_Potential"
+            elif isinstance(model, Path):
+                if model.is_file():
+                    model = model.parent
+                potential = load_model(model)
+            elif isinstance(model, str):
+                potential = load_model(model)
+            else:
+                model = "M3GNet-MP-2021.2.8-DIRECT-PES"
+                potential = load_model(model)
+
+            calculator = M3GNetCalculator(potential=potential, **kwargs)
+
+        case "chgnet":
+            from chgnet import __version__
+            from chgnet.model.dynamics import CHGNetCalculator
+            from chgnet.model.model import CHGNet
+            import torch
+
+            # Set before loading to avoid type mismatches
+            torch.set_default_dtype(torch.float32)
+
+            # Use loaded model (from kwargs) if specified
+            # Otherwise, load the model if given a path, else use a default model
+            if isinstance(model, CHGNet):
+                loaded_model = model
+                model = "loaded_CHGNet"
+            elif isinstance(model, Path):
+                loaded_model = CHGNet.from_file(model)
+            elif isinstance(model, str):
+                loaded_model = CHGNet.load(model_name=model, use_device=device)
+            else:
+                model = __version__
+                loaded_model = None
+
+            calculator = CHGNetCalculator(
+                model=loaded_model, use_device=device, **kwargs
+            )
+
+        case "alignn":
+            from alignn import __version__
+            from alignn.ff.ff import (
+                AlignnAtomwiseCalculator,
+                default_path,
+                get_figshare_model_ff,
+            )
+
+            # Set default path to directory containing config and model location
+            if isinstance(model, Path):
+                if model.is_file():
+                    model = model.parent
+            # If a string, assume referring to model_name e.g. "v5.27.2024"
+            elif isinstance(model, str):
+                model = get_figshare_model_ff(model_name=model)
+            else:
+                model = default_path()
+
+            calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
+
+        case "sevennet":
+            from sevenn import __version__
+            from sevenn.sevennet_calculator import SevenNetCalculator
+            import torch
+
+            # Set before loading model to avoid type mismatches
+            torch.set_default_dtype(torch.float32)
+
+            if isinstance(model, Path):
+                model = str(model)
+            elif not isinstance(model, str):
+                model = "SevenNet-0_11July2024"
+
+            kwargs.setdefault("file_type", "checkpoint")
+            kwargs.setdefault("sevennet_config", None)
+            calculator = SevenNetCalculator(model=model, device=device, **kwargs)
+
+        case "nequip":
+            from nequip import __version__
+            from nequip.ase import NequIPCalculator
+
+            # No default `model`
+            if model is None:
+                raise ValueError(
+                    f"Please specify `model`, as there is no default model for {arch}"
+                )
+
             model = str(model)
 
-        calculator = MatterSimCalculator(
-            potential=potential, load_path=model, device=device, **kwargs
-        )
+            calculator = NequIPCalculator.from_deployed_model(
+                model_path=model, device=device, **kwargs
+            )
 
-    elif arch == "grace":
-        from tensorpotential.calculator import grace_fm
+        case "dpa3":
+            from deepmd import __version__
+            from deepmd.calculator import DP
 
-        __version__ = "0.5.1"
+            # No default `model`
+            if model is None:
+                # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
+                raise ValueError(
+                    "Please specify `model`, as there is no "
+                    f"default model for {arch} "
+                    "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
+                )
 
-        # Default model
-        model = model if model else "GRACE-2L-OMAT"
-
-        if isinstance(model, Path):
             model = str(model)
 
-        calculator = grace_fm(model, **kwargs)
+            calculator = DP(model=model, **kwargs)
 
-    elif arch == "fairchem":
-        from fairchem.core import OCPCalculator, __version__
+        case "orb":
+            from orb_models import __version__
+            from orb_models.forcefield.calculator import ORBCalculator
+            from orb_models.forcefield.direct_regressor import DirectForcefieldRegressor
+            import orb_models.forcefield.pretrained as orb_ff
 
-        # Default model
-        model = model if model else "EquiformerV2-31M-S2EF-OC20-All+MD"
+            # Default model
+            model = model if model else "orb_v3_conservative_20_omat"
 
-        model_name = None
-        checkpoint_path = None
+            if isinstance(model, DirectForcefieldRegressor):
+                loaded_model = model
+                model = "loaded_DirectForcefieldRegressor"
+            else:
+                try:
+                    loaded_model = getattr(orb_ff, model.replace("-", "_"))()
+                except AttributeError as e:
+                    raise ValueError(
+                        "`model` must be a `DirectForcefieldRegressor`, pre-trained "
+                        "model label (e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
+                    ) from e
 
-        if isinstance(model, Path) and model.exists():
-            checkpoint_path = str(model)
-        else:
-            model_name = str(model)
+            calculator = ORBCalculator(model=loaded_model, device=device, **kwargs)
 
-        kwargs.setdefault("local_cache", "~/.cache/fairchem")
-        cpu = True if device == "cpu" else False
+        case "mattersim":
+            from mattersim import __version__
+            from mattersim.forcefield import MatterSimCalculator
+            from torch.nn import Module
 
-        calculator = OCPCalculator(
-            model_name=model_name, checkpoint_path=checkpoint_path, cpu=cpu, **kwargs
-        )
+            # Default model
+            model = model if model else "mattersim-v1.0.0-5M"
 
-    else:
-        raise ValueError(
-            f"Unrecognized {arch=}. Suported architectures "
-            f"are {', '.join(Architectures.__args__)}"
-        )
+            if isinstance(model, Module):
+                potential = model
+                model = "loaded_Module"
+            else:
+                potential = None
+
+            if isinstance(model, Path):
+                model = str(model)
+
+            calculator = MatterSimCalculator(
+                potential=potential, load_path=model, device=device, **kwargs
+            )
+
+        case "grace":
+            from tensorpotential.calculator import grace_fm
+
+            __version__ = "0.5.1"
+
+            # Default model
+            model = model if model else "GRACE-2L-OMAT"
+
+            if isinstance(model, Path):
+                model = str(model)
+
+            calculator = grace_fm(model, **kwargs)
+
+        case "equiformer" | "esen":
+            from fairchem.core import OCPCalculator, __version__
+
+            # Default model
+            if arch == "equiformer":
+                model = model if model else "EquiformerV2-31M-S2EF-OC20-All+MD"
+            if arch == "esen":
+                model = model if model else "eSEN-30M-OMAT24"
+
+            model_name = None
+            checkpoint_path = None
+
+            if isinstance(model, Path) and model.exists():
+                checkpoint_path = str(model)
+            else:
+                model_name = str(model)
+
+            kwargs.setdefault("local_cache", "~/.cache/fairchem")
+            cpu = True if device == "cpu" else False
+
+            calculator = OCPCalculator(
+                model_name=model_name,
+                checkpoint_path=checkpoint_path,
+                cpu=cpu,
+                **kwargs,
+            )
+
+        case _:
+            raise ValueError(
+                f"Unrecognized {arch=}. Suported architectures "
+                f"are {', '.join(Architectures.__args__)}"
+            )
 
     if isinstance(model, Path):
         model = model.as_posix()
