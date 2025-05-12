@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from difflib import get_close_matches
 from functools import singledispatchmethod
 import re
 from typing import TypeVar
@@ -71,22 +72,11 @@ class Stats:
 
     @_getind.register
     def _(self, lab: str) -> int:  # numpydoc ignore=GL08
-        fuzzy_matches = []
-        for index, label in enumerate(self.labels):
-            # Exact (case-insensitive) match.
-            if lab.lower() == label.lower():
-                return index
-            if lab.lower() in label.lower():
-                fuzzy_matches.append((index, label.lower()))
-        # Case-insensitive fuzzy match, only has to be `in` the labels.
-        if len(fuzzy_matches) == 1:
-            # A unique fuzzy match.
-            return fuzzy_matches[0][0]
-        if len(fuzzy_matches) > 1:
-            # Fuzzy match to the shortest label (e.g. 'Time' vs. 'Real_time').
-            return sorted(fuzzy_matches, key=lambda x: len(x[1]))[0][0]
-        raise IndexError(f"{lab} not found in labels")
-        return index
+        labels = [label.lower() for label in self.labels]
+        match = get_close_matches(lab.lower(), labels, n=1)
+        if len(match) == 0:
+            raise IndexError(f"{lab} not found in labels")
+        return labels.index(match[0])
 
     @singledispatchmethod
     def __getitem__(self, ind) -> NDArray[float64]:
