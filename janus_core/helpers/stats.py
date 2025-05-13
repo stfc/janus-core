@@ -7,6 +7,7 @@ from difflib import get_close_matches
 from functools import singledispatchmethod
 import re
 from typing import TypeVar
+from warnings import warn
 
 from numpy import float64, genfromtxt, zeros
 from numpy.typing import NDArray
@@ -73,10 +74,15 @@ class Stats:
     @_getind.register
     def _(self, lab: str) -> int:  # numpydoc ignore=GL08
         labels = [label.lower() for label in self.labels]
-        match = get_close_matches(lab.lower(), labels, n=1)
-        if len(match) == 0:
+        if lab.lower() in labels:
+            return labels.index(lab.lower())
+        matches = get_close_matches(lab.lower(), labels)
+        if len(matches) == 0:
             raise IndexError(f"{lab} not found in labels")
-        return labels.index(match[0])
+        if len(matches) > 1:
+            warn(f"multiple matches found for label {lab}: {matches}", stacklevel=2)
+
+        return labels.index(matches[0])
 
     @singledispatchmethod
     def __getitem__(self, ind) -> NDArray[float64]:

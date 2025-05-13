@@ -93,6 +93,12 @@ class TestStats:
         """Test getitem from a str."""
         assert self.data._getind(label) == expectedindex
 
+    @pytest.mark.parametrize("label", ("px", "ti", "Target"))
+    def test_str_getitem_warns(self, label):
+        """Test warnings issued from ambiguous getitem."""
+        with pytest.warns(UserWarning, match="multiple matches found for label"):
+            self.data._getind(label)
+
     def test_repr(self, capsys):
         """Test repr working correctly."""
         print(self.data)
