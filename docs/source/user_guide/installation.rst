@@ -96,6 +96,6 @@ be installed together.
 MLIPs with limited OS support
 -----------------------------
 
-Several MLIP packages have limited support on Windows We are currently unable to
+Several MLIP packages have limited support on Windows. We are currently unable to
 support ``orb``, ``mattersim``, ``alignn`` or ``matgl`` as ``extras`` on Windows, so they
 must be installed manually.
