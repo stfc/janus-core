@@ -236,8 +236,6 @@ def test_writing_structs(tmp_path):
     assert generated_path.exists()
     atoms = read(generated_path, index=":")
     assert len(atoms) == 5
-    assert "system_name" in atoms[0].info
-    assert atoms[0].info["system_name"] == "NaCl"
 
     # Read eos summary file
     with open(summary_path, encoding="utf8") as file:
@@ -490,3 +488,70 @@ def test_missing_arch(tmp_path):
     )
     assert result.exit_code == 2
     assert "Missing option" in result.stdout
+
+
+def test_info(tmp_path):
+    """Test info written to generated structures."""
+    file_prefix = tmp_path / "NaCl"
+    generated_path = tmp_path / "NaCl-generated.extxyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
+            "--n-volumes",
+            4,
+            "--file-prefix",
+            file_prefix,
+            "--write-structures",
+            "--no-minimize",
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert generated_path.exists()
+
+    atoms = read(generated_path, index=":")
+    for struct in atoms:
+        assert "system_name" in struct.info
+        assert struct.info["system_name"] == "NaCl"
+        assert "config_type" in struct.info
+        assert struct.info["config_type"] == "eos"
+
+
+def test_info_min(tmp_path):
+    """Test info written to generated structures after minimisation."""
+    file_prefix = tmp_path / "NaCl"
+    generated_path = tmp_path / "NaCl-generated.extxyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "eos",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
+            "--n-volumes",
+            4,
+            "--file-prefix",
+            file_prefix,
+            "--write-structures",
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert generated_path.exists()
+
+    atoms = read(generated_path, index=":")
+    for struct in atoms:
+        assert "system_name" in struct.info
+        assert struct.info["system_name"] == "NaCl"
+        assert "config_type" in struct.info
+        assert struct.info["config_type"] == "geom_opt"
