@@ -385,6 +385,7 @@ class GeomOpt(BaseCalculation):
             struct_path=self.struct_path,
             write_results=self.write_results,
             write_kwargs=self.write_kwargs,
+            config_type="geom_opt",
         )
 
         # Reformat trajectory file from binary
@@ -395,6 +396,7 @@ class GeomOpt(BaseCalculation):
                 struct_path=self.struct_path,
                 write_results=True,
                 write_kwargs=self.traj_kwargs,
+                config_type="geom_opt",
             )
 
         if self.logger:

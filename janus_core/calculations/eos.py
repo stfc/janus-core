@@ -310,6 +310,7 @@ class EoS(BaseCalculation):
                 struct_path=self.struct_path,
                 write_results=self.write_structures,
                 write_kwargs=self.write_kwargs,
+                config_type="eos",
             )
 
         # Set constant volume for geometry optimization of generated structures
@@ -402,6 +403,7 @@ class EoS(BaseCalculation):
                 write_results=self.write_structures,
                 set_info=False,
                 write_kwargs=self.write_kwargs,
+                config_type="eos",
             )
 
         if self.logger:
