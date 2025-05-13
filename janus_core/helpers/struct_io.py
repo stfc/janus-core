@@ -244,6 +244,7 @@ def output_structs(
     properties: Collection[Properties] = (),
     invalidate_calc: bool = False,
     write_kwargs: ASEWriteArgs | None = None,
+    config_type: str = None,
 ) -> None:
     """
     Copy or move calculated results to Atoms.info dict and/or write structures to file.
@@ -266,6 +267,9 @@ def output_structs(
         Default is False.
     write_kwargs
         Keyword arguments passed to ase.io.write. Default is {}.
+    config_type
+        Label for calculation that generated configurations, added to the Atoms info if
+        it does not exist already. Default is no label.
     """
     # Separate kwargs for output_structs from kwargs for ase.io.write
     # This assumes values passed via kwargs have priority over passed parameters
@@ -280,7 +284,9 @@ def output_structs(
     if set_info:
         for image in images:
             results_to_info(
-                image, properties=properties, invalidate_calc=invalidate_calc
+                image,
+                properties=properties,
+                invalidate_calc=invalidate_calc,
             )
     else:
         # Label architecture even if not copying results to info
@@ -290,10 +296,12 @@ def output_structs(
             if image.calc and "model" in image.calc.parameters:
                 image.info["model"] = image.calc.parameters["model"]
 
-    # Add label for system
+    # Add labels for system and configuration type
     for image in images:
         if struct_path and "system_name" not in image.info:
             image.info["system_name"] = Path(struct_path).stem
+        if "config_type" not in image.info:
+            image.info["config_type"] = config_type
 
     if write_results:
         # Check required filename is specified
