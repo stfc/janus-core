@@ -213,6 +213,7 @@ constraint-dependencies = [
     "tensorflow>=2.16.1",
     "tensorflow-io-gcs-filesystem<=0.31.0; sys_platform == 'win32'",
     "snowballstemmer<3",
+    "click<8.2.0",
 ]
 conflicts = [
     [
