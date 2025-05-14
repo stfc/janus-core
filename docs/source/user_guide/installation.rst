@@ -70,7 +70,7 @@ Due to the different requirements of the MLIPs we support, it is not always poss
 
 
 MLIPs requiring DGL
-------------------
+-------------------
 
 `DGL <https://github.com/dmlc/dgl>`_, which is a dependency of ``alignn`` and ``matgl``, no longer
 publishes to PyPI, and no longer publishes any packages for Windows or MacOS.
