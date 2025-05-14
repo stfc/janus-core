@@ -76,6 +76,29 @@ class TestStats:
         """Test getitem indexing working correctly."""
         assert (self.data[ind] == self.data.data[:, expectedcol]).all()
 
+    @pytest.mark.parametrize(
+        "label, expectedindex",
+        (
+            ("Time", 2),
+            ("time", 2),
+            ("ti", 2),
+            ("real", 1),
+            ("pxx", 10),
+            ("vol", 8),
+            ("T", 5),
+            ("p", 9),
+        ),
+    )
+    def test_str_getitem(self, label, expectedindex):
+        """Test getitem from a str."""
+        assert self.data._getind(label) == expectedindex
+
+    @pytest.mark.parametrize("label", ("px", "ti", "Target"))
+    def test_str_getitem_warns(self, label):
+        """Test warnings issued from ambiguous getitem."""
+        with pytest.warns(UserWarning, match="multiple matches found for label"):
+            self.data._getind(label)
+
     def test_repr(self, capsys):
         """Test repr working correctly."""
         print(self.data)
