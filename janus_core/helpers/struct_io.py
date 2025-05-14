@@ -300,8 +300,8 @@ def output_structs(
     for image in images:
         if struct_path and "system_name" not in image.info:
             image.info["system_name"] = Path(struct_path).stem
-        if "config_type" not in image.info:
-            image.info["config_type"] = config_type
+        if config_type:
+            image.info.setdefault("config_type", config_type)
 
     if write_results:
         # Check required filename is specified
