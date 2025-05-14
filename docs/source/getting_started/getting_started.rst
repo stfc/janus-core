@@ -36,18 +36,16 @@ For example, to install MACE, CHGNet, and SevenNet, run:
 
 .. warning::
 
-    ``matgl`` and ``alignn`` depend on `dgl <https://github.com/dmlc/dgl?tab=readme-ov-file>`_,
-    which no longer publishes to PyPI. If ``janus-core`` is installed with either of these extras,
-    PyTorch will automatically be set to 2.2.0 to ensure compatibility. However, this is incompatible
-    with ``chgnet``, and may limit the available features in others, including ``mace``. To use
-    ``matgl`` and/or ``alignn`` with more recent PyTorch release, please refer to the
-    :doc:`installation documentation </user_guide/installation>`.
+    We are unable to support for automatic installation of all combinations of MLIPs, or MLIPs on all platforms.
+    Please refer to the :doc:`installation documentation </user_guide/installation>` for more details.
 
-To install all MLIPs that do not depend on ``dgl``:
+
+To install all MLIPs currently compatible with MACE, run:
 
 .. code-block:: python
 
     python3 -m pip install janus-core[all]
+
 
 Currently supported extras are:
 

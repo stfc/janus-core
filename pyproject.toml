@@ -83,14 +83,14 @@ mattersim = [
 
 # MLIPs with dgl dependency
 alignn = [
-    "alignn == 2024.5.27",
-    "torch == 2.2",
-    "torchdata == 0.7.1",
+    "alignn == 2024.5.27; sys_platform != 'win32'",
+    "torch == 2.2; sys_platform != 'win32'",
+    "torchdata == 0.7.1; sys_platform != 'win32'",
 ]
 m3gnet = [
-    "matgl == 1.1.3",
-    "torch == 2.2",
-    "torchdata == 0.7.1",
+    "matgl == 1.1.3; sys_platform != 'win32'",
+    "torch == 2.2; sys_platform != 'win32'",
+    "torchdata == 0.7.1; sys_platform != 'win32'",
 ]
 
 [project.scripts]
