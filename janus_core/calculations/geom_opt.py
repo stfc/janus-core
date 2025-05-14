@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 import warnings
 
@@ -243,9 +244,11 @@ class GeomOpt(BaseCalculation):
                     "Please use traj_kwargs['filename'] to save the trajectory"
                 )
 
+            # Set filenames for trajectory, and ensure directories exist
             self.traj_kwargs.setdefault(
                 "filename", self._build_filename("traj.extxyz").absolute()
             )
+            Path(self.traj_kwargs["filename"]).parent.mkdir(parents=True, exist_ok=True)
             self.opt_kwargs["trajectory"] = str(self.traj_kwargs["filename"])
 
         elif self.traj_kwargs:
