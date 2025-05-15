@@ -90,7 +90,9 @@ jobs:
         uses: pandoc/actions/setup@v1
 
       - name: Install dependencies
-        run: uv sync
+        run: |
+          uv sync --extra mace
+          uv pip install --reinstall pynvml
 
       - name: Build docs
         run: cd docs && uv run make html
