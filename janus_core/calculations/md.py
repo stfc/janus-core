@@ -511,8 +511,7 @@ class MolecularDynamics(BaseCalculation):
                 raise FileNotFoundError(
                     f"PLUMED input file not found or is not a file: {plumed_input_path}"
                 )
-            with open(plumed_input_path, "r", encoding="utf-8") as f:
-                plumed_script = f.read()
+            plumed_script = plumed_input_path.read_text(encoding="utf-8")
             plumed_input_source = str(plumed_input_path.resolve())
 
             # Calculate kT in ASE units (eV)
