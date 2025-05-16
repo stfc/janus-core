@@ -73,11 +73,11 @@ class GeomOpt(BaseCalculation):
     angle_tolerance
         Angle precision for spglib symmetry determination, in degrees. Default is -1.0,
         which means an internally optimized routine is used to judge symmetry.
-    filter_func
-        Filter function, or name of function from ase.filters to apply constraints to
-        atoms. Default is `FrechetCellFilter`.
+    filter_class
+        Filter class, or name of class from ase.filters to wrap around atoms.
+        Default is `FrechetCellFilter`.
     filter_kwargs
-        Keyword arguments to pass to filter_func. Default is {}.
+        Keyword arguments to pass to filter_class. Default is {}.
     optimizer
         Optimization function, or name of function from ase.optimize. Default is
         `LBFGS`.
@@ -114,7 +114,7 @@ class GeomOpt(BaseCalculation):
         symmetrize: bool = False,
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
-        filter_func: Callable | str | None = FrechetCellFilter,
+        filter_class: Callable | str | None = FrechetCellFilter,
         filter_kwargs: dict[str, Any] | None = None,
         optimizer: Callable | str = LBFGS,
         opt_kwargs: ASEOptArgs | None = None,
@@ -167,11 +167,11 @@ class GeomOpt(BaseCalculation):
         angle_tolerance
             Angle precision for spglib symmetry determination, in degrees. Default is
             -1.0, which means an internally optimized routine is used to judge symmetry.
-        filter_func
-            Filter function, or name of function from ase.filters to apply constraints
-            to atoms. Default is `FrechetCellFilter`.
+        filter_class
+            Filter class, or name of class from ase.filters to wrap around atoms.
+            Default is `FrechetCellFilter`.
         filter_kwargs
-            Keyword arguments to pass to filter_func. Default is {}.
+            Keyword arguments to pass to filter_class. Default is {}.
         optimizer
             Optimization function, or name of function from ase.optimize. Default is
             `LBFGS`.
@@ -200,7 +200,7 @@ class GeomOpt(BaseCalculation):
         self.symmetrize = symmetrize
         self.symmetry_tolerance = symmetry_tolerance
         self.angle_tolerance = angle_tolerance
-        self.filter_func = filter_func
+        self.filter_class = filter_class
         self.filter_kwargs = filter_kwargs
         self.optimizer = optimizer
         self.opt_kwargs = opt_kwargs
@@ -289,13 +289,13 @@ class GeomOpt(BaseCalculation):
         if self.logger:
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)
 
-        if self.filter_func is not None:
+        if self.filter_class is not None:
             if "scalar_pressure" in self.filter_kwargs:
                 self.filter_kwargs["scalar_pressure"] *= units.GPa
-            self.filtered_struct = self.filter_func(self.struct, **self.filter_kwargs)
+            self.filtered_struct = self.filter_class(self.struct, **self.filter_kwargs)
             self.dyn = self.optimizer(self.filtered_struct, **self.opt_kwargs)
             if self.logger:
-                self.logger.info("Using filter: %s", self.filter_func.__name__)
+                self.logger.info("Using filter: %s", self.filter_class.__name__)
                 if "hydrostatic_strain" in self.filter_kwargs:
                     self.logger.info(
                         "hydrostatic_strain: %s",
@@ -314,18 +314,18 @@ class GeomOpt(BaseCalculation):
             self.dyn = self.optimizer(self.struct, **self.opt_kwargs)
 
     def _set_functions(self) -> None:
-        """Set optimizer and filter functions."""
+        """Set optimizer and filter."""
         if isinstance(self.optimizer, str):
             try:
                 self.optimizer = getattr(ase.optimize, self.optimizer)
             except AttributeError as e:
                 raise AttributeError(f"No such optimizer: {self.optimizer}") from e
 
-        if self.filter_func is not None and isinstance(self.filter_func, str):
+        if self.filter_class is not None and isinstance(self.filter_class, str):
             try:
-                self.filter_func = getattr(filters, self.filter_func)
+                self.filter_class = getattr(filters, self.filter_class)
             except AttributeError as e:
-                raise AttributeError(f"No such filter: {self.filter_func}") from e
+                raise AttributeError(f"No such filter: {self.filter_class}") from e
 
     def run(self) -> None:
         """Run geometry optimization."""
@@ -344,7 +344,7 @@ class GeomOpt(BaseCalculation):
         converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
 
         # Calculate current maximum force
-        if self.filter_func is not None:
+        if self.filter_class is not None:
             max_force = linalg.norm(self.filtered_struct.get_forces(), axis=1).max()
         else:
             max_force = linalg.norm(self.struct.get_forces(), axis=1).max()
@@ -355,7 +355,7 @@ class GeomOpt(BaseCalculation):
             # Update max force
             old_max_force = max_force
             struct = (
-                self.filtered_struct if self.filter_func is not None else self.struct
+                self.filtered_struct if self.filter_class is not None else self.struct
             )
             max_force = linalg.norm(struct.get_forces(), axis=1).max()
 
