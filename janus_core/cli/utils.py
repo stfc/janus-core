@@ -134,7 +134,7 @@ def parse_typer_dicts(typer_dicts: list[TyperDict]) -> list[dict]:
 
 def yaml_converter_loader(config_file: str) -> dict[str, Any]:
     """
-    Load yaml configuration and replace hyphens with underscores.
+    Load yaml configuration, replace hyphens with underscores, and swap filter keyword.
 
     Parameters
     ----------
@@ -150,6 +150,11 @@ def yaml_converter_loader(config_file: str) -> dict[str, Any]:
         return {}
 
     config = yaml_loader(config_file)
+
+    # Rename filter
+    if "filter" in config:
+        config["filter_class"] = config.pop("filter")
+
     # Replace all "-"" with "_" in conf
     return dict_remove_hyphens(config)
 

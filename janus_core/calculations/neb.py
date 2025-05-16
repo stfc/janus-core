@@ -339,7 +339,7 @@ class NEB(BaseCalculation):
         self.write_kwargs["filename"] = self._build_filename("neb-band.extxyz")
 
         # Variable cell in periodic directions is not implemented yet for NEB
-        self.minimize_kwargs.setdefault("filter_func", None)
+        self.minimize_kwargs.setdefault("filter_class", None)
 
         # Write out file by default if minimizing
         self.minimize_kwargs.setdefault("write_results", True)
