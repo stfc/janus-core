@@ -170,18 +170,19 @@ def choose_calculator(
 
             # Use potential (from kwargs) if specified
             # Otherwise, load the model if given a path, else use a default model
-            if isinstance(model, Potential):
-                potential = model
-                model = "loaded_Potential"
-            elif isinstance(model, Path):
-                if model.is_file():
-                    model = model.parent
-                potential = load_model(model)
-            elif isinstance(model, str):
-                potential = load_model(model)
-            else:
-                model = "M3GNet-MP-2021.2.8-DIRECT-PES"
-                potential = load_model(model)
+            match model:
+                case Potential():
+                    potential = model
+                    model = "loaded_Potential"
+                case Path():
+                    if model.is_file():
+                        model = model.parent
+                    potential = load_model(model)
+                case str():
+                    potential = load_model(model)
+                case _:
+                    model = "M3GNet-MP-2021.2.8-DIRECT-PES"
+                    potential = load_model(model)
 
             calculator = M3GNetCalculator(potential=potential, **kwargs)
 
@@ -196,16 +197,17 @@ def choose_calculator(
 
             # Use loaded model (from kwargs) if specified
             # Otherwise, load the model if given a path, else use a default model
-            if isinstance(model, CHGNet):
-                loaded_model = model
-                model = "loaded_CHGNet"
-            elif isinstance(model, Path):
-                loaded_model = CHGNet.from_file(model)
-            elif isinstance(model, str):
-                loaded_model = CHGNet.load(model_name=model, use_device=device)
-            else:
-                model = __version__
-                loaded_model = None
+            match model:
+                case CHGNet():
+                    loaded_model = model
+                    model = "loaded_CHGNet"
+                case Path():
+                    loaded_model = CHGNet.from_file(model)
+                case str():
+                    loaded_model = CHGNet.load(model_name=model, use_device=device)
+                case _:
+                    model = __version__
+                    loaded_model = None
 
             calculator = CHGNetCalculator(
                 model=loaded_model, use_device=device, **kwargs
@@ -220,14 +222,15 @@ def choose_calculator(
             )
 
             # Set default path to directory containing config and model location
-            if isinstance(model, Path):
-                if model.is_file():
-                    model = model.parent
-            # If a string, assume referring to model_name e.g. "v5.27.2024"
-            elif isinstance(model, str):
-                model = get_figshare_model_ff(model_name=model)
-            else:
-                model = default_path()
+            match model:
+                case Path():
+                    if model.is_file():
+                        model = model.parent
+                # If a string, assume referring to model_name e.g. "v5.27.2024"
+                case str():
+                    model = get_figshare_model_ff(model_name=model)
+                case _:
+                    model = default_path()
 
             calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
 
@@ -239,10 +242,11 @@ def choose_calculator(
             # Set before loading model to avoid type mismatches
             torch.set_default_dtype(torch.float32)
 
-            if isinstance(model, Path):
-                model = str(model)
-            elif not isinstance(model, str):
-                model = "SevenNet-0_11July2024"
+            match model:
+                case Path() | str():
+                    model = str(model)
+                case _:
+                    model = "SevenNet-0_11July2024"
 
             kwargs.setdefault("file_type", "checkpoint")
             kwargs.setdefault("sevennet_config", None)
@@ -287,20 +291,20 @@ def choose_calculator(
             from orb_models.forcefield.direct_regressor import DirectForcefieldRegressor
             import orb_models.forcefield.pretrained as orb_ff
 
-            # Default model
-            model = model if model else "orb_v3_conservative_20_omat"
-
-            if isinstance(model, DirectForcefieldRegressor):
-                loaded_model = model
-                model = "loaded_DirectForcefieldRegressor"
-            else:
-                try:
+            match model:
+                case DirectForcefieldRegressor():
+                    loaded_model = model
+                    model = "loaded_DirectForcefieldRegressor"
+                case str() if hasattr(orb_ff, model.replace("-", "_")):
                     loaded_model = getattr(orb_ff, model.replace("-", "_"))()
-                except AttributeError as e:
+                case None:
+                    # Default model
+                    model = "orb_v3_conservative_20_omat"
+                case _:
                     raise ValueError(
                         "`model` must be a `DirectForcefieldRegressor`, pre-trained "
                         "model label (e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
-                    ) from e
+                    )
 
             calculator = ORBCalculator(model=loaded_model, device=device, **kwargs)
 
@@ -309,17 +313,15 @@ def choose_calculator(
             from mattersim.forcefield import MatterSimCalculator
             from torch.nn import Module
 
-            # Default model
-            model = model if model else "mattersim-v1.0.0-5M"
-
-            if isinstance(model, Module):
-                potential = model
-                model = "loaded_Module"
-            else:
-                potential = None
-
-            if isinstance(model, Path):
-                model = str(model)
+            potential = None
+            match model:
+                case Module():
+                    potential = model
+                    model = "loaded_Module"
+                case Path() | str():
+                    model = str(model)
+                case None:
+                    model = "mattersim-v1.0.0-5M"
 
             calculator = MatterSimCalculator(
                 potential=potential, load_path=model, device=device, **kwargs
@@ -341,11 +343,13 @@ def choose_calculator(
         case "equiformer" | "esen":
             from fairchem.core import OCPCalculator, __version__
 
-            # Default model
-            if arch == "equiformer":
-                model = model if model else "EquiformerV2-31M-S2EF-OC20-All+MD"
-            if arch == "esen":
-                model = model if model else "eSEN-30M-OMAT24"
+            match arch, model:
+                case ("equiformer", None):
+                    model = "EquiformerV2-31M-S2EF-OC20-All+MD"
+                case ("esen", None):
+                    model = "eSEN-30M-OMAT24"
+                case _:
+                    pass
 
             model_name = None
             checkpoint_path = None
