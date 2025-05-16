@@ -244,7 +244,7 @@ def output_structs(
     properties: Collection[Properties] = (),
     invalidate_calc: bool = False,
     write_kwargs: ASEWriteArgs | None = None,
-    config_type: str = None,
+    config_type: str = "",
 ) -> None:
     """
     Copy or move calculated results to Atoms.info dict and/or write structures to file.
