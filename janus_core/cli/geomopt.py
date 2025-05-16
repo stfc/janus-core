@@ -116,6 +116,7 @@ def geomopt(
     filter_class: Annotated[
         str | None,
         Option(
+            "--filter",
             help=(
                 "Name of ASE filter to wrap around atoms. If using "
                 "--opt-cell-lengths or --opt-cell-fully, defaults to "
@@ -126,9 +127,7 @@ def geomopt(
     ] = None,
     filter_func: Annotated[
         str | None,
-        Option(
-            help="Deprecated. Please use --filter_class", rich_help_panel="Calculation"
-        ),
+        Option(help="Deprecated. Please use --filter", rich_help_panel="Calculation"),
     ] = None,
     pressure: Annotated[
         float,
@@ -300,7 +299,7 @@ def geomopt(
     _set_minimize_kwargs(minimize_kwargs, opt_cell_lengths, pressure)
 
     if filter_func and filter_class:
-        raise ValueError("--filter-func is deprecated, please only use --filter-class")
+        raise ValueError("--filter-func is deprecated, please only use --filter")
 
     if opt_cell_fully or opt_cell_lengths:
         # Use default filter unless filter explicitly passed
