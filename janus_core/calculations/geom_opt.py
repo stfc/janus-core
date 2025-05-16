@@ -76,6 +76,8 @@ class GeomOpt(BaseCalculation):
     filter_class
         Filter class, or name of class from ase.filters to wrap around atoms.
         Default is `FrechetCellFilter`.
+    filter_func
+        Deprecated. Please use `filter_class`.
     filter_kwargs
         Keyword arguments to pass to filter_class. Default is {}.
     optimizer
@@ -115,6 +117,7 @@ class GeomOpt(BaseCalculation):
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
         filter_class: Callable | str | None = FrechetCellFilter,
+        filter_func: Callable | str | None = None,
         filter_kwargs: dict[str, Any] | None = None,
         optimizer: Callable | str = LBFGS,
         opt_kwargs: ASEOptArgs | None = None,
@@ -170,6 +173,8 @@ class GeomOpt(BaseCalculation):
         filter_class
             Filter class, or name of class from ase.filters to wrap around atoms.
             Default is `FrechetCellFilter`.
+        filter_func
+            Deprecated. Please use `filter_class`.
         filter_kwargs
             Keyword arguments to pass to filter_class. Default is {}.
         optimizer
@@ -194,6 +199,10 @@ class GeomOpt(BaseCalculation):
                 read_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs
             )
         )
+
+        # Handle deprecated filter_func, but warn later after logging is set up
+        if filter_func:
+            filter_class = filter_func
 
         self.fmax = fmax
         self.steps = steps
@@ -232,6 +241,15 @@ class GeomOpt(BaseCalculation):
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
+
+        # Warn for deprecated filter_func now that logging is set up
+        if filter_func:
+            warnings.warn(
+                "`filter_func` has been deprecated, but currently overrides "
+                "`filter_class`. Please only set `filter_class`.",
+                FutureWarning,
+                stacklevel=2,
+            )
 
         # Set output files
         self.write_kwargs["filename"] = self._build_filename(
