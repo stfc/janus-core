@@ -284,9 +284,7 @@ def output_structs(
     if set_info:
         for image in images:
             results_to_info(
-                image,
-                properties=properties,
-                invalidate_calc=invalidate_calc,
+                image, properties=properties, invalidate_calc=invalidate_calc
             )
     else:
         # Label architecture even if not copying results to info
