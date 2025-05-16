@@ -549,7 +549,7 @@ def test_optimizer_str(tmp_path):
 
 
 def test_filter_str(tmp_path):
-    """Test setting filter function."""
+    """Test setting filter."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -565,7 +565,7 @@ def test_filter_str(tmp_path):
             "--out",
             results_path,
             "--opt-cell-fully",
-            "--filter-func",
+            "--filter-class",
             "UnitCellFilter",
             "--log",
             log_path,
@@ -581,7 +581,7 @@ def test_filter_str(tmp_path):
 
 
 def test_filter_str_error(tmp_path):
-    """Test setting filter function without --opt-cell-fully or --opt-cell-lengths."""
+    """Test setting filter without --opt-cell-fully or --opt-cell-lengths."""
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -596,7 +596,7 @@ def test_filter_str_error(tmp_path):
             "mace_mp",
             "--out",
             results_path,
-            "--filter-func",
+            "--filter-class",
             "UnitCellFilter",
             "--log",
             log_path,
