@@ -1179,6 +1179,7 @@ class MolecularDynamics(BaseCalculation):
                 struct_path=self.struct_path,
                 write_results=True,
                 write_kwargs=write_kwargs,
+                config_type="md",
             )
 
     def _write_final_state(self) -> None:
@@ -1196,6 +1197,7 @@ class MolecularDynamics(BaseCalculation):
             struct_path=self.struct_path,
             write_results=True,
             write_kwargs=write_kwargs,
+            config_type="md",
         )
 
     def _post_process(self) -> None:
@@ -1267,6 +1269,7 @@ class MolecularDynamics(BaseCalculation):
                 struct_path=self.struct_path,
                 write_results=True,
                 write_kwargs=write_kwargs,
+                config_type="md",
             )
             self.restart_files.append(self._restart_file)
             if self.rotate_restart:

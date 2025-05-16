@@ -615,11 +615,6 @@ def test_write_kwargs(tmp_path):
     assert "mace_mp_energy" in traj[0].info
     assert "mace_mp_energy" in final_atoms.info
 
-    assert "system_name" in final_atoms.info
-    assert final_atoms.info["system_name"] == "NaCl"
-    assert "system_name" in traj[0].info
-    assert traj[0].info["system_name"] == "NaCl"
-
 
 @pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
 def test_valid_traj_input(read_kwargs, tmp_path):
@@ -1090,3 +1085,57 @@ def test_missing_arch(tmp_path):
     )
     assert result.exit_code == 2
     assert "Missing option" in result.stdout
+
+
+def test_info(tmp_path):
+    """Test info written to output structures."""
+    file_prefix = tmp_path / "NaCl"
+    traj_path = tmp_path / "NaCl-traj.extxyz"
+    final_path = tmp_path / "NaCl-final.extxyz"
+    restart_path = tmp_path / "NaCl-res-1.extxyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "md",
+            "--ensemble",
+            "nvt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
+            "--steps",
+            2,
+            "--traj-every",
+            2,
+            "--restart-every",
+            1,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert traj_path.exists()
+    assert restart_path.exists()
+    assert final_path.exists()
+
+    traj_atoms = read(traj_path, index=":")
+    for struct in traj_atoms:
+        assert "system_name" in struct.info
+        assert struct.info["system_name"] == "NaCl"
+        assert "config_type" in struct.info
+        assert struct.info["config_type"] == "md"
+
+    restart_atoms = read(restart_path)
+    assert "system_name" in restart_atoms.info
+    assert restart_atoms.info["system_name"] == "NaCl"
+    assert "config_type" in restart_atoms.info
+    assert restart_atoms.info["config_type"] == "md"
+
+    final_atoms = read(final_path)
+    assert "system_name" in final_atoms.info
+    assert final_atoms.info["system_name"] == "NaCl"
+    assert "config_type" in final_atoms.info
+    assert final_atoms.info["config_type"] == "md"

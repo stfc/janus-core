@@ -135,6 +135,8 @@ def test_traj(tmp_path):
     assert "mace_mp_forces" in atoms.arrays
     assert "system_name" in atoms.info
     assert atoms.info["system_name"] == "NaCl"
+    assert "config_type" in atoms.info
+    assert atoms.info["config_type"] == "geom_opt"
 
     # Read geomopt summary file
     with open(summary_path, encoding="utf8") as file:
@@ -189,8 +191,6 @@ def test_opt_fully(tmp_path):
         90.0,
     ]
     assert atoms.cell.cellpar() == pytest.approx(expected)
-    assert "system_name" in atoms.info
-    assert atoms.info["system_name"] == "NaCl-deformed"
 
 
 def test_opt_fully_and_vectors(tmp_path):
@@ -975,3 +975,32 @@ def test_missing_arch(tmp_path):
     )
     assert result.exit_code == 2
     assert "Missing option" in result.stdout
+
+
+def test_info(tmp_path):
+    """Test info written to output structure."""
+    file_prefix = tmp_path / "NaCl"
+    results_path = tmp_path / "NaCl-opt.extxyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert results_path.exists()
+
+    atoms = read(results_path)
+    assert "system_name" in atoms.info
+    assert atoms.info["system_name"] == "NaCl"
+    assert "config_type" in atoms.info
+    assert atoms.info["config_type"] == "geom_opt"

@@ -497,6 +497,7 @@ class NEB(BaseCalculation):
             struct_path=self.struct_path,
             write_results=self.write_band,
             write_kwargs=self.write_kwargs,
+            config_type="neb",
         )
 
     def run_nebtools(self):

@@ -568,3 +568,44 @@ def test_missing_arch(tmp_path):
     )
     assert result.exit_code == 2
     assert "Missing option" in result.stdout
+
+
+def test_info(tmp_path):
+    """Test info written to output structures."""
+    file_prefix = tmp_path / "LiFePO4"
+    neb_path = tmp_path / "LiFePO4-neb-band.extxyz"
+
+    result = runner.invoke(
+        app,
+        [
+            "neb",
+            "--init-struct",
+            DATA_PATH / "LiFePO4_start.cif",
+            "--final-struct",
+            DATA_PATH / "LiFePO4_end.cif",
+            "--interpolator",
+            "pymatgen",
+            "--fmax",
+            5,
+            "--n-images",
+            5,
+            "--write-band",
+            "--arch",
+            "mace_mp",
+            "--model-path",
+            MACE_PATH,
+            "--file-prefix",
+            file_prefix,
+            "--no-tracker",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert neb_path.exists()
+
+    atoms = read(neb_path, index=":")
+    for struct in atoms:
+        assert "system_name" in struct.info
+        assert struct.info["system_name"] == "LiFePO4_start"
+        assert "config_type" in struct.info
+        assert struct.info["config_type"] == "neb"
