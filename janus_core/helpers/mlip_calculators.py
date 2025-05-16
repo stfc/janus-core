@@ -300,6 +300,7 @@ def choose_calculator(
                 case None:
                     # Default model
                     model = "orb_v3_conservative_20_omat"
+                    loaded_model = getattr(orb_ff, model)()
                 case _:
                     raise ValueError(
                         "`model` must be a `DirectForcefieldRegressor`, pre-trained "
