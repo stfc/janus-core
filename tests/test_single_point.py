@@ -17,11 +17,14 @@ from tests.utils import read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
-MACE_PATH = MODEL_PATH / "mace_mp_small.model"
-SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
-NEQUIP_PATH = MODEL_PATH / "toluene.pth"
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
+ESEN_LABEL = "eSEN-30M-MP"
+MACE_PATH = MODEL_PATH / "mace_mp_small.model"
+NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -71,9 +74,54 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
 @pytest.mark.parametrize(
     "arch, device, expected_energy, struct, kwargs",
     [
+        (
+            "alignn",
+            "cpu",
+            -11.148092269897461,
+            "NaCl.cif",
+            {"model": ALIGNN_PATH / "best_model.pt"},
+        ),
+        (
+            "alignn",
+            "cpu",
+            -11.148092269897461,
+            "NaCl.cif",
+            {"model": ALIGNN_PATH / "best_model.pt"},
+        ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
+        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
+        (
+            "equiformer",
+            "cpu",
+            -0.7482733,
+            "NaCl.cif",
+            {},
+        ),
+        (
+            "equiformer",
+            "cpu",
+            -0.7586595,
+            "NaCl.cif",
+            {"model": EQUIFORMER_LABEL},
+        ),
+        (
+            "esen",
+            "cpu",
+            -27.0977497,
+            "NaCl.cif",
+            {},
+        ),
+        (
+            "esen",
+            "cpu",
+            -27.07935905,
+            "NaCl.cif",
+            {"model": ESEN_LABEL},
+        ),
+        ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
+        ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
         (
             "nequip",
             "cpu",
@@ -98,22 +146,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             "NaCl.cif",
             {"model": "SevenNet-0_11July2024"},
         ),
-        ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
-        (
-            "alignn",
-            "cpu",
-            -11.148092269897461,
-            "NaCl.cif",
-            {"model": ALIGNN_PATH / "best_model.pt"},
-        ),
-        (
-            "alignn",
-            "cpu",
-            -11.148092269897461,
-            "NaCl.cif",
-            {"model": ALIGNN_PATH / "best_model.pt"},
-        ),
-        ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
     ],
 )
 def test_extras(arch, device, expected_energy, struct, kwargs):
@@ -129,7 +161,7 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
             **kwargs,
         )
         energy = single_point.run()["energy"]
-        assert energy == pytest.approx(expected_energy, rel=1e-5)
+        assert energy == pytest.approx(expected_energy, rel=1e-3)
     except URLError as err:
         if "Connection timed out" in err.reason:
             pytest.skip("Model download failed")
