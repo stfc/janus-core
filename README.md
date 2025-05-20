@@ -55,6 +55,7 @@ python3 -m pip install janus-core[mace,chgnet,sevennet]
 > Please refer to the [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html)
 > for more details.
 
+
 To install all MLIPs currently compatible with MACE, run:
 
 ```python
@@ -89,6 +90,8 @@ Current and planned features include:
   - Orb
   - MatterSim
   - GRACE
+  - EquiformerV2
+  - eSEN
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics

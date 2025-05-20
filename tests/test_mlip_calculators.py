@@ -26,13 +26,27 @@ try:
 except ImportError:
     CHGNET_MODEL = None
 
-SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
+EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
+ESEN_LABEL = "eSEN-30M-MP"
+
+try:
+    from fairchem.core.models.model_registry import model_name_to_local_file
+
+    EQUIFORMER_PATH = model_name_to_local_file(
+        EQUIFORMER_LABEL,
+        local_cache=Path("~/.cache/fairchem").expanduser(),
+    )
+    ESEN_PATH = model_name_to_local_file(
+        EQUIFORMER_LABEL,
+        local_cache="~/.cache/fairchem",
+    )
+except ImportError:
+    EQUIFORMER_PATH = None
+    ESEN_PATH = None
 
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
-
-DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 
@@ -43,9 +57,11 @@ try:
 except ImportError:
     ORB_MODEL = None
 
+SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+
+ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 M3GNET_DIR_PATH = MODEL_PATH / "M3GNet-MP-2021.2.8-DIRECT-PES"
 M3GNET_MODEL_PATH = M3GNET_DIR_PATH / "model.pt"
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 
 try:
     from matgl import load_model
@@ -75,6 +91,18 @@ except ImportError:
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model_path": DPA3_PATH}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
+        ("equiformer", "cpu", {}),
+        ("equiformer", "cpu", {"model": EQUIFORMER_LABEL}),
+        ("equiformer", "cpu", {"model_path": EQUIFORMER_LABEL}),
+        ("equiformer", "cpu", {"model_name": EQUIFORMER_LABEL}),
+        ("equiformer", "cpu", {"model_name": EQUIFORMER_PATH}),
+        ("equiformer", "cpu", {"checkpoint_path": EQUIFORMER_PATH}),
+        ("esen", "cpu", {}),
+        ("esen", "cpu", {"model": ESEN_LABEL}),
+        ("esen", "cpu", {"model_path": ESEN_LABEL}),
+        ("esen", "cpu", {"model_name": ESEN_LABEL}),
+        ("esen", "cpu", {"model_name": ESEN_PATH}),
+        ("esen", "cpu", {"checkpoint_path": ESEN_PATH}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
@@ -130,11 +158,12 @@ def test_invalid_arch():
         ("mace_mp", "/invalid/path"),
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
+        ("fairchem", "/invalid/path"),
+        ("grace", "/invalid/path"),
         ("mattersim", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
         ("sevenn", "/invalid/path"),
-        ("grace", "/invalid/path"),
         ("alignn", "invalid/path"),
         ("m3gnet", "/invalid/path"),
     ],
@@ -153,25 +182,6 @@ def test_invalid_model(arch, model):
         {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
         {"arch": "mace", "model_path": MACE_MP_PATH, "model": MACE_MP_PATH},
         {"arch": "mace", "model": MACE_MP_PATH, "potential": MACE_MP_PATH},
-        {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
-        {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
-        {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
-        {
-            "arch": "mattersim",
-            "model": "mattersim-v1.0.0-1m",
-            "path": "mattersim-v1.0.0-1m",
-        },
-        {"arch": "nequip", "model_path": NEQUIP_PATH, "model": NEQUIP_PATH},
-        {"arch": "nequip", "model": NEQUIP_PATH, "path": NEQUIP_PATH},
-        {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
-        {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
-        {"arch": "sevennet", "model": SEVENNET_PATH, "path": SEVENNET_PATH},
-        {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
-        {
-            "arch": "grace",
-            "model_path": "GRACE-1L-MP-r6",
-            "model": "GRACE-1L-MP-r6",
-        },
         {
             "arch": "alignn",
             "model_path": ALIGNN_PATH / "best_model.pt",
@@ -182,6 +192,40 @@ def test_invalid_model(arch, model):
             "model": ALIGNN_PATH / "best_model.pt",
             "path": ALIGNN_PATH / "best_model.pt",
         },
+        {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
+        {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
+        {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
+        {
+            "arch": "esen",
+            "model_path": ESEN_LABEL,
+            "model": ESEN_LABEL,
+        },
+        {
+            "arch": "equiformer",
+            "model_path": EQUIFORMER_LABEL,
+            "model": EQUIFORMER_LABEL,
+        },
+        {
+            "arch": "grace",
+            "model_path": "GRACE-1L-MP-r6",
+            "model": "GRACE-1L-MP-r6",
+        },
+        {
+            "arch": "mattersim",
+            "model": "mattersim-v1.0.0-1m",
+            "path": "mattersim-v1.0.0-1m",
+        },
+        {
+            "arch": "mattersim",
+            "model_path": "mattersim-v1.0.0-1m",
+            "path": "mattersim-v1.0.0-1m",
+        },
+        {"arch": "nequip", "model_path": NEQUIP_PATH, "model": NEQUIP_PATH},
+        {"arch": "nequip", "model": NEQUIP_PATH, "path": NEQUIP_PATH},
+        {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
+        {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
+        {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
+        {"arch": "sevennet", "model": SEVENNET_PATH, "path": SEVENNET_PATH},
     ],
 )
 def test_model_model_paths(kwargs):
