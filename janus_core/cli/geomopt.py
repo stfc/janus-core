@@ -42,7 +42,7 @@ def _set_minimize_kwargs(
         Other keyword arguments to pass to geometry optimizer.
     opt_cell_lengths
         Whether to optimize cell vectors, as well as atomic positions, by setting
-        `hydrostatic_strain` in the filter function.
+        `hydrostatic_strain` in the filter.
     pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True.
@@ -113,16 +113,21 @@ def geomopt(
             rich_help_panel="Calculation",
         ),
     ] = False,
-    filter_func: Annotated[
+    filter_class: Annotated[
         str | None,
         Option(
+            "--filter",
             help=(
-                "Name of ASE filter/constraint function to use. If using "
+                "Name of ASE filter to wrap around atoms. If using "
                 "--opt-cell-lengths or --opt-cell-fully, defaults to "
                 "`FrechetCellFilter`."
             ),
             rich_help_panel="Calculation",
         ),
+    ] = None,
+    filter_func: Annotated[
+        str | None,
+        Option(help="Deprecated. Please use --filter", rich_help_panel="Calculation"),
     ] = None,
     pressure: Annotated[
         float,
@@ -199,14 +204,15 @@ def geomopt(
         Set maximum number of optimization steps to run. Default is 1000.
     opt_cell_lengths
         Whether to optimize cell vectors, as well as atomic positions, by setting
-        `hydrostatic_strain` in the filter function. Default is False.
+        `hydrostatic_strain` in the filter. Default is False.
     opt_cell_fully
         Whether to fully optimize the cell vectors, angles, and atomic positions.
         Default is False.
+    filter_class
+        Name of filter from ase.filters to wrap around atoms. If using
+        --opt-cell-lengths or --opt-cell-fully, defaults to `FrechetCellFilter`.
     filter_func
-        Name of filter function from ase.filters or ase.constraints, to apply
-        constraints to atoms. If using --opt-cell-lengths or --opt-cell-fully, defaults
-        to `FrechetCellFilter` if available, otherwise `ExpCellFilter`.
+        Deprecated. Please use `filter_class`.
     pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
@@ -292,17 +298,24 @@ def geomopt(
 
     _set_minimize_kwargs(minimize_kwargs, opt_cell_lengths, pressure)
 
+    if filter_func and filter_class:
+        raise ValueError("--filter-func is deprecated, please only use --filter")
+
     if opt_cell_fully or opt_cell_lengths:
-        # Use default filter unless filter function explicitly passed
-        opt_cell_fully_dict = {"filter_func": filter_func} if filter_func else {}
+        # Use default filter unless filter explicitly passed
+        if filter_class:
+            opt_cell_fully_dict = {"filter_class": filter_class}
+        elif filter_func:
+            opt_cell_fully_dict = {"filter_func": filter_func, "filter_class": None}
+        else:
+            opt_cell_fully_dict = {}
     else:
-        if filter_func:
+        if filter_class or filter_func:
             raise ValueError(
-                "--opt-cell-lengths or --opt-cell-fully must be set to use a filter "
-                "function"
+                "--opt-cell-lengths or --opt-cell-fully must be set to use a filter"
             )
-        # Override default filter function with None
-        opt_cell_fully_dict = {"filter_func": None}
+        # Override default filter class with None
+        opt_cell_fully_dict = {"filter_class": None}
 
     log_kwargs = {"filemode": "w"}
     if log:

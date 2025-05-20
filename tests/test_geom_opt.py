@@ -19,15 +19,15 @@ MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 test_data = [
     ("mace", "NaCl.cif", -27.046349600581266, {}),
     ("mace", "NaCl.cif", -27.046361983699768, {"fmax": 0.001}),
-    ("mace", "NaCl.cif", -27.04633922116779, {"filter_func": UnitCellFilter}),
-    ("mace", "H2O.cif", -14.051389496520015, {"filter_func": None}),
+    ("mace", "NaCl.cif", -27.04633922116779, {"filter_class": UnitCellFilter}),
+    ("mace", "H2O.cif", -14.051389496520015, {"filter_class": None}),
     (
         "mace",
         "NaCl.cif",
         -26.727162796978426,
         {
             "fmax": 0.001,
-            "filter_func": FrechetCellFilter,
+            "filter_class": FrechetCellFilter,
             "filter_kwargs": {"scalar_pressure": 5.0},
         },
     ),
@@ -282,7 +282,7 @@ def test_invalid_str_optimizer():
 
 
 def test_str_filter(tmp_path):
-    """Test setting filter function with string."""
+    """Test setting filter with string."""
     log_file = tmp_path / "opt.log"
 
     single_point = SinglePoint(
@@ -294,7 +294,7 @@ def test_str_filter(tmp_path):
     optimizer = GeomOpt(
         single_point.struct,
         fmax=0.001,
-        filter_func="UnitCellFilter",
+        filter_class="UnitCellFilter",
         log_kwargs={"filename": log_file},
     )
     optimizer.run()
@@ -306,7 +306,7 @@ def test_str_filter(tmp_path):
 
 
 def test_invalid_str_filter():
-    """Test setting invalid filter function with string."""
+    """Test setting invalid filter with string."""
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-sg.cif",
         arch="mace_mp",
@@ -314,7 +314,7 @@ def test_invalid_str_filter():
     )
 
     with pytest.raises(AttributeError):
-        GeomOpt(single_point.struct, fmax=0.001, filter_func="test")
+        GeomOpt(single_point.struct, fmax=0.001, filter_class="test")
 
 
 def test_invalid_struct():
@@ -416,3 +416,16 @@ def test_traj_kwargs_new_dir(tmp_path):
     assert traj_path.exists()
     traj = read(traj_path, index=":")
     assert len(traj) == 3
+
+
+def test_deprecation_filter_func(tmp_path):
+    """Test FutureWarning raised for model in calc_kwargs."""
+    with pytest.warns(FutureWarning, match="`filter_func` has been deprecated"):
+        geom_opt = GeomOpt(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace_mp",
+            model=MODEL_PATH,
+            fmax=0.001,
+            filter_func="UnitCellFilter",
+        )
+    assert isinstance(geom_opt.filtered_struct, UnitCellFilter)
