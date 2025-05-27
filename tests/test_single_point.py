@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import shutil
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
@@ -164,6 +164,10 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         assert energy == pytest.approx(expected_energy, rel=1e-3)
     except URLError as err:
         if "Connection timed out" in err.reason:
+            pytest.skip("Model download failed")
+        raise err
+    except HTTPError as err:
+        if "Service Unavailable" in err.msg or "Too Many Requests for url" in err.msg:
             pytest.skip("Model download failed")
         raise err
 
