@@ -138,12 +138,12 @@ def test_mlips(arch, device, kwargs):
         assert calculator.parameters["model"] is not None
     except BadZipFile:
         pytest.skip("Model download failed")
-    except URLError as err:
-        if "Connection timed out" in err.reason:
+    except HTTPError as err:  # Inherits from URLError, so check first
+        if "Service Unavailable" in err.msg or "Too Many Requests for url" in err.msg:
             pytest.skip("Model download failed")
         raise err
-    except HTTPError as err:
-        if "Service Unavailable" in err.msg or "Too Many Requests for url" in err.msg:
+    except URLError as err:
+        if "Connection timed out" in err.reason:
             pytest.skip("Model download failed")
         raise err
 
