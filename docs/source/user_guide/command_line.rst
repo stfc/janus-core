@@ -285,7 +285,7 @@ For all options, run ``janus geomopt --help``.
 Molecular dynamics
 ------------------
 
-Run an NPT molecular dynamics simulation (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field) at 300K and 1 bar for 1000 steps (1 ps, default time-step is 1 fs):
+Run an NPT molecular dynamics simulation (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field) at 300K and 1 GPa for 1000 steps (1 ps, default time-step is 1 fs):
 
 .. code-block:: bash
 
