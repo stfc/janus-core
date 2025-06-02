@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import os
 from pathlib import Path
 
 import pytest
@@ -16,6 +18,17 @@ UNITS LENGTH=A TIME=fs ENERGY=eV
 d: DISTANCE ATOMS=1,2
 PRINT ARG=d FILE=COLVAR STRIDE=1
 """
+
+
+@contextlib.contextmanager
+def cwd(path):
+    """Change working directory and return to previous on exit."""
+    prev_cwd = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)
 
 
 @pytest.fixture
@@ -47,27 +60,28 @@ def test_nvt_plumed(tmp_path, plumed_input_file):
 
     colvar_file = tmp_path / "COLVAR"
 
-    nvt = NVT(
-        struct=DATA_PATH / "benzene.xyz",
-        arch="mace_mp",
-        model=MODEL_PATH,
-        steps=5,
-        timestep=0.5,
-        temp=300.0,
-        plumed_input=plumed_input_file,
-        plumed_log=plumed_log,
-        file_prefix=tmp_path / "benzene",
-    )
+    with cwd(tmp_path):
+        nvt = NVT(
+            struct=DATA_PATH / "benzene.xyz",
+            arch="mace_mp",
+            model=MODEL_PATH,
+            steps=5,
+            timestep=0.5,
+            temp=300.0,
+            plumed_input=plumed_input_file,
+            plumed_log=plumed_log,
+            file_prefix=tmp_path / "benzene",
+        )
 
-    nvt.run()
+        nvt.run()
 
-    assert plumed_log.exists()
-    assert colvar_file.exists()
+        assert plumed_log.exists()
+        assert colvar_file.exists()
 
-    with open(colvar_file) as f:
-        lines = f.readlines()
-    assert len(lines) > 1
-    assert "d" in lines[0]
+        with open(colvar_file) as f:
+            lines = f.readlines()
+        assert len(lines) > 1
+        assert "d" in lines[0]
 
 
 def test_no_plumed_input():
@@ -79,7 +93,4 @@ def test_no_plumed_input():
         steps=5,
         plumed_input=None,
     )
-
-    output_files = nvt.output_files
-    assert "plumed_log" in output_files
-    assert output_files["plumed_log"] is None
+    assert nvt.output_files["plumed_log"] is None
