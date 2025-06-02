@@ -162,9 +162,9 @@ class MolecularDynamics(BaseCalculation):
     correlation_kwargs
         Keyword arguments to control on-the-fly correlations. Default is `None`.
     plumed_input
-        PLUMED input or path to a PLUMED input file. If provided,
-        the ASE Plumed calculator will be used to wrap the MLIP calculator.
-        Requires the 'plumed' extra to be installed. Default is None.
+        Path to a PLUMED input file. If provided, the ASE Plumed calculator will be
+        used to wrap the MLIP calculator. Requires the `plumed` extra to be installed,
+        and configured. Default is None.
     plumed_log
         Path for the PLUMED log file. Default is inferred from `file_prefix`.
     seed
@@ -345,8 +345,9 @@ class MolecularDynamics(BaseCalculation):
         correlation_kwargs
             Keyword arguments to control on-the-fly correlations. Default is `None`.
         plumed_input
-            PLUMED input script content or path to a PLUMED input file.
-            Default is None.
+            Path to a PLUMED input file. If provided, the ASE Plumed calculator will be
+            used to wrap the MLIP calculator. Requires the `plumed` extra to be
+            installed, and configured. Default is None.
         plumed_log
             Path for the PLUMED log file. Default is inferred from `file_prefix`.
         seed
@@ -497,25 +498,29 @@ class MolecularDynamics(BaseCalculation):
         # Wrap calculator with Plumed if input is provided
         if self.plumed_input:
             try:
-                import plumed
-                from ase.calculators.plumed import Plumed
-            except ImportError:
+                from ase.calculators.plumed import Plumed as PlumedCalc
+                from plumed import Plumed
+
+                # Raise runtime error if PLUMED_KERNEL environment variable not set
+                Plumed()
+            except ImportError as err:
                 raise ImportError(
                     "PLUMED Python package not found. Please install PLUMED with its "
                     "Python interface to use this feature."
-                )
+                ) from err
+            except RuntimeError as err:
+                if any("PLUMED not available" in arg for arg in err.args):
+                    raise RuntimeError(
+                        "Please ensure PLUMED_KERNEL environment variable is set"
+                    ) from err
 
-            # Read input script from file if it's a path
+            # Read input script from file
             plumed_input_path = Path(self.plumed_input)
             if not plumed_input_path.is_file():
                 raise FileNotFoundError(
                     f"PLUMED input file not found or is not a file: {plumed_input_path}"
                 )
             plumed_script = plumed_input_path.read_text(encoding="utf-8")
-            plumed_input_source = str(plumed_input_path.resolve())
-
-            # Calculate kT in ASE units (eV)
-            kT = self.temp * units.kB
 
             self.plumed_log = self._build_filename(
                 "plumed.log", self.param_prefix, filename=self.plumed_log
@@ -523,12 +528,12 @@ class MolecularDynamics(BaseCalculation):
 
             build_file_dir(self.plumed_log)
 
-            self.struct.calc = Plumed(
+            self.struct.calc = PlumedCalc(
                 calc=self.struct.calc,
                 input=plumed_script.splitlines(),
                 timestep=self.timestep,
                 atoms=self.struct,
-                kT=kT,
+                kT=self.temp * units.kB,  # kT in ASE units (eV)
                 log=str(self.plumed_log),
                 restart=self.restart,
             )
@@ -1102,7 +1107,7 @@ class MolecularDynamics(BaseCalculation):
                 / units.GPa
             )
         except (ValueError, NotImplementedError):
-            # ASE's Plumed wrapper does not implement get_stress(). 
+            # ASE's Plumed wrapper does not implement get_stress().
             # This does not affect the simulation, only statistics logging
             volume = 0.0
             pressure = 0.0
