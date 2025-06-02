@@ -129,6 +129,10 @@ def geomopt(
         str | None,
         Option(help="Deprecated. Please use --filter", rich_help_panel="Calculation"),
     ] = None,
+    constraint_func: Annotated[
+        str,
+        Option(help="Name of ASE constraint function to use."),
+    ] = None,
     pressure: Annotated[
         float,
         Option(
@@ -212,7 +216,11 @@ def geomopt(
         Name of filter from ase.filters to wrap around atoms. If using
         --opt-cell-lengths or --opt-cell-fully, defaults to `FrechetCellFilter`.
     filter_func
-        Deprecated. Please use `filter_class`.
+        Deprecated. Please use `--filter_class`.
+    constraint_func
+        Name of constraint function from ase.constraints, to apply constraints
+        to atoms. Parameters should be included as a "constraint_kwargs" dict
+        within "minimize_kwargs". Default is None.
     pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
@@ -293,6 +301,7 @@ def geomopt(
     # Check optimized structure path not duplicated
     if "filename" in write_kwargs:
         raise ValueError("'filename' must be passed through the --out option")
+
     if out:
         write_kwargs["filename"] = out
 
@@ -339,6 +348,7 @@ def geomopt(
         "symmetrize": symmetrize,
         "symmetry_tolerance": symmetry_tolerance,
         "file_prefix": file_prefix,
+        "constraint_func": constraint_func,
         **opt_cell_fully_dict,
         **minimize_kwargs,
         "write_results": True,
