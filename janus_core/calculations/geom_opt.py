@@ -5,8 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 import inspect
 from pathlib import Path
-from typing import Any, Callable
-
+from typing import Any
 import warnings
 
 from ase import Atoms, constraints, filters, units
@@ -125,10 +124,10 @@ class GeomOpt(BaseCalculation):
         filter_class: Callable | str | None = FrechetCellFilter,
         filter_func: Callable | str | None = None,
         filter_kwargs: dict[str, Any] | None = None,
-        optimizer: Callable | str = LBFGS,
-        opt_kwargs: ASEOptArgs | None = None,
         constraint_func: Callable | str | None = None,
         constraint_kwargs: dict[str, Any] | None = None,
+        optimizer: Callable | str = LBFGS,
+        opt_kwargs: ASEOptArgs | None = None,
         write_results: bool = False,
         write_kwargs: OutputKwargs | None = None,
         write_traj: bool = False,
@@ -185,6 +184,11 @@ class GeomOpt(BaseCalculation):
             Deprecated. Please use `filter_class`.
         filter_kwargs
             Keyword arguments to pass to filter_class. Default is {}.
+        constraint_func
+            Constraint function, or name of function from ase.constraints. Default is
+            None.
+        constraint_kwargs
+            Keyword arguments to pass to constraint_func. Default is {}.
         optimizer
             Optimization function, or name of function from ase.optimize. Default is
             `LBFGS`.
@@ -202,9 +206,21 @@ class GeomOpt(BaseCalculation):
             "filename" keyword is inferred from `file_prefix` if not given.
             Default is {}.
         """
-        read_kwargs, constraint_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs = (
+        (
+            read_kwargs,
+            constraint_kwargs,
+            filter_kwargs,
+            opt_kwargs,
+            write_kwargs,
+            traj_kwargs,
+        ) = list(
             none_to_dict(
-                (read_kwargs, constraint_kwargs, filter_kwargs, opt_kwargs, write_kwargs, traj_kwargs)
+                read_kwargs,
+                constraint_kwargs,
+                filter_kwargs,
+                opt_kwargs,
+                write_kwargs,
+                traj_kwargs,
             )
         )
 
@@ -220,7 +236,7 @@ class GeomOpt(BaseCalculation):
         self.filter_class = filter_class
         self.filter_kwargs = filter_kwargs
         self.constraint_func = constraint_func
-        self.constraint_kwargs = constraint_kwargs        
+        self.constraint_kwargs = constraint_kwargs
         self.optimizer = optimizer
         self.opt_kwargs = opt_kwargs
         self.write_results = write_results
@@ -312,7 +328,8 @@ class GeomOpt(BaseCalculation):
         }
 
     def _set_mandatory_constraint_kwargs(self) -> None:
-        """Inspect constraint class for mandatory arguments
+        """
+        Inspect constraint class for mandatory arguments.
 
         For now we are just looking for the "atoms" parameter of FixSymmetry
         """
@@ -369,9 +386,11 @@ class GeomOpt(BaseCalculation):
             try:
                 self.constraint_func = getattr(constraints, self.constraint_func)
             except AttributeError as e:
-                raise AttributeError(f"No such constraint: {self.constraint_func}") from e
+                raise AttributeError(
+                    f"No such constraint: {self.constraint_func}"
+                ) from e
 
-        if self.filter_class is not None and isinstance(self.filter_func, str):
+        if self.filter_class is not None and isinstance(self.filter_class, str):
             try:
                 self.filter_class = getattr(filters, self.filter_class)
             except AttributeError as e:
