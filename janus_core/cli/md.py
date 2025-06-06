@@ -137,6 +137,14 @@ def md(
     ] = 10,
     post_process_kwargs: PostProcessKwargs = None,
     correlation_kwargs: CorrelationKwargs = None,
+    plumed_input: Annotated[
+        Path | None,
+        Option(help="Path to PLUMED input file.", rich_help_panel="Calculation"),
+    ] = None,
+    plumed_log: Annotated[
+        Path | None,
+        Option(help="Path for the PLUMED log file.", rich_help_panel="Calculation"),
+    ] = None,
     seed: Annotated[
         int | None,
         Option(
@@ -410,6 +418,12 @@ def md(
         Keyword arguments to pass to post-processing. Default is None.
     correlation_kwargs
         Keyword arguments to pass for on-the-fly correlations. Default is None.
+    plumed_input
+        Path to a PLUMED input file. If provided, the ASE Plumed calculator will be
+        used to wrap the MLIP calculator. Requires the `plumed` extra to be
+        installed, and configured. Default is None.
+    plumed_log
+        Path for the PLUMED log file. Default is inferred from `file_prefix`.
     seed
         Random seed used by numpy.random and random functions, such as in Langevin.
         Default is None.
@@ -634,6 +648,8 @@ def md(
         "write_kwargs": write_kwargs,
         "post_process_kwargs": post_process_kwargs,
         "correlation_kwargs": correlation_kwargs,
+        "plumed_input": plumed_input,
+        "plumed_log": plumed_log,
         "seed": seed,
         "enable_progress_bar": progress_bar,
         "update_progress_every": update_progress_every,
