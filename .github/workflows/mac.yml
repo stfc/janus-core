@@ -24,6 +24,17 @@ jobs:
       - name: Install "all" dependencies
         run: uv sync --extra all
 
+      - name: Install PLUMED
+        uses: Iximiel/install-plumed@v1
+        id: plumed
+        continue-on-error: true
+
+      - name: Set environment variable based on plumed success
+        run: |
+          if [ "${{ steps.plumed.outcome }}" = "success" ]; then
+            echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.so" >> $GITHUB_ENV
+          fi
+
       - name: Run test suite
         env:
           # show timings of tests
