@@ -10,11 +10,16 @@ from ase.calculators.lj import LennardJones
 from ase.constraints import FixedPlane
 from ase.io import read
 import pytest
+from typer.testing import CliRunner
 
 from janus_core.calculations.md import NVT
+from janus_core.cli.janus import app
+from tests.utils import assert_log_contains
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
+
+runner = CliRunner()
 
 
 @contextlib.contextmanager
@@ -170,3 +175,41 @@ def test_atoms_struct(tmp_path):
         with open(colvar_file) as f:
             lines = f.readlines()
         assert len(lines) > 1
+
+
+def test_cli(tmp_path, plumed_input_file):
+    """Test plumed via CLI."""
+    file_prefix = tmp_path / "plumed"
+    log_path = tmp_path / "test.log"
+    plumed_log = tmp_path / "plumed.log"
+
+    with cwd(tmp_path):
+        result = runner.invoke(
+            app,
+            [
+                "md",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
+                "--model",
+                MODEL_PATH,
+                "--ensemble",
+                "nvt",
+                "--steps",
+                1,
+                "--log",
+                log_path,
+                "--file-prefix",
+                file_prefix,
+                "--no-tracker",
+                "--plumed-input",
+                plumed_input_file,
+                "--plumed-log",
+                plumed_log,
+            ],
+        )
+
+    assert result.exit_code == 0
+
+    assert_log_contains(log_path, includes=["Plumed calculator configured"])
