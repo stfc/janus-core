@@ -28,11 +28,16 @@ jobs:
         id: plumed
         continue-on-error: true
 
+      - name: Set environment variable based on plumed success
+        run: |
+          if [ "${{ steps.plumed.outcome }}" = "success" ]; then
+            echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.so" >> $GITHUB_ENV
+          fi
+
       - name: Run test suite
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-          PLUMED_KERNEL: "${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.so"
         run: uv run pytest --cov janus_core --cov-append .
 
       - name: Install updated e3nn dependencies
