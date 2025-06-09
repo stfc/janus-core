@@ -538,6 +538,9 @@ class MolecularDynamics(BaseCalculation):
                 restart=self.restart,
             )
 
+            if self.logger:
+                self.logger.info("Plumed calculator configured")
+
         # Set output file names
         self.final_file = self._build_filename(
             "final.extxyz", self.param_prefix, filename=self.final_file
