@@ -6,18 +6,15 @@ import contextlib
 import os
 from pathlib import Path
 
+from ase.calculators.lj import LennardJones
+from ase.constraints import FixedPlane
+from ase.io import read
 import pytest
 
 from janus_core.calculations.md import NVT
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
-
-PLUMED_INPUT_CONTENT = """
-UNITS LENGTH=A TIME=fs ENERGY=eV
-d: DISTANCE ATOMS=1,2
-PRINT ARG=d FILE=COLVAR STRIDE=1
-"""
 
 
 @contextlib.contextmanager
@@ -46,8 +43,13 @@ def set_env(**environ):
 @pytest.fixture
 def plumed_input_file(tmp_path):
     """Create a simple PLUMED input file for testing."""
+    plumed_input = """
+    UNITS LENGTH=A TIME=fs ENERGY=eV
+    d: DISTANCE ATOMS=1,2
+    PRINT ARG=d FILE=COLVAR STRIDE=1
+    """
     plumed_file = tmp_path / "plumed.dat"
-    plumed_file.write_text(PLUMED_INPUT_CONTENT)
+    plumed_file.write_text(plumed_input)
     return plumed_file
 
 
@@ -123,3 +125,48 @@ def test_no_plumed_env(tmp_path):
                 plumed_log="",
                 file_prefix=tmp_path / "plumed",
             )
+
+
+def test_atoms_struct(tmp_path):
+    """
+    Test passing a structure with an attached calculator.
+
+    Based on tutorial: https://github.com/Sucerquia/ASE-PLUMED_tutorial.
+    """
+    file_prefix = tmp_path / "plumed"
+    plumed_log = tmp_path / "plumed.log"
+    colvar_file = tmp_path / "COLVAR"
+
+    plumed_input = """
+    UNITS LENGTH=A TIME=fs ENERGY=eV
+    d: DISTANCE ATOMS=1,2
+    PRINT ARG=d FILE=COLVAR STRIDE=1
+    """
+    plumed_file = tmp_path / "plumed.dat"
+    plumed_file.write_text(plumed_input)
+
+    struct = read(DATA_PATH / "isomer.xyz")
+    cons = [FixedPlane(i, [0, 0, 1]) for i in range(7)]
+    struct.set_constraint(cons)
+    struct.set_masses([1, 1, 1, 1, 1, 1, 1])
+    struct.calc = LennardJones(rc=2.5, r0=3.0)
+
+    with cwd(tmp_path):
+        nvt = NVT(
+            struct=struct,
+            steps=5,
+            timestep=0.5,
+            temp=300.0,
+            plumed_input=plumed_file,
+            plumed_log=plumed_log,
+            file_prefix=file_prefix,
+        )
+
+        nvt.run()
+
+        assert plumed_log.exists()
+        assert colvar_file.exists()
+
+        with open(colvar_file) as f:
+            lines = f.readlines()
+        assert len(lines) > 1
