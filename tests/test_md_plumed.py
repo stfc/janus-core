@@ -31,6 +31,18 @@ def cwd(path):
         os.chdir(prev_cwd)
 
 
+@contextlib.contextmanager
+def set_env(**environ):
+    """Set the environment variables temporarily."""
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
+
+
 @pytest.fixture
 def plumed_input_file(tmp_path):
     """Create a simple PLUMED input file for testing."""
@@ -94,3 +106,20 @@ def test_no_plumed_input():
         plumed_input=None,
     )
     assert nvt.output_files["plumed_log"] is None
+
+
+def test_no_plumed_env(tmp_path):
+    """Test environment variable not set."""
+    with set_env(PLUMED_KERNEL=""):
+        with pytest.raises(RuntimeError):
+            NVT(
+                struct=DATA_PATH / "benzene.xyz",
+                arch="mace_mp",
+                model=MODEL_PATH,
+                steps=5,
+                timestep=0.5,
+                temp=300.0,
+                plumed_input=plumed_input_file,
+                plumed_log="",
+                file_prefix=tmp_path / "plumed",
+            )
