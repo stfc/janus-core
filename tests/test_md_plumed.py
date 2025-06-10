@@ -75,13 +75,13 @@ def test_plumed_import():
 
 def test_nvt_plumed(tmp_path, plumed_input_file):
     """Test NVT with PLUMED."""
-    plumed_log = tmp_path / "plumed.log"
-
+    file_prefix = tmp_path / "NaCl"
+    plumed_log = tmp_path / "test" / "NaCl-plumed.log"
     colvar_file = tmp_path / "COLVAR"
 
     with cwd(tmp_path):
         nvt = NVT(
-            struct=DATA_PATH / "benzene.xyz",
+            struct=DATA_PATH / "NaCl.cif",
             arch="mace_mp",
             model=MODEL_PATH,
             steps=5,
@@ -89,24 +89,25 @@ def test_nvt_plumed(tmp_path, plumed_input_file):
             temp=300.0,
             plumed_input=plumed_input_file,
             plumed_log=plumed_log,
-            file_prefix=tmp_path / "benzene",
+            file_prefix=file_prefix,
         )
 
         nvt.run()
 
         assert plumed_log.exists()
         assert colvar_file.exists()
+        assert nvt.struct.calc.istep == 6
 
         with open(colvar_file) as f:
             lines = f.readlines()
-        assert len(lines) > 1
-        assert "d" in lines[0]
+            assert all(field in lines[0] for field in ("timed"))
+            assert len(lines) > 0
 
 
 def test_no_plumed_input():
     """Test MD without PLUMED input."""
     nvt = NVT(
-        struct=DATA_PATH / "benzene.xyz",
+        struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
         steps=5,
@@ -120,7 +121,7 @@ def test_no_plumed_env(tmp_path):
     with set_env(PLUMED_KERNEL=""):
         with pytest.raises(RuntimeError):
             NVT(
-                struct=DATA_PATH / "benzene.xyz",
+                struct=DATA_PATH / "NaCl.cif",
                 arch="mace_mp",
                 model=MODEL_PATH,
                 steps=5,
@@ -128,7 +129,7 @@ def test_no_plumed_env(tmp_path):
                 temp=300.0,
                 plumed_input=plumed_input_file,
                 plumed_log="",
-                file_prefix=tmp_path / "plumed",
+                file_prefix=tmp_path / "NaCl",
             )
 
 
@@ -138,7 +139,7 @@ def test_atoms_struct(tmp_path):
 
     Based on tutorial: https://github.com/Sucerquia/ASE-PLUMED_tutorial.
     """
-    file_prefix = tmp_path / "plumed"
+    file_prefix = tmp_path / "NaCl"
     plumed_log = tmp_path / "plumed.log"
     colvar_file = tmp_path / "COLVAR"
 
@@ -171,7 +172,7 @@ def test_atoms_struct(tmp_path):
 
 def test_cli(tmp_path, plumed_input_file):
     """Test plumed via CLI."""
-    file_prefix = tmp_path / "plumed"
+    file_prefix = tmp_path / "NaCl"
     log_path = tmp_path / "test.log"
     plumed_log = tmp_path / "plumed.log"
 
@@ -205,3 +206,86 @@ def test_cli(tmp_path, plumed_input_file):
     assert result.exit_code == 0
 
     assert_log_contains(log_path, includes=["Plumed calculator configured"])
+
+
+def test_restart(tmp_path, plumed_input_file):
+    """Test restarting plumed simulation."""
+    file_prefix = tmp_path / "NaCl"
+    log_path = tmp_path / "test.log"
+    stats_path = tmp_path / "NaCl-stats.dat"
+
+    with cwd(tmp_path):
+        nvt = NVT(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+            temp=300.0,
+            steps=4,
+            restart_every=4,
+            stats_every=1,
+            file_prefix=file_prefix,
+            plumed_input=plumed_input_file,
+        )
+        nvt.run()
+
+        assert nvt.dyn.nsteps == 4
+
+        nvt_restart = NVT(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+            temp=300.0,
+            steps=8,
+            stats_every=1,
+            restart=True,
+            restart_auto=True,
+            file_prefix=file_prefix,
+            plumed_input=plumed_input_file,
+            log_kwargs={"filename": log_path},
+            track_carbon=False,
+        )
+        nvt_restart.run()
+
+    assert nvt_restart.offset == 4
+    assert nvt_restart.struct.calc.istep == 9
+
+    assert_log_contains(log_path, includes=["Plumed calculator configured"])
+
+    assert stats_path.exists()
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+    # Header, steps 0 - 4, 5 - 8 in stats
+    assert len(lines) == 10
+
+
+def test_plumed_minimise(tmp_path, plumed_input_file):
+    """Test PLUMED with minimisation before."""
+    file_prefix = tmp_path / "NaCl"
+    plumed_log = tmp_path / "NaCl-plumed.log"
+    colvar_file = tmp_path / "COLVAR"
+
+    with cwd(tmp_path):
+        nvt = NVT(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace_mp",
+            model=MODEL_PATH,
+            minimize=True,
+            minimize_kwargs={"filter_class": None},
+            steps=3,
+            timestep=0.5,
+            temp=300.0,
+            plumed_input=plumed_input_file,
+            file_prefix=file_prefix,
+        )
+
+        nvt.run()
+
+        assert plumed_log.exists()
+        assert colvar_file.exists()
+        assert nvt.struct.calc.istep == 4
+
+        with open(colvar_file) as f:
+            lines = f.readlines()
+            assert all(field in lines[0] for field in ("timed"))
+            assert len(lines) > 0
