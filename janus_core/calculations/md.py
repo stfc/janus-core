@@ -538,6 +538,11 @@ class MolecularDynamics(BaseCalculation):
                 restart=self.restart,
             )
 
+            # If restarting, positions and momenta already set to match last config
+            # Plumed calculator istep must be set too
+            if self.restart:
+                self.struct.calc.istep = self.offset
+
             if self.logger:
                 self.logger.info("Plumed calculator configured")
 
