@@ -142,14 +142,6 @@ def test_atoms_struct(tmp_path):
     plumed_log = tmp_path / "plumed.log"
     colvar_file = tmp_path / "COLVAR"
 
-    plumed_input = """
-    UNITS LENGTH=A TIME=fs ENERGY=eV
-    d: DISTANCE ATOMS=1,2
-    PRINT ARG=d FILE=COLVAR STRIDE=1
-    """
-    plumed_file = tmp_path / "plumed.dat"
-    plumed_file.write_text(plumed_input)
-
     struct = read(DATA_PATH / "isomer.xyz")
     cons = [FixedPlane(i, [0, 0, 1]) for i in range(7)]
     struct.set_constraint(cons)
@@ -162,7 +154,7 @@ def test_atoms_struct(tmp_path):
             steps=5,
             timestep=0.5,
             temp=300.0,
-            plumed_input=plumed_file,
+            plumed_input=DATA_PATH / "plumed.dat",
             plumed_log=plumed_log,
             file_prefix=file_prefix,
         )
