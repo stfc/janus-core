@@ -438,6 +438,23 @@ Additional settings for geometry optimization, such as enabling optimization of 
     janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 0 --temp-end 300 --temp-step 10 --temp-time 10 --minimize --minimize-kwargs "{'filter_kwargs': {'hydrostatic_strain' : True}}"
 
 
+Enhanced sampling
+-----------------
+
+`PLUMED <https://www.plumed.org>`_ can be used to carry out biased simulations through ``janus-core``:
+
+.. code-block:: bash
+
+    janus md --arch mace_mp --ensemble nvt --struct tests/data/NaCl.cif --steps 100 --plumed-input tests/data/plumed.dat
+
+
+In addition to the standard `Molecular dynamics`_ output files, this will also save a PLUMED log file, ``NaCl-nvt-T300.0-plumed.log``,
+and any other output files specified by the input file, such as ``COLVAR`` in this example.
+
+.. warning::
+    `Unit conversions <https://wiki.fysik.dtu.dk/ase/ase/calculators/plumed.html#units>`_ are necessary to maintain consistency with ASE.
+
+
 Equation of State
 -----------------
 
