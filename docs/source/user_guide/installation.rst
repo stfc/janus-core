@@ -61,6 +61,19 @@ Some libraries are not installed by default, but may improve performance, such a
 - ``cuEquivariance`` can be used for `CUDA accerlation of MACE <https://mace-docs.readthedocs.io/en/latest/guide/cuda_acceleration.html>`_ (with PyTorch 2.4 onwards)
 - `PyTorch implementation of DFTD3 <https://github.com/CheukHinHoJerry/torch-dftd.git>`_, which can be used by MACE calculations on GPU
 
+PLUMED
+======
+
+The `Plumed Python wrapper <https://pypi.org/project/plumed/>`_ is installable as an ``extra``.
+However, as described in the linked package description, it is necessary to additionally build and install
+the PLUMED library, and set the ``PLUMED_KERNEL`` environment variable.
+
+Further installation options are described in the `documentation <https://www.plumed.org/download>`_.
+
+.. warning::
+
+    Pre-compiled binary sources, including those available through ``conda-forge``, may not correspond to the latest release.
+    For example, there are resolved issues on MacOS that require building from source.
 
 
 MLIP Incompatibilies
