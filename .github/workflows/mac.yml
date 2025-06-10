@@ -32,7 +32,7 @@ jobs:
       - name: Set environment variable based on plumed success
         run: |
           if [ "${{ steps.plumed.outcome }}" = "success" ]; then
-            echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.so" >> $GITHUB_ENV
+            echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
           fi
 
       - name: Run test suite
