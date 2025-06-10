@@ -495,56 +495,7 @@ class MolecularDynamics(BaseCalculation):
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
-        # Wrap calculator with Plumed if input is provided
-        if self.plumed_input:
-            try:
-                from ase.calculators.plumed import Plumed as PlumedCalc
-                from plumed import Plumed
-
-                # Raise runtime error if PLUMED_KERNEL environment variable not set
-                Plumed()
-            except ImportError as err:
-                raise ImportError(
-                    "PLUMED Python package not found. Please install PLUMED with its "
-                    "Python interface to use this feature."
-                ) from err
-            except RuntimeError as err:
-                if any("PLUMED not available" in arg for arg in err.args):
-                    raise RuntimeError(
-                        "Please ensure PLUMED_KERNEL environment variable is set"
-                    ) from err
-
-            # Read input script from file
-            plumed_input_path = Path(self.plumed_input)
-            if not plumed_input_path.is_file():
-                raise FileNotFoundError(
-                    f"PLUMED input file not found or is not a file: {plumed_input_path}"
-                )
-            plumed_script = plumed_input_path.read_text(encoding="utf-8")
-
-            self.plumed_log = self._build_filename(
-                "plumed.log", self.param_prefix, filename=self.plumed_log
-            )
-
-            build_file_dir(self.plumed_log)
-
-            self.struct.calc = PlumedCalc(
-                calc=self.struct.calc,
-                input=plumed_script.splitlines(),
-                timestep=self.timestep,
-                atoms=self.struct,
-                kT=self.temp * units.kB,  # kT in ASE units (eV)
-                log=str(self.plumed_log),
-                restart=self.restart,
-            )
-
-            # If restarting, positions and momenta already set to match last config
-            # Plumed calculator istep must be set too
-            if self.restart:
-                self.struct.calc.istep = self.offset
-
-            if self.logger:
-                self.logger.info("Plumed calculator configured")
+        self._config_plumed()
 
         # Set output file names
         self.final_file = self._build_filename(
@@ -717,6 +668,53 @@ class MolecularDynamics(BaseCalculation):
 
         return total_steps
 
+    def _config_plumed(self):
+        """Wrap calculator with Plumed if input is provided."""
+        if self.plumed_input:
+            try:
+                from ase.calculators.plumed import Plumed as PlumedCalc
+                from plumed import Plumed
+
+                # Raise runtime error if PLUMED_KERNEL environment variable not set
+                Plumed()
+            except ImportError as err:
+                raise ImportError(
+                    "PLUMED Python package not found. Please install PLUMED with its "
+                    "Python interface to use this feature."
+                ) from err
+            except RuntimeError as err:
+                if any("PLUMED not available" in arg for arg in err.args):
+                    raise RuntimeError(
+                        "Please ensure PLUMED_KERNEL environment variable is set"
+                    ) from err
+
+            # Read input script from file
+            plumed_input_path = Path(self.plumed_input)
+            if not plumed_input_path.is_file():
+                raise FileNotFoundError(
+                    f"PLUMED input file not found or is not a file: {plumed_input_path}"
+                )
+            plumed_script = plumed_input_path.read_text(encoding="utf-8")
+
+            self.plumed_log = self._build_filename(
+                "plumed.log", self.param_prefix, filename=self.plumed_log
+            )
+
+            build_file_dir(self.plumed_log)
+
+            self.struct.calc = PlumedCalc(
+                calc=self.struct.calc,
+                input=plumed_script.splitlines(),
+                timestep=self.timestep,
+                atoms=self.struct,
+                kT=self.temp * units.kB,  # kT in ASE units (eV)
+                log=str(self.plumed_log),
+                restart=self.restart,
+            )
+
+            if self.logger:
+                self.logger.info("Plumed calculator configured")
+
     def _init_progress_bar(self) -> Progress:
         """
         Initialise MD progress bar.
@@ -828,6 +826,8 @@ class MolecularDynamics(BaseCalculation):
                     logger=self.logger,
                 )
 
+                self._config_plumed()
+
                 # Infer last dynamics step
                 last_stem = last_restart.stem
                 try:
@@ -859,6 +859,11 @@ class MolecularDynamics(BaseCalculation):
                 "Statistics and trajectory files must already exist to restart "
                 "simulation"
             )
+
+        # Positions and momenta already set to match last config
+        # Plumed calculator istep must be set too
+        if self.plumed_input:
+            self.struct.calc.istep = self.offset
 
     def _rotate_restart_files(self) -> None:
         """Rotate restart files."""
