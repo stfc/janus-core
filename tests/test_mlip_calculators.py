@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from zipfile import BadZipFile
 
 import pytest
@@ -138,6 +138,10 @@ def test_mlips(arch, device, kwargs):
         assert calculator.parameters["model"] is not None
     except BadZipFile:
         pytest.skip("Model download failed")
+    except HTTPError as err:  # Inherits from URLError, so check first
+        if "Service Unavailable" in err.msg or "Too Many Requests for url" in err.msg:
+            pytest.skip("Model download failed")
+        raise err
     except URLError as err:
         if "Connection timed out" in err.reason:
             pytest.skip("Model download failed")
