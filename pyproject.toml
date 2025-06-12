@@ -44,7 +44,7 @@ chgnet = [
     "chgnet == 0.4.0",
 ]
 dpa3 = [
-    "deepmd-kit",
+    "deepmd-kit == 3.1.0",
 ]
 grace = [
     "tensorpotential == 0.5.1",
@@ -274,6 +274,3 @@ conflicts = [
       { extra = "all" },
     ],
 ]
-
-[tool.uv.sources]
-deepmd-kit = { git = "https://github.com/deepmodeling/deepmd-kit.git", rev = "dpa3-alpha" }
