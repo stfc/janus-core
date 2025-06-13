@@ -40,14 +40,14 @@ For example, to install MACE, CHGNet, and SevenNet, run:
     Please refer to the :doc:`installation documentation </user_guide/installation>` for more details.
 
 
-To install all MLIPs currently compatible with MACE, run:
+To install all MLIPs and features currently compatible with MACE, run:
 
 .. code-block:: python
 
     python3 -m pip install janus-core[all]
 
 
-Currently supported extras are:
+Currently supported MLIP ``extras`` are:
 
 - ``alignn``: `ALIGNN <https://github.com/usnistgov/alignn>`_
 - ``chgnet``: `CHGNet <https://github.com/CederGroupHub/chgnet/>`_
@@ -65,6 +65,16 @@ Currently supported extras are:
 
     ``orb`` and ``mattersim`` are not currently compatible with Windows natively,
     but can be installed and run via Windows Subsystem for Linux.
+
+
+Additional features can also be enabled as ``extras``:
+
+- ``visualise``: `WEAS Widget <https://github.com/superstar54/weas-widget>`_
+- ``plumed``: `PLUMED <https://www.plumed.org>`_
+
+.. note::
+
+    PLUMED requires further installation steps, described in the :doc:`installation documentation </user_guide/installation/>`.
 
 
 ``extras`` are also listed in `pyproject.toml <https://github.com/stfc/janus-core/blob/main/pyproject.toml>`_ under ``[project.optional-dependencies]``.

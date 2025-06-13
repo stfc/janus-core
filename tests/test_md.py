@@ -636,7 +636,7 @@ def test_rotate_restart(tmp_path):
 
 
 def test_atoms_struct(tmp_path):
-    """Test restarting NVT molecular dynamics."""
+    """Test passing a structure with an attached calculator."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"

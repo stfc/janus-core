@@ -110,7 +110,7 @@ Current and planned features include:
   - MACE
 - [x] Data preprocessing
   - MACE
-- [ ] Rare events simulations
+- [x] Rare events simulations
   - PLUMED
 
 

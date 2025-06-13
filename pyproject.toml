@@ -59,6 +59,9 @@ nequip = [
 orb = [
     "orb-models == 0.5.4; sys_platform != 'win32'",
 ]
+plumed = [
+    "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
+]
 sevennet = [
     "sevenn == 0.10.3",
 ]
@@ -72,6 +75,7 @@ all = [
     "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
+    "janus-core[plumed]",
     "janus-core[sevennet]",
     "janus-core[visualise]",
 ]

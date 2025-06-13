@@ -7,7 +7,7 @@ jobs:
   tests:
     runs-on: [self-hosted, macOS]
     if: github.repository == 'stfc/janus-core'
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       matrix:
         python-version: ["3.10","3.11","3.12"]
@@ -23,6 +23,17 @@ jobs:
 
       - name: Install "all" dependencies
         run: uv sync --extra all
+
+      - name: Install PLUMED
+        uses: Iximiel/install-plumed@v1
+        id: plumed
+        continue-on-error: true
+
+      - name: Set environment variable based on plumed success
+        run: |
+          if [ "${{ steps.plumed.outcome }}" = "success" ]; then
+            echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
+          fi
 
       - name: Run test suite
         env:
