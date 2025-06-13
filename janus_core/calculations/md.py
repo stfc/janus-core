@@ -1215,7 +1215,7 @@ class MolecularDynamics(BaseCalculation):
                 "ascii",
                 file=stats_file,
                 units=self.stats_units,
-                **{key: () for key in self.stats_units},
+                **dict.fromkeys(self.stats_units, ()),
             )
 
     def _write_stats_file(self) -> None:
