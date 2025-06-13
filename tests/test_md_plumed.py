@@ -23,7 +23,7 @@ runner = CliRunner()
 
 
 @contextlib.contextmanager
-def cwd(path):
+def chdir(path):
     """Change working directory and return to previous on exit."""
     prev_cwd = Path.cwd()
     os.chdir(path)
@@ -79,7 +79,7 @@ def test_nvt_plumed(tmp_path, plumed_input_file):
     plumed_log = tmp_path / "test" / "NaCl-plumed.log"
     colvar_file = tmp_path / "COLVAR"
 
-    with cwd(tmp_path):
+    with chdir(tmp_path):
         nvt = NVT(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace_mp",
@@ -100,7 +100,7 @@ def test_nvt_plumed(tmp_path, plumed_input_file):
 
         with open(colvar_file) as f:
             lines = f.readlines()
-            assert all(field in lines[0] for field in ("timed"))
+            assert all(field in lines[0] for field in ("time", "d"))
             assert len(lines) > 0
 
 
@@ -146,10 +146,10 @@ def test_atoms_struct(tmp_path):
     struct = read(DATA_PATH / "isomer.xyz")
     cons = [FixedPlane(i, [0, 0, 1]) for i in range(7)]
     struct.set_constraint(cons)
-    struct.set_masses([1, 1, 1, 1, 1, 1, 1])
+    struct.set_masses([1] * 7)
     struct.calc = LennardJones(rc=2.5, r0=3.0)
 
-    with cwd(tmp_path):
+    with chdir(tmp_path):
         nvt = NVT(
             struct=struct,
             steps=5,
@@ -165,8 +165,7 @@ def test_atoms_struct(tmp_path):
         assert plumed_log.exists()
         assert colvar_file.exists()
 
-        with open(colvar_file) as f:
-            lines = f.readlines()
+        lines = colvar_file.read_text().splitlines()
         assert len(lines) > 1
 
 
@@ -176,7 +175,7 @@ def test_cli(tmp_path, plumed_input_file):
     log_path = tmp_path / "test.log"
     plumed_log = tmp_path / "plumed.log"
 
-    with cwd(tmp_path):
+    with chdir(tmp_path):
         result = runner.invoke(
             app,
             [
@@ -214,7 +213,7 @@ def test_restart(tmp_path, plumed_input_file):
     log_path = tmp_path / "test.log"
     stats_path = tmp_path / "NaCl-stats.dat"
 
-    with cwd(tmp_path):
+    with chdir(tmp_path):
         nvt = NVT(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
@@ -265,7 +264,7 @@ def test_plumed_minimise(tmp_path, plumed_input_file):
     plumed_log = tmp_path / "NaCl-plumed.log"
     colvar_file = tmp_path / "COLVAR"
 
-    with cwd(tmp_path):
+    with chdir(tmp_path):
         nvt = NVT(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace_mp",
@@ -287,5 +286,5 @@ def test_plumed_minimise(tmp_path, plumed_input_file):
 
         with open(colvar_file) as f:
             lines = f.readlines()
-            assert all(field in lines[0] for field in ("timed"))
+            assert all(field in lines[0] for field in ("time", "d"))
             assert len(lines) > 0

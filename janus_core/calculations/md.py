@@ -687,6 +687,7 @@ class MolecularDynamics(BaseCalculation):
                     raise RuntimeError(
                         "Please ensure PLUMED_KERNEL environment variable is set"
                     ) from err
+                raise
 
             # Read input script from file
             plumed_input_path = Path(self.plumed_input)
