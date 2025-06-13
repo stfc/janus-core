@@ -12,7 +12,7 @@ from ase.io import read
 import pytest
 from typer.testing import CliRunner
 
-from janus_core.calculations.md import NVT
+from janus_core.calculations.md import NPH, NPT, NPT_MTK, NVE, NVT, NVT_CSVR, NVT_NH
 from janus_core.cli.janus import app
 from tests.utils import assert_log_contains
 
@@ -73,14 +73,15 @@ def test_plumed_import():
             pytest.skip("PLUMED not configured")
 
 
-def test_nvt_plumed(tmp_path, plumed_input_file):
+@pytest.mark.parametrize("ensemble", (NVT, NVE, NVT_NH, NVT_CSVR))
+def test_md_plumed(tmp_path, plumed_input_file, ensemble):
     """Test NVT with PLUMED."""
     file_prefix = tmp_path / "NaCl"
     plumed_log = tmp_path / "test" / "NaCl-plumed.log"
     colvar_file = tmp_path / "COLVAR"
 
     with chdir(tmp_path):
-        nvt = NVT(
+        md = ensemble(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace_mp",
             model=MODEL_PATH,
@@ -92,11 +93,11 @@ def test_nvt_plumed(tmp_path, plumed_input_file):
             file_prefix=file_prefix,
         )
 
-        nvt.run()
+        md.run()
 
         assert plumed_log.exists()
         assert colvar_file.exists()
-        assert nvt.struct.calc.istep == 6
+        assert md.struct.calc.istep == 6
 
         with open(colvar_file) as f:
             lines = f.readlines()
@@ -288,3 +289,24 @@ def test_plumed_minimise(tmp_path, plumed_input_file):
             lines = f.readlines()
             assert all(field in lines[0] for field in ("time", "d"))
             assert len(lines) > 0
+
+
+@pytest.mark.parametrize("ensemble", (NPT, NPH, NPT_MTK))
+def test_plumed_invalid_ensemble(tmp_path, plumed_input_file, ensemble):
+    """Test error raised for incompatible ensembles."""
+    file_prefix = tmp_path / "NaCl"
+    plumed_log = tmp_path / "test" / "NaCl-plumed.log"
+
+    with chdir(tmp_path):
+        with pytest.raises(NotImplementedError):
+            ensemble(
+                struct=DATA_PATH / "NaCl.cif",
+                arch="mace_mp",
+                model=MODEL_PATH,
+                steps=5,
+                timestep=0.5,
+                temp=300.0,
+                plumed_input=plumed_input_file,
+                plumed_log=plumed_log,
+                file_prefix=file_prefix,
+            )
