@@ -671,6 +671,9 @@ class MolecularDynamics(BaseCalculation):
     def _config_plumed(self):
         """Wrap calculator with Plumed if input is provided."""
         if self.plumed_input:
+            if isinstance(self, NPT | NPH | NPT_MTK):
+                raise NotImplementedError("Plumed calculator does not implement stress")
+
             try:
                 from ase.calculators.plumed import Plumed as PlumedCalc
                 from plumed import Plumed
