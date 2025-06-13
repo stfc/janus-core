@@ -1,0 +1,73 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+ensemble: npt-mtk
+struct: "tests/data/NaCl.cif"
+steps: 100
+timestep: 0.1
+temp: 100
+equil_steps: 100
+minimize: True
+minimize_every: 50
+minimize_kwargs:
+  opt_kwargs:
+    maxstep: 0.1
+rescale_velocities: True
+remove_rot: True
+rescale_every: 50
+
+post_process_kwargs:
+  rdf_compute: True
+correlation_kwargs:
+  vaf:
+    a: Velocity
+    points: 250
+  saf:
+    a: Stress
+    a_kwargs: {'components': ['xy', 'yz', 'zx']}
+    points: 250
+plumed_input: null
+plumed_log: null
+
+pressure: 1
+thermostat_time: 100
+barostat_time: 1000
+thermostat_chain: 3
+barostat_chain: 3
+thermostat_substeps: 1
+barostat_substeps: 1
+
+temp_start: 0
+temp_end: 100
+temp_step: 10
+temp_time: 1
+
+restart: False
+restart_auto: True
+restart_stem: npt-mtk-restart
+restart_every: 1000
+rotate_restart: True
+restarts_to_keep: 2
+
+final_file: npt-mtk-final.extxyz
+stats_file: npt-mtk-stats.dat
+stats_every: 100
+traj_file: npt-mtk-traj.extxyz
+traj_append: False
+traj_start: 10
+traj_every: 100
+
+file_prefix: NaCl
+read_kwargs:
+  index: "0"
+write_kwargs:
+  invalidate_calc: True
+
+log: npt-mtk-log.yml
+summary: npt-mtk-summary.yml
+tracker: False
+progress_bar: True
+update_progress_every: 10

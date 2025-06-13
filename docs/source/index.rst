@@ -17,6 +17,7 @@ Welcome to janus-core's documentation!
    getting_started/getting_started
    user_guide/index
    tutorials/index
+   examples/index
    developer_guide/index
    API documentation <apidoc/janus_core>
 

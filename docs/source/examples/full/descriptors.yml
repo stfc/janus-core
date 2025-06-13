@@ -1,0 +1,22 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+struct: "tests/data/NaCl.cif"
+invariants_only: True
+calc_per_element: False
+calc_per_atom: True
+out: NaCl-descriptors.extxyz
+
+file_prefix: NaCl
+read_kwargs:
+  index: ":"
+write_kwargs:
+  invalidate_calc: False
+
+log: descriptors-log.yml
+summary: descriptors-summary.yml
+tracker: False
+progress_bar: True

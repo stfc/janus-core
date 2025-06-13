@@ -1,0 +1,60 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+ensemble: nve
+struct: "tests/data/NaCl.cif"
+steps: 100
+timestep: 0.1
+temp: 100
+equil_steps: 100
+minimize: True
+minimize_every: 50
+minimize_kwargs:
+  opt_kwargs:
+    maxstep: 0.1
+rescale_velocities: True
+remove_rot: True
+rescale_every: 50
+
+post_process_kwargs:
+  rdf_compute: True
+correlation_kwargs:
+  vaf:
+    a: Velocity
+    points: 250
+  saf:
+    a: Stress
+    a_kwargs: {'components': ['xy', 'yz', 'zx']}
+    points: 250
+plumed_input: null
+plumed_log: null
+
+restart: False
+restart_auto: True
+restart_stem: nve-restart
+restart_every: 1000
+rotate_restart: True
+restarts_to_keep: 2
+
+final_file: nve-final.extxyz
+stats_file: nve-stats.dat
+stats_every: 100
+traj_file: nve-traj.extxyz
+traj_append: False
+traj_start: 10
+traj_every: 100
+
+file_prefix: NaCl
+read_kwargs:
+  index: "0"
+write_kwargs:
+  invalidate_calc: True
+
+log: nve-log.yml
+summary: nve-summary.yml
+tracker: False
+progress_bar: True
+update_progress_every: 10

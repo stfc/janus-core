@@ -1,0 +1,35 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+struct: "tests/data/NaCl.cif"
+optimizer: FIRE
+fmax: 0.0005
+steps: 100
+opt_cell_lengths: False
+opt_cell_fully: True
+filter_class: UnitCellFilter
+pressure: 0.0001
+symmetrize: True
+symmetry_tolerance: 0.001
+out: NaCl-opt.extxyz
+write_traj: True
+minimize_kwargs:
+  filter_kwargs:
+    constant_volume: True
+  traj_kwargs:
+    invalidate_calc: True
+  opt_kwargs:
+    maxstep: 0.1
+
+file_prefix: NaCl
+read_kwargs:
+  index: "0"
+write_kwargs:
+  invalidate_calc: True
+
+log: geomopt-log.yml
+summary: geomopt-summary.yml
+tracker: False
