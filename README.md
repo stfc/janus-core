@@ -98,7 +98,7 @@ Current and planned features include:
   - NVE
   - NVT (Langevin(Eijnden/Ciccotti flavour) and Nosé-Hoover (Melchionna flavour))
   - NPT (Nosé-Hoover (Melchiona flavour))
-- [x] Nudge Elastic Band
+- [x] Nudged Elastic Band
 - [x] Phonons
   - Phonopy
 - [x] Equation of State
