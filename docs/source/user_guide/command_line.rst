@@ -243,7 +243,7 @@ By default, all structures in a trajectory file will be read, but specific struc
 
 .. code-block:: bash
 
-    janus singlepoint --struct tests/data/benzene-traj.xyz --read-kwargs "{'index': 0}"
+    janus singlepoint --struct tests/data/benzene-traj.xyz --arch mace_mp --read-kwargs "{'index': 0}"
 
 
 For all options, run ``janus singlepoint --help``.
@@ -305,7 +305,7 @@ Additional options may be specified. For example:
 
 .. code-block:: bash
 
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1000 --timestep 0.5 --temp 300 --minimize --minimize-every 100 --rescale-velocities --remove-rot --rescale-every 100 --equil-steps 200
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --steps 1000 --timestep 0.5 --temp 300 --minimize --minimize-every 100 --rescale-velocities --remove-rot --rescale-every 100 --equil-steps 200
 
 
 This performs an NVT molecular dynamics simulation at 300K for 1000 steps (0.5 ps), including performing geometry optimization, rescaling velocities, and removing rotation,
@@ -314,7 +314,7 @@ both before beginning dynamics and at steps 100 and 200 of the simulation.
 
 .. code-block:: bash
 
-    janus md --ensemble nve --struct tests/data/NaCl.cif --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.extxyz" --stats-every 10 --stats-file "example-statistics.dat"
+    janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 200 --temp 300 --traj-start 100 --traj-every 10 --traj-file "example-trajectory.extxyz" --stats-every 10 --stats-file "example-statistics.dat"
 
 
 This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps), saving the trajectory every 10 steps after the first 100, and the thermodynamical statistics every 10 steps,
@@ -326,8 +326,8 @@ For example:
 
 .. code-block:: bash
 
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1200 --stats-every 10 --traj-every 100 --restart-every 1000
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --steps 1200 --stats-every 10 --traj-every 100 --restart
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --steps 1200 --stats-every 10 --traj-every 100 --restart-every 1000
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --steps 2200 --stats-every 10 --traj-every 100 --restart
 
 will create, then restart from, ``NaCl-npt-T300.0-p1.0-res-1000.extxyz``,
 running an additional 1000 steps, and appending the statistics and trajectory files created by the first command.
@@ -350,7 +350,7 @@ To compute the VAF across all atoms from the command line the following options 
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 1000 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_start': 10, 'vaf_stop': None, 'vaf_step': 2}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 1000 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_start': 10, 'vaf_stop': None, 'vaf_step': 2}"
 
 In this case a file ``NaCl-nve-T300.0-vaf.dat`` would be created containing correlation values and lag times. The file will contain 45 correlation values with an implied time step of 20 fs. That is starting at time step 100 and correlating every 20 steps.
 
@@ -360,7 +360,7 @@ To compute partial VAFs of Na and Cl the following kwargs may be passed:
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_atoms': (('Na',), ('Cl',)), 'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat')}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --traj-every 10 --post-process-kwargs "{'vaf_compute': True, 'vaf_atoms': (('Na',), ('Cl',)), 'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat')}"
 
 Where ``'vaf_atoms'`` is a ``Sequence`` of ``Sequence`` of element names (or atom indices) included in each VAF. The output files must also be specified in the case of multiple VAFs, by default defined relative to the working directory.
 
@@ -368,7 +368,7 @@ Computing the RDF is similar, for example:
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --traj-every 10 --post-process-kwargs "{'rdf_compute': True, 'rdf_rmax': 2.0, 'rdf_elements': ('Na', 'Cl'), 'rdf_by_elements': True}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --traj-every 10 --post-process-kwargs "{'rdf_compute': True, 'rdf_rmax': 2.0, 'rdf_elements': ('Na', 'Cl'), 'rdf_by_elements': True}"
 
 will compute the RDFs for ``Na`` and ``Cl`` atoms. Seperately for each paring, up to a maximum cutoff distance of ``2.0`` Angstroms. These will be written to three seperate files ``NaCl-nve-T300.0-Na_Na-rdf.dat``, ``NaCl-nve-T300.0-Cl_Cl-rdf.dat``, and ``NaCl-nve-T300.0-Na_Cl-rdf.dat``. Setting ``'rdf_by_elements': False`` will generate one RDF of all atoms saved to ``NaCl-nve-T300.0-rdf.dat``.
 
@@ -381,7 +381,7 @@ Alongside post-processing, correlations may be calculated during MD. This means 
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'correlation_frequency': 2}}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'correlation_frequency': 2}}"
 
 This would result in the file ```janus_results/NaCl-nve-T300.0-cor.dat``` containing the combined VAF for Na and Cl atoms correlated every other step, meaning 50 correlation lag times.
 
@@ -391,7 +391,7 @@ Correlation observables may also specify their own keyword arguments. For exampl
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --correlation-kwargs "{'saf': {'a': 'Stress', 'points': 100, 'a_kwargs': {'components': ['xy', 'yz', 'zx']}}}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --correlation-kwargs "{'saf': {'a': 'Stress', 'points': 100, 'a_kwargs': {'components': ['xy', 'yz', 'zx']}}}"
 
 Resulting in the stress auto-correlation function :math:`\frac{1}{3}(\langle\sigma_{xy}\sigma_{xy}\rangle+\langle\sigma_{yz}\sigma_{yz}\rangle+\langle\sigma_{zx}\sigma_{zx}\rangle)`, calculated every step for 100 correlation lag times.
 
@@ -399,7 +399,7 @@ The Velocity observable may also be computed over specific components (it defaul
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'a_kwargs': {'atoms_slice': (0, None, 2)}}}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'a_kwargs': {'atoms_slice': (0, None, 2)}}}"
 
 Heating
 -------
@@ -408,7 +408,7 @@ Run an NVT heating simultation from 20K to 300K in steps of 20K, with 10fs at ea
 
 .. code-block:: bash
 
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10
 
 
 The produced final, statistics, and trajectory files will indicate the heating range:
@@ -423,7 +423,7 @@ MD can also be carried out after heating using the same options as described in 
 
 .. code-block:: bash
 
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10 --steps 1000 --temp 300
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --temp-start 20 --temp-end 300 --temp-step 20 --temp-time 10 --steps 1000 --temp 300
 
 
 This performs the same initial heating, before running a further 1000 steps (1 ps) at 300K.
@@ -435,7 +435,7 @@ Additional settings for geometry optimization, such as enabling optimization of 
 
 .. code-block:: bash
 
-    janus md --ensemble nvt --struct tests/data/NaCl.cif --temp-start 0 --temp-end 300 --temp-step 10 --temp-time 10 --minimize --minimize-kwargs "{'filter_kwargs': {'hydrostatic_strain' : True}}"
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --temp-start 0 --temp-end 300 --temp-step 10 --temp-time 10 --minimize --minimize-kwargs "{'filter_kwargs': {'hydrostatic_strain' : True}}"
 
 
 Enhanced sampling
@@ -445,7 +445,7 @@ Enhanced sampling
 
 .. code-block:: bash
 
-    janus md --arch mace_mp --ensemble nvt --struct tests/data/NaCl.cif --steps 100 --plumed-input tests/data/plumed.dat
+    janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --plumed-input tests/data/plumed.dat
 
 
 In addition to the standard `Molecular dynamics`_ output files, this will also save a PLUMED log file, ``NaCl-nvt-T300.0-plumed.log``,
@@ -462,7 +462,7 @@ Fit the equation of state for a structure (using the `MACE-MP <https://github.co
 
 .. code-block:: bash
 
-    janus eos --struct tests/data/NaCl.cif --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --arch mace_mp --model small
+    janus eos --struct tests/data/NaCl.cif --arch mace_mp --no-minimize --min-volume 0.9 --max-volume 1.1 --n-volumes 9 --model small
 
 
 This will save the energies and volumes for nine lattice constants in ``NaCl-eos-raw.dat``, and the fitted minimum energy, volume, and bulk modulus in ``NaCl-eos-fit.dat``,
@@ -473,7 +473,7 @@ Optimization at constant volume for all generated structures can also be perform
 
 .. code-block:: bash
 
-    janus eos --struct tests/data/NaCl.cif --minimize-all --fmax 0.0001
+    janus eos --struct tests/data/NaCl.cif --arch mace_mp --minimize-all --fmax 0.0001
 
 
 For all options, run ``janus eos --help``.
@@ -486,7 +486,7 @@ Calculate phonons with a 2x2x2 supercell, after geometry optimization (using the
 
 .. code-block:: bash
 
-    janus phonons --struct tests/data/NaCl.cif --supercell "2 2 2" --minimize --arch mace_mp --model small
+    janus phonons --struct tests/data/NaCl.cif --arch mace_mp --supercell "2 2 2" --minimize --model small
 
 
 This will save the Phonopy parameters, including displacements and force constants, to ``NaCl-phonopy.yml`` and ``NaCl-force_constants.hdf5``,
@@ -497,7 +497,7 @@ and save the results to a compressed yaml file, ``NaCl-auto_bands.yml.xz``:
 
 .. code-block:: bash
 
-    janus phonons --struct tests/data/NaCl.cif --supercell "2 2 2" --minimize --arch mace_mp --model small --bands
+    janus phonons --struct tests/data/NaCl.cif --arch mace_mp --supercell "2 2 2" --minimize --bands --model small
 
 
 If you need eigenvectors and group velocities written, add the ``--write-full`` option. This will generate a much larger file, but can be used to visualise phonon modes.
@@ -506,7 +506,7 @@ Further calculations, including thermal properties, DOS, and PDOS, can also be c
 
 .. code-block:: bash
 
-    janus phonons --struct tests/data/NaCl.cif --supercell "2 3 4" --dos --pdos --thermal --temp-start 0 --temp-end 300 --temp-step 50
+    janus phonons --struct tests/data/NaCl.cif --arch mace_mp --supercell "2 3 4" --dos --pdos --thermal --temp-min 0 --temp-max 300 --temp-step 50
 
 
 This will create additional output files: ``NaCl-thermal.dat`` for the thermal properties (heat capacity, entropy, and free energy)
@@ -529,7 +529,7 @@ but band paths can also be specified explicitly using the ``--paths`` option to 
 
 .. code-block:: bash
 
-    janus phonons --struct tests/data/NaCl.cif --bands --plot-to-file --paths tests/data/paths.yml
+    janus phonons --struct tests/data/NaCl.cif --arch mace_mp --bands --plot-to-file --paths tests/data/paths.yml
 
 
 This will save the results in a compressed yaml file, ``NaCl-bands.yml.xz``, as well as the generated plot, ``NaCl-bands.svg``.
@@ -603,7 +603,7 @@ Run the Nudged Elastic Band method (using the `MACE-MP <https://github.com/ACEsu
 
 .. code-block:: bash
 
-    janus neb --init-struct tests/data/N2.xyz --final-struct tests/data/2N.xyz --minimize
+    janus neb --init-struct tests/data/N2.xyz --final-struct tests/data/2N.xyz --arch mace_mp --minimize
 
 
 This will use ASE's built-in `interpolation <https://wiki.fysik.dtu.dk/ase/ase/neb.html#interpolation>`_
@@ -618,7 +618,7 @@ this can be passed instead of the initial and final structures:
 
 .. code-block:: bash
 
-    janus neb  --neb-structs tests/data/N2-neb-images.xyz
+    janus neb --neb-structs tests/data/N2-neb-images.xyz --arch mace_mp
 
 
 Additional options include using `pymatgen to interpolate <https://pymatgen.org/pymatgen.core.html#pymatgen.core.structure.IStructure.interpolate>`_,
@@ -689,7 +689,7 @@ The mean descriptor per element can also be calculated, and all descriptors, rat
 
 .. code-block:: bash
 
-    janus descriptors --struct tests/data/NaCl.cif --no-invariants-only --calc-per-element
+    janus descriptors --struct tests/data/NaCl.cif --arch mace_mp --no-invariants-only --calc-per-element
 
 
 This will generate the same output files, but additional labels (``mace_mp_Cl_descriptor`` and ``mace_mp_Na_descriptor``) will be saved in ``NaCl-descriptors.extxyz``.
