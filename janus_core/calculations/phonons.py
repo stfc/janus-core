@@ -436,9 +436,7 @@ class Phonons(BaseCalculation):
         return {
             "log": self.log_kwargs["filename"] if self.logger else None,
             "params": self.phonopy_file if self.write_results else None,
-            "force_constants": (
-                self.force_consts_file if self.force_consts_to_hdf5 else None
-            ),
+            "force_constants": (self.force_consts_file if self.hdf5 else None),
             "bands": (
                 self.bands_file
                 if self.write_results and "bands" in self.calcs
