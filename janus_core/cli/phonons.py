@@ -391,7 +391,7 @@ def phonons(
         "temp_min": temp_min,
         "temp_max": temp_max,
         "temp_step": temp_step,
-        "force_consts_to_hdf5": hdf5,
+        "hdf5": hdf5,
         "plot_to_file": plot_to_file,
         "write_results": True,
         "write_full": write_full,
