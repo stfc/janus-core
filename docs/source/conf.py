@@ -128,9 +128,8 @@ html_logo = "images/janus-core.png"
 html_theme_options = {
     "source_repository": "https://github.com/stfc/janus-core/",
     "source_branch": "main",
-    "source_directory": "docs/",
+    "source_directory": "docs/source",
 }
-
 
 # Add any paths that contain custom themes here, relative to this directory.
 # ~ html_theme_path = ["."]
