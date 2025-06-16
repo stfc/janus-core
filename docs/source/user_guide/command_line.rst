@@ -381,7 +381,7 @@ Alongside post-processing, correlations may be calculated during MD. This means 
 
 .. code-block:: bash
 
-   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'correlation_frequency': 2}}"
+   janus md --ensemble nve --struct tests/data/NaCl.cif --arch mace_mp --steps 100 --correlation-kwargs "{'vaf': {'a': 'Velocity', 'points': 100, 'update_frequency': 2}}"
 
 This would result in the file ```janus_results/NaCl-nve-T300.0-cor.dat``` containing the combined VAF for Na and Cl atoms correlated every other step, meaning 50 correlation lag times.
 
