@@ -377,3 +377,240 @@ For comparison the :class:`janus_core.processing.observables.Velocity` built-in'
 
     def __call__(self, atoms: Atoms) -> list[float]:
         return atoms.get_velocities()[self.atoms_slice, :][:, self._indices].flatten()
+
+
+Deprecating a parameter
+=======================
+
+When deprecating a parameter, we aim to include a warning for at least one release cycle
+before removing the original parameter, to minimise the impact on users.
+
+This deprecation period will be extended following the release of v1.
+
+Deprecation should be handled for both the CLI and Python interfaces,
+as described below for  the requirements in renaming ``model_path`` to ``model``,
+as well as renaming ``filter_func`` to ``filter_class`` when these requirements differ.
+
+
+Python interface
+----------------
+
+1. Update the parameters.
+
+In addition to adding the new parameter, the old parameter default should be changed to ``None``:
+
+.. code-block:: python
+
+    def __init__(
+        self,
+        ...
+        model: PathLike | None = None,
+        model_path: PathLike | None = None,
+        ...
+        filter_func: Callable | str | None = None,
+        filter_kwargs: dict[str, Any] | None = None,
+    )
+
+All references to the old paramter must be updated, which may include cases where separate calculations interact:
+
+.. code-block:: python
+
+    self.minimize_kwargs.setdefault("filter_class", None)
+
+
+2. Handle the duplicated parameters.
+
+If both are specifed, we should raise an error if possible:
+
+.. code-block:: python
+
+    if model_path:
+        # `model`` is a new parameter, so there is no reason to be using both
+        if model:
+            raise ValueError(
+                "`model` has replaced `model_path`. Please only use `model`"
+            )
+        self.model = model_path
+
+
+If the new parameter's default is not ``None``, it's usually acceptable to allow both,
+prefering the old option, as this is only not ``None`` if it has been set explicitly:
+
+.. code-block:: python
+
+        if filter_func:
+            filter_class = filter_func
+
+
+3. Raise a ``FutureWarning`` if the old parameter is set.
+
+This usually needs to be later than the duplicate parameters are handled,
+to ensure logging has been set up:
+
+.. code-block:: python
+
+    if model_path:
+        warn(
+            "`model_path` has been deprecated. Please use `model`.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
+
+4. Update the parameter docstrings:
+
+.. code-block:: python
+
+    """"
+    Parameters
+    ----------
+    ...
+    model
+        MLIP model label, path to model, or loaded model. Default is `None`.
+    model_path
+        Deprecated. Please use `model`.
+    ...
+    """"
+
+
+5. Test that the old option still correctly sets the new parameter.
+
+This should also check that a ``FutureWarning`` is raised:
+
+.. code-block:: python
+
+    def test_deprecation_model_path():
+        """Test FutureWarning raised for model_path."""
+        skip_extras("mace")
+
+        with pytest.warns(FutureWarning, match="`model_path` has been deprecated"):
+            sp = SinglePoint(
+                arch="mace_mp",
+                model_path=MACE_PATH,
+                struct=DATA_PATH / "NaCl.cif",
+            )
+
+        assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
+
+
+6. Replace the old option in tests and documentation, including:
+
+- README
+- Python user guide
+- Python tutorial notebooks
+- Python tests
+
+
+Command line
+------------
+
+1. Add the new parameter:
+
+.. code-block:: python
+
+    Model = Annotated[
+        str | None,
+        Option(
+            help="MLIP model name, or path to model.", rich_help_panel="MLIP calculator"
+        ),
+    ]
+
+2. Add the ``deprecated_option`` callback to the old parameter,
+which prints a warning if it is used, and hide the option:
+
+.. code-block:: python
+
+    from janus_core.cli.utils import deprecated_option
+
+    ModelPath = Annotated[
+        str | None,
+        Option(
+            help="Deprecated. Please use --model",
+            rich_help_panel="MLIP calculator",
+            callback=deprecated_option,
+            hidden=True,
+        ),
+    ]
+
+3. Update the docstrings, with a deprecation note for consistency:
+
+.. code-block:: python
+
+    """
+    Parameters
+    ----------
+    ...
+    model
+        Path to MLIP model or name of model. Default is `None`.
+    model_path
+        Deprecated. Please use `model`.
+    ...
+    """"
+
+
+4. Handle the duplicate values.
+
+If the parameter is passed directly to the Python interface, and no other parameters depend on it,
+it may be sufficient to pass both through and handle it within the Python interface, as is the case for ``model_path``:
+
+.. code-block:: python
+
+    singlepoint_kwargs = {
+        ...
+        "model": model,
+        "model_path": model_path,
+        ...
+    }
+
+
+However, it may be necessary to ensure only one value has been specified before the Python interface is reached,
+as is the case for ``filter_func`` in ``geomopt``:
+
+.. code-block:: python
+
+    if filter_func and filter_class:
+        raise ValueError("--filter-func is deprecated, please only use --filter")
+
+
+5. Test that the old option still correctly sets the new parameter.
+
+Ideally, this would also check that a ``FutureWarning`` is raised,
+but capture of this is inconsistent during tests, so we do not currently test against this:
+
+.. code-block:: python
+
+    def test_model_path_deprecated(tmp_path):
+        """Test model_path sets model."""
+        file_prefix = tmp_path / "NaCl"
+        results_path = tmp_path / "NaCl-results.extxyz"
+        log_path = tmp_path / "test.log"
+
+        result = runner.invoke(
+            app,
+            [
+                "singlepoint",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
+                "--model-path",
+                MACE_PATH,
+                "--log",
+                log_path,
+                "--file-prefix",
+                file_prefix,
+                "--no-tracker",
+            ],
+        )
+        assert result.exit_code == 0
+
+        atoms = read(results_path)
+        assert "model" in atoms.info
+        assert atoms.info["model"] == str(MACE_PATH.as_posix())
+
+6. Replace the old CLI option in tests and documentation, including:
+
+- README
+- CLI user guide
+- CLI tutorial notebooks
+- CLI tests
