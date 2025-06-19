@@ -2,6 +2,52 @@
 Installation
 ============
 
+Advanced installation
+=====================
+
+While `pip <https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages>`_
+is a quick and accessible way to get started, we strongly recommend installing a package manager,
+such as `uv <https://docs.astral.sh/uv/>`_ or `micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_
+to install ``janus-core`` and its dependencies for practical use.
+
+This guide focuses on ``uv``, but many package managers provide similar benefits, including installing and managing Python itself
+(particularly useful in high performance computing environments), much faster dependency installation,
+and virtual environment management.
+
+In particular, we will describe the use of ``uv pip``, which is designed to resemble the standard ``pip`` interface,
+with similar commands (``uv pip install``,  ``uv pip list``, ``uv pip tree``, etc.).
+`Compared with pip <https://docs.astral.sh/uv/pip/compatibility/>`_, ``uv pip`` is slightly lower level
+and tends to be stricter, but in most cases ``uv pip`` can be used as a drop-in replacement for ``pip``.
+
+1. `Install uv <https://docs.astral.sh/uv/getting-started/installation/>`_
+
+2. Create and activate your virtual environment, specifying the desired Python version:
+
+.. code-block:: bash
+
+    uv venv -p 3.12
+    source .venv/bin/activate
+
+.. tip::
+
+    If you have already created a virtual environment using ``python3 -m venv``,
+    ``micromamba``, ``conda``, etc, ``uv`` can still install dependencies into it if
+    this is activated instead.
+
+
+3. Use ``uv pip`` in place of ``python3 -m pip`` to install ``janus-core``
+and any optional dependencies (in this case, MACE), into your virtual environment:
+
+.. code-block:: bash
+
+    uv pip install janus-core[mace] -U
+
+
+.. note::
+
+    We continue to refer to ``python3 -m pip`` elsewhere in the documentation for generality.
+
+
 PLUMED
 ======
 
@@ -45,11 +91,6 @@ or a specific version:
 .. code-block:: bash
 
     python3 -m pip install torch==2.5.1
-
-
-.. tip::
-
-    If you are using ``uv``, ``python3 -m pip`` should be replaced with ``uv pip``
 
 
 Installing from git repositories
