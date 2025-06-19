@@ -23,7 +23,7 @@ from janus_core.cli.types import (
     Tracker,
     WriteKwargs,
 )
-from janus_core.cli.utils import yaml_converter_callback
+from janus_core.cli.utils import deprecated_option, yaml_converter_callback
 
 app = Typer()
 
@@ -127,7 +127,12 @@ def geomopt(
     ] = None,
     filter_func: Annotated[
         str | None,
-        Option(help="Deprecated. Please use --filter", rich_help_panel="Calculation"),
+        Option(
+            help="Deprecated. Please use --filter",
+            rich_help_panel="Calculation",
+            callback=deprecated_option,
+            hidden=True,
+        ),
     ] = None,
     pressure: Annotated[
         float,

@@ -9,6 +9,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from typer import CallbackParam, secho
+from typer.colors import YELLOW
 from typer_config import conf_callback_factory, yaml_loader
 import yaml
 
@@ -409,3 +411,25 @@ def parse_correlation_kwargs(kwargs: CorrelationKwargs) -> list[dict]:
 
         parsed_kwargs.append(cor_kwargs)
     return parsed_kwargs
+
+
+# Callback to print warning for deprecated options
+def deprecated_option(param: CallbackParam, value: Any):
+    """
+    Print warning for deprecated option.
+
+    Parameters
+    ----------
+    param
+        Callback parameters from typer.
+    value
+        Value of parameter.
+
+    Returns
+    -------
+    Any
+        Unmodified parameter value.
+    """
+    if value:
+        secho(f"Warning: --{param.name} is deprecated.", fg=YELLOW)
+    return value
