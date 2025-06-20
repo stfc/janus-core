@@ -631,7 +631,7 @@ def test_displacement_kwargs(tmp_path):
 
 
 def test_paths(tmp_path):
-    """Test displacement_kwargs can be set."""
+    """Test passing qpoint file."""
     file_prefix = tmp_path / "NaCl"
     qpoint_file = DATA_PATH / "paths.yml"
     band_results = tmp_path / "NaCl-bands.yml.xz"

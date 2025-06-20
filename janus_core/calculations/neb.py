@@ -257,7 +257,7 @@ class NEB(BaseCalculation):
             if init_struct or final_struct:
                 raise ValueError(
                     "`neb_structs` cannot be specified in combination with "
-                    "`init_struct` or final_struct"
+                    "`init_struct` or `final_struct`"
                 )
 
             if minimize:
