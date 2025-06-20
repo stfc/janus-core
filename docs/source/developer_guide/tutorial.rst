@@ -425,7 +425,7 @@ If both are specifed, we should raise an error if possible:
 .. code-block:: python
 
     if model_path:
-        # `model`` is a new parameter, so there is no reason to be using both
+        # `model` is a new parameter, so there is no reason to be using both
         if model:
             raise ValueError(
                 "`model` has replaced `model_path`. Please only use `model`"
