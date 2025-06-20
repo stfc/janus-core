@@ -1,0 +1,37 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+init-struct: "tests/data/LiFePO4_start.cif"
+final-struct: "tests/data/LiFePO4_end.cif"
+neb-structs: null
+neb-class: NEB
+n-images: 10
+write-band: True
+neb-kwargs:
+  dynamic_relaxation: False
+interpolator: pymatgen
+interpolator-kwargs:
+  autosort_tol: 0.0
+optimizer: FIRE
+fmax: 1
+steps: 1000
+optimizer-kwargs:
+  a: 0.01
+plot-band: True
+minimize: True
+minimize_kwargs:
+  opt_kwargs:
+    maxstep: 0.1
+
+file_prefix: NaCl
+read_kwargs:
+  index: "0"
+write_kwargs:
+  invalidate_calc: True
+
+log: neb-log.yml
+summary: neb-summary.yml
+tracker: False

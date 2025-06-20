@@ -160,7 +160,8 @@ This will run a singlepoint energy calculation on ``KCl.cif`` using the `MACE-MP
 .. note::
     ``properties`` must be passed as a Yaml list, as above, not as a string.
 
-Example configurations for all commands can be found in `janus-tutorials <https://github.com/stfc/janus-tutorials/tree/main/configs>`_
+
+Example configurations for all commands can be found in :doc:`here </examples/index>`.
 
 
 Output files

@@ -1,0 +1,22 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+struct: "tests/data/NaCl.cif"
+properties:
+  - energy
+  - hessian
+out: NaCl-results.extxyz
+
+file_prefix: NaCl
+read_kwargs:
+  index: ":"
+write_kwargs:
+  invalidate_calc: False
+
+log: singlepoint-log.yml
+summary: singlepoint-summary.yml
+tracker: False
+progress_bar: True

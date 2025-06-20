@@ -1,0 +1,49 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+struct: "tests/data/NaCl.cif"
+supercell: 2 2 2
+displacement: 0.01
+displacement_kwargs:
+  is_plusminus: True
+mesh:
+  - 10
+  - 10
+  - 10
+bands: True
+n_qpoints: 0
+qpoint_file: null
+symmetrize: True
+minimize: True
+fmax: 0.01
+minimize_kwargs:
+  filter_kwargs:
+    constant_volume: False
+hdf5: True
+plot_to_file: True
+write_full: True
+
+dos: True
+dos_kwargs:
+  freq_min: -1
+  freq_max: 0
+
+pdos: True
+pdos_kwargs:
+  xyz_projection: True
+
+thermal: True
+temp_min: 0
+temp_max: 100
+temp_step: 10
+
+file_prefix: NaCl
+read_kwargs:
+  index: "0"
+
+log: phonons-log.yml
+summary: phonons-summary.yml
+tracker: False

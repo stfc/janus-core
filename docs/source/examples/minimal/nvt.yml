@@ -1,0 +1,4 @@
+arch: mace_mp
+
+ensemble: nvt
+struct: "tests/data/NaCl.cif"

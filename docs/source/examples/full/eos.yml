@@ -1,0 +1,29 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+struct: "tests/data/NaCl.cif"
+min_volume: 0.9
+max_volume: 1.1
+n_volumes: 10
+eos_type: birchmurnaghan
+minimize: True
+minimize_all: True
+fmax: 0.01
+minimize_kwargs:
+  filter_kwargs:
+    constant_volume: True
+write_structures: True
+plot_to_file: True
+
+file_prefix: NaCl
+read_kwargs:
+  index: "0"
+write_kwargs:
+  invalidate_calc: True
+
+log: eos-log.yml
+summary: eos-summary.yml
+tracker: False

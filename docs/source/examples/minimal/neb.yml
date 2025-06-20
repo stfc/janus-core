@@ -1,0 +1,3 @@
+arch: mace_mp
+
+neb-structs: "tests/data/LiFePO4-neb-band.xyz"
