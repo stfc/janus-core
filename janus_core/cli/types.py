@@ -192,8 +192,9 @@ MinimizeKwargs = Annotated[
         parser=parse_dict_class,
         help=(
             """
-            Keyword arguments to pass to optimizer. Must be passed as a dictionary
-            wrapped in quotes, e.g. "{'key': value}".
+            Keyword arguments to pass to geometry optimizer, including "opt_kwargs",
+            "filter_kwargs", and "traj_kwargs". Must be passed as a dictionary wrapped
+            in quotes, e.g. "{'key': value}".
             """
         ),
         metavar="DICT",
