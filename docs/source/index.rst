@@ -6,15 +6,13 @@
 Welcome to janus-core's documentation!
 ======================================
 
-.. image::  images/janus-core.png
-   :height: 100px
-   :target: https://github.com/stfc/janus-core/
+``janus-core`` provides tools to perform and analyse calculations using machine learnt interatomic potentials (MLIPs),
+as well as facilitating training and fine-tuning of MLIPs.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   getting_started/getting_started
    user_guide/index
    tutorials/index
    examples/index
