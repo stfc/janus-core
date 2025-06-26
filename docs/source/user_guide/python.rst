@@ -101,7 +101,7 @@ will return
 Additional Calculators
 ======================
 
-Although ``janus-core`` only directly supports the MLIP calculators listed in :doc:`Getting started </getting_started/getting_started>`,
+Although ``janus-core`` only directly supports the MLIP calculators listed in :doc:`Getting started </user_guide/get_started>`,
 any valid `ASE calculator <https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html>`_
 can be attached to a structure, including calculators for currently unsupported MLIPs.
 
