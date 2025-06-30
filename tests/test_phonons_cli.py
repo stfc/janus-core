@@ -36,7 +36,7 @@ def test_phonons():
     """Test calculating force constants and band structure."""
     results_dir = Path("./janus_results")
     phonopy_path = results_dir / "NaCl-phonopy.yml"
-    bands_path = results_dir / "NaCl-auto_bands.yml.xz"
+    bands_path = results_dir / "NaCl-auto_bands.yml"
     log_path = results_dir / "NaCl-phonons-log.yml"
     summary_path = results_dir / "NaCl-phonons-summary.yml"
 
@@ -68,7 +68,7 @@ def test_phonons():
 
         has_eigenvectors = False
         has_velocity = False
-        with lzma.open(bands_path, mode="rt") as file:
+        with open(bands_path) as file:
             for line in file:
                 if "eigenvector" in line:
                     has_eigenvectors = True
@@ -113,7 +113,7 @@ def test_phonons():
 def test_bands_simple(tmp_path):
     """Test calculating force constants and reduced bands information."""
     file_prefix = tmp_path / "NaCl"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
 
     result = runner.invoke(
@@ -157,6 +157,7 @@ def test_hdf5(tmp_path):
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
     hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
+    bands_results = tmp_path / "test" / "NaCl-auto_bands.hdf5"
     summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
     log_path = tmp_path / "test" / "NaCl-phonons-log.yml"
 
@@ -168,6 +169,7 @@ def test_hdf5(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--bands",
             "--file-prefix",
             file_prefix,
             "--hdf5",
@@ -176,6 +178,7 @@ def test_hdf5(tmp_path):
     assert result.exit_code == 0
     assert phonon_results.exists()
     assert hdf5_results.exists()
+    assert bands_results.exists()
 
     # Read phonons summary file
     with open(summary_path, encoding="utf8") as file:
@@ -184,7 +187,7 @@ def test_hdf5(tmp_path):
     output_files = {
         "params": phonon_results,
         "force_constants": hdf5_results,
-        "bands": None,
+        "bands": bands_results,
         "bands_plot": None,
         "dos": None,
         "dos_plot": None,
@@ -293,10 +296,10 @@ def test_plot(tmp_path):
     """Test for plotting routines."""
     file_prefix = tmp_path / "NaCl"
     phonon_results = tmp_path / "NaCl-phonopy.yml"
-    bands_path = tmp_path / "NaCl-auto_bands.yml.xz"
+    bands_path = tmp_path / "NaCl-auto_bands.yml"
     pdos_results = tmp_path / "NaCl-pdos.dat"
     dos_results = tmp_path / "NaCl-dos.dat"
-    autoband_results = tmp_path / "NaCl-auto_bands.yml.xz"
+    autoband_results = tmp_path / "NaCl-auto_bands.yml"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
     log_path = tmp_path / "NaCl-phonons-log.yml"
     svgs = [
@@ -634,7 +637,7 @@ def test_paths(tmp_path):
     """Test passing qpoint file."""
     file_prefix = tmp_path / "NaCl"
     qpoint_file = DATA_PATH / "paths.yml"
-    band_results = tmp_path / "NaCl-bands.yml.xz"
+    band_results = tmp_path / "NaCl-bands.yml"
 
     result = runner.invoke(
         app,
