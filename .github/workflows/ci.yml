@@ -53,6 +53,19 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: uv run pytest tests/test_{mlip_calculators,single_point}.py
 
+      - name: Install uma
+        run: |
+          uv sync --extra uma
+          uv pip install --reinstall pynvml
+          uv pip install fairchem-core[torch-extras] --no-build-isolation
+
+      - name: Run test suite for UMA
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run pytest tests/test_{mlip_calculators,single_point}.py
+
       - name: Install dgl dependencies
         run: |
           uv sync --extra mace --extra m3gnet --extra alignn
