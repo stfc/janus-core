@@ -132,6 +132,7 @@ Architectures = Literal[
     "esen",
     "equiformer",
     "pet_mad",
+    "uma",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]
