@@ -27,6 +27,7 @@ PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
 )
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
+UMA_LABEL = "uma-m-1p1"
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -120,6 +121,20 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             -27.07935905,
             "NaCl.cif",
             {"model": ESEN_LABEL},
+        ),
+        (
+            "uma",
+            "cpu",
+            -27.09502286,
+            "NaCl.cif",
+            {},
+        ),
+        (
+            "uma",
+            "cpu",
+            -27.09960527,
+            "NaCl.cif",
+            {"model": UMA_LABEL},
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),

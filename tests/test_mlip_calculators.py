@@ -31,6 +31,7 @@ DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
 ESEN_LABEL = "eSEN-30M-MP"
 
+
 try:
     from fairchem.core.models.model_registry import model_name_to_local_file
 
@@ -59,6 +60,18 @@ except ImportError:
 
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
+UMA_LABEL = "uma-m-1p1"
+
+try:
+    from fairchem.core import pretrained_mlip
+
+    UMA_PREDICT_UNIT = pretrained_mlip.get_predict_unit(
+        model_name=UMA_LABEL, device="cpu"
+    )
+
+except ImportError:
+    UMA_PREDICT_UNIT = None
+
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 M3GNET_DIR_PATH = MODEL_PATH / "M3GNet-MP-2021.2.8-DIRECT-PES"
 M3GNET_MODEL_PATH = M3GNET_DIR_PATH / "model.pt"
@@ -78,17 +91,11 @@ PET_MAD_CHECKPOINT = (
 @pytest.mark.parametrize(
     "arch, device, kwargs",
     [
-        ("mace", "cpu", {"model": MACE_MP_PATH}),
-        ("mace", "cpu", {"model_paths": MACE_MP_PATH}),
-        ("mace", "cpu", {"model_path": MACE_MP_PATH}),
-        ("mace_off", "cpu", {}),
-        ("mace_off", "cpu", {"model": "small"}),
-        ("mace_off", "cpu", {"model_path": MACE_OFF_PATH}),
-        ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
-        ("mace_mp", "cpu", {}),
-        ("mace_mp", "cpu", {"model": "small"}),
-        ("mace_mp", "cpu", {"model_path": MACE_MP_PATH}),
-        ("mace_mp", "cpu", {"model": MACE_MP_PATH}),
+        ("alignn", "cpu", {}),
+        ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
+        ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
+        ("alignn", "cpu", {"model": "alignnff_wt10"}),
+        ("alignn", "cpu", {"path": ALIGNN_PATH}),
         ("chgnet", "cpu", {}),
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model_path": CHGNET_PATH}),
@@ -107,8 +114,26 @@ PET_MAD_CHECKPOINT = (
         ("esen", "cpu", {"model_name": ESEN_LABEL}),
         ("esen", "cpu", {"model_name": ESEN_PATH}),
         ("esen", "cpu", {"checkpoint_path": ESEN_PATH}),
+        ("grace", "cpu", {}),
+        ("grace", "cpu", {"model_path": "GRACE-1L-MP-r6"}),
+        ("mace", "cpu", {"model": MACE_MP_PATH}),
+        ("mace", "cpu", {"model_paths": MACE_MP_PATH}),
+        ("mace", "cpu", {"model_path": MACE_MP_PATH}),
+        ("mace_mp", "cpu", {}),
+        ("mace_mp", "cpu", {"model": "small"}),
+        ("mace_mp", "cpu", {"model_path": MACE_MP_PATH}),
+        ("mace_mp", "cpu", {"model": MACE_MP_PATH}),
+        ("mace_off", "cpu", {}),
+        ("mace_off", "cpu", {"model": "small"}),
+        ("mace_off", "cpu", {"model_path": MACE_OFF_PATH}),
+        ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
+        ("m3gnet", "cpu", {}),
+        ("m3gnet", "cpu", {"model_path": M3GNET_DIR_PATH}),
+        ("m3gnet", "cpu", {"model_path": M3GNET_MODEL_PATH}),
+        ("m3gnet", "cpu", {"potential": M3GNET_DIR_PATH}),
+        ("m3gnet", "cpu", {"potential": M3GNET_POTENTIAL}),
         ("nequip", "cpu", {"model_path": NEQUIP_PATH}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),
@@ -121,18 +146,12 @@ PET_MAD_CHECKPOINT = (
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
         ("sevennet", "cpu", {"model": "sevennet-0"}),
-        ("alignn", "cpu", {}),
-        ("alignn", "cpu", {"model_path": ALIGNN_PATH}),
-        ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
-        ("alignn", "cpu", {"model": "alignnff_wt10"}),
-        ("alignn", "cpu", {"path": ALIGNN_PATH}),
-        ("m3gnet", "cpu", {}),
-        ("m3gnet", "cpu", {"model_path": M3GNET_DIR_PATH}),
-        ("m3gnet", "cpu", {"model_path": M3GNET_MODEL_PATH}),
-        ("m3gnet", "cpu", {"potential": M3GNET_DIR_PATH}),
-        ("m3gnet", "cpu", {"potential": M3GNET_POTENTIAL}),
-        ("grace", "cpu", {}),
-        ("grace", "cpu", {"model_path": "GRACE-1L-MP-r6"}),
+        ("uma", "cpu", {}),
+        ("uma", "cpu", {"model": UMA_LABEL}),
+        ("uma", "cpu", {"model_path": UMA_LABEL}),
+        ("uma", "cpu", {"model_name": UMA_LABEL}),
+        ("uma", "cpu", {"model": UMA_PREDICT_UNIT}),
+        ("uma", "cpu", {"predict_unit": UMA_PREDICT_UNIT}),
     ],
 )
 def test_mlips(arch, device, kwargs):
@@ -190,10 +209,6 @@ def test_invalid_model(arch, model):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
-        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
-        {"arch": "mace", "model_path": MACE_MP_PATH, "model": MACE_MP_PATH},
-        {"arch": "mace", "model": MACE_MP_PATH, "potential": MACE_MP_PATH},
         {
             "arch": "alignn",
             "model_path": ALIGNN_PATH / "best_model.pt",
@@ -207,11 +222,7 @@ def test_invalid_model(arch, model):
         {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
         {"arch": "dpa3", "model_path": DPA3_PATH, "model": DPA3_PATH},
         {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
-        {
-            "arch": "esen",
-            "model_path": ESEN_LABEL,
-            "model": ESEN_LABEL,
-        },
+        {"arch": "esen", "model_path": ESEN_LABEL, "model": ESEN_LABEL},
         {
             "arch": "equiformer",
             "model_path": EQUIFORMER_LABEL,
@@ -222,6 +233,10 @@ def test_invalid_model(arch, model):
             "model_path": "GRACE-1L-MP-r6",
             "model": "GRACE-1L-MP-r6",
         },
+        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
+        {"arch": "mace", "model_path": MACE_MP_PATH, "model": MACE_MP_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "potential": MACE_MP_PATH},
         {
             "arch": "mattersim",
             "model": "mattersim-v1.0.0-1m",
@@ -243,6 +258,7 @@ def test_invalid_model(arch, model):
         },
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
         {"arch": "sevennet", "model": SEVENNET_PATH, "path": SEVENNET_PATH},
+        {"arch": "uma", "model_path": UMA_LABEL, "model": UMA_LABEL},
     ],
 )
 def test_model_model_paths(kwargs):
