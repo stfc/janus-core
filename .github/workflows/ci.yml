@@ -38,7 +38,7 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest --cov janus_core --cov-append .
+        run: uv run --extra all pytest --cov janus_core --cov-append .
 
       - name: Install updated e3nn dependencies
         run: |
@@ -51,7 +51,7 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run pytest tests/test_{mlip_calculators,single_point}.py
+        run: uv run --extra mattersim --extra fairchem pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install uma
         run: |
@@ -64,7 +64,7 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run pytest tests/test_{mlip_calculators,single_point}.py
+        run: uv run --extra uma pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install dgl dependencies
         run: |
@@ -75,7 +75,7 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run pytest tests/test_{mlip_calculators,single_point,eos}.py
+        run: uv run --extra mace --extra m3gnet --extra alignn pytest tests/test_{mlip_calculators,single_point,eos}.py
 
       - name: Report coverage to Coveralls
         uses: coverallsapp/github-action@v2
