@@ -65,7 +65,9 @@ jobs:
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
 
       - name: Create space in cache
-        run: rm -r ~/.cache/*
+        run: |
+          rm -rf ~/.cache/*
+          uv cache clean
 
       - name: Install UMA
         run: |

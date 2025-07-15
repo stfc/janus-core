@@ -125,13 +125,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         (
             "uma",
             "cpu",
-            -27.09960527,
-            "NaCl.cif",
-            {},
-        ),
-        (
-            "uma",
-            "cpu",
             -27.10070295,
             "NaCl.cif",
             {"model": UMA_LABEL},

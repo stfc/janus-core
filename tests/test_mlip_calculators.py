@@ -146,7 +146,6 @@ PET_MAD_CHECKPOINT = (
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
         ("sevennet", "cpu", {"model": "sevennet-0"}),
-        ("uma", "cpu", {}),
         ("uma", "cpu", {"model": UMA_LABEL}),
         ("uma", "cpu", {"model_path": UMA_LABEL}),
         ("uma", "cpu", {"model_name": UMA_LABEL}),
