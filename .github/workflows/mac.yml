@@ -38,7 +38,7 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run --extra all pytest
+        run: uv run --no-sync pytest
 
       - name: Install updated e3nn dependencies
         run: |
@@ -51,7 +51,18 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run --extra mattersim --extra fairchem pytest tests/test_{mlip_calculators,single_point}.py
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
+
+      - name: Install dgl dependencies
+        run: |
+          uv sync --extra mace --extra m3gnet --extra alignn
+          uv pip install --reinstall pynvml
+
+      - name: Run test suite for dgl dependencies
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
 
       - name: Install uma
         run: |
@@ -64,15 +75,4 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run --extra uma pytest tests/test_{mlip_calculators,single_point}.py
-
-      - name: Install dgl dependencies
-        run: |
-          uv sync --extra mace --extra m3gnet --extra alignn
-          uv pip install --reinstall pynvml
-
-      - name: Run test suite for dgl dependencies
-        env:
-          # show timings of tests
-          PYTEST_ADDOPTS: "--durations=0"
-        run: uv run --extra mace --extra m3gnet --extra alignn pytest tests/test_{mlip_calculators,single_point,eos}.py
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py

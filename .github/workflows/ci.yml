@@ -38,7 +38,7 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run --extra all pytest --cov janus_core --cov-append .
+        run: uv run --no-sync pytest --cov janus_core --cov-append .
 
       - name: Install updated e3nn dependencies
         run: |
@@ -51,20 +51,7 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run --extra mattersim --extra fairchem pytest tests/test_{mlip_calculators,single_point}.py
-
-      - name: Install uma
-        run: |
-          uv sync --extra uma
-          uv pip install --reinstall pynvml
-          uv pip install fairchem-core[torch-extras] --no-build-isolation
-
-      - name: Run test suite for UMA
-        env:
-          # show timings of tests
-          PYTEST_ADDOPTS: "--durations=0"
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run --extra uma pytest tests/test_{mlip_calculators,single_point}.py
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install dgl dependencies
         run: |
@@ -75,7 +62,23 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run --extra mace --extra m3gnet --extra alignn pytest tests/test_{mlip_calculators,single_point,eos}.py
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
+
+      - name: Create space in cache
+        run: rm -r ~/.cache/*
+
+      - name: Install UMA
+        run: |
+          uv sync --extra uma
+          uv pip install --reinstall pynvml
+          uv pip install fairchem-core[torch-extras] --no-build-isolation
+
+      - name: Run test suite for UMA
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Report coverage to Coveralls
         uses: coverallsapp/github-action@v2
