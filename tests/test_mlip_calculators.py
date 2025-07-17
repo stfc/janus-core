@@ -60,7 +60,7 @@ except ImportError:
 
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
-UMA_LABEL = "uma-m-1p1"
+UMA_LABEL = "uma-s-1"
 
 try:
     from fairchem.core import pretrained_mlip
