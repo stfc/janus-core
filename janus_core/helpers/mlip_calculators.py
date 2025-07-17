@@ -396,7 +396,7 @@ def choose_calculator(
                         model_name=model, device=device
                     )
                 case None:
-                    model = "uma-s-1p1"
+                    model = "uma-m-1p1"
                     predict_unit = pretrained_mlip.get_predict_unit(
                         model_name=model, device=device
                     )
