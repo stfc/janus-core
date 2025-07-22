@@ -547,6 +547,7 @@ def test_missing_arch(struct):
 def test_dispersion(arch, pred):
     """Test dispersion correction."""
     skip_extras(arch)
+    pytest.importorskip("torch_dftd")
 
     data_path = DATA_PATH / "benzene.xyz"
     sp_no_d3 = SinglePoint(
