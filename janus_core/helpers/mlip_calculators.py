@@ -114,7 +114,9 @@ def add_dispersion(
         dtype=dtype,
         **kwargs,
     )
-    return SumCalculator([calc, d3_calc])
+    sum_calc = SumCalculator([calc, d3_calc])
+    sum_calc.parameters = calc.parameters
+    return sum_calc
 
 
 def choose_calculator(
