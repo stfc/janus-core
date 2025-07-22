@@ -46,12 +46,15 @@ chgnet = [
 dpa3 = [
     "deepmd-kit == 3.1.0",
 ]
+d3 = [
+    "torch-dftd==0.4.0",
+]
 grace = [
     "tensorpotential == 0.5.1",
 ]
 mace = [
     "mace-torch==0.3.13",
-    "torch-dftd==0.4.0",
+    "janus-core[d3]",
 ]
 nequip = [
     "nequip == 0.6.1",
