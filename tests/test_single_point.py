@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 from urllib.error import HTTPError, URLError
 
+from ase.calculators.mixing import SumCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
 from numpy import isfinite
@@ -531,3 +532,38 @@ def test_missing_arch(struct):
 
     with pytest.raises(ValueError, match="A calculator must be attached"):
         SinglePoint(struct=struct)
+
+
+@pytest.mark.parametrize(
+    "arch, pred",
+    [
+        ("mace_mp", -0.29815768),
+        ("mace_off", -0.08281747),
+        ("sevennet", -0.08281749),
+        ("mattersim", -0.08281749),
+    ],
+)
+def test_dispersion(arch, pred):
+    """Test dispersion correction."""
+    skip_extras(arch)
+
+    data_path = DATA_PATH / "benzene.xyz"
+    sp_no_d3 = SinglePoint(
+        struct=data_path,
+        arch=arch,
+        properties="energy",
+        calc_kwargs={"dispersion": False},
+    )
+    assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
+    no_d3_results = sp_no_d3.run()
+
+    sp_d3 = SinglePoint(
+        struct=data_path,
+        arch=arch,
+        properties="energy",
+        calc_kwargs={"dispersion": True},
+    )
+    assert isinstance(sp_d3.struct.calc, SumCalculator)
+    d3_results = sp_d3.run()
+
+    assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(pred)
