@@ -42,7 +42,7 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
-          uv sync --extra mattersim --extra fairchem
+          uv sync --extra mattersim --extra fairchem --extra d3
           uv pip install --reinstall pynvml
           uv pip install fairchem-core[torch-extras] --no-build-isolation
 
@@ -55,7 +55,7 @@ jobs:
 
       - name: Install dgl dependencies
         run: |
-          uv sync --extra mace --extra m3gnet --extra alignn
+          uv sync --extra mace --extra m3gnet --extra alignn --extra d3
           uv pip install --reinstall pynvml
 
       - name: Run test suite for dgl dependencies
