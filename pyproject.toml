@@ -73,8 +73,8 @@ visualise = [
 ]
 all = [
     "janus-core[chgnet]",
-    "janus-core[dpa3]",
     "janus-core[grace]",
+    "janus-core[d3]",
     "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
