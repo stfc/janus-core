@@ -537,10 +537,11 @@ def test_missing_arch(struct):
 @pytest.mark.parametrize(
     "arch, pred",
     [
+        ("m3gnet", -0.08281749),
         ("mace_mp", -0.29815768),
         ("mace_off", -0.08281747),
-        ("sevennet", -0.08281749),
         ("mattersim", -0.08281749),
+        ("sevennet", -0.08281749),
     ],
 )
 def test_dispersion(arch, pred):
