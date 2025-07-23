@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 from urllib.error import HTTPError, URLError
 
+from ase import units
 from ase.calculators.mixing import SumCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
@@ -535,16 +536,20 @@ def test_missing_arch(struct):
 
 
 @pytest.mark.parametrize(
-    "arch, pred",
+    "arch, kwargs, pred",
     [
-        ("m3gnet", -0.08281749),
-        ("mace_mp", -0.29815768),
-        ("mace_off", -0.08281747),
-        ("mattersim", -0.08281749),
-        ("sevennet", -0.08281749),
+        ("m3gnet", {}, -0.08281749),
+        (
+            "mace_mp",
+            {"damping": "zero", "xc": "pbe", "cutoff": 95 * units.Bohr},
+            -0.08281749,
+        ),
+        ("mace_off", {}, -0.08281747),
+        ("mattersim", {}, -0.08281749),
+        ("sevennet", {}, -0.08281749),
     ],
 )
-def test_dispersion(arch, pred):
+def test_dispersion(arch, kwargs, pred):
     """Test dispersion correction."""
     skip_extras(arch)
     pytest.importorskip("torch_dftd")
@@ -563,7 +568,7 @@ def test_dispersion(arch, pred):
         struct=data_path,
         arch=arch,
         properties="energy",
-        calc_kwargs={"dispersion": True},
+        calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
     )
     assert isinstance(sp_d3.struct.calc, SumCalculator)
     d3_results = sp_d3.run()
@@ -579,6 +584,14 @@ def test_mace_mp_dispersion():
     from mace.calculators import mace_mp
 
     data_path = DATA_PATH / "benzene.xyz"
+
+    no_d3_energy = SinglePoint(
+        struct=data_path,
+        arch="mace_mp",
+        properties="energy",
+        calc_kwargs={"dispersion": False},
+    ).run()["energy"]
+
     d3_energy = SinglePoint(
         struct=data_path,
         arch="mace_mp",
@@ -595,4 +608,6 @@ def test_mace_mp_dispersion():
         calc_kwargs={"dispersion": False},
     ).run()["energy"]
 
+    # Different default to other architectures
+    assert d3_energy - no_d3_energy == pytest.approx(-0.29815768)
     assert d3_energy == pytest.approx(mace_d3_energy)
