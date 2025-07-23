@@ -253,7 +253,7 @@ def test_d3():
     calculator = choose_calculator(arch="mace_mp", dispersion=True)
     assert calculator.parameters["version"] is not None
     assert calculator.parameters["model"] is not None
-    assert calculator.parameters["arch"] == "mace_mp-d3"
+    assert calculator.parameters["arch"] == "mace_mp_d3"
 
 
 def test_d3_manual():
@@ -264,4 +264,4 @@ def test_d3_manual():
     calculator = add_dispersion(calculator)
     assert calculator.parameters["version"] is not None
     assert calculator.parameters["model"] is not None
-    assert calculator.parameters["arch"] == "mace_mp-d3"
+    assert calculator.parameters["arch"] == "mace_mp_d3"

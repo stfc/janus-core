@@ -119,7 +119,7 @@ def test_dispersion():
     descriptors_disp.run()
 
     assert (
-        descriptors_disp.struct.info["mace_mp_descriptor"]
+        descriptors_disp.struct.info["mace_mp_d3_descriptor"]
         == descriptors.struct.info["mace_mp_descriptor"]
     )
 
