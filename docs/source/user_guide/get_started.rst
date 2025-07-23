@@ -60,6 +60,7 @@ Currently supported MLIP ``extras`` are:
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
 - ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
+- ``pet_mad``: `PET-MAD <https://github.com/lab-cosmo/pet-mad>`_
 
 .. note::
 
