@@ -8,7 +8,7 @@ from zipfile import BadZipFile
 
 import pytest
 
-from janus_core.helpers.mlip_calculators import choose_calculator
+from janus_core.helpers.mlip_calculators import add_dispersion, choose_calculator
 from tests.utils import skip_extras
 
 MODEL_PATH = Path(__file__).parent / "models"
@@ -244,3 +244,24 @@ def test_invalid_device(arch):
     """Test error raised if invalid device is specified."""
     with pytest.raises(ValueError):
         choose_calculator(arch=arch, device="invalid")
+
+
+def test_d3():
+    """Test adding D3 dispersion calculator automatically."""
+    skip_extras("mace_mp")
+
+    calculator = choose_calculator(arch="mace_mp", dispersion=True)
+    assert calculator.parameters["version"] is not None
+    assert calculator.parameters["model"] is not None
+    assert calculator.parameters["arch"] == "mace_mp-d3"
+
+
+def test_d3_manual():
+    """Test adding D3 dispersion calculator manually."""
+    skip_extras("mace_mp")
+
+    calculator = choose_calculator(arch="mace_mp")
+    calculator = add_dispersion(calculator)
+    assert calculator.parameters["version"] is not None
+    assert calculator.parameters["model"] is not None
+    assert calculator.parameters["arch"] == "mace_mp-d3"
