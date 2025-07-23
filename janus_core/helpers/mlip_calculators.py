@@ -372,11 +372,15 @@ def choose_calculator(
 
         case "pet_mad":
             from pet_mad import __version__
+            from pet_mad._version import LATEST_VERSION
             from pet_mad.calculator import PETMADCalculator
 
             calculator = PETMADCalculator(
                 checkpoint_path=model, device=device, **kwargs
             )
+
+            if model is None:
+                model = LATEST_VERSION
 
         case _:
             raise ValueError(
