@@ -124,7 +124,12 @@ def add_dispersion(
         **kwargs,
     )
     sum_calc = SumCalculator([calc, d3_calc])
+
+    # Copy calculator parameters to make more accessible
     sum_calc.parameters = calc.parameters
+    if "arch" in sum_calc.parameters:
+        sum_calc.parameters["arch"] = sum_calc.parameters["arch"] + "-d3"
+
     return sum_calc
 
 
