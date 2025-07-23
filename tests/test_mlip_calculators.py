@@ -64,13 +64,18 @@ UMA_LABEL = "uma-s-1"
 
 try:
     from fairchem.core import pretrained_mlip
+    from huggingface_hub.errors import GatedRepoError
 
-    UMA_PREDICT_UNIT = pretrained_mlip.get_predict_unit(
-        model_name=UMA_LABEL, device="cpu"
-    )
+    try:
+        UMA_PREDICT_UNIT = pretrained_mlip.get_predict_unit(
+            model_name=UMA_LABEL, device="cpu"
+        )
+    except GatedRepoError:
+        UMA_PREDICT_UNIT = None
 
 except ImportError:
     UMA_PREDICT_UNIT = None
+
 
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 M3GNET_DIR_PATH = MODEL_PATH / "M3GNet-MP-2021.2.8-DIRECT-PES"
