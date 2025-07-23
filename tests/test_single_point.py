@@ -569,3 +569,30 @@ def test_dispersion(arch, pred):
     d3_results = sp_d3.run()
 
     assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(pred)
+
+
+def test_mace_mp_dispersion():
+    """Test mace_mp dispersion correction matches default."""
+    skip_extras("mace_mp")
+    pytest.importorskip("torch_dftd")
+
+    from mace.calculators import mace_mp
+
+    data_path = DATA_PATH / "benzene.xyz"
+    d3_energy = SinglePoint(
+        struct=data_path,
+        arch="mace_mp",
+        properties="energy",
+        calc_kwargs={"dispersion": True},
+    ).run()["energy"]
+
+    struct = read(data_path)
+    struct.calc = mace_mp(model="small", dispersion=True)
+
+    mace_d3_energy = SinglePoint(
+        struct=struct,
+        properties="energy",
+        calc_kwargs={"dispersion": False},
+    ).run()["energy"]
+
+    assert d3_energy == pytest.approx(mace_d3_energy)
