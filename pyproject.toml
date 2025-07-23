@@ -59,6 +59,9 @@ nequip = [
 orb = [
     "orb-models == 0.5.4; sys_platform != 'win32'",
 ]
+pet-mad = [
+    "pet-mad == 1.3.1"
+]
 plumed = [
     "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
 ]
@@ -75,6 +78,7 @@ all = [
     "janus-core[mace]",
     "janus-core[nequip]",
     "janus-core[orb]",
+    "janus-core[pet-mad]",
     "janus-core[plumed]",
     "janus-core[sevennet]",
     "janus-core[visualise]",
