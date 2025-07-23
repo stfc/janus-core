@@ -128,7 +128,7 @@ def add_dispersion(
     # Copy calculator parameters to make more accessible
     sum_calc.parameters = calc.parameters
     if "arch" in sum_calc.parameters:
-        sum_calc.parameters["arch"] = sum_calc.parameters["arch"] + "-d3"
+        sum_calc.parameters["arch"] = sum_calc.parameters["arch"] + "_d3"
 
     return sum_calc
 
