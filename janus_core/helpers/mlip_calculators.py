@@ -87,7 +87,10 @@ def _set_no_weights_only_load():
 
 
 def add_dispersion(
-    calc: Calculator, device: Devices, dtype: torch.dtype, **kwargs
+    calc: Calculator,
+    device: Devices = "cpu",
+    dtype: torch.dtype | None = None,
+    **kwargs,
 ) -> SumCalculator:
     """
     Add D3 dispersion calculator to existing calculator.
@@ -99,7 +102,7 @@ def add_dispersion(
     device
         Device to run calculator on. Default is "cpu".
     dtype
-        Calculation precision.
+        Calculation precision. Default is current torch dtype.
     **kwargs
         Additional keyword arguments passed to `TorchDFTD3Calculator`.
 
@@ -112,6 +115,8 @@ def add_dispersion(
         from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
     except ImportError as err:
         raise ImportError("Please install the d3 extra.") from err
+
+    dtype = dtype if dtype else get_default_dtype()
 
     d3_calc = TorchDFTD3Calculator(
         device=device,
@@ -445,9 +450,7 @@ def choose_calculator(
     calculator.parameters["model"] = str(model)
 
     if dispersion:
-        return add_dispersion(
-            calculator, device, get_default_dtype(), **dispersion_kwargs
-        )
+        return add_dispersion(calc=calculator, device=device, **dispersion_kwargs)
 
     return calculator
 
