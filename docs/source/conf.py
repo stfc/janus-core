@@ -243,4 +243,5 @@ nitpick_ignore = [
     ("py:class", "Progress"),
     ("py:class", "ProgressBar"),
     ("py:class", "typer.models.CallbackParam"),
+    ("py:class", "SumCalculator"),
 ]

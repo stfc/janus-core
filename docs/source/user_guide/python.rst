@@ -98,6 +98,60 @@ will return
     unless the same ``arch`` is chosen, in which case these values will also be overwritten.
 
 
+D3 Dispersion
+=============
+
+A PyTorch implementation of DFTD2 and DFTD3, using the `TorchDFTD3Calculator <https://github.com/pfnet-research/torch-dftd>`_,
+can be used to add dispersion corrections to MLIP predictions.
+
+The required Python pacakge is included with ``mace_mp``, but can also be installed as its own extra:
+
+.. code-block:: bash
+
+    pip install janus-core[d3]
+
+
+Once installed, dispersion can be added through ``calc_kwargs`` through the ``dispersion`` keyword,
+with ``dispersion_kwargs`` used to pass any further keywords to the ``TorchDFTD3Calculator``:
+
+.. code-block:: python
+
+    from ase import units
+
+    from janus_core.calculations.single_point import SinglePoint
+
+    single_point = SinglePoint(
+        struct="tests/data/NaCl.cif",
+        arch="mace_mp",
+        model="tests/models/mace_mp_small.model",
+        calc_kwargs={"dispersion": True, "dispersion_kwargs": {"cutoff":  95.0 * units.Bohr}}
+    )
+
+.. note::
+    In most cases, defaults for ``dispersion_kwargs`` are those set within ``TorchDFTD3Calculator``,
+    but in the case of ``mace_mp``, we mirror the corresponding defaults from the
+    ``mace.calculators.mace_mp`` function.
+
+
+The ``TorchDFTD3Calculator`` can also be added to any existing calculator if required:
+
+.. note::
+    Keyword arguments for ``TorchDFTD3Calculator`` should be passed directly here,
+    as shown with ``cutoff``. This will not have access to ``mace_mp`` default values,
+    so will always use defaults from ``TorchDFTD3Calculator``.
+
+
+.. code-block:: python
+
+    from ase import units
+
+    from janus_core.helpers.mlip_calculators import add_dispersion, choose_calculator
+
+    mace_calc = choose_calculator("mace_mp")
+    calc = add_dispersion(mace_calc, device="cpu", cutoff=95 * units.Bohr)
+
+
+
 Additional Calculators
 ======================
 
