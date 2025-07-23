@@ -16,7 +16,6 @@ import warnings
 from ase import units
 from ase.calculators.mixing import SumCalculator
 from torch import get_default_dtype
-from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 from janus_core.helpers.utils import none_to_dict
@@ -109,6 +108,11 @@ def add_dispersion(
     SumCalculator
         Configured calculator with D3 dispersion correction added.
     """
+    try:
+        from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
+    except ImportError as err:
+        raise ImportError("Please install the d3 extra.") from err
+
     d3_calc = TorchDFTD3Calculator(
         device=device,
         dtype=dtype,
