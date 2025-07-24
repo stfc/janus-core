@@ -11,7 +11,6 @@ from __future__ import annotations
 from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, get_args
-import warnings
 
 from ase import units
 from ase.calculators.mixing import SumCalculator
@@ -205,13 +204,7 @@ def choose_calculator(
             model = model if model else "small"
             kwargs.setdefault("default_dtype", "float64")
 
-            # Remove dispersion (to be added later for any calculator)
-            if dispersion and not kwargs.get("dispersion", True):
-                warnings.warn(
-                    "`dispersion` set in two places. kwargs value will be used",
-                    stacklevel=2,
-                )
-            dispersion = kwargs.pop("dispersion", dispersion)
+            # Set mace_mp dispersion defaults
             dispersion_kwargs.setdefault("damping", kwargs.pop("damping", "bj"))
             dispersion_kwargs.setdefault("xc", kwargs.pop("dispersion_xc", "pbe"))
             dispersion_kwargs.setdefault(
