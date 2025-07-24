@@ -60,11 +60,11 @@ Currently supported MLIP ``extras`` are:
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
 - ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
-- ``pet_mad``: `PET-MAD <https://github.com/lab-cosmo/pet-mad>`_
+- ``pet-mad``: `PET-MAD <https://github.com/lab-cosmo/pet-mad>`_
 
 .. note::
 
-    ``orb`` and ``mattersim`` are not currently compatible with Windows natively,
+    ``orb``, ``mattersim``, and ``pet-mad`` are not currently compatible with Windows natively,
     but can be installed and run via Windows Subsystem for Linux.
 
 
