@@ -59,7 +59,8 @@ Currently supported MLIP ``extras`` are:
 - ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
-- ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
+- ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/facebookresearch/fairchem/tree/fairchem_core-1.10.0/src/fairchem/core>`_
+- ``uma``: `UMA <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
 - ``pet-mad``: `PET-MAD <https://github.com/lab-cosmo/pet-mad>`_
 
 .. note::

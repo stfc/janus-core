@@ -53,6 +53,7 @@ def _set_model(
         "path",
         "model_name",
         "checkpoint_path",
+        "predict_unit",
     }
     present = kwargs.keys() & model_kwargs
 
@@ -381,6 +382,31 @@ def choose_calculator(
 
             if model is None:
                 model = LATEST_VERSION
+
+        case "uma":
+            from fairchem.core import FAIRChemCalculator, __version__, pretrained_mlip
+            from fairchem.core.units.mlip_unit import MLIPPredictUnit
+
+            match model:
+                case MLIPPredictUnit():
+                    predict_unit = model
+                    model = "loaded_Module"
+                case Path() | str():
+                    predict_unit = pretrained_mlip.get_predict_unit(
+                        model_name=model, device=device
+                    )
+                case None:
+                    model = "uma-m-1p1"
+                    predict_unit = pretrained_mlip.get_predict_unit(
+                        model_name=model, device=device
+                    )
+
+            kwargs.setdefault("task_name", "omat")
+
+            calculator = FAIRChemCalculator(
+                predict_unit=predict_unit,
+                **kwargs,
+            )
 
         case _:
             raise ValueError(

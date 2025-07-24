@@ -92,6 +92,7 @@ Current and planned features include:
   - GRACE
   - EquiformerV2
   - eSEN
+  - UMA
   - PET-MAD
 - [x] Single point calculations
 - [x] Geometry optimisation

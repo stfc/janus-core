@@ -28,7 +28,7 @@ readme = "README.md"
 dependencies = [
     "ase<4.0,>=3.25",
     "codecarbon<3.0.0,>=2.8.4",
-    "numpy<2.0.0,>=1.26.4",
+    "numpy<3.0.0,>=1.26.4",
     "phonopy<3.0.0,>=2.23.1",
     "pymatgen>=2025.1.24",
     "pyyaml<7.0.0,>=6.0.1",
@@ -91,6 +91,10 @@ fairchem = [
 
 mattersim = [
     "mattersim == 1.1.2; sys_platform != 'win32'",
+]
+
+uma = [
+    "fairchem-core == 2.3.0",
 ]
 
 # MLIPs with dgl dependency
@@ -279,6 +283,38 @@ conflicts = [
     ],
     [
       { extra = "fairchem" },
+      { extra = "all" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "alignn" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "fairchem" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "grace" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "mattersim" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "m3gnet" },
+    ],
+    [
+      { extra = "uma" },
+      { extra = "sevennet" },
+    ],
+    [
+      { extra = "uma" },
       { extra = "all" },
     ],
 ]
