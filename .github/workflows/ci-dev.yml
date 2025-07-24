@@ -38,4 +38,4 @@ jobs:
       env:
         # show timings of tests
         PYTEST_ADDOPTS: "--durations=0"
-      run: uv run pytest .
+      run: uv run --no-sync pytest .
