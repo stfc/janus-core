@@ -70,6 +70,10 @@ try:
 except ImportError:
     M3GNET_POTENTIAL = None
 
+PET_MAD_CHECKPOINT = (
+    "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
+)
+
 
 @pytest.mark.parametrize(
     "arch, device, kwargs",
@@ -109,6 +113,9 @@ except ImportError:
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),
         ("orb", "cpu", {"model": ORB_MODEL}),
+        ("pet_mad", "cpu", {}),
+        ("pet_mad", "cpu", {"model": PET_MAD_CHECKPOINT}),
+        ("pet_mad", "cpu", {"checkpoint_path": PET_MAD_CHECKPOINT}),
         ("sevennet", "cpu", {"model": SEVENNET_PATH}),
         ("sevennet", "cpu", {"path": SEVENNET_PATH}),
         ("sevennet", "cpu", {"model_path": SEVENNET_PATH}),
@@ -167,6 +174,7 @@ def test_invalid_arch():
         ("mattersim", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
+        ("pet_mad", "/invalid/path"),
         ("sevenn", "/invalid/path"),
         ("alignn", "invalid/path"),
         ("m3gnet", "/invalid/path"),
@@ -228,6 +236,11 @@ def test_invalid_model(arch, model):
         {"arch": "nequip", "model": NEQUIP_PATH, "path": NEQUIP_PATH},
         {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
         {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
+        {
+            "arch": "pet_mad",
+            "model": PET_MAD_CHECKPOINT,
+            "checkpoint_path": PET_MAD_CHECKPOINT,
+        },
         {"arch": "sevennet", "model_path": SEVENNET_PATH, "model": SEVENNET_PATH},
         {"arch": "sevennet", "model": SEVENNET_PATH, "path": SEVENNET_PATH},
     ],

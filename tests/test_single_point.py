@@ -23,8 +23,10 @@ EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
 ESEN_LABEL = "eSEN-30M-MP"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+PET_MAD_CHECKPOINT = (
+    "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
+)
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
-
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -131,6 +133,14 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
         ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
+        ("pet_mad", "cpu", -27.47624969482422, "NaCl.cif", {}),
+        (
+            "pet_mad",
+            "cpu",
+            -27.47624969482422,
+            "NaCl.cif",
+            {"model": PET_MAD_CHECKPOINT},
+        ),
         (
             "sevennet",
             "cpu",
