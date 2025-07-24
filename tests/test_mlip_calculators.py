@@ -66,14 +66,11 @@ try:
     from fairchem.core import pretrained_mlip
     from huggingface_hub.errors import GatedRepoError
 
-    try:
-        UMA_PREDICT_UNIT = pretrained_mlip.get_predict_unit(
-            model_name=UMA_LABEL, device="cpu"
-        )
-    except GatedRepoError:
-        UMA_PREDICT_UNIT = None
+    UMA_PREDICT_UNIT = pretrained_mlip.get_predict_unit(
+        model_name=UMA_LABEL, device="cpu"
+    )
 
-except ImportError:
+except (ImportError, GatedRepoError):
     UMA_PREDICT_UNIT = None
 
 
