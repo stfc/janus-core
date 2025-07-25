@@ -434,10 +434,10 @@ def test_hessian(tmp_path):
     assert result.exit_code == 0
 
     atoms = read(results_path)
-    assert "mace_mp_energy" in atoms.info
-    assert "mace_mp_hessian" in atoms.info
-    assert "mace_stress" not in atoms.info
-    assert atoms.info["mace_mp_hessian"].shape == (24, 8, 3)
+    assert "mace_mp_d3_energy" in atoms.info
+    assert "mace_mp_d3_hessian" in atoms.info
+    assert "mace_mp_d3_stress" not in atoms.info
+    assert atoms.info["mace_mp_d3_hessian"].shape == (24, 8, 3)
     assert atoms.info["units"]["hessian"] == "ev/Ang^2"
 
 

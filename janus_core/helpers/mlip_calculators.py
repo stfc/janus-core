@@ -12,7 +12,9 @@ from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, get_args
 
+from ase import units
 from ase.calculators.mixing import SumCalculator
+from torch import get_default_dtype
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 from janus_core.helpers.utils import none_to_dict
@@ -84,10 +86,59 @@ def _set_no_weights_only_load():
     environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")
 
 
+def add_dispersion(
+    calc: Calculator,
+    device: Devices = "cpu",
+    dtype: torch.dtype | None = None,
+    **kwargs,
+) -> SumCalculator:
+    """
+    Add D3 dispersion calculator to existing calculator.
+
+    Parameters
+    ----------
+    calc
+        Calculator to add D3 correction to.
+    device
+        Device to run calculator on. Default is "cpu".
+    dtype
+        Calculation precision. Default is current torch dtype.
+    **kwargs
+        Additional keyword arguments passed to `TorchDFTD3Calculator`.
+
+    Returns
+    -------
+    SumCalculator
+        Configured calculator with D3 dispersion correction added.
+    """
+    try:
+        from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
+    except ImportError as err:
+        raise ImportError("Please install the d3 extra.") from err
+
+    dtype = dtype if dtype else get_default_dtype()
+
+    d3_calc = TorchDFTD3Calculator(
+        device=device,
+        dtype=dtype,
+        **kwargs,
+    )
+    sum_calc = SumCalculator([calc, d3_calc])
+
+    # Copy calculator parameters to make more accessible
+    sum_calc.parameters = calc.parameters
+    if "arch" in sum_calc.parameters:
+        sum_calc.parameters["arch"] = sum_calc.parameters["arch"] + "_d3"
+
+    return sum_calc
+
+
 def choose_calculator(
     arch: Architectures,
     device: Devices = "cpu",
     model: PathLike | None = None,
+    dispersion: bool = False,
+    dispersion_kwargs: dict[str, Any] | None = None,
     **kwargs,
 ) -> Calculator:
     """
@@ -101,6 +152,11 @@ def choose_calculator(
         Device to run calculator on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
+    dispersion
+        Whether to add D3 dispersion.
+    dispersion_kwargs
+        Additional keyword arguments for `TorchDFTD3Calculator`. Defaults for mace_mp
+        are taken from mace_mp's defaults.
     **kwargs
         Additional keyword arguments passed to the selected calculator.
 
@@ -116,6 +172,8 @@ def choose_calculator(
     ValueError
         Invalid architecture specified.
     """
+    dispersion_kwargs = dispersion_kwargs if dispersion_kwargs else {}
+
     model = _set_model(model, kwargs)
 
     if device not in get_args(Devices):
@@ -146,6 +204,13 @@ def choose_calculator(
             # Default to "small" model and float64 precision
             model = model if model else "small"
             kwargs.setdefault("default_dtype", "float64")
+
+            # Set mace_mp dispersion defaults
+            dispersion_kwargs.setdefault("damping", kwargs.pop("damping", "bj"))
+            dispersion_kwargs.setdefault("xc", kwargs.pop("dispersion_xc", "pbe"))
+            dispersion_kwargs.setdefault(
+                "cutoff", kwargs.pop("dispersion_cutoff", 40.0 * units.Bohr)
+            )
 
             calculator = mace_mp(model=model, device=device, **kwargs)
 
@@ -419,6 +484,9 @@ def choose_calculator(
     calculator.parameters["version"] = __version__
     calculator.parameters["arch"] = arch
     calculator.parameters["model"] = str(model)
+
+    if dispersion:
+        return add_dispersion(calc=calculator, device=device, **dispersion_kwargs)
 
     return calculator
 

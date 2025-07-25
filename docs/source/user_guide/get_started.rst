@@ -71,6 +71,7 @@ Currently supported MLIP ``extras`` are:
 
 Additional features can also be enabled as ``extras``:
 
+- ``d3``: `DFTD3 <https://github.com/pfnet-research/torch-dftd>`_
 - ``visualise``: `WEAS Widget <https://github.com/superstar54/weas-widget>`_
 - ``plumed``: `PLUMED <https://www.plumed.org>`_
 

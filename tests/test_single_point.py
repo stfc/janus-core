@@ -6,6 +6,8 @@ from pathlib import Path
 import shutil
 from urllib.error import HTTPError, URLError
 
+from ase import units
+from ase.calculators.mixing import SumCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
 from numpy import isfinite
@@ -549,3 +551,81 @@ def test_missing_arch(struct):
 
     with pytest.raises(ValueError, match="A calculator must be attached"):
         SinglePoint(struct=struct)
+
+
+@pytest.mark.parametrize(
+    "arch, kwargs, pred",
+    [
+        ("m3gnet", {}, -0.08281749),
+        (
+            "mace_mp",
+            {"damping": "zero", "xc": "pbe", "cutoff": 95 * units.Bohr},
+            -0.08281749,
+        ),
+        ("mace_off", {}, -0.08281747),
+        ("mattersim", {}, -0.08281749),
+        ("sevennet", {}, -0.08281749),
+    ],
+)
+def test_dispersion(arch, kwargs, pred):
+    """Test dispersion correction."""
+    skip_extras(arch)
+    pytest.importorskip("torch_dftd")
+
+    data_path = DATA_PATH / "benzene.xyz"
+    sp_no_d3 = SinglePoint(
+        struct=data_path,
+        arch=arch,
+        properties="energy",
+        calc_kwargs={"dispersion": False},
+    )
+    assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
+    no_d3_results = sp_no_d3.run()
+
+    sp_d3 = SinglePoint(
+        struct=data_path,
+        arch=arch,
+        properties="energy",
+        calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
+    )
+    assert isinstance(sp_d3.struct.calc, SumCalculator)
+    d3_results = sp_d3.run()
+
+    assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(pred)
+
+
+def test_mace_mp_dispersion():
+    """Test mace_mp dispersion correction matches default."""
+    skip_extras("mace_mp")
+    pytest.importorskip("torch_dftd")
+
+    from mace.calculators import mace_mp
+
+    data_path = DATA_PATH / "benzene.xyz"
+
+    no_d3_energy = SinglePoint(
+        struct=data_path,
+        arch="mace_mp",
+        properties="energy",
+        calc_kwargs={"dispersion": False},
+    ).run()["energy"]
+
+    d3_energy = SinglePoint(
+        struct=data_path,
+        arch="mace_mp",
+        properties="energy",
+        calc_kwargs={"dispersion": True},
+    ).run()["energy"]
+
+    struct = read(data_path)
+    struct.calc = mace_mp(model="small", dispersion=True)
+
+    mace_d3_energy = SinglePoint(
+        struct=struct,
+        properties="energy",
+        calc_kwargs={"dispersion": False},
+    ).run()["energy"]
+
+    # Different default to other architectures
+    assert d3_energy - no_d3_energy == pytest.approx(-0.29815768)
+    assert d3_energy == pytest.approx(mace_d3_energy)
