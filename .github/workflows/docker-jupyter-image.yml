@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./containers
-          file: ./containters/Dockerfile.jupyter
+          file: ./containers/Dockerfile.jupyter
           push: true
           tags: |
             ghcr.io/stfc/janus-core/jupyter:${{ github.sha }}
