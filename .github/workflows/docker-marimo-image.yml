@@ -1,4 +1,4 @@
-name: ghcr-jupyter
+name: ghcr-marimo
 on:
   push:
 #    branches: [ "main" ]
@@ -26,8 +26,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./containers
-          file: ./containers/Dockerfile.jupyter
+          file: ./containers/Dockerfile.marimo
           push: true
           tags: |
-            ghcr.io/stfc/janus-core/jupyter:${{ github.sha }}
-            ghcr.io/stfc/janus-core/jupyter:latest
+            ghcr.io/stfc/janus-core/marimo:${{ github.sha }}
+            ghcr.io/stfc/janus-core/marimo:latest
