@@ -152,8 +152,12 @@ pre-commit = [
 ]
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["uv_build>=0.8.4,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "janus_core"
+module-root = ""
 
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)
