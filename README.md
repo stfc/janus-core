@@ -322,9 +322,8 @@ pytest -v  # Discover and run all tests
 Contributors to this project were funded by
 
 [![PSDI](https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/psdi-100.webp)](https://www.psdi.ac.uk/)
-[![ALC](https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/alc-100.webp)](https://adalovelacecentre.ac.uk/)
+[<img src="docs/source/images/alc.svg" width="200" height="100" />](https://adalovelacecentre.ac.uk/)
 [![CoSeC](https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/cosec-100.webp)](https://www.scd.stfc.ac.uk/Pages/CoSeC.aspx)
-
 
 [ci-badge]: https://github.com/stfc/janus-core/actions/workflows/ci.yml/badge.svg?branch=main
 [ci-link]: https://github.com/stfc/janus-core/actions
