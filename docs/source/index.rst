@@ -30,7 +30,7 @@ Contributors to ``janus-core`` were supported by
    :height: 100px
    :target: https://www.psdi.ac.uk/
 
-.. image:: images/alc-100.webp
+.. image:: images/alc.svg
    :height: 100px
    :target: https://adalovelacecentre.ac.uk/
 
