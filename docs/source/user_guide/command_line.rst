@@ -191,7 +191,7 @@ will save the main output file to ``./results/NaCl.extxyz``, but the summary and
 Data saved
 ++++++++++
 
-By default, calculations performed will modify the underlying `ase.Atoms <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_ object
+By default, calculations performed will modify the underlying `ase.Atoms <https://ase-lib.org/ase/atoms.html>`_ object
 to store information in the ``Atoms.info`` and ``Atoms.arrays`` dictionaries about the MLIP used.
 
 Additional dictionary keys include ``arch``, corresponding to the MLIP architecture used,
@@ -453,7 +453,7 @@ In addition to the standard `Molecular dynamics`_ output files, this will also s
 and any other output files specified by the input file, such as ``COLVAR`` in this example.
 
 .. warning::
-    `Unit conversions <https://wiki.fysik.dtu.dk/ase/ase/calculators/plumed.html#units>`_ are necessary to maintain consistency with ASE.
+    `Unit conversions <https://ase-lib.org/ase/calculators/plumed.html#units>`_ are necessary to maintain consistency with ASE.
 
 
 Equation of State
@@ -607,7 +607,7 @@ Run the Nudged Elastic Band method (using the `MACE-MP <https://github.com/ACEsu
     janus neb --init-struct tests/data/N2.xyz --final-struct tests/data/2N.xyz --arch mace_mp --minimize
 
 
-This will use ASE's built-in `interpolation <https://wiki.fysik.dtu.dk/ase/ase/neb.html#interpolation>`_
+This will use ASE's built-in `interpolation <https://ase-lib.org/ase/neb.html#interpolation>`_
 between the minimized initial and final structures, before applying ASE's ``NEBOptimizer``, an adaptive ODE solver,
 to the NEB.
 
@@ -623,7 +623,7 @@ this can be passed instead of the initial and final structures:
 
 
 Additional options include using `pymatgen to interpolate <https://pymatgen.org/pymatgen.core.html#pymatgen.core.structure.IStructure.interpolate>`_,
-with the ``--interpolator`` option, using `DyNEB <https://wiki.fysik.dtu.dk/ase/ase/neb.html#ase.mep.dyneb.DyNEB>`_ for scaled and dynamic
+with the ``--interpolator`` option, using `DyNEB <https://ase-lib.org/ase/neb.html#ase.mep.dyneb.DyNEB>`_ for scaled and dynamic
 optimizations of images through the ``--neb-method`` option, and changing the optimizer using the ``--neb-optimizer`` option.
 
 
