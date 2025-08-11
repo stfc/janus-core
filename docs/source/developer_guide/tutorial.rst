@@ -5,7 +5,7 @@ Tutorial
 Adding a new MLIP
 =================
 
-Integration of new MLIPs currently requires a corresponding `ASE calculator <https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html>`_.
+Integration of new MLIPs currently requires a corresponding `ASE calculator <https://ase-lib.org/ase/calculators/calculators.html>`_.
 
 The following steps can then be taken, using `ORB <https://github.com/orbital-materials/orb-models>`_ as an example:
 

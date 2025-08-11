@@ -51,7 +51,7 @@ numpydoc_class_members_toctree = False
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "ase": ("https://wiki.fysik.dtu.dk/ase/", None),
+    "ase": ("https://ase-lib.org/", None),
     "phonopy": ("https://phonopy.github.io/phonopy/", None),
     "codecarbon": ("https://mlco2.github.io/codecarbon/", None),
     "torch": ("https://pytorch.org/docs/stable", None),

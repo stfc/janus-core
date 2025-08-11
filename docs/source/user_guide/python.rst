@@ -156,12 +156,12 @@ Additional Calculators
 ======================
 
 Although ``janus-core`` only directly supports the MLIP calculators listed in :doc:`Getting started </user_guide/get_started>`,
-any valid `ASE calculator <https://wiki.fysik.dtu.dk/ase/ase/calculators/calculators.html>`_
+any valid `ASE calculator <https://ase-lib.org/ase/calculators/calculators.html>`_
 can be attached to a structure, including calculators for currently unsupported MLIPs.
 
 This structure can then be passed to ``janus-core`` calculations, which can be run as usual.
 
-For example, performing geometry optimisation using the (`ASE built-in <https://wiki.fysik.dtu.dk/ase/ase/calculators/others.html#lennard-jones>`_) Lennard Jones potential calculator:
+For example, performing geometry optimisation using the (`ASE built-in <https://ase-lib.org/ase/calculators/others.html#lennard-jones>`_) Lennard Jones potential calculator:
 
 .. code-block:: python
 
