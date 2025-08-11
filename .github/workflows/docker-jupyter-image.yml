@@ -1,12 +1,12 @@
 name: ghcr-jupyter
 on:
   push:
-#    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
+    branches: [ "main" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.repository == 'stfc/janus-core'
     permissions:
       packages: write
       contents: read
