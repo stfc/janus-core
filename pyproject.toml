@@ -66,7 +66,7 @@ upet = [
     "upet == 0.2.1; python_version > '3.11'"
 ]
 plumed = [
-    "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
+    "plumed<3.0.0,>=2.9.0; sys_platform != 'win32' and python_version < '3.13'",
 ]
 visualise = [
     "weas-widget<0.2,>=0.1.26"
