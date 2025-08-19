@@ -53,7 +53,7 @@ grace = [
     "tensorpotential == 0.5.1",
 ]
 mace = [
-    "mace-torch==0.3.13",
+    "mace-torch==0.3.14",
     "janus-core[d3]",
 ]
 nequip = [
