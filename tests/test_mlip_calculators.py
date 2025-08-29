@@ -169,7 +169,7 @@ def test_mlips(arch, device, kwargs):
     except BadZipFile:
         pytest.skip("Model download failed")
     except HTTPError as err:  # Inherits from URLError, so check first
-        if "Service Unavailable" in err.msg or "Too Many Requests for url" in err.msg:
+        if "Service Unavailable" in err.msg or "Too Many Requests" in err.msg:
             pytest.skip("Model download failed")
         raise err
     except URLError as err:
