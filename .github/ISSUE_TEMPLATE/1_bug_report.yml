@@ -24,7 +24,7 @@ body:
     attributes:
       label: Version
       description: What version of janus-core are you using? (see `janus --version`)
-      placeholder: e.g., janus-core version: 0.8.3
+      placeholder: "e.g., janus-core version: 0.8.3"
     validations:
       required: true
 
