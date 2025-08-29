@@ -1,20 +1,37 @@
----
 name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+description: Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Please review [our guide on interacting with the issue tracker](https://github.com/astral-sh/uv/issues/9452) before opening a new issue.**
 
----
+  - type: textarea
+    attributes:
+      label: Summary
+      description: |
+        A clear and concise description of what new feature or behaviour you would like to see. If applicable, please describe the current behaviour as well.
+    validations:
+      required: true
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+  - type: textarea
+    attributes:
+      label: Example
+      description: Provide an example of how the user experience would change or how the new feature would be used.
+    validations:
+      required: false
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+  - type: textarea
+    attributes:
+      label: Alternatives
+      description: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false

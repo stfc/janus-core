@@ -1,0 +1,26 @@
+name: Question
+description: Ask a question about janus-core
+labels: ["question"]
+body:
+  - type: textarea
+    attributes:
+      label: Question
+      description: Describe your question in detail.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Platform
+      description: What operating system and architecture are you using? (see `uname -orsm`)
+      placeholder: e.g., macOS 14 arm64, Windows 11 x86_64, Ubuntu 20.04 amd64
+    validations:
+      required: false
+
+  - type: input
+    attributes:
+      label: Version
+      description: What version of janus-cire are you using? (see `janus --version`)
+      placeholder: e.g., janus-core version: 0.8.3
+    validations:
+      required: false
