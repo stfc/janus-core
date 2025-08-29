@@ -20,7 +20,7 @@ body:
   - type: input
     attributes:
       label: Version
-      description: What version of janus-cire are you using? (see `janus --version`)
+      description: What version of janus-core are you using? (see `janus --version`)
       placeholder: "e.g., janus-core version: 0.8.3"
     validations:
       required: false
