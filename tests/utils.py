@@ -144,7 +144,7 @@ def skip_extras(arch: str):
                 pytest.skip("Unable to download model")
         case "grace":
             pytest.importorskip("tensorpotential")
-        case "mace" | "mace_mp" | "mace_off":
+        case "mace" | "mace_mp" | "mace_off" | "mace_omol":
             pytest.importorskip("mace")
         case "mattersim":
             pytest.importorskip("mattersim")
