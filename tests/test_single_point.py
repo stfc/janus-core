@@ -185,7 +185,7 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         energy = single_point.run()["energy"]
         assert energy == pytest.approx(expected_energy, rel=1e-3)
     except HTTPError as err:  # Inherits from URLError, so check first
-        if "Service Unavailable" in err.msg or "Too Many Requests for url" in err.msg:
+        if "Service Unavailable" in err.msg or "Too Many Requests" in err.msg:
             pytest.skip("Model download failed")
         raise err
     except URLError as err:
