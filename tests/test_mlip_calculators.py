@@ -47,7 +47,7 @@ except ImportError:
     EQUIFORMER_PATH = None
     ESEN_PATH = None
 
-NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 
