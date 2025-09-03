@@ -132,6 +132,8 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             {"model": UMA_LABEL},
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
+        ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),
+        ("mace_omol", "cpu", -2079.8650795528843, "H2O.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
         ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
         (
@@ -563,6 +565,7 @@ def test_missing_arch(struct):
             -0.08281749,
         ),
         ("mace_off", {}, -0.08281747),
+        ("mace_omol", {}, -0.08281747),
         ("mattersim", {}, -0.08281749),
         ("sevennet", {}, -0.08281749),
     ],

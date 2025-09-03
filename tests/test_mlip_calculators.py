@@ -132,6 +132,8 @@ PET_MAD_CHECKPOINT = (
         ("mace_off", "cpu", {"model": "small"}),
         ("mace_off", "cpu", {"model_path": MACE_OFF_PATH}),
         ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
+        ("mace_omol", "cpu", {}),
+        ("mace_omol", "cpu", {"model": "extra_large"}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model_path": "mattersim-v1.0.0-1m"}),
         ("m3gnet", "cpu", {}),
