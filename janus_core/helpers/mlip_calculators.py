@@ -340,8 +340,8 @@ def choose_calculator(
 
             model = str(model)
 
-            calculator = NequIPCalculator.from_deployed_model(
-                model_path=model, device=device, **kwargs
+            calculator = NequIPCalculator.from_compiled_model(
+                compile_path=model, device=device, **kwargs
             )
 
         case "dpa3":
