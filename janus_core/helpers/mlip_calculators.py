@@ -224,6 +224,16 @@ def choose_calculator(
 
             calculator = mace_off(model=model, device=device, **kwargs)
 
+        case "mace_omol":
+            from mace import __version__
+            from mace.calculators import mace_omol
+
+            # Default to "extra_large" model and float64 precision
+            model = model if model else "extra_large"
+            kwargs.setdefault("default_dtype", "float64")
+
+            calculator = mace_omol(model=model, device=device, **kwargs)
+
         case "m3gnet":
             from matgl import __version__, load_model
             from matgl.apps.pes import Potential
