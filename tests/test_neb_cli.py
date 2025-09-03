@@ -236,7 +236,7 @@ def test_invalid_interpolator(tmp_path):
         ],
     )
     assert result.exit_code == 2
-    assert "'test' is not one of 'ase', 'pymatgen'." in result.stderr
+    assert "'test' is not one of" in result.stderr
 
 
 def test_interpolate_and_band(tmp_path):

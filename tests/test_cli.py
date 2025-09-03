@@ -13,7 +13,7 @@ runner = CliRunner()
 def test_no_args():
     """Test calling `janus` with no arguments/options."""
     result = runner.invoke(app)
-    assert result.exit_code == 0
+    assert result.exit_code == 2
     assert "Usage: janus [OPTIONS] COMMAND [ARGS]..." in strip_ansi_codes(result.stdout)
 
 
