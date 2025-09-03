@@ -236,7 +236,7 @@ def test_invalid_interpolator(tmp_path):
         ],
     )
     assert result.exit_code == 2
-    assert "'test' is not one of 'ase', 'pymatgen'." in result.stdout
+    assert "'test' is not one of" in result.stderr
 
 
 def test_interpolate_and_band(tmp_path):
@@ -567,7 +567,7 @@ def test_missing_arch(tmp_path):
         ],
     )
     assert result.exit_code == 2
-    assert "Missing option" in result.stdout
+    assert "Missing option" in result.stderr
 
 
 def test_info(tmp_path):
