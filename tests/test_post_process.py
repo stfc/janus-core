@@ -14,6 +14,7 @@ from janus_core.calculations.md import NVE
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.cli.janus import app
 from janus_core.processing import post_process
+from tests.utils import chdir
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
@@ -22,85 +23,87 @@ runner = CliRunner()
 
 def test_md_pp(tmp_path):
     """Test post-processing as part of MD cycle."""
-    file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
-    rdf_path = tmp_path / "Cl4Na4-nve-T300.0-rdf.dat"
-    vaf_path = tmp_path / "Cl4Na4-nve-T300.0-vaf.dat"
+    with chdir(tmp_path):
+        file_prefix = "Cl4Na4-nve-T300.0"
+        rdf_path = Path("Cl4Na4-nve-T300.0-rdf.dat")
+        vaf_path = Path("Cl4Na4-nve-T300.0-vaf.dat")
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-    )
+        single_point = SinglePoint(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+        )
 
-    nve = NVE(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=10,
-        traj_every=2,
-        stats_every=15,
-        file_prefix=file_prefix,
-        post_process_kwargs={
-            "rdf_compute": True,
-            "rdf_rmax": 2.5,
-            "vaf_compute": True,
-        },
-    )
+        nve = NVE(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=10,
+            traj_every=2,
+            stats_every=15,
+            file_prefix=file_prefix,
+            post_process_kwargs={
+                "rdf_compute": True,
+                "rdf_rmax": 2.5,
+                "vaf_compute": True,
+            },
+        )
 
-    nve.run()
+        nve.run()
 
-    assert rdf_path.exists()
-    rdf = np.loadtxt(rdf_path)
-    assert len(rdf) == 50
+        assert rdf_path.exists()
+        rdf = np.loadtxt(rdf_path)
+        assert len(rdf) == 50
 
-    # Cell too small to really compute RDF
-    assert np.all(rdf[:, 1] == 0)
+        # Cell too small to really compute RDF
+        assert np.all(rdf[:, 1] == 0)
 
-    assert vaf_path.exists()
+        assert vaf_path.exists()
 
 
 def test_md_pp_cli(tmp_path):
     """Test all MD simulations are able to run."""
-    file_prefix = tmp_path / "nve-T300"
-    rdf_path = tmp_path / "nve-T300-rdf.dat"
-    vaf_na_path = tmp_path / "vaf_na.dat"
-    vaf_cl_path = tmp_path / "vaf_cl.dat"
+    with chdir(tmp_path):
+        file_prefix = "nve-T300"
+        rdf_path = Path("nve-T300-rdf.dat")
+        vaf_na_path = Path("vaf_na.dat")
+        vaf_cl_path = Path("vaf_cl.dat")
 
-    result = runner.invoke(
-        app,
-        [
-            "md",
-            "--ensemble",
-            "nve",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--arch",
-            "mace_mp",
-            "--file-prefix",
-            file_prefix,
-            "--steps",
-            10,
-            "--traj-every",
-            2,
-            "--post-process-kwargs",
-            """{'vaf_compute': True,
-            'vaf_atoms': (('Na',),('Cl',)),
-            'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat'),
-            'rdf_compute': True,
-            'rdf_rmax': 2.5}""",
-        ],
-    )
+        result = runner.invoke(
+            app,
+            [
+                "md",
+                "--ensemble",
+                "nve",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
+                "--file-prefix",
+                file_prefix,
+                "--steps",
+                10,
+                "--traj-every",
+                2,
+                "--post-process-kwargs",
+                """{'vaf_compute': True,
+                'vaf_atoms': (('Na',),('Cl',)),
+                'vaf_output_files': ('vaf_na.dat', 'vaf_cl.dat'),
+                'rdf_compute': True,
+                'rdf_rmax': 2.5}""",
+            ],
+        )
 
-    assert result.exit_code == 0
+        assert result.exit_code == 0
 
-    assert rdf_path.exists()
-    rdf = np.loadtxt(rdf_path)
-    assert len(rdf) == 50
+        assert rdf_path.exists()
+        rdf = np.loadtxt(rdf_path)
+        assert len(rdf) == 50
 
-    # Cell too small to really compute RDF
-    assert np.all(rdf[:, 1] == 0)
+        # Cell too small to really compute RDF
+        assert np.all(rdf[:, 1] == 0)
 
-    assert vaf_na_path.exists()
-    assert vaf_cl_path.exists()
+        assert vaf_na_path.exists()
+        assert vaf_cl_path.exists()
 
 
 def test_rdf():

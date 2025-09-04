@@ -1120,8 +1120,8 @@ def test_auto_restart(tmp_path, capsys):
     with chdir(tmp_path):
         # Include T300.0 to test Path.stem vs Path.name
         final_path = "md-T300.0-final.extxyz"
-        traj_path = "md-T300.0-traj.extxyz"
-        stats_path = "md-T300.0-stats.dat"
+        traj_path = Path("md-T300.0-traj.extxyz")
+        stats_path = Path("md-T300.0-stats.dat")
         log_file = "md.log"
 
         # Predicted restart file, from defaults
