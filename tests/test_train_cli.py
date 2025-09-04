@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
-import shutil
 
 from typer.testing import CliRunner
 import yaml
@@ -12,6 +10,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     strip_ansi_codes,
@@ -70,25 +69,18 @@ def test_help():
 
 def test_train(tmp_path):
     """Test MLIP training."""
-    model = Path("test.model")
-    compiled_model = Path("test_compiled.model")
-    results_path = Path("results")
-    checkpoints_path = Path("checkpoints")
-    logs_path = Path("logs")
-    results_dir = Path("./janus_results")
-    log_path = results_dir / "train-log.yml"
-    summary_path = results_dir / "train-summary.yml"
+    with chdir(tmp_path):
+        model = Path("test.model")
+        compiled_model = Path("test_compiled.model")
+        results_path = Path("results")
+        checkpoints_path = Path("checkpoints")
+        logs_path = Path("logs")
+        results_dir = Path("./janus_results")
+        log_path = results_dir / "train-log.yml"
+        summary_path = results_dir / "train-summary.yml"
 
-    assert not model.exists()
-    assert not compiled_model.exists()
-    assert not logs_path.exists()
-    assert not results_path.exists()
-    assert not checkpoints_path.exists()
-    assert not results_dir.exists()
+        config = write_tmp_config(DATA_PATH / "mlip_train.yml", Path())
 
-    config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -130,17 +122,6 @@ def test_train(tmp_path):
         }
         check_output_files(train_summary, output_files)
 
-    finally:
-        # Tidy up models
-        model.unlink(missing_ok=True)
-        compiled_model.unlink(missing_ok=True)
-
-        # Tidy up directories
-        shutil.rmtree(logs_path, ignore_errors=True)
-        shutil.rmtree(results_path, ignore_errors=True)
-        shutil.rmtree(checkpoints_path, ignore_errors=True)
-        shutil.rmtree(results_dir, ignore_errors=True)
-
         clear_log_handlers()
 
 
@@ -168,24 +149,18 @@ def test_train_with_foundation(tmp_path):
 
 def test_fine_tune(tmp_path):
     """Test MLIP fine-tuning."""
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    with chdir(tmp_path):
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
 
-    model = Path("test-finetuned.model")
-    compiled_model = Path("test-finetuned_compiled.model")
-    logs_path = Path("logs")
-    results_path = Path("results")
-    checkpoints_path = Path("checkpoints")
+        model = Path("test-finetuned.model")
+        compiled_model = Path("test-finetuned_compiled.model")
+        logs_path = Path("logs")
+        results_path = Path("results")
+        checkpoints_path = Path("checkpoints")
 
-    assert not model.exists()
-    assert not compiled_model.exists()
-    assert not logs_path.exists()
-    assert not results_path.exists()
-    assert not checkpoints_path.exists()
+        config = write_tmp_config(DATA_PATH / "mlip_fine_tune.yml", Path())
 
-    config = write_tmp_config(DATA_PATH / "mlip_fine_tune.yml", tmp_path)
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -206,21 +181,8 @@ def test_fine_tune(tmp_path):
         assert logs_path.is_dir()
         assert results_path.is_dir()
         assert checkpoints_path.is_dir()
-    finally:
-        # Tidy up models
-        model.unlink(missing_ok=True)
-        compiled_model.unlink(missing_ok=True)
 
-        # Tidy up directories
-        shutil.rmtree(logs_path, ignore_errors=True)
-        shutil.rmtree(results_path, ignore_errors=True)
-        shutil.rmtree(checkpoints_path, ignore_errors=True)
-
-        # Clean up logger
-        logger = logging.getLogger()
-        logger.handlers = [
-            h for h in logger.handlers if not isinstance(h, logging.FileHandler)
-        ]
+        clear_log_handlers()
 
 
 def test_fine_tune_no_foundation(tmp_path):
@@ -272,23 +234,17 @@ def test_fine_tune_invalid_foundation(tmp_path):
 
 def test_no_carbon(tmp_path):
     """Test disabling carbon tracking."""
-    model = Path("test.model")
-    compiled_model = Path("test_compiled.model")
-    results_path = Path("results")
-    checkpoints_path = Path("checkpoints")
-    logs_path = Path("logs")
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    with chdir(tmp_path):
+        Path("test.model")
+        Path("test_compiled.model")
+        Path("results")
+        Path("checkpoints")
+        Path("logs")
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
 
-    assert not model.exists()
-    assert not compiled_model.exists()
-    assert not logs_path.exists()
-    assert not results_path.exists()
-    assert not checkpoints_path.exists()
+        config = write_tmp_config(DATA_PATH / "mlip_train.yml", Path())
 
-    config = write_tmp_config(DATA_PATH / "mlip_train.yml", tmp_path)
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -307,15 +263,5 @@ def test_no_carbon(tmp_path):
         with open(summary_path, encoding="utf8") as file:
             train_summary = yaml.safe_load(file)
         assert "emissions" not in train_summary
-
-    finally:
-        # Tidy up models
-        model.unlink(missing_ok=True)
-        compiled_model.unlink(missing_ok=True)
-
-        # Tidy up directories
-        shutil.rmtree(logs_path, ignore_errors=True)
-        shutil.rmtree(results_path, ignore_errors=True)
-        shutil.rmtree(checkpoints_path, ignore_errors=True)
 
         clear_log_handlers()

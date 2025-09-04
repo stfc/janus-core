@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -14,6 +13,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     read_atoms,
@@ -33,16 +33,14 @@ def test_help():
     assert "Usage: janus geomopt [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_geomopt():
+def test_geomopt(tmp_path):
     """Test geomopt calculation."""
-    results_dir = Path("./janus_results")
-    results_path = results_dir / "NaCl-opt.extxyz"
-    log_path = results_dir / "NaCl-geomopt-log.yml"
-    summary_path = results_dir / "NaCl-geomopt-summary.yml"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        results_path = results_dir / "NaCl-opt.extxyz"
+        log_path = results_dir / "NaCl-geomopt-log.yml"
+        summary_path = results_dir / "NaCl-geomopt-summary.yml"
 
-    assert not results_dir.exists()
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -62,9 +60,6 @@ def test_geomopt():
         assert summary_path.exists()
         read_atoms(results_path)
 
-    finally:
-        # Ensure files deleted if command fails
-        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 
