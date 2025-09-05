@@ -31,7 +31,7 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
-          uv sync --extra fairchem
+          uv sync --extra fairchem --extra sevennet
           uv pip install --reinstall pynvml
           uv pip install "fairchem-core[torch-extras]" --no-build-isolation
 
