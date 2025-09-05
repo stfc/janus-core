@@ -69,9 +69,6 @@ pet-mad = [
 plumed = [
     "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
 ]
-sevennet = [
-    "sevenn == 0.10.3",
-]
 visualise = [
     "weas-widget<0.2,>=0.1.26"
 ]
@@ -84,7 +81,6 @@ all = [
     "janus-core[orb]",
     "janus-core[pet-mad]",
     "janus-core[plumed]",
-    "janus-core[sevennet]",
     "janus-core[visualise]",
 ]
 
@@ -92,9 +88,11 @@ all = [
 fairchem = [
     "fairchem-core == 1.10.0",
 ]
-
 mattersim = [
     "mattersim == 1.1.2; sys_platform != 'win32'",
+]
+sevennet = [
+    "sevenn == 0.11.2.post1",
 ]
 
 uma = [
@@ -318,10 +316,14 @@ conflicts = [
     ],
     [
       { extra = "uma" },
-      { extra = "sevennet" },
+      { extra = "all" },
     ],
     [
-      { extra = "uma" },
+      { extra = "sevennet" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "sevennet" },
       { extra = "all" },
     ],
 ]
