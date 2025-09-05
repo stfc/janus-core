@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -17,6 +16,7 @@ from janus_core.cli.janus import app
 from janus_core.helpers.stats import Stats
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     strip_ansi_codes,
@@ -57,7 +57,7 @@ test_data = [
 
 
 @pytest.mark.parametrize("ensemble", test_data)
-def test_md(ensemble):
+def test_md(ensemble, tmp_path):
     """Test all MD simulations are able to run."""
     # Expected default file prefix for each ensemble
     file_prefix = {
@@ -70,25 +70,23 @@ def test_md(ensemble):
         "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
     }
 
-    results_dir = Path("./janus_results")
-    output_files = {
-        key: results_dir / (file_prefix[ensemble] + name)
-        for key, name in [
-            ("final_structure", "final.extxyz"),
-            ("restarts", "res-2.extxyz"),
-            ("stats", "stats.dat"),
-            ("trajectory", "traj.extxyz"),
-            ("rdfs", "rdf.dat"),
-            ("vafs", "vaf.dat"),
-            ("correlations", "cor.dat"),
-            ("log", "md-log.yml"),
-            ("summary", "md-summary.yml"),
-        ]
-    }
+    with chdir(tmp_path):
+        results_dir = Path("./janus_results")
+        output_files = {
+            key: results_dir / (file_prefix[ensemble] + name)
+            for key, name in [
+                ("final_structure", "final.extxyz"),
+                ("restarts", "res-2.extxyz"),
+                ("stats", "stats.dat"),
+                ("trajectory", "traj.extxyz"),
+                ("rdfs", "rdf.dat"),
+                ("vafs", "vaf.dat"),
+                ("correlations", "cor.dat"),
+                ("log", "md-log.yml"),
+                ("summary", "md-summary.yml"),
+            ]
+        }
 
-    assert not results_dir.exists()
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -162,8 +160,6 @@ def test_md(ensemble):
 
         assert "2/2" in result.output
 
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -15,7 +14,7 @@ from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_CSVR, NVT_NH
 from janus_core.calculations.single_point import SinglePoint
 from janus_core.helpers.mlip_calculators import choose_calculator
 from janus_core.helpers.stats import Stats
-from tests.utils import assert_log_contains
+from tests.utils import assert_log_contains, chdir
 
 if hasattr(ase.md.nose_hoover_chain, "IsotropicMTKNPT"):
     from janus_core.calculations.md import NPT_MTK
@@ -73,33 +72,31 @@ def test_init(ensemble, expected):
     assert dyn.ensemble == expected
 
 
-def test_npt():
+def test_npt(tmp_path):
     """Test NPT molecular dynamics."""
-    results_dir = Path("./janus_results")
-    restart_path_1 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-2.extxyz"
-    restart_path_2 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-4.extxyz"
-    restart_final = results_dir / "Cl4Na4-npt-T300.0-p1.0-final.extxyz"
-    traj_path = results_dir / "Cl4Na4-npt-T300.0-p1.0-traj.extxyz"
-    stats_path = results_dir / "Cl4Na4-npt-T300.0-p1.0-stats.dat"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        restart_path_1 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-2.extxyz"
+        restart_path_2 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-4.extxyz"
+        restart_final = results_dir / "Cl4Na4-npt-T300.0-p1.0-final.extxyz"
+        traj_path = results_dir / "Cl4Na4-npt-T300.0-p1.0-traj.extxyz"
+        stats_path = results_dir / "Cl4Na4-npt-T300.0-p1.0-stats.dat"
 
-    assert not results_dir.exists()
+        single_point = SinglePoint(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+        )
+        npt = NPT(
+            struct=single_point.struct,
+            pressure=1.0,
+            temp=300.0,
+            steps=4,
+            traj_every=1,
+            restart_every=2,
+            stats_every=1,
+        )
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-    )
-    npt = NPT(
-        struct=single_point.struct,
-        pressure=1.0,
-        temp=300.0,
-        steps=4,
-        traj_every=1,
-        restart_every=2,
-        stats_every=1,
-    )
-
-    try:
         npt.run()
         restart_atoms_1 = read(restart_path_1)
         assert isinstance(restart_atoms_1, Atoms)
@@ -117,35 +114,31 @@ def test_npt():
             assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
             # Includes step 0
             assert len(lines) == 6
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
-def test_nvt_nh():
+def test_nvt_nh(tmp_path):
     """Test NVT-Nosé–Hoover  molecular dynamics."""
-    results_dir = Path("./janus_results")
-    restart_path = results_dir / "Cl4Na4-nvt-nh-T300.0-res-3.extxyz"
-    restart_final_path = results_dir / "Cl4Na4-nvt-nh-T300.0-final.extxyz"
-    traj_path = results_dir / "Cl4Na4-nvt-nh-T300.0-traj.extxyz"
-    stats_path = results_dir / "Cl4Na4-nvt-nh-T300.0-stats.dat"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        restart_path = results_dir / "Cl4Na4-nvt-nh-T300.0-res-3.extxyz"
+        restart_final_path = results_dir / "Cl4Na4-nvt-nh-T300.0-final.extxyz"
+        traj_path = results_dir / "Cl4Na4-nvt-nh-T300.0-traj.extxyz"
+        stats_path = results_dir / "Cl4Na4-nvt-nh-T300.0-stats.dat"
 
-    assert not results_dir.exists()
+        single_point = SinglePoint(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+        )
+        nvt_nh = NVT_NH(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=3,
+            traj_every=1,
+            restart_every=3,
+            stats_every=1,
+        )
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-    )
-    nvt_nh = NVT_NH(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=3,
-        traj_every=1,
-        restart_every=3,
-        stats_every=1,
-    )
-
-    try:
         nvt_nh.run()
 
         restart_atoms = read(restart_path)
@@ -164,8 +157,6 @@ def test_nvt_nh():
             assert " | T [K]" in lines[0]
             # Includes step 0
             assert len(lines) == 5
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_nve(tmp_path):
@@ -200,31 +191,29 @@ def test_nve(tmp_path):
         assert len(lines) == 6
 
 
-def test_nph():
+def test_nph(tmp_path):
     """Test NPH molecular dynamics."""
-    results_dir = Path("./janus_results")
-    restart_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-res-2.extxyz"
-    restart_final_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-final.extxyz"
-    traj_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-traj.extxyz"
-    stats_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-stats.dat"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        restart_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-res-2.extxyz"
+        restart_final_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-final.extxyz"
+        traj_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-traj.extxyz"
+        stats_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-stats.dat"
 
-    assert not results_dir.exists()
+        single_point = SinglePoint(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+        )
+        nph = NPH(
+            struct=single_point.struct,
+            temp=300.0,
+            steps=3,
+            traj_every=2,
+            restart_every=4,
+            stats_every=2,
+        )
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-    )
-    nph = NPH(
-        struct=single_point.struct,
-        temp=300.0,
-        steps=3,
-        traj_every=2,
-        restart_every=4,
-        stats_every=2,
-    )
-
-    try:
         nph.run()
 
         with pytest.raises(FileNotFoundError):
@@ -243,34 +232,30 @@ def test_nph():
             assert " | Epot/N [eV]" in lines[0]
             # Includes step 0
             assert len(lines) == 3
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
-def test_nvt_csvr():
+def test_nvt_csvr(tmp_path):
     """Test NVT CSVR molecular dynamics."""
-    results_dir = Path("./janus_results")
-    restart_path_1 = results_dir / "NaCl-nvt-csvr-T300.0-res-2.extxyz"
-    restart_path_2 = results_dir / "NaCl-nvt-csvr-T300.0-res-4.extxyz"
-    restart_final = results_dir / "NaCl-nvt-csvr-T300.0-final.extxyz"
-    traj_path = results_dir / "NaCl-nvt-csvr-T300.0-traj.extxyz"
-    stats_path = results_dir / "NaCl-nvt-csvr-T300.0-stats.dat"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        restart_path_1 = results_dir / "NaCl-nvt-csvr-T300.0-res-2.extxyz"
+        restart_path_2 = results_dir / "NaCl-nvt-csvr-T300.0-res-4.extxyz"
+        restart_final = results_dir / "NaCl-nvt-csvr-T300.0-final.extxyz"
+        traj_path = results_dir / "NaCl-nvt-csvr-T300.0-traj.extxyz"
+        stats_path = results_dir / "NaCl-nvt-csvr-T300.0-stats.dat"
 
-    assert not results_dir.exists()
+        csvr = NVT_CSVR(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+            temp=300.0,
+            steps=4,
+            traj_every=1,
+            restart_every=2,
+            stats_every=1,
+            taut=10,
+        )
 
-    csvr = NVT_CSVR(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-        temp=300.0,
-        steps=4,
-        traj_every=1,
-        restart_every=2,
-        stats_every=1,
-        taut=10,
-    )
-
-    try:
         csvr.run()
         restart_atoms_1 = read(restart_path_1)
         assert isinstance(restart_atoms_1, Atoms)
@@ -286,41 +271,37 @@ def test_nvt_csvr():
             lines = stats_file.readlines()
             assert "Target_T [K]" in lines[0]
             assert len(lines) == 6
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
-def test_npt_mtk():
+def test_npt_mtk(tmp_path):
     """Test NPT MTK molecular dynamics."""
-    results_dir = Path("./janus_results")
-    restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
-    restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz"
-    restart_final = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-final.extxyz"
-    traj_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz"
-    stats_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-stats.dat"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
+        restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz"
+        restart_final = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-final.extxyz"
+        traj_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz"
+        stats_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-stats.dat"
 
-    assert not results_dir.exists()
+        npt_mtk = NPT_MTK(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+            temp=300.0,
+            pressure=0.0001,
+            steps=4,
+            traj_every=1,
+            restart_every=2,
+            stats_every=1,
+            thermostat_time=80.0,
+            barostat_time=800.0,
+            thermostat_chain=2,
+            barostat_chain=2,
+            thermostat_substeps=2,
+            barostat_substeps=2,
+        )
 
-    npt_mtk = NPT_MTK(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-        temp=300.0,
-        pressure=0.0001,
-        steps=4,
-        traj_every=1,
-        restart_every=2,
-        stats_every=1,
-        thermostat_time=80.0,
-        barostat_time=800.0,
-        thermostat_chain=2,
-        barostat_chain=2,
-        thermostat_substeps=2,
-        barostat_substeps=2,
-    )
-
-    try:
         npt_mtk.run()
         restart_atoms_1 = read(restart_path_1)
         assert isinstance(restart_atoms_1, Atoms)
@@ -336,9 +317,6 @@ def test_npt_mtk():
             lines = stats_file.readlines()
             assert "Target_T [K]" in lines[0] and "Target_P [GPa]" in lines[0]
             assert len(lines) == 6
-
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_restart(tmp_path):
@@ -884,32 +862,31 @@ def test_heating_restart(tmp_path, capsys):
     assert "8/8" in capsys.readouterr().out
 
 
-def test_heating_files():
+def test_heating_files(tmp_path):
     """Test default heating file names."""
-    results_dir = Path("./janus_results")
-    traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-traj.extxyz"
-    stats_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-stats.dat"
-    final_path = results_dir / "Cl4Na4-nvt-T10-T20-final.extxyz"
+    with chdir(tmp_path):
+        results_dir = Path("./janus_results")
+        traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-traj.extxyz"
+        stats_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-stats.dat"
+        final_path = results_dir / "Cl4Na4-nvt-T10-T20-final.extxyz"
 
-    assert not results_dir.exists()
+        single_point = SinglePoint(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+        )
+        nvt = NVT(
+            struct=single_point.struct,
+            temp=25.0,
+            steps=0,
+            traj_every=2,
+            stats_every=2,
+            temp_start=10,
+            temp_end=20,
+            temp_step=10,
+            temp_time=2,
+        )
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-    )
-    nvt = NVT(
-        struct=single_point.struct,
-        temp=25.0,
-        steps=0,
-        traj_every=2,
-        stats_every=2,
-        temp_start=10,
-        temp_end=20,
-        temp_step=10,
-        temp_time=2,
-    )
-    try:
         nvt.run()
         final_atoms = read(final_path, index=":")
         assert isinstance(final_atoms[0], Atoms)
@@ -925,36 +902,32 @@ def test_heating_files():
         assert stats.data[1, 16] == 10.0
         assert stats.data[2, 16] == 20.0
 
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
-
-def test_heating_md_files():
+def test_heating_md_files(tmp_path):
     """Test default heating files when also running md."""
-    results_dir = Path("./janus_results")
-    traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz"
-    stats_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-stats.dat"
-    final_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-final.extxyz"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz"
+        stats_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-stats.dat"
+        final_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-final.extxyz"
 
-    assert not results_dir.exists()
+        single_point = SinglePoint(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace",
+            model=MODEL_PATH,
+        )
+        nvt = NVT(
+            struct=single_point.struct,
+            temp=25.0,
+            steps=2,
+            traj_every=100,
+            stats_every=2,
+            temp_start=10,
+            temp_end=20,
+            temp_step=10,
+            temp_time=2,
+        )
 
-    single_point = SinglePoint(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace",
-        model=MODEL_PATH,
-    )
-    nvt = NVT(
-        struct=single_point.struct,
-        temp=25.0,
-        steps=2,
-        traj_every=100,
-        stats_every=2,
-        temp_start=10,
-        temp_end=20,
-        temp_step=10,
-        temp_time=2,
-    )
-    try:
         nvt.run()
         final_atoms = read(final_path, index=":")
         assert len(final_atoms) == 3
@@ -969,9 +942,6 @@ def test_heating_md_files():
         assert stats.data[0, 16] == 10
         assert stats.data[2, 16] == 20
         assert stats.data[3, 16] == 25
-
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_ramp_negative(tmp_path):
@@ -1147,20 +1117,17 @@ def test_logging(tmp_path):
 
 def test_auto_restart(tmp_path, capsys):
     """Test auto restarting simulation."""
-    # tmp_path for all files other than restart
-    # Include T300.0 to test Path.stem vs Path.name
-    final_path = tmp_path / "md-T300.0-final.extxyz"
-    traj_path = tmp_path / "md-T300.0-traj.extxyz"
-    stats_path = tmp_path / "md-T300.0-stats.dat"
-    log_file = tmp_path / "md.log"
+    with chdir(tmp_path):
+        # Include T300.0 to test Path.stem vs Path.name
+        final_path = "md-T300.0-final.extxyz"
+        traj_path = Path("md-T300.0-traj.extxyz")
+        stats_path = Path("md-T300.0-stats.dat")
+        log_file = "md.log"
 
-    # Predicted restart file, from defaults
-    results_dir = Path("./janus_results")
-    restart_path = results_dir / "NaCl-nvt-T300.0-res-4.extxyz"
+        # Predicted restart file, from defaults
+        results_dir = Path("janus_results")
+        restart_path = results_dir / "NaCl-nvt-T300.0-res-4.extxyz"
 
-    assert not results_dir.exists()
-
-    try:
         nvt = NVT(
             struct=DATA_PATH / "NaCl.cif",
             arch="mace_mp",
@@ -1237,9 +1204,6 @@ def test_auto_restart(tmp_path, capsys):
 
         # Check progress bar has completed.
         assert "7/7" in capsys.readouterr().out
-
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_auto_restart_restart_stem(tmp_path):

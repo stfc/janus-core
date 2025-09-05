@@ -14,23 +14,12 @@ from typer.testing import CliRunner
 
 from janus_core.calculations.md import NPH, NPT, NPT_MTK, NVE, NVT, NVT_CSVR, NVT_NH
 from janus_core.cli.janus import app
-from tests.utils import assert_log_contains
+from tests.utils import assert_log_contains, chdir
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 runner = CliRunner()
-
-
-@contextlib.contextmanager
-def chdir(path):
-    """Change working directory and return to previous on exit."""
-    prev_cwd = Path.cwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(prev_cwd)
 
 
 @contextlib.contextmanager

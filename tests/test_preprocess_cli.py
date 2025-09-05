@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from typer.testing import CliRunner
 import yaml
@@ -11,6 +10,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     strip_ansi_codes,
@@ -63,31 +63,25 @@ def test_help():
 
 def test_preprocess(tmp_path):
     """Test MLIP preprocessing."""
-    train_path = Path("train")
-    val_path = Path("val")
-    test_path = Path("test")
-    stats_path = Path("./statistics.json")
-    results_dir = Path("./janus_results")
-    log_path = results_dir / "preprocess-log.yml"
-    summary_path = results_dir / "preprocess-summary.yml"
+    with chdir(tmp_path):
+        train_path = Path("train")
+        val_path = Path("val")
+        test_path = Path("test")
+        stats_path = Path("statistics.json")
+        results_dir = Path("janus_results")
+        log_path = results_dir / "preprocess-log.yml"
+        summary_path = results_dir / "preprocess-summary.yml"
 
-    assert not train_path.exists()
-    assert not val_path.exists()
-    assert not test_path.exists()
-    assert not stats_path.exists()
-    assert not results_dir.exists()
+        config = write_tmp_config(DATA_PATH / "mlip_preprocess.yml", Path())
 
-    config = write_tmp_config(DATA_PATH / "mlip_preprocess.yml", tmp_path)
-
-    result = runner.invoke(
-        app,
-        [
-            "preprocess",
-            "--mlip-config",
-            config,
-        ],
-    )
-    try:
+        result = runner.invoke(
+            app,
+            [
+                "preprocess",
+                "--mlip-config",
+                config,
+            ],
+        )
         assert result.exit_code == 0
 
         assert train_path.is_dir()
@@ -120,97 +114,62 @@ def test_preprocess(tmp_path):
         }
         check_output_files(preprocess_summary, output_files)
 
-    finally:
-        # Tidy up directories
-        shutil.rmtree(train_path, ignore_errors=True)
-        shutil.rmtree(val_path, ignore_errors=True)
-        shutil.rmtree(test_path, ignore_errors=True)
-        shutil.rmtree(results_dir, ignore_errors=True)
-
         clear_log_handlers()
 
 
 def test_preprocess_stats(tmp_path):
     """Test statistics file."""
-    train_path = Path("train")
-    val_path = Path("val")
-    test_path = Path("test")
-    stats_path = Path("./statistics.json")
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    with chdir(tmp_path):
+        stats_path = Path("./statistics.json")
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
 
-    assert not train_path.exists()
-    assert not val_path.exists()
-    assert not test_path.exists()
-    assert not stats_path.exists()
+        config = write_tmp_config(DATA_PATH / "mlip_preprocess_stats.yml", Path())
 
-    config = write_tmp_config(DATA_PATH / "mlip_preprocess_stats.yml", tmp_path)
+        result = runner.invoke(
+            app,
+            [
+                "preprocess",
+                "--mlip-config",
+                config,
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
 
-    result = runner.invoke(
-        app,
-        [
-            "preprocess",
-            "--mlip-config",
-            config,
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
-    try:
         assert result.exit_code == 0
         assert stats_path.is_file()
-
-    finally:
-        # Tidy up directories
-        shutil.rmtree(train_path, ignore_errors=True)
-        shutil.rmtree(val_path, ignore_errors=True)
-        shutil.rmtree(test_path, ignore_errors=True)
-
-        stats_path.unlink(missing_ok=True)
 
         clear_log_handlers()
 
 
 def test_no_carbon(tmp_path):
     """Test disabling carbon tracking."""
-    train_path = Path("train")
-    val_path = Path("val")
-    test_path = Path("test")
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    with chdir(tmp_path):
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
 
-    assert not train_path.exists()
-    assert not val_path.exists()
-    assert not test_path.exists()
+        config = write_tmp_config(DATA_PATH / "mlip_preprocess.yml", Path())
 
-    config = write_tmp_config(DATA_PATH / "mlip_preprocess.yml", tmp_path)
-
-    result = runner.invoke(
-        app,
-        [
-            "preprocess",
-            "--mlip-config",
-            config,
-            "--no-tracker",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
-    try:
+        result = runner.invoke(
+            app,
+            [
+                "preprocess",
+                "--mlip-config",
+                config,
+                "--no-tracker",
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
         assert result.exit_code == 0
 
         with open(summary_path, encoding="utf8") as file:
             preprocess_summary = yaml.safe_load(file)
         assert "emissions" not in preprocess_summary
-
-    finally:
-        # Tidy up directories
-        shutil.rmtree(train_path, ignore_errors=True)
-        shutil.rmtree(val_path, ignore_errors=True)
-        shutil.rmtree(test_path, ignore_errors=True)
 
         clear_log_handlers()

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
+import os
 from pathlib import Path
 import re
 from typing import Any
@@ -199,3 +201,14 @@ def check_output_files(summary: dict[str, Any], output_files: dict[str, Path]) -
             assert output_file == str(value.absolute().as_posix()), (
                 f"{value} is inconsistent with {output_file}"
             )
+
+
+@contextlib.contextmanager
+def chdir(path):
+    """Change working directory and return to previous on exit."""
+    prev_cwd = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)

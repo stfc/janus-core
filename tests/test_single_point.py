@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 from urllib.error import HTTPError, URLError
 
 from ase import units
@@ -14,7 +13,7 @@ from numpy import isfinite
 import pytest
 
 from janus_core.calculations.single_point import SinglePoint
-from tests.utils import read_atoms, skip_extras
+from tests.utils import chdir, read_atoms, skip_extras
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -248,17 +247,15 @@ def test_single_point_traj():
     )
 
 
-def test_single_point_write():
+def test_single_point_write(tmp_path):
     """Test writing singlepoint results."""
     skip_extras("mace")
 
-    data_path = DATA_PATH / "NaCl.cif"
-    results_dir = Path("./janus_results")
-    results_path = results_dir / "NaCl-results.extxyz"
+    with chdir(tmp_path):
+        data_path = DATA_PATH / "NaCl.cif"
+        results_dir = Path("janus_results")
+        results_path = results_dir / "NaCl-results.extxyz"
 
-    assert not results_dir.exists()
-
-    try:
         single_point = SinglePoint(
             struct=data_path,
             arch="mace",
@@ -285,8 +282,6 @@ def test_single_point_write():
         assert atoms.arrays["mace_forces"][0] == pytest.approx(
             [4.11996826e-18, 1.79977561e-17, 1.80139537e-17]
         )
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
 
 
 def test_single_point_write_kwargs(tmp_path):

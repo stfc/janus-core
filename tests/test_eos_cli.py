@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from ase.io import read
 import pytest
@@ -13,6 +12,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     strip_ansi_codes,
@@ -31,17 +31,15 @@ def test_help():
     assert "Usage: janus eos [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_eos():
+def test_eos(tmp_path):
     """Test calculating the equation of state."""
-    results_dir = Path("./janus_results")
-    eos_raw_path = results_dir / "NaCl-eos-raw.dat"
-    eos_fit_path = results_dir / "NaCl-eos-fit.dat"
-    log_path = results_dir / "NaCl-eos-log.yml"
-    summary_path = results_dir / "NaCl-eos-summary.yml"
+    with chdir(tmp_path):
+        results_dir = Path("./janus_results")
+        eos_raw_path = results_dir / "NaCl-eos-raw.dat"
+        eos_fit_path = results_dir / "NaCl-eos-fit.dat"
+        log_path = results_dir / "NaCl-eos-log.yml"
+        summary_path = results_dir / "NaCl-eos-summary.yml"
 
-    assert not results_dir.exists()
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -110,8 +108,6 @@ def test_eos():
         }
         check_output_files(eos_summary, output_files)
 
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 

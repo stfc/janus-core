@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -13,6 +12,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     read_atoms,
@@ -32,16 +32,14 @@ def test_singlepoint_help():
     assert "Usage: janus singlepoint [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_singlepoint():
+def test_singlepoint(tmp_path):
     """Test singlepoint calculation."""
-    results_dir = Path("./janus_results")
-    results_path = results_dir / "NaCl-results.extxyz"
-    log_path = results_dir / "NaCl-singlepoint-log.yml"
-    summary_path = results_dir / "NaCl-singlepoint-summary.yml"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        results_path = results_dir / "NaCl-results.extxyz"
+        log_path = results_dir / "NaCl-singlepoint-log.yml"
+        summary_path = results_dir / "NaCl-singlepoint-summary.yml"
 
-    assert not results_dir.exists()
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -75,10 +73,6 @@ def test_singlepoint():
         assert "units" in atoms.info
         for prop, units in expected_units.items():
             assert atoms.info["units"][prop] == units
-
-    finally:
-        # Ensure files deleted if command fails
-        shutil.rmtree(results_dir, ignore_errors=True)
 
         clear_log_handlers()
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 
 from ase import Atoms
 from ase.io import read
@@ -14,6 +13,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     strip_ansi_codes,
@@ -32,18 +32,16 @@ def test_help():
     assert "Usage: janus neb [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_neb():
+def test_neb(tmp_path):
     """Test calculating force constants and band structure."""
-    results_dir = Path("./janus_results")
-    results_path = results_dir / "LiFePO4_start-neb-results.dat"
-    band_path = results_dir / "LiFePO4_start-neb-band.extxyz"
-    plot_path = results_dir / "LiFePO4_start-neb-plot.svg"
-    log_path = results_dir / "LiFePO4_start-neb-log.yml"
-    summary_path = results_dir / "LiFePO4_start-neb-summary.yml"
+    with chdir(tmp_path):
+        results_dir = Path("./janus_results")
+        results_path = results_dir / "LiFePO4_start-neb-results.dat"
+        band_path = results_dir / "LiFePO4_start-neb-band.extxyz"
+        plot_path = results_dir / "LiFePO4_start-neb-plot.svg"
+        log_path = results_dir / "LiFePO4_start-neb-log.yml"
+        summary_path = results_dir / "LiFePO4_start-neb-summary.yml"
 
-    assert not results_dir.exists()
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -112,8 +110,6 @@ def test_neb():
         assert isinstance(band[0], Atoms)
         assert len(band) == 7
 
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 

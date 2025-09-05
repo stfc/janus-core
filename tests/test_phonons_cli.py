@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import lzma
 from pathlib import Path
-import shutil
 
 from ase.io import read
 import pytest
@@ -14,6 +13,7 @@ import yaml
 from janus_core.cli.janus import app
 from tests.utils import (
     assert_log_contains,
+    chdir,
     check_output_files,
     clear_log_handlers,
     strip_ansi_codes,
@@ -32,17 +32,15 @@ def test_help():
     assert "Usage: janus phonons [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_phonons():
+def test_phonons(tmp_path):
     """Test calculating force constants and band structure."""
-    results_dir = Path("./janus_results")
-    phonopy_path = results_dir / "NaCl-phonopy.yml"
-    bands_path = results_dir / "NaCl-auto_bands.yml.xz"
-    log_path = results_dir / "NaCl-phonons-log.yml"
-    summary_path = results_dir / "NaCl-phonons-summary.yml"
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        phonopy_path = results_dir / "NaCl-phonopy.yml"
+        bands_path = results_dir / "NaCl-auto_bands.yml.xz"
+        log_path = results_dir / "NaCl-phonons-log.yml"
+        summary_path = results_dir / "NaCl-phonons-summary.yml"
 
-    assert not results_dir.exists()
-
-    try:
         result = runner.invoke(
             app,
             [
@@ -105,8 +103,6 @@ def test_phonons():
         }
         check_output_files(summary=phonon_summary, output_files=output_files)
 
-    finally:
-        shutil.rmtree(results_dir, ignore_errors=True)
         clear_log_handlers()
 
 
