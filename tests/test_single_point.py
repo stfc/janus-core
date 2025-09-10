@@ -23,7 +23,7 @@ DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
 ESEN_LABEL = "eSEN-30M-MP"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
-NEQUIP_PATH = MODEL_PATH / "toluene.pth"
+NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
 )

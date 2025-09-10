@@ -57,9 +57,6 @@ mace = [
     "mace-torch==0.3.14",
     "janus-core[d3]",
 ]
-nequip = [
-    "nequip == 0.6.1",
-]
 orb = [
     "orb-models == 0.5.5; sys_platform != 'win32'",
 ]
@@ -77,7 +74,6 @@ all = [
     "janus-core[grace]",
     "janus-core[d3]",
     "janus-core[mace]",
-    "janus-core[nequip]",
     "janus-core[orb]",
     "janus-core[pet-mad]",
     "janus-core[plumed]",
@@ -91,10 +87,12 @@ fairchem = [
 mattersim = [
     "mattersim == 1.1.2; sys_platform != 'win32'",
 ]
+nequip = [
+    "nequip == 0.14.0",
+]
 sevennet = [
     "sevenn == 0.11.2.post1",
 ]
-
 uma = [
     "fairchem-core == 2.3.0",
 ]
@@ -324,6 +322,14 @@ conflicts = [
     ],
     [
       { extra = "sevennet" },
+      { extra = "all" },
+    ],
+    [
+      { extra = "nequip" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "nequip" },
       { extra = "all" },
     ],
 ]
