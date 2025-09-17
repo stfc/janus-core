@@ -12,7 +12,7 @@ body:
   - type: input
     attributes:
       label: Platform
-      description: What operating system and architecture are you using? (see `uname -orsm`)
+      description: What operating system and architecture are you using? (see `uname -orsm` on Linux/MacOS)
       placeholder: e.g., macOS 14 arm64, Windows 11 x86_64, Ubuntu 20.04 amd64
     validations:
       required: false
