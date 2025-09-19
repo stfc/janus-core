@@ -156,7 +156,7 @@ RUN mamba install  --yes \
     'sympy' \
     'widgetsnbextension'\
     'xlrd' \
-    'meson' \
+    'gxx' \
     'spglib' && \
     mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
