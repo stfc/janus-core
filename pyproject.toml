@@ -168,7 +168,7 @@ pythonpath = ["."]
 source=["janus_core"]
 
 [tool.ruff]
-exclude = ["conf.py", "*ipynb"]
+exclude = ["conf.py", "*ipynb","containers/assets/tutorials/*.py"]
 target-version = "py310"
 
 [tool.ruff.lint]
