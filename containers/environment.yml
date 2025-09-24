@@ -14,9 +14,9 @@ dependencies:
 #      - git+https://github.com/ACEsuit/mace.git@develop
       - torch-dftd
 #      - git+https://github.com/CheukHinHoJerry/torch-dftd.git
-      - cuequivariance==0.5.1
-      - cuequivariance-torch==0.5.1
-      - cuequivariance-ops-torch-cu12==0.5.1
+      - cuequivariance==0.6.1
+      - cuequivariance-torch==0.6.1
+      - cuequivariance-ops-torch-cu12==0.6.1
       - torchvision
       - weas-widget
       - seaborn
