@@ -183,5 +183,6 @@ RUN . /opt/conda/bin/activate && \
     mamba clean --all -f -y && \
     rm -rf "/home/${NB_USER}/.cache"
 
+EXPOSE 8888
 
 WORKDIR "${HOME}"

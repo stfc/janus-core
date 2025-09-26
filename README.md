@@ -294,6 +294,43 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 Minimal and full example configuration files for all calculations can be found
 [here](https://stfc.github.io/janus-core/examples/index.html).
 
+## Docker/Podman images
+
+You can use janus_core in a jupyerhub or marimo environment, we provide regular updated images.
+
+
+```shell
+docker pull ghcr.io/stfc/janus-core/jupyter:latest
+
+docker pull ghcr.io/stfc/janus-core/marimo:latest
+```
+or using podman
+
+```shell
+podman pull ghcr.io/stfc/janus-core/jupyter:latest
+
+podman pull ghcr.io/stfc/janus-core/marimo:latest
+```
+
+to start
+
+for marimo
+
+```shell
+
+podman run --rm --security-opt seccomp=unconfined -p 8842:8842 ghcr.io/stfc/janus-core/marimo:latest
+
+```
+for jypyterhub
+
+```
+podman run --rm --security-opt seccomp=unconfined -p 8888:8888 ghcr.io/stfc/janus-core/jupyter:latest
+```
+
+for more details on how to share filesystem and so on you can check Run Locally section in this document
+https://summer.ccp5.ac.uk/introduction.html
+
+
 
 ## Development
 

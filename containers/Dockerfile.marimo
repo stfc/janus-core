@@ -27,7 +27,7 @@ RUN apt update --yes && \
     locale-gen
 
 
-ARG marimo_version=0.14.16
+ARG marimo_version=0.16.2
 ENV MARIMO_SKIP_UPDATE_CHECK=1
 ENV UV_SYSTEM_PYTHON=1
 RUN uv pip install --no-cache-dir marimo==${marimo_version} && \
