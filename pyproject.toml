@@ -168,7 +168,7 @@ pythonpath = ["."]
 source=["janus_core"]
 
 [tool.ruff]
-exclude = ["conf.py", "*ipynb"]
+exclude = ["conf.py", "*ipynb","containers/assets/tutorials/*.py"]
 target-version = "py310"
 
 [tool.ruff.lint]
@@ -192,6 +192,8 @@ select = [
     # isort
     "UP",
 ]
+[tool.ruff.lint.per-file-ignores]
+'containers/*.py' = ['D100', 'E501']
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true

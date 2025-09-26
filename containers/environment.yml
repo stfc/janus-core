@@ -1,0 +1,24 @@
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - pip
+  - pip:
+      - git+https://github.com/imagdau/aseMolec@main
+      - skmatter
+      - pymatgen
+      - tqdm
+      - pack-mm
+      - 'janus-core[all]@git+https://github.com/stfc/janus-core.git@main'
+      - git+https://github.com/ChengUCB/les.git
+#      - git+https://github.com/ACEsuit/mace.git@develop
+      - torch-dftd
+#      - git+https://github.com/CheukHinHoJerry/torch-dftd.git
+      - cuequivariance==0.6.1
+      - cuequivariance-torch==0.6.1
+      - cuequivariance-ops-torch-cu12==0.6.1
+      - torchvision
+      - weas-widget
+      - seaborn
+      - data-tutorials
+      - opentsne
