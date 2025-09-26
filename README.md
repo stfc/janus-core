@@ -296,8 +296,7 @@ Minimal and full example configuration files for all calculations can be found
 
 ## Docker/Podman images
 
-You can use janus_core in a jupyerhub or marimo environment, we provide regular updated images.
-
+You can use `janus_core` in a JupyterHub or marimo environment. We provide regularly updated images, which can be dowloaded by running:
 
 ```shell
 docker pull ghcr.io/stfc/janus-core/jupyter:latest
@@ -312,23 +311,20 @@ podman pull ghcr.io/stfc/janus-core/jupyter:latest
 podman pull ghcr.io/stfc/janus-core/marimo:latest
 ```
 
-to start
-
-for marimo
+To start, for marimo run:
 
 ```shell
 
 podman run --rm --security-opt seccomp=unconfined -p 8842:8842 ghcr.io/stfc/janus-core/marimo:latest
 
 ```
-for jypyterhub
+or for JupyterHub, run:
 
 ```
 podman run --rm --security-opt seccomp=unconfined -p 8888:8888 ghcr.io/stfc/janus-core/jupyter:latest
 ```
 
-for more details on how to share filesystem and so on you can check Run Locally section in this document
-https://summer.ccp5.ac.uk/introduction.html
+For more details on how to share your filesystem and so on you can refer to this documentation: https://summer.ccp5.ac.uk/introduction.html#run-locally.
 
 
 
