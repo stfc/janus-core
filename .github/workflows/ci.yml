@@ -86,6 +86,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           parallel: true
+          fail-on-error: false
           flag-name: run-${{ matrix.python-version }}
           file: coverage.xml
           base-path: janus_core
@@ -98,6 +99,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           parallel-finished: true
+          fail-on-error: false
 
   docs:
     runs-on: ubuntu-latest
