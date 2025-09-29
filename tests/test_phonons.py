@@ -41,7 +41,7 @@ def test_calc_phonons():
 
 
 def test_force_consts_to_hdf5_deprecation():
-    """Test calculating phonons from ASE atoms object."""
+    """Test deprecation of force-consts-to-hdf5."""
     struct = read(DATA_PATH / "NaCl.cif")
     struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
     with pytest.warns(FutureWarning, match="--force_consts_to_hdf5 is deprecated."):
