@@ -290,7 +290,7 @@ class Phonons(BaseCalculation):
         self.enable_progress_bar = enable_progress_bar
 
         # Handle deprecation
-        if force_consts_to_hdf5:
+        if force_consts_to_hdf5 is not None:
             if hdf5:
                 raise ValueError(
                     """`force_consts_to_hdf5`: has replaced `hdf5`.
