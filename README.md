@@ -17,6 +17,7 @@ Tools for machine learnt interatomic potentials
 - [Features](#features)
 - [Python interface](#python-interface)
 - [Command line interface](#command-line-interface)
+- [Docker/Podman images](#dockerpodman-images)
 - [Development](#development)
 - [License](#license)
 - [Funding](#funding)
@@ -293,6 +294,41 @@ This will run a singlepoint energy calculation on `KCl.cif` using the [MACE-MP](
 
 Minimal and full example configuration files for all calculations can be found
 [here](https://stfc.github.io/janus-core/examples/index.html).
+
+## Docker/Podman images
+
+You can use `janus_core` in a JupyterHub or marimo environment using [docker](https://www.docker.com) or [podman](https://podman.io/). We provide regularly updated docker/podman images, which can be dowloaded by running:
+
+```shell
+docker pull ghcr.io/stfc/janus-core/jupyter:amd64-latest
+
+docker pull ghcr.io/stfc/janus-core/marimo:amd64-latest
+```
+or using podman
+
+```shell
+podman pull ghcr.io/stfc/janus-core/jupyter-amd64:latest
+
+podman pull ghcr.io/stfc/janus-core/marimo-amd64:latest
+```
+
+for amd64 architecture, if you require arm64 replace amd64 with arm64 above, and next instructions.
+
+To start, for marimo run:
+
+```shell
+
+podman run --rm --security-opt seccomp=unconfined -p 8842:8842 ghcr.io/stfc/janus-core/marimo:amd64-latest
+
+```
+or for JupyterHub, run:
+
+```
+podman run --rm --security-opt seccomp=unconfined -p 8888:8888 ghcr.io/stfc/janus-core/jupyter:amd64-latest
+```
+
+For more details on how to share your filesystem and so on you can refer to this documentation: https://summer.ccp5.ac.uk/introduction.html#run-locally.
+
 
 
 ## Development
