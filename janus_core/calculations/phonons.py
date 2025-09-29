@@ -162,7 +162,7 @@ class Phonons(BaseCalculation):
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
-        force_consts_to_hdf5: None = None,
+        force_consts_to_hdf5: bool | None = None,
         hdf5: bool = True,
         plot_to_file: bool = False,
         write_results: bool = True,
