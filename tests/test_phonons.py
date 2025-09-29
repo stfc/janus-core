@@ -40,6 +40,20 @@ def test_calc_phonons():
     assert "phonon" in phonons.results
 
 
+def test_force_consts_to_hdf5_deprecation():
+    """Test calculating phonons from ASE atoms object."""
+    struct = read(DATA_PATH / "NaCl.cif")
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    with pytest.warns(FutureWarning, match="--force_consts_to_hdf5 is deprecated."):
+        phonons = Phonons(
+            struct=struct,
+            force_consts_to_hdf5=True,
+        )
+
+    phonons.calc_force_constants(write_force_consts=True)
+    assert "phonon" in phonons.results
+
+
 def test_optimize(tmp_path):
     """Test optimizing structure before calculation."""
     log_file = tmp_path / "phonons.log"
