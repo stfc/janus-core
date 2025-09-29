@@ -283,7 +283,6 @@ class Phonons(BaseCalculation):
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.temp_step = temp_step
-        self.force_consts_to_hdf5 = force_consts_to_hdf5
         self.hdf5 = hdf5
         self.plot_to_file = plot_to_file
         self.write_results = write_results
@@ -367,7 +366,7 @@ class Phonons(BaseCalculation):
         if not self.qpoint_file:
             filename = f"auto_{filename}"
         self.bands_file = self._build_filename(filename)
-
+        self.bands_plot_file = self._build_filename("bands.svg")
         self.dos_file = self._build_filename("dos.dat")
         self.dos_plot_file = self._build_filename("dos.svg")
         self.bands_dos_plot_file = self._build_filename("bs-dos.svg")

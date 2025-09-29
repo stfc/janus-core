@@ -118,7 +118,7 @@ def phonons(
             callback=deprecated_option,
             hidden=True,
         ),
-    ] = True,
+    ] = None,
     hdf5: Annotated[
         bool,
         Option(
