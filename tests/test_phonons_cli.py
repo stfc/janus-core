@@ -37,7 +37,7 @@ def test_phonons(tmp_path):
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         phonopy_path = results_dir / "NaCl-phonopy.yml"
-        bands_path = results_dir / "NaCl-auto_bands.yml.xz"
+        bands_path = results_dir / "NaCl-auto_bands.hdf5"
         log_path = results_dir / "NaCl-phonons-log.yml"
         summary_path = results_dir / "NaCl-phonons-summary.yml"
 
