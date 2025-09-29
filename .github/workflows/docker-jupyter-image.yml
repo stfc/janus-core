@@ -32,7 +32,7 @@ jobs:
             ghcr.io/stfc/janus-core/jupyter:amd64-${{ github.sha }}
             ghcr.io/stfc/janus-core/jupyter:amd64-latest
   build-arm64:
-    runs-on: ubuntu-latest-arm
+    runs-on: ubuntu-24.04-arm
     if: github.repository == 'stfc/janus-core'
     permissions:
       packages: write
