@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any, get_args
+from warnings import warn
 
 from ase import Atoms
 from numpy import ndarray
@@ -107,6 +108,8 @@ class Phonons(BaseCalculation):
         End temperature for thermal properties calculations, in K. Default is 1000.0.
     temp_step
         Temperature step for thermal properties calculations, in K. Default is 50.0.
+    force_consts_to_hdf5
+        Deprecated. Please use `hdf5`.
     hdf5
         Whether to write force constants and bands in hdf5 or not. Default is True.
     plot_to_file
@@ -159,6 +162,7 @@ class Phonons(BaseCalculation):
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
+        force_consts_to_hdf5: None = None,
         hdf5: bool = True,
         plot_to_file: bool = False,
         write_results: bool = True,
@@ -237,6 +241,8 @@ class Phonons(BaseCalculation):
             End temperature for thermal calculations, in K. Default is 1000.0.
         temp_step
             Temperature step for thermal calculations, in K. Default is 50.0.
+        force_consts_to_hdf5
+            Deprecated. Please use `hdf5`.
         hdf5
             Whether to write force constants and bands in hdf5 or not. Default is True.
         plot_to_file
@@ -277,11 +283,27 @@ class Phonons(BaseCalculation):
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.temp_step = temp_step
+        self.force_consts_to_hdf5 = force_consts_to_hdf5
         self.hdf5 = hdf5
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
         self.enable_progress_bar = enable_progress_bar
+
+        # Handle deprecation
+        if force_consts_to_hdf5:
+            if hdf5:
+                raise ValueError(
+                    """`force_consts_to_hdf5`: has replaced `hdf5`.
+                     Please only use `hdf5`"""
+                )
+            self.hdf5 = force_consts_to_hdf5
+            warn(
+                """`force_consts_to_hdf5` has been deprecated.
+                Please use `hdf5`.""",
+                FutureWarning,
+                stacklevel=2,
+            )
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -340,17 +362,12 @@ class Phonons(BaseCalculation):
         # Output files
         self.phonopy_file = self._build_filename("phonopy.yml")
         self.force_consts_file = self._build_filename("force_constants.hdf5")
-        if self.qpoint_file:
-            if hdf5:
-                self.bands_file = self._build_filename("bands.hdf5")
-            else:
-                self.bands_file = self._build_filename("bands.yml")
-        else:
-            if hdf5:
-                self.bands_file = self._build_filename("auto_bands.hdf5")
-            else:
-                self.bands_file = self._build_filename("auto_bands.yml")
-        self.bands_plot_file = self._build_filename("bands.svg")
+
+        filename = "bands" + (".hdf5" if hdf5 else ".yml")
+        if not self.qpoint_file:
+            filename = f"auto_{filename}"
+        self.bands_file = self._build_filename(filename)
+
         self.dos_file = self._build_filename("dos.dat")
         self.dos_plot_file = self._build_filename("dos.svg")
         self.bands_dos_plot_file = self._build_filename("bs-dos.svg")
@@ -571,7 +588,7 @@ class Phonons(BaseCalculation):
             Whether to save the force constants separately to an hdf5 file. Default is
             self.hdf5.
         force_consts_file
-            Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
+            Name of hdf5 file to save force constants. Unused if `hdf5`
             is False. Default is inferred from `file_prefix`.
         """
         if "phonon" not in self.results:
