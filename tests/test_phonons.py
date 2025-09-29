@@ -44,7 +44,9 @@ def test_force_consts_to_hdf5_deprecation():
     """Test deprecation of force-consts-to-hdf5."""
     struct = read(DATA_PATH / "NaCl.cif")
     struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
-    with pytest.warns(FutureWarning, match="--force_consts_to_hdf5 is deprecated."):
+    with pytest.warns(
+        FutureWarning, match="`force_consts_to_hdf5` has been deprecated."
+    ):
         phonons = Phonons(
             struct=struct,
             force_consts_to_hdf5=True,

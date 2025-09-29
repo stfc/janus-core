@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import lzma
 from pathlib import Path
 
 from ase.io import read
+from h5py import File as HDF5Open
 import pytest
 from typer.testing import CliRunner
 import yaml
@@ -37,7 +37,7 @@ def test_phonons(tmp_path):
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         phonopy_path = results_dir / "NaCl-phonopy.yml"
-        bands_path = results_dir / "NaCl-auto_bands.hdf5"
+        bands_path = results_dir / "NaCl-auto_bands.yml"
         log_path = results_dir / "NaCl-phonons-log.yml"
         summary_path = results_dir / "NaCl-phonons-summary.yml"
 
@@ -66,14 +66,12 @@ def test_phonons(tmp_path):
 
         has_eigenvectors = False
         has_velocity = False
-        with open(bands_path) as file:
-            for line in file:
-                if "eigenvector" in line:
-                    has_eigenvectors = True
-                if "group_velocity" in line:
-                    has_velocity = True
-                if has_eigenvectors and has_velocity:
-                    break
+        with open(bands_path, encoding="utf8") as file:
+            bands = yaml.safe_load(file)
+            if "eigenvector" in bands["phonon"][0]["band"][0]:
+                has_eigenvectors = True
+            if "group_velocity" in bands["phonon"][0]["band"][0]:
+                has_velocity = True
         assert has_eigenvectors and has_velocity
 
         assert "command" in phonon_summary
@@ -132,7 +130,7 @@ def test_bands_simple(tmp_path):
     assert result.exit_code == 0
 
     assert autoband_results.exists()
-    with lzma.open(autoband_results, mode="rb") as file:
+    with open(autoband_results, encoding="utf-8") as file:
         bands = yaml.safe_load(file)
     assert "eigenvector" not in bands["phonon"][0]["band"][0]
     assert bands["nqpoint"] == 126
@@ -196,10 +194,21 @@ def test_hdf5(tmp_path):
         "summary": summary_path,
     }
     check_output_files(summary=phonon_summary, output_files=output_files)
+    has_eigenvectors = False
+    has_velocity = False
+    nqpoints = 0
+    with HDF5Open(bands_results, "r") as bands:
+        if "eigenvector" in bands:
+            has_eigenvectors = True
+        if "group_velocity" in bands:
+            has_velocity = True
+        nqpoints = bands["nqpoint"][0]
+    assert has_eigenvectors and has_velocity
+    assert nqpoints == 306
 
 
-def test_hdf5_deprecated(tmp_path):
-    """Test saving force constants to HDF5 in new directory."""
+def test_force_consts_to_hdf5_deprecated(tmp_path):
+    """Test saving force constants to HDF5 deprecated."""
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
     hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
@@ -705,7 +714,7 @@ def test_paths(tmp_path):
     assert result.exit_code == 0
 
     assert band_results.exists()
-    with lzma.open(band_results, mode="rb") as file:
+    with open(band_results, encoding="utf-8") as file:
         bands = yaml.safe_load(file)
     assert bands["nqpoint"] == 11
     assert bands["npath"] == 1
