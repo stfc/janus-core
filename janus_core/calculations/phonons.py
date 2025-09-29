@@ -291,7 +291,7 @@ class Phonons(BaseCalculation):
 
         # Handle deprecation
         if force_consts_to_hdf5 is not None:
-            if hdf5:
+            if hdf5 is False:
                 raise ValueError(
                     """`force_consts_to_hdf5`: has replaced `hdf5`.
                      Please only use `hdf5`"""
