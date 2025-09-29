@@ -26,7 +26,7 @@ from janus_core.cli.types import (
     Summary,
     Tracker,
 )
-from janus_core.cli.utils import yaml_converter_callback
+from janus_core.cli.utils import deprecated_option, yaml_converter_callback
 
 app = Typer()
 
@@ -110,10 +110,19 @@ def phonons(
         ),
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
-    hdf5: Annotated[
+    force_consts_to_hdf5: Annotated[
         bool,
         Option(
             help="Whether to save force constants in hdf5.",
+            rich_help_panel="Calculation",
+            callback=deprecated_option,
+            hidden=True,
+        ),
+    ] = True,
+    hdf5: Annotated[
+        bool,
+        Option(
+            help="Whether to save force constants and bands in hdf5.",
             rich_help_panel="Calculation",
         ),
     ] = True,
@@ -228,8 +237,11 @@ def phonons(
         Default is 0.1.
     minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
+    force_consts_to_hdf5
+        Deprecated. Please use `hdf5`.
     hdf5
-        Whether to save force constants in hdf5 format. Default is True.
+        Whether to save force constants and bands in hdf5 format.
+        Default is True.
     plot_to_file
         Whether to plot. Default is False.
     write_full
