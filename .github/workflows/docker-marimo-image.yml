@@ -11,6 +11,7 @@ jobs:
       packages: write
       contents: read
     steps:
+# free space from https://stackoverflow.com/questions/75536771/github-runner-out-of-disk-space-after-building-docker-image
       -
         name: Check disk space
         run: df . -h
