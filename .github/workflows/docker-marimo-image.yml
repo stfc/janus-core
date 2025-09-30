@@ -12,11 +12,11 @@ jobs:
       contents: read
     steps:
 # free space from https://stackoverflow.com/questions/75536771/github-runner-out-of-disk-space-after-building-docker-image
-      -
-        name: Check disk space
+
+      - name: Check disk space
         run: df . -h
-      -
-        name: Free disk space
+
+      - name: Free disk space
         run: |
           sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
           sudo rm -rf \
@@ -46,8 +46,8 @@ jobs:
           sudo apt-get autoremove -y >/dev/null 2>&1
           sudo apt-get autoclean -y >/dev/null 2>&1
           echo "some packages purged"
-      -
-        name: Check disk space
+
+      - name: Check disk space
         run: |
           sudo dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -nr | head
           df . -h
