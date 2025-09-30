@@ -25,7 +25,7 @@ jobs:
           echo "some directories deleted"
           sudo apt install aptitude -y >/dev/null 2>&1
           sudo aptitude purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
-            esl-erlang firefox gfortran-8 gfortran-9 google-chrome-stable \
+            esl-erlang firefox gfortran google-chrome-stable \
             google-cloud-sdk imagemagick \
             libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
             mercurial apt-transport-https mono-complete libmysqlclient \
@@ -33,6 +33,8 @@ jobs:
             libfreetype6 libfreetype6-dev libfontconfig1 libfontconfig1-dev \
             snmp pollinate libpq-dev postgresql-client powershell ruby-full \
             sphinxsearch subversion mongodb-org azure-cli microsoft-edge-stable \
+            temurin-11-jdk temurin-8-jdk temurin-17-jdk temurin-21-jdk \
+            llvm-16-dev llvm-17-dev llvm-18-dev \
             -y -f >/dev/null 2>&1
           sudo aptitude purge google-cloud-sdk -f -y >/dev/null 2>&1
           sudo aptitude purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
