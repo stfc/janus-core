@@ -1,12 +1,12 @@
 name: ghcr-marimo
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "main" ]
 
 jobs:
   build-amd64:
     runs-on: ubuntu-latest
-    if: github.repository == 'alinelena/janus-core'
+    if: github.repository == 'stfc/janus-core'
     permissions:
       packages: write
       contents: read
