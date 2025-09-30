@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any, get_args
+from warnings import warn
 
 from ase import Atoms
 from numpy import ndarray
@@ -108,7 +109,9 @@ class Phonons(BaseCalculation):
     temp_step
         Temperature step for thermal properties calculations, in K. Default is 50.0.
     force_consts_to_hdf5
-        Whether to write force constants in hdf format or not. Default is True.
+        Deprecated. Please use `hdf5`.
+    hdf5
+        Whether to write force constants and bands in hdf5 or not. Default is True.
     plot_to_file
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
@@ -159,7 +162,8 @@ class Phonons(BaseCalculation):
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
-        force_consts_to_hdf5: bool = True,
+        force_consts_to_hdf5: bool | None = None,
+        hdf5: bool = True,
         plot_to_file: bool = False,
         write_results: bool = True,
         write_full: bool = True,
@@ -238,7 +242,9 @@ class Phonons(BaseCalculation):
         temp_step
             Temperature step for thermal calculations, in K. Default is 50.0.
         force_consts_to_hdf5
-            Whether to write force constants in hdf format or not. Default is True.
+            Deprecated. Please use `hdf5`.
+        hdf5
+            Whether to write force constants and bands in hdf5 or not. Default is True.
         plot_to_file
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
@@ -277,11 +283,26 @@ class Phonons(BaseCalculation):
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.temp_step = temp_step
-        self.force_consts_to_hdf5 = force_consts_to_hdf5
+        self.hdf5 = hdf5
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
         self.enable_progress_bar = enable_progress_bar
+
+        # Handle deprecation
+        if force_consts_to_hdf5 is not None:
+            if hdf5 is False:
+                raise ValueError(
+                    """`force_consts_to_hdf5`: has replaced `hdf5`.
+                     Please only use `hdf5`"""
+                )
+            self.hdf5 = force_consts_to_hdf5
+            warn(
+                """`force_consts_to_hdf5` has been deprecated.
+                Please use `hdf5`.""",
+                FutureWarning,
+                stacklevel=2,
+            )
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -340,10 +361,11 @@ class Phonons(BaseCalculation):
         # Output files
         self.phonopy_file = self._build_filename("phonopy.yml")
         self.force_consts_file = self._build_filename("force_constants.hdf5")
-        if self.qpoint_file:
-            self.bands_file = self._build_filename("bands.yml.xz")
-        else:
-            self.bands_file = self._build_filename("auto_bands.yml.xz")
+
+        filename = "bands" + (".hdf5" if hdf5 else ".yml")
+        if not self.qpoint_file:
+            filename = f"auto_{filename}"
+        self.bands_file = self._build_filename(filename)
         self.bands_plot_file = self._build_filename("bands.svg")
         self.dos_file = self._build_filename("dos.dat")
         self.dos_plot_file = self._build_filename("dos.svg")
@@ -430,9 +452,7 @@ class Phonons(BaseCalculation):
         return {
             "log": self.log_kwargs["filename"] if self.logger else None,
             "params": self.phonopy_file if self.write_results else None,
-            "force_constants": (
-                self.force_consts_file if self.force_consts_to_hdf5 else None
-            ),
+            "force_constants": (self.force_consts_file if self.hdf5 else None),
             "bands": (
                 self.bands_file
                 if self.write_results and "bands" in self.calcs
@@ -552,7 +572,7 @@ class Phonons(BaseCalculation):
         self,
         *,
         phonopy_file: PathLike | None = None,
-        force_consts_to_hdf5: bool | None = None,
+        hdf5: bool | None = None,
         force_consts_file: PathLike | None = None,
     ) -> None:
         """
@@ -563,11 +583,11 @@ class Phonons(BaseCalculation):
         phonopy_file
             Name of yaml file to save params of phonopy and optionally force constants.
             Default is inferred from `file_prefix`.
-        force_consts_to_hdf5
+        hdf5
             Whether to save the force constants separately to an hdf5 file. Default is
-            self.force_consts_to_hdf5.
+            self.hdf5.
         force_consts_file
-            Name of hdf5 file to save force constants. Unused if `force_consts_to_hdf5`
+            Name of hdf5 file to save force constants. Unused if `hdf5`
             is False. Default is inferred from `file_prefix`.
         """
         if "phonon" not in self.results:
@@ -576,8 +596,8 @@ class Phonons(BaseCalculation):
                 "Please run `calc_force_constants` first"
             )
 
-        if force_consts_to_hdf5 is None:
-            force_consts_to_hdf5 = self.force_consts_to_hdf5
+        if hdf5 is None:
+            hdf5 = self.hdf5
 
         if phonopy_file:
             self.phonopy_file = phonopy_file
@@ -586,11 +606,11 @@ class Phonons(BaseCalculation):
 
         phonon = self.results["phonon"]
 
-        save_force_consts = not force_consts_to_hdf5
+        save_force_consts = not hdf5
         build_file_dir(self.phonopy_file)
         phonon.save(self.phonopy_file, settings={"force_constants": save_force_consts})
 
-        if force_consts_to_hdf5:
+        if hdf5:
             build_file_dir(self.force_consts_file)
             write_force_constants_to_hdf5(
                 phonon.force_constants, filename=self.force_consts_file
@@ -621,6 +641,7 @@ class Phonons(BaseCalculation):
     def write_bands(
         self,
         *,
+        hdf5: bool | None = None,
         bands_file: PathLike | None = None,
         save_plots: bool | None = None,
         plot_file: PathLike | None = None,
@@ -630,6 +651,9 @@ class Phonons(BaseCalculation):
 
         Parameters
         ----------
+        hdf5
+            Whether to save the bands in an hdf5 file. Default is
+            self.hdf5.
         bands_file
             Name of yaml file to save band structure. Default is inferred from
             `file_prefix`.
@@ -645,11 +669,15 @@ class Phonons(BaseCalculation):
                 "Please run `calc_force_constants` first"
             )
 
+        if hdf5 is None:
+            hdf5 = self.hdf5
+
         if save_plots is None:
             save_plots = self.plot_to_file
 
         if bands_file:
             self.bands_file = bands_file
+
         if plot_file:
             self.bands_plot_file = plot_file
 
@@ -682,10 +710,14 @@ class Phonons(BaseCalculation):
         )
 
         build_file_dir(self.bands_file)
-        self.results["phonon"].write_yaml_band_structure(
-            filename=self.bands_file,
-            compression="lzma",
-        )
+        if hdf5:
+            self.results["phonon"].write_hdf5_band_structure(
+                filename=self.bands_file,
+            )
+        else:
+            self.results["phonon"].write_yaml_band_structure(
+                filename=self.bands_file,
+            )
 
         bplt = self.results["phonon"].plot_band_structure()
         if save_plots:

@@ -494,7 +494,7 @@ This will save the Phonopy parameters, including displacements and force constan
 in addition to generating a log file, ``NaCl-phonons-log.yml``, and summary of inputs, ``NaCl-phonons-summary.yml``.
 
 Additionally, the ``--bands`` option can be added to calculate the band structure
-and save the results to a compressed yaml file, ``NaCl-auto_bands.yml.xz``:
+and save the results to a compressed yaml file, ``NaCl-auto_bands.hdf5``:
 
 .. code-block:: bash
 
@@ -533,7 +533,7 @@ but band paths can also be specified explicitly using the ``--paths`` option to 
     janus phonons --struct tests/data/NaCl.cif --arch mace_mp --bands --plot-to-file --paths tests/data/paths.yml
 
 
-This will save the results in a compressed yaml file, ``NaCl-bands.yml.xz``, as well as the generated plot, ``NaCl-bands.svg``.
+This will save the results in a compressed yaml file, ``NaCl-bands.hdf5``, as well as the generated plot, ``NaCl-bands.svg``.
 
 The ``--paths`` file must include:
 
