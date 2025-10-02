@@ -27,7 +27,7 @@ RUN apt update --yes && \
     locale-gen
 
 
-ARG marimo_version=0.16.2
+ARG marimo_version=0.16.4
 ENV MARIMO_SKIP_UPDATE_CHECK=1
 ENV UV_SYSTEM_PYTHON=1
 RUN uv pip install --no-cache-dir marimo==${marimo_version} && \
@@ -51,8 +51,8 @@ RUN uv pip install --no-cache-dir marimo[recommended,lsp,sql] altair pandas pyth
   pytest
 RUN uv pip install --no-cache-dir 'janus-core[all]@git+https://github.com/stfc/janus-core.git@main'
 RUN uv pip install  --no-cache-dir cuequivariance==0.5.1 \
-  cuequivariance-torch==0.5.1 \
-  cuequivariance-ops-torch-cu12==0.5.1 \
+  cuequivariance-torch==0.6.1 \
+  cuequivariance-ops-torch-cu12==0.6.1 \
   torchvision \
   pack-mm \
   seaborn \
@@ -63,4 +63,4 @@ RUN uv pip install  --no-cache-dir cuequivariance==0.5.1 \
   pymatviz \
   git+https://github.com/imagdau/aseMolec@main
 
-CMD marimo edit --no-token -p $PORT --host $HOST
+CMD ["/bin/sh", "-c", "exec marimo edit --no-token -p $PORT --host $HOST"]
