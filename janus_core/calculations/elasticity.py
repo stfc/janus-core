@@ -205,7 +205,7 @@ class Elasticity(BaseCalculation):
             "generated.extxyz", filename=self.write_kwargs.get("filename")
         )
 
-        self.elasticity_file = self._build_filename("elasticity.dat")
+        self.elasticity_file = self._build_filename("elastic_tensor.dat")
 
         self.results = {}
 
@@ -275,12 +275,12 @@ class Elasticity(BaseCalculation):
                 values = [
                     self.elastic_tensor.property_dict[prop]
                     for prop in (
-                        "g_reuss",
-                        "g_voigt",
-                        "g_vrh",
                         "k_reuss",
                         "k_voigt",
                         "k_vrh",
+                        "g_reuss",
+                        "g_voigt",
+                        "g_vrh",
                         "y_mod",
                         "universal_anisotropy",
                         "homogeneous_poisson",
