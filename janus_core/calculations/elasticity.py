@@ -74,6 +74,8 @@ class Elasticity(BaseCalculation):
     write_kwargs
         Keyword arguments to pass to ase.io.write to save generated structures.
         Default is {}.
+    write_voigt
+        Whether to write out in Voigt notation, Default is True.
 
     Attributes
     ----------
@@ -102,6 +104,7 @@ class Elasticity(BaseCalculation):
         write_results: bool = True,
         write_structures: bool = False,
         write_kwargs: OutputKwargs | None = None,
+        write_voigt: bool = True,
     ) -> None:
         """
         Initialise class.
@@ -149,6 +152,8 @@ class Elasticity(BaseCalculation):
         write_kwargs
             Keyword arguments to pass to ase.io.write to save generated structures.
             Default is {}.
+        write_voigt
+            Whether to write out in Voigt notation, Default is True.
         """
         read_kwargs, minimize_kwargs, write_kwargs = none_to_dict(
             read_kwargs, minimize_kwargs, write_kwargs
@@ -160,6 +165,7 @@ class Elasticity(BaseCalculation):
         self.write_results = write_results
         self.write_structures = write_structures
         self.write_kwargs = write_kwargs
+        self.write_voigt = write_voigt
 
         if (
             (self.minimize or self.minimize_all)
@@ -286,7 +292,13 @@ class Elasticity(BaseCalculation):
                         "homogeneous_poisson",
                     )
                 ]
-                for cijkl in self.elastic_tensor.flatten():
+
+                vals = (
+                    self.elastic_tensor.voigt
+                    if self.write_voigt
+                    else self.elastic_tensor
+                )
+                for cijkl in vals.flatten():
                     values.append(cijkl)
                 print(" ".join(map(str, values)), file=out)
         return self.elastic_tensor
@@ -311,21 +323,18 @@ class Elasticity(BaseCalculation):
         ]
         for i, deformed_structure in enumerate(self.deformed_structures):
             deformed_structure.calc = copy(self.struct.calc)
+            progress = f"{i} / {len(self.deformed_structures)}"
             if self.minimize_all:
                 if self.logger:
                     self.logger.info(
-                        "Minimising deformed structure %u / %u",
-                        i,
-                        len(self.deformed_structures),
+                        "Calculating stress for deformed structure " + progress
                     )
                 optimizer = GeomOpt(deformed_structure, **self.minimize_kwargs)
                 optimizer.run()
 
             if self.logger:
                 self.logger.info(
-                    "Calculating stress for deformed structure %u / %u",
-                    i,
-                    len(self.deformed_structures),
+                    "Calculating stress for deformed structure " + progress,
                 )
 
             # Always append first original structure
