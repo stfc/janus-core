@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from copy import copy
 from typing import Any
 
@@ -76,6 +77,12 @@ class Elasticity(BaseCalculation):
         Default is {}.
     write_voigt
         Whether to write out in Voigt notation, Default is True.
+    shear_strains
+        The shear strains to build the DeformedStructureSet.
+        Default is (-0.06, -0.03, 0.03, 0.06).
+    normal_strains
+        The normal strains to build the DeformedStructureSet.
+        Default is (-0.01, -0.005, 0.005, 0.01).
 
     Attributes
     ----------
@@ -105,6 +112,8 @@ class Elasticity(BaseCalculation):
         write_structures: bool = False,
         write_kwargs: OutputKwargs | None = None,
         write_voigt: bool = True,
+        shear_strains: Sequence[float] = (-0.06, -0.03, 0.03, 0.06),
+        normal_strains: Sequence[float] = (-0.01, -0.005, 0.005, 0.01),
     ) -> None:
         """
         Initialise class.
@@ -154,6 +163,12 @@ class Elasticity(BaseCalculation):
             Default is {}.
         write_voigt
             Whether to write out in Voigt notation, Default is True.
+        shear_strains
+            The shear strains to build the DeformedStructureSet.
+            Default is (-0.06, -0.03, 0.03, 0.06).
+        normal_strains
+            The normal strains to build the DeformedStructureSet.
+            Default is (-0.01, -0.005, 0.005, 0.01).
         """
         read_kwargs, minimize_kwargs, write_kwargs = none_to_dict(
             read_kwargs, minimize_kwargs, write_kwargs
@@ -166,6 +181,8 @@ class Elasticity(BaseCalculation):
         self.write_structures = write_structures
         self.write_kwargs = write_kwargs
         self.write_voigt = write_voigt
+        self.normal_strains = normal_strains
+        self.shear_strains = shear_strains
 
         if (
             (self.minimize or self.minimize_all)
@@ -311,7 +328,9 @@ class Elasticity(BaseCalculation):
             self.tracker.start_task("Calculate configurations")
 
         self.deformed_structure_set = DeformedStructureSet(
-            AseAtomsAdaptor.get_structure(self.struct)
+            AseAtomsAdaptor.get_structure(self.struct),
+            norm_strains=self.normal_strains,
+            shear_strains=self.shear_strains,
         )
 
         self.stresses = []

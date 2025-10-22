@@ -24,12 +24,20 @@ def test_calc_elasticity(tmp_path):
     struct = bulk("Al", crystalstructure="fcc")
     struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
+    strains = np.array([-1.0, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75, 1.0])
+
     elasticity = Elasticity(
-        struct, file_prefix=tmp_path / "elasticity", log_kwargs={"filename": log_file}
+        struct,
+        file_prefix=tmp_path / "elasticity",
+        log_kwargs={"filename": log_file},
+        shear_strains=0.4 * strains,
+        normal_strains=0.2 * strains,
     )
+
     elastic_tensor = elasticity.run()
 
-    assert elastic_tensor.k_reuss == approx(80.34637735135381, rel=1e-3)
+    assert len(elasticity.deformed_structure_set) == 48
+    assert elastic_tensor.k_reuss == approx(97.07446854941564, rel=1e-3)
 
     # Check geometry optimization run by default
     assert_log_contains(
