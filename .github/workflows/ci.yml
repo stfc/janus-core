@@ -43,6 +43,7 @@ jobs:
       - name: Install updated e3nn dependencies
         run: |
           uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
+          uv pip install --reinstall pynvml
           uv pip install fairchem-core[torch-extras] --no-build-isolation
 
       - name: Run test suite for updated e3nn dependencies
@@ -53,7 +54,9 @@ jobs:
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install dgl dependencies
-        run: uv sync --extra mace --extra m3gnet --extra alignn --extra d3
+        run: |
+          uv sync --extra mace --extra m3gnet --extra alignn --extra d3
+          uv pip install --reinstall pynvml
 
       - name: Run test suite for dgl dependencies
         env:
@@ -69,6 +72,7 @@ jobs:
       - name: Install UMA
         run: |
           uv sync --extra uma
+          uv pip install --reinstall pynvml
           uv pip install fairchem-core[torch-extras] --no-build-isolation
 
       - name: Run test suite for UMA
@@ -118,7 +122,9 @@ jobs:
         uses: pandoc/actions/setup@v1
 
       - name: Install dependencies
-        run: uv sync --extra mace
+        run: |
+          uv sync --extra mace
+          uv pip install --reinstall pynvml
 
       - name: Build docs
         run: cd docs && uv run make html
