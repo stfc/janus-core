@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from copy import copy
 from typing import Any
 
 from ase import Atoms
 from ase.units import GPa
+import numpy as np
 from pymatgen.analysis.elasticity import ElasticTensor
 from pymatgen.analysis.elasticity.strain import (
     DeformedStructureSet,
@@ -77,12 +77,15 @@ class Elasticity(BaseCalculation):
         Default is {}.
     write_voigt
         Whether to write out in Voigt notation, Default is True.
-    shear_strains
-        The shear strains to build the DeformedStructureSet.
-        Default is (-0.06, -0.03, 0.03, 0.06).
-    normal_strains
-        The normal strains to build the DeformedStructureSet.
-        Default is (-0.01, -0.005, 0.005, 0.01).
+    shear_magnitude
+        The magnitude of shear strain to apply for deformed structures.
+        Default is 0.06.
+    normal_magnitude
+        The magnitude of normal strain to apply for deformed structures.
+        Default is 0.01.
+    n_strains
+        The number of normal and shear strains to apply for deformed structures.
+        Default is 4.
 
     Attributes
     ----------
@@ -112,8 +115,9 @@ class Elasticity(BaseCalculation):
         write_structures: bool = False,
         write_kwargs: OutputKwargs | None = None,
         write_voigt: bool = True,
-        shear_strains: Sequence[float] = (-0.06, -0.03, 0.03, 0.06),
-        normal_strains: Sequence[float] = (-0.01, -0.005, 0.005, 0.01),
+        shear_magnitude: float = 0.06,
+        normal_magnitude: float = 0.01,
+        n_strains: int = 4,
     ) -> None:
         """
         Initialise class.
@@ -163,12 +167,15 @@ class Elasticity(BaseCalculation):
             Default is {}.
         write_voigt
             Whether to write out in Voigt notation, Default is True.
-        shear_strains
-            The shear strains to build the DeformedStructureSet.
-            Default is (-0.06, -0.03, 0.03, 0.06).
-        normal_strains
-            The normal strains to build the DeformedStructureSet.
-            Default is (-0.01, -0.005, 0.005, 0.01).
+        shear_magnitude
+            The magnitude of shear strain to apply for deformed structures.
+            Default is 0.06.
+        normal_magnitude
+            The magnitude of normal strain to apply for deformed structures.
+            Default is 0.01.
+        n_strains
+            The number of normal and shear strains to apply for deformed structures.
+            Default is 4.
         """
         read_kwargs, minimize_kwargs, write_kwargs = none_to_dict(
             read_kwargs, minimize_kwargs, write_kwargs
@@ -181,8 +188,13 @@ class Elasticity(BaseCalculation):
         self.write_structures = write_structures
         self.write_kwargs = write_kwargs
         self.write_voigt = write_voigt
-        self.normal_strains = normal_strains
-        self.shear_strains = shear_strains
+
+        strains = np.array(
+            [-1 + 2 * i / n_strains for i in range(n_strains // 2)]
+            + [2 * (i + 1) / n_strains for i in range(n_strains // 2)]
+        )
+        self.normal_strains = strains * normal_magnitude
+        self.shear_strains = strains * shear_magnitude
 
         if (
             (self.minimize or self.minimize_all)
