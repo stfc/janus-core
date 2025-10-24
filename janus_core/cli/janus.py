@@ -8,6 +8,7 @@ from typer import Exit, Option, Typer
 
 from janus_core import __version__
 from janus_core.cli.descriptors import descriptors
+from janus_core.cli.elasticity import elasticity
 from janus_core.cli.eos import eos
 from janus_core.cli.geomopt import geomopt
 from janus_core.cli.md import md
@@ -42,6 +43,10 @@ app.command(
     help="Calculate equation of state.",
     rich_help_panel="Calculations",
 )(eos)
+app.command(
+    help="Calculate elasticity tensors.",
+    rich_help_panel="Calculations",
+)(elasticity)
 app.command(
     help="Run Nudged Elastic Band method.",
     rich_help_panel="Calculations",
