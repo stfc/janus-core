@@ -45,7 +45,7 @@ janus\_core.calculations.eos module
    :show-inheritance:
 
 janus\_core.calculations.elasticity module
------------------------------------
+------------------------------------------
 
 .. automodule:: janus_core.calculations.elasticity
    :members:
@@ -128,7 +128,7 @@ janus\_core.cli.eos module
    :show-inheritance:
 
 janus\_core.cli.elasticity module
---------------------------
+---------------------------------
 
 .. automodule:: janus_core.cli.elasticity
    :members:
