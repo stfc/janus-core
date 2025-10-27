@@ -44,6 +44,16 @@ janus\_core.calculations.eos module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.calculations.elasticity module
+-----------------------------------
+
+.. automodule:: janus_core.calculations.elasticity
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.calculations.geom\_opt module
 -----------------------------------------
 
@@ -116,6 +126,17 @@ janus\_core.cli.eos module
    :private-members:
    :undoc-members:
    :show-inheritance:
+
+janus\_core.cli.elasticity module
+--------------------------
+
+.. automodule:: janus_core.cli.elasticity
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 
 janus\_core.cli.geomopt module
 ------------------------------
