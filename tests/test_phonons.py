@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ase.io import read
+from h5py import File
 import pytest
 
 from janus_core.calculations.phonons import Phonons
@@ -54,6 +55,29 @@ def test_force_consts_to_hdf5_deprecation():
 
     phonons.calc_force_constants(write_force_consts=True)
     assert "phonon" in phonons.results
+
+
+def test_force_consts_compression(tmp_path):
+    """Test compression of force constants."""
+    log_file = tmp_path / "phonons.log"
+    force_constants = tmp_path / "NaCl-force_constants.hdf5"
+
+    struct = read(DATA_PATH / "NaCl.cif")
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+
+    phonons = Phonons(
+        struct=struct,
+        file_prefix=tmp_path / "NaCl",
+        log_kwargs={"filename": log_file},
+        hdf5=True,
+        hdf5_compression="gzip",
+    )
+    phonons.run()
+
+    assert force_constants.exists()
+    with File(force_constants, "r") as h5f:
+        assert "force_constants" in h5f
+        assert h5f["force_constants"].compression == "gzip"
 
 
 def test_optimize(tmp_path):
