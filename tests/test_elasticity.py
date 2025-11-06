@@ -62,7 +62,8 @@ def test_calc_elasticity(tmp_path):
             "homogeneous_poisson",
         )
     ):
-        assert elastic_tensor.property_dict[prop] == approx(
+        units = 1.0 / 1e9 if prop == "y_mod" else 1.0
+        assert elastic_tensor.property_dict[prop] * units == approx(
             written_elasticity[i], rel=1e-3
         )
 
@@ -114,7 +115,8 @@ def test_no_optimize_no_write_voigt(tmp_path):
             "homogeneous_poisson",
         )
     ):
-        assert elastic_tensor.property_dict[prop] == approx(
+        units = 1.0 / 1e9 if prop == "y_mod" else 1.0
+        assert elastic_tensor.property_dict[prop] * units == approx(
             written_elasticity[i], rel=1e-3
         )
 
