@@ -89,9 +89,8 @@ class Elasticity(BaseCalculation):
 
     Attributes
     ----------
-    results: ElasticityResults
-        Dictionary containing the elasticity tensor and the derived
-        bulk and shear moduli.
+    elastic_tensor: ElasticTensor
+        The ElasticTensor (GPa).
     """
 
     def __init__(
@@ -242,7 +241,7 @@ class Elasticity(BaseCalculation):
 
         self.elasticity_file = self._build_filename("elastic_tensor.dat")
 
-        self.results = {}
+        self.elastic_tensor = None
 
     @property
     def output_files(self) -> None:
@@ -268,9 +267,8 @@ class Elasticity(BaseCalculation):
 
         Returns
         -------
-        ElasticityResults
-            Dictionary containing the ElasticTensor and derived values of
-            the shear and bulk moduli.
+        ElasticTensor
+            The ElasticTensor (GPa).
         """
         self._set_info_units()
 
@@ -307,6 +305,7 @@ class Elasticity(BaseCalculation):
                     " Elastic constants (row-major) [GPa]",
                     file=out,
                 )
+
                 values = [
                     self.elastic_tensor.property_dict[prop]
                     for prop in (
@@ -316,11 +315,16 @@ class Elasticity(BaseCalculation):
                         "g_reuss",
                         "g_voigt",
                         "g_vrh",
-                        "y_mod",
-                        "universal_anisotropy",
-                        "homogeneous_poisson",
                     )
                 ]
+
+                # y_mod multiplies by 1e9, which happens to convert
+                # to Pa if the tensor is actually supplied in GPa.
+                # See https://github.com/materialsproject/pymatgen/issues/4435
+                values.append(self.elastic_tensor.y_mod / 1e9)
+
+                for dimensionless in ("universal_anisotropy", "homogeneous_poisson"):
+                    values.append(self.elastic_tensor.property_dict[dimensionless])
 
                 vals = (
                     self.elastic_tensor.voigt
@@ -329,7 +333,9 @@ class Elasticity(BaseCalculation):
                 )
                 for cijkl in vals.flatten():
                     values.append(cijkl)
+
                 print(" ".join(map(str, values)), file=out)
+
         return self.elastic_tensor
 
     def _calculate_elasticity(self) -> None:
