@@ -98,7 +98,7 @@ def test_output_structs(
     if arch == "mace_mp":
         model = "small"
     if arch == "chgnet":
-        model = "0.4.0"
+        model = "0.4.2"
     if arch == "sevennet":
         model = "SevenNet-0_11July2024"
 
