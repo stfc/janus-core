@@ -1,6 +1,6 @@
 [project]
 name = "janus-core"
-version = "0.8.5"
+version = "0.8.6"
 description = "Tools for machine learnt interatomic potentials"
 authors = [
     { name = "Elliott Kasoar" },
