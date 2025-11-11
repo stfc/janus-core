@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from ase.io import read
 import numpy as np
 from pytest import approx
 from typer.testing import CliRunner
@@ -32,6 +33,7 @@ def test_elasticity(tmp_path):
         elasticity_path = results_dir / "NaCl-elastic_tensor.dat"
         log_path = results_dir / "NaCl-elasticity-log.yml"
         summary_path = results_dir / "NaCl-elasticity-summary.yml"
+        generated_path = results_dir / "NaCl-generated.extxyz"
 
         result = runner.invoke(
             app,
@@ -42,7 +44,9 @@ def test_elasticity(tmp_path):
                 "--arch",
                 "mace_mp",
                 "--n-strains",
-                "10",
+                "2",
+                "--minimize-all",
+                "--write-structures",
             ],
         )
 
@@ -51,13 +55,24 @@ def test_elasticity(tmp_path):
         assert elasticity_path.exists()
         assert log_path.exists()
         assert summary_path.exists()
+        assert generated_path.exists()
 
         written_elasticity = np.loadtxt(elasticity_path)
 
-        assert written_elasticity[0] == approx(27.34894599677472)
-        assert written_elasticity[-1] == approx(12.287521633256832)
+        assert written_elasticity[0] == approx(27.368617328271498)
+        assert written_elasticity[-1] == approx(2.1775175649257585)
+
+        generated = read(generated_path, index=":")
+        assert len(generated) == 13
 
         assert_log_contains(log_path, includes=["Minimising initial structure"])
+
+        with open(log_path) as io:
+            logs = yaml.safe_load(io.read())
+            optimization_logs = sum(
+                log["message"] == ["Starting geometry optimization"] for log in logs
+            )
+            assert optimization_logs == 13
 
         with open(summary_path, encoding="utf8") as file:
             elasticity_summary = yaml.safe_load(file)
@@ -73,4 +88,4 @@ def test_elasticity(tmp_path):
         assert elasticity_summary["emissions"] > 0
 
         assert "n_strains" in elasticity_summary["config"]
-        assert elasticity_summary["config"]["n_strains"] == 10
+        assert elasticity_summary["config"]["n_strains"] == 2
