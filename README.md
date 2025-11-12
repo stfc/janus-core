@@ -63,12 +63,12 @@ To install all MLIPs currently compatible with MACE, run:
 python3 -m pip install janus-core[all]
 ```
 
-Individual `extras` are listed in [Getting Started](https://stfc.github.io/janus-core/getting_started/getting_started.html#installation), as well as in [pyproject.toml](pyproject.toml) under `[project.optional-dependencies]`.
+Individual `extras` are listed in [Getting Started](https://stfc.github.io/janus-core/user_guide/get_started.html#installation), as well as in [pyproject.toml](pyproject.toml) under `[project.optional-dependencies]`.
 
 
 ### Further help
 
-Please see [Getting Started](https://stfc.github.io/janus-core/getting_started/getting_started.html),
+Please see [Getting Started](https://stfc.github.io/janus-core/user_guide/get_started.html),
 as well as guides for janus-core's [Python](https://stfc.github.io/janus-core/user_guide/python.html)
 and [command line](https://stfc.github.io/janus-core/user_guide/command_line.html) interfaces,
 for additional information, or [open an issue](https://github.com/stfc/janus-core/issues/new) if something doesn't seem right.
@@ -341,7 +341,7 @@ We recommend installing uv for dependency management when developing for `janus-
 ```shell
 git clone https://github.com/stfc/janus-core
 cd janus-core
-uv sync --extras all # Create a virtual environment and install dependencies
+uv sync --extra [extra] # Create a virtual environment and install dependencies
 source .venv/bin/activate
 pre-commit install  # Install pre-commit hooks
 pytest -v  # Discover and run all tests
