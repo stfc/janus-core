@@ -71,6 +71,7 @@ This should return something similar to:
     Commands:
       descriptors  Calculate MLIP descriptors.
       eos          Calculate equation of state.
+      elasticity   Calculate elasticity tensors.
       geomopt      Perform geometry optimization and save optimized structure...
       md           Run molecular dynamics simulation, and save trajectory and...
       neb          Run Nudged Elastic Band method.
@@ -479,6 +480,32 @@ Optimization at constant volume for all generated structures can also be perform
 
 For all options, run ``janus eos --help``.
 
+
+Elasticity
+----------
+
+Calculate the elasticity tensor for a given structure (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field):
+
+.. code-block:: bash
+
+   janus elasticity --struct tests/data/NaCl.cif --arch mace_mp
+
+This will use `pymatgen <https://github.com/materialsproject/pymatgen>`_ to generate a set of deformed structures of the input structure. These
+are used to estimate the stress-strain relationship and thereby calculate the elasticity tensor.
+
+The output, by default, is written to ```janus_results/NaCl-elastic_tensor.dat``` containing derived values of the bulk and shear modulus in
+Reuss/Voigt/VRH schemes, Young's modulus, the Universal anisotropy, Homogeneous Poisson ratio, and finally the elasticty tensor in row-major
+(Voigt form by default). The units are GPa throughout.
+
+By default 4 shear and 4 normal strains are applied. This means two positively and two negatively sheared structures in each possible direction.
+Which results in 4*3*2 stress calculations.
+
+These can be adjusted in number and independently in magnitude. For example to use 10 shear and normal strains with maximum magnitudes 0.1
+and 0.02 the following command can be executed:
+
+.. code-block:: bash
+
+   janus elasticity --struct tests/data/NaCl.cif --arch mace_mp --shear-magnitude 0.1 --normal-magnitude 0.02 --n-strains 10
 
 Phonons
 -------
