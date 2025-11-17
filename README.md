@@ -341,7 +341,7 @@ We recommend installing uv for dependency management when developing for `janus-
 ```shell
 git clone https://github.com/stfc/janus-core
 cd janus-core
-uv sync --extra [extra] # Create a virtual environment and install dependencies
+uv sync --extra all # Create a virtual environment and install dependencies
 source .venv/bin/activate
 pre-commit install  # Install pre-commit hooks
 pytest -v  # Discover and run all tests
