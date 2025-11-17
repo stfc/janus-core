@@ -31,7 +31,7 @@ Extras, such as optional MLIPs, can also be installed by running::
 
 or to install all MLIPs that do not depend on ``dgl``::
 
-    uv sync -p 3.12 --extras all
+    uv sync -p 3.12 --extra all
 
 
 Using uv
