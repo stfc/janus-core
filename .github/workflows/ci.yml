@@ -20,6 +20,11 @@ jobs:
           version: "0.6.2"
           python-version: ${{ matrix.python-version }}
 
+      - name: Create space in cache
+        run: |
+          rm -rf ~/.cache/*
+          uv cache clean
+
       - name: Install "all" dependencies
         run: uv sync --extra all
 
@@ -63,11 +68,6 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
-
-      - name: Create space in cache
-        run: |
-          rm -rf ~/.cache/*
-          uv cache clean
 
       - name: Install UMA
         run: |
