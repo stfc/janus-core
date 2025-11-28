@@ -26,7 +26,76 @@ def test_help():
     assert "Usage: janus elasticity [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_elasticity(tmp_path):
+def test_elasticity_opt_none(tmp_path):
+    """Test calculating the ElasticTensor from the CLI without optimisation."""
+    with chdir(tmp_path):
+        results_dir = Path("./janus_results")
+        elasticity_path = results_dir / "NaCl-elastic_tensor.dat"
+        log_path = results_dir / "NaCl-elasticity-log.yml"
+        summary_path = results_dir / "NaCl-elasticity-summary.yml"
+        generated_path = results_dir / "NaCl-generated.extxyz"
+        minimized_path = results_dir / "NaCl-minimized-structure.extxyz"
+
+        result = runner.invoke(
+            app,
+            [
+                "elasticity",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
+                "--n-strains",
+                "2",
+                "--no-minimize",
+                "--write-structures",
+                "--no-tracker",
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        assert elasticity_path.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+        assert generated_path.exists()
+        assert not minimized_path.exists()
+
+        written_elasticity = np.loadtxt(elasticity_path)
+
+        assert written_elasticity[0] == approx(30.790682905554178)
+        assert written_elasticity[-1] == approx(12.56316539484207)
+
+        generated = read(generated_path, index=":")
+        assert len(generated) == 12
+
+        for struct in generated:
+            assert "strain" in struct.info
+
+        assert_log_contains(
+            log_path,
+            excludes=["Minimising initial structure", "Starting geometry optimization"],
+        )
+
+        with open(summary_path, encoding="utf8") as file:
+            elasticity_summary = yaml.safe_load(file)
+
+        with open(summary_path, encoding="utf8") as file:
+            elasticity_summary = yaml.safe_load(file)
+
+        assert "command" in elasticity_summary
+        assert "janus elasticity" in elasticity_summary["command"]
+        assert "start_time" in elasticity_summary
+        assert "config" in elasticity_summary
+        assert "info" in elasticity_summary
+        assert "end_time" in elasticity_summary
+
+        assert "emissions" not in elasticity_summary
+
+        assert "n_strains" in elasticity_summary["config"]
+        assert elasticity_summary["config"]["n_strains"] == 2
+
+
+def test_elasticity_opt_all(tmp_path):
     """Test calculating the ElasticTensor from the command line."""
     with chdir(tmp_path):
         results_dir = Path("./janus_results")
@@ -34,6 +103,7 @@ def test_elasticity(tmp_path):
         log_path = results_dir / "NaCl-elasticity-log.yml"
         summary_path = results_dir / "NaCl-elasticity-summary.yml"
         generated_path = results_dir / "NaCl-generated.extxyz"
+        minimized_path = results_dir / "NaCl-minimized-structure.extxyz"
 
         result = runner.invoke(
             app,
@@ -56,14 +126,23 @@ def test_elasticity(tmp_path):
         assert log_path.exists()
         assert summary_path.exists()
         assert generated_path.exists()
+        assert minimized_path.exists()
 
         written_elasticity = np.loadtxt(elasticity_path)
 
         assert written_elasticity[0] == approx(27.368617328271498)
         assert written_elasticity[-1] == approx(2.1775175649257585)
 
+        minimized = read(minimized_path, index=":")
+        assert len(minimized) == 1
+        assert "strain" in minimized[0].info
+        assert minimized[0].info["strain"] == approx(np.zeros(6))
+
         generated = read(generated_path, index=":")
-        assert len(generated) == 13
+        assert len(generated) == 12
+
+        for struct in generated:
+            assert "strain" in struct.info
 
         assert_log_contains(log_path, includes=["Minimising initial structure"])
 

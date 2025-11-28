@@ -234,6 +234,11 @@ class Elasticity(BaseCalculation):
             self.logger, self.minimize_kwargs, self.log_kwargs, track_carbon
         )
 
+        self.minimize_write_kwargs = self.write_kwargs.copy()
+        self.minimize_write_kwargs["filename"] = self._build_filename(
+            "minimized-structure.extxyz", filename=self.write_kwargs.get("filename")
+        )
+
         # Set output files
         self.write_kwargs["filename"] = self._build_filename(
             "generated.extxyz", filename=self.write_kwargs.get("filename")
@@ -278,12 +283,15 @@ class Elasticity(BaseCalculation):
             optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
             optimizer.run()
 
-            # Optionally write structure to file
+            # If no reference strain in info, assume 0
+            self.struct.info["strain"] = self.struct.info["strain"] = np.zeros(6)
+
+            # Optionally write minimized structure to file
             output_structs(
                 images=self.struct,
                 struct_path=self.struct_path,
                 write_results=self.write_structures,
-                write_kwargs=self.write_kwargs,
+                write_kwargs=self.minimize_write_kwargs,
                 config_type="elasticity",
             )
 
@@ -374,19 +382,18 @@ class Elasticity(BaseCalculation):
                     "Calculating stress for deformed structure " + progress,
                 )
 
-            # Always append first original structure
-            self.write_kwargs["append"] = True
-            # Write structures, but no need to set info c_struct is not used elsewhere
-            output_structs(
-                images=deformed_structure,
-                struct_path=self.struct_path,
-                write_results=self.write_structures,
-                set_info=False,
-                write_kwargs=self.write_kwargs,
-                config_type="elasticity",
-            )
-
             self.stresses.append(deformed_structure.get_stress(voigt=False) / GPa)
+
+        for struct, strain in zip(self.deformed_structures, self.strains, strict=False):
+            struct.info["strain"] = strain.voigt
+
+        output_structs(
+            images=self.deformed_structures,
+            struct_path=self.struct_path,
+            write_results=self.write_structures,
+            write_kwargs=self.write_kwargs,
+            config_type="elasticity",
+        )
 
         if self.logger:
             self.logger.info("Calculating stress for initial structure")
