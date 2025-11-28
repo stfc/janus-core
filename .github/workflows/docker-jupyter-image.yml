@@ -54,7 +54,7 @@ jobs:
           sudo du /usr/ -hx -d 4 --threshold=1G | sort -hr | head
 
       - name: 'clone the repo'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: 'login to ghcr'
         uses: docker/login-action@v3
         with:
@@ -73,6 +73,7 @@ jobs:
           tags: |
             ghcr.io/stfc/janus-core/jupyter:amd64-${{ github.sha }}
             ghcr.io/stfc/janus-core/jupyter:amd64-latest
+
   build-arm64:
     runs-on: ubuntu-24.04-arm
     if: github.repository == 'stfc/janus-core'
@@ -123,7 +124,7 @@ jobs:
           sudo du /usr/ -hx -d 4 --threshold=1G | sort -hr | head
 
       - name: 'clone the repo'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: 'login to ghcr'
         uses: docker/login-action@v3
         with:
