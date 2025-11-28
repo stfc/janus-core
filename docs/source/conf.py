@@ -57,6 +57,7 @@ intersphinx_mapping = {
     "torch": ("https://pytorch.org/docs/stable", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "rich": ("https://rich.readthedocs.io/en/stable/", None),
+    "pymatgen": ("https://pymatgen.org",None),
 }
 
 # Add any paths that contain templates here, relative to this directory.

@@ -11,3 +11,4 @@ Python Tutorials
     eos
     phonons
     neb
+    elasticity
