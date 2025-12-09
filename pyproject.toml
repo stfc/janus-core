@@ -81,7 +81,7 @@ all = [
 ]
 
 # MLIPs with updated e3nn
-fairchem = [
+fairchem-1 = [
     "fairchem-core == 1.10.0",
 ]
 mattersim = [
@@ -93,7 +93,7 @@ nequip = [
 sevennet = [
     "sevenn == 0.11.2.post1",
 ]
-uma = [
+fairchem-2 = [
     "fairchem-core == 2.12.0",
 ]
 
@@ -271,55 +271,55 @@ conflicts = [
       { extra = "all" },
     ],
     [
-      { extra = "fairchem" },
+      { extra = "fairchem-1" },
       { extra = "alignn" },
     ],
     [
-      { extra = "fairchem" },
+      { extra = "fairchem-1" },
       { extra = "m3gnet" },
     ],
     [
-      { extra = "fairchem" },
+      { extra = "fairchem-1" },
       { extra = "mace" },
     ],
     [
-      { extra = "fairchem" },
+      { extra = "fairchem-1" },
       { extra = "orb" },
     ],
     [
-      { extra = "fairchem" },
+      { extra = "fairchem-1" },
       { extra = "all" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "alignn" },
     ],
     [
-      { extra = "uma" },
-      { extra = "fairchem" },
+      { extra = "fairchem-1" },
+      { extra = "fairchem-2" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "grace" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "mace" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "mattersim" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "m3gnet" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "pet-mad" },
     ],
     [
-      { extra = "uma" },
+      { extra = "fairchem-2" },
       { extra = "all" },
     ],
     [
