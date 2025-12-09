@@ -9,9 +9,7 @@ from warnings import warn
 from ase import Atoms
 from numpy import ndarray
 import phonopy
-from phonopy.file_IO import (
-    write_force_constants_to_hdf5,
-)
+from phonopy.file_IO import write_force_constants_to_hdf5
 from phonopy.phonon.band_structure import (
     get_band_qpoints_and_path_connections,
     get_band_qpoints_by_seekpath,
@@ -115,7 +113,7 @@ class Phonons(BaseCalculation):
     hdf5
         Whether to write force constants and bands in hdf5 or not. Default is True.
     hdf5_compression
-        Compression scheme to use for force constants. Default is None.
+        Compression scheme to use for force constants, gzip or lzf. Default is None.
     plot_to_file
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.

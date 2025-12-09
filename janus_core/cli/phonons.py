@@ -126,6 +126,13 @@ def phonons(
             rich_help_panel="Calculation",
         ),
     ] = True,
+    hdf5_compression: Annotated[
+        str | None,
+        Option(
+            help="Compression scheme for HDF5 force constants, gzip or lzf.",
+            rich_help_panel="Calculation",
+        ),
+    ] = None,
     plot_to_file: Annotated[
         bool,
         Option(
@@ -242,6 +249,9 @@ def phonons(
     hdf5
         Whether to save force constants and bands in hdf5 format.
         Default is True.
+    hdf5_compression
+        Compression scheme to use for hdf5 force constants, gzip or lzf.
+        Default is None.
     plot_to_file
         Whether to plot. Default is False.
     write_full
@@ -404,6 +414,7 @@ def phonons(
         "temp_max": temp_max,
         "temp_step": temp_step,
         "hdf5": hdf5,
+        "hdf5_compression": hdf5_compression,
         "plot_to_file": plot_to_file,
         "write_results": True,
         "write_full": write_full,

@@ -146,7 +146,8 @@ def test_bands_simple(tmp_path):
     assert phonon_summary["config"]["bands"]
 
 
-def test_hdf5(tmp_path):
+@pytest.mark.parametrize("compression", [None, "gzip", "lzf"])
+def test_hdf5(tmp_path, compression):
     """Test saving force constants and bands to HDF5 in new directory."""
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
@@ -155,6 +156,11 @@ def test_hdf5(tmp_path):
     summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
     log_path = tmp_path / "test" / "NaCl-phonons-log.yml"
 
+    compression_kwargs = []
+    if compression is not None:
+        compression_kwargs = ["--hdf5-compression", compression]
+
+    print(compression_kwargs)
     result = runner.invoke(
         app,
         [
@@ -166,7 +172,10 @@ def test_hdf5(tmp_path):
             "--bands",
             "--file-prefix",
             file_prefix,
+            "--model",
+            "/home/vol04/scarf1214/models/mace_mp_0.small.pt",
             "--hdf5",
+            *compression_kwargs,
         ],
     )
     assert result.exit_code == 0
@@ -203,8 +212,13 @@ def test_hdf5(tmp_path):
         if "group_velocity" in bands:
             has_velocity = True
         nqpoints = bands["nqpoint"][0]
+
     assert has_eigenvectors and has_velocity
     assert nqpoints == 306
+
+    with HDF5Open(hdf5_results, "r") as h5f:
+        assert "force_constants" in h5f
+        assert h5f["force_constants"].compression == compression
 
 
 def test_force_consts_to_hdf5_deprecated(tmp_path):
