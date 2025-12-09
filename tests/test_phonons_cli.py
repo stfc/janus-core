@@ -218,57 +218,6 @@ def test_hdf5(tmp_path, compression):
         assert h5f["force_constants"].compression == compression
 
 
-def test_force_consts_to_hdf5_deprecated(tmp_path):
-    """Test saving force constants to HDF5 deprecated."""
-    file_prefix = tmp_path / "test" / "NaCl"
-    phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
-    hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
-    bands_results = tmp_path / "test" / "NaCl-auto_bands.hdf5"
-    summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
-    log_path = tmp_path / "test" / "NaCl-phonons-log.yml"
-
-    result = runner.invoke(
-        app,
-        [
-            "phonons",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--arch",
-            "mace_mp",
-            "--bands",
-            "--file-prefix",
-            file_prefix,
-            "--force-consts-to-hdf5",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert phonon_results.exists()
-    assert hdf5_results.exists()
-    assert bands_results.exists()
-
-    # Read phonons summary file
-    with open(summary_path, encoding="utf8") as file:
-        phonon_summary = yaml.safe_load(file)
-
-    output_files = {
-        "params": phonon_results,
-        "force_constants": hdf5_results,
-        "bands": bands_results,
-        "bands_plot": None,
-        "dos": None,
-        "dos_plot": None,
-        "band_dos_plot": None,
-        "pdos": None,
-        "pdos_plot": None,
-        "thermal": None,
-        "minimized_initial_structure": None,
-        "log": log_path,
-        "summary": summary_path,
-    }
-    check_output_files(summary=phonon_summary, output_files=output_files)
-
-
 def test_thermal_props(tmp_path):
     """Test calculating thermal properties."""
     file_prefix = tmp_path / "test" / "NaCl"
