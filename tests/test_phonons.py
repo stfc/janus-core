@@ -166,7 +166,7 @@ def test_symmetrize(tmp_path):
     phonons_2 = Phonons(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
