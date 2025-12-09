@@ -132,11 +132,15 @@ def geomopt(
             rich_help_panel="Calculation",
             callback=deprecated_option,
             hidden=True,
-        )
+        ),
     ] = None,
-    constraint_func: Annotated[
+    constraint_class: Annotated[
         str,
-        Option(help="Name of ASE constraint function to use."),
+        Option(
+            "--constraint",
+            help="Name of ASE constraint to attach to atoms.",
+            rich_help_panel="Calculation",
+        ),
     ] = None,
     pressure: Annotated[
         float,
@@ -222,8 +226,8 @@ def geomopt(
         --opt-cell-lengths or --opt-cell-fully, defaults to `FrechetCellFilter`.
     filter_func
         Deprecated. Please use `--filter_class`.
-    constraint_func
-        Name of constraint function from ase.constraints, to apply constraints
+    constraint_class
+        Name of constraint class from ase.constraints, to apply constraints
         to atoms. Parameters should be included as a "constraint_kwargs" dict
         within "minimize_kwargs". Default is None.
     pressure
@@ -353,7 +357,7 @@ def geomopt(
         "symmetrize": symmetrize,
         "symmetry_tolerance": symmetry_tolerance,
         "file_prefix": file_prefix,
-        "constraint_func": constraint_func,
+        "constraint_class": constraint_class,
         **opt_cell_fully_dict,
         **minimize_kwargs,
         "write_results": True,

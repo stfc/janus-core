@@ -81,10 +81,10 @@ class GeomOpt(BaseCalculation):
         Deprecated. Please use `filter_class`.
     filter_kwargs
         Keyword arguments to pass to filter_class. Default is {}.
-    constraint_func
-        Constraint function, or name of function from ase.constraints. Default is None.
+    constraint_class
+        Constraint class, or name of class from ase.constraints. Default is None.
     constraint_kwargs
-        Keyword arguments to pass to constraint_func. Default is {}.
+        Keyword arguments to pass to constraint_class. Default is {}.
     optimizer
         Optimization function, or name of function from ase.optimize. Default is
         `LBFGS`.
@@ -124,7 +124,7 @@ class GeomOpt(BaseCalculation):
         filter_class: Callable | str | None = FrechetCellFilter,
         filter_func: Callable | str | None = None,
         filter_kwargs: dict[str, Any] | None = None,
-        constraint_func: Callable | str | None = None,
+        constraint_class: type | str | None = None,
         constraint_kwargs: dict[str, Any] | None = None,
         optimizer: Callable | str = LBFGS,
         opt_kwargs: ASEOptArgs | None = None,
@@ -184,11 +184,11 @@ class GeomOpt(BaseCalculation):
             Deprecated. Please use `filter_class`.
         filter_kwargs
             Keyword arguments to pass to filter_class. Default is {}.
-        constraint_func
-            Constraint function, or name of function from ase.constraints. Default is
+        constraint_class
+            Constraint class, or name of class from ase.constraints. Default is
             None.
         constraint_kwargs
-            Keyword arguments to pass to constraint_func. Default is {}.
+            Keyword arguments to construct constraint_class. Default is {}.
         optimizer
             Optimization function, or name of function from ase.optimize. Default is
             `LBFGS`.
@@ -235,7 +235,7 @@ class GeomOpt(BaseCalculation):
         self.angle_tolerance = angle_tolerance
         self.filter_class = filter_class
         self.filter_kwargs = filter_kwargs
-        self.constraint_func = constraint_func
+        self.constraint_class = constraint_class
         self.constraint_kwargs = constraint_kwargs
         self.optimizer = optimizer
         self.opt_kwargs = opt_kwargs
@@ -333,7 +333,7 @@ class GeomOpt(BaseCalculation):
 
         For now we are just looking for the "atoms" parameter of FixSymmetry
         """
-        parameters = inspect.signature(self.constraint_func.__init__).parameters
+        parameters = inspect.signature(self.constraint_class.__init__).parameters
         if "atoms" in parameters:
             self.constraint_kwargs["atoms"] = self.struct
 
@@ -343,12 +343,12 @@ class GeomOpt(BaseCalculation):
         if self.logger:
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)
 
-        if self.constraint_func is not None:
+        if self.constraint_class is not None:
             self._set_mandatory_constraint_kwargs()
-            self.struct.set_constraint(self.constraint_func(**self.constraint_kwargs))
+            self.struct.set_constraint(self.constraint_class(**self.constraint_kwargs))
 
             if self.logger:
-                self.logger.info("Using constraint: %s", self.constraint_func.__name__)
+                self.logger.info("Using constraint: %s", self.constraint_class.__name__)
 
         if self.filter_class is not None:
             if "scalar_pressure" in self.filter_kwargs:
@@ -382,12 +382,12 @@ class GeomOpt(BaseCalculation):
             except AttributeError as e:
                 raise AttributeError(f"No such optimizer: {self.optimizer}") from e
 
-        if self.constraint_func is not None and isinstance(self.constraint_func, str):
+        if self.constraint_class is not None and isinstance(self.constraint_class, str):
             try:
-                self.constraint_func = getattr(constraints, self.constraint_func)
+                self.constraint_class = getattr(constraints, self.constraint_class)
             except AttributeError as e:
                 raise AttributeError(
-                    f"No such constraint: {self.constraint_func}"
+                    f"No such constraint: {self.constraint_class}"
                 ) from e
 
         if self.filter_class is not None and isinstance(self.filter_class, str):
