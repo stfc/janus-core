@@ -73,7 +73,12 @@ Packages in the ``dev`` dependency group allow tests to be run locally using ``p
 
 .. note::
 
-    MACE must be installed for tests to run successfully. All other MLIPs are optional.
+    Since many tests check against specific calculation outputs, the ``mace`` extra is
+    required for most tests to run successfully. ``chgnet`` is also required for
+    ``test_descriptors.py``.
+
+    All other extras are optional, as tests that depend on these will be skipped if the
+    import fails.
 
 
 Alternatively, tests can be run in separate virtual environments using ``tox``::
