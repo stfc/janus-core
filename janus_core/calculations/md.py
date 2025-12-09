@@ -72,8 +72,6 @@ class MolecularDynamics(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model
         Path to MLIP model or name of model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -196,7 +194,6 @@ class MolecularDynamics(BaseCalculation):
         arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
-        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         attach_logger: bool | None = None,
@@ -254,8 +251,6 @@ class MolecularDynamics(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model
             Path to MLIP model or name of model. Default is `None`.
-        model_path
-            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -479,7 +474,6 @@ class MolecularDynamics(BaseCalculation):
             arch=arch,
             device=device,
             model=model,
-            model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
