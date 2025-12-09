@@ -172,8 +172,6 @@ def test_hdf5(tmp_path, compression):
             "--bands",
             "--file-prefix",
             file_prefix,
-            "--model",
-            "/home/vol04/scarf1214/models/mace_mp_0.small.pt",
             "--hdf5",
             *compression_kwargs,
         ],
