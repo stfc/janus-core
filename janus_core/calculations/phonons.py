@@ -249,7 +249,7 @@ class Phonons(BaseCalculation):
         hdf5
             Whether to write force constants and bands in hdf5 or not. Default is True.
         hdf5_compression
-            Compression scheme to use for force constants. Default is None.
+            Compression scheme to use for force constants, gzip or lzf. Default is None.
         plot_to_file
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
@@ -594,7 +594,7 @@ class Phonons(BaseCalculation):
             Whether to save the force constants separately to an hdf5 file. Default is
             self.hdf5.
         compression
-            Compression scheme to use fo hdf5 file. Default is None.
+            Compression scheme to use fo hdf5 file, gzip or lzf. Default is None.
         force_consts_file
             Name of hdf5 file to save force constants. Unused if `hdf5`
             is False. Default is inferred from `file_prefix`.

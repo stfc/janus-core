@@ -160,7 +160,6 @@ def test_hdf5(tmp_path, compression):
     if compression is not None:
         compression_kwargs = ["--hdf5-compression", compression]
 
-    print(compression_kwargs)
     result = runner.invoke(
         app,
         [
