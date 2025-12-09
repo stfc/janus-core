@@ -12,13 +12,17 @@ jobs:
         python-version: ["3.10","3.11","3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.6.2"
           python-version: ${{ matrix.python-version }}
+
+      - name: Create space in cache
+        run: |
+          rm -rf ~/.cache/*
+          uv cache clean
 
       - name: Install "all" dependencies
         run: uv sync --extra all
@@ -42,6 +46,7 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
+          uv cache clean
           uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
           uv pip install --reinstall pynvml
           uv pip install fairchem-core[torch-extras] --no-build-isolation
@@ -55,6 +60,7 @@ jobs:
 
       - name: Install dgl dependencies
         run: |
+          uv cache clean
           uv sync --extra mace --extra m3gnet --extra alignn --extra d3
           uv pip install --reinstall pynvml
 
@@ -64,13 +70,9 @@ jobs:
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
 
-      - name: Create space in cache
-        run: |
-          rm -rf ~/.cache/*
-          uv cache clean
-
       - name: Install UMA
         run: |
+          uv cache clean
           uv sync --extra uma
           uv pip install --reinstall pynvml
           uv pip install fairchem-core[torch-extras] --no-build-isolation
