@@ -48,7 +48,6 @@ def test_elasticity_opt_none(tmp_path):
                 "2",
                 "--no-minimize",
                 "--write-structures",
-                "--no-tracker",
             ],
         )
 
@@ -89,7 +88,8 @@ def test_elasticity_opt_none(tmp_path):
         assert "info" in elasticity_summary
         assert "end_time" in elasticity_summary
 
-        assert "emissions" not in elasticity_summary
+        assert "emissions" in elasticity_summary
+        assert elasticity_summary["emissions"] > 0
 
         assert "n_strains" in elasticity_summary["config"]
         assert elasticity_summary["config"]["n_strains"] == 2
@@ -117,6 +117,7 @@ def test_elasticity_opt_all(tmp_path):
                 "2",
                 "--minimize-all",
                 "--write-structures",
+                "--no-tracker",
             ],
         )
 
@@ -163,8 +164,7 @@ def test_elasticity_opt_all(tmp_path):
         assert "info" in elasticity_summary
         assert "end_time" in elasticity_summary
 
-        assert "emissions" in elasticity_summary
-        assert elasticity_summary["emissions"] > 0
+        assert "emissions" not in elasticity_summary
 
         assert "n_strains" in elasticity_summary["config"]
         assert elasticity_summary["config"]["n_strains"] == 2
