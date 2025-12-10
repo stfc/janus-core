@@ -184,7 +184,7 @@ To ensure that the calculator does not receive multiple versions of keywords, it
 
 If the keyword is used by other calculators, this should be done within the ``elif`` branch, but in most cases it can be done automatically by appending ``model_kwargs`` within ``_set_model``::
 
-    model_kwargs = {"model_path", "model_paths", "potential", "path"}
+    model_kwargs = {"model_paths", "potential", "path"}
 
 In addition to setting the calculator, ``__version__`` must also imported here, providing a check on the package independent of the calculator itself.
 
@@ -256,7 +256,7 @@ It is also useful to test that invalid model paths are handled as expected:
     def test_invalid_model(arch, model):
 
 
-and that ``model``, and ``model_path`` or the "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously:
+and that ``model`` and "standard" MLIP calculator parameter (``path``) cannot be defined simultaneously:
 
 .. code-block:: python
 
@@ -264,11 +264,10 @@ and that ``model``, and ``model_path`` or the "standard" MLIP calculator paramet
         "kwargs",
         [
             {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
-            {"arch": "orb", "model_path": ORB_MODEL, "model": ORB_MODEL},
             {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
         ],
     )
-    def test_model_model_paths(kwargs):
+    def test_duplicate_model_input(kwargs):
 
 
 Test correctness

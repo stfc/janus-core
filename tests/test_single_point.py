@@ -94,7 +94,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
-        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
         (
             "equiformer",
             "cpu",
@@ -463,71 +462,16 @@ def test_hessian_not_implemented(struct):
         )
 
 
-def test_invalid_model_model_path():
-    """Test error is raised when model and model_path are passed."""
+def test_invalid_model_calc_kwargs():
+    """Test error is raised when model is passed via calc_kwargs."""
     skip_extras("mace")
 
     with pytest.raises(ValueError):
         SinglePoint(
-            arch="mace_mp",
-            model=MACE_PATH,
-            model_path=MACE_PATH,
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-
-@pytest.mark.parametrize("keyword", ("model", "model_path"))
-def test_invalid_model_calc_kwargs(keyword):
-    """Test error is raised when model and model via calc_kwargs are passed."""
-    skip_extras("mace")
-
-    with pytest.raises(ValueError):
-        SinglePoint(
-            arch="mace_mp",
-            model=MACE_PATH,
-            calc_kwargs={keyword: MACE_PATH},
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-
-def test_invalid_model_path_calc_kwargs():
-    """Test error is raised when model_path is passed via calc_kwargs."""
-    skip_extras("mace")
-
-    with pytest.raises(ValueError):
-        SinglePoint(
-            arch="mace_mp",
-            calc_kwargs={"model_path": MACE_PATH},
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-
-def test_deprecation_model_path():
-    """Test FutureWarning raised for model_path."""
-    skip_extras("mace")
-
-    with pytest.warns(FutureWarning, match="`model_path` has been deprecated"):
-        sp = SinglePoint(
-            arch="mace_mp",
-            model_path=MACE_PATH,
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
-
-
-def test_deprecation_model_calc_kwargs():
-    """Test FutureWarning raised for model in calc_kwargs."""
-    skip_extras("mace")
-
-    with pytest.warns(FutureWarning, match="Please pass `model` explicitly"):
-        sp = SinglePoint(
             arch="mace_mp",
             calc_kwargs={"model": MACE_PATH},
             struct=DATA_PATH / "NaCl.cif",
         )
-
-    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
 
 
 def test_fake_calc_error():
