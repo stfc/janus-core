@@ -123,6 +123,7 @@ Architectures = Literal[
     "m3gnet",
     "chgnet",
     "alignn",
+    "alphanet",
     "sevennet",
     "nequip",
     "dpa3",

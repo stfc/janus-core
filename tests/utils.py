@@ -132,6 +132,8 @@ def skip_extras(arch: str):
         case "alignn":
             # alignn caches downloaded model in site-packages
             pytest.importorskip("alignn.ff.ff")
+        case "alphanet":
+            pytest.importorskip("alphanet")
         case "chgnet":
             pytest.importorskip("chgnet")
         case "dpa3":

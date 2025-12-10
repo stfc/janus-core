@@ -49,6 +49,10 @@ except ImportError:
 
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
+ALPHANET_PATH = MODEL_PATH / "alphanet"
+ALPHANET_CKPT = ALPHANET_PATH / "test_model.ckpt"
+ALPHANET_CONFIG = ALPHANET_PATH / "test_model.json"
+
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 
 try:
@@ -101,6 +105,11 @@ PET_MAD_CHECKPOINT = (
         ("alignn", "cpu", {"model": ALIGNN_PATH / "best_model.pt"}),
         ("alignn", "cpu", {"model": "alignnff_wt10"}),
         ("alignn", "cpu", {"path": ALIGNN_PATH}),
+        ("alphanet", "cpu", {"model_path": ALPHANET_CKPT}),
+        ("alphanet", "cpu", {"model": ALPHANET_CKPT}),
+        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG}),
+        ("alphanet", "cpu", {"model_path": ALPHANET_CKPT, "precision": "32"}),
+        ("alphanet", "cpu", {"model_path": ALPHANET_CKPT, "precision": "64"}),
         ("chgnet", "cpu", {}),
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model": CHGNET_PATH}),
@@ -181,6 +190,7 @@ def test_invalid_arch():
     "arch, model",
     [
         ("alignn", "invalid/path"),
+        ("alphanet", "/invalid/path"),
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
         ("equiformer", "/invalid/path"),
@@ -240,6 +250,11 @@ def test_d3_manual():
             "arch": "alignn",
             "model": ALIGNN_PATH / "best_model.pt",
             "path": ALIGNN_PATH / "best_model.pt",
+        },
+        {
+            "arch": "alphanet",
+            "model_path": ALPHANET_CKPT,
+            "model": ALPHANET_CKPT,
         },
         {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
         {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},

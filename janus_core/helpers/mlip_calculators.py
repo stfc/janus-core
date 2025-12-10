@@ -305,6 +305,49 @@ def choose_calculator(
 
             calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
 
+        case "alphanet":
+            from alphanet import __version__
+            from alphanet.infer.calc import AlphaNetCalculator
+            from alphanet.config import All_Config
+            import torch
+
+            # Set before loading model to avoid type mismatches
+            torch.set_default_dtype(torch.float32)
+
+            # Default to MATPES-r2SCAN model 
+            if model is None:
+                model = "AlphaNet-MATPES-r2SCAN"
+
+            # Convert model to Path if it's a string file path
+            if isinstance(model, str) and (model.endswith('.ckpt') or model.endswith('.pt')):
+                model = Path(model)
+
+            # Get config path from kwargs or auto-detect
+            config_path = kwargs.pop("config", None)
+            if config_path is None and isinstance(model, Path):
+                # Auto-detect: try stem.json then parent_name.json
+                config_path = model.parent / f"{model.stem}.json"
+                if not config_path.exists():
+                    config_path = model.parent / f"{model.parent.name}.json"
+            
+            # If model is still a string (model name), config must be provided
+            if config_path is None:
+                raise ValueError(
+                    f"Config file must be specified for model '{model}'. "
+                    "Use config='/path/to/config.json' or provide model_path to a .ckpt file."
+                )
+
+            config = All_Config().from_json(str(config_path))
+            precision = kwargs.pop("precision", "32")
+
+            calculator = AlphaNetCalculator(
+                ckpt_path=str(model),
+                config=config,
+                device=device,
+                precision=precision,
+                **kwargs,
+            )
+
         case "sevennet":
             from sevenn import __version__
             from sevenn.sevennet_calculator import SevenNetCalculator

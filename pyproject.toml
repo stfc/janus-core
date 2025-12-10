@@ -41,6 +41,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+alphanet = [
+    "alphanet @ git+https://github.com/zmyybc/AlphaNet.git",
+]
 chgnet = [
     "chgnet == 0.4.2",
 ]
@@ -70,6 +73,7 @@ visualise = [
     "weas-widget<0.2,>=0.1.26"
 ]
 all = [
+    "janus-core[alphanet]", 
     "janus-core[chgnet]",
     "janus-core[grace]",
     "janus-core[d3]",
