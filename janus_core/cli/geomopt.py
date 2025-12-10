@@ -23,7 +23,7 @@ from janus_core.cli.types import (
     Tracker,
     WriteKwargs,
 )
-from janus_core.cli.utils import deprecated_option, yaml_converter_callback
+from janus_core.cli.utils import yaml_converter_callback
 
 app = Typer()
 
@@ -125,15 +125,6 @@ def geomopt(
             rich_help_panel="Calculation",
         ),
     ] = None,
-    filter_func: Annotated[
-        str | None,
-        Option(
-            help="Deprecated. Please use --filter",
-            rich_help_panel="Calculation",
-            callback=deprecated_option,
-            hidden=True,
-        ),
-    ] = None,
     pressure: Annotated[
         float,
         Option(
@@ -216,8 +207,6 @@ def geomopt(
     filter_class
         Name of filter from ase.filters to wrap around atoms. If using
         --opt-cell-lengths or --opt-cell-fully, defaults to `FrechetCellFilter`.
-    filter_func
-        Deprecated. Please use `filter_class`.
     pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
@@ -303,19 +292,14 @@ def geomopt(
 
     _set_minimize_kwargs(minimize_kwargs, opt_cell_lengths, pressure)
 
-    if filter_func and filter_class:
-        raise ValueError("--filter-func is deprecated, please only use --filter")
-
     if opt_cell_fully or opt_cell_lengths:
         # Use default filter unless filter explicitly passed
         if filter_class:
             opt_cell_fully_dict = {"filter_class": filter_class}
-        elif filter_func:
-            opt_cell_fully_dict = {"filter_func": filter_func, "filter_class": None}
         else:
             opt_cell_fully_dict = {}
     else:
-        if filter_class or filter_func:
+        if filter_class:
             raise ValueError(
                 "--opt-cell-lengths or --opt-cell-fully must be set to use a filter"
             )
