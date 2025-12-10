@@ -343,6 +343,22 @@ CorrelationKwargs = Annotated[
     ),
 ]
 
+ElasticityKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to elasiticty for user strains. Must be
+            passed as a dictionary wrapped in quotes, e.g. "[{'key' : values}]".
+            """
+        ),
+        metavar="DICT",
+        rich_help_panel="Calculation",
+    ),
+]
+
+
 LogPath = Annotated[
     Path | None,
     Option(

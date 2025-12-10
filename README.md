@@ -115,6 +115,7 @@ Current and planned features include:
   - MACE
 - [x] Rare events simulations
   - PLUMED
+- [x] Elasticity
 
 
 ## Python interface
@@ -154,6 +155,7 @@ directory. This currently includes examples for:
 
 - [Nudged Elastic Band](docs/source/tutorials/python/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/neb.ipynb)
 
+- [Elasticity](docs/source/tutorials/python/elasticity.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/elasticity.ipynb)
 
 ### Calculation outputs
 
@@ -221,6 +223,7 @@ janus neb
 janus train
 janus descriptors
 janus preprocess
+janus elasticity
 ```
 
 For example, a single point calcuation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field) can be performed by running:
@@ -321,7 +324,7 @@ This currently includes examples for:
 
 - [Nudged Elastic Band](docs/source/tutorials/cli/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/neb.ipynb)
 
-
+- [Elasticity](docs/source/tutorials/cli/elasticity.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/elasticity.ipynb)
 
 ### Using configuration files
 
