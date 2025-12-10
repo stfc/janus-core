@@ -62,6 +62,10 @@ and ``model``, corresponding to the model path, name or label.
 Results from the MLIP calculator, which are typically stored in ``Atoms.calc.results``, will also,
 by default, be copied to these dictionaries, prefixed by the MLIP ``arch``.
 
+The ``model`` and version of the MLIP package will also be saved to the calculator that
+is attached to the structure in the ``Atoms.calc.parameters`` dictionary.
+
+
 For example:
 
 .. code-block:: python
@@ -76,6 +80,7 @@ For example:
 
     single_point.run()
     print(single_point.struct.info)
+    print(single_point.struct.calc.parameters)
 
 will return
 
@@ -91,6 +96,9 @@ will return
         'mace_mp_stress': array([-4.78327600e-03, -4.78327600e-03, -4.78327600e-03,  1.08000967e-19, -2.74004242e-19, -2.04504710e-19]),
         'system_name': 'NaCl',
     }
+
+    {'version': '0.3.14', 'arch': 'mace_mp', 'model': 'tests/models/mace_mp_small.model'}
+
 
 .. note::
     If running calculations with multiple MLIPs, ``arch`` and ``mlip_model`` will be overwritten with the most recent MLIP information.
@@ -144,12 +152,20 @@ The ``TorchDFTD3Calculator`` can also be added to any existing calculator if req
 .. code-block:: python
 
     from ase import units
+    from ase.io import read
 
+    from janus_core.calculations.single_point import SinglePoint
     from janus_core.helpers.mlip_calculators import add_dispersion, choose_calculator
+
+    struct = read("tests/data/NaCl-deformed.cif")
 
     mace_calc = choose_calculator("mace_mp")
     calc = add_dispersion(mace_calc, device="cpu", cutoff=95 * units.Bohr)
 
+    struct.calc = calc
+
+    single_point = SinglePoint(struct=struct)
+    single_point.run()
 
 
 Additional Calculators
@@ -165,9 +181,10 @@ For example, performing geometry optimisation using the (`ASE built-in <https://
 
 .. code-block:: python
 
-    from janus_core.calculations.geom_opt import GeomOpt
     from ase.calculators.lj import LennardJones
     from ase.io import read
+
+    from janus_core.calculations.geom_opt import GeomOpt
 
     struct = read("tests/data/NaCl-deformed.cif")
     struct.calc = LennardJones()
@@ -177,3 +194,28 @@ For example, performing geometry optimisation using the (`ASE built-in <https://
         fmax=0.001,
     )
     geom_opt.run()
+
+
+Similarly, if you have any issues setting up a calculator from a supported MLIP, these
+can still be set up manually:
+
+.. code-block:: python
+
+    from ase.io import read
+    from mace.calculators import mace_mp
+
+    from janus_core.calculations.geom_opt import GeomOpt
+
+    struct = read("tests/data/NaCl-deformed.cif")
+    struct.calc = mace_mp()
+
+    geom_opt = GeomOpt(
+        struct=struct,
+        fmax=0.001,
+    )
+    geom_opt.run()
+
+.. note::
+    Setting up a calculator this way means that we are unable to set the ``Atoms.info``
+    details about the calculator, such as ``model`` and ``arch``, or
+    ``Atoms.calc.parameters``, described in `Calculation outputs`_.
