@@ -493,7 +493,7 @@ Calculate the elasticity tensor for a given structure (using the `MACE-MP <https
 This will use `pymatgen <https://github.com/materialsproject/pymatgen>`_ to generate a set of deformed structures of the input structure. These
 are used to estimate the stress-strain relationship and thereby calculate the elasticity tensor.
 
-The output, by default, is written to ```janus_results/NaCl-elastic_tensor.dat``` containing derived values of the bulk and shear modulus in
+The output, by default, is written to ``janus_results/NaCl-elastic_tensor.dat`` containing derived values of the bulk and shear modulus in
 Reuss/Voigt/VRH schemes, Young's modulus, the Universal anisotropy, Homogeneous Poisson ratio, and finally the elasticty tensor in row-major
 (Voigt form by default). The units are GPa throughout.
 
