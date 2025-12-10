@@ -112,6 +112,8 @@ class Phonons(BaseCalculation):
         Deprecated. Please use `hdf5`.
     hdf5
         Whether to write force constants and bands in hdf5 or not. Default is True.
+    hdf5_compression
+        Compression scheme to use for force constants, gzip or lzf. Default is None.
     plot_to_file
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
@@ -164,6 +166,7 @@ class Phonons(BaseCalculation):
         temp_step: float = 50.0,
         force_consts_to_hdf5: bool | None = None,
         hdf5: bool = True,
+        hdf5_compression: str | None = None,
         plot_to_file: bool = False,
         write_results: bool = True,
         write_full: bool = True,
@@ -245,6 +248,8 @@ class Phonons(BaseCalculation):
             Deprecated. Please use `hdf5`.
         hdf5
             Whether to write force constants and bands in hdf5 or not. Default is True.
+        hdf5_compression
+            Compression scheme to use for force constants, gzip or lzf. Default is None.
         plot_to_file
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
@@ -284,6 +289,7 @@ class Phonons(BaseCalculation):
         self.temp_max = temp_max
         self.temp_step = temp_step
         self.hdf5 = hdf5
+        self.hdf5_compression = hdf5_compression
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
@@ -573,6 +579,7 @@ class Phonons(BaseCalculation):
         *,
         phonopy_file: PathLike | None = None,
         hdf5: bool | None = None,
+        compression: str | None = None,
         force_consts_file: PathLike | None = None,
     ) -> None:
         """
@@ -586,6 +593,8 @@ class Phonons(BaseCalculation):
         hdf5
             Whether to save the force constants separately to an hdf5 file. Default is
             self.hdf5.
+        compression
+            Compression scheme to use fo hdf5 file, gzip or lzf. Default is None.
         force_consts_file
             Name of hdf5 file to save force constants. Unused if `hdf5`
             is False. Default is inferred from `file_prefix`.
@@ -598,6 +607,9 @@ class Phonons(BaseCalculation):
 
         if hdf5 is None:
             hdf5 = self.hdf5
+
+        if compression is None:
+            compression = self.hdf5_compression
 
         if phonopy_file:
             self.phonopy_file = phonopy_file
@@ -613,7 +625,9 @@ class Phonons(BaseCalculation):
         if hdf5:
             build_file_dir(self.force_consts_file)
             write_force_constants_to_hdf5(
-                phonon.force_constants, filename=self.force_consts_file
+                phonon.force_constants,
+                filename=self.force_consts_file,
+                compression=compression,
             )
 
     def calc_bands(self, write_bands: bool | None = None, **kwargs) -> None:
