@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Annotated, get_args
 from click import Choice
 from typer import Option
 
-from janus_core.cli.utils import deprecated_option
 from janus_core.helpers.janus_types import Architectures, Devices
 
 if TYPE_CHECKING:
@@ -98,15 +97,6 @@ Model = Annotated[
     str | None,
     Option(
         help="MLIP model name, or path to model.", rich_help_panel="MLIP calculator"
-    ),
-]
-ModelPath = Annotated[
-    str | None,
-    Option(
-        help="Deprecated. Please use --model",
-        rich_help_panel="MLIP calculator",
-        callback=deprecated_option,
-        hidden=True,
     ),
 ]
 

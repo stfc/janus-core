@@ -1323,7 +1323,7 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
     md = ensemble(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         steps=2,
         file_prefix=file_prefix,
         enable_progress_bar=True,

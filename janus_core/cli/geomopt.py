@@ -16,14 +16,13 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     Model,
-    ModelPath,
     ReadKwargsLast,
     StructPath,
     Summary,
     Tracker,
     WriteKwargs,
 )
-from janus_core.cli.utils import deprecated_option, yaml_converter_callback
+from janus_core.cli.utils import yaml_converter_callback
 
 app = Typer()
 
@@ -187,7 +186,6 @@ def geomopt(
     # MLIP Calculator
     device: Device = "cpu",
     model: Model = None,
-    model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
     # Structure I/O
     file_prefix: FilePrefix = None,
@@ -251,8 +249,6 @@ def geomopt(
         Device to run model on. Default is "cpu".
     model
         Path to MLIP model or name of model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
@@ -316,19 +312,14 @@ def geomopt(
 
     _set_minimize_kwargs(minimize_kwargs, opt_cell_lengths, pressure)
 
-    if filter_func and filter_class:
-        raise ValueError("--filter-func is deprecated, please only use --filter")
-
     if opt_cell_fully or opt_cell_lengths:
         # Use default filter unless filter explicitly passed
         if filter_class:
             opt_cell_fully_dict = {"filter_class": filter_class}
-        elif filter_func:
-            opt_cell_fully_dict = {"filter_func": filter_func, "filter_class": None}
         else:
             opt_cell_fully_dict = {}
     else:
-        if filter_class or filter_func:
+        if filter_class:
             raise ValueError(
                 "--opt-cell-lengths or --opt-cell-fully must be set to use a filter"
             )
@@ -345,7 +336,6 @@ def geomopt(
         "arch": arch,
         "device": device,
         "model": model,
-        "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,

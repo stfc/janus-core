@@ -18,7 +18,6 @@ from janus_core.cli.types import (
     LogPath,
     MinimizeKwargs,
     Model,
-    ModelPath,
     PDoSKwargs,
     ProgressBar,
     ReadKwargsLast,
@@ -26,7 +25,7 @@ from janus_core.cli.types import (
     Summary,
     Tracker,
 )
-from janus_core.cli.utils import deprecated_option, yaml_converter_callback
+from janus_core.cli.utils import yaml_converter_callback
 
 app = Typer()
 
@@ -110,15 +109,6 @@ def phonons(
         ),
     ] = 0.1,
     minimize_kwargs: MinimizeKwargs = None,
-    force_consts_to_hdf5: Annotated[
-        bool,
-        Option(
-            help="Whether to save force constants in hdf5.",
-            rich_help_panel="Calculation",
-            callback=deprecated_option,
-            hidden=True,
-        ),
-    ] = None,
     hdf5: Annotated[
         bool,
         Option(
@@ -126,6 +116,13 @@ def phonons(
             rich_help_panel="Calculation",
         ),
     ] = True,
+    hdf5_compression: Annotated[
+        str | None,
+        Option(
+            help="Compression scheme for HDF5 force constants, gzip or lzf.",
+            rich_help_panel="Calculation",
+        ),
+    ] = None,
     plot_to_file: Annotated[
         bool,
         Option(
@@ -186,7 +183,6 @@ def phonons(
     # MLIP Calculator
     device: Device = "cpu",
     model: Model = None,
-    model_path: ModelPath = None,
     calc_kwargs: CalcKwargs = None,
     # Strucuture I/O
     file_prefix: FilePrefix = None,
@@ -237,11 +233,12 @@ def phonons(
         Default is 0.1.
     minimize_kwargs
         Other keyword arguments to pass to geometry optimizer. Default is {}.
-    force_consts_to_hdf5
-        Deprecated. Please use `hdf5`.
     hdf5
         Whether to save force constants and bands in hdf5 format.
         Default is True.
+    hdf5_compression
+        Compression scheme to use for hdf5 force constants, gzip or lzf.
+        Default is None.
     plot_to_file
         Whether to plot. Default is False.
     write_full
@@ -270,8 +267,6 @@ def phonons(
         Device to run model on. Default is "cpu".
     model
         Path to MLIP model or name of model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     calc_kwargs
         Keyword arguments to pass to the selected calculator. Default is {}.
     file_prefix
@@ -382,7 +377,6 @@ def phonons(
         "arch": arch,
         "device": device,
         "model": model,
-        "model_path": model_path,
         "read_kwargs": read_kwargs,
         "calc_kwargs": calc_kwargs,
         "attach_logger": True,
@@ -404,6 +398,7 @@ def phonons(
         "temp_max": temp_max,
         "temp_step": temp_step,
         "hdf5": hdf5,
+        "hdf5_compression": hdf5_compression,
         "plot_to_file": plot_to_file,
         "write_results": True,
         "write_full": write_full,

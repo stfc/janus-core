@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any
-from warnings import warn
 
 from ase import Atoms
 
@@ -51,8 +50,6 @@ class BaseCalculation(FileNameMixin):
         Device to run model on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. Default is {}.
     sequence_allowed
@@ -92,7 +89,6 @@ class BaseCalculation(FileNameMixin):
         arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
-        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         sequence_allowed: bool = True,
         calc_kwargs: dict[str, Any] | None = None,
@@ -119,8 +115,6 @@ class BaseCalculation(FileNameMixin):
             Device to run MLIP model on. Default is "cpu".
         model
             MLIP model label, path to model, or loaded model. Default is `None`.
-        model_path
-            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. Default is {}.
         sequence_allowed
@@ -161,27 +155,8 @@ class BaseCalculation(FileNameMixin):
             attach_logger, log_kwargs, track_carbon
         )
 
-        # Set model from deprecated model_path (warn later, after logging is set up)
-        if model_path:
-            # `model`` is a new parameter, so there is no reason to be using both
-            if model:
-                raise ValueError(
-                    "`model` has replaced `model_path`. Please only use `model`"
-                )
-            self.model = model_path
-
-        # Disallow `model_path` in kwargs
-        if not self.model and "model_path" in self.calc_kwargs:
-            raise ValueError("`model` must be passed explicitly")
-
-        # Disallow `model` in kwargs if `model` is used
-        # Raise warning after logging is set up
-        raise_model_warning = False
         if "model" in self.calc_kwargs:
-            if model:
-                raise ValueError("`model must be passed explicitly")
-            self.model = self.calc_kwargs.pop("model")
-            raise_model_warning = True
+            raise ValueError("Please set the `model` parameter explicitly")
 
         # Read structures and/or attach calculators
         # Note: logger not set up so yet so not passed here
@@ -231,21 +206,6 @@ class BaseCalculation(FileNameMixin):
         self.tracker = config_tracker(
             self.logger, self.track_carbon, **self.tracker_kwargs
         )
-
-        # Warn now that logging is set up
-        if model_path:
-            warn(
-                "`model_path` has been deprecated. Please use `model`.",
-                FutureWarning,
-                stacklevel=2,
-            )
-
-        if raise_model_warning:
-            warn(
-                "Please pass `model` explicitly.",
-                FutureWarning,
-                stacklevel=2,
-            )
 
     def _set_info_units(
         self, keys: Sequence[str] = ("energy", "forces", "stress")
