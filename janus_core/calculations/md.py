@@ -808,7 +808,18 @@ class MolecularDynamics(BaseCalculation):
             restart_stem = self._restart_stem
 
             # Use restart_stem.name otherwise T300.0 etc. counts as extension
-            poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
+            poss_restarts = list(
+                restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
+            )
+
+            # If no restarts found, check potential last results directory
+            if not poss_restarts:
+                results_dirs = sorted(restart_stem.parent.parent.glob("janus_results*"))
+                if results_dirs:
+                    poss_restarts = results_dirs[-1].glob(
+                        f"{restart_stem.name}*.extxyz"
+                    )
+
             try:
                 last_restart = max(poss_restarts, key=getmtime)
 
