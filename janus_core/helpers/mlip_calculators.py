@@ -49,7 +49,6 @@ def _set_model(
     # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
     # to loaded PyTorch models
     model_kwargs = {
-        "model_path",
         "model_paths",
         "potential",
         "path",
@@ -62,15 +61,11 @@ def _set_model(
     # Use model if specified, but check not also specified via kwargs
     if model and present:
         raise ValueError(
-            "`model` cannot be used in combination with 'model_path', "
-            "'model_paths', 'potential', or 'path'"
+            f"`model` cannot be used in combination with any keys in {model_kwargs}"
         )
     if len(present) > 1:
         # Check at most one suitable kwarg is specified
-        raise ValueError(
-            "Only one of 'model_path', 'model_paths', 'potential', and 'path' can be "
-            "specified"
-        )
+        raise ValueError(f"Only one of keyword in {model_kwargs} can be specified.")
     if present:
         # Set model from kwargs if any are specified
         model = kwargs.pop(present.pop())

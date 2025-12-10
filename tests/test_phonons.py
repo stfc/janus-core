@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ase.io import read
+from h5py import File
 import pytest
 
 from janus_core.calculations.phonons import Phonons
@@ -40,20 +41,27 @@ def test_calc_phonons():
     assert "phonon" in phonons.results
 
 
-def test_force_consts_to_hdf5_deprecation():
-    """Test deprecation of force-consts-to-hdf5."""
+def test_force_consts_compression(tmp_path):
+    """Test compression of force constants."""
+    log_file = tmp_path / "phonons.log"
+    force_constants = tmp_path / "NaCl-force_constants.hdf5"
+
     struct = read(DATA_PATH / "NaCl.cif")
     struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
-    with pytest.warns(
-        FutureWarning, match="`force_consts_to_hdf5` has been deprecated."
-    ):
-        phonons = Phonons(
-            struct=struct,
-            force_consts_to_hdf5=True,
-        )
 
-    phonons.calc_force_constants(write_force_consts=True)
-    assert "phonon" in phonons.results
+    phonons = Phonons(
+        struct=struct,
+        file_prefix=tmp_path / "NaCl",
+        log_kwargs={"filename": log_file},
+        hdf5=True,
+        hdf5_compression="gzip",
+    )
+    phonons.run()
+
+    assert force_constants.exists()
+    with File(force_constants, "r") as h5f:
+        assert "force_constants" in h5f
+        assert h5f["force_constants"].compression == "gzip"
 
 
 def test_optimize(tmp_path):
@@ -142,7 +150,7 @@ def test_symmetrize(tmp_path):
     phonons_2 = Phonons(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},

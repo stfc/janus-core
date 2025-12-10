@@ -1,10 +1,9 @@
-"""Set up eos commandline interface."""
+"""Set up elasticity commandline interface."""
 
 from __future__ import annotations
 
-from typing import Annotated, get_args
+from typing import Annotated
 
-from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -23,39 +22,47 @@ from janus_core.cli.types import (
     WriteKwargs,
 )
 from janus_core.cli.utils import yaml_converter_callback
-from janus_core.helpers.janus_types import EoSNames
 
 app = Typer()
 
 
 @app.command()
 @use_config(yaml_converter_callback, param_help="Path to configuration file.")
-def eos(
+def elasticity(
     # numpydoc ignore=PR02
     ctx: Context,
     # Required
     arch: Architecture,
     struct: StructPath,
     # Calculation
-    min_volume: Annotated[
+    shear_magnitude: Annotated[
         float,
-        Option(help="Minimum volume scale factor.", rich_help_panel="Calculation"),
-    ] = 0.95,
-    max_volume: Annotated[
-        float,
-        Option(help="Maximum volume scale factor.", rich_help_panel="Calculation"),
-    ] = 1.05,
-    n_volumes: Annotated[
-        int, Option(help="Number of volumes.", rich_help_panel="Calculation")
-    ] = 7,
-    eos_type: Annotated[
-        str,
         Option(
-            click_type=Choice(get_args(EoSNames)),
-            help="Type of fit for equation of state.",
+            help="Magnitude of shear strain for deformed structures.",
             rich_help_panel="Calculation",
         ),
-    ] = "birchmurnaghan",
+    ] = 0.06,
+    normal_magnitude: Annotated[
+        float,
+        Option(
+            help="Magnitude of normal strain for deformed structures.",
+            rich_help_panel="Calculation",
+        ),
+    ] = 0.01,
+    n_strains: Annotated[
+        int,
+        Option(
+            help="Number of normal and shear strains to use for deformed structures.",
+            rich_help_panel="Calculation",
+        ),
+    ] = 4,
+    write_voigt: Annotated[
+        bool,
+        Option(
+            help="Write the ElasticityTensor in Voigt notation.",
+            rich_help_panel="Calculation",
+        ),
+    ] = True,
     minimize: Annotated[
         bool,
         Option(
@@ -85,13 +92,6 @@ def eos(
             rich_help_panel="Calculation",
         ),
     ] = False,
-    plot_to_file: Annotated[
-        bool,
-        Option(
-            help="Whether to plot equation of state.",
-            rich_help_panel="Calculation",
-        ),
-    ] = False,
     # MLIP Calculator
     device: Device = "cpu",
     model: Model = None,
@@ -116,14 +116,17 @@ def eos(
         MLIP architecture to use for calculations.
     struct
         Path of structure to simulate.
-    min_volume
-        Minimum volume scale factor. Default is 0.95.
-    max_volume
-        Maximum volume scale factor. Default is 1.05.
-    n_volumes
-        Number of volumes to use. Default is 7.
-    eos_type
-        Type of fit for equation of state. Default is "birchmurnaghan".
+    shear_magnitude
+        The magnitude of shear strain to apply for deformed structures.
+        Default is 0.06.
+    normal_magnitude
+        The magnitude of normal strain to apply for deformed structures.
+        Default is 0.01.
+    n_strains
+        The number of normal and shear strains to apply for deformed structures.
+        Default is 4.
+    write_voigt
+        Whether to write out in Voigt notation, Default is True.
     minimize
         Whether to minimize initial structure before calculations. Default is True.
     minimize_all
@@ -135,8 +138,6 @@ def eos(
         Other keyword arguments to pass to geometry optimizer. Default is {}.
     write_structures
         True to write out all genereated structures. Default is False.
-    plot_to_file
-        Whether to save plot equation of state to svg. Default is False.
     device
         Device to run model on. Default is "cpu".
     model
@@ -164,7 +165,7 @@ def eos(
     config
         Path to yaml configuration file to define the above options. Default is None.
     """
-    from janus_core.calculations.eos import EoS
+    from janus_core.calculations.elasticity import Elasticity
     from janus_core.cli.utils import (
         carbon_summary,
         check_config,
@@ -204,8 +205,8 @@ def eos(
     if log:
         log_kwargs["filename"] = log
 
-    # Dictionary of inputs for EoS class
-    eos_kwargs = {
+    # Dictionary of inputs for Elasticity class
+    elasticity_kwargs = {
         "struct": struct,
         "arch": arch,
         "device": device,
@@ -215,45 +216,44 @@ def eos(
         "attach_logger": True,
         "log_kwargs": log_kwargs,
         "track_carbon": tracker,
-        "min_volume": min_volume,
-        "max_volume": max_volume,
-        "n_volumes": n_volumes,
-        "eos_type": eos_type,
         "minimize": minimize,
         "minimize_all": minimize_all,
         "minimize_kwargs": minimize_kwargs,
         "write_structures": write_structures,
         "write_kwargs": write_kwargs,
-        "plot_to_file": plot_to_file,
         "file_prefix": file_prefix,
+        "write_voigt": write_voigt,
+        "shear_magnitude": shear_magnitude,
+        "normal_magnitude": normal_magnitude,
+        "n_strains": n_strains,
     }
 
-    # Initialise EoS
-    equation_of_state = EoS(**eos_kwargs)
+    # Initialise Elasticity
+    elasticity = Elasticity(**elasticity_kwargs)
 
     # Set summary and log files
-    summary = equation_of_state._build_filename("eos-summary.yml", filename=summary)
-    log = equation_of_state.log_kwargs["filename"]
+    summary = elasticity._build_filename("elasticity-summary.yml", filename=summary)
+    log = elasticity.log_kwargs["filename"]
 
     # Add structure, MLIP information, and log to info
     info = get_struct_info(
-        struct=equation_of_state.struct,
+        struct=elasticity.struct,
         struct_path=struct,
     )
 
-    output_files = equation_of_state.output_files
+    output_files = elasticity.output_files
 
     # Save summary information before calculations begin
     start_summary(
-        command="eos",
+        command="elasticity",
         summary=summary,
         info=info,
         config=config,
         output_files=output_files,
     )
 
-    # Run equation of state calculations
-    equation_of_state.run()
+    # Run elasticity calculations
+    elasticity.run()
 
     # Save carbon summary
     if tracker:

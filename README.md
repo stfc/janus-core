@@ -115,6 +115,7 @@ Current and planned features include:
   - MACE
 - [x] Rare events simulations
   - PLUMED
+- [x] Elasticity
 
 
 ## Python interface
@@ -127,7 +128,7 @@ from janus_core.calculations.single_point import SinglePoint
 single_point = SinglePoint(
     struct="tests/data/NaCl.cif",
     arch="mace_mp",
-    model_path="tests/models/mace_mp_small.model",
+    model="tests/models/mace_mp_small.model",
 )
 
 results = single_point.run()
@@ -136,15 +137,25 @@ print(results)
 
 will read the NaCl structure file and attach the MACE-MP (medium) calculator, before calculating and printing the energy, forces, and stress.
 
-Jupyter Notebook tutorials illustrating the use of currently available calculations can be found in the [tutorials](https://github.com/stfc/janus-core/tree/main/docs/source/tutorials) documentation directory. This currently includes examples for:
+### Tutorials
+
+Jupyter Notebook tutorials illustrating the use of currently available calculations can
+be found in the [Python tutorials](docs/source/tutorials/python) documentation
+directory. This currently includes examples for:
 
 - [Single Point](docs/source/tutorials/python/single_point.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/single_point.ipynb)
+
 - [Geometry Optimization](docs/source/tutorials/python/geom_opt.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/geom_opt.ipynb)
+
 - [Molecular Dynamics](docs/source/tutorials/python/md.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/md.ipynb)
+
 - [Equation of State](docs/source/tutorials/python/eos.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/eos.ipynb)
+
 - [Phonons](docs/source/tutorials/python/phonons.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/phonons.ipynb)
+
 - [Nudged Elastic Band](docs/source/tutorials/python/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/neb.ipynb)
 
+- [Elasticity](docs/source/tutorials/python/elasticity.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/python/elasticity.ipynb)
 
 ### Calculation outputs
 
@@ -152,7 +163,7 @@ By default, calculations performed will modify the underlying [ase.Atoms](https:
 to store information in the `Atoms.info` and `Atoms.arrays` dictionaries about the MLIP used.
 
 Additional dictionary keys include `arch`, corresponding to the MLIP architecture used,
-and `model_path`, corresponding to the model path, name or label.
+and `model`, corresponding to the model path, name or label.
 
 Results from the MLIP calculator, which are typically stored in `Atoms.calc.results`, will also, by default,
 be copied to these dictionaries, prefixed by the MLIP `arch`.
@@ -165,7 +176,7 @@ from janus_core.calculations.single_point import SinglePoint
 single_point = SinglePoint(
     struct="tests/data/NaCl.cif",
     arch="mace_mp",
-    model_path="tests/models/mace_mp_small.model",
+    model="tests/models/mace_mp_small.model",
 )
 
 single_point.run()
@@ -179,7 +190,7 @@ will return
   'spacegroup': Spacegroup(1, setting=1),
   'unit_cell': 'conventional',
   'occupancy': {'0': {'Na': 1.0}, '1': {'Cl': 1.0}, '2': {'Na': 1.0}, '3': {'Cl': 1.0}, '4': {'Na': 1.0}, '5': {'Cl': 1.0}, '6': {'Na': 1.0}, '7': {'Cl': 1.0}},
-  'model_path': 'tests/models/mace_mp_small.model',
+  'model': 'tests/models/mace_mp_small.model',
   'arch': 'mace_mp',
   'mace_mp_energy': -27.035127799332745,
   'mace_mp_stress': array([-4.78327600e-03, -4.78327600e-03, -4.78327600e-03,  1.08000967e-19, -2.74004242e-19, -2.04504710e-19]),
@@ -212,12 +223,13 @@ janus neb
 janus train
 janus descriptors
 janus preprocess
+janus elasticity
 ```
 
 For example, a single point calcuation (using the [MACE-MP](https://github.com/ACEsuit/mace-mp) "small" force-field) can be performed by running:
 
 ```shell
-janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model-path small
+janus singlepoint --struct tests/data/NaCl.cif --arch mace_mp --model small
 ```
 
 A description of each subcommand, as well as valid options, can be listed using the `--help` option. For example,
@@ -231,40 +243,88 @@ prints the following:
 ```shell
 Usage: janus singlepoint [OPTIONS]
 
-  Perform single point calculations and save to file.
+Perform single point calculations and save to file.
 
-Options:
-  --struct PATH        Path of structure to simulate.  [required]
-  --arch TEXT          MLIP architecture to use for calculations.  [default:
-                       mace_mp]
-  --device TEXT        Device to run calculations on.  [default: cpu]
-  --model-path TEXT    Path to MLIP model.  [default: None]
-  --properties TEXT    Properties to calculate. If not specified, 'energy',
-                       'forces' and 'stress' will be returned.
-  --out PATH           Path to save structure with calculated results. Default
-                       is inferred from name of structure file.
-  --read-kwargs DICT   Keyword arguments to pass to ase.io.read. Must be
-                       passed as a dictionary wrapped in quotes, e.g. "{'key'
-                       : value}".  [default: "{}"]
-  --calc-kwargs DICT   Keyword arguments to pass to selected calculator. Must
-                       be passed as a dictionary wrapped in quotes, e.g.
-                       "{'key' : value}". For the default architecture
-                       ('mace_mp'), "{'model':'small'}" is set unless
-                       overwritten.
-  --write-kwargs DICT  Keyword arguments to pass to ase.io.write when saving
-                       results. Must be passed as a dictionary wrapped in
-                       quotes, e.g. "{'key' : value}".  [default: "{}"]
-  --log PATH           Path to save logs to. Default is inferred from the name
-                       of the structure file.
-  --summary PATH       Path to save summary of inputs, start/end time, and
-                       carbon emissions. Default is inferred from the name of
-                       the structure file.
-  --config TEXT        Configuration file.
-  --help               Show this message and exit.
+
+╭─ Options ───────────────────────────────────────────────────────────────────────────╮
+│ --config        TEXT  Path to configuration file.                                   │
+│ --help                Show this message and exit.                                   │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ MLIP calculator ───────────────────────────────────────────────────────────────────╮
+│ *  --arch               [mace|mace_mp|mace_off|m3gne  MLIP architecture to use for  │
+│                         t|chgnet|alignn|sevennet|neq  calculations.                 │
+│                         uip|dpa3|orb|mattersim|grace  [required]                    │
+│                         |esen|equiformer|pet_mad|uma                                │
+│                         |mace_omol]                                                 │
+│    --device             [cpu|cuda|mps|xpu]            Device to run calculations    │
+│                                                       on.                           │
+│                                                       [default: cpu]                │
+│    --model              TEXT                          MLIP model name, or path to   │
+│                                                       model.                        │
+│    --calc-kwargs        DICT                          Keyword arguments to pass to  │
+│                                                       selected calculator. Must be  │
+│                                                       passed as a dictionary        │
+│                                                       wrapped in quotes, e.g.       │
+│                                                       "{'key': value}".             │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Calculation ───────────────────────────────────────────────────────────────────────╮
+│ *  --struct            PATH                          Path of structure to simulate. │
+│                                                      [required]                     │
+│    --properties        [energy|stress|forces|hessia  Properties to calculate. If    │
+│                        n]                            not specified, 'energy',       │
+│                                                      'forces' and 'stress' will be  │
+│                                                      returned.                      │
+│    --out               PATH                          Path to save structure with    │
+│                                                      calculated results. Default is │
+│                                                      inferred from `file_prefix`.   │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Structure I/O ─────────────────────────────────────────────────────────────────────╮
+│ --file-prefix         PATH  Prefix for output files, including directories. Default │
+│                             directory is ./janus_results, and default filename      │
+│                             prefix is inferred from the input stucture filename.    │
+│ --read-kwargs         DICT  Keyword arguments to pass to ase.io.read. Must be       │
+│                             passed as a dictionary wrapped in quotes, e.g. "{'key': │
+│                             value}". By default, read_kwargs['index'] = ':', so all │
+│                             structures are read.                                    │
+│ --write-kwargs        DICT  Keyword arguments to pass to ase.io.write when saving   │
+│                             any structures. Must be passed as a dictionary wrapped  │
+│                             in quotes, e.g. "{'key': value}".                       │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Logging/summary ───────────────────────────────────────────────────────────────────╮
+│ --log                                  PATH  Path to save logs to. Default is       │
+│                                              inferred from `file_prefix`            │
+│ --tracker         --no-tracker               Whether to save carbon emissions of    │
+│                                              calculation                            │
+│                                              [default: tracker]                     │
+│ --summary                              PATH  Path to save summary of inputs,        │
+│                                              start/end time, and carbon emissions.  │
+│                                              Default is inferred from               │
+│                                              `file_prefix`.                         │
+│ --progress-bar    --no-progress-bar          Whether to show progress bar.          │
+│                                              [default: progress-bar]                │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
 ```
+
 
 Please see the [user guide](https://stfc.github.io/janus-core/user_guide/command_line.html) for examples of each subcommand.
 
+### Tutorials
+
+Jupyter Notebook tutorials illustrating the use of currently available calculations can
+be found in the [CLI tutorials](docs/source/tutorials/cli) documentation directory.
+This currently includes examples for:
+
+- [Single Point](docs/source/tutorials/cli/singlepoint.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/singlepoint.ipynb)
+
+- [Geometry Optimization](docs/source/tutorials/cli/geomopt.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/geomopt.ipynb)
+
+- [Molecular Dynamics](docs/source/tutorials/cli/md.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/md.ipynb)
+
+- [Phonons](docs/source/tutorials/cli/phonons.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/phonons.ipynb)
+
+- [Nudged Elastic Band](docs/source/tutorials/cli/neb.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/neb.ipynb)
+
+- [Elasticity](docs/source/tutorials/cli/elasticity.ipynb) [![badge](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stfc/janus-core/blob/main/docs/source/tutorials/cli/elasticity.ipynb)
 
 ### Using configuration files
 

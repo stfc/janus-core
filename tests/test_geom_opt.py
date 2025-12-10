@@ -416,16 +416,3 @@ def test_traj_kwargs_new_dir(tmp_path):
     assert traj_path.exists()
     traj = read(traj_path, index=":")
     assert len(traj) == 3
-
-
-def test_deprecation_filter_func(tmp_path):
-    """Test FutureWarning raised for model in calc_kwargs."""
-    with pytest.warns(FutureWarning, match="`filter_func` has been deprecated"):
-        geom_opt = GeomOpt(
-            struct=DATA_PATH / "NaCl.cif",
-            arch="mace_mp",
-            model=MODEL_PATH,
-            fmax=0.001,
-            filter_func="UnitCellFilter",
-        )
-    assert isinstance(geom_opt.filtered_struct, UnitCellFilter)

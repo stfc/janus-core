@@ -42,8 +42,6 @@ class GeomOpt(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -76,8 +74,6 @@ class GeomOpt(BaseCalculation):
     filter_class
         Filter class, or name of class from ase.filters to wrap around atoms.
         Default is `FrechetCellFilter`.
-    filter_func
-        Deprecated. Please use `filter_class`.
     filter_kwargs
         Keyword arguments to pass to filter_class. Default is {}.
     optimizer
@@ -103,7 +99,6 @@ class GeomOpt(BaseCalculation):
         arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
-        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         attach_logger: bool | None = None,
@@ -117,7 +112,6 @@ class GeomOpt(BaseCalculation):
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
         filter_class: Callable | str | None = FrechetCellFilter,
-        filter_func: Callable | str | None = None,
         filter_kwargs: dict[str, Any] | None = None,
         optimizer: Callable | str = LBFGS,
         opt_kwargs: ASEOptArgs | None = None,
@@ -139,8 +133,6 @@ class GeomOpt(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model
             MLIP model label, path to model, or loaded model. Default is `None`.
-        model_path
-            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -173,8 +165,6 @@ class GeomOpt(BaseCalculation):
         filter_class
             Filter class, or name of class from ase.filters to wrap around atoms.
             Default is `FrechetCellFilter`.
-        filter_func
-            Deprecated. Please use `filter_class`.
         filter_kwargs
             Keyword arguments to pass to filter_class. Default is {}.
         optimizer
@@ -200,10 +190,6 @@ class GeomOpt(BaseCalculation):
             )
         )
 
-        # Handle deprecated filter_func, but warn later after logging is set up
-        if filter_func:
-            filter_class = filter_func
-
         self.fmax = fmax
         self.steps = steps
         self.symmetrize = symmetrize
@@ -228,7 +214,6 @@ class GeomOpt(BaseCalculation):
             arch=arch,
             device=device,
             model=model,
-            model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
@@ -241,15 +226,6 @@ class GeomOpt(BaseCalculation):
 
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
-
-        # Warn for deprecated filter_func now that logging is set up
-        if filter_func:
-            warnings.warn(
-                "`filter_func` has been deprecated, but currently overrides "
-                "`filter_class`. Please only set `filter_class`.",
-                FutureWarning,
-                stacklevel=2,
-            )
 
         # Set output files
         self.write_kwargs["filename"] = self._build_filename(

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any, get_args
-from warnings import warn
 
 from ase import Atoms
 from numpy import ndarray
@@ -50,8 +49,6 @@ class Phonons(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -108,10 +105,10 @@ class Phonons(BaseCalculation):
         End temperature for thermal properties calculations, in K. Default is 1000.0.
     temp_step
         Temperature step for thermal properties calculations, in K. Default is 50.0.
-    force_consts_to_hdf5
-        Deprecated. Please use `hdf5`.
     hdf5
         Whether to write force constants and bands in hdf5 or not. Default is True.
+    hdf5_compression
+        Compression scheme to use for force constants, gzip or lzf. Default is None.
     plot_to_file
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
@@ -140,7 +137,6 @@ class Phonons(BaseCalculation):
         arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
-        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         attach_logger: bool | None = None,
@@ -162,8 +158,8 @@ class Phonons(BaseCalculation):
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
-        force_consts_to_hdf5: bool | None = None,
         hdf5: bool = True,
+        hdf5_compression: str | None = None,
         plot_to_file: bool = False,
         write_results: bool = True,
         write_full: bool = True,
@@ -183,8 +179,6 @@ class Phonons(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model
             MLIP model label, path to model, or loaded model. Default is `None`.
-        model_path
-            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -241,10 +235,10 @@ class Phonons(BaseCalculation):
             End temperature for thermal calculations, in K. Default is 1000.0.
         temp_step
             Temperature step for thermal calculations, in K. Default is 50.0.
-        force_consts_to_hdf5
-            Deprecated. Please use `hdf5`.
         hdf5
             Whether to write force constants and bands in hdf5 or not. Default is True.
+        hdf5_compression
+            Compression scheme to use for force constants, gzip or lzf. Default is None.
         plot_to_file
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
@@ -284,25 +278,11 @@ class Phonons(BaseCalculation):
         self.temp_max = temp_max
         self.temp_step = temp_step
         self.hdf5 = hdf5
+        self.hdf5_compression = hdf5_compression
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
         self.enable_progress_bar = enable_progress_bar
-
-        # Handle deprecation
-        if force_consts_to_hdf5 is not None:
-            if hdf5 is False:
-                raise ValueError(
-                    """`force_consts_to_hdf5`: has replaced `hdf5`.
-                     Please only use `hdf5`"""
-                )
-            self.hdf5 = force_consts_to_hdf5
-            warn(
-                """`force_consts_to_hdf5` has been deprecated.
-                Please use `hdf5`.""",
-                FutureWarning,
-                stacklevel=2,
-            )
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -325,7 +305,6 @@ class Phonons(BaseCalculation):
             arch=arch,
             device=device,
             model=model,
-            model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
@@ -573,6 +552,7 @@ class Phonons(BaseCalculation):
         *,
         phonopy_file: PathLike | None = None,
         hdf5: bool | None = None,
+        compression: str | None = None,
         force_consts_file: PathLike | None = None,
     ) -> None:
         """
@@ -586,6 +566,8 @@ class Phonons(BaseCalculation):
         hdf5
             Whether to save the force constants separately to an hdf5 file. Default is
             self.hdf5.
+        compression
+            Compression scheme to use fo hdf5 file, gzip or lzf. Default is None.
         force_consts_file
             Name of hdf5 file to save force constants. Unused if `hdf5`
             is False. Default is inferred from `file_prefix`.
@@ -598,6 +580,9 @@ class Phonons(BaseCalculation):
 
         if hdf5 is None:
             hdf5 = self.hdf5
+
+        if compression is None:
+            compression = self.hdf5_compression
 
         if phonopy_file:
             self.phonopy_file = phonopy_file
@@ -613,7 +598,9 @@ class Phonons(BaseCalculation):
         if hdf5:
             build_file_dir(self.force_consts_file)
             write_force_constants_to_hdf5(
-                phonon.force_constants, filename=self.force_consts_file
+                phonon.force_constants,
+                filename=self.force_consts_file,
+                compression=compression,
             )
 
     def calc_bands(self, write_bands: bool | None = None, **kwargs) -> None:
