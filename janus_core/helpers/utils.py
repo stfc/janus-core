@@ -110,8 +110,20 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             struct_name = struct.get_chemical_formula()
 
         # Set default output directory
-        prefix = Path("./janus_results") / struct_name
+        results_dir = Path("./janus_results")
+        results_dirs = sorted(Path(".").glob("janus_results*"))
 
+        if results_dirs:
+            try:
+                results_dir = Path(
+                    "janus_results_"
+                    + str(int(results_dirs[-1].name.split("_")[-1]) + 1)
+                )
+            except ValueError:
+                if results_dir.exists():
+                    results_dir = Path("./janus_results_1")
+
+        prefix = results_dir / struct_name
         return "-".join((str(prefix), *filter(None, additional)))
 
     def _build_filename(
