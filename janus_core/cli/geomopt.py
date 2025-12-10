@@ -124,15 +124,6 @@ def geomopt(
             rich_help_panel="Calculation",
         ),
     ] = None,
-    filter_func: Annotated[
-        str | None,
-        Option(
-            help="Deprecated. Please use --filter",
-            rich_help_panel="Calculation",
-            callback=deprecated_option,
-            hidden=True,
-        ),
-    ] = None,
     constraint_class: Annotated[
         str,
         Option(
@@ -222,8 +213,6 @@ def geomopt(
     filter_class
         Name of filter from ase.filters to wrap around atoms. If using
         --opt-cell-lengths or --opt-cell-fully, defaults to `FrechetCellFilter`.
-    filter_func
-        Deprecated. Please use `--filter_class`.
     constraint_class
         Name of constraint class from ase.constraints, to apply constraints
         to atoms. Parameters should be included as a "constraint_kwargs" dict
