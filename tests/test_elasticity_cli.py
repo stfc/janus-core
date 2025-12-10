@@ -33,8 +33,8 @@ def test_elasticity_opt_none(tmp_path):
         elasticity_path = results_dir / "NaCl-elastic_tensor.dat"
         log_path = results_dir / "NaCl-elasticity-log.yml"
         summary_path = results_dir / "NaCl-elasticity-summary.yml"
-        generated_path = results_dir / "NaCl-generated.extxyz"
-        minimized_path = results_dir / "NaCl-minimized-structure.extxyz"
+        generated_path = results_dir / "NaCl-elasticity-generated.extxyz"
+        minimized_path = results_dir / "NaCl-elasticity-opt.extxyz"
 
         result = runner.invoke(
             app,
@@ -48,7 +48,6 @@ def test_elasticity_opt_none(tmp_path):
                 "2",
                 "--no-minimize",
                 "--write-structures",
-                "--no-tracker",
             ],
         )
 
@@ -102,8 +101,8 @@ def test_elasticity_opt_all(tmp_path):
         elasticity_path = results_dir / "NaCl-elastic_tensor.dat"
         log_path = results_dir / "NaCl-elasticity-log.yml"
         summary_path = results_dir / "NaCl-elasticity-summary.yml"
-        generated_path = results_dir / "NaCl-generated.extxyz"
-        minimized_path = results_dir / "NaCl-minimized-structure.extxyz"
+        generated_path = results_dir / "NaCl-elasticity-generated.extxyz"
+        minimized_path = results_dir / "NaCl-elasticity-opt.extxyz"
 
         result = runner.invoke(
             app,

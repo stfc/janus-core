@@ -19,17 +19,17 @@ MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 def test_calc_elasticity(tmp_path):
     """Test calculating elasticity for Aluminium."""
-    elasticity_path = tmp_path / "elasticity-elastic_tensor.dat"
-    log_file = tmp_path / "elasticity.log"
-    generated_path = tmp_path / "elasticity-generated.extxyz"
-    minimized_path = tmp_path / "elasticity-minimized-structure.extxyz"
+    elasticity_path = tmp_path / "Al-elastic_tensor.dat"
+    log_file = tmp_path / "Al-elasticity.log"
+    generated_path = tmp_path / "Al-elasticity-generated.extxyz"
+    minimized_path = tmp_path / "Al-elasticity-opt.extxyz"
 
     struct = bulk("Al", crystalstructure="fcc")
     struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     elasticity = Elasticity(
         struct,
-        file_prefix=tmp_path / "elasticity",
+        file_prefix=tmp_path / "Al",
         log_kwargs={"filename": log_file},
         write_structures=True,
         shear_magnitude=0.4,
@@ -88,17 +88,17 @@ def test_calc_elasticity(tmp_path):
 
 def test_no_optimize_no_write_voigt(tmp_path):
     """Test calculating elasticity for Aluminium without optimization."""
-    elasticity_path = tmp_path / "elasticity-elastic_tensor.dat"
-    log_file = tmp_path / "elasticity.log"
-    generated_path = tmp_path / "elasticity-generated.extxyz"
-    minimized_path = tmp_path / "elasticity-minimized-structure.extxyz"
+    elasticity_path = tmp_path / "Al-elastic_tensor.dat"
+    log_file = tmp_path / "Al-elasticity.log"
+    generated_path = tmp_path / "Al-elasticity-generated.extxyz"
+    minimized_path = tmp_path / "Al-elasticity-opt.extxyz"
 
     struct = bulk("Al", crystalstructure="fcc")
     struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
 
     elasticity = Elasticity(
         struct,
-        file_prefix=tmp_path / "elasticity",
+        file_prefix=tmp_path / "Al",
         log_kwargs={"filename": log_file},
         minimize=False,
         write_voigt=False,

@@ -236,12 +236,12 @@ class Elasticity(BaseCalculation):
 
         self.minimize_write_kwargs = self.write_kwargs.copy()
         self.minimize_write_kwargs["filename"] = self._build_filename(
-            "minimized-structure.extxyz", filename=self.write_kwargs.get("filename")
+            "elasticity-opt.extxyz", filename=self.write_kwargs.get("filename")
         )
 
         # Set output files
         self.write_kwargs["filename"] = self._build_filename(
-            "generated.extxyz", filename=self.write_kwargs.get("filename")
+            "elasticity-generated.extxyz", filename=self.write_kwargs.get("filename")
         )
 
         self.elasticity_file = self._build_filename("elastic_tensor.dat")
