@@ -155,7 +155,6 @@ class BaseCalculation(FileNameMixin):
             attach_logger, log_kwargs, track_carbon
         )
 
-        # Disallow `model_path` in kwargs
         if "model" in self.calc_kwargs:
             raise ValueError("Please set the `model` parameter explicitly")
 
