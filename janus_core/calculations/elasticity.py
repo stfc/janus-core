@@ -399,7 +399,7 @@ class Elasticity(BaseCalculation):
         )
 
         if self.logger:
-            self.logger.info("Structure calculations complete.")
+            self.logger.info("Elasticity calculations complete.")
         if self.tracker:
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
