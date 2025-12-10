@@ -343,7 +343,7 @@ class Elasticity(BaseCalculation):
     def _calculate_elasticity(self) -> None:
         """Generate deformed structures and calculate the elasticity."""
         if self.logger:
-            self.logger.info("Starting structure calculations")
+            self.logger.info("Starting elasticity calculations")
         if self.tracker:
             self.tracker.start_task("Calculate configurations")
 
