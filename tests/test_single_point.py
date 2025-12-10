@@ -462,15 +462,14 @@ def test_hessian_not_implemented(struct):
         )
 
 
-@pytest.mark.parametrize("keyword", ("model", "model_path"))
-def test_invalid_model_calc_kwargs(keyword):
-    """Test error is raised when model/model_path passed via calc_kwargs are passed."""
+def test_invalid_model_calc_kwargs():
+    """Test error is raised when model is passed via calc_kwargs."""
     skip_extras("mace")
 
     with pytest.raises(ValueError):
         SinglePoint(
             arch="mace_mp",
-            calc_kwargs={keyword: MACE_PATH},
+            calc_kwargs={"model": MACE_PATH},
             struct=DATA_PATH / "NaCl.cif",
         )
 

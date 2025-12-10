@@ -231,3 +231,38 @@ def test_d3_manual():
     assert calculator.parameters["version"] is not None
     assert calculator.parameters["model"] is not None
     assert calculator.parameters["arch"] == "mace_mp_d3"
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {
+            "arch": "alignn",
+            "model": ALIGNN_PATH / "best_model.pt",
+            "path": ALIGNN_PATH / "best_model.pt",
+        },
+        {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
+        {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
+        {"arch": "mace", "model": MACE_MP_PATH, "potential": MACE_MP_PATH},
+        {
+            "arch": "mattersim",
+            "model": "mattersim-v1.0.0-1m",
+            "path": "mattersim-v1.0.0-1m",
+        },
+        {"arch": "nequip", "model": NEQUIP_PATH, "path": NEQUIP_PATH},
+        {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
+        {
+            "arch": "pet_mad",
+            "model": PET_MAD_CHECKPOINT,
+            "checkpoint_path": PET_MAD_CHECKPOINT,
+        },
+        {"arch": "sevennet", "model": SEVENNET_PATH, "path": SEVENNET_PATH},
+    ],
+)
+def test_duplicate_model_input(kwargs):
+    """Test error raised if model is specified in multiple ways."""
+    skip_extras(kwargs["arch"])
+    with pytest.raises(ValueError):
+        choose_calculator(**kwargs)
