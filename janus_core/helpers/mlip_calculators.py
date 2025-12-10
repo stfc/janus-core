@@ -319,17 +319,28 @@ def choose_calculator(
             # Set before loading model to avoid type mismatches
             torch.set_default_dtype(torch.float32)
 
-            # Default to MATPES-r2SCAN model
+            # Default to MATPES-r2SCAN model 
             if model is None:
                 model = "AlphaNet-MATPES-r2SCAN"
+
+            # Convert model to Path if it's a string file path
+            if isinstance(model, str) and (model.endswith('.ckpt') or model.endswith('.pt')):
+                model = Path(model)
 
             # Get config path from kwargs or auto-detect
             config_path = kwargs.pop("config", None)
             if config_path is None and isinstance(model, Path):
-                # Auto-detect: try stem.json or aqcat.json in model directory
+                # Auto-detect: try stem.json then parent_name.json
                 config_path = model.parent / f"{model.stem}.json"
                 if not config_path.exists():
                     config_path = model.parent / f"{model.parent.name}.json"
+            
+            # If model is still a string (model name), config must be provided
+            if config_path is None:
+                raise ValueError(
+                    f"Config file must be specified for model '{model}'. "
+                    "Use config='/path/to/config.json' or provide model_path to a .ckpt file."
+                )
 
             config = All_Config().from_json(str(config_path))
             precision = kwargs.pop("precision", "32")
