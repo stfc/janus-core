@@ -48,6 +48,7 @@ def test_elasticity_opt_none(tmp_path):
                 "2",
                 "--no-minimize",
                 "--write-structures",
+                "--no-tracker",
             ],
         )
 
