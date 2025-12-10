@@ -41,6 +41,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+alphanet = [
+    "torch >= 2.1.0, < 3.0",
+    "torch-scatter >= 2.1.0",
+    "torch-geometric >= 2.5.0", 
+    "pytorch-lightning >= 2.0.0",
+]
 chgnet = [
     "chgnet == 0.4.2",
 ]
@@ -65,12 +71,6 @@ pet-mad = [
 ]
 plumed = [
     "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
-]
-alphanet = [
-    "torch >= 2.1.0, < 3.0",
-    "torch-scatter >= 2.1.0",
-    "torch-geometric >= 2.5.0", 
-    "pytorch-lightning >= 2.0.0",
 ]
 visualise = [
     "weas-widget<0.2,>=0.1.26"
