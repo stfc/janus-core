@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any, get_args
-from warnings import warn
 
 from ase import Atoms
 from numpy import ndarray
@@ -108,8 +107,6 @@ class Phonons(BaseCalculation):
         End temperature for thermal properties calculations, in K. Default is 1000.0.
     temp_step
         Temperature step for thermal properties calculations, in K. Default is 50.0.
-    force_consts_to_hdf5
-        Deprecated. Please use `hdf5`.
     hdf5
         Whether to write force constants and bands in hdf5 or not. Default is True.
     hdf5_compression
@@ -164,7 +161,6 @@ class Phonons(BaseCalculation):
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
-        force_consts_to_hdf5: bool | None = None,
         hdf5: bool = True,
         hdf5_compression: str | None = None,
         plot_to_file: bool = False,
@@ -244,8 +240,6 @@ class Phonons(BaseCalculation):
             End temperature for thermal calculations, in K. Default is 1000.0.
         temp_step
             Temperature step for thermal calculations, in K. Default is 50.0.
-        force_consts_to_hdf5
-            Deprecated. Please use `hdf5`.
         hdf5
             Whether to write force constants and bands in hdf5 or not. Default is True.
         hdf5_compression
@@ -294,21 +288,6 @@ class Phonons(BaseCalculation):
         self.write_results = write_results
         self.write_full = write_full
         self.enable_progress_bar = enable_progress_bar
-
-        # Handle deprecation
-        if force_consts_to_hdf5 is not None:
-            if hdf5 is False:
-                raise ValueError(
-                    """`force_consts_to_hdf5`: has replaced `hdf5`.
-                     Please only use `hdf5`"""
-                )
-            self.hdf5 = force_consts_to_hdf5
-            warn(
-                """`force_consts_to_hdf5` has been deprecated.
-                Please use `hdf5`.""",
-                FutureWarning,
-                stacklevel=2,
-            )
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
