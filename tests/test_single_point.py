@@ -19,6 +19,7 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
+ALPHANET_PATH = MODEL_PATH / "alphanet" / "test_model.ckpt"
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
 ESEN_LABEL = "eSEN-30M-MP"
@@ -91,6 +92,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             -11.148092269897461,
             "NaCl.cif",
             {"model": ALIGNN_PATH / "best_model.pt"},
+        ),
+        (
+            "alphanet",
+            "cpu",
+            -25.0030517578125,
+            "NaCl.cif",
+            {"model": ALPHANET_PATH},
         ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
