@@ -44,10 +44,6 @@ dependencies = [
 alphanet = [
     "alphanet @ git+https://github.com/zmyybc/AlphaNet.git",
     "numpy<2.0",
-    "torch>=2.1.0",
-    "torch-geometric",
-    "torch-scatter",
-    "lightning",
 ]
 chgnet = [
     "chgnet == 0.4.2",
