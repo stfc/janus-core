@@ -339,4 +339,16 @@ conflicts = [
       { extra = "nequip" },
       { extra = "all" },
     ],
+    [
+      { extra = "alphanet" },
+      { extra = "fairchem" },
+    ],
+    [
+      { extra = "alphanet" },
+      { extra = "uma" },
+    ],
+    [
+      { extra = "alphanet" },
+      { extra = "all" },
+    ],
 ]
