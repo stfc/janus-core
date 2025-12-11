@@ -131,14 +131,20 @@ def test_file_name_mixin_build(mixin_params, file_args, file_kwargs, file_name):
 @pytest.mark.parametrize(
     "existing_dirs, expected_new_dir",
     (
-        # Defaults to structure atoms from ASE
         ((), "janus_results"),
         (("janus_results",), "janus_results_1"),
-        (("janus_results_1",), "janus_results_2"),
         (("janus_results", "janus_results_1"), "janus_results_2"),
+        (("janus_results", "janus_results_1", "janus_results_2"), "janus_results_3"),
+        # Check non-sequential output directories
+        (("janus_results_1",), "janus_results_2"),
+        (("janus_results_2",), "janus_results_3"),
         (("janus_results_1", "janus_results_2"), "janus_results_3"),
         (("janus_results", "janus_results_2"), "janus_results_3"),
-        (("janus_results", "janus_results_1", "janus_results_2"), "janus_results_3"),
+        # Check non-default output directories
+        (("janus_results1"), "janus_results"),
+        (("janus_results", "janus_results1"), "janus_results_1"),
+        (("janus_result"), "janus_results"),
+        (("janus_results_abc"), "janus_results"),
     ),
 )
 def test_new_results_dir(tmp_path, existing_dirs, expected_new_dir):
