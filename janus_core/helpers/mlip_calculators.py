@@ -321,7 +321,7 @@ def choose_calculator(
 
             # Default to MATPES-r2SCAN model 
             if model is None:
-                model = "AlphaNet-MATPES-r2SCAN"
+                model = "AlphaNet-MPtrj-v1"
 
             # Convert model to Path if it's a string file path
             if isinstance(model, str) and (model.endswith('.ckpt') or model.endswith('.pt')):
