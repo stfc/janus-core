@@ -49,24 +49,39 @@ To install all MLIPs and features currently compatible with MACE, run:
 
 Currently supported MLIP ``extras`` are:
 
-- ``alignn``: `ALIGNN <https://github.com/usnistgov/alignn>`_
-- ``chgnet``: `CHGNet <https://github.com/CederGroupHub/chgnet/>`_
-- ``mace``: `MACE <https://github.com/ACEsuit/mace>`_
-- ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
-- ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
-- ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
-- ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
-- ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
-- ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
-- ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
-- ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/facebookresearch/fairchem/tree/fairchem_core-1.10.0/src/fairchem/core>`_
-- ``uma``: `UMA <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
-- ``pet-mad``: `PET-MAD <https://github.com/lab-cosmo/pet-mad>`_
+- ``alignn``: `ALIGNN (alignn) <https://github.com/usnistgov/alignn>`_
+- ``chgnet``: `CHGNet (chgnet) <https://github.com/CederGroupHub/chgnet/>`_
+- ``mace``: `MACE (mace, mace_mp, mace_off, mace_omol) <https://github.com/ACEsuit/mace>`_
+- ``m3gnet``: `M3GNet (m3gnet) <https://github.com/materialsvirtuallab/matgl/>`_
+- ``sevenn``: `SevenNet (sevennet) <https://github.com/MDIL-SNU/SevenNet/>`_
+- ``nequip``: `NequIP (nequip) <https://github.com/mir-group/nequip>`_
+- ``dpa3``: `DPA3 (dpa3) <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
+- ``orb``: `Orb (orb) <https://github.com/orbital-materials/orb-models>`_
+- ``mattersim``: `MatterSim (mattersim) <https://github.com/microsoft/mattersim>`_
+- ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
+- ``fairchem-1``: `eqV2 DeNS/eSEN (esen, equiformer) <https://github.com/facebookresearch/fairchem/tree/fairchem_core-1.10.0/src/fairchem/core>`_
+- ``fairchem-2``: `UMA (uma) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
+- ``pet-mad``: `PET-MAD (pet_mad) <https://github.com/lab-cosmo/pet-mad>`_
+
+The labels in brackets are the corresponding architecture parameters (``arch``) that
+should be set to use these models.
 
 .. note::
 
-    ``orb``, ``mattersim``, and ``pet-mad`` are not currently compatible with Windows natively,
-    but can be installed and run via Windows Subsystem for Linux.
+    ``orb``, ``mattersim``, ``pet-mad``, ``alignn``, and ``m3gnet`` are not currently
+    compatible with Windows natively, but can be installed and run via Windows
+    Subsystem for Linux.
+
+.. note::
+
+    ``fairchem-1`` requires on additional build-time dependencies, which can be installed
+    via::
+
+        python -m pip install 'fairchem-core[torch-extras]==1.10.0'
+
+    or::
+
+        uv pip install 'fairchem-core[torch-extras]==1.10.0' --no-build-isolation
 
 
 Additional features can also be enabled as ``extras``:

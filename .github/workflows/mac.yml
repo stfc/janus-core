@@ -42,7 +42,7 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
-          uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
+          uv sync --extra mattersim --extra fairchem-1 --extra sevennet --extra nequip --extra d3
           uv pip install --reinstall pynvml
           uv pip install "fairchem-core[torch-extras]" --no-build-isolation
 
@@ -64,11 +64,11 @@ jobs:
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
 
-      - name: Install uma
+      - name: Install UMA
         run: |
-          uv sync --extra uma
+          uv sync --extra fairchem-2
           uv pip install --reinstall pynvml
-          uv pip install fairchem-core[torch-extras] --no-build-isolation
+          uv pip install fairchem-core --no-build-isolation
 
       - name: Run test suite for UMA
         env:
