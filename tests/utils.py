@@ -242,7 +242,7 @@ def download_alphanet_model(model_name: str = "MATPES") -> tuple[Path, Path]:
     
     # Download if not cached
     cache_dir.mkdir(parents=True, exist_ok=True)
-    base_url = f"https://media.githubusercontent.com/media/zmyybc/AlphaNet/main/pretrained/{model_name}"
+    base_url = f"https://github.com/zmyybc/AlphaNet/raw/jax_and_zbl/pretrained/{model_name}"
     
     print(f"Downloading AlphaNet {model_name} checkpoint...")
     request = Request(f"{base_url}/r2scan_1021.ckpt", headers={"User-Agent": "janus-core"})
