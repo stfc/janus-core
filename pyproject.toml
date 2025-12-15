@@ -42,7 +42,7 @@ dependencies = [
 
 [project.optional-dependencies]
 alphanet = [
-    "alphanet >= 0.1.2",
+    "alphanet @ git+https://github.com/zmyybc/AlphaNet.git",
     "numpy<2.0",
 ]
 chgnet = [
