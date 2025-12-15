@@ -19,7 +19,18 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
 ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
-ALPHANET_PATH = MODEL_PATH / "alphanet" / "test_model.ckpt"
+
+# AlphaNet MATPES model - download if not present
+ALPHANET_CKPT = MODEL_PATH / "alphanet" / "MATPES" / "r2scan_1021.ckpt"
+ALPHANET_CONFIG = MODEL_PATH / "alphanet" / "MATPES" / "matpes.json"
+
+if not ALPHANET_CKPT.exists() or not ALPHANET_CONFIG.exists():
+    try:
+        from tests.utils import download_alphanet_model
+        ALPHANET_CKPT, ALPHANET_CONFIG = download_alphanet_model("MATPES")
+    except Exception as e:
+        print(f"Warning: Could not download AlphaNet MATPES model: {e}")
+
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
 ESEN_LABEL = "eSEN-30M-MP"
@@ -96,9 +107,9 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         (
             "alphanet",
             "cpu",
-            -25.0030517578125,
+            -55.31890106201172,
             "NaCl.cif",
-            {"model": ALPHANET_PATH},
+            {"calc_kwargs": {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG}},
         ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
