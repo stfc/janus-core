@@ -27,6 +27,7 @@ ALPHANET_CONFIG = MODEL_PATH / "alphanet" / "MATPES" / "matpes.json"
 if not ALPHANET_CKPT.exists() or not ALPHANET_CONFIG.exists():
     try:
         from tests.utils import download_alphanet_model
+
         ALPHANET_CKPT, ALPHANET_CONFIG = download_alphanet_model("MATPES")
     except Exception as e:
         print(f"Warning: Could not download AlphaNet MATPES model: {e}")

@@ -312,8 +312,8 @@ def choose_calculator(
 
         case "alphanet":
             from alphanet import __version__
-            from alphanet.infer.calc import AlphaNetCalculator
             from alphanet.config import All_Config
+            from alphanet.infer.calc import AlphaNetCalculator
             import torch
 
             # Set before loading model to avoid type mismatches
