@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import re
 from typing import Any
-from urllib.request import urlopen, Request
+from urllib.request import Request, urlopen
 
 from ase import Atoms
 from ase.io import read
@@ -16,6 +16,7 @@ import pytest
 import yaml
 
 from janus_core.helpers.janus_types import MaybeSequence, PathLike
+
 
 def read_atoms(path: Path) -> Atoms | None:
     """
@@ -231,27 +232,31 @@ def download_alphanet_model(model_name: str = "MATPES") -> tuple[Path, Path]:
         Paths to (checkpoint_file, config_file).
     """
     # Directory for cached test data
-    TEST_CACHE_DIR = Path.home() / ".cache" / "janus-core" / "test-data"
-    cache_dir = TEST_CACHE_DIR / "alphanet" / model_name
+    test_cache_dir = Path.home() / ".cache" / "janus-core" / "test-data"
+    cache_dir = test_cache_dir / "alphanet" / model_name
     ckpt_path = cache_dir / "r2scan_1021.ckpt"
     json_path = cache_dir / "matpes.json"
-    
+
     # Return if already cached
     if ckpt_path.exists() and json_path.exists():
         return ckpt_path, json_path
-    
+
     # Download if not cached
     cache_dir.mkdir(parents=True, exist_ok=True)
-    base_url = f"https://github.com/zmyybc/AlphaNet/raw/jax_and_zbl/pretrained/{model_name}"
-    
+    base_url = (
+        f"https://github.com/zmyybc/AlphaNet/raw/jax_and_zbl/pretrained/{model_name}"
+    )
+
     print(f"Downloading AlphaNet {model_name} checkpoint...")
-    request = Request(f"{base_url}/r2scan_1021.ckpt", headers={"User-Agent": "janus-core"})
+    request = Request(
+        f"{base_url}/r2scan_1021.ckpt", headers={"User-Agent": "janus-core"}
+    )
     with urlopen(request, timeout=300) as response:
         ckpt_path.write_bytes(response.read())
-    
+
     print(f"Downloading AlphaNet {model_name} config...")
     request = Request(f"{base_url}/matpes.json", headers={"User-Agent": "janus-core"})
     with urlopen(request, timeout=30) as response:
         json_path.write_bytes(response.read())
-    
+
     return ckpt_path, json_path
