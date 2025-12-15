@@ -74,7 +74,7 @@ visualise = [
     "weas-widget<0.2,>=0.1.26"
 ]
 all = [
-    "janus-core[alphanet]", 
+    "janus-core[alphanet]",
     "janus-core[chgnet]",
     "janus-core[grace]",
     "janus-core[d3]",
