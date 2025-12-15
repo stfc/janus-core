@@ -319,27 +319,20 @@ def choose_calculator(
             # Set before loading model to avoid type mismatches
             torch.set_default_dtype(torch.float32)
 
-            # Default to MATPES-r2SCAN model 
+            # No default model
             if model is None:
-                model = "AlphaNet-MPtrj-v1"
+                raise ValueError(
+                    f"Please specify `model`, as there is no default model for {arch}. "
+                    "Provide path to AlphaNet checkpoint file (.ckpt). "
+                    "Download from: https://github.com/zmyybc/AlphaNet/tree/main/pretrained"
+                )
 
-            # Convert model to Path if it's a string file path
-            if isinstance(model, str) and (model.endswith('.ckpt') or model.endswith('.pt')):
-                model = Path(model)
-
-            # Get config path from kwargs or auto-detect
+            # Get config path from kwargs
             config_path = kwargs.pop("config", None)
-            if config_path is None and isinstance(model, Path):
-                # Auto-detect: try stem.json then parent_name.json
-                config_path = model.parent / f"{model.stem}.json"
-                if not config_path.exists():
-                    config_path = model.parent / f"{model.parent.name}.json"
-            
-            # If model is still a string (model name), config must be provided
             if config_path is None:
                 raise ValueError(
-                    f"Config file must be specified for model '{model}'. "
-                    "Use config='/path/to/config.json' or provide model_path to a .ckpt file."
+                    "Config file must be specified with config='/path/to/config.json'. "
+                    "Download from: https://github.com/zmyybc/AlphaNet/tree/main/pretrained"
                 )
 
             config = All_Config().from_json(str(config_path))
