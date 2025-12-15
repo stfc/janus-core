@@ -49,9 +49,16 @@ except ImportError:
 
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
-ALPHANET_PATH = MODEL_PATH / "alphanet"
-ALPHANET_CKPT = ALPHANET_PATH / "test_model.ckpt"
-ALPHANET_CONFIG = ALPHANET_PATH / "test_model.json"
+# AlphaNet MATPES model - download if not present
+ALPHANET_CKPT = MODEL_PATH / "alphanet" / "MATPES" / "r2scan_1021.ckpt"
+ALPHANET_CONFIG = MODEL_PATH / "alphanet" / "MATPES" / "matpes.json"
+
+if not ALPHANET_CKPT.exists() or not ALPHANET_CONFIG.exists():
+    try:
+        from tests.utils import download_alphanet_model
+        ALPHANET_CKPT, ALPHANET_CONFIG = download_alphanet_model("MATPES")
+    except Exception as e:
+        print(f"Warning: Could not download AlphaNet MATPES model: {e}")
 
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 
@@ -105,10 +112,9 @@ PET_MAD_CHECKPOINT = (
         ("alignn", "cpu", {"model_path": ALIGNN_PATH / "best_model.pt"}),
         ("alignn", "cpu", {"model": "alignnff_wt10"}),
         ("alignn", "cpu", {"path": ALIGNN_PATH}),
-        ("alphanet", "cpu", {"model": ALPHANET_CKPT}),
         ("alphanet", "cpu", {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG}),
-        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "precision": "32"}),
-        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "precision": "64"}),
+        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG, "precision": "32"}),
+        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG, "precision": "64"}),
         ("chgnet", "cpu", {}),
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model_path": CHGNET_PATH}),
