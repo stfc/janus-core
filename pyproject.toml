@@ -46,6 +46,7 @@ alphanet = [
     "numpy<2.0",
     "torch>=2.0.0; sys_platform != 'win32'",
     "torch-geometric; sys_platform != 'win32'",
+    "torch-scatter; sys_platform != 'win32'",
 ]
 chgnet = [
     "chgnet == 0.4.2",
@@ -353,3 +354,6 @@ conflicts = [
       { extra = "all" },
     ],
 ]
+
+[tool.uv.extra-build-dependencies]
+torch-scatter = ["torch"]
