@@ -56,6 +56,12 @@ python3 -m pip install janus-core[mace,chgnet,sevennet]
 > Please refer to the [installation documentation](https://stfc.github.io/janus-core/user_guide/installation.html)
 > for more details.
 
+> [!NOTE]
+> **AlphaNet** requires manual installation of `torch-scatter` after installing the `alphanet` extra:
+> ```bash
+> python3 -m pip install janus-core[alphanet]
+> python3 -m pip install --no-build-isolation torch-scatter
+> ```
 
 To install all MLIPs currently compatible with MACE, run:
 
@@ -85,6 +91,7 @@ Current and planned features include:
   - M3GNet
   - CHGNet
   - ALIGNN
+  - AlphaNet
   - SevenNet
   - NequIP
   - DPA3
