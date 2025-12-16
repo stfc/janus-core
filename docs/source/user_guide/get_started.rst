@@ -65,7 +65,7 @@ Currently supported MLIP ``extras`` are:
 
 .. note::
 
-    ``orb``, ``mattersim``, and ``pet-mad`` are not currently compatible with Windows natively,
+    ``alphanet``, ``orb``, ``mattersim``, and ``pet-mad`` are not currently compatible with Windows natively,
     but can be installed and run via Windows Subsystem for Linux.
 
 
