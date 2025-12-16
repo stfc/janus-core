@@ -56,6 +56,7 @@ def _set_model(
         "model_name",
         "checkpoint_path",
         "predict_unit",
+        "ckpt_path",
     }
     present = kwargs.keys() & model_kwargs
 
