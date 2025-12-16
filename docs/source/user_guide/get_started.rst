@@ -50,6 +50,7 @@ To install all MLIPs and features currently compatible with MACE, run:
 Currently supported MLIP ``extras`` are:
 
 - ``alignn``: `ALIGNN <https://github.com/usnistgov/alignn>`_
+- ``alphanet``: `AlphaNet <https://github.com/zmyybc/AlphaNet>`_
 - ``chgnet``: `CHGNet <https://github.com/CederGroupHub/chgnet/>`_
 - ``mace``: `MACE <https://github.com/ACEsuit/mace>`_
 - ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
