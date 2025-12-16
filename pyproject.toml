@@ -44,6 +44,7 @@ dependencies = [
 alphanet = [
     "alphanet @ git+https://github.com/zmyybc/AlphaNet.git",
     "numpy<2.0",
+    "torch>=2.0.0; sys_platform != 'win32'",
 ]
 chgnet = [
     "chgnet == 0.4.2",
