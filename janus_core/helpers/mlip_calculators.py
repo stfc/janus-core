@@ -335,7 +335,7 @@ def choose_calculator(
                     "Download from: https://github.com/zmyybc/AlphaNet/tree/main/pretrained"
                 )
 
-            config = All_Config().from_json(str(config_path))
+            config = All_Config().from_json(config_path)
             precision = kwargs.pop("precision", "32")
 
             calculator = AlphaNetCalculator(
