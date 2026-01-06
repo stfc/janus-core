@@ -1003,7 +1003,7 @@ class Phonons(BaseCalculation):
         ndarray
             Forces on the structure.
         """
-        return PhonopyAtomsAdaptor.get_atoms(struct).get_forces()
+        return PhonopyAtomsAdaptor.get_atoms(struct, self.calc).get_forces()
 
     def run(self) -> None:
         """Run phonon calculations."""
