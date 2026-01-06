@@ -9,9 +9,11 @@ from pathlib import Path
 from typing import Any, get_args
 
 from ase import Atoms
+from ase.calculators.calculator import Calculator
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read, write
 from ase.io.formats import filetype
+from phonopy.structure.atoms import PhonopyAtoms
 
 from janus_core.helpers.janus_types import (
     Architectures,
@@ -321,3 +323,56 @@ def output_structs(
 
         build_file_dir(write_kwargs["filename"])
         write(images=images, **write_kwargs)
+
+
+class PhonopyAtomsAdaptor:
+    """Adaptor to bridge between ASE and pymatgen atoms."""
+
+    # No magnetic moments considered
+    @staticmethod
+    def get_atoms(struct: PhonopyAtoms, calc: Calculator | None = None) -> Atoms:
+        """
+        Convert Phonopy Atoms structure to ASE Atoms structure.
+
+        Parameters
+        ----------
+        struct
+            PhonopyAtoms structure to be converted.
+        calc
+            Optional calculator to attach.
+
+        Returns
+        -------
+        Atoms
+            Converted ASE Atoms structure.
+        """
+        return Atoms(
+            symbols=struct.symbols,
+            scaled_positions=struct.scaled_positions,
+            cell=struct.cell,
+            masses=struct.masses,
+            pbc=True,
+            calculator=calc,
+        )
+
+    @staticmethod
+    def get_phonopy_atoms(struct: Atoms) -> PhonopyAtoms:
+        """
+        Convert ASE Atoms structure to Phonopy Atoms structure.
+
+        Parameters
+        ----------
+        struct
+            ASE Atoms structure to be converted.
+
+        Returns
+        -------
+        PhonopyAtoms
+            Converted PhonopyAtoms structure.
+        """
+        return PhonopyAtoms(
+            symbols=struct.get_chemical_symbols(),
+            cell=struct.cell.array,
+            scaled_positions=struct.get_scaled_positions(),
+            masses=struct.get_masses(),
+        )

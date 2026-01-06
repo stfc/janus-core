@@ -27,6 +27,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
+from janus_core.helpers.struct_io import PhonopyAtomsAdaptor
 from janus_core.helpers.utils import (
     build_file_dir,
     none_to_dict,
@@ -498,7 +499,7 @@ class Phonons(BaseCalculation):
 
         self._set_info_units()
 
-        cell = self._ASE_to_PhonopyAtoms(self.struct)
+        cell = PhonopyAtomsAdaptor.get_phonopy_atoms(self.struct)
 
         if len(self.supercell) == 3:
             supercell_matrix = (
@@ -988,53 +989,6 @@ class Phonons(BaseCalculation):
             build_file_dir(self.pdos_plot_file)
             bplt.savefig(self.pdos_plot_file)
 
-    # No magnetic moments considered
-    # Disable invalid-function-name
-    def _Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:  # noqa: N802
-        """
-        Convert Phonopy Atoms structure to ASE Atoms structure.
-
-        Parameters
-        ----------
-        struct
-            PhonopyAtoms structure to be converted.
-
-        Returns
-        -------
-        Atoms
-            Converted ASE Atoms structure.
-        """
-        return Atoms(
-            symbols=struct.symbols,
-            scaled_positions=struct.scaled_positions,
-            cell=struct.cell,
-            masses=struct.masses,
-            pbc=True,
-            calculator=self.calc,
-        )
-
-    # Disable invalid-function-name
-    def _ASE_to_PhonopyAtoms(self, struct: Atoms) -> PhonopyAtoms:  # noqa: N802
-        """
-        Convert ASE Atoms structure to Phonopy Atoms structure.
-
-        Parameters
-        ----------
-        struct
-            ASE Atoms structure to be converted.
-
-        Returns
-        -------
-        PhonopyAtoms
-            Converted PhonopyAtoms structure.
-        """
-        return PhonopyAtoms(
-            symbols=struct.get_chemical_symbols(),
-            cell=struct.cell.array,
-            scaled_positions=struct.get_scaled_positions(),
-            masses=struct.get_masses(),
-        )
-
     def _calc_forces(self, struct: PhonopyAtoms) -> ndarray:
         """
         Calculate forces on PhonopyAtoms structure.
@@ -1049,8 +1003,7 @@ class Phonons(BaseCalculation):
         ndarray
             Forces on the structure.
         """
-        atoms = self._Phonopy_to_ASEAtoms(struct)
-        return atoms.get_forces()
+        return PhonopyAtomsAdaptor.get_atoms(struct, self.calc).get_forces()
 
     def run(self) -> None:
         """Run phonon calculations."""
