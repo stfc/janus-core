@@ -8,13 +8,14 @@ from typing import Annotated
 from typer import Option, Typer
 import yaml
 
-from janus_core.cli.types import LogPath, Summary, Tracker
+from janus_core.cli.types import Architectures, LogPath, Summary, Tracker
 
 app = Typer()
 
 
 @app.command()
 def train(
+    arch: Architectures,
     mlip_config: Annotated[
         Path, Option(help="Configuration file to pass to MLIP CLI.", show_default=False)
     ],
@@ -30,6 +31,8 @@ def train(
 
     Parameters
     ----------
+    arch
+        The achitecture to train with.
     mlip_config
         Configuration file to pass to MLIP CLI.
     fine_tune
@@ -93,7 +96,11 @@ def train(
 
     # Run training
     run_train(
-        mlip_config, attach_logger=True, log_kwargs=log_kwargs, track_carbon=tracker
+        arch,
+        mlip_config,
+        attach_logger=True,
+        log_kwargs=log_kwargs,
+        track_carbon=tracker,
     )
 
     # Save carbon summary

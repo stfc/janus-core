@@ -85,7 +85,7 @@ def test_train(tmp_path):
             app,
             [
                 "train",
-                "--mlip-config",
+                "mace--mlip-config",
                 config,
             ],
         )
@@ -135,6 +135,7 @@ def test_train_with_foundation(tmp_path):
         app,
         [
             "train",
+            "mace",
             "--mlip-config",
             config,
             "--log",
@@ -165,6 +166,7 @@ def test_fine_tune(tmp_path):
             app,
             [
                 "train",
+                "mace",
                 "--mlip-config",
                 config,
                 "--fine-tune",
@@ -196,6 +198,7 @@ def test_fine_tune_no_foundation(tmp_path):
         app,
         [
             "train",
+            "mace",
             "--mlip-config",
             config,
             "--fine-tune",
@@ -219,6 +222,7 @@ def test_fine_tune_invalid_foundation(tmp_path):
         app,
         [
             "train",
+            "mace",
             "--mlip-config",
             config,
             "--fine-tune",
@@ -249,6 +253,7 @@ def test_no_carbon(tmp_path):
             app,
             [
                 "train",
+                "mace",
                 "--mlip-config",
                 config,
                 "--no-tracker",
