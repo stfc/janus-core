@@ -85,7 +85,8 @@ def test_train(tmp_path):
             app,
             [
                 "train",
-                "mace--mlip-config",
+                "mace",
+                "--mlip-config",
                 config,
             ],
         )
