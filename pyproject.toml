@@ -83,6 +83,7 @@ all = [
 # MLIPs with updated e3nn
 fairchem-1 = [
     "fairchem-core == 1.10.0",
+    "scipy < 1.17.0",
 ]
 mattersim = [
     "mattersim == 1.1.2; sys_platform != 'win32'",
