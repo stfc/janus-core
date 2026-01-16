@@ -80,9 +80,10 @@ def write_tmp_config_nequip(
         Path to yaml config file to be fixed.
     tmp_path
         Temporary path from pytest in which to write corrected config.
-    model_path
-        Path to a saved model.
-
+    fine_tune
+        Whether fine tuning. Default is False.
+    model_type
+        If using a package or checkpoint file.
     Returns
     -------
     Path
@@ -227,7 +228,13 @@ def test_fine_tune(tmp_path):
         summary_path = tmp_path / "summary.yml"
         logs_path = results_dir / "logs"
 
-        config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path())
+        model = Path("test-finetuned.model")
+        compiled_model = Path("test-finetuned_compiled.model")
+        logs_path = Path("logs")
+        results_path = Path("results")
+        checkpoints_path = Path("checkpoints")
+
+        config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path.cwd())
 
         result = runner.invoke(
             app,
