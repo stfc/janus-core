@@ -13,6 +13,7 @@ from tests.utils import (
     chdir,
     check_output_files,
     clear_log_handlers,
+    skip_extras,
     strip_ansi_codes,
 )
 
@@ -22,9 +23,9 @@ MODEL_PATH = Path(__file__).parent / "models"
 runner = CliRunner()
 
 
-def write_tmp_config(config_path: Path, tmp_path: Path) -> Path:
+def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
     """
-    Fix paths in config files and write corrected config to tmp_path.
+    Fix paths in config files and write corrected config to tmp_path for mace.
 
     Parameters
     ----------
@@ -60,6 +61,42 @@ def write_tmp_config(config_path: Path, tmp_path: Path) -> Path:
     return tmp_config
 
 
+def write_tmp_config_nequip(config_path: Path, tmp_path: Path) -> Path:
+    """
+    Fix paths in config files and write corrected config to tmp_path for nequip.
+
+    Parameters
+    ----------
+    config_path
+        Path to yaml config file to be fixed.
+    tmp_path
+        Temporary path from pytest in which to write corrected config.
+
+    Returns
+    -------
+    Path
+        Temporary path to corrected config file.
+    """
+    # Load config from tests/data
+    with open(config_path, encoding="utf8") as file:
+        config = yaml.safe_load(file)
+
+    # Use DATA_PATH to set paths relative to this test file
+    for file in ("train_file_path", "test_file_path", "val_file_path"):
+        if (
+            file in config["data"]
+            and (DATA_PATH / Path(config["data"][file]).name).exists()
+        ):
+            config["data"][file] = str(DATA_PATH / Path(config["data"][file]).name)
+
+    # Write out temporary config with corrected paths
+    tmp_config = tmp_path / "config.yaml"
+    with open(tmp_config, "w", encoding="utf8") as file:
+        yaml.dump(config, file)
+
+    return tmp_config
+
+
 def test_help():
     """Test calling `janus train --help`."""
     result = runner.invoke(app, ["train", "--help"])
@@ -69,6 +106,8 @@ def test_help():
 
 def test_train(tmp_path):
     """Test MLIP training."""
+    skip_extras("mace")
+
     with chdir(tmp_path):
         model = Path("test.model")
         compiled_model = Path("test_compiled.model")
@@ -79,7 +118,7 @@ def test_train(tmp_path):
         log_path = results_dir / "train-log.yml"
         summary_path = results_dir / "train-summary.yml"
 
-        config = write_tmp_config(DATA_PATH / "mlip_train.yml", Path())
+        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path())
 
         result = runner.invoke(
             app,
@@ -128,9 +167,11 @@ def test_train(tmp_path):
 
 def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
+    skip_extras("mace")
+
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
-    config = write_tmp_config(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
+    config = write_tmp_config_mace(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
 
     result = runner.invoke(
         app,
@@ -151,6 +192,8 @@ def test_train_with_foundation(tmp_path):
 
 def test_fine_tune(tmp_path):
     """Test MLIP fine-tuning."""
+    skip_extras("mace")
+
     with chdir(tmp_path):
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
@@ -161,7 +204,7 @@ def test_fine_tune(tmp_path):
         results_path = Path("results")
         checkpoints_path = Path("checkpoints")
 
-        config = write_tmp_config(DATA_PATH / "mlip_fine_tune.yml", Path())
+        config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path())
 
         result = runner.invoke(
             app,
@@ -190,6 +233,8 @@ def test_fine_tune(tmp_path):
 
 def test_fine_tune_no_foundation(tmp_path):
     """Test MLIP fine-tuning raises errors without foundation_model."""
+    skip_extras("mace")
+
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
 
@@ -215,6 +260,8 @@ def test_fine_tune_no_foundation(tmp_path):
 
 def test_fine_tune_invalid_foundation(tmp_path):
     """Test MLIP fine-tuning raises errors with invalid foundation_model."""
+    skip_extras("mace")
+
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
     config = DATA_PATH / "mlip_fine_tune_invalid_foundation.yml"
@@ -239,6 +286,8 @@ def test_fine_tune_invalid_foundation(tmp_path):
 
 def test_no_carbon(tmp_path):
     """Test disabling carbon tracking."""
+    skip_extras("mace")
+
     with chdir(tmp_path):
         Path("test.model")
         Path("test_compiled.model")
@@ -248,7 +297,7 @@ def test_no_carbon(tmp_path):
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
 
-        config = write_tmp_config(DATA_PATH / "mlip_train.yml", Path())
+        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path())
 
         result = runner.invoke(
             app,
@@ -271,3 +320,63 @@ def test_no_carbon(tmp_path):
         assert "emissions" not in train_summary
 
         clear_log_handlers()
+
+
+def test_nequip_train(tmp_path):
+    """Test training with nequip."""
+    skip_extras("nequip")
+
+    with chdir(tmp_path):
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
+        config_path = DATA_PATH / "nequip_train.yaml"
+        last_ckpt_path = tmp_path / "janus_results/last.ckpt"
+        best_ckpt_path = tmp_path / "janus_results/best.ckpt"
+        train_log_path = tmp_path / "janus_results/train_log"
+        metrics_path = tmp_path / "janus_results/train_log/version_0/metrics.csv"
+
+        config_path = write_tmp_config_nequip(config_path, tmp_path)
+
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "nequip",
+                "--mlip-config",
+                config_path,
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert log_path.exists()
+        assert summary_path.exists()
+        assert best_ckpt_path.exists()
+        assert last_ckpt_path.exists()
+        assert train_log_path.exists()
+        assert metrics_path.exists()
+
+        with open(metrics_path) as metrics:
+            header = metrics.readline().split(",")
+
+        assert header[:3] == ["epoch", "lr-Adam", "step"]
+
+
+def test_nequip_train_invalid_config_suffix(tmp_path):
+    """Test training with nequip."""
+    skip_extras("nequip")
+
+    with chdir(tmp_path):
+        config_path = DATA_PATH / "mlip_train.yml"
+
+        config_path = write_tmp_config_mace(config_path, tmp_path)
+
+        result = runner.invoke(
+            app,
+            ["train", "nequip", "--mlip-config", config_path],
+        )
+        assert result.exit_code == 1
+        assert isinstance(result.exception, ValueError)

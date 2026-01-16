@@ -68,11 +68,17 @@ def train(
             from hydra.core.hydra_config import HydraConfig
             from nequip.scripts.train import main as run
 
+            if mlip_config.suffix != ".yaml":
+                raise ValueError(
+                    "Hydra (nequip) only supports .yaml config files, "
+                    f"{mlip_config} will not be found."
+                )
+
             # Setup the HydraConfig global singleton (Compose API).
             # Paths must be strings.
             initialize(version_base=None, config_dir=str(mlip_config.parent.absolute()))
             # Obtain the HydraConfig from the path.
-            mlip_args = compose(config_name=mlip_config.name, return_hydra_config=True)
+            mlip_args = compose(config_name=mlip_config.stem, return_hydra_config=True)
             # This is normally set when using the Hydra CLI directly. The Compose
             # API does not set it.
             mlip_args.hydra.runtime.output_dir = "./janus_results/"
