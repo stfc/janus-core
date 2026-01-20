@@ -69,16 +69,6 @@ plumed = [
 visualise = [
     "weas-widget<0.2,>=0.1.26"
 ]
-all = [
-    "janus-core[chgnet]",
-    "janus-core[grace]",
-    "janus-core[d3]",
-    "janus-core[mace]",
-    "janus-core[orb]",
-    "janus-core[pet-mad]",
-    "janus-core[plumed]",
-    "janus-core[visualise]",
-]
 
 # MLIPs with updated e3nn
 fairchem-1 = [
@@ -258,20 +248,8 @@ conflicts = [
       { extra = "m3gnet" },
     ],
     [
-      { extra = "all" },
-      { extra = "alignn" },
-    ],
-    [
-      { extra = "all" },
-      { extra = "m3gnet" },
-    ],
-    [
       { extra = "mattersim" },
       { extra = "mace" },
-    ],
-    [
-      { extra = "mattersim" },
-      { extra = "all" },
     ],
     [
       { extra = "fairchem-1" },
@@ -288,10 +266,6 @@ conflicts = [
     [
       { extra = "fairchem-1" },
       { extra = "orb" },
-    ],
-    [
-      { extra = "fairchem-1" },
-      { extra = "all" },
     ],
     [
       { extra = "fairchem-2" },
@@ -322,23 +296,11 @@ conflicts = [
       { extra = "pet-mad" },
     ],
     [
-      { extra = "fairchem-2" },
-      { extra = "all" },
-    ],
-    [
       { extra = "sevennet" },
       { extra = "mace" },
     ],
     [
-      { extra = "sevennet" },
-      { extra = "all" },
-    ],
-    [
       { extra = "nequip" },
       { extra = "mace" },
-    ],
-    [
-      { extra = "nequip" },
-      { extra = "all" },
     ],
 ]
