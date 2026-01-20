@@ -205,7 +205,7 @@ def test_fine_tune(tmp_path):
 
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
-        logs_path = Path("logs")
+        logs_path = results_dir / Path("logs")
 
         config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path())
 
