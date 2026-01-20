@@ -110,6 +110,13 @@ def write_tmp_config_nequip(
             if (MODEL_PATH / pth).is_file():
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
+    if fine_tune:
+        model = Path(config["training_module"]["model"]["checkpoint_path"]).name
+        if (MODEL_PATH / model).exists():
+            config["training_module"]["model"]["checkpoint_path"] = str(
+                MODEL_PATH / model
+            )
+
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yaml"
     with open(tmp_config, "w", encoding="utf8") as file:

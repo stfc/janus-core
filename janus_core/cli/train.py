@@ -134,12 +134,6 @@ def train(
     if summary is None:
         summary = file_prefix / "train-summary.yml"
 
-    if log is None:
-        log = file_prefix / "train-log.yml"
-
-    if summary is None:
-        summary = file_prefix / "train-summary.yml"
-
     config = {
         "mlip_config": mlip_config,
         "fine_tune": fine_tune,
