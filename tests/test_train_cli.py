@@ -109,12 +109,12 @@ def test_train(tmp_path):
     skip_extras("mace")
 
     with chdir(tmp_path):
-        model = Path("test.model")
-        compiled_model = Path("test_compiled.model")
-        results_path = Path("results")
-        checkpoints_path = Path("checkpoints")
-        logs_path = Path("logs")
         results_dir = Path("./janus_results")
+
+        model = results_dir / "test.model"
+        compiled_model = results_dir / "test_compiled.model"
+        checkpoints_path = results_dir / "checkpoints"
+        logs_path = results_dir / "logs"
         log_path = results_dir / "train-log.yml"
         summary_path = results_dir / "train-summary.yml"
 
@@ -131,10 +131,10 @@ def test_train(tmp_path):
         )
         assert result.exit_code == 0
 
+        assert results_dir.is_dir()
         assert model.exists()
         assert compiled_model.exists()
         assert logs_path.is_dir()
-        assert results_path.is_dir()
         assert checkpoints_path.is_dir()
         assert log_path.exists()
         assert summary_path.exists()
@@ -169,8 +169,10 @@ def test_train_with_foundation(tmp_path):
     """Test MLIP training raises error with foundation_model in config."""
     skip_extras("mace")
 
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
+    results_dir = tmp_path / "janus_results"
+
+    log_path = results_dir / "test.log"
+    summary_path = results_dir / "summary.yml"
     config = write_tmp_config_mace(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
 
     result = runner.invoke(
@@ -195,14 +197,15 @@ def test_fine_tune(tmp_path):
     skip_extras("mace")
 
     with chdir(tmp_path):
+        results_dir = Path("janus_results")
+
+        model = results_dir / "test-finetuned.model"
+        compiled_model = results_dir / "test-finetuned_compiled.model"
+        checkpoints_path = results_dir / "checkpoints"
+
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
-
-        model = Path("test-finetuned.model")
-        compiled_model = Path("test-finetuned_compiled.model")
         logs_path = Path("logs")
-        results_path = Path("results")
-        checkpoints_path = Path("checkpoints")
 
         config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path())
 
@@ -222,10 +225,10 @@ def test_fine_tune(tmp_path):
         )
         assert result.exit_code == 0
 
+        assert results_dir.is_dir()
         assert model.exists()
         assert compiled_model.exists()
         assert logs_path.is_dir()
-        assert results_path.is_dir()
         assert checkpoints_path.is_dir()
 
         clear_log_handlers()
@@ -289,11 +292,13 @@ def test_no_carbon(tmp_path):
     skip_extras("mace")
 
     with chdir(tmp_path):
-        Path("test.model")
-        Path("test_compiled.model")
-        Path("results")
-        Path("checkpoints")
-        Path("logs")
+        results_dir = Path("./janus_results_no_carbon")
+
+        model_path = results_dir / "test.model"
+        compiled_path = results_dir / "test_compiled.model"
+        checkpoints_path = results_dir / "checkpoints"
+        logs_path = results_dir / "logs"
+
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
 
@@ -306,6 +311,8 @@ def test_no_carbon(tmp_path):
                 "mace",
                 "--mlip-config",
                 config,
+                "--file_prefix",
+                results_dir,
                 "--no-tracker",
                 "--log",
                 log_path,
@@ -314,6 +321,12 @@ def test_no_carbon(tmp_path):
             ],
         )
         assert result.exit_code == 0
+
+        assert results_dir.exists()
+        assert model_path.exists()
+        assert checkpoints_path.exists()
+        assert compiled_path.exists()
+        assert logs_path.exists()
 
         with open(summary_path, encoding="utf8") as file:
             train_summary = yaml.safe_load(file)
@@ -329,11 +342,15 @@ def test_nequip_train(tmp_path):
     with chdir(tmp_path):
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
+
+        results_dir = Path("janus_results")
+
         config_path = DATA_PATH / "nequip_train.yaml"
-        last_ckpt_path = tmp_path / "janus_results/last.ckpt"
-        best_ckpt_path = tmp_path / "janus_results/best.ckpt"
-        train_log_path = tmp_path / "janus_results/train_log"
-        metrics_path = tmp_path / "janus_results/train_log/version_0/metrics.csv"
+
+        last_ckpt_path = results_dir / "last.ckpt"
+        best_ckpt_path = results_dir / "best.ckpt"
+        train_log_path = results_dir / "train_log"
+        metrics_path = results_dir / "train_log/version_0/metrics.csv"
 
         config_path = write_tmp_config_nequip(config_path, tmp_path)
 
@@ -352,6 +369,7 @@ def test_nequip_train(tmp_path):
         )
         assert result.exit_code == 0
 
+        assert results_dir.exists()
         assert log_path.exists()
         assert summary_path.exists()
         assert best_ckpt_path.exists()

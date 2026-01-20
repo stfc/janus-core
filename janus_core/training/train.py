@@ -15,6 +15,7 @@ from janus_core.helpers.utils import check_files_exist, none_to_dict, set_log_tr
 def train(
     arch: Architectures,
     mlip_config: PathLike,
+    file_prefix: PathLike,
     req_file_keys: Sequence[PathLike] = (
         "train_file",
         "test_file",
@@ -38,6 +39,8 @@ def train(
         The architecture to train.
     mlip_config
         Configuration file to pass to MLIP.
+    file_prefix
+        Prefix for output files, including directories.
     req_file_keys
         List of files that must exist if defined in the configuration file.
         Default is ("train_file", "test_file", "valid_file", "statistics_file").
@@ -59,7 +62,7 @@ def train(
 
             # Path must be passed as a string
             mlip_args = build_default_arg_parser().parse_args(
-                ["--config", str(mlip_config)]
+                ["--config", str(mlip_config), "--work_dir", str(file_prefix)]
             )
 
         case "nequip":
@@ -81,7 +84,7 @@ def train(
             mlip_args = compose(config_name=mlip_config.stem, return_hydra_config=True)
             # This is normally set when using the Hydra CLI directly. The Compose
             # API does not set it.
-            mlip_args.hydra.runtime.output_dir = "./janus_results/"
+            mlip_args.hydra.runtime.output_dir = file_prefix
             HydraConfig().set_config(mlip_args)
 
         case _:

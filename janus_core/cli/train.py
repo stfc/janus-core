@@ -22,9 +22,18 @@ def train(
     fine_tune: Annotated[
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
-    log: LogPath = Path("./janus_results/train-log.yml"),
+    file_prefix: Annotated[
+        Path,
+        Option(
+            help=(
+                "Prefix for output files, including directories."
+                "Default directory is ./janus_results."
+            )
+        ),
+    ] = Path("./janus_results"),
+    log: LogPath = None,
     tracker: Tracker = True,
-    summary: Summary = Path("./janus_results/train-summary.yml"),
+    summary: Summary = None,
 ) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
@@ -37,14 +46,17 @@ def train(
         Configuration file to pass to MLIP CLI.
     fine_tune
         Whether to fine-tune a foundational model. Default is False.
+    file_prefix
+        Prefix for output files, including directories.
+        Default directory is ./janus_results.
     log
-        Path to write logs to. Default is Path("train-log.yml").
+        Path to write logs to. Default is inferred from `file_prefix`.
     tracker
         Whether to save carbon emissions of calculation in log file and summary.
         Default is True.
     summary
-        Path to save summary of inputs, start/end time, and carbon emissions. Default
-        is Path("train-summary.yml").
+        Path to save summary of inputs, start/end time, and carbon emissions.
+        Default is inferred from `file_prefix`.
     """
     from janus_core.cli.utils import carbon_summary, end_summary, start_summary
     from janus_core.training.train import train as run_train
@@ -70,6 +82,12 @@ def train(
             )
     elif "foundation_model" in config:
         raise ValueError("Please include the `--fine-tune` option for fine-tuning")
+
+    if log is None:
+        log = file_prefix / "train-log.yml"
+
+    if summary is None:
+        summary = file_prefix / "train-summary.yml"
 
     config = {
         "mlip_config": mlip_config,
@@ -98,6 +116,7 @@ def train(
     run_train(
         arch,
         mlip_config,
+        file_prefix,
         attach_logger=True,
         log_kwargs=log_kwargs,
         track_carbon=tracker,
