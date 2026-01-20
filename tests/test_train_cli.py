@@ -61,7 +61,9 @@ def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
     return tmp_config
 
 
-def write_tmp_config_nequip(config_path: Path, tmp_path: Path) -> Path:
+def write_tmp_config_nequip(
+    config_path: Path, tmp_path: Path, fine_tune: bool = False
+) -> Path:
     """
     Fix paths in config files and write corrected config to tmp_path for nequip.
 
@@ -71,6 +73,8 @@ def write_tmp_config_nequip(config_path: Path, tmp_path: Path) -> Path:
         Path to yaml config file to be fixed.
     tmp_path
         Temporary path from pytest in which to write corrected config.
+    model_path
+        Path to a saved model.
 
     Returns
     -------
@@ -89,10 +93,17 @@ def write_tmp_config_nequip(config_path: Path, tmp_path: Path) -> Path:
         ):
             config["data"][file] = str(DATA_PATH / Path(config["data"][file]).name)
 
+    if fine_tune:
+        model = Path(config["training_module"]["model"]["checkpoint_path"]).name
+        if (MODEL_PATH / model).exists():
+            config["training_module"]["model"]["checkpoint_path"] = str(
+                MODEL_PATH / model
+            )
+
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yaml"
     with open(tmp_config, "w", encoding="utf8") as file:
-        yaml.dump(config, file)
+        yaml.dump(config, file, sort_keys=False)
 
     return tmp_config
 
@@ -398,3 +409,50 @@ def test_nequip_train_invalid_config_suffix(tmp_path):
         )
         assert result.exit_code == 1
         assert isinstance(result.exception, ValueError)
+
+
+def test_nequip_fine_tune_checkpoint(tmp_path):
+    """Test fine-tuning with nequip."""
+    skip_extras("nequip")
+
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+
+        log_path = tmp_path / "ft_test.log"
+        summary_path = tmp_path / "ft_summary.yml"
+
+        best_ckpt_path = results_dir / "best.ckpt"
+        train_log_path = results_dir / "train_log"
+        metrics_path = results_dir / "train_log/version_0/metrics.csv"
+
+        config_path = write_tmp_config_nequip(
+            DATA_PATH / "nequip_fine_tune.yaml", tmp_path, True
+        )
+
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "nequip",
+                "--mlip-config",
+                config_path,
+                "--fine-tune",
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert results_dir.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+        assert best_ckpt_path.exists()
+        assert train_log_path.exists()
+        assert metrics_path.exists()
+
+        with open(metrics_path) as metrics:
+            header = metrics.readline().split(",")
+
+        assert header[:3] == ["epoch", "lr-Adam", "step"]

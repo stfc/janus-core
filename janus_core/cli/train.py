@@ -64,24 +64,64 @@ def train(
     with open(mlip_config, encoding="utf8") as config_file:
         config = yaml.safe_load(config_file)
 
-    if fine_tune:
-        if "foundation_model" not in config:
-            raise ValueError(
-                "Please include `foundation_model` in your configuration file"
-            )
-        if (
-            config["foundation_model"]
-            not in ("small", "medium", "large", "small_off", "medium_off", "large_off")
-            and not Path(config["foundation_model"]).exists()
-        ):
-            raise ValueError(
-                """
-                Invalid foundational model. Valid options are: 'small', 'medium',
-                'large', 'small_off', 'medium_off', 'large_off', or a path to the model
-                """
-            )
-    elif "foundation_model" in config:
-        raise ValueError("Please include the `--fine-tune` option for fine-tuning")
+    match arch:
+        case "mace" | "mace_mp" | "mace_off" | "mace_omol":
+            if fine_tune:
+                if "foundation_model" not in config:
+                    raise ValueError(
+                        "Please include `foundation_model` in your configuration file"
+                    )
+                if (
+                    config["foundation_model"]
+                    not in (
+                        "small",
+                        "medium",
+                        "large",
+                        "small_off",
+                        "medium_off",
+                        "large_off",
+                    )
+                    and not Path(config["foundation_model"]).exists()
+                ):
+                    raise ValueError(
+                        """
+                        Invalid foundational model. Valid options are: 'small',
+                        'medium','large', 'small_off', 'medium_off', 'large_off',
+                        or a path to the model
+                        """
+                    )
+                if "foundation_model" in config:
+                    raise ValueError(
+                        "Please include the `--fine-tune` option for fine-tuning"
+                    )
+
+        case "nequip":
+            if "training_module" not in config:
+                raise ValueError(
+                    """There is no top-level training_module section in your
+                    configuration file."""
+                )
+            if "model" not in config["training_module"]:
+                raise ValueError(
+                    """There is no model section in the training_module section
+                    of your configuration file."""
+                )
+            if "_target_" not in config["training_module"]["model"]:
+                raise ValueError(
+                    """There is _target_ section in the model section
+                    of your configuration file."""
+                )
+            model = config["training_module"]["model"]["_target_"]
+
+            # See nequip.model.__all__
+            if fine_tune and model not in (
+                "nequip.model.ModelFromCheckpoint",
+                "nequip.model.ModelFromPackage",
+            ):
+                raise ValueError(
+                    """Fine-tuning requested but there is no checkpoint or
+                    package specified in your config."""
+                )
 
     if log is None:
         log = file_prefix / "train-log.yml"
