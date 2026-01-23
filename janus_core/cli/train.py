@@ -90,10 +90,10 @@ def train(
                         or a path to the model
                         """
                     )
-                if "foundation_model" in config:
-                    raise ValueError(
-                        "Please include the `--fine-tune` option for fine-tuning"
-                    )
+            elif "foundation_model" in config:
+                raise ValueError(
+                    "Please include the `--fine-tune` option for fine-tuning"
+                )
 
         case "nequip":
             if "training_module" not in config:

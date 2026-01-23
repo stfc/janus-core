@@ -322,7 +322,7 @@ def test_no_carbon(tmp_path):
                 "mace",
                 "--mlip-config",
                 config,
-                "--file_prefix",
+                "--file-prefix",
                 results_dir,
                 "--no-tracker",
                 "--log",
