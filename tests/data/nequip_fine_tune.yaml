@@ -102,5 +102,5 @@ training_module:
 
   # Start from scratch
   model:
-    _target_: nequip.model.ModelFromCheckpoint
-    checkpoint_path: tests/models/nequip-checkpoint.ckpt
+    _target_: nequip.model.ModelFromPackage
+    package_path: tests/models/extra/NequIP-MP-L-0.1.nequip.zip

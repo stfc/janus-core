@@ -27,6 +27,10 @@ jobs:
       - name: Install "all" dependencies
         run: uv sync --extra all
 
+      - name: Download extra models
+        run: |
+          source tests/models/extra_models.sh
+
       - name: Run test suite
         env:
           # show timings of tests

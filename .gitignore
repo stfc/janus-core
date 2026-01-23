@@ -38,3 +38,4 @@ checkpoints/
 results/
 logs/
 *.model
+tests/models/extra
