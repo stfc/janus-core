@@ -28,6 +28,7 @@ jobs:
         run: uv sync --extra all
 
       - name: Download extra models
+        shell: bash
         run: |
           source tests/models/extra_models.sh
 
