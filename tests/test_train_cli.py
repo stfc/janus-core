@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+>>>>>>> defd1be (Fix formatting, use curl)
 from typer.testing import CliRunner
 import yaml
 
@@ -17,8 +18,6 @@ from tests.utils import (
     skip_extras,
     strip_ansi_codes,
 )
-
-from pytest import skip
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -113,13 +112,13 @@ def write_tmp_config_nequip(
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     if fine_tune:
-        model = Path(config["training_module"]["model"][model_type+"_path"]).name
+        model = Path(config["training_module"]["model"][model_type + "_path"]).name
         if (MODEL_PATH / model).exists():
-            config["training_module"]["model"][model_type+"_path"] = str(
+            config["training_module"]["model"][model_type + "_path"] = str(
                 MODEL_PATH / model
             )
         elif (MODEL_PATH / "extra" / model).exists():
-            config["training_module"]["model"][model_type+"_path"] = str(
+            config["training_module"]["model"][model_type + "_path"] = str(
                 MODEL_PATH / "extra" / model
             )
 
