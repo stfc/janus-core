@@ -6,7 +6,6 @@ from pathlib import Path
 
 from ase.io import read, write
 import pytest
-from pytest import skip
 from typer.testing import CliRunner
 import yaml
 
@@ -20,8 +19,6 @@ from tests.utils import (
     skip_extras,
     strip_ansi_codes,
 )
-
-from pytest import skip
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
@@ -71,14 +68,10 @@ def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
 
 
 def write_tmp_config_nequip(
-<<<<<<< HEAD
     config_path: Path,
     tmp_path: Path,
     fine_tune: bool = False,
     model_type: str = "package",
-=======
-    config_path: Path, tmp_path: Path, fine_tune: bool = False, model_type: str = "package"
->>>>>>> b13e3b6 (Adds extra models, nequip tested on foundation)
 ) -> Path:
     """
     Fix paths in config files and write corrected config to tmp_path for nequip.
@@ -127,13 +120,13 @@ def write_tmp_config_nequip(
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     if fine_tune:
-        model = Path(config["training_module"]["model"][model_type+"_path"]).name
+        model = Path(config["training_module"]["model"][model_type + "_path"]).name
         if (MODEL_PATH / model).exists():
-            config["training_module"]["model"][model_type+"_path"] = str(
+            config["training_module"]["model"][model_type + "_path"] = str(
                 MODEL_PATH / model
             )
         elif (MODEL_PATH / "extra" / model).exists():
-            config["training_module"]["model"][model_type+"_path"] = str(
+            config["training_module"]["model"][model_type + "_path"] = str(
                 MODEL_PATH / "extra" / model
             )
 
@@ -603,12 +596,13 @@ def test_sevennet_train(tmp_path):
             assert lines[0].split(",")[0] == "epoch"
 
 
+@pytest.mark.skipif(
+    not SEVENNET_EXTRA_MODEL_PATH.exists(),
+    reason=f"Extra model: {SEVENNET_EXTRA_MODEL_PATH} not downloaded.",
+)
 def test_sevennet_fine_tune_foundation(tmp_path):
     """Test training with sevennet."""
     skip_extras("sevennet")
-
-    if not SEVENNET_EXTRA_MODEL_PATH.exists():
-        skip(f"Extra model: {SEVENNET_EXTRA_MODEL_PATH} not downloaded.")
 
     with chdir(tmp_path):
         log_path = tmp_path / "test.log"
