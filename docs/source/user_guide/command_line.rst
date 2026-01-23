@@ -698,6 +698,33 @@ Training Nequip MLIPS
 Configuration of Nequip training is outlined in the `Nequip user guide <https://nequip.readthedocs.io/en/latest/guide/guide.html>`_. In particular note that the configuration file must have a ``.yaml`` extension.
 
 The results directory contents depends on the options selected in the configuration file, but may typically contain model checkpoint, ``.ckpt``, files and a metrics directory.
+>>>>>>> 6325581 (Update train docs)
+
+.. note::
+    Different architectures may have different restrictions or features. For example Nequip requires YAML files to be written as ``.yaml`` rather than ``.yml``. See the sections below for specific archictecture guidance.
+
+Foundational models can also be fine-tuned, by passing the ``--fine-tune`` option:
+
+.. code-block:: bash
+
+    janus train mace --mlip-config /path/to/mace/fine/tuning/config.yml --fine-tune
+
+By default the output of training or fine-tuning will be in the ``./janus_results`` directory. This directory's contents varies in structure depending on the architecture being trained and whether fine-tuning is being conducted. However as with other commands a log file, ``train-log.yml``, and summary file, ``train-summary.yml``, will be generated in ``./janus_results`` by default.
+
+Training MACE MLIPs
++++++++++++++++++++
+
+For MACE, training will create ``logs``, ``checkpoints`` and ``results`` sub-directories, as well as saving the trained model, and a compiled version of the model.
+
+Instructions for writing a MACE ``config.yml`` file can be found in the `MACE Readme <https://github.com/ACEsuit/mace?tab=readme-ov-file#training>`_ and the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_.
+
+
+Training Nequip MLIPS
++++++++++++++++++++++
+
+Configuration of Nequip training is outlined in the `Nequip user guide <https://nequip.readthedocs.io/en/latest/guide/guide.html>`_. In particular note that the configuration file must have a ``.yaml`` extension.
+
+The results directory contents depends on the options selected in the configuration file, but may typically contain model checkpoint, ``.ckpt``, files and a metrics directory.
 
 
 Training SevenNet MLIPS
