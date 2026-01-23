@@ -21,6 +21,8 @@ from tests.utils import (
     strip_ansi_codes,
 )
 
+from pytest import skip
+
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 EXTRA_MODEL_PATH = MODEL_PATH / "extra"
@@ -69,10 +71,14 @@ def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
 
 
 def write_tmp_config_nequip(
+<<<<<<< HEAD
     config_path: Path,
     tmp_path: Path,
     fine_tune: bool = False,
     model_type: str = "package",
+=======
+    config_path: Path, tmp_path: Path, fine_tune: bool = False, model_type: str = "package"
+>>>>>>> b13e3b6 (Adds extra models, nequip tested on foundation)
 ) -> Path:
     """
     Fix paths in config files and write corrected config to tmp_path for nequip.
@@ -121,10 +127,14 @@ def write_tmp_config_nequip(
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     if fine_tune:
-        model = Path(config["training_module"]["model"]["checkpoint_path"]).name
+        model = Path(config["training_module"]["model"][model_type+"_path"]).name
         if (MODEL_PATH / model).exists():
-            config["training_module"]["model"]["checkpoint_path"] = str(
+            config["training_module"]["model"][model_type+"_path"] = str(
                 MODEL_PATH / model
+            )
+        elif (MODEL_PATH / "extra" / model).exists():
+            config["training_module"]["model"][model_type+"_path"] = str(
+                MODEL_PATH / "extra" / model
             )
 
     # Write out temporary config with corrected paths
