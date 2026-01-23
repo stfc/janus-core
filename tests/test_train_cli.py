@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pytest import skip
 from typer.testing import CliRunner
 import yaml
 
@@ -17,11 +18,11 @@ from tests.utils import (
     strip_ansi_codes,
 )
 
-from pytest import skip
-
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
-NEQUIP_EXTRA_MODEL_PATH = Path(__file__).parent / "models" / "extra" / "NequIP-MP-L-0.1.nequip.zip"
+NEQUIP_EXTRA_MODEL_PATH = (
+    Path(__file__).parent / "models" / "extra" / "NequIP-MP-L-0.1.nequip.zip"
+)
 
 runner = CliRunner()
 
@@ -65,7 +66,10 @@ def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
 
 
 def write_tmp_config_nequip(
-    config_path: Path, tmp_path: Path, fine_tune: bool = False, model_type: str = "package"
+    config_path: Path,
+    tmp_path: Path,
+    fine_tune: bool = False,
+    model_type: str = "package",
 ) -> Path:
     """
     Fix paths in config files and write corrected config to tmp_path for nequip.
@@ -97,13 +101,13 @@ def write_tmp_config_nequip(
             config["data"][file] = str(DATA_PATH / Path(config["data"][file]).name)
 
     if fine_tune:
-        model = Path(config["training_module"]["model"][model_type+"_path"]).name
+        model = Path(config["training_module"]["model"][model_type + "_path"]).name
         if (MODEL_PATH / model).exists():
-            config["training_module"]["model"][model_type+"_path"] = str(
+            config["training_module"]["model"][model_type + "_path"] = str(
                 MODEL_PATH / model
             )
         elif (MODEL_PATH / "extra" / model).exists():
-            config["training_module"]["model"][model_type+"_path"] = str(
+            config["training_module"]["model"][model_type + "_path"] = str(
                 MODEL_PATH / "extra" / model
             )
 
