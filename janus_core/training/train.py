@@ -5,17 +5,17 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from mace.cli.run_train import run
-from mace.tools import build_default_arg_parser as mace_parser
 import yaml
 
-from janus_core.helpers.janus_types import PathLike
+from janus_core.helpers.janus_types import Architectures, PathLike
 from janus_core.helpers.log import config_logger, config_tracker
 from janus_core.helpers.utils import check_files_exist, none_to_dict, set_log_tracker
 
 
 def train(
+    arch: Architectures,
     mlip_config: PathLike,
+    file_prefix: PathLike,
     req_file_keys: Sequence[PathLike] = (
         "train_file",
         "test_file",
@@ -35,8 +35,12 @@ def train(
 
     Parameters
     ----------
+    arch
+        The architecture to train.
     mlip_config
         Configuration file to pass to MLIP.
+    file_prefix
+        Prefix for output files, including directories.
     req_file_keys
         List of files that must exist if defined in the configuration file.
         Default is ("train_file", "test_file", "valid_file", "statistics_file").
@@ -51,6 +55,41 @@ def train(
     tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
+    match arch:
+        case "mace" | "mace_mp" | "mace_off" | "mace_omol":
+            from mace.cli.run_train import run
+            from mace.tools import build_default_arg_parser
+
+            # Path must be passed as a string
+            mlip_args = build_default_arg_parser().parse_args(
+                ["--config", str(mlip_config), "--work_dir", str(file_prefix)]
+            )
+
+        case "nequip":
+            from hydra import compose
+            from hydra import initialize_config_dir as initialize
+            from hydra.core.hydra_config import HydraConfig
+            from nequip.scripts.train import main as run
+
+            if mlip_config.suffix != ".yaml":
+                raise ValueError(
+                    "Hydra (nequip) only supports .yaml config files, "
+                    f"{mlip_config} will not be found."
+                )
+
+            # Setup the HydraConfig global singleton (Compose API).
+            # Paths must be strings.
+            initialize(version_base=None, config_dir=str(mlip_config.parent.absolute()))
+            # Obtain the HydraConfig from the path.
+            mlip_args = compose(config_name=mlip_config.stem, return_hydra_config=True)
+            # This is normally set when using the Hydra CLI directly. The Compose
+            # API does not set it.
+            mlip_args.hydra.runtime.output_dir = file_prefix
+            HydraConfig().set_config(mlip_args)
+
+        case _:
+            raise ValueError(f"{arch} is currently unsupported in train.")
+
     log_kwargs, tracker_kwargs = none_to_dict(log_kwargs, tracker_kwargs)
 
     # Validate inputs
@@ -71,9 +110,6 @@ def train(
 
     if logger and "foundation_model" in options:
         logger.info("Fine tuning model: %s", options["foundation_model"])
-
-    # Path must be passed as a string
-    mlip_args = mace_parser().parse_args(["--config", str(mlip_config)])
 
     if logger:
         logger.info("Starting training")

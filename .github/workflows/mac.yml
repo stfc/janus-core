@@ -34,6 +34,10 @@ jobs:
             echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
           fi
 
+      - name: Download extra models
+        run: |
+          source tests/models/extra_models.sh
+
       - name: Run test suite
         env:
           # show timings of tests
