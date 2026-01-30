@@ -369,6 +369,59 @@ def test_restart(tmp_path):
     assert len(traj) == 9
 
 
+def test_restart_with_d3(tmp_path):
+    """Test restarting molecular dynamics simulation (with D3)."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
+    stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
+
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model=MODEL_PATH,
+        calc_kwargs={"dispersion": True},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=4,
+        traj_every=1,
+        restart_every=4,
+        stats_every=1,
+        file_prefix=file_prefix,
+        calc_kwargs={"dispersion": True},
+    )
+    nvt.run()
+
+    assert nvt.dyn.nsteps == 4
+
+    nvt_restart = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=8,
+        traj_every=1,
+        restart_every=4,
+        stats_every=1,
+        restart=True,
+        restart_auto=False,
+        file_prefix=file_prefix,
+        calc_kwargs={"dispersion": True},
+    )
+    nvt_restart.run()
+    assert nvt_restart.offset == 4
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        assert " | Target_T [K]" in lines[0]
+        # Includes step 0, and step 4 from restart
+        assert len(lines) == 10
+        assert int(lines[-1].split()[0]) == 8
+
+    traj = read(traj_path, index=":")
+    assert all(isinstance(image, Atoms) for image in traj)
+    assert len(traj) == 9
+
+
 def test_minimize(tmp_path):
     """Test geometry optimzation before dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
