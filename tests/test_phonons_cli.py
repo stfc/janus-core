@@ -146,6 +146,51 @@ def test_bands_simple(tmp_path):
     assert phonon_summary["config"]["bands"]
 
 
+def test_qpoints_simple(tmp_path):
+    """Test qpoints mode."""
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        qpoints_results = results_dir / "NaCl-qpoints.hdf5"
+        summary_path = results_dir / "NaCl-phonons-summary.yml"
+
+        with open("QPOINTS", mode="w", encoding="utf8") as file:
+            file.write("3\n0.0 0.0 0.0\n0.1 0.1 0.0\n0.2 0.2 0.2\n")
+
+        result = runner.invoke(
+            app,
+            [
+                "phonons",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
+                "--qpoints",
+                "--write-full",
+                "--hdf5",
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert qpoints_results.exists()
+        with HDF5Open(qpoints_results, "r") as h5f:
+            assert "dynamical_matrix" in h5f
+            assert "eigenvector" in h5f
+            assert "frequency" in h5f
+            assert "masses" in h5f
+            assert "qpoint" in h5f
+            assert "reciprocal_lattice" in h5f
+
+        # Read phonons summary file
+        assert summary_path.exists()
+        with open(summary_path, encoding="utf8") as file:
+            phonon_summary = yaml.safe_load(file)
+
+        assert "command" in phonon_summary
+        assert "janus phonons" in phonon_summary["command"]
+        assert "config" in phonon_summary
+        assert phonon_summary["config"]["qpoints"]
+
+
 @pytest.mark.parametrize("compression", [None, "gzip", "lzf"])
 def test_hdf5(tmp_path, compression):
     """Test saving force constants and bands to HDF5 in new directory."""

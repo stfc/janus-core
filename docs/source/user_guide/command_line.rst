@@ -623,6 +623,13 @@ with 101 sampling points for each path segment.
    :height: 700px
    :align: center
 
+List of q-points
+++++++++++++++++
+
+Band mode outputs results in q lines or segments. Phonons data on a list of arbitrary points can be obtained with the ``--qpoints`` option. This corresponds to the ``QPOINTS`` tag in phonopy.
+
+Input q-points have to be supplied in file ``QPOINTS``, formatted as prescribed by `phonopy <https://phonopy.github.io/phonopy/input-files.html#qpoints-file>`_.
+
 
 Nudged Elastic Band
 -------------------

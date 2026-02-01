@@ -68,6 +68,13 @@ def phonons(
             help="Whether to compute band structure.", rich_help_panel="Calculation"
         ),
     ] = False,
+    qpoints: Annotated[
+        bool,
+        Option(
+            help="Whether to compute for qpoints supplied in file QPOINTS.",
+            rich_help_panel="Calculation",
+        ),
+    ] = False,
     n_qpoints: Annotated[
         int,
         Option(
@@ -218,6 +225,8 @@ def phonons(
         Mesh for sampling. Default is (10, 10, 10).
     bands
         Whether to calculate and save the band structure. Default is False.
+    qpoints
+        Whether to compute for qpoints supplied in file QPOINTS. Default is False.
     n_qpoints
         Number of q-points to sample along generated path, including end points.
         Unused if `qpoint_file` is specified. Default is 51.
@@ -360,6 +369,8 @@ def phonons(
     calcs = []
     if bands:
         calcs.append("bands")
+    if qpoints:
+        calcs.append("qpoints")
     if thermal:
         calcs.append("thermal")
     if dos:
