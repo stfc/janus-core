@@ -7,6 +7,7 @@ from collections.abc import Generator, Iterable, Sequence
 from io import StringIO
 from logging import Logger
 from pathlib import Path
+import re
 from typing import Any, Literal, TextIO
 
 from ase import Atoms
@@ -110,8 +111,23 @@ class FileNameMixin(ABC):  # noqa: B024 (abstract-base-class-without-abstract-me
             struct_name = struct.get_chemical_formula()
 
         # Set default output directory
-        prefix = Path("./janus_results") / struct_name
+        results_dir = Path("./janus_results")
+        results_dirs = Path(".").glob("janus_results_*")
 
+        if results_dirs:
+            idx = (
+                int(match.group(0))
+                for dir in results_dirs
+                if (match := re.search("([0-9]+)$", str(dir)))
+            )
+            new_idx = max(idx, default=-1) + 1
+
+            if new_idx:
+                results_dir = Path(f"./janus_results_{new_idx}")
+            elif results_dir.exists():
+                results_dir = Path("./janus_results_1")
+
+        prefix = results_dir / struct_name
         return "-".join((str(prefix), *filter(None, additional)))
 
     def _build_filename(
