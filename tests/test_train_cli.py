@@ -23,9 +23,9 @@ from tests.utils import (
 
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
-NEQUIP_EXTRA_MODEL_PATH = (
-    Path(__file__).parent / "models" / "extra" / "NequIP-MP-L-0.1.nequip.zip"
-)
+EXTRA_MODEL_PATH = MODEL_PATH / "extra"
+NEQUIP_EXTRA_MODEL_PATH = EXTRA_MODEL_PATH / "NequIP-MP-L-0.1.nequip.zip"
+SEVENNET_EXTRA_MODEL_PATH = EXTRA_MODEL_PATH / "checkpoint_sevennet_omat.pth"
 
 runner = CliRunner()
 
@@ -546,6 +546,61 @@ def test_sevennet_train(tmp_path):
                 "sevennet",
                 "--mlip-config",
                 config_path,
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert results_dir.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+        assert sevennet_log_path.exists()
+        assert sevenn_data_path.is_dir()
+        assert metrics_path.exists()
+
+        for checkpoint in checkpoints_paths:
+            assert checkpoint.exists()
+
+        with open(metrics_path) as metrics:
+            lines = metrics.readlines()
+            assert len(lines) == 3
+            assert lines[0].split(",")[0] == "epoch"
+
+
+def test_sevennet_finetune_foundation(tmp_path):
+    """Test training with sevennet."""
+    skip_extras("sevennet")
+
+    if not SEVENNET_EXTRA_MODEL_PATH.exists():
+        skip(f"Extra model: {SEVENNET_EXTRA_MODEL_PATH} not downloaded.")
+
+    with chdir(tmp_path):
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
+
+        results_dir = Path("janus_results")
+
+        checkpoints_paths = [
+            results_dir / f"checkpoint_{ver}.pth" for ver in ("0", "1", "best")
+        ]
+        sevennet_log_path = results_dir / "log.sevenn"
+        sevenn_data_path = results_dir / "sevenn_data"
+        metrics_path = results_dir / "lc.csv"
+
+        config_path = DATA_PATH / "sevennet_fine_tune.yml"
+        config_path = write_tmp_data_sevennet(config_path, tmp_path)
+
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "sevennet",
+                "--mlip-config",
+                config_path,
+                "--fine-tune",
                 "--log",
                 log_path,
                 "--summary",
