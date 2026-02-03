@@ -658,7 +658,7 @@ Training and fine-tuning MLIPs
 ------------------------------
 
 .. note::
-    Currently only MACE and Nequip models are supported.
+    Currently only MACE, Nequip, and SevenNet models are supported.
 
 Models can be trained by passing an archictecture and an archictecture specific configuration file as options to the ``janus train`` command. The configuration file will be passed to the corresponding MLIPs command line interface. For example to train a MACE MLIP:
 
@@ -698,6 +698,11 @@ Configuration of Nequip training is outlined in the `Nequip user guide <https://
 
 The results directory contents depends on the options selected in the configuration file, but may typically contain model checkpoint, ``.ckpt``, files and a metrics directory.
 
+
+Training SevenNet MLIPS
++++++++++++++++++++++++
+
+The `SevenNet documentation <https://sevennet.readthedocs.io/en/latest/>`_ contains information on training SevenNet MLIPs. The SevenNet `tutorial repository <https://github.com/MDIL-SNU/sevennet_tutorial/tree/main>`_ also contains some example ```.yaml``` configuration files for training and fine-tuning.
 
 Preprocessing training data
 ----------------------------

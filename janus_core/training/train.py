@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from argparse import ArgumentParser
 from typing import Any
 
 import yaml
@@ -92,6 +93,15 @@ def train(
                         f"Both package_path and checkpoint_path in {mlip_config}."
                     )
                 foundation_model = model["checkpoint_path"]
+
+        case "sevennet":
+            from sevenn.main.sevenn import cmd_parser_train, run
+
+            parser = ArgumentParser()
+            cmd_parser_train(parser)
+            mlip_args = parser.parse_args(
+                [str(mlip_config), "--working_dir", str(file_prefix), "-s"]
+            )
 
         case _:
             raise ValueError(f"{arch} is currently unsupported in train.")
