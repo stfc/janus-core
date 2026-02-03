@@ -583,12 +583,12 @@ def md(
     if thermostat_time is None:
         if ensemble in ("npt", "nph", "nvt-nh"):
             thermostat_time = 50.0
-        elif ensemble == "npt-mtk":
+        elif ensemble in ("npt-mtk-iso", "npt-mtk-aniso"):
             thermostat_time = 100.0
     if barostat_time is None:
         if ensemble in ("npt", "nph"):
             barostat_time = 75.0
-        elif ensemble == "npt-mtk":
+        elif ensemble in ("npt-mtk-iso", "npt-mtk-aniso"):
             barostat_time = 1000.0
 
     dyn_kwargs = {
@@ -731,7 +731,7 @@ def md(
         ):
             del dyn_kwargs[key]
         dyn = NVT_CSVR(**dyn_kwargs)
-    elif ensemble == "npt-mtk":
+    elif ensemble in ("npt-mtk-iso", "npt-mtk-aniso"):
         for key in ("bulk_modulus", "friction", "taut"):
             del dyn_kwargs[key]
         dyn = NPT_MTK(**dyn_kwargs)

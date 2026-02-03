@@ -2145,7 +2145,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
     barostat_substeps
         The number of sub-steps in barostat integration. Default is 1.
     ensemble
-        Name for thermodynamic ensemble. Default is "npt-mtk".
+        Name for thermodynamic ensemble. Default is "npt-mtk-iso".
     ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
@@ -2162,7 +2162,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         barostat_chain: int = 3,
         thermostat_substeps: int = 1,
         barostat_substeps: int = 1,
-        ensemble: Ensembles = "npt-mtk",
+        ensemble: Ensembles = "npt-mtk-iso",
         ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
@@ -2190,16 +2190,27 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         barostat_substeps
             The number of sub-steps in barostat integration. Default is 1.
         ensemble
-            Name for thermodynamic ensemble. Default is "npt-mtk".
+            Name for thermodynamic ensemble. Default is "npt-mtk-iso".
         ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
         try:
-            from ase.md.nose_hoover_chain import (
-                IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
-            )
+            if ensemble == "npt-mtk-iso":
+                from ase.md.nose_hoover_chain import (
+                    IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
+                )
+            elif ensemble == "npt-mtk-aniso":
+                from ase.md.nose_hoover_chain import (
+                    MTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
+                )
+            else:
+                raise ValueError(
+                    "Ensemble NPT_MTK can only be 'npt-mtk-iso' or 'npt-mtk-aniso."
+                    f"Not {ensemble}"
+                )
+
         except ImportError as e:
             raise NotImplementedError(
                 "Please download the latest ASE commits to use this module"
@@ -2242,8 +2253,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         if file_prefix is not None:
             return ""
 
-        pressure = f"-p{self.pressure}"
-        return f"{super()._set_param_prefix(file_prefix)}{pressure}"
+        return f"{super()._set_param_prefix(file_prefix)}-p{self.pressure}"
 
     @property
     def info_unit_keys(self) -> tuple[str]:

@@ -67,7 +67,7 @@ def test_md(ensemble, tmp_path):
         "nvt-nh": "NaCl-nvt-nh-T300.0-",
         "nph": "NaCl-nph-T300.0-p0.0-",
         "nvt-csvr": "NaCl-nvt-csvr-T300.0-",
-        "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
+        "npt-mtk": "NaCl-npt-mtk-iso-T300.0-p0.0-",
     }
 
     with chdir(tmp_path):
