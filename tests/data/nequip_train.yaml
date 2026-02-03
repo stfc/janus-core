@@ -21,8 +21,8 @@ data:
     dft_forces: forces
 
   train_file_path: tests/data/mlip_train.xyz
-  test_file_path: tests/data/mlip_train.xyz
-  val_file_path: tests/data/mlip_train.xyz
+  test_file_path: tests/data/mlip_test.xyz
+  val_file_path: tests/data/mlip_valid.xyz
 
   transforms:
     - _target_: nequip.data.transforms.ChemicalSpeciesToAtomTypeMapper
