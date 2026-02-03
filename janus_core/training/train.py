@@ -2,26 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import Any
 
 import yaml
 
 from janus_core.helpers.janus_types import Architectures, PathLike
 from janus_core.helpers.log import config_logger, config_tracker
-from janus_core.helpers.utils import check_files_exist, none_to_dict, set_log_tracker
+from janus_core.helpers.utils import none_to_dict, set_log_tracker
 
 
 def train(
     arch: Architectures,
     mlip_config: PathLike,
     file_prefix: PathLike,
-    req_file_keys: Sequence[PathLike] = (
-        "train_file",
-        "test_file",
-        "valid_file",
-        "statistics_file",
-    ),
     attach_logger: bool = False,
     log_kwargs: dict[str, Any] | None = None,
     track_carbon: bool | None = None,
@@ -41,9 +34,6 @@ def train(
         Configuration file to pass to MLIP.
     file_prefix
         Prefix for output files, including directories.
-    req_file_keys
-        List of files that must exist if defined in the configuration file.
-        Default is ("train_file", "test_file", "valid_file", "statistics_file").
     attach_logger
         Whether to attach a logger. Default is True if "filename" is passed in
         log_kwargs, else False.
@@ -55,6 +45,11 @@ def train(
     tracker_kwargs
         Keyword arguments to pass to `config_tracker`. Default is {}.
     """
+    with open(mlip_config, encoding="utf8") as file:
+        options = yaml.safe_load(file)
+
+    foundation_model = None
+
     match arch:
         case "mace" | "mace_mp" | "mace_off" | "mace_omol":
             from mace.cli.run_train import run
@@ -64,6 +59,8 @@ def train(
             mlip_args = build_default_arg_parser().parse_args(
                 ["--config", str(mlip_config), "--work_dir", str(file_prefix)]
             )
+
+            foundation_model = options.get("foundation_model")
 
         case "nequip":
             from hydra import compose
@@ -87,15 +84,16 @@ def train(
             mlip_args.hydra.runtime.output_dir = file_prefix
             HydraConfig().set_config(mlip_args)
 
+            model = options["training_module"]["model"]
+            if "package_path" in model:
+                foundation_model = model["package_path"]
+            if "checkpoint_path" in model:
+                foundation_model = model["checkpoint_path"]
+
         case _:
             raise ValueError(f"{arch} is currently unsupported in train.")
 
     log_kwargs, tracker_kwargs = none_to_dict(log_kwargs, tracker_kwargs)
-
-    # Validate inputs
-    with open(mlip_config, encoding="utf8") as file:
-        options = yaml.safe_load(file)
-    check_files_exist(options, req_file_keys)
 
     attach_logger, track_carbon = set_log_tracker(
         attach_logger, log_kwargs, track_carbon
@@ -106,10 +104,11 @@ def train(
         log_kwargs.setdefault("filename", "train-log.yml")
     log_kwargs.setdefault("name", __name__)
     logger = config_logger(**log_kwargs)
-    tracker = config_tracker(logger, track_carbon, **tracker_kwargs)
 
-    if logger and "foundation_model" in options:
-        logger.info("Fine tuning model: %s", options["foundation_model"])
+    if logger and foundation_model is not None:
+        logger.info("Fine tuning model: %s", foundation_model)
+
+    tracker = config_tracker(logger, track_carbon, **tracker_kwargs)
 
     if logger:
         logger.info("Starting training")
