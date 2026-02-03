@@ -36,7 +36,7 @@ test_data = [
     (NVT_CSVR, "nvt-csvr"),
     pytest.param(
         NPT_MTK,
-        "npt-mtk",
+        "npt-mtk-iso",
         marks=pytest.mark.skipif(
             MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
         ),
@@ -274,15 +274,17 @@ def test_nvt_csvr(tmp_path):
 
 
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
-def test_npt_mtk(tmp_path):
+@pytest.mark.parametrize("ensemble", ["iso", "aniso"])
+def test_npt_mtk(tmp_path, ensemble):
     """Test NPT MTK molecular dynamics."""
     with chdir(tmp_path):
         results_dir = Path("janus_results")
-        restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
-        restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz"
-        restart_final = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-final.extxyz"
-        traj_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz"
-        stats_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-stats.dat"
+        stem = f"NaCl-npt-mtk-{ensemble}-T300.0-p0.0001"
+        restart_path_1 = results_dir / f"{stem}-res-2.extxyz"
+        restart_path_2 = results_dir / f"{stem}-res-4.extxyz"
+        restart_final = results_dir / f"{stem}-final.extxyz"
+        traj_path = results_dir / f"{stem}-traj.extxyz"
+        stats_path = results_dir / f"{stem}-stats.dat"
 
         npt_mtk = NPT_MTK(
             struct=DATA_PATH / "NaCl.cif",
@@ -300,6 +302,7 @@ def test_npt_mtk(tmp_path):
             barostat_chain=2,
             thermostat_substeps=2,
             barostat_substeps=2,
+            ensemble=f"npt-mtk-{ensemble}",
         )
 
         npt_mtk.run()
