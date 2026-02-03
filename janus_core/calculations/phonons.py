@@ -8,7 +8,7 @@ from typing import Any, get_args
 from ase import Atoms
 from numpy import ndarray
 import phonopy
-from phonopy.file_IO import write_force_constants_to_hdf5
+from phonopy.file_IO import parse_QPOINTS, write_force_constants_to_hdf5
 from phonopy.phonon.band_structure import (
     get_band_qpoints_and_path_connections,
     get_band_qpoints_by_seekpath,
@@ -342,11 +342,13 @@ class Phonons(BaseCalculation):
         self.phonopy_file = self._build_filename("phonopy.yml")
         self.force_consts_file = self._build_filename("force_constants.hdf5")
 
-        filename = "bands" + (".hdf5" if hdf5 else ".yml")
+        suffix = ".hdf5" if hdf5 else ".yml"
+        filename = "bands" + suffix
         if not self.qpoint_file:
             filename = f"auto_{filename}"
         self.bands_file = self._build_filename(filename)
         self.bands_plot_file = self._build_filename("bands.svg")
+        self.qpoints_file = self._build_filename("qpoints" + suffix)
         self.dos_file = self._build_filename("dos.dat")
         self.dos_plot_file = self._build_filename("dos.svg")
         self.bands_dos_plot_file = self._build_filename("bs-dos.svg")
@@ -436,6 +438,11 @@ class Phonons(BaseCalculation):
             "bands": (
                 self.bands_file
                 if self.write_results and "bands" in self.calcs
+                else None
+            ),
+            "qpoints": (
+                self.qpoints_file
+                if self.write_results and "qpoints" in self.calcs
                 else None
             ),
             "bands_plot": self.bands_plot_file if self.plot_to_file else None,
@@ -711,6 +718,86 @@ class Phonons(BaseCalculation):
         if save_plots:
             build_file_dir(self.bands_plot_file)
             bplt.savefig(self.bands_plot_file)
+
+    def calc_qpoints(self, write_qpoints: bool | None = None, **kwargs) -> None:
+        """
+        Calculate phonons at qpoints supplied by file QPOINTS, analoguous to phonopy.
+
+        Parameters
+        ----------
+        write_qpoints
+            Whether to write out results to file. Default is self.write_results.
+        **kwargs
+            Additional keyword arguments to pass to `write_bands`.
+        """
+        if write_qpoints is None:
+            write_qpoints = self.write_results
+
+        # Calculate phonons if not already in results
+        if "phonon" not in self.results:
+            # Use general (self.write_results) setting for writing force constants
+            self.calc_force_constants(write_force_consts=self.write_results)
+
+        if write_qpoints:
+            self.write_qpoints(**kwargs)
+
+    def write_qpoints(
+        self,
+        *,
+        hdf5: bool | None = None,
+        qpoints_file: PathLike | None = None,
+    ) -> None:
+        """
+        Write results of qpoints mode calculations.
+
+        Parameters
+        ----------
+        hdf5
+            Whether to save the bands in an hdf5 file. Default is
+            self.hdf5.
+        qpoints_file
+            Name of yaml file to save band structure. Default is inferred from
+            `file_prefix`.
+        """
+        if "phonon" not in self.results:
+            raise ValueError(
+                "Force constants have not been calculated yet. "
+                "Please run `calc_force_constants` first"
+            )
+
+        if hdf5 is None:
+            hdf5 = self.hdf5
+
+        if qpoints_file:
+            self.qpoints_file = qpoints_file
+
+        # maybe use self.qpoint_file or allow custom input filename
+        # also allow passing a list of points programmatically
+        q_points = parse_QPOINTS()
+
+        fonons = self.results["phonon"]
+
+        fonons.run_qpoints(
+            q_points,
+            with_eigenvectors=self.write_full,
+            with_group_velocities=self.write_full,
+            with_dynamical_matrices=self.write_full,
+            # nac_q_direction = self.nac_q_direction,
+        )
+
+        build_file_dir(self.qpoints_file)
+        if hdf5:
+            # not in phonopy yet
+            # fonons.write_hdf5_qpoints_phonon(filename=self.qpoints_file)
+
+            # until the above is implemented in phonopy
+            fonons._qpoints.write_hdf5(filename=self.qpoints_file)
+        else:
+            # not in phonopy yet
+            # fonons.write_yaml_qpoints_phonon(filename=self.qpoints_file)
+
+            # until the above is implemented in phonopy
+            fonons._qpoints.write_yaml(filename=self.qpoints_file)
 
     def calc_thermal_props(
         self,
@@ -1014,6 +1101,9 @@ class Phonons(BaseCalculation):
         if "bands" in self.calcs:
             self.calc_bands()
 
+        if "qpoints" in self.calcs:
+            self.calc_qpoints()
+
         # Calculate thermal properties if specified
         if "thermal" in self.calcs:
             self.calc_thermal_props()
@@ -1021,5 +1111,6 @@ class Phonons(BaseCalculation):
         # Calculate DOS and PDOS if specified
         if "dos" in self.calcs:
             self.calc_dos(plot_bands="bands" in self.calcs)
+
         if "pdos" in self.calcs:
             self.calc_pdos()
