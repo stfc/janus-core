@@ -817,7 +817,7 @@ class MolecularDynamics(BaseCalculation):
                     struct=last_restart,
                     read_kwargs=self.read_kwargs,
                     sequence_allowed=False,
-                    arch=self.arch,
+                    arch=self.arch.removesuffix("_d3"),
                     device=self.device,
                     model=self.model,
                     calc_kwargs=self.calc_kwargs,
