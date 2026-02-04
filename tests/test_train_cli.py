@@ -120,15 +120,11 @@ def write_tmp_config_nequip(
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     if fine_tune:
-        model = Path(config["training_module"]["model"][model_type + "_path"]).name
-        if (MODEL_PATH / model).exists():
-            config["training_module"]["model"][model_type + "_path"] = str(
-                MODEL_PATH / model
-            )
-        elif (MODEL_PATH / "extra" / model).exists():
-            config["training_module"]["model"][model_type + "_path"] = str(
-                MODEL_PATH / "extra" / model
-            )
+        model_dict = config["training_module"]["model"]
+        model = Path(model_dict[f"{model_type}_path"]).name
+        for pth in (model, f"extra/{model}"):
+            if (MODEL_PATH / pth).is_file():
+                model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yaml"
@@ -651,6 +647,8 @@ def test_sevennet_fine_tune_foundation(tmp_path):
             assert len(lines) == 2
             assert lines[0].split(",")[0] == "epoch"
         with open(metrics_path) as metrics:
+=======
+>>>>>>> cf676e2 (Apply suggestions from code review)
             header = metrics.readline().split(",")
 
         assert header[:3] == ["epoch", "lr-Adam", "step"]
