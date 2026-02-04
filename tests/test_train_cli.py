@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
->>>>>>> defd1be (Fix formatting, use curl)
 from typer.testing import CliRunner
 import yaml
 
@@ -103,7 +102,6 @@ def write_tmp_config_nequip(
         pth = DATA_PATH / Path(config["data"][file]).name
         if pth.is_file():
             config["data"][file] = str(pth)
-
     if fine_tune:
         model_dict = config["training_module"]["model"]
         model = Path(model_dict[f"{model_type}_path"]).name
@@ -430,7 +428,7 @@ def test_nequip_train_invalid_config_suffix(tmp_path):
 
 
 @pytest.mark.skipif(
-    not NEQUIP_EXTRA_MODEL_PATH.exists(), 
+    not NEQUIP_EXTRA_MODEL_PATH.exists(),
     reason=f"Extra model: {NEQUIP_EXTRA_MODEL_PATH} not downloaded.",
 )
 def test_nequip_fine_tune_foundation(tmp_path):
