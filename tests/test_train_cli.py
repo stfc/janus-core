@@ -105,12 +105,6 @@ def write_tmp_config_nequip(
         pth = DATA_PATH / Path(config["data"][file]).name
         if pth.is_file():
             config["data"][file] = str(pth)
-    if fine_tune:
-        model_dict = config["training_module"]["model"]
-        model = Path(model_dict[f"{model_type}_path"]).name
-        for pth in (model, f"extra/{model}"):
-            if (MODEL_PATH / pth).is_file():
-                model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     if fine_tune:
         model_dict = config["training_module"]["model"]
