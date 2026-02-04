@@ -25,7 +25,7 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 EXTRA_MODEL_PATH = MODEL_PATH / "extra"
 NEQUIP_EXTRA_MODEL_PATH = EXTRA_MODEL_PATH / "NequIP-MP-L-0.1.nequip.zip"
-SEVENNET_EXTRA_MODEL_PATH = EXTRA_MODEL_PATH / "checkpoint_sevennet_omat.pth"
+SEVENNET_EXTRA_MODEL_PATH = EXTRA_MODEL_PATH / "SevenNet_l3i5.pth"
 
 runner = CliRunner()
 
@@ -120,7 +120,9 @@ def write_tmp_config_nequip(
     return tmp_config
 
 
-def write_tmp_data_sevennet(config_path: Path, tmp_path: Path) -> Path:
+def write_tmp_data_sevennet(
+    config_path: Path, tmp_path: Path, fine_tune: bool = False
+) -> Path:
     """
     Fix paths and data columns, write config and data to tmp_path.
 
@@ -133,7 +135,7 @@ def write_tmp_data_sevennet(config_path: Path, tmp_path: Path) -> Path:
 
     Returns
     -------
-    Path
+    Path.
         Temporary path to corrected config file.
     """
     # Load config from tests/data
@@ -156,6 +158,13 @@ def write_tmp_data_sevennet(config_path: Path, tmp_path: Path) -> Path:
                         rename_atoms_attributes(frame, rename_info, rename_arrays)
                     write(tmp_path / name, frames)
                     files[i] = str(tmp_path / name)
+
+    if fine_tune:
+        model = Path(config["train"]["continue"]["checkpoint"]).name
+        if (MODEL_PATH / "extra" / model).exists():
+            config["train"]["continue"]["checkpoint"] = str(
+                MODEL_PATH / "extra" / model
+            )
 
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yml"
@@ -570,7 +579,7 @@ def test_sevennet_train(tmp_path):
             assert lines[0].split(",")[0] == "epoch"
 
 
-def test_sevennet_finetune_foundation(tmp_path):
+def test_sevennet_fine_tune_foundation(tmp_path):
     """Test training with sevennet."""
     skip_extras("sevennet")
 
@@ -591,7 +600,7 @@ def test_sevennet_finetune_foundation(tmp_path):
         metrics_path = results_dir / "lc.csv"
 
         config_path = DATA_PATH / "sevennet_fine_tune.yml"
-        config_path = write_tmp_data_sevennet(config_path, tmp_path)
+        config_path = write_tmp_data_sevennet(config_path, tmp_path, True)
 
         result = runner.invoke(
             app,
@@ -621,5 +630,5 @@ def test_sevennet_finetune_foundation(tmp_path):
 
         with open(metrics_path) as metrics:
             lines = metrics.readlines()
-            assert len(lines) == 3
+            assert len(lines) == 2
             assert lines[0].split(",")[0] == "epoch"
