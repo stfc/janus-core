@@ -30,7 +30,7 @@ jobs:
       - name: Download extra models
         shell: bash
         run: |
-          source tests/models/extra_models.sh
+          python3 tests/models/extra_models.py
 
       - name: Run test suite
         env:
