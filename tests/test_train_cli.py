@@ -101,15 +101,11 @@ def write_tmp_config_nequip(
             config["data"][file] = str(DATA_PATH / Path(config["data"][file]).name)
 
     if fine_tune:
-        model = Path(config["training_module"]["model"][model_type + "_path"]).name
-        if (MODEL_PATH / model).exists():
-            config["training_module"]["model"][model_type + "_path"] = str(
-                MODEL_PATH / model
-            )
-        elif (MODEL_PATH / "extra" / model).exists():
-            config["training_module"]["model"][model_type + "_path"] = str(
-                MODEL_PATH / "extra" / model
-            )
+        model_dict = config["training_module"]["model"]
+        model = Path(model_dict[f"{model_type}_path"]).name
+        for pth in (model, f"extra/{model}"):
+            if (MODEL_PATH / pth).is_file():
+                model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yaml"
@@ -131,7 +127,7 @@ def test_train(tmp_path):
     skip_extras("mace")
 
     with chdir(tmp_path):
-        results_dir = Path("./janus_results")
+        results_dir = Path.cwd() / "janus_results"
 
         model = results_dir / "test.model"
         compiled_model = results_dir / "test_compiled.model"
@@ -140,7 +136,7 @@ def test_train(tmp_path):
         log_path = results_dir / "train-log.yml"
         summary_path = results_dir / "train-summary.yml"
 
-        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path())
+        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path.cwd())
 
         result = runner.invoke(
             app,
@@ -227,7 +223,7 @@ def test_fine_tune(tmp_path):
 
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
-        logs_path = results_dir / Path("logs")
+        logs_path = results_dir / "logs"
 
         config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path())
 
@@ -314,7 +310,7 @@ def test_no_carbon(tmp_path):
     skip_extras("mace")
 
     with chdir(tmp_path):
-        results_dir = Path("./janus_results_no_carbon")
+        results_dir = Path.cwd() / "janus_results_no_carbon"
 
         model_path = results_dir / "test.model"
         compiled_path = results_dir / "test_compiled.model"
@@ -324,7 +320,7 @@ def test_no_carbon(tmp_path):
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
 
-        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path())
+        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path.cwd())
 
         result = runner.invoke(
             app,
@@ -399,7 +395,7 @@ def test_nequip_train(tmp_path):
         assert train_log_path.exists()
         assert metrics_path.exists()
 
-        with open(metrics_path) as metrics:
+        with open(metrics_path, encoding="utf-8") as metrics:
             header = metrics.readline().split(",")
 
         assert header[:3] == ["epoch", "lr-Adam", "step"]
@@ -422,12 +418,13 @@ def test_nequip_train_invalid_config_suffix(tmp_path):
         assert isinstance(result.exception, ValueError)
 
 
+@pytest.mark.skipif(
+    not NEQUIP_EXTRA_MODEL_PATH.exists(), 
+    reason=f"Extra model: {NEQUIP_EXTRA_MODEL_PATH} not downloaded.",
+)
 def test_nequip_fine_tune_foundation(tmp_path):
     """Test fine-tuning with a nequip foundation model."""
     skip_extras("nequip")
-
-    if not NEQUIP_EXTRA_MODEL_PATH.exists():
-        skip(f"Extra model: {NEQUIP_EXTRA_MODEL_PATH} not downloaded.")
 
     with chdir(tmp_path):
         results_dir = Path("janus_results")
@@ -466,7 +463,7 @@ def test_nequip_fine_tune_foundation(tmp_path):
         assert train_log_path.exists()
         assert metrics_path.exists()
 
-        with open(metrics_path) as metrics:
+        with open(metrics_path, encoding="utf-8") as metrics:
             header = metrics.readline().split(",")
 
         assert header[:3] == ["epoch", "lr-Adam", "step"]
