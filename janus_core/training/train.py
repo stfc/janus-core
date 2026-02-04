@@ -85,9 +85,12 @@ def train(
             HydraConfig().set_config(mlip_args)
 
             model = options["training_module"]["model"]
-            if "package_path" in model:
-                foundation_model = model["package_path"]
+            foundation_model = model.get("package_path")
             if "checkpoint_path" in model:
+                if foundation_model:
+                    raise ValueError(
+                        f"Both package_path and checkpoint_path in {mlip_config}."
+                    )
                 foundation_model = model["checkpoint_path"]
 
         case _:

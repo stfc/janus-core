@@ -8,7 +8,7 @@ from typing import Annotated
 from typer import Option, Typer
 import yaml
 
-from janus_core.cli.types import Architectures, LogPath, Summary, Tracker
+from janus_core.cli.types import Architectures, LogPath, Summary
 
 app = Typer()
 
@@ -31,9 +31,9 @@ def train(
             )
         ),
     ] = Path("./janus_results"),
-    log: LogPath = None,
-    tracker: Tracker = True,
-    summary: Summary = None,
+    log: LogPath | None = None,
+    tracker: bool = True,
+    summary: Summary | None = None,
 ) -> None:
     """
     Run training for MLIP by passing a configuration file to the MLIP's CLI.
@@ -122,6 +122,8 @@ def train(
                     """Fine-tuning requested but there is no checkpoint or
                     package specified in your config."""
                 )
+        case _:
+            raise ValueError(f"Unsupported Architecture ({arch})")
 
     if log is None:
         log = file_prefix / "train-log.yml"
