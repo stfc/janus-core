@@ -23,14 +23,14 @@ def train(
         bool, Option(help="Whether to fine-tune a foundational model.")
     ] = False,
     file_prefix: Annotated[
-        Path,
+        Path | None,
         Option(
             help=(
                 "Prefix for output files, including directories."
                 "Default directory is ./janus_results."
             )
         ),
-    ] = Path.cwd() / "janus_results",
+    ] = None,
     log: LogPath | None = None,
     tracker: bool = True,
     summary: Summary | None = None,
@@ -124,6 +124,9 @@ def train(
                 )
         case _:
             raise ValueError(f"Unsupported Architecture ({arch})")
+
+    if file_prefix is None:
+        file_prefix = Path.cwd() / "janus_results"
 
     if log is None:
         log = file_prefix / "train-log.yml"
