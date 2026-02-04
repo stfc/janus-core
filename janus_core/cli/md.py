@@ -734,7 +734,7 @@ def md(
     elif ensemble in ("npt-mtk-iso", "npt-mtk-aniso"):
         for key in ("bulk_modulus", "friction", "taut"):
             del dyn_kwargs[key]
-        dyn = NPT_MTK(**dyn_kwargs)
+        dyn = NPT_MTK(ensemble=ensemble, **dyn_kwargs)
     else:
         raise ValueError(f"Unsupported Ensemble ({ensemble})")
 
