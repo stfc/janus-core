@@ -30,7 +30,7 @@ def train(
                 "Default directory is ./janus_results."
             )
         ),
-    ] = Path("./janus_results"),
+    ] = Path.cwd() / "janus_results",
     log: LogPath | None = None,
     tracker: bool = True,
     summary: Summary | None = None,
