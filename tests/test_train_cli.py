@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from ase.io import read, write
+import pytest
 from pytest import skip
 from typer.testing import CliRunner
 import yaml
@@ -143,21 +143,20 @@ def write_tmp_data_sevennet(
         config = yaml.safe_load(file)
 
     # Use DATA_PATH to set paths relative to this test file
-    for dataset in ("load_dataset_path", "load_validset_path"):
-        if dataset in config["data"]:
-            files = config["data"][dataset]
-            for i, file in enumerate(files):
-                name = Path(file).name
-                path = DATA_PATH / name
-                if path.exists():
-                    frames = read(path, index=":")
-                    # There is currenlty no option to rename these.
-                    rename_info = {"dft_energy": "energy", "dft_stress": "stress"}
-                    rename_arrays = {"dft_forces": "forces"}
-                    for frame in frames:
-                        rename_atoms_attributes(frame, rename_info, rename_arrays)
-                    write(tmp_path / name, frames)
-                    files[i] = str(tmp_path / name)
+    for dataset in config["data"].keys() & {"load_dataset_path", "load_validset_path"}:
+        files = config["data"][dataset]
+        for i, file in enumerate(files):
+            name = Path(file).name
+            path = DATA_PATH / name
+            if path.exists():
+                frames = read(path, index=":")
+                # There is currenlty no option to rename these.
+                rename_info = {"dft_energy": "energy", "dft_stress": "stress"}
+                rename_arrays = {"dft_forces": "forces"}
+                for frame in frames:
+                    rename_atoms_attributes(frame, rename_info, rename_arrays)
+                write(tmp_path / name, frames)
+                files[i] = str(tmp_path / name)
 
     if fine_tune:
         model = Path(config["train"]["continue"]["checkpoint"]).name

@@ -1,0 +1,55 @@
+model:
+    chemical_species: 'Auto'
+    cutoff: 2.0
+    channel: 4
+    lmax: 1
+    num_convolution_layer: 1
+
+    weight_nn_hidden_neurons: [4, 4]
+    radial_basis:
+        radial_basis_name: 'bessel'
+        bessel_basis_num: 8
+    cutoff_function:
+        cutoff_function_name: 'poly_cut'
+        poly_cut_p_value: 6
+
+    act_gate: {'e': 'silu', 'o': 'tanh'}
+    act_scalar: {'e': 'silu', 'o': 'tanh'}
+
+    is_parity: False
+
+    self_connection_type: 'nequip'
+
+    conv_denominator: "avg_num_neigh"
+    train_denominator: False
+    train_shift_scale: False
+
+train:
+    random_seed: 1
+    is_train_stress: True
+    epoch: 2
+    optimizer: 'adam'
+    optim_param:
+        lr: 0.005
+    scheduler: 'exponentiallr'
+    scheduler_param:
+        gamma: 0.99
+    force_loss_weight: 0.1
+    stress_loss_weight: 1e-06
+    per_epoch: 1
+    error_record:
+        - ['Energy', 'RMSE']
+        - ['Force', 'RMSE']
+        - ['Stress', 'RMSE']
+        - ['TotalLoss', 'None']
+
+data:
+    batch_size: 4
+    data_divide_ratio: 0.1
+
+    shift: 'per_atom_energy_mean'
+    scale: 'force_rms'
+    data_format: 'ase'
+    data_format_args:
+        index: ':'
+    load_dataset_path: ['tests/data/mlip_train.xyz']

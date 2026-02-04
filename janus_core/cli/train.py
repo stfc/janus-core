@@ -122,6 +122,27 @@ def train(
                     """Fine-tuning requested but there is no checkpoint or
                     package specified in your config."""
                 )
+        case "sevennet":
+            continue_section = config["train"].get("continue")
+            if continue_section is None and fine_tune:
+                raise ValueError(
+                    """Fine-tuning requested but there is no continue
+                    section in yor config."""
+                )
+                model = continue_section.get("checkpoint")
+                if model is None:
+                    raise ValueError(
+                        """No model specified as a checkpoint for
+                        fine-tuning.
+                        """
+                    )
+            if not fine_tune and continue_section is not None:
+                raise ValueError(
+                    """Fine-tuning not requested but a continue
+                    section is in your config. Please use
+                    --fine-tune"""
+                )
+
         case _:
             raise ValueError(f"Unsupported Architecture ({arch})")
 
