@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pytest import skip
+import pytest
 from typer.testing import CliRunner
 import yaml
 
@@ -93,12 +93,14 @@ def write_tmp_config_nequip(
         config = yaml.safe_load(file)
 
     # Use DATA_PATH to set paths relative to this test file
-    for file in ("train_file_path", "test_file_path", "val_file_path"):
-        if (
-            file in config["data"]
-            and (DATA_PATH / Path(config["data"][file]).name).exists()
-        ):
-            config["data"][file] = str(DATA_PATH / Path(config["data"][file]).name)
+    for file in config["data"].keys() & {
+        "train_file_path",
+        "test_file_path",
+        "val_file_path",
+    }:
+        pth = DATA_PATH / Path(config["data"][file]).name
+        if pth.is_file():
+            config["data"][file] = str(pth)
 
     if fine_tune:
         model_dict = config["training_module"]["model"]
@@ -419,7 +421,7 @@ def test_nequip_train_invalid_config_suffix(tmp_path):
 
 
 @pytest.mark.skipif(
-    not NEQUIP_EXTRA_MODEL_PATH.exists(), 
+    not NEQUIP_EXTRA_MODEL_PATH.exists(),
     reason=f"Extra model: {NEQUIP_EXTRA_MODEL_PATH} not downloaded.",
 )
 def test_nequip_fine_tune_foundation(tmp_path):
