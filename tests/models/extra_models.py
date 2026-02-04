@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("path", type=Path, help="Path to save the downloaded files.")
     args = parser.parse_args()
 
+    args.path.mkdir(parents=True, exist_ok=True)
     urlretrieve(
         "https://zenodo.org/records/16980200/files/NequIP-MP-L-0.1.nequip.zip",
         filename=args.path / "NequIP-MP-L-0.1.nequip.zip",
