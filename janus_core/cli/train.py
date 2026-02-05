@@ -143,6 +143,24 @@ def train(
                     --fine-tune"""
                 )
 
+        case "grace":
+            if "potential" not in config:
+                raise ValueError("No potential is specified in you config.")
+
+            if fine_tune:
+                model = config["potential"].get("finetune_foundation_model")
+                if model is None:
+                    raise ValueError(
+                        """Fine-tuning was requested but your conifg
+                        does not contains a finetune_foundation_model"""
+                    )
+            elif "finetune_foundation_model" in config["potential"]:
+                raise ValueError(
+                    """Fine-tuning not requested but finetune_foundation_model
+                    is in your config. Please use --fine-tune.
+                    """
+                )
+
         case _:
             raise ValueError(f"Unsupported Architecture ({arch})")
 
