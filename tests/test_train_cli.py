@@ -173,6 +173,39 @@ def write_tmp_data_sevennet(
     return tmp_config
 
 
+def write_tmp_config_grace(config_path: Path, tmp_path: Path) -> Path:
+    """
+    Fix paths in config files and write corrected config to tmp_path for grace.
+
+    Parameters
+    ----------
+    config_path
+        Path to yaml config file to be fixed.
+    tmp_path
+        Temporary path from pytest in which to write corrected config.
+
+    Returns
+    -------
+    Path
+        Temporary path to corrected config file.
+    """
+    # Load config from tests/data
+    with open(config_path, encoding="utf8") as file:
+        config = yaml.safe_load(file)
+
+    # Use DATA_PATH to set paths relative to this test file
+    for file in config["data"].keys() & {"filename", "test_filename"}:
+        if (DATA_PATH / Path(config["data"][file]).name).exists():
+            config["data"][file] = str(DATA_PATH / Path(config["data"][file]).name)
+
+    # Write out temporary config with corrected paths
+    tmp_config = tmp_path / "config.yml"
+    with open(tmp_config, "w", encoding="utf8") as file:
+        yaml.dump(config, file)
+
+    return tmp_config
+
+
 def test_help():
     """Test calling `janus train --help`."""
     result = runner.invoke(app, ["train", "--help"])
@@ -630,4 +663,48 @@ def test_sevennet_fine_tune_foundation(tmp_path):
         with open(metrics_path) as metrics:
             lines = metrics.readlines()
             assert len(lines) == 2
-            assert lines[0].split(",")[0] == "epoch"
+            assert lines[1].split(",")[0] == "epoch"
+
+
+def test_grace_fine_tune_foundation(tmp_path):
+    """Test fine tuning grace."""
+    skip_extras("grace")
+
+    with chdir(tmp_path):
+        log_path = tmp_path / "test.log"
+        summary_path = tmp_path / "summary.yml"
+
+        results_dir = Path("janus_results")
+        grace_dir = results_dir / "seed" / "42"
+
+        metrics_path = grace_dir / "train_metrics.yaml"
+
+        config_path = DATA_PATH / "grace_fine_tune.yml"
+        config_path = write_tmp_config_grace(config_path, tmp_path)
+        result = runner.invoke(
+            app,
+            [
+                "train",
+                "grace",
+                "--mlip-config",
+                config_path,
+                "--fine-tune",
+                "--log",
+                log_path,
+                "--summary",
+                summary_path,
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert results_dir.exists()
+        assert log_path.exists()
+        assert summary_path.exists()
+        assert grace_dir.is_dir()
+        assert metrics_path.exists()
+
+        with open(metrics_path, encoding="utf8") as file:
+            metrics = yaml.safe_load(file)
+            assert len(metrics) == 1
+            for epoch in metrics:
+                assert "total_loss/train" in epoch

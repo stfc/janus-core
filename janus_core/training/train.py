@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -103,6 +104,11 @@ def train(
                 [str(mlip_config), "--working_dir", str(file_prefix), "-s"]
             )
 
+        case "grace":
+            from tensorpotential.cli.gracemaker import main as run
+
+            mlip_args = [str(mlip_config)]
+
         case _:
             raise ValueError(f"{arch} is currently unsupported in train.")
 
@@ -129,6 +135,11 @@ def train(
         tracker.start_task("Training")
 
     run(mlip_args)
+
+    if arch == "grace" and (Path.cwd() / "seed").exists():
+        # Gracemaker always works in ./seed.
+        file_prefix.mkdir(parents=True, exist_ok=True)
+        (Path.cwd() / "seed").rename(file_prefix.resolve() / "seed")
 
     if logger:
         logger.info("Training complete")
