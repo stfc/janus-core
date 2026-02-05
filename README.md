@@ -107,8 +107,10 @@ Current and planned features include:
 - [x] Equation of State
 - [x] Training ML potentials
   - MACE
+  - Nequip
 - [x] Fine-tuning MLIPs
   - MACE
+  - Nequip
 - [x] MLIP descriptors
   - MACE
 - [x] Data preprocessing
