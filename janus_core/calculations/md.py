@@ -18,7 +18,7 @@ from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
-from ase.md.npt import NPT as ASE_NPT
+from ase.md.melchionna import MelchionnaNPT as ASE_NPT  # noqa: N814
 from ase.md.velocitydistribution import (
     MaxwellBoltzmannDistribution,
     Stationary,
