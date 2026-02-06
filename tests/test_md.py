@@ -317,12 +317,12 @@ def test_nvt_csvr(tmp_path):
 
 
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
-@pytest.mark.parametrize("ensemble", ["iso", "aniso"])
-def test_npt_mtk(tmp_path, ensemble):
+@pytest.mark.parametrize("mtk_flavour", ["iso", "aniso"])
+def test_npt_mtk(tmp_path, mtk_flavour):
     """Test NPT MTK molecular dynamics."""
     with chdir(tmp_path):
         results_dir = Path("janus_results")
-        stem = f"NaCl-npt-mtk-{ensemble}-T300.0-p0.0001"
+        stem = f"NaCl-npt-mtk-{mtk_flavour}-T300.0-p0.0001"
         restart_path_1 = results_dir / f"{stem}-res-2.extxyz"
         restart_path_2 = results_dir / f"{stem}-res-4.extxyz"
         restart_final = results_dir / f"{stem}-final.extxyz"
@@ -345,7 +345,7 @@ def test_npt_mtk(tmp_path, ensemble):
             barostat_chain=2,
             thermostat_substeps=2,
             barostat_substeps=2,
-            ensemble=f"npt-mtk-{ensemble}",
+            ensemble=f"npt-mtk-{mtk_flavour}",
         )
 
         npt_mtk.run()
