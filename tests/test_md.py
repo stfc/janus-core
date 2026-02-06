@@ -72,6 +72,49 @@ def test_init(ensemble, expected):
     assert dyn.ensemble == expected
 
 
+def test_deprecation_npt_mtk(tmp_path):
+    """Test FutureWarning raise for ensemble ntp-mtk."""
+    with chdir(tmp_path):
+        with pytest.warns(
+            FutureWarning,
+            match="`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
+        ):
+            results_dir = tmp_path / Path("janus_results")
+            restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p1.0-res-2.extxyz"
+            restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p1.0-res-4.extxyz"
+            restart_final = results_dir / "NaCl-npt-mtk-T300.0-p1.0-final.extxyz"
+            traj_path = results_dir / "NaCl-npt-mtk-T300.0-p1.0-traj.extxyz"
+            stats_path = results_dir / "NaCl-npt-mtk-T300.0-p1.0-stats.dat"
+
+            npt = NPT_MTK(
+                struct=DATA_PATH / "NaCl.cif",
+                arch="mace",
+                model=MODEL_PATH,
+                ensemble="npt-mtk",
+                pressure=1.0,
+                temp=300.0,
+                steps=4,
+                traj_every=1,
+                restart_every=2,
+                stats_every=1,
+            )
+            npt.run()
+            for restart in (restart_path_1, restart_path_2, restart_final):
+                atoms = read(restart)
+                assert isinstance(atoms, Atoms)
+
+            traj = read(traj_path, index=":")
+            assert all(isinstance(image, Atoms) for image in traj)
+            # Includes step 0
+            assert len(traj) == 5
+
+            with open(stats_path, encoding="utf8") as stats_file:
+                lines = stats_file.readlines()
+                assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
+                # Includes step 0
+                assert len(lines) == 6
+
+
 def test_npt(tmp_path):
     """Test NPT molecular dynamics."""
     with chdir(tmp_path):
