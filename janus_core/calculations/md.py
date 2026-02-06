@@ -2197,7 +2197,16 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
             Additional keyword arguments.
         """
         try:
-            if ensemble == "npt-mtk-iso":
+            if ensemble == "npt-mtk":
+                warn(
+                    "`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
+                    FutureWarning,
+                    stacklevel=2,
+                )
+                from ase.md.nose_hoover_chain import (
+                    IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
+                )
+            elif ensemble == "npt-mtk-iso":
                 from ase.md.nose_hoover_chain import (
                     IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
                 )
