@@ -68,13 +68,24 @@ An example configuration file with all parameters set for an NVT CSVR simulation
 
 .. literalinclude:: full/nvt-csvr.yml
 
-NPT MTK
-=======
+NPT MTK Isostropic
+=================
 
-A minimal example configuration file for an NPT MTK simulation using ``janus md`` is:
+A minimal example configuration file for an NPT MTK (Isotropic) simulation using ``janus md`` is:
 
-.. literalinclude:: minimal/npt-mtk.yml
+.. literalinclude:: minimal/npt-mtk-iso.yml
 
-An example configuration file with all parameters set for an NPT MTK simulation using ``janus md`` is:
+An example configuration file with all parameters set for an NPT MTK (Isotropic) simulation using ``janus md`` is:
 
-.. literalinclude:: full/npt-mtk.yml
+.. literalinclude:: full/npt-mtk-iso.yml
+
+NPT MTK Anisotropic
+===================
+
+A minimal example configuration file for an NPT MTK (Anisotropic) simulation using ``janus md`` is:
+
+.. literalinclude:: minimal/npt-mtk-aniso.yml
+
+An example configuration file with all parameters set for an NPT MTK (Anisotropic) simulation using ``janus md`` is:
+
+.. literalinclude:: full/npt-mtk-aniso.yml

@@ -1,4 +1,0 @@
-arch: mace_mp
-
-ensemble: npt-mtk-iso
-struct: "tests/data/NaCl.cif"
