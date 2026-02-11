@@ -665,22 +665,45 @@ Training and fine-tuning MLIPs
 ------------------------------
 
 .. note::
-    Currently only MACE models are supported. See the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_ for further configuration details
+    Currently only MACE and Nequip models are supported.
 
-Models can be trained by passing a configuration file to the MLIP's command line interface:
-
-.. code-block:: bash
-
-    janus train --mlip-config /path/to/training/config.yml
-
-For MACE, this will create ``logs``, ``checkpoints`` and ``results`` directories, as well as saving the trained model, and a compiled version of the model.
-Additionally, a log file, ``train-log.yml``, and summary file, ``train-summary.yml``, will be generated.
-
-Foundational models can also be fine-tuned, by including the ``foundation_model`` option in your configuration file, and using ``--fine-tune`` option:
+Models can be trained by passing an archictecture and an archictecture specific configuration file as options to the ``janus train`` command. The configuration file will be passed to the corresponding MLIPs command line interface. For example to train a MACE MLIP:
 
 .. code-block:: bash
 
-    janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
+    janus train mace --mlip-config /path/to/mace/training/config.yml
+
+or to train a Nequip MLIP:
+
+.. code-block:: bash
+
+    janus train nequip --mlip-config /path/to/nequip/training/config.yaml
+
+.. note::
+    Different architectures may have different restrictions or features. For example Nequip requires YAML files to be written as ``.yaml`` rather than ``.yml``. See the sections below for specific archictecture guidance.
+
+Foundational models can also be fine-tuned, by passing the ``--fine-tune`` option:
+
+.. code-block:: bash
+
+    janus train mace --mlip-config /path/to/mace/fine/tuning/config.yml --fine-tune
+
+By default the output of training or fine-tuning will be in the ``./janus_results`` directory. This directory's contents varies in structure depending on the architecture being trained and whether fine-tuning is being conducted. However as with other commands a log file, ``train-log.yml``, and summary file, ``train-summary.yml``, will be generated in ``./janus_results`` by default.
+
+Training MACE MLIPs
++++++++++++++++++++
+
+For MACE, training will create ``logs``, ``checkpoints`` and ``results`` sub-directories, as well as saving the trained model, and a compiled version of the model.
+
+Instructions for writing a MACE ``config.yml`` file can be found in the `MACE Readme <https://github.com/ACEsuit/mace?tab=readme-ov-file#training>`_ and the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_.
+
+
+Training Nequip MLIPS
++++++++++++++++++++++
+
+Configuration of Nequip training is outlined in the `Nequip user guide <https://nequip.readthedocs.io/en/latest/guide/guide.html>`_. In particular note that the configuration file must have a ``.yaml`` extension.
+
+The results directory contents depends on the options selected in the configuration file, but may typically contain model checkpoint, ``.ckpt``, files and a metrics directory.
 
 
 Preprocessing training data
