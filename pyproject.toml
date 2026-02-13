@@ -96,6 +96,7 @@ sevennet = [
 ]
 fairchem-2 = [
     "fairchem-core == 2.12.0",
+    "setuptools < 82",
 ]
 
 # MLIPs with dgl dependency
