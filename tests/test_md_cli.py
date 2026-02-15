@@ -48,7 +48,13 @@ test_data = [
     ("nph"),
     ("nvt-csvr"),
     pytest.param(
-        "npt-mtk",
+        "npt-mtk-iso",
+        marks=pytest.mark.skipif(
+            MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
+        ),
+    ),
+    pytest.param(
+        "npt-mtk-aniso",
         marks=pytest.mark.skipif(
             MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
         ),
@@ -67,7 +73,8 @@ def test_md(ensemble, tmp_path):
         "nvt-nh": "NaCl-nvt-nh-T300.0-",
         "nph": "NaCl-nph-T300.0-p0.0-",
         "nvt-csvr": "NaCl-nvt-csvr-T300.0-",
-        "npt-mtk": "NaCl-npt-mtk-T300.0-p0.0-",
+        "npt-mtk-iso": "NaCl-npt-mtk-iso-T300.0-p0.0-",
+        "npt-mtk-aniso": "NaCl-npt-mtk-aniso-T300.0-p0.0-",
     }
 
     with chdir(tmp_path):
