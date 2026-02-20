@@ -46,6 +46,7 @@ chgnet = [
 ]
 dpa3 = [
     "deepmd-kit == 3.1.2",
+    "MPICH",
 ]
 d3 = [
     "torch-dftd==0.5.1",
