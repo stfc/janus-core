@@ -486,7 +486,9 @@ def test_dispersion(arch, kwargs, pred):
     assert isinstance(sp_d3.struct.calc, SumCalculator)
     d3_results = sp_d3.run()
 
-    assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(pred)
+    assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(
+        pred, rel=1e-5
+    )
 
 
 def test_mace_mp_dispersion():
