@@ -229,34 +229,6 @@ def choose_calculator(
 
             calculator = mace_omol(model=model, device=device, **kwargs)
 
-        case "m3gnet":
-            from matgl import __version__, load_model
-            from matgl.apps.pes import Potential
-            from matgl.ext.ase import M3GNetCalculator
-            import torch
-
-            # Set before loading model to avoid type mismatches
-            torch.set_default_dtype(torch.float32)
-            kwargs.setdefault("stress_weight", 1.0 / 160.21766208)
-
-            # Use potential (from kwargs) if specified
-            # Otherwise, load the model if given a path, else use a default model
-            match model:
-                case Potential():
-                    potential = model
-                    model = "loaded_Potential"
-                case Path():
-                    if model.is_file():
-                        model = model.parent
-                    potential = load_model(model)
-                case str():
-                    potential = load_model(model)
-                case _:
-                    model = "M3GNet-MP-2021.2.8-DIRECT-PES"
-                    potential = load_model(model)
-
-            calculator = M3GNetCalculator(potential=potential, **kwargs)
-
         case "chgnet":
             from chgnet import __version__
             from chgnet.model.dynamics import CHGNetCalculator
@@ -283,27 +255,6 @@ def choose_calculator(
             calculator = CHGNetCalculator(
                 model=loaded_model, use_device=device, **kwargs
             )
-
-        case "alignn":
-            from alignn import __version__
-            from alignn.ff.ff import (
-                AlignnAtomwiseCalculator,
-                default_path,
-                get_figshare_model_ff,
-            )
-
-            # Set default path to directory containing config and model location
-            match model:
-                case Path():
-                    if model.is_file():
-                        model = model.parent
-                # If a string, assume referring to model_name e.g. "v5.27.2024"
-                case str():
-                    model = get_figshare_model_ff(model_name=model)
-                case _:
-                    model = default_path()
-
-            calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
 
         case "sevennet":
             from sevenn import __version__
@@ -412,35 +363,6 @@ def choose_calculator(
 
             calculator = grace_fm(model, **kwargs)
 
-        case "equiformer" | "esen":
-            from fairchem.core import OCPCalculator, __version__
-
-            match arch, model:
-                case ("equiformer", None):
-                    model = "EquiformerV2-31M-S2EF-OC20-All+MD"
-                case ("esen", None):
-                    model = "eSEN-30M-OMAT24"
-                case _:
-                    pass
-
-            model_name = None
-            checkpoint_path = None
-
-            if isinstance(model, Path) and model.exists():
-                checkpoint_path = str(model)
-            else:
-                model_name = str(model)
-
-            kwargs.setdefault("local_cache", Path("~/.cache/fairchem").expanduser())
-            cpu = True if device == "cpu" else False
-
-            calculator = OCPCalculator(
-                model_name=model_name,
-                checkpoint_path=checkpoint_path,
-                cpu=cpu,
-                **kwargs,
-            )
-
         case "pet_mad":
             from pet_mad import __version__
             from pet_mad._version import LATEST_VERSION
@@ -453,7 +375,7 @@ def choose_calculator(
             if model is None:
                 model = LATEST_VERSION
 
-        case "uma":
+        case "fairchem":
             from fairchem.core import FAIRChemCalculator, __version__, pretrained_mlip
             from fairchem.core.units.mlip_unit import MLIPPredictUnit
 

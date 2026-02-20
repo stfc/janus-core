@@ -130,22 +130,6 @@ MLIP Incompatibilies
 Due to the different requirements of the MLIPs we support, it is not always possible to install all combinations of ``extras``.
 
 
-MLIPs requiring DGL
--------------------
-
-`DGL <https://github.com/dmlc/dgl>`_, which is a dependency of ``alignn`` and ``matgl``, no longer
-publishes to PyPI, and no longer publishes any packages for Windows or MacOS.
-
-When installing these MLIPs on Linux or MacOS, ``janus-core`` will therefore automatically install
-``dgl==2.1.0``, as well as ``torch==2.2.0``, to ensure full compatibility. However, this is incompatible
-with ``chgnet``, and may limit the available features in others, including ``mace``.
-
-To use ``alignn`` and/or ``matgl`` with more recent versions of PyTorch, ``torch`` and ``dgl`` must
-both be upgraded manually. Please refer to their
-`installation instructions <https://www.dgl.ai/pages/start.html>`_ to upgrade ``dgl``, ensuring
-that the PyTorch version, CUDA version, and OS are selected appropriately.
-
-
 MLIPs with different versions of e3nn
 -------------------------------------
 
@@ -158,5 +142,5 @@ MLIPs with limited OS support
 -----------------------------
 
 Several MLIP packages have limited support on Windows. We are currently unable to
-support ``orb``, ``mattersim``, ``pet-mad``, ``alignn`` or ``matgl`` as ``extras`` on Windows, so they
+support ``orb``, ``mattersim``, or ``pet-mad`` as ``extras`` on Windows, so they
 must be installed manually.

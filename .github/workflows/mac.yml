@@ -21,7 +21,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install "all" dependencies
-        run: uv sync --extra all
+        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra pet-mad --extra plumed
 
       - name: Install PLUMED
         uses: Iximiel/install-plumed@v1
@@ -46,35 +46,11 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
-          uv sync --extra mattersim --extra fairchem-1 --extra sevennet --extra nequip --extra d3
+          uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
           uv pip install --reinstall pynvml
           uv pip install "fairchem-core[torch-extras]" --no-build-isolation
 
       - name: Run test suite for updated e3nn dependencies
-        env:
-          # show timings of tests
-          PYTEST_ADDOPTS: "--durations=0"
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
-
-      - name: Install dgl dependencies
-        run: |
-          uv sync --extra mace --extra m3gnet --extra alignn --extra d3
-          uv pip install --reinstall pynvml
-
-      - name: Run test suite for dgl dependencies
-        env:
-          # show timings of tests
-          PYTEST_ADDOPTS: "--durations=0"
-        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point,eos}.py
-
-      - name: Install UMA
-        run: |
-          uv sync --extra fairchem-2
-          uv pip install --reinstall pynvml
-          uv pip install fairchem-core --no-build-isolation
-
-      - name: Run test suite for UMA
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"

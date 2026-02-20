@@ -129,29 +129,16 @@ def skip_extras(arch: str):
         Model architecture.
     """
     match arch:
-        case "alignn":
-            # alignn caches downloaded model in site-packages
-            pytest.importorskip("alignn.ff.ff")
         case "chgnet":
             pytest.importorskip("chgnet")
         case "dpa3":
             pytest.importorskip("deepmd")
-        case "equiformer":
-            pytest.importorskip("fairchem.core.common.relaxation")
-        case "esen":
-            pytest.importorskip("fairchem.core.common.relaxation")
-            from huggingface_hub.utils._auth import get_token
-
-            if not get_token():
-                pytest.skip("Unable to download model")
         case "grace":
             pytest.importorskip("tensorpotential")
         case "mace" | "mace_mp" | "mace_off" | "mace_omol":
             pytest.importorskip("mace")
         case "mattersim":
             pytest.importorskip("mattersim")
-        case "m3gnet":
-            pytest.importorskip("matgl")
         case "nequip":
             pytest.importorskip("nequip")
         case "orb":
@@ -160,7 +147,7 @@ def skip_extras(arch: str):
             pytest.importorskip("pet_mad")
         case "sevennet":
             pytest.importorskip("sevenn")
-        case "uma":
+        case "fairchem":
             pytest.importorskip("fairchem.core.calculate")
             from huggingface_hub.utils._auth import get_token
 

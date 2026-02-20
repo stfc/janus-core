@@ -15,8 +15,7 @@ The following steps can then be taken, using `ORB <https://github.com/orbital-ma
 Dependencies for ``janus-core`` are specified through a ``pyproject.toml`` file,
 with syntax consistent with `PEP 621 <https://docs.astral.sh/uv/concepts/projects/dependencies/#project-dependencies>`_.
 
-New MLIPs should be added as optional dependencies under ``[project.optional-dependencies]``,
-both with its own label, and to ``all`` if it is compatible with existing MLIPs::
+New MLIPs should be added as optional dependencies under ``[project.optional-dependencies]``::
 
     [project.optional-dependencies]
     chgnet = [
@@ -24,46 +23,21 @@ both with its own label, and to ``all`` if it is compatible with existing MLIPs:
     ]
     mace = [
         "mace-torch==0.3.10",
-        "torch-dftd==0.4.0",
+        "janus-core[d3]",
     ]
 
     orb = [
         "orb-models == 0.4.2",
-        "pynanoflann",
     ]
-
-    all = [
-        "janus-core[chgnet]",
-        "janus-core[mace]",
-        "janus-core[orb]",
-    ]
-
-    # MLIPs with dgl dependency
-    alignn = [
-        "alignn == 2024.5.27",
-        "torch == 2.2",
-        "torchdata == 0.7.1",
-    ]
-    m3gnet = [
-        "matgl == 1.1.3",
-        "torch == 2.2",
-        "torchdata == 0.7.1",
-    ]
-
-    [tool.uv.sources]
-    pynanoflann = { git = "https://github.com/dwastberg/pynanoflann", rev = "af434039ae14bedcbb838a7808924d6689274168" }
 
 
 ``uv`` will automatically resolve dependencies of the MLIP, if present, to ensure consistency with existing dependencies.
 
 .. note::
 
-    In most cases, sub-dependencies should automatically be included with the specified MLIP, but a few exceptions can be seen.
-
-    For example, ``orb`` requires ``pynanoflann``, but does not list it as a dependency. ``pynanoflann`` requires a specific git commit,
-    defined in ``[tool.uv.sources]``. Similarly, ``torch-dftd`` is not listed as a dependency of ``mace``, so has been manually included.
-
-    In the case of ``alignn`` and ``m3gnet``, ``torch`` and ``torchdata`` are listed dependencies, but are pinned to ensure compatibility.
+    In most cases, sub-dependencies should automatically be included with the specified
+    MLIP, but in some cases additional sub-dependencies should be declared, as we do
+    with ``janus-core[d3]``.
 
 
 Extra dependencies can then be installed by running:
@@ -73,38 +47,23 @@ Extra dependencies can then be installed by running:
     uv sync --extra mace --extra orb
 
 
-or, for all compatible extras:
-
-.. code-block:: bash
-
-    uv sync --extra all
-
-
 If a new MLIP is not compatible with others, this must be declared as a conflict. For example:
 
 .. code-block:: bash
 
     conflicts = [
         [
-            { extra = "chgnet" },
-            { extra = "alignn" },
+            { extra = "mattersim" },
+            { extra = "mace" },
         ],
         [
-            { extra = "chgnet" },
-            { extra = "m3gnet" },
-        ],
-        [
-            { extra = "all" },
-            { extra = "alignn" },
-        ],
-        [
-            { extra = "all" },
-            { extra = "m3gnet" },
-        ],
+            { extra = "fairchem" },
+            { extra = "grace" },
+        ]
     ]
 
+This states that ``mattersim`` and ``mace`` are incompatible, and ``fairchem`` and ``grace`` are incompatible.
 
-This states that ``m3gnet`` and ``alignn`` both conflict with ``chgnet``, and by extension, ``all`` (due to different ``torch`` requirements).
 
 2. Register MLIP architecture
 -----------------------------
@@ -119,9 +78,7 @@ In this case, we choose the label ``"orb"``:
         "mace",
         "mace_mp",
         "mace_off",
-        "m3gnet",
         "chgnet",
-        "alignn",
         "orb",
     ]
 

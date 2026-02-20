@@ -18,10 +18,7 @@ from tests.utils import chdir, read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
-EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
-ESEN_LABEL = "eSEN-30M-MP"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
@@ -78,52 +75,10 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
 @pytest.mark.parametrize(
     "arch, device, expected_energy, struct, kwargs",
     [
-        (
-            "alignn",
-            "cpu",
-            -11.148092269897461,
-            "NaCl.cif",
-            {"model": ALIGNN_PATH / "best_model.pt"},
-        ),
-        (
-            "alignn",
-            "cpu",
-            -11.148092269897461,
-            "NaCl.cif",
-            {"model": ALIGNN_PATH / "best_model.pt"},
-        ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
         (
-            "equiformer",
-            "cpu",
-            -0.7482733,
-            "NaCl.cif",
-            {},
-        ),
-        (
-            "equiformer",
-            "cpu",
-            -0.7586595,
-            "NaCl.cif",
-            {"model": EQUIFORMER_LABEL},
-        ),
-        (
-            "esen",
-            "cpu",
-            -27.0977497,
-            "NaCl.cif",
-            {},
-        ),
-        (
-            "esen",
-            "cpu",
-            -27.07935905,
-            "NaCl.cif",
-            {"model": ESEN_LABEL},
-        ),
-        (
-            "uma",
+            "fairchem",
             "cpu",
             -27.10070295,
             "NaCl.cif",
@@ -133,7 +88,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),
         ("mace_omol", "cpu", -2079.8650795528843, "H2O.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
-        ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
         (
             "nequip",
             "cpu",
@@ -497,7 +451,6 @@ def test_missing_arch(struct):
 @pytest.mark.parametrize(
     "arch, kwargs, pred",
     [
-        ("m3gnet", {}, -0.08281749),
         (
             "mace_mp",
             {"damping": "zero", "xc": "pbe", "cutoff": 95 * units.Bohr},
