@@ -22,7 +22,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: uv sync --extra all
+      run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra pet-mad --extra plumed
 
     # Full reinstall in case the version number is the same as the last release
     - name: Uninstall release versions

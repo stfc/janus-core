@@ -29,10 +29,6 @@ Extras, such as optional MLIPs, can also be installed by running::
 
     uv sync -p 3.12 --extra chgnet --extra sevennet
 
-or to install all MLIPs that do not depend on ``dgl``::
-
-    uv sync -p 3.12 --extra all
-
 
 Using uv
 ++++++++

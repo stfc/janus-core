@@ -49,7 +49,7 @@ RUN uv pip install --no-cache-dir marimo[recommended,lsp,sql] altair pandas pyth
   openai \
   nbformat \
   pytest
-RUN uv pip install --no-cache-dir 'janus-core[all]@git+https://github.com/stfc/janus-core.git@main'
+RUN uv pip install --no-cache-dir 'janus-core[chgnet,dpa3,d3,grace,mace,orb,pet-mad,plumed]@git+https://github.com/stfc/janus-core.git@main'
 RUN uv pip install  --no-cache-dir cuequivariance==0.5.1 \
   cuequivariance-torch==0.6.1 \
   cuequivariance-ops-torch-cu12==0.6.1 \

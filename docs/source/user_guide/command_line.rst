@@ -37,12 +37,6 @@ which can be installed using ``janus-core``'s ``visualise`` extra. For example:
 
     pip install janus-core[mace,visualise]
 
-or
-
-.. code-block:: bash
-
-    pip install janus-core[all]
-
 
 Basic usage
 -----------

@@ -28,25 +28,6 @@ except ImportError:
 
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
-EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
-ESEN_LABEL = "eSEN-30M-MP"
-
-
-try:
-    from fairchem.core.models.model_registry import model_name_to_local_file
-
-    EQUIFORMER_PATH = model_name_to_local_file(
-        EQUIFORMER_LABEL,
-        local_cache=Path("~/.cache/fairchem").expanduser(),
-    )
-    ESEN_PATH = model_name_to_local_file(
-        EQUIFORMER_LABEL,
-        local_cache="~/.cache/fairchem",
-    )
-except ImportError:
-    EQUIFORMER_PATH = None
-    ESEN_PATH = None
-
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
@@ -77,17 +58,6 @@ except ImportError:
     UMA_PREDICT_UNIT = None
 
 
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
-M3GNET_DIR_PATH = MODEL_PATH / "M3GNet-MP-2021.2.8-DIRECT-PES"
-M3GNET_MODEL_PATH = M3GNET_DIR_PATH / "model.pt"
-
-try:
-    from matgl import load_model
-
-    M3GNET_POTENTIAL = load_model(path=M3GNET_DIR_PATH)
-except ImportError:
-    M3GNET_POTENTIAL = None
-
 PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
 )
@@ -96,26 +66,11 @@ PET_MAD_CHECKPOINT = (
 @pytest.mark.parametrize(
     "arch, device, kwargs",
     [
-        ("alignn", "cpu", {}),
-        ("alignn", "cpu", {"model": ALIGNN_PATH}),
-        ("alignn", "cpu", {"model": ALIGNN_PATH / "best_model.pt"}),
-        ("alignn", "cpu", {"model": "alignnff_wt10"}),
-        ("alignn", "cpu", {"path": ALIGNN_PATH}),
         ("chgnet", "cpu", {}),
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model": CHGNET_PATH}),
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
-        ("equiformer", "cpu", {}),
-        ("equiformer", "cpu", {"model": EQUIFORMER_LABEL}),
-        ("equiformer", "cpu", {"model_name": EQUIFORMER_LABEL}),
-        ("equiformer", "cpu", {"model_name": EQUIFORMER_PATH}),
-        ("equiformer", "cpu", {"checkpoint_path": EQUIFORMER_PATH}),
-        ("esen", "cpu", {}),
-        ("esen", "cpu", {"model": ESEN_LABEL}),
-        ("esen", "cpu", {"model_name": ESEN_LABEL}),
-        ("esen", "cpu", {"model_name": ESEN_PATH}),
-        ("esen", "cpu", {"checkpoint_path": ESEN_PATH}),
         ("grace", "cpu", {}),
         ("grace", "cpu", {"model": "GRACE-1L-MP-r6"}),
         ("mace", "cpu", {"model": MACE_MP_PATH}),
@@ -130,11 +85,6 @@ PET_MAD_CHECKPOINT = (
         ("mace_omol", "cpu", {"model": "extra_large"}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model": "mattersim-v1.0.0-1m"}),
-        ("m3gnet", "cpu", {}),
-        ("m3gnet", "cpu", {"model": M3GNET_DIR_PATH}),
-        ("m3gnet", "cpu", {"model": M3GNET_MODEL_PATH}),
-        ("m3gnet", "cpu", {"potential": M3GNET_DIR_PATH}),
-        ("m3gnet", "cpu", {"potential": M3GNET_POTENTIAL}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),
         ("orb", "cpu", {"model": ORB_MODEL}),
@@ -145,10 +95,10 @@ PET_MAD_CHECKPOINT = (
         ("sevennet", "cpu", {"path": SEVENNET_PATH}),
         ("sevennet", "cpu", {}),
         ("sevennet", "cpu", {"model": "sevennet-0"}),
-        ("uma", "cpu", {"model": UMA_LABEL}),
-        ("uma", "cpu", {"model_name": UMA_LABEL}),
-        ("uma", "cpu", {"model": UMA_PREDICT_UNIT}),
-        ("uma", "cpu", {"predict_unit": UMA_PREDICT_UNIT}),
+        ("fairchem", "cpu", {"model": UMA_LABEL}),
+        ("fairchem", "cpu", {"model_name": UMA_LABEL}),
+        ("fairchem", "cpu", {"model": UMA_PREDICT_UNIT}),
+        ("fairchem", "cpu", {"predict_unit": UMA_PREDICT_UNIT}),
     ],
 )
 def test_mlips(arch, device, kwargs):
@@ -180,17 +130,13 @@ def test_invalid_arch():
 @pytest.mark.parametrize(
     "arch, model",
     [
-        ("alignn", "invalid/path"),
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
-        ("equiformer", "/invalid/path"),
-        ("esen", "/invalid/path"),
         ("grace", "/invalid/path"),
         ("mace", "/invalid/path"),
         ("mace_mp", "/invalid/path"),
         ("mace_off", "/invalid/path"),
         ("mattersim", "/invalid/path"),
-        ("m3gnet", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
         ("pet_mad", "/invalid/path"),
@@ -236,11 +182,6 @@ def test_d3_manual():
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {
-            "arch": "alignn",
-            "model": ALIGNN_PATH / "best_model.pt",
-            "path": ALIGNN_PATH / "best_model.pt",
-        },
         {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
         {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
         {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
