@@ -717,4 +717,3 @@ def test_grace_fine_tune_foundation(tmp_path):
             assert len(metrics) == 1
             for epoch in metrics:
                 assert "total_loss/train" in epoch
->>>>>>> 6602b00 (Add grace to train)
