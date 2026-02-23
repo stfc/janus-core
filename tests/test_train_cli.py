@@ -87,6 +87,7 @@ def write_tmp_config_nequip(
         Whether fine tuning. Default is False.
     model_type
         If using a package or checkpoint file.
+
     Returns
     -------
     Path
