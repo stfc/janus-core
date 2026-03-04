@@ -97,9 +97,9 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
         ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
-        ("pet_mad", "cpu", -27.47624969482422, "NaCl.cif", {}),
+        ("upet", "cpu", -27.47624969482422, "NaCl.cif", {}),
         (
-            "pet_mad",
+            "upet",
             "cpu",
             -27.47624969482422,
             "NaCl.cif",

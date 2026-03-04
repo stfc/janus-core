@@ -143,8 +143,8 @@ def skip_extras(arch: str):
             pytest.importorskip("nequip")
         case "orb":
             pytest.importorskip("orb_models")
-        case "pet_mad":
-            pytest.importorskip("pet_mad")
+        case "upet":
+            pytest.importorskip("upet")
         case "sevennet":
             pytest.importorskip("sevenn")
         case "fairchem":
