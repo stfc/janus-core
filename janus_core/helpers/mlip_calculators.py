@@ -363,17 +363,22 @@ def choose_calculator(
 
             calculator = grace_fm(model, **kwargs)
 
-        case "pet_mad":
-            from pet_mad import __version__
-            from pet_mad._version import LATEST_VERSION
-            from pet_mad.calculator import PETMADCalculator
+        case "upet":
+            from upet import __version__
+            from upet.calculator import UPETCalculator
 
-            calculator = PETMADCalculator(
-                checkpoint_path=model, device=device, **kwargs
+            # Default model
+            model = model if model else "pet-mad-s"
+            checkpoint_path = None
+
+            # If `model` is a path, pass via `checkpoint_path`
+            if Path(model).exists():
+                checkpoint_path = model
+                model = None
+
+            calculator = UPETCalculator(
+                model=model, checkpoint_path=checkpoint_path, device=device, **kwargs
             )
-
-            if model is None:
-                model = LATEST_VERSION
 
         case "fairchem":
             from fairchem.core import FAIRChemCalculator, __version__, pretrained_mlip
