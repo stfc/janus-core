@@ -61,8 +61,8 @@ mace = [
 orb = [
     "orb-models == 0.5.5; sys_platform != 'win32'",
 ]
-pet-mad = [
-    "pet-mad == 1.3.1; sys_platform != 'win32'"
+upet = [
+    "upet == 0.2.1; python_version > '3.11'"
 ]
 plumed = [
     "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
@@ -230,10 +230,6 @@ conflicts = [
     [
       { extra = "fairchem" },
       { extra = "mace" },
-    ],
-    [
-      { extra = "fairchem" },
-      { extra = "pet-mad" },
     ],
     [
       { extra = "sevennet" },
