@@ -371,8 +371,8 @@ def choose_calculator(
             model = model if model else "pet-mad-s"
             checkpoint_path = None
 
-            # If `model` is a path, pass via `checkpoint_path`
-            if Path(model).exists():
+            # Pass checkpoint (local/URL) via `checkpoint_path`
+            if model.endswith(".ckpt"):
                 checkpoint_path = model
                 model = None
 
