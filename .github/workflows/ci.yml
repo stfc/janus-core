@@ -25,7 +25,7 @@ jobs:
           uv cache clean
 
       - name: Install "all" dependencies
-        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra pet-mad --extra plumed
+        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra upet --extra plumed
 
       - name: Install PLUMED
         uses: Iximiel/install-plumed@v1
