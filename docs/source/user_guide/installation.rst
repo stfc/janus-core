@@ -142,5 +142,5 @@ MLIPs with limited OS support
 -----------------------------
 
 Several MLIP packages have limited support on Windows. We are currently unable to
-support ``orb``, ``mattersim``, or ``pet-mad`` as ``extras`` on Windows, so they
-must be installed manually.
+support ``orb`` or ``mattersim`` as ``extras`` on Windows, so they must be installed
+manually.

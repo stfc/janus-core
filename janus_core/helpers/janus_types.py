@@ -127,7 +127,7 @@ Architectures = Literal[
     "orb",
     "mattersim",
     "grace",
-    "pet_mad",
+    "upet",
     "fairchem",
     "mace_omol",
 ]

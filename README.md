@@ -244,8 +244,8 @@ Usage: janus singlepoint [OPTIONS]
 ╭─ MLIP calculator ────────────────────────────────────────────────────────────────╮
 │ *  --arch               [mace|mace_mp|mace_off|chg  MLIP architecture to use for │
 │                         net|sevennet|nequip|dpa3|o  calculations.                │
-│                         rb|mattersim|grace|pet_mad  [required]                   │
-│                         |fairchem|mace_omol]                                     │
+│                         rb|mattersim|grace|upet|fa  [required]                   │
+│                         airchem|mace_omol]                                       │
 │    --device             [cpu|cuda|mps|xpu]          Device to run calculations   │
 │                                                     on.                          │
 │                                                     [default: cpu]               │

@@ -22,10 +22,10 @@ DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
-    "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
+    "https://huggingface.co/lab-cosmo/upet/resolve/main/models/pet-mad-s-v1.1.0.ckpt"
 )
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
-UMA_LABEL = "uma-s-1"
+UMA_LABEL = "uma-s-1p1"
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -97,9 +97,9 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
         ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
-        ("pet_mad", "cpu", -27.47624969482422, "NaCl.cif", {}),
+        ("upet", "cpu", -30.168052673339844, "NaCl.cif", {}),
         (
-            "pet_mad",
+            "upet",
             "cpu",
             -27.47624969482422,
             "NaCl.cif",
