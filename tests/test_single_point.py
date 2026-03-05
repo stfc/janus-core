@@ -25,7 +25,7 @@ PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/upet/resolve/main/models/pet-mad-s-v1.1.0.ckpt"
 )
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
-UMA_LABEL = "uma-s-1"
+UMA_LABEL = "uma-s-1p1"
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
