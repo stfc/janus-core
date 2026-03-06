@@ -50,7 +50,7 @@ Currently supported MLIP ``extras`` are:
 - ``orb``: `Orb (orb) <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim (mattersim) <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
-- ``fairchem``: `UMA (uma) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
+- ``fairchem``: `UMA (fairchem) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
 - ``upet``: `UPET (upet) <https://github.com/lab-cosmo/upet>`_
 
 The labels in brackets are the corresponding architecture parameters (``arch``) that
