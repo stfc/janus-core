@@ -51,14 +51,14 @@ Currently supported MLIP ``extras`` are:
 - ``mattersim``: `MatterSim (mattersim) <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
 - ``fairchem``: `UMA (uma) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
-- ``upet``: `PET-MAD (pet_mad) <https://github.com/lab-cosmo/upet>`_
+- ``upet``: `UPET (upet) <https://github.com/lab-cosmo/upet>`_
 
 The labels in brackets are the corresponding architecture parameters (``arch``) that
 should be set to use these models.
 
 .. note::
 
-    ``orb``, ``mattersim``, and ``pet-mad`` are not currently compatible with Windows
+    ``orb`` and ``mattersim`` are not currently compatible with Windows
     natively, but can be installed and run via Windows Subsystem for Linux.
 
 
