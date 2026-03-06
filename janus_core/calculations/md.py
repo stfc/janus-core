@@ -18,7 +18,7 @@ from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
-from ase.md.melchionna import MelchionnaNPT as ASE_NPT  # noqa: N814
+from ase.md.melchionna import MelchionnaNPT
 from ase.md.velocitydistribution import (
     MaxwellBoltzmannDistribution,
     Stationary,
@@ -531,7 +531,7 @@ class MolecularDynamics(BaseCalculation):
             self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
             self.minimize_kwargs.setdefault("write_results", False)
 
-        self.dyn: Langevin | VelocityVerlet | ASE_NPT
+        self.dyn: Langevin | VelocityVerlet | MelchionnaNPT
         self.n_atoms = len(self.struct)
 
         self.offset = 0
@@ -1572,7 +1572,7 @@ class NPT(MolecularDynamics):
             pfactor *= units.fs**2 * units.GPa
         else:
             pfactor = None
-        self.dyn = ASE_NPT(
+        self.dyn = MelchionnaNPT(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
@@ -1861,7 +1861,7 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         self.ttime = thermostat_time * units.fs
 
-        self.dyn = ASE_NPT(
+        self.dyn = MelchionnaNPT(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
@@ -2052,7 +2052,7 @@ class NPH(MolecularDynamics):
         # convert the pfactor to ASE internal units
         pfactor *= units.fs**2 * units.GPa
 
-        self.dyn = ASE_NPT(
+        self.dyn = MelchionnaNPT(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
