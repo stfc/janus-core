@@ -79,7 +79,7 @@ PET_MAD_CHECKPOINT = (
         ("mace_mp", "cpu", {"model": "small"}),
         ("mace_mp", "cpu", {"model": MACE_MP_PATH}),
         ("mace_off", "cpu", {}),
-        ("mace_off", "cpu", {"model": "small"}),
+        ("mace_off", "cpu", {"model": "medium"}),
         ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
         ("mace_omol", "cpu", {}),
         ("mace_omol", "cpu", {"model": "extra_large"}),
@@ -117,6 +117,9 @@ def test_mlips(arch, device, kwargs):
         raise err
     except URLError as err:
         if "Connection timed out" in err.reason:
+            pytest.skip("Model download failed")
+    except RuntimeError as err:
+        if "Model download failed" in str(err):
             pytest.skip("Model download failed")
         raise err
 
