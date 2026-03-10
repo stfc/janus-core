@@ -144,6 +144,10 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         if "Connection timed out" in err.reason:
             pytest.skip("Model download failed")
         raise err
+    except RuntimeError as err:
+        if "Model download failed" in str(err):
+            pytest.skip("Model download failed")
+        raise err
 
 
 def test_single_point_none():
@@ -467,28 +471,33 @@ def test_dispersion(arch, kwargs, pred):
     skip_extras(arch)
     pytest.importorskip("torch_dftd")
 
-    data_path = DATA_PATH / "benzene.xyz"
-    sp_no_d3 = SinglePoint(
-        struct=data_path,
-        arch=arch,
-        properties="energy",
-        calc_kwargs={"dispersion": False},
-    )
-    assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
-    no_d3_results = sp_no_d3.run()
+    try:
+        data_path = DATA_PATH / "benzene.xyz"
+        sp_no_d3 = SinglePoint(
+            struct=data_path,
+            arch=arch,
+            properties="energy",
+            calc_kwargs={"dispersion": False},
+        )
+        assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
+        no_d3_results = sp_no_d3.run()
 
-    sp_d3 = SinglePoint(
-        struct=data_path,
-        arch=arch,
-        properties="energy",
-        calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
-    )
-    assert isinstance(sp_d3.struct.calc, SumCalculator)
-    d3_results = sp_d3.run()
+        sp_d3 = SinglePoint(
+            struct=data_path,
+            arch=arch,
+            properties="energy",
+            calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
+        )
+        assert isinstance(sp_d3.struct.calc, SumCalculator)
+        d3_results = sp_d3.run()
 
-    assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(
-        pred, rel=1e-5
-    )
+        assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(
+            pred, rel=1e-5
+        )
+    except RuntimeError as err:
+        if "Model download failed" in str(err):
+            pytest.skip("Model download failed")
+        raise err
 
 
 def test_mace_mp_dispersion():
