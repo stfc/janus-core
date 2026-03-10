@@ -539,9 +539,18 @@ class NEB(BaseCalculation):
                 print("#Barrier [eV] | delta E [eV] | Max force [eV/Å] ", file=out)
                 print(*self.results.values(), file=out)
 
-    def run(self) -> dict[str, float]:
+    def run(
+        self, fmax: float | None = None, steps: int | None = None
+    ) -> dict[str, float]:
         """
         Run Nudged Elastic Band method.
+
+        Parameters
+        ----------
+        fmax
+            Maximum force for NEB optimiser. Default is `self.fmax`.
+        steps
+            Maximum steps for NEB optimiser. Default is `self.steps`.
 
         Returns
         -------
@@ -554,6 +563,9 @@ class NEB(BaseCalculation):
             self.tracker.start_task("NEB")
 
         self._set_info_units()
+
+        fmax = fmax if fmax is not None else self.fmax
+        steps = steps if steps is not None else self.steps
 
         if hasattr(self, "neb"):
             if self.logger:
@@ -570,7 +582,7 @@ class NEB(BaseCalculation):
 
             self.interpolate()
 
-        self.optimize()
+        self.optimize(fmax=fmax, steps=steps)
         self.run_nebtools()
         self.plot()
 

@@ -223,8 +223,7 @@ def test_restart_update_climb(tmp_path):
         neb.run()
         neb.neb.climb = label == "climb"
 
-        neb.optimize(fmax=1.2)
-        neb.run_nebtools()
+        neb.run(fmax=1.2)
         results[label] = neb.results
 
     assert results["climb"]["barrier"] != results["no-climb"]["barrier"]
