@@ -108,11 +108,13 @@ class MolecularDynamics(BaseCalculation):
     minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
     rescale_velocities
-        Whether to rescale velocities. Default is False.
+        Whether to rescale velocities before dynamics and during equilibration.
+        Frequency during equilibration depends on `rescale_every`. Default is False.
     remove_rot
-        Whether to remove rotation. Default is False.
+        Whether to remove rotation when rescaling velocities. Default is False.
     rescale_every
-        Frequency to rescale velocities. Default is 10.
+        Frequency to rescale velocities and remove roation during equilibration.
+        Default is 10.
     file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         and temperature.
@@ -285,11 +287,13 @@ class MolecularDynamics(BaseCalculation):
         minimize_kwargs
             Keyword arguments to pass to geometry optimizer. Default is {}.
         rescale_velocities
-            Whether to rescale velocities. Default is False.
+            Whether to rescale velocities before dynamics and during equilibration.
+            Frequency during equilibration depends on `rescale_every`. Default is False.
         remove_rot
-            Whether to remove rotation. Default is False.
+            Whether to remove rotation when rescaling velocities. Default is False.
         rescale_every
-            Frequency to rescale velocities. Default is 10.
+            Frequency to rescale velocities and remove roation during equilibration.
+            Default is 10.
         file_prefix
             Prefix for output filenames. Default is inferred from structure, ensemble,
             and temperature.
@@ -1371,14 +1375,8 @@ class MolecularDynamics(BaseCalculation):
             raise ValueError("Temperature set for ensemble with no thermostat.")
 
     def run(self) -> None:
-        """Run molecular dynamics simulation and/or temperature ramp."""
+        """Prepare and run molecular dynamics simulation and/or temperature ramp."""
         self._set_info_units(self.info_unit_keys)
-
-        if not self.restart:
-            if self.minimize:
-                self._optimize_structure()
-            if self.rescale_velocities:
-                self._reset_velocities()
 
         if self.offset == 0:
             self._write_header()
@@ -1412,9 +1410,16 @@ class MolecularDynamics(BaseCalculation):
         if self.ramp_temp:
             self.temp = self.temp_start
 
-        # Set velocities to match current temperature
+        # Relax and set velocities to match current temperature
         if not self.restart:
-            self._set_velocity_distribution()
+            if self.minimize:
+                self._optimize_structure()
+            if self.rescale_velocities:
+                self._set_velocity_distribution()
+            if np.isclose(self.struct.get_kinetic_energy(), 0.0, rtol=0, atol=1e-12):
+                if self.logger:
+                    self.logger.warning("Setting velocity due to zero kinetic energy")
+                self._set_velocity_distribution()
 
         # Run temperature ramp
         if self.ramp_temp:
