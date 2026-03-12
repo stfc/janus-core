@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from copy import copy
 from typing import Any, get_args
+import warnings
 
 from ase import Atoms
 import ase.mep
@@ -475,15 +476,42 @@ class NEB(BaseCalculation):
             case _:
                 raise ValueError("Invalid interpolator selected")
 
-    def optimize(self):
-        """Run NEB optimization."""
+    def optimize(self, fmax: float | None = None, steps: int | None = None) -> None:
+        """
+        Run NEB optimisation.
+
+        Parameters
+        ----------
+        fmax
+            Maximum force for NEB optimiser. Default is `self.fmax`.
+        steps
+            Maximum steps for NEB optimiser. Default is `self.steps`.
+        """
+        fmax = fmax if fmax is not None else self.fmax
+        steps = steps if steps is not None else self.steps
+
         if not hasattr(self, "neb"):
             self.interpolate()
 
-        optimizer = self.optimizer(self.neb, **self.optimizer_kwargs)
-        optimizer.run(fmax=self.fmax, steps=self.steps)
+        if not hasattr(self, "opt"):
+            self.opt = self.optimizer(self.neb, **self.optimizer_kwargs)
+
+        self.converged = self.opt.run(fmax=fmax, steps=steps)
+
+        if not self.converged:
+            message = f"NEB optimization has not converged after {steps} steps."
+            try:
+                message += (
+                    f" Current max force {self.neb.get_residual()} > target force "
+                    f"{fmax}"
+                )
+            except RuntimeError:
+                pass
+
+            warnings.warn(message, stacklevel=2)
+
         if self.logger:
-            self.logger.info("Optimization steps: %s", optimizer.nsteps)
+            self.logger.info("Optimization steps: %s", self.opt.nsteps)
 
         # Optionally write band images to file
         output_structs(
@@ -511,9 +539,18 @@ class NEB(BaseCalculation):
                 print("#Barrier [eV] | delta E [eV] | Max force [eV/Å] ", file=out)
                 print(*self.results.values(), file=out)
 
-    def run(self) -> dict[str, float]:
+    def run(
+        self, fmax: float | None = None, steps: int | None = None
+    ) -> dict[str, float]:
         """
         Run Nudged Elastic Band method.
+
+        Parameters
+        ----------
+        fmax
+            Maximum force for NEB optimiser. Default is `self.fmax`.
+        steps
+            Maximum steps for NEB optimiser. Default is `self.steps`.
 
         Returns
         -------
@@ -527,17 +564,25 @@ class NEB(BaseCalculation):
 
         self._set_info_units()
 
-        if self.minimize:
-            GeomOpt(self.init_struct, **self.minimize_kwargs).run()
+        fmax = fmax if fmax is not None else self.fmax
+        steps = steps if steps is not None else self.steps
 
-            # Change filename to be written
-            self.minimize_kwargs["write_kwargs"]["filename"] = (
-                self.final_struct_min_path
-            )
-            GeomOpt(self.final_struct, **self.minimize_kwargs).run()
+        if hasattr(self, "neb"):
+            if self.logger:
+                self.logger.info("Continuing from previous NEB optimisation")
+        else:
+            if self.minimize:
+                GeomOpt(self.init_struct, **self.minimize_kwargs).run()
 
-        self.interpolate()
-        self.optimize()
+                # Change filename to be written
+                self.minimize_kwargs["write_kwargs"]["filename"] = (
+                    self.final_struct_min_path
+                )
+                GeomOpt(self.final_struct, **self.minimize_kwargs).run()
+
+            self.interpolate()
+
+        self.optimize(fmax=fmax, steps=steps)
         self.run_nebtools()
         self.plot()
 

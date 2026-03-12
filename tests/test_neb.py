@@ -168,6 +168,67 @@ def test_neb_plot(tmp_path):
     assert neb.results["max_force"] == pytest.approx(1.5425684122118983)
 
 
+def test_converge_warning(tmp_path, LFPO_start_b, LFPO_end_b):
+    """Test warning raised if NEB does not converge."""
+    neb = NEB(
+        init_struct=LFPO_start_b,
+        final_struct=LFPO_end_b,
+        arch="mace_mp",
+        model=MODEL_PATH,
+        n_images=5,
+        steps=1,
+        fmax=0.1,
+        file_prefix=tmp_path / "LFPO",
+    )
+    with pytest.warns(UserWarning, match="NEB optimization has not converged"):
+        neb.run()
+    assert not neb.converged
+
+
+def test_restart(tmp_path):
+    """Test restarting NEB optimisation."""
+    neb = NEB(
+        neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
+        arch="mace",
+        model=MODEL_PATH,
+        interpolator=None,
+        file_prefix=tmp_path / "LFPO",
+        fmax=1.3,
+    )
+    neb.optimize()
+    neb.run_nebtools()
+    init_force = neb.results["max_force"]
+
+    neb.optimize(fmax=1.2)
+
+    neb.run_nebtools()
+    final_force = neb.results["max_force"]
+
+    assert final_force < init_force
+
+
+def test_restart_update_climb(tmp_path):
+    """Test updating NEB climb setting when continuing optimization."""
+    results = {}
+
+    for label in ("climb", "no-climb"):
+        neb = NEB(
+            neb_structs=DATA_PATH / "LiFePO4-neb-band.xyz",
+            arch="mace",
+            model=MODEL_PATH,
+            interpolator=None,
+            fmax=1.3,
+            file_prefix=tmp_path / "LFPO",
+        )
+        neb.run()
+        neb.neb.climb = label == "climb"
+
+        neb.run(fmax=1.2)
+        results[label] = neb.results
+
+    assert results["climb"]["barrier"] != results["no-climb"]["barrier"]
+
+
 @pytest.mark.parametrize("n_images", (-5, 0, 1.5))
 def test_invalid_n_images(LFPO_start_b, LFPO_end_b, n_images):
     """Test setting invalid invalid n_images."""
