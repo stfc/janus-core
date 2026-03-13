@@ -127,7 +127,7 @@ def train(
             if continue_section is None and fine_tune:
                 raise ValueError(
                     """Fine-tuning requested but there is no continue
-                    section in yor config."""
+                    section in your config."""
                 )
                 model = continue_section.get("checkpoint")
                 if model is None:
