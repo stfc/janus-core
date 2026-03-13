@@ -36,7 +36,7 @@ test_data = [
     (NVT_CSVR, "nvt-csvr"),
     pytest.param(
         NPT_MTK,
-        "npt-mtk",
+        "npt-mtk-iso",
         marks=pytest.mark.skipif(
             MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
         ),
@@ -70,6 +70,49 @@ def test_init(ensemble, expected):
         struct=single_point.struct,
     )
     assert dyn.ensemble == expected
+
+
+def test_deprecation_npt_mtk(tmp_path):
+    """Test FutureWarning raise for ensemble ntp-mtk."""
+    with chdir(tmp_path):
+        with pytest.warns(
+            FutureWarning,
+            match="`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
+        ):
+            results_dir = tmp_path / Path("janus_results")
+            restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p1.0-res-2.extxyz"
+            restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p1.0-res-4.extxyz"
+            restart_final = results_dir / "NaCl-npt-mtk-T300.0-p1.0-final.extxyz"
+            traj_path = results_dir / "NaCl-npt-mtk-T300.0-p1.0-traj.extxyz"
+            stats_path = results_dir / "NaCl-npt-mtk-T300.0-p1.0-stats.dat"
+
+            npt = NPT_MTK(
+                struct=DATA_PATH / "NaCl.cif",
+                arch="mace",
+                model=MODEL_PATH,
+                ensemble="npt-mtk",
+                pressure=1.0,
+                temp=300.0,
+                steps=4,
+                traj_every=1,
+                restart_every=2,
+                stats_every=1,
+            )
+            npt.run()
+            for restart in (restart_path_1, restart_path_2, restart_final):
+                atoms = read(restart)
+                assert isinstance(atoms, Atoms)
+
+            traj = read(traj_path, index=":")
+            assert all(isinstance(image, Atoms) for image in traj)
+            # Includes step 0
+            assert len(traj) == 5
+
+            with open(stats_path, encoding="utf8") as stats_file:
+                lines = stats_file.readlines()
+                assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
+                # Includes step 0
+                assert len(lines) == 6
 
 
 def test_npt(tmp_path):
@@ -274,15 +317,17 @@ def test_nvt_csvr(tmp_path):
 
 
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
-def test_npt_mtk(tmp_path):
+@pytest.mark.parametrize("mtk_flavour", ["iso", "aniso"])
+def test_npt_mtk(tmp_path, mtk_flavour):
     """Test NPT MTK molecular dynamics."""
     with chdir(tmp_path):
         results_dir = Path("janus_results")
-        restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
-        restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz"
-        restart_final = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-final.extxyz"
-        traj_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz"
-        stats_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-stats.dat"
+        stem = f"NaCl-npt-mtk-{mtk_flavour}-T300.0-p0.0001"
+        restart_path_1 = results_dir / f"{stem}-res-2.extxyz"
+        restart_path_2 = results_dir / f"{stem}-res-4.extxyz"
+        restart_final = results_dir / f"{stem}-final.extxyz"
+        traj_path = results_dir / f"{stem}-traj.extxyz"
+        stats_path = results_dir / f"{stem}-stats.dat"
 
         npt_mtk = NPT_MTK(
             struct=DATA_PATH / "NaCl.cif",
@@ -300,6 +345,7 @@ def test_npt_mtk(tmp_path):
             barostat_chain=2,
             thermostat_substeps=2,
             barostat_substeps=2,
+            ensemble=f"npt-mtk-{mtk_flavour}",
         )
 
         npt_mtk.run()
