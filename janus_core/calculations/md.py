@@ -19,6 +19,7 @@ from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
 from ase.md.melchionna import MelchionnaNPT
+from ase.md.nose_hoover_chain import MTKNPT, IsotropicMTKNPT
 from ase.md.velocitydistribution import (
     MaxwellBoltzmannDistribution,
     Stationary,
@@ -2196,34 +2197,22 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         **kwargs
             Additional keyword arguments.
         """
-        try:
-            if ensemble == "npt-mtk":
-                warn(
-                    "`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
-                    FutureWarning,
-                    stacklevel=2,
-                )
-                from ase.md.nose_hoover_chain import (
-                    IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
-                )
-            elif ensemble == "npt-mtk-iso":
-                from ase.md.nose_hoover_chain import (
-                    IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
-                )
-            elif ensemble == "npt-mtk-aniso":
-                from ase.md.nose_hoover_chain import (
-                    MTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
-                )
-            else:
-                raise ValueError(
-                    "Ensemble NPT_MTK can only be 'npt-mtk-iso' or 'npt-mtk-aniso."
-                    f"Not {ensemble}"
-                )
-
-        except ImportError as e:
-            raise NotImplementedError(
-                "Please download the latest ASE commits to use this module"
-            ) from e
+        if ensemble == "npt-mtk":
+            warn(
+                "`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            ase_npt_mtk = IsotropicMTKNPT
+        elif ensemble == "npt-mtk-iso":
+            ase_npt_mtk = IsotropicMTKNPT
+        elif ensemble == "npt-mtk-aniso":
+            ase_npt_mtk = MTKNPT
+        else:
+            raise ValueError(
+                "Ensemble NPT_MTK can only be 'npt-mtk-iso' or 'npt-mtk-aniso."
+                f"Not {ensemble}"
+            )
 
         self.pressure = pressure
 
@@ -2231,7 +2220,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
 
-        self.dyn = ASE_NPT_MTK(
+        self.dyn = ase_npt_mtk(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
