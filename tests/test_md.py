@@ -549,7 +549,7 @@ def test_reset_velocities_zero_kinetic_energy(tmp_path):
     final_velocities = single_point.struct.get_velocities()
     final_kinetic_energy = single_point.struct.get_kinetic_energy()
 
-    # Final state should be stationary, but with non-zero velocities
+    # Final state should have zero net momentum, but non-zero velocities
     assert init_momentum == pytest.approx(0, abs=1e-10)
     assert init_kinetic_energy == pytest.approx(0)
     assert final_momentum == pytest.approx(0, abs=1e-10)
