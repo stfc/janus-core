@@ -248,15 +248,6 @@ def choose_calculator(
             # Set before loading to avoid type mismatches
             torch.set_default_dtype(torch.float32)
 
-        case "chgnet":
-            from chgnet import __version__
-            from chgnet.model.dynamics import CHGNetCalculator
-            from chgnet.model.model import CHGNet
-            import torch
-
-            # Set before loading to avoid type mismatches
-            torch.set_default_dtype(torch.float32)
-
             # Use loaded model (from kwargs) if specified
             # Otherwise, load the model if given a path, else use a default model
             match model:
