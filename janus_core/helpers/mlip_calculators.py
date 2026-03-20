@@ -229,6 +229,24 @@ def choose_calculator(
 
             calculator = mace_omol(model=model, device=device, **kwargs)
 
+        case "mace_polar":
+            from mace import __version__
+
+            # Default to "polar-1-s" model and float64 precision
+            model = model if model else "polar-1-s"
+            kwargs.setdefault("default_dtype", "float64")
+
+            calculator = mace_omol(model=model, device=device, **kwargs)
+
+        case "chgnet":
+            from chgnet import __version__
+            from chgnet.model.dynamics import CHGNetCalculator
+            from chgnet.model.model import CHGNet
+            import torch
+
+            # Set before loading to avoid type mismatches
+            torch.set_default_dtype(torch.float32)
+
         case "chgnet":
             from chgnet import __version__
             from chgnet.model.dynamics import CHGNetCalculator
