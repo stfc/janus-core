@@ -231,12 +231,13 @@ def choose_calculator(
 
         case "mace_polar":
             from mace import __version__
+            from mace.calculators import mace_polar
 
             # Default to "polar-1-s" model and float64 precision
             model = model if model else "polar-1-s"
             kwargs.setdefault("default_dtype", "float64")
 
-            calculator = mace_omol(model=model, device=device, **kwargs)
+            calculator = mace_polar(model=model, device=device, **kwargs)
 
         case "chgnet":
             from chgnet import __version__
