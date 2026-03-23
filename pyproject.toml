@@ -55,7 +55,7 @@ grace = [
     "tensorpotential == 0.5.1",
 ]
 mace = [
-    "mace-torch==0.3.14",
+    "mace-torch==0.3.15",
     "janus-core[d3]",
 ]
 orb = [
