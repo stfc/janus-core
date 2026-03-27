@@ -42,6 +42,7 @@ For example, to install MACE, CHGNet, and SevenNet, run:
 
 Currently supported MLIP ``extras`` are:
 
+
 - ``chgnet``: `CHGNet (chgnet) <https://github.com/CederGroupHub/chgnet/>`_
 - ``mace``: `MACE (mace, mace_mp, mace_off, mace_omol) <https://github.com/ACEsuit/mace>`_
 - ``sevenn``: `SevenNet (sevennet) <https://github.com/MDIL-SNU/SevenNet/>`_
@@ -52,13 +53,14 @@ Currently supported MLIP ``extras`` are:
 - ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
 - ``fairchem``: `UMA (fairchem) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
 - ``upet``: `UPET (upet) <https://github.com/lab-cosmo/upet>`_
+- ``alphanet``: `AlphaNet <https://github.com/zmyybc/AlphaNet>`_
 
 The labels in brackets are the corresponding architecture parameters (``arch``) that
 should be set to use these models.
 
 .. note::
 
-    ``orb`` and ``mattersim`` are not currently compatible with Windows
+    ``alphanet``, ``orb`` and ``mattersim`` are not currently compatible with Windows
     natively, but can be installed and run via Windows Subsystem for Linux.
 
 

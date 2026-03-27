@@ -18,6 +18,15 @@ from tests.utils import chdir, read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
+ALPHANET_CKPT = MODEL_PATH / "alphanet" / "MATPES" / "r2scan_1021.ckpt"
+ALPHANET_CONFIG = MODEL_PATH / "alphanet" / "MATPES" / "matpes.json"
+if not ALPHANET_CKPT.exists() or not ALPHANET_CONFIG.exists():
+    try:
+        from tests.utils import download_alphanet_model
+        ALPHANET_CKPT, ALPHANET_CONFIG = download_alphanet_model("MATPES")
+    except Exception as e:
+        print(f"Warning: Could not download AlphaNet MATPES model: {e}")
+
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
@@ -75,6 +84,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
 @pytest.mark.parametrize(
     "arch, device, expected_energy, struct, kwargs",
     [
+        (
+            "alphanet",
+            "cpu",
+            -55.31890106201172,
+            "NaCl.cif",
+            {"calc_kwargs": {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG}},
+        ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
         (

@@ -121,6 +121,7 @@ Architectures = Literal[
     "mace_mp",
     "mace_off",
     "chgnet",
+    "alphanet",
     "sevennet",
     "nequip",
     "dpa3",

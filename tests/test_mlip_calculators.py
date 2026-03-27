@@ -30,6 +30,18 @@ DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
 
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
+# AlphaNet MATPES model - download if not present
+ALPHANET_CKPT = MODEL_PATH / "alphanet" / "MATPES" / "r2scan_1021.ckpt"
+ALPHANET_CONFIG = MODEL_PATH / "alphanet" / "MATPES" / "matpes.json"
+
+if not ALPHANET_CKPT.exists() or not ALPHANET_CONFIG.exists():
+    try:
+        from tests.utils import download_alphanet_model
+
+        ALPHANET_CKPT, ALPHANET_CONFIG = download_alphanet_model("MATPES")
+    except Exception as e:
+        print(f"Warning: Could not download AlphaNet MATPES model: {e}")
+
 ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 
 try:
@@ -66,6 +78,10 @@ PET_MAD_CHECKPOINT = (
 @pytest.mark.parametrize(
     "arch, device, kwargs",
     [
+
+        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG}),
+        ("alphanet", "cpu", {"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG, "precision": "32"}),
+        ("alphanet","cpu",{"model": ALPHANET_CKPT, "config": ALPHANET_CONFIG, "precision": "64"}),
         ("chgnet", "cpu", {}),
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model": CHGNET_PATH}),
@@ -133,6 +149,7 @@ def test_invalid_arch():
 @pytest.mark.parametrize(
     "arch, model",
     [
+        ("alphanet", "/invalid/path"),
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
         ("grace", "/invalid/path"),
@@ -196,6 +213,7 @@ def test_d3_manual():
             "path": "mattersim-v1.0.0-1m",
         },
         {"arch": "nequip", "model": NEQUIP_PATH, "path": NEQUIP_PATH},
+        {"arch": "alphanet","model_path": ALPHANET_CKPT,"model": ALPHANET_CKPT},
         {"arch": "orb", "model": ORB_MODEL, "path": ORB_MODEL},
         {
             "arch": "upet",

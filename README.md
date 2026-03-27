@@ -85,6 +85,7 @@ Current and planned features include:
   - GRACE
   - UMA
   - PET-MAD
+  - AlphaNet
 - [x] Single point calculations
 - [x] Geometry optimisation
 - [x] Molecular Dynamics
