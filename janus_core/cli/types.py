@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Annotated, get_args
 from click import Choice
 from typer import Option
 
-from janus_core.cli.utils import deprecated_option
 from janus_core.helpers.janus_types import Architectures, Devices
 
 if TYPE_CHECKING:
@@ -98,15 +97,6 @@ Model = Annotated[
     str | None,
     Option(
         help="MLIP model name, or path to model.", rich_help_panel="MLIP calculator"
-    ),
-]
-ModelPath = Annotated[
-    str | None,
-    Option(
-        help="Deprecated. Please use --model",
-        rich_help_panel="MLIP calculator",
-        callback=deprecated_option,
-        hidden=True,
     ),
 ]
 
@@ -352,6 +342,22 @@ CorrelationKwargs = Annotated[
         rich_help_panel="Calculation",
     ),
 ]
+
+ElasticityKwargs = Annotated[
+    TyperDict | None,
+    Option(
+        parser=parse_dict_class,
+        help=(
+            """
+            Keyword arguments to pass to elasiticty for user strains. Must be
+            passed as a dictionary wrapped in quotes, e.g. "[{'key' : values}]".
+            """
+        ),
+        metavar="DICT",
+        rich_help_panel="Calculation",
+    ),
+]
+
 
 LogPath = Annotated[
     Path | None,

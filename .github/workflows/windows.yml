@@ -11,6 +11,10 @@ jobs:
       matrix:
         python-version: ["3.10","3.11","3.12"]
 
+    # Use non-interactive backend for plotting
+    env:
+      MPLBACKEND: Agg
+
     steps:
       - uses: actions/checkout@v6
 
@@ -21,7 +25,12 @@ jobs:
           prune-cache: false
 
       - name: Install "all" dependencies
-        run: uv sync --extra all
+        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace
+
+      - name: Download extra models
+        shell: bash
+        run: |
+          python3 tests/models/extra_models.py tests/models/extra
 
       - name: Run test suite
         env:

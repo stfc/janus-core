@@ -40,34 +40,28 @@ For example, to install MACE, CHGNet, and SevenNet, run:
     Please refer to the :doc:`installation documentation </user_guide/installation>` for more details.
 
 
-To install all MLIPs and features currently compatible with MACE, run:
-
-.. code-block:: python
-
-    python3 -m pip install janus-core[all]
-
-
 Currently supported MLIP ``extras`` are:
 
-- ``alignn``: `ALIGNN <https://github.com/usnistgov/alignn>`_
+
+- ``chgnet``: `CHGNet (chgnet) <https://github.com/CederGroupHub/chgnet/>`_
+- ``mace``: `MACE (mace, mace_mp, mace_off, mace_omol) <https://github.com/ACEsuit/mace>`_
+- ``sevenn``: `SevenNet (sevennet) <https://github.com/MDIL-SNU/SevenNet/>`_
+- ``nequip``: `NequIP (nequip) <https://github.com/mir-group/nequip>`_
+- ``dpa3``: `DPA3 (dpa3) <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
+- ``orb``: `Orb (orb) <https://github.com/orbital-materials/orb-models>`_
+- ``mattersim``: `MatterSim (mattersim) <https://github.com/microsoft/mattersim>`_
+- ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
+- ``fairchem``: `UMA (fairchem) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
+- ``upet``: `UPET (upet) <https://github.com/lab-cosmo/upet>`_
 - ``alphanet``: `AlphaNet <https://github.com/zmyybc/AlphaNet>`_
-- ``chgnet``: `CHGNet <https://github.com/CederGroupHub/chgnet/>`_
-- ``mace``: `MACE <https://github.com/ACEsuit/mace>`_
-- ``m3gnet``: `M3GNet <https://github.com/materialsvirtuallab/matgl/>`_
-- ``sevenn``: `SevenNet <https://github.com/MDIL-SNU/SevenNet/>`_
-- ``nequip``: `NequIP <https://github.com/mir-group/nequip>`_
-- ``dpa3``: `DPA3 <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
-- ``orb``: `Orb <https://github.com/orbital-materials/orb-models>`_
-- ``mattersim``: `MatterSim <https://github.com/microsoft/mattersim>`_
-- ``grace``: `GRACE <https://github.com/ICAMS/grace-tensorpotential>`_
-- ``fairchem``: `eqV2 DeNS/eSEN <https://github.com/facebookresearch/fairchem/tree/fairchem_core-1.10.0/src/fairchem/core>`_
-- ``uma``: `UMA <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
-- ``pet-mad``: `PET-MAD <https://github.com/lab-cosmo/pet-mad>`_
+
+The labels in brackets are the corresponding architecture parameters (``arch``) that
+should be set to use these models.
 
 .. note::
 
-    ``alphanet``, ``orb``, ``mattersim``, and ``pet-mad`` are not currently compatible with Windows natively,
-    but can be installed and run via Windows Subsystem for Linux.
+    ``alphanet``, ``orb`` and ``mattersim`` are not currently compatible with Windows
+    natively, but can be installed and run via Windows Subsystem for Linux.
 
 
 Additional features can also be enabled as ``extras``:

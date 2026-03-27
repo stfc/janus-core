@@ -146,7 +146,53 @@ def test_bands_simple(tmp_path):
     assert phonon_summary["config"]["bands"]
 
 
-def test_hdf5(tmp_path):
+def test_qpoints_simple(tmp_path):
+    """Test qpoints mode."""
+    with chdir(tmp_path):
+        results_dir = Path("janus_results")
+        qpoints_results = results_dir / "NaCl-qpoints.hdf5"
+        summary_path = results_dir / "NaCl-phonons-summary.yml"
+
+        with open("QPOINTS", mode="w", encoding="utf8") as file:
+            file.write("3\n0.0 0.0 0.0\n0.1 0.1 0.0\n0.2 0.2 0.2\n")
+
+        result = runner.invoke(
+            app,
+            [
+                "phonons",
+                "--struct",
+                DATA_PATH / "NaCl.cif",
+                "--arch",
+                "mace_mp",
+                "--qpoints",
+                "--write-full",
+                "--hdf5",
+            ],
+        )
+        assert result.exit_code == 0
+
+        assert qpoints_results.exists()
+        with HDF5Open(qpoints_results, "r") as h5f:
+            assert "dynamical_matrix" in h5f
+            assert "eigenvector" in h5f
+            assert "frequency" in h5f
+            assert "masses" in h5f
+            assert "qpoint" in h5f
+            assert "reciprocal_lattice" in h5f
+
+        # Read phonons summary file
+        assert summary_path.exists()
+        with open(summary_path, encoding="utf8") as file:
+            phonon_summary = yaml.safe_load(file)
+
+        assert "command" in phonon_summary
+        assert "janus phonons" in phonon_summary["command"]
+        assert "config" in phonon_summary
+        assert phonon_summary["config"]["qpoints"]
+
+
+@pytest.mark.parametrize("compression", [None, "gzip", "lzf"])
+def test_hdf5(tmp_path, compression):
     """Test saving force constants and bands to HDF5 in new directory."""
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
@@ -154,6 +200,10 @@ def test_hdf5(tmp_path):
     bands_results = tmp_path / "test" / "NaCl-auto_bands.hdf5"
     summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
     log_path = tmp_path / "test" / "NaCl-phonons-log.yml"
+
+    compression_kwargs = []
+    if compression is not None:
+        compression_kwargs = ["--hdf5-compression", compression]
 
     result = runner.invoke(
         app,
@@ -167,6 +217,7 @@ def test_hdf5(tmp_path):
             "--file-prefix",
             file_prefix,
             "--hdf5",
+            *compression_kwargs,
         ],
     )
     assert result.exit_code == 0
@@ -203,59 +254,13 @@ def test_hdf5(tmp_path):
         if "group_velocity" in bands:
             has_velocity = True
         nqpoints = bands["nqpoint"][0]
+
     assert has_eigenvectors and has_velocity
     assert nqpoints == 306
 
-
-def test_force_consts_to_hdf5_deprecated(tmp_path):
-    """Test saving force constants to HDF5 deprecated."""
-    file_prefix = tmp_path / "test" / "NaCl"
-    phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
-    hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
-    bands_results = tmp_path / "test" / "NaCl-auto_bands.hdf5"
-    summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
-    log_path = tmp_path / "test" / "NaCl-phonons-log.yml"
-
-    result = runner.invoke(
-        app,
-        [
-            "phonons",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--arch",
-            "mace_mp",
-            "--bands",
-            "--file-prefix",
-            file_prefix,
-            "--force-consts-to-hdf5",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert phonon_results.exists()
-    assert hdf5_results.exists()
-    assert bands_results.exists()
-
-    # Read phonons summary file
-    with open(summary_path, encoding="utf8") as file:
-        phonon_summary = yaml.safe_load(file)
-
-    output_files = {
-        "params": phonon_results,
-        "force_constants": hdf5_results,
-        "bands": bands_results,
-        "bands_plot": None,
-        "dos": None,
-        "dos_plot": None,
-        "band_dos_plot": None,
-        "pdos": None,
-        "pdos_plot": None,
-        "thermal": None,
-        "minimized_initial_structure": None,
-        "log": log_path,
-        "summary": summary_path,
-    }
-    check_output_files(summary=phonon_summary, output_files=output_files)
+    with HDF5Open(hdf5_results, "r") as h5f:
+        assert "force_constants" in h5f
+        assert h5f["force_constants"].compression == compression
 
 
 def test_thermal_props(tmp_path):
@@ -735,43 +740,6 @@ def test_model(tmp_path):
             "--arch",
             "mace_mp",
             "--model",
-            MACE_PATH,
-            "--log",
-            log_path,
-            "--file-prefix",
-            file_prefix,
-            "--no-tracker",
-            "--no-hdf5",
-            "--minimize",
-        ],
-    )
-    assert result.exit_code == 0
-
-    assert_log_contains(
-        log_path, excludes=["FutureWarning: `model_path` has been deprecated."]
-    )
-
-    # Use minimized structure to check Atoms.info
-    atoms = read(results_path)
-    assert "model" in atoms.info
-    assert atoms.info["model"] == str(MACE_PATH.as_posix())
-
-
-def test_model_path_deprecated(tmp_path):
-    """Test model_path sets model."""
-    file_prefix = tmp_path / "NaCl"
-    results_path = tmp_path / "NaCl-opt.extxyz"
-    log_path = tmp_path / "test.log"
-
-    result = runner.invoke(
-        app,
-        [
-            "phonons",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--arch",
-            "mace_mp",
-            "--model-path",
             MACE_PATH,
             "--log",
             log_path,

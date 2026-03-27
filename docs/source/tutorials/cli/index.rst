@@ -10,3 +10,4 @@ Command-line Tutorials
     md
     phonons
     neb
+    elasticity

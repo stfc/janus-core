@@ -369,6 +369,59 @@ def test_restart(tmp_path):
     assert len(traj) == 9
 
 
+def test_restart_with_d3(tmp_path):
+    """Test restarting molecular dynamics simulation (with D3)."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
+    stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
+
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model=MODEL_PATH,
+        calc_kwargs={"dispersion": True},
+    )
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=4,
+        traj_every=1,
+        restart_every=4,
+        stats_every=1,
+        file_prefix=file_prefix,
+        calc_kwargs={"dispersion": True},
+    )
+    nvt.run()
+
+    assert nvt.dyn.nsteps == 4
+
+    nvt_restart = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=8,
+        traj_every=1,
+        restart_every=4,
+        stats_every=1,
+        restart=True,
+        restart_auto=False,
+        file_prefix=file_prefix,
+        calc_kwargs={"dispersion": True},
+    )
+    nvt_restart.run()
+    assert nvt_restart.offset == 4
+
+    with open(stats_path, encoding="utf8") as stats_file:
+        lines = stats_file.readlines()
+        assert " | Target_T [K]" in lines[0]
+        # Includes step 0, and step 4 from restart
+        assert len(lines) == 10
+        assert int(lines[-1].split()[0]) == 8
+
+    traj = read(traj_path, index=":")
+    assert all(isinstance(image, Atoms) for image in traj)
+    assert len(traj) == 9
+
+
 def test_minimize(tmp_path):
     """Test geometry optimzation before dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
@@ -423,8 +476,85 @@ def test_reset_velocities(tmp_path):
 
     final_momentum = np.sum(single_point.struct.get_momenta())
     assert abs(final_momentum) < abs(init_momentum)
-    assert init_momentum != pytest.approx(0)
-    assert final_momentum == pytest.approx(0)
+    assert init_momentum != pytest.approx(0, abs=1e-10)
+    # Rescaling sets `Stationary`
+    assert final_momentum == pytest.approx(0, abs=1e-10)
+
+
+def test_no_reset_velocities(tmp_path):
+    """Test not resetting velocities before dynamics."""
+    struct_file = DATA_PATH / "lj-traj.xyz"
+    file_prefix = tmp_path / "md"
+
+    # Check initial velocities are non-zero.
+    struct = read(struct_file)
+    init_momentum = np.sum(struct.get_momenta())
+    init_velocities = struct.get_velocities()
+    assert init_momentum != pytest.approx(0, abs=1e-10)
+
+    nvt = NVT(
+        arch="mace",
+        model=MODEL_PATH,
+        struct=struct_file,
+        temp=300.0,
+        steps=0,
+        traj_every=1,
+        stats_every=1,
+        rescale_velocities=False,
+        file_prefix=file_prefix,
+    )
+    nvt.run()
+
+    # Check final velocities are non-zero and unchanged
+    final_momentum = np.sum(nvt.struct.get_momenta())
+    final_velocities = nvt.struct.get_velocities()
+    assert final_momentum == pytest.approx(init_momentum)
+    assert final_velocities == pytest.approx(init_velocities)
+
+
+def test_reset_velocities_zero_kinetic_energy(tmp_path):
+    """Test velocities are set for zero kinetic energy."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct=DATA_PATH / "H2O.cif",
+        arch="mace",
+        model=MODEL_PATH,
+    )
+    # Give structure arbitrary velocities
+    single_point.struct.set_velocities(np.zeros((3, 3)))
+    init_momentum = np.sum(single_point.struct.get_momenta())
+    init_velocities = single_point.struct.get_velocities()
+    init_kinetic_energy = single_point.struct.get_kinetic_energy()
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_every=1,
+        stats_every=1,
+        rescale_velocities=False,
+        file_prefix=file_prefix,
+        log_kwargs={"filename": log_file},
+    )
+    nvt.run()
+
+    assert_log_contains(
+        log_file,
+        includes=["Setting velocity due to zero kinetic energy"],
+    )
+
+    final_momentum = np.sum(single_point.struct.get_momenta())
+    final_velocities = single_point.struct.get_velocities()
+    final_kinetic_energy = single_point.struct.get_kinetic_energy()
+
+    # Final state should have zero net momentum, but non-zero velocities
+    assert init_momentum == pytest.approx(0, abs=1e-10)
+    assert init_kinetic_energy == pytest.approx(0)
+    assert final_momentum == pytest.approx(0, abs=1e-10)
+    assert final_kinetic_energy != pytest.approx(0, abs=1e-10)
+    assert final_velocities != pytest.approx(init_velocities)
 
 
 def test_remove_rot(tmp_path):
@@ -1323,7 +1453,7 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
     md = ensemble(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
-        model_path=MODEL_PATH,
+        model=MODEL_PATH,
         steps=2,
         file_prefix=file_prefix,
         enable_progress_bar=True,

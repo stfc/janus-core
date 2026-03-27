@@ -64,7 +64,7 @@ def test_no_optimize(tmp_path):
 
 @pytest.mark.parametrize(
     "arch, device",
-    [("chgnet", "cpu"), ("sevennet", "cpu"), ("m3gnet", "cpu"), ("alignn", "cpu")],
+    [("chgnet", "cpu"), ("sevennet", "cpu")],
 )
 def test_extras(arch, device, tmp_path):
     """Test extra potentials."""

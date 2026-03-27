@@ -18,7 +18,7 @@ from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
-from ase.md.npt import NPT as ASE_NPT
+from ase.md.melchionna import MelchionnaNPT
 from ase.md.velocitydistribution import (
     MaxwellBoltzmannDistribution,
     Stationary,
@@ -72,8 +72,6 @@ class MolecularDynamics(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model
         Path to MLIP model or name of model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -110,11 +108,13 @@ class MolecularDynamics(BaseCalculation):
     minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
     rescale_velocities
-        Whether to rescale velocities. Default is False.
+        Whether to rescale velocities before dynamics and during equilibration.
+        Frequency during equilibration depends on `rescale_every`. Default is False.
     remove_rot
-        Whether to remove rotation. Default is False.
+        Whether to remove rotation when rescaling velocities. Default is False.
     rescale_every
-        Frequency to rescale velocities. Default is 10.
+        Frequency to rescale velocities and remove roation during equilibration.
+        Default is 10.
     file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         and temperature.
@@ -196,7 +196,6 @@ class MolecularDynamics(BaseCalculation):
         arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
-        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         attach_logger: bool | None = None,
@@ -254,8 +253,6 @@ class MolecularDynamics(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model
             Path to MLIP model or name of model. Default is `None`.
-        model_path
-            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -290,11 +287,13 @@ class MolecularDynamics(BaseCalculation):
         minimize_kwargs
             Keyword arguments to pass to geometry optimizer. Default is {}.
         rescale_velocities
-            Whether to rescale velocities. Default is False.
+            Whether to rescale velocities before dynamics and during equilibration.
+            Frequency during equilibration depends on `rescale_every`. Default is False.
         remove_rot
-            Whether to remove rotation. Default is False.
+            Whether to remove rotation when rescaling velocities. Default is False.
         rescale_every
-            Frequency to rescale velocities. Default is 10.
+            Frequency to rescale velocities and remove roation during equilibration.
+            Default is 10.
         file_prefix
             Prefix for output filenames. Default is inferred from structure, ensemble,
             and temperature.
@@ -479,7 +478,6 @@ class MolecularDynamics(BaseCalculation):
             arch=arch,
             device=device,
             model=model,
-            model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
@@ -537,7 +535,7 @@ class MolecularDynamics(BaseCalculation):
             self.minimize_kwargs["write_kwargs"] = {"filename": opt_file}
             self.minimize_kwargs.setdefault("write_results", False)
 
-        self.dyn: Langevin | VelocityVerlet | ASE_NPT
+        self.dyn: Langevin | VelocityVerlet | MelchionnaNPT
         self.n_atoms = len(self.struct)
 
         self.offset = 0
@@ -823,7 +821,7 @@ class MolecularDynamics(BaseCalculation):
                     struct=last_restart,
                     read_kwargs=self.read_kwargs,
                     sequence_allowed=False,
-                    arch=self.arch,
+                    arch=self.arch.removesuffix("_d3"),
                     device=self.device,
                     model=self.model,
                     calc_kwargs=self.calc_kwargs,
@@ -1377,14 +1375,8 @@ class MolecularDynamics(BaseCalculation):
             raise ValueError("Temperature set for ensemble with no thermostat.")
 
     def run(self) -> None:
-        """Run molecular dynamics simulation and/or temperature ramp."""
+        """Prepare and run molecular dynamics simulation and/or temperature ramp."""
         self._set_info_units(self.info_unit_keys)
-
-        if not self.restart:
-            if self.minimize:
-                self._optimize_structure()
-            if self.rescale_velocities:
-                self._reset_velocities()
 
         if self.offset == 0:
             self._write_header()
@@ -1418,9 +1410,16 @@ class MolecularDynamics(BaseCalculation):
         if self.ramp_temp:
             self.temp = self.temp_start
 
-        # Set velocities to match current temperature
+        # Relax and set velocities to match current temperature
         if not self.restart:
-            self._set_velocity_distribution()
+            if self.minimize:
+                self._optimize_structure()
+            if self.rescale_velocities:
+                self._set_velocity_distribution()
+            if np.isclose(self.struct.get_kinetic_energy(), 0.0, rtol=0, atol=1e-12):
+                if self.logger:
+                    self.logger.warning("Setting velocity due to zero kinetic energy")
+                self._set_velocity_distribution()
 
         # Run temperature ramp
         if self.ramp_temp:
@@ -1578,7 +1577,7 @@ class NPT(MolecularDynamics):
             pfactor *= units.fs**2 * units.GPa
         else:
             pfactor = None
-        self.dyn = ASE_NPT(
+        self.dyn = MelchionnaNPT(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
@@ -1867,7 +1866,7 @@ class NVT_NH(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
         self.ttime = thermostat_time * units.fs
 
-        self.dyn = ASE_NPT(
+        self.dyn = MelchionnaNPT(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
@@ -2058,7 +2057,7 @@ class NPH(MolecularDynamics):
         # convert the pfactor to ASE internal units
         pfactor *= units.fs**2 * units.GPa
 
-        self.dyn = ASE_NPT(
+        self.dyn = MelchionnaNPT(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,

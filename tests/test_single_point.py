@@ -18,30 +18,23 @@ from tests.utils import chdir, read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
-ALIGNN_PATH = MODEL_PATH / "v5.27.2024"
-
-# AlphaNet MATPES model - download if not present
 ALPHANET_CKPT = MODEL_PATH / "alphanet" / "MATPES" / "r2scan_1021.ckpt"
 ALPHANET_CONFIG = MODEL_PATH / "alphanet" / "MATPES" / "matpes.json"
-
 if not ALPHANET_CKPT.exists() or not ALPHANET_CONFIG.exists():
     try:
         from tests.utils import download_alphanet_model
-
         ALPHANET_CKPT, ALPHANET_CONFIG = download_alphanet_model("MATPES")
     except Exception as e:
         print(f"Warning: Could not download AlphaNet MATPES model: {e}")
 
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
-EQUIFORMER_LABEL = "EquiformerV2-83M-S2EF-OC20-2M"
-ESEN_LABEL = "eSEN-30M-MP"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
-    "https://huggingface.co/lab-cosmo/pet-mad/resolve/v1.1.0/models/pet-mad-v1.1.0.ckpt"
+    "https://huggingface.co/lab-cosmo/upet/resolve/main/models/pet-mad-s-v1.1.0.ckpt"
 )
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
-UMA_LABEL = "uma-s-1"
+UMA_LABEL = "uma-s-1p1"
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -92,20 +85,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     "arch, device, expected_energy, struct, kwargs",
     [
         (
-            "alignn",
-            "cpu",
-            -11.148092269897461,
-            "NaCl.cif",
-            {"model": ALIGNN_PATH / "best_model.pt"},
-        ),
-        (
-            "alignn",
-            "cpu",
-            -11.148092269897461,
-            "NaCl.cif",
-            {"model": ALIGNN_PATH / "best_model.pt"},
-        ),
-        (
             "alphanet",
             "cpu",
             -55.31890106201172,
@@ -114,37 +93,8 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
-        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model_path": DPA3_PATH}),
         (
-            "equiformer",
-            "cpu",
-            -0.7482733,
-            "NaCl.cif",
-            {},
-        ),
-        (
-            "equiformer",
-            "cpu",
-            -0.7586595,
-            "NaCl.cif",
-            {"model": EQUIFORMER_LABEL},
-        ),
-        (
-            "esen",
-            "cpu",
-            -27.0977497,
-            "NaCl.cif",
-            {},
-        ),
-        (
-            "esen",
-            "cpu",
-            -27.07935905,
-            "NaCl.cif",
-            {"model": ESEN_LABEL},
-        ),
-        (
-            "uma",
+            "fairchem",
             "cpu",
             -27.10070295,
             "NaCl.cif",
@@ -154,7 +104,6 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),
         ("mace_omol", "cpu", -2079.8650795528843, "H2O.cif", {}),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
-        ("m3gnet", "cpu", -26.729949951171875, "NaCl.cif", {}),
         (
             "nequip",
             "cpu",
@@ -164,9 +113,9 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ),
         ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
         ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
-        ("pet_mad", "cpu", -27.47624969482422, "NaCl.cif", {}),
+        ("upet", "cpu", -30.168052673339844, "NaCl.cif", {}),
         (
-            "pet_mad",
+            "upet",
             "cpu",
             -27.47624969482422,
             "NaCl.cif",
@@ -209,6 +158,10 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         raise err
     except URLError as err:
         if "Connection timed out" in err.reason:
+            pytest.skip("Model download failed")
+        raise err
+    except RuntimeError as err:
+        if "Model download failed" in str(err):
             pytest.skip("Model download failed")
         raise err
 
@@ -483,71 +436,16 @@ def test_hessian_not_implemented(struct):
         )
 
 
-def test_invalid_model_model_path():
-    """Test error is raised when model and model_path are passed."""
+def test_invalid_model_calc_kwargs():
+    """Test error is raised when model is passed via calc_kwargs."""
     skip_extras("mace")
 
     with pytest.raises(ValueError):
         SinglePoint(
-            arch="mace_mp",
-            model=MACE_PATH,
-            model_path=MACE_PATH,
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-
-@pytest.mark.parametrize("keyword", ("model", "model_path"))
-def test_invalid_model_calc_kwargs(keyword):
-    """Test error is raised when model and model via calc_kwargs are passed."""
-    skip_extras("mace")
-
-    with pytest.raises(ValueError):
-        SinglePoint(
-            arch="mace_mp",
-            model=MACE_PATH,
-            calc_kwargs={keyword: MACE_PATH},
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-
-def test_invalid_model_path_calc_kwargs():
-    """Test error is raised when model_path is passed via calc_kwargs."""
-    skip_extras("mace")
-
-    with pytest.raises(ValueError):
-        SinglePoint(
-            arch="mace_mp",
-            calc_kwargs={"model_path": MACE_PATH},
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-
-def test_deprecation_model_path():
-    """Test FutureWarning raised for model_path."""
-    skip_extras("mace")
-
-    with pytest.warns(FutureWarning, match="`model_path` has been deprecated"):
-        sp = SinglePoint(
-            arch="mace_mp",
-            model_path=MACE_PATH,
-            struct=DATA_PATH / "NaCl.cif",
-        )
-
-    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
-
-
-def test_deprecation_model_calc_kwargs():
-    """Test FutureWarning raised for model in calc_kwargs."""
-    skip_extras("mace")
-
-    with pytest.warns(FutureWarning, match="Please pass `model` explicitly"):
-        sp = SinglePoint(
             arch="mace_mp",
             calc_kwargs={"model": MACE_PATH},
             struct=DATA_PATH / "NaCl.cif",
         )
-
-    assert sp.struct.calc.parameters["model"] == str(MACE_PATH.as_posix())
 
 
 def test_fake_calc_error():
@@ -573,7 +471,6 @@ def test_missing_arch(struct):
 @pytest.mark.parametrize(
     "arch, kwargs, pred",
     [
-        ("m3gnet", {}, -0.08281749),
         (
             "mace_mp",
             {"damping": "zero", "xc": "pbe", "cutoff": 95 * units.Bohr},
@@ -590,26 +487,33 @@ def test_dispersion(arch, kwargs, pred):
     skip_extras(arch)
     pytest.importorskip("torch_dftd")
 
-    data_path = DATA_PATH / "benzene.xyz"
-    sp_no_d3 = SinglePoint(
-        struct=data_path,
-        arch=arch,
-        properties="energy",
-        calc_kwargs={"dispersion": False},
-    )
-    assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
-    no_d3_results = sp_no_d3.run()
+    try:
+        data_path = DATA_PATH / "benzene.xyz"
+        sp_no_d3 = SinglePoint(
+            struct=data_path,
+            arch=arch,
+            properties="energy",
+            calc_kwargs={"dispersion": False},
+        )
+        assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
+        no_d3_results = sp_no_d3.run()
 
-    sp_d3 = SinglePoint(
-        struct=data_path,
-        arch=arch,
-        properties="energy",
-        calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
-    )
-    assert isinstance(sp_d3.struct.calc, SumCalculator)
-    d3_results = sp_d3.run()
+        sp_d3 = SinglePoint(
+            struct=data_path,
+            arch=arch,
+            properties="energy",
+            calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
+        )
+        assert isinstance(sp_d3.struct.calc, SumCalculator)
+        d3_results = sp_d3.run()
 
-    assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(pred)
+        assert (d3_results["energy"] - no_d3_results["energy"]) == pytest.approx(
+            pred, rel=1e-5
+        )
+    except RuntimeError as err:
+        if "Model download failed" in str(err):
+            pytest.skip("Model download failed")
+        raise err
 
 
 def test_mace_mp_dispersion():

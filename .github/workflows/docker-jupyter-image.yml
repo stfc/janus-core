@@ -24,8 +24,7 @@ jobs:
             /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
             /usr/lib/jvm || true
           echo "some directories deleted"
-          sudo apt install aptitude -y >/dev/null 2>&1
-          sudo aptitude purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
+          sudo apt-get purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
             esl-erlang firefox gfortran google-chrome-stable \
             google-cloud-sdk imagemagick \
             libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
@@ -36,15 +35,15 @@ jobs:
             sphinxsearch subversion mongodb-org azure-cli microsoft-edge-stable \
             temurin-11-jdk temurin-8-jdk temurin-17-jdk temurin-21-jdk \
             llvm-16-dev llvm-17-dev llvm-18-dev \
-            -y -f >/dev/null 2>&1
-          sudo aptitude purge google-cloud-sdk -f -y >/dev/null 2>&1
-          sudo aptitude purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
+            -y -f >/dev/null 2>&1 || true
+          sudo apt-get purge google-cloud-sdk -f -y >/dev/null 2>&1 || true
+          sudo apt-get purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
           sudo apt purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
-          sudo aptitude purge '~n ^mysql' -f -y >/dev/null 2>&1
-          sudo aptitude purge '~n ^php' -f -y >/dev/null 2>&1
-          sudo aptitude purge '~n ^dotnet' -f -y >/dev/null 2>&1
-          sudo apt-get autoremove -y >/dev/null 2>&1
-          sudo apt-get autoclean -y >/dev/null 2>&1
+          sudo apt-get purge '~n ^mysql' -f -y >/dev/null 2>&1 || true
+          sudo apt-get purge '~n ^php' -f -y >/dev/null 2>&1 || true
+          sudo apt-get purge '~n ^dotnet' -f -y >/dev/null 2>&1 || true
+          sudo apt-get autoremove -y >/dev/null 2>&1 || true
+          sudo apt-get autoclean -y >/dev/null 2>&1 || true
           echo "some packages purged"
 
       - name: Check disk space
@@ -94,8 +93,7 @@ jobs:
             /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
             /usr/lib/jvm || true
           echo "some directories deleted"
-          sudo apt install aptitude -y >/dev/null 2>&1
-          sudo aptitude purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
+          sudo apt-get purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
             esl-erlang firefox gfortran google-chrome-stable \
             google-cloud-sdk imagemagick \
             libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
@@ -106,15 +104,15 @@ jobs:
             sphinxsearch subversion mongodb-org azure-cli microsoft-edge-stable \
             temurin-11-jdk temurin-8-jdk temurin-17-jdk temurin-21-jdk \
             llvm-16-dev llvm-17-dev llvm-18-dev \
-            -y -f >/dev/null 2>&1
-          sudo aptitude purge google-cloud-sdk -f -y >/dev/null 2>&1
-          sudo aptitude purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
+            -y -f >/dev/null 2>&1 || true
+          sudo apt-get purge google-cloud-sdk -f -y >/dev/null 2>&1 || true
+          sudo apt-get purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
           sudo apt purge microsoft-edge-stable -f -y >/dev/null 2>&1 || true
-          sudo aptitude purge '~n ^mysql' -f -y >/dev/null 2>&1
-          sudo aptitude purge '~n ^php' -f -y >/dev/null 2>&1
-          sudo aptitude purge '~n ^dotnet' -f -y >/dev/null 2>&1
-          sudo apt-get autoremove -y >/dev/null 2>&1
-          sudo apt-get autoclean -y >/dev/null 2>&1
+          sudo apt-get purge '~n ^mysql' -f -y >/dev/null 2>&1 || true
+          sudo apt-get purge '~n ^php' -f -y >/dev/null 2>&1 || true
+          sudo apt-get purge '~n ^dotnet' -f -y >/dev/null 2>&1 || true
+          sudo apt-get autoremove -y >/dev/null 2>&1 || true
+          sudo apt-get autoclean -y >/dev/null 2>&1 || true
           echo "some packages purged"
 
       - name: Check disk space

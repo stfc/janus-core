@@ -1,0 +1,30 @@
+arch: mace_mp
+device: cpu
+model: "tests/models/mace_mp_small.model"
+calc_kwargs:
+  dispersion: True
+
+struct: "tests/data/NaCl.cif"
+fmax: 0.1
+log: null
+minimize: true
+minimize_all: true
+minimize_kwargs:
+  filter_kwargs:
+    constant_volume: True
+
+n_strains: 2
+normal_magnitude: 0.01
+shear_magnitude: 0.1
+
+file_prefix: NaCl
+write_structures: true
+write_voigt: true
+read_kwargs:
+  index: "0"
+write_kwargs:
+  invalidate_calc: True
+
+log: elasticity-log.yml
+summary: elasticity-summary.yml
+tracker: False

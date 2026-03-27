@@ -120,9 +120,7 @@ Architectures = Literal[
     "mace",
     "mace_mp",
     "mace_off",
-    "m3gnet",
     "chgnet",
-    "alignn",
     "alphanet",
     "sevennet",
     "nequip",
@@ -130,16 +128,14 @@ Architectures = Literal[
     "orb",
     "mattersim",
     "grace",
-    "esen",
-    "equiformer",
-    "pet_mad",
-    "uma",
+    "upet",
+    "fairchem",
     "mace_omol",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal["nph", "npt", "nve", "nvt", "nvt-nh", "nvt-csvr", "npt-mtk"]
 Properties = Literal["energy", "stress", "forces", "hessian"]
-PhononCalcs = Literal["bands", "dos", "pdos", "thermal"]
+PhononCalcs = Literal["bands", "dos", "pdos", "qpoints", "thermal"]
 Interpolators = Literal["ase", "pymatgen"]
 
 

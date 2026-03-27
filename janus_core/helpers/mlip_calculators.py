@@ -49,7 +49,6 @@ def _set_model(
     # Note: "model" for chgnet (but not mace_mp or mace_off) and "potential" may refer
     # to loaded PyTorch models
     model_kwargs = {
-        "model_path",
         "model_paths",
         "potential",
         "path",
@@ -63,15 +62,11 @@ def _set_model(
     # Use model if specified, but check not also specified via kwargs
     if model and present:
         raise ValueError(
-            "`model` cannot be used in combination with 'model_path', "
-            "'model_paths', 'potential', or 'path'"
+            f"`model` cannot be used in combination with any keys in {model_kwargs}"
         )
     if len(present) > 1:
         # Check at most one suitable kwarg is specified
-        raise ValueError(
-            "Only one of 'model_path', 'model_paths', 'potential', and 'path' can be "
-            "specified"
-        )
+        raise ValueError(f"Only one of keyword in {model_kwargs} can be specified.")
     if present:
         # Set model from kwargs if any are specified
         model = kwargs.pop(present.pop())
@@ -235,34 +230,6 @@ def choose_calculator(
 
             calculator = mace_omol(model=model, device=device, **kwargs)
 
-        case "m3gnet":
-            from matgl import __version__, load_model
-            from matgl.apps.pes import Potential
-            from matgl.ext.ase import M3GNetCalculator
-            import torch
-
-            # Set before loading model to avoid type mismatches
-            torch.set_default_dtype(torch.float32)
-            kwargs.setdefault("stress_weight", 1.0 / 160.21766208)
-
-            # Use potential (from kwargs) if specified
-            # Otherwise, load the model if given a path, else use a default model
-            match model:
-                case Potential():
-                    potential = model
-                    model = "loaded_Potential"
-                case Path():
-                    if model.is_file():
-                        model = model.parent
-                    potential = load_model(model)
-                case str():
-                    potential = load_model(model)
-                case _:
-                    model = "M3GNet-MP-2021.2.8-DIRECT-PES"
-                    potential = load_model(model)
-
-            calculator = M3GNetCalculator(potential=potential, **kwargs)
-
         case "chgnet":
             from chgnet import __version__
             from chgnet.model.dynamics import CHGNetCalculator
@@ -290,26 +257,7 @@ def choose_calculator(
                 model=loaded_model, use_device=device, **kwargs
             )
 
-        case "alignn":
-            from alignn import __version__
-            from alignn.ff.ff import (
-                AlignnAtomwiseCalculator,
-                default_path,
-                get_figshare_model_ff,
-            )
 
-            # Set default path to directory containing config and model location
-            match model:
-                case Path():
-                    if model.is_file():
-                        model = model.parent
-                # If a string, assume referring to model_name e.g. "v5.27.2024"
-                case str():
-                    model = get_figshare_model_ff(model_name=model)
-                case _:
-                    model = default_path()
-
-            calculator = AlignnAtomwiseCalculator(path=model, device=device, **kwargs)
 
         case "alphanet":
             from alphanet import __version__
@@ -454,48 +402,24 @@ def choose_calculator(
 
             calculator = grace_fm(model, **kwargs)
 
-        case "equiformer" | "esen":
-            from fairchem.core import OCPCalculator, __version__
+        case "upet":
+            from upet import __version__
+            from upet.calculator import UPETCalculator
 
-            match arch, model:
-                case ("equiformer", None):
-                    model = "EquiformerV2-31M-S2EF-OC20-All+MD"
-                case ("esen", None):
-                    model = "eSEN-30M-OMAT24"
-                case _:
-                    pass
-
-            model_name = None
+            # Default model
+            model = model if model else "pet-mad-s"
             checkpoint_path = None
 
-            if isinstance(model, Path) and model.exists():
-                checkpoint_path = str(model)
-            else:
-                model_name = str(model)
+            # Pass checkpoint (local/URL) via `checkpoint_path`
+            if model.endswith(".ckpt"):
+                checkpoint_path = model
+                model = None
 
-            kwargs.setdefault("local_cache", Path("~/.cache/fairchem").expanduser())
-            cpu = True if device == "cpu" else False
-
-            calculator = OCPCalculator(
-                model_name=model_name,
-                checkpoint_path=checkpoint_path,
-                cpu=cpu,
-                **kwargs,
+            calculator = UPETCalculator(
+                model=model, checkpoint_path=checkpoint_path, device=device, **kwargs
             )
 
-        case "pet_mad":
-            from pet_mad import __version__
-            from pet_mad._version import LATEST_VERSION
-            from pet_mad.calculator import PETMADCalculator
-
-            calculator = PETMADCalculator(
-                checkpoint_path=model, device=device, **kwargs
-            )
-
-            if model is None:
-                model = LATEST_VERSION
-
-        case "uma":
+        case "fairchem":
             from fairchem.core import FAIRChemCalculator, __version__, pretrained_mlip
             from fairchem.core.units.mlip_unit import MLIPPredictUnit
 

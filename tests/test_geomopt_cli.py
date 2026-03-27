@@ -915,40 +915,6 @@ def test_model(tmp_path):
     )
     assert result.exit_code == 0
 
-    assert_log_contains(
-        log_path, excludes=["FutureWarning: `model_path` has been deprecated."]
-    )
-
-    atoms = read(results_path)
-    assert "model" in atoms.info
-    assert atoms.info["model"] == str(MACE_PATH.as_posix())
-
-
-def test_model_path_deprecated(tmp_path):
-    """Test model_path sets model."""
-    file_prefix = tmp_path / "NaCl"
-    results_path = tmp_path / "NaCl-opt.extxyz"
-    log_path = tmp_path / "test.log"
-
-    result = runner.invoke(
-        app,
-        [
-            "geomopt",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--arch",
-            "mace_mp",
-            "--model-path",
-            MACE_PATH,
-            "--log",
-            log_path,
-            "--file-prefix",
-            file_prefix,
-            "--no-tracker",
-        ],
-    )
-    assert result.exit_code == 0
-
     atoms = read(results_path)
     assert "model" in atoms.info
     assert atoms.info["model"] == str(MACE_PATH.as_posix())
@@ -999,63 +965,3 @@ def test_info(tmp_path):
     assert atoms.info["system_name"] == "NaCl"
     assert "config_type" in atoms.info
     assert atoms.info["config_type"] == "geom_opt"
-
-
-def test_filter_func_deprecated(tmp_path):
-    """Test filter_func sets filter."""
-    file_prefix = tmp_path / "NaCl"
-    log_path = tmp_path / "test.log"
-
-    result = runner.invoke(
-        app,
-        [
-            "geomopt",
-            "--struct",
-            DATA_PATH / "NaCl.cif",
-            "--arch",
-            "mace_mp",
-            "--model",
-            MACE_PATH,
-            "--opt-cell-fully",
-            "--filter-func",
-            "UnitCellFilter",
-            "--log",
-            log_path,
-            "--file-prefix",
-            file_prefix,
-            "--no-tracker",
-        ],
-    )
-    assert result.exit_code == 0
-    assert_log_contains(
-        log_path,
-        includes=["Starting geometry optimization", "Using filter: UnitCellFilter"],
-    )
-
-
-def test_filter_func_error(tmp_path):
-    """Test setting filter_func without --opt-cell-fully or --opt-cell-lengths."""
-    results_path = tmp_path / "NaCl-opt.extxyz"
-    log_path = tmp_path / "test.log"
-    summary_path = tmp_path / "summary.yml"
-
-    result = runner.invoke(
-        app,
-        [
-            "geomopt",
-            "--struct",
-            DATA_PATH / "NaCl-deformed.cif",
-            "--arch",
-            "mace_mp",
-            "--out",
-            results_path,
-            "--filter-func",
-            "UnitCellFilter",
-            "--log",
-            log_path,
-            "--summary",
-            summary_path,
-        ],
-    )
-    assert result.exit_code == 1
-    assert isinstance(result.exception, ValueError)

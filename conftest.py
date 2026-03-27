@@ -5,6 +5,7 @@ Based on https://docs.pytest.org/en/latest/example/simple.html.
 
 from __future__ import annotations
 
+import logging
 import sys
 
 import pytest
@@ -21,10 +22,11 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """Configure pytest to include marker for extra MLIPs."""
+    """Configure pytest."""
     config.addinivalue_line(
         "markers", "extra_mlips: mark test as containing extra MLIPs"
     )
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def pytest_collection_modifyitems(config, items):

@@ -12,3 +12,4 @@ Example configurations
     eos
     neb
     descriptors
+    elasticity

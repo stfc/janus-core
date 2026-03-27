@@ -496,49 +496,6 @@ def test_model(tmp_path):
     )
     assert result.exit_code == 0
 
-    assert_log_contains(
-        log_path, excludes=["FutureWarning: `model_path` has been deprecated."]
-    )
-
-    atoms = read(results_path)
-    assert "model" in atoms.info
-    assert atoms.info["model"] == str(MACE_PATH.as_posix())
-
-
-def test_model_path_deprecated(tmp_path):
-    """Test model_path sets model."""
-    file_prefix = tmp_path / "NaCl"
-    results_path = tmp_path / "NaCl-neb-band.extxyz"
-    log_path = tmp_path / "test.log"
-
-    result = runner.invoke(
-        app,
-        [
-            "neb",
-            "--init-struct",
-            DATA_PATH / "LiFePO4_start.cif",
-            "--final-struct",
-            DATA_PATH / "LiFePO4_end.cif",
-            "--interpolator",
-            "pymatgen",
-            "--fmax",
-            5,
-            "--n-images",
-            5,
-            "--write-band",
-            "--arch",
-            "mace_mp",
-            "--model-path",
-            MACE_PATH,
-            "--log",
-            log_path,
-            "--file-prefix",
-            file_prefix,
-            "--no-tracker",
-        ],
-    )
-    assert result.exit_code == 0
-
     atoms = read(results_path)
     assert "model" in atoms.info
     assert atoms.info["model"] == str(MACE_PATH.as_posix())
@@ -588,7 +545,7 @@ def test_info(tmp_path):
             "--write-band",
             "--arch",
             "mace_mp",
-            "--model-path",
+            "--model",
             MACE_PATH,
             "--file-prefix",
             file_prefix,

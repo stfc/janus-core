@@ -1,0 +1,3 @@
+arch: mace_mp
+
+struct: "tests/data/NaCl.cif"

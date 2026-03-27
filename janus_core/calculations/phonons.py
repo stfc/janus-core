@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any, get_args
-from warnings import warn
 
 from ase import Atoms
 from numpy import ndarray
 import phonopy
-from phonopy.file_IO import write_force_constants_to_hdf5
+from phonopy.file_IO import parse_QPOINTS, write_force_constants_to_hdf5
 from phonopy.phonon.band_structure import (
     get_band_qpoints_and_path_connections,
     get_band_qpoints_by_seekpath,
@@ -28,6 +27,7 @@ from janus_core.helpers.janus_types import (
     PathLike,
     PhononCalcs,
 )
+from janus_core.helpers.struct_io import PhonopyAtomsAdaptor
 from janus_core.helpers.utils import (
     build_file_dir,
     none_to_dict,
@@ -50,8 +50,6 @@ class Phonons(BaseCalculation):
         Device to run MLIP model on. Default is "cpu".
     model
         MLIP model label, path to model, or loaded model. Default is `None`.
-    model_path
-        Deprecated. Please use `model`.
     read_kwargs
         Keyword arguments to pass to ase.io.read. By default,
         read_kwargs["index"] is -1.
@@ -108,10 +106,10 @@ class Phonons(BaseCalculation):
         End temperature for thermal properties calculations, in K. Default is 1000.0.
     temp_step
         Temperature step for thermal properties calculations, in K. Default is 50.0.
-    force_consts_to_hdf5
-        Deprecated. Please use `hdf5`.
     hdf5
         Whether to write force constants and bands in hdf5 or not. Default is True.
+    hdf5_compression
+        Compression scheme to use for force constants, gzip or lzf. Default is None.
     plot_to_file
         Whether to plot various graphs as band stuctures, dos/pdos in svg.
         Default is False.
@@ -140,7 +138,6 @@ class Phonons(BaseCalculation):
         arch: Architectures | None = None,
         device: Devices = "cpu",
         model: PathLike | None = None,
-        model_path: PathLike | None = None,
         read_kwargs: ASEReadArgs | None = None,
         calc_kwargs: dict[str, Any] | None = None,
         attach_logger: bool | None = None,
@@ -162,8 +159,8 @@ class Phonons(BaseCalculation):
         temp_min: float = 0.0,
         temp_max: float = 1000.0,
         temp_step: float = 50.0,
-        force_consts_to_hdf5: bool | None = None,
         hdf5: bool = True,
+        hdf5_compression: str | None = None,
         plot_to_file: bool = False,
         write_results: bool = True,
         write_full: bool = True,
@@ -183,8 +180,6 @@ class Phonons(BaseCalculation):
             Device to run MLIP model on. Default is "cpu".
         model
             MLIP model label, path to model, or loaded model. Default is `None`.
-        model_path
-            Deprecated. Please use `model`.
         read_kwargs
             Keyword arguments to pass to ase.io.read. By default,
             read_kwargs["index"] is -1.
@@ -241,10 +236,10 @@ class Phonons(BaseCalculation):
             End temperature for thermal calculations, in K. Default is 1000.0.
         temp_step
             Temperature step for thermal calculations, in K. Default is 50.0.
-        force_consts_to_hdf5
-            Deprecated. Please use `hdf5`.
         hdf5
             Whether to write force constants and bands in hdf5 or not. Default is True.
+        hdf5_compression
+            Compression scheme to use for force constants, gzip or lzf. Default is None.
         plot_to_file
             Whether to plot various graphs as band stuctures, dos/pdos in svg.
             Default is False.
@@ -284,25 +279,11 @@ class Phonons(BaseCalculation):
         self.temp_max = temp_max
         self.temp_step = temp_step
         self.hdf5 = hdf5
+        self.hdf5_compression = hdf5_compression
         self.plot_to_file = plot_to_file
         self.write_results = write_results
         self.write_full = write_full
         self.enable_progress_bar = enable_progress_bar
-
-        # Handle deprecation
-        if force_consts_to_hdf5 is not None:
-            if hdf5 is False:
-                raise ValueError(
-                    """`force_consts_to_hdf5`: has replaced `hdf5`.
-                     Please only use `hdf5`"""
-                )
-            self.hdf5 = force_consts_to_hdf5
-            warn(
-                """`force_consts_to_hdf5` has been deprecated.
-                Please use `hdf5`.""",
-                FutureWarning,
-                stacklevel=2,
-            )
 
         # Ensure supercell is a valid list
         self.supercell = [supercell] * 3 if isinstance(supercell, int) else supercell
@@ -325,7 +306,6 @@ class Phonons(BaseCalculation):
             arch=arch,
             device=device,
             model=model,
-            model_path=model_path,
             read_kwargs=read_kwargs,
             sequence_allowed=False,
             calc_kwargs=calc_kwargs,
@@ -362,11 +342,13 @@ class Phonons(BaseCalculation):
         self.phonopy_file = self._build_filename("phonopy.yml")
         self.force_consts_file = self._build_filename("force_constants.hdf5")
 
-        filename = "bands" + (".hdf5" if hdf5 else ".yml")
+        suffix = ".hdf5" if hdf5 else ".yml"
+        filename = "bands" + suffix
         if not self.qpoint_file:
             filename = f"auto_{filename}"
         self.bands_file = self._build_filename(filename)
         self.bands_plot_file = self._build_filename("bands.svg")
+        self.qpoints_file = self._build_filename("qpoints" + suffix)
         self.dos_file = self._build_filename("dos.dat")
         self.dos_plot_file = self._build_filename("dos.svg")
         self.bands_dos_plot_file = self._build_filename("bs-dos.svg")
@@ -458,6 +440,11 @@ class Phonons(BaseCalculation):
                 if self.write_results and "bands" in self.calcs
                 else None
             ),
+            "qpoints": (
+                self.qpoints_file
+                if self.write_results and "qpoints" in self.calcs
+                else None
+            ),
             "bands_plot": self.bands_plot_file if self.plot_to_file else None,
             "dos": (
                 self.dos_file if self.write_results and "dos" in self.calcs else None
@@ -519,7 +506,7 @@ class Phonons(BaseCalculation):
 
         self._set_info_units()
 
-        cell = self._ASE_to_PhonopyAtoms(self.struct)
+        cell = PhonopyAtomsAdaptor.get_phonopy_atoms(self.struct)
 
         if len(self.supercell) == 3:
             supercell_matrix = (
@@ -573,6 +560,7 @@ class Phonons(BaseCalculation):
         *,
         phonopy_file: PathLike | None = None,
         hdf5: bool | None = None,
+        compression: str | None = None,
         force_consts_file: PathLike | None = None,
     ) -> None:
         """
@@ -586,6 +574,8 @@ class Phonons(BaseCalculation):
         hdf5
             Whether to save the force constants separately to an hdf5 file. Default is
             self.hdf5.
+        compression
+            Compression scheme to use fo hdf5 file, gzip or lzf. Default is None.
         force_consts_file
             Name of hdf5 file to save force constants. Unused if `hdf5`
             is False. Default is inferred from `file_prefix`.
@@ -598,6 +588,9 @@ class Phonons(BaseCalculation):
 
         if hdf5 is None:
             hdf5 = self.hdf5
+
+        if compression is None:
+            compression = self.hdf5_compression
 
         if phonopy_file:
             self.phonopy_file = phonopy_file
@@ -613,7 +606,9 @@ class Phonons(BaseCalculation):
         if hdf5:
             build_file_dir(self.force_consts_file)
             write_force_constants_to_hdf5(
-                phonon.force_constants, filename=self.force_consts_file
+                phonon.force_constants,
+                filename=self.force_consts_file,
+                compression=compression,
             )
 
     def calc_bands(self, write_bands: bool | None = None, **kwargs) -> None:
@@ -723,6 +718,86 @@ class Phonons(BaseCalculation):
         if save_plots:
             build_file_dir(self.bands_plot_file)
             bplt.savefig(self.bands_plot_file)
+
+    def calc_qpoints(self, write_qpoints: bool | None = None, **kwargs) -> None:
+        """
+        Calculate phonons at qpoints supplied by file QPOINTS, analoguous to phonopy.
+
+        Parameters
+        ----------
+        write_qpoints
+            Whether to write out results to file. Default is self.write_results.
+        **kwargs
+            Additional keyword arguments to pass to `write_bands`.
+        """
+        if write_qpoints is None:
+            write_qpoints = self.write_results
+
+        # Calculate phonons if not already in results
+        if "phonon" not in self.results:
+            # Use general (self.write_results) setting for writing force constants
+            self.calc_force_constants(write_force_consts=self.write_results)
+
+        if write_qpoints:
+            self.write_qpoints(**kwargs)
+
+    def write_qpoints(
+        self,
+        *,
+        hdf5: bool | None = None,
+        qpoints_file: PathLike | None = None,
+    ) -> None:
+        """
+        Write results of qpoints mode calculations.
+
+        Parameters
+        ----------
+        hdf5
+            Whether to save the bands in an hdf5 file. Default is
+            self.hdf5.
+        qpoints_file
+            Name of yaml file to save band structure. Default is inferred from
+            `file_prefix`.
+        """
+        if "phonon" not in self.results:
+            raise ValueError(
+                "Force constants have not been calculated yet. "
+                "Please run `calc_force_constants` first"
+            )
+
+        if hdf5 is None:
+            hdf5 = self.hdf5
+
+        if qpoints_file:
+            self.qpoints_file = qpoints_file
+
+        # maybe use self.qpoint_file or allow custom input filename
+        # also allow passing a list of points programmatically
+        q_points = parse_QPOINTS()
+
+        fonons = self.results["phonon"]
+
+        fonons.run_qpoints(
+            q_points,
+            with_eigenvectors=self.write_full,
+            with_group_velocities=self.write_full,
+            with_dynamical_matrices=self.write_full,
+            # nac_q_direction = self.nac_q_direction,
+        )
+
+        build_file_dir(self.qpoints_file)
+        if hdf5:
+            # not in phonopy yet
+            # fonons.write_hdf5_qpoints_phonon(filename=self.qpoints_file)
+
+            # until the above is implemented in phonopy
+            fonons._qpoints.write_hdf5(filename=self.qpoints_file)
+        else:
+            # not in phonopy yet
+            # fonons.write_yaml_qpoints_phonon(filename=self.qpoints_file)
+
+            # until the above is implemented in phonopy
+            fonons._qpoints.write_yaml(filename=self.qpoints_file)
 
     def calc_thermal_props(
         self,
@@ -1001,53 +1076,6 @@ class Phonons(BaseCalculation):
             build_file_dir(self.pdos_plot_file)
             bplt.savefig(self.pdos_plot_file)
 
-    # No magnetic moments considered
-    # Disable invalid-function-name
-    def _Phonopy_to_ASEAtoms(self, struct: PhonopyAtoms) -> Atoms:  # noqa: N802
-        """
-        Convert Phonopy Atoms structure to ASE Atoms structure.
-
-        Parameters
-        ----------
-        struct
-            PhonopyAtoms structure to be converted.
-
-        Returns
-        -------
-        Atoms
-            Converted ASE Atoms structure.
-        """
-        return Atoms(
-            symbols=struct.symbols,
-            scaled_positions=struct.scaled_positions,
-            cell=struct.cell,
-            masses=struct.masses,
-            pbc=True,
-            calculator=self.calc,
-        )
-
-    # Disable invalid-function-name
-    def _ASE_to_PhonopyAtoms(self, struct: Atoms) -> PhonopyAtoms:  # noqa: N802
-        """
-        Convert ASE Atoms structure to Phonopy Atoms structure.
-
-        Parameters
-        ----------
-        struct
-            ASE Atoms structure to be converted.
-
-        Returns
-        -------
-        PhonopyAtoms
-            Converted PhonopyAtoms structure.
-        """
-        return PhonopyAtoms(
-            symbols=struct.get_chemical_symbols(),
-            cell=struct.cell.array,
-            scaled_positions=struct.get_scaled_positions(),
-            masses=struct.get_masses(),
-        )
-
     def _calc_forces(self, struct: PhonopyAtoms) -> ndarray:
         """
         Calculate forces on PhonopyAtoms structure.
@@ -1062,8 +1090,7 @@ class Phonons(BaseCalculation):
         ndarray
             Forces on the structure.
         """
-        atoms = self._Phonopy_to_ASEAtoms(struct)
-        return atoms.get_forces()
+        return PhonopyAtomsAdaptor.get_atoms(struct, self.calc).get_forces()
 
     def run(self) -> None:
         """Run phonon calculations."""
@@ -1074,6 +1101,9 @@ class Phonons(BaseCalculation):
         if "bands" in self.calcs:
             self.calc_bands()
 
+        if "qpoints" in self.calcs:
+            self.calc_qpoints()
+
         # Calculate thermal properties if specified
         if "thermal" in self.calcs:
             self.calc_thermal_props()
@@ -1081,5 +1111,6 @@ class Phonons(BaseCalculation):
         # Calculate DOS and PDOS if specified
         if "dos" in self.calcs:
             self.calc_dos(plot_bands="bands" in self.calcs)
+
         if "pdos" in self.calcs:
             self.calc_pdos()

@@ -37,12 +37,6 @@ which can be installed using ``janus-core``'s ``visualise`` extra. For example:
 
     pip install janus-core[mace,visualise]
 
-or
-
-.. code-block:: bash
-
-    pip install janus-core[all]
-
 
 Basic usage
 -----------
@@ -71,6 +65,7 @@ This should return something similar to:
     Commands:
       descriptors  Calculate MLIP descriptors.
       eos          Calculate equation of state.
+      elasticity   Calculate elasticity tensors.
       geomopt      Perform geometry optimization and save optimized structure...
       md           Run molecular dynamics simulation, and save trajectory and...
       neb          Run Nudged Elastic Band method.
@@ -480,6 +475,32 @@ Optimization at constant volume for all generated structures can also be perform
 For all options, run ``janus eos --help``.
 
 
+Elasticity
+----------
+
+Calculate the elasticity tensor for a given structure (using the `MACE-MP <https://github.com/ACEsuit/mace-mp>`_ "small" force-field):
+
+.. code-block:: bash
+
+   janus elasticity --struct tests/data/NaCl.cif --arch mace_mp
+
+This will use `pymatgen <https://github.com/materialsproject/pymatgen>`_ to generate a set of deformed structures of the input structure. These
+are used to estimate the stress-strain relationship and thereby calculate the elasticity tensor.
+
+The output, by default, is written to ``janus_results/NaCl-elastic_tensor.dat`` containing derived values of the bulk and shear modulus in
+Reuss/Voigt/VRH schemes, Young's modulus, the Universal anisotropy, Homogeneous Poisson ratio, and finally the elasticty tensor in row-major
+(Voigt form by default). The units are GPa throughout.
+
+By default 4 shear and 4 normal strains are applied. This means two positively and two negatively sheared structures in each possible direction.
+Which results in 4*3*2 stress calculations.
+
+These can be adjusted in number and independently in magnitude. For example to use 10 shear and normal strains with maximum magnitudes 0.1
+and 0.02 the following command can be executed:
+
+.. code-block:: bash
+
+   janus elasticity --struct tests/data/NaCl.cif --arch mace_mp --shear-magnitude 0.1 --normal-magnitude 0.02 --n-strains 10
+
 Phonons
 -------
 
@@ -596,6 +617,13 @@ with 101 sampling points for each path segment.
    :height: 700px
    :align: center
 
+List of q-points
+++++++++++++++++
+
+Band mode outputs results in q lines or segments. Phonons data on a list of arbitrary points can be obtained with the ``--qpoints`` option. This corresponds to the ``QPOINTS`` tag in phonopy.
+
+Input q-points have to be supplied in file ``QPOINTS``, formatted as prescribed by `phonopy <https://phonopy.github.io/phonopy/input-files.html#qpoints-file>`_.
+
 
 Nudged Elastic Band
 -------------------
@@ -631,22 +659,45 @@ Training and fine-tuning MLIPs
 ------------------------------
 
 .. note::
-    Currently only MACE models are supported. See the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_ for further configuration details
+    Currently only MACE and Nequip models are supported.
 
-Models can be trained by passing a configuration file to the MLIP's command line interface:
-
-.. code-block:: bash
-
-    janus train --mlip-config /path/to/training/config.yml
-
-For MACE, this will create ``logs``, ``checkpoints`` and ``results`` directories, as well as saving the trained model, and a compiled version of the model.
-Additionally, a log file, ``train-log.yml``, and summary file, ``train-summary.yml``, will be generated.
-
-Foundational models can also be fine-tuned, by including the ``foundation_model`` option in your configuration file, and using ``--fine-tune`` option:
+Models can be trained by passing an archictecture and an archictecture specific configuration file as options to the ``janus train`` command. The configuration file will be passed to the corresponding MLIPs command line interface. For example to train a MACE MLIP:
 
 .. code-block:: bash
 
-    janus train --mlip-config /path/to/fine/tuning/config.yml --fine-tune
+    janus train mace --mlip-config /path/to/mace/training/config.yml
+
+or to train a Nequip MLIP:
+
+.. code-block:: bash
+
+    janus train nequip --mlip-config /path/to/nequip/training/config.yaml
+
+.. note::
+    Different architectures may have different restrictions or features. For example Nequip requires YAML files to be written as ``.yaml`` rather than ``.yml``. See the sections below for specific archictecture guidance.
+
+Foundational models can also be fine-tuned, by passing the ``--fine-tune`` option:
+
+.. code-block:: bash
+
+    janus train mace --mlip-config /path/to/mace/fine/tuning/config.yml --fine-tune
+
+By default the output of training or fine-tuning will be in the ``./janus_results`` directory. This directory's contents varies in structure depending on the architecture being trained and whether fine-tuning is being conducted. However as with other commands a log file, ``train-log.yml``, and summary file, ``train-summary.yml``, will be generated in ``./janus_results`` by default.
+
+Training MACE MLIPs
++++++++++++++++++++
+
+For MACE, training will create ``logs``, ``checkpoints`` and ``results`` sub-directories, as well as saving the trained model, and a compiled version of the model.
+
+Instructions for writing a MACE ``config.yml`` file can be found in the `MACE Readme <https://github.com/ACEsuit/mace?tab=readme-ov-file#training>`_ and the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_.
+
+
+Training Nequip MLIPS
++++++++++++++++++++++
+
+Configuration of Nequip training is outlined in the `Nequip user guide <https://nequip.readthedocs.io/en/latest/guide/guide.html>`_. In particular note that the configuration file must have a ``.yaml`` extension.
+
+The results directory contents depends on the options selected in the configuration file, but may typically contain model checkpoint, ``.ckpt``, files and a metrics directory.
 
 
 Preprocessing training data
