@@ -7,6 +7,7 @@ from pathlib import Path
 from ase import Atoms
 from ase.io import read
 import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -33,8 +34,12 @@ def test_help():
     assert "Usage: janus geomopt [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_geomopt(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_geomopt(tmp_path, device):
     """Test geomopt calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         results_path = results_dir / "NaCl-opt.extxyz"
@@ -49,6 +54,8 @@ def test_geomopt(tmp_path):
                 DATA_PATH / "NaCl.cif",
                 "--arch",
                 "mace_mp",
+                "--device",
+                device,
                 "--fmax",
                 "0.2",
             ],
@@ -63,8 +70,12 @@ def test_geomopt(tmp_path):
         clear_log_handlers()
 
 
-def test_log(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_log(tmp_path, device):
     """Test log correctly written for geomopt."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -77,6 +88,8 @@ def test_log(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--log",
@@ -99,8 +112,12 @@ def test_log(tmp_path):
     )
 
 
-def test_traj(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_traj(tmp_path, device):
     """Test trajectory correctly written for geomopt."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     traj_path = tmp_path / "test.extxyz"
     log_path = tmp_path / "test.log"
@@ -114,6 +131,8 @@ def test_traj(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--write-traj",
@@ -146,8 +165,12 @@ def test_traj(tmp_path):
     check_output_files(geomopt_summary, output_files)
 
 
-def test_opt_fully(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_opt_fully(tmp_path, device):
     """Test passing --opt-cell-fully without --opt-cell-lengths."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -160,6 +183,8 @@ def test_opt_fully(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--opt-cell-fully",
@@ -188,8 +213,12 @@ def test_opt_fully(tmp_path):
     assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
-def test_opt_fully_and_vectors(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_opt_fully_and_vectors(tmp_path, device):
     """Test passing --opt-cell-fully with --opt-cell-lengths."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -202,6 +231,8 @@ def test_opt_fully_and_vectors(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--opt-cell-fully",
             "--opt-cell-lengths",
             "--out",
@@ -228,8 +259,12 @@ def test_opt_fully_and_vectors(tmp_path):
     assert atoms.cell.cellpar() == pytest.approx(expected)
 
 
-def test_vectors_not_opt_fully(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_vectors_not_opt_fully(tmp_path, device):
     """Test passing --opt-cell-lengths without --opt-cell-fully."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -242,6 +277,8 @@ def test_vectors_not_opt_fully(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--opt-cell-lengths",
@@ -259,9 +296,13 @@ def test_vectors_not_opt_fully(tmp_path):
 test_data = ["--opt-cell-lengths", "--opt-cell-fully"]
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("option", test_data)
-def test_scalar_pressure(option, tmp_path):
+def test_scalar_pressure(option, tmp_path, device):
     """Test passing --pressure with --opt-cell-lengths."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -274,6 +315,8 @@ def test_scalar_pressure(option, tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             option,
@@ -317,8 +360,12 @@ def test_opt_kwargs_traj(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_restart(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_restart(tmp_path, device):
     """Test restarting geometry optimization."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     data_path = DATA_PATH / "NaCl-deformed.cif"
     restart_path = tmp_path / "NaCl-res.pkl"
     results_path = tmp_path / "NaCl-opt.extxyz"
@@ -335,6 +382,8 @@ def test_restart(tmp_path):
             data_path,
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--minimize-kwargs",
@@ -377,8 +426,12 @@ def test_restart(tmp_path):
     assert final_energy < intermediate_energy
 
 
-def test_summary(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_summary(tmp_path, device):
     """Test summary file can be read correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -391,6 +444,8 @@ def test_summary(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--log",
@@ -429,8 +484,12 @@ def test_summary(tmp_path):
     check_output_files(geomopt_summary, output_files)
 
 
-def test_config(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_config(tmp_path, device):
     """Test passing a config file with opt_kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -443,6 +502,8 @@ def test_config(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--log",
@@ -481,8 +542,12 @@ def test_invalid_config():
     assert isinstance(result.exception, ValueError)
 
 
-def test_const_volume(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_const_volume(tmp_path, device):
     """Test setting constant volume with --opt-cell-fully."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -497,6 +562,8 @@ def test_const_volume(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--opt-cell-fully",
@@ -512,8 +579,12 @@ def test_const_volume(tmp_path):
     assert_log_contains(log_path, includes=["constant_volume: True"])
 
 
-def test_optimizer_str(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_optimizer_str(tmp_path, device):
     """Test setting optimizer function."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -526,6 +597,8 @@ def test_optimizer_str(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--optimizer",
@@ -543,8 +616,12 @@ def test_optimizer_str(tmp_path):
     )
 
 
-def test_filter_str(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_filter_str(tmp_path, device):
     """Test setting filter."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -557,6 +634,8 @@ def test_filter_str(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--opt-cell-fully",
@@ -603,9 +682,13 @@ def test_filter_str_error(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
-def test_valid_traj_input(read_kwargs, tmp_path):
+def test_valid_traj_input(read_kwargs, tmp_path, device):
     """Test valid trajectory input structure handled."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "benezene-traj.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -618,6 +701,8 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             DATA_PATH / "benzene-traj.xyz",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--read-kwargs",
@@ -661,8 +746,12 @@ def test_invalid_traj_input(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_reuse_output(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_reuse_output(tmp_path, device):
     """Test using geomopt output as new input."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path_1 = tmp_path / "test" / "NaCl-opt-1.extxyz"
     results_path_2 = tmp_path / "test" / "NaCl-opt-2.extxyz"
     log_path = tmp_path / "test.log"
@@ -676,6 +765,8 @@ def test_reuse_output(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--fmax",
             0.1,
             "--out",
@@ -699,6 +790,8 @@ def test_reuse_output(tmp_path):
             results_path_1,
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--fmax",
             0.01,
             "--out",
@@ -716,8 +809,12 @@ def test_reuse_output(tmp_path):
     assert results_1.positions != pytest.approx(results_2.positions)
 
 
-def test_symmetrize(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_symmetrize(tmp_path, device):
     """Test symmetrizing final structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path_1 = tmp_path / "test" / "NaCl-opt-1.extxyz"
     results_path_2 = tmp_path / "test" / "NaCl-opt-2.extxyz"
     log_path = tmp_path / "test.log"
@@ -731,6 +828,8 @@ def test_symmetrize(tmp_path):
             DATA_PATH / "NaCl-deformed.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--fmax",
             0.001,
             "--out",
@@ -752,6 +851,8 @@ def test_symmetrize(tmp_path):
             results_path_1,
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--fmax",
             0.001,
             "--out",
@@ -778,8 +879,12 @@ def test_symmetrize(tmp_path):
     assert results_2.cell.cellpar() == pytest.approx(expected)
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -792,6 +897,8 @@ def test_no_carbon(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--log",
@@ -809,8 +916,12 @@ def test_no_carbon(tmp_path):
     assert "emissions" not in geomopt_summary
 
 
-def test_units(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_units(tmp_path, device):
     """Test correct units are saved."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -823,6 +934,8 @@ def test_units(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             results_path,
             "--log",
@@ -840,8 +953,12 @@ def test_units(tmp_path):
         assert atoms.info["units"][prop] == units
 
 
-def test_file_prefix(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_file_prefix(tmp_path, device):
     """Test file prefix creates directories and affects all files."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test/test"
     result = runner.invoke(
         app,
@@ -851,6 +968,8 @@ def test_file_prefix(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--file-prefix",
             file_prefix,
             "--write-traj",
@@ -890,8 +1009,12 @@ def test_traj_kwargs_no_write(tmp_path):
     assert "trajectory writing not enabled" in result.exception.args[0]
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
@@ -904,6 +1027,8 @@ def test_model(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--model",
             MACE_PATH,
             "--log",
@@ -938,8 +1063,12 @@ def test_missing_arch(tmp_path):
     assert "Missing option" in result.stderr
 
 
-def test_info(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_info(tmp_path, device):
     """Test info written to output structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-opt.extxyz"
 
@@ -951,6 +1080,8 @@ def test_info(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--file-prefix",
             file_prefix,
             "--no-tracker",

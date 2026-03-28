@@ -7,7 +7,9 @@ from pathlib import Path
 from ase.build import bulk
 from ase.io import read
 import numpy as np
+import pytest
 from pytest import approx
+import torch
 
 from janus_core.calculations.elasticity import Elasticity
 from janus_core.helpers.mlip_calculators import choose_calculator
@@ -17,15 +19,19 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 
-def test_calc_elasticity(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_elasticity(tmp_path, device):
     """Test calculating elasticity for Aluminium."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     elasticity_path = tmp_path / "Al-elastic_tensor.dat"
     log_file = tmp_path / "Al-elasticity.log"
     generated_path = tmp_path / "Al-elasticity-generated.extxyz"
     minimized_path = tmp_path / "Al-elasticity-opt.extxyz"
 
     struct = bulk("Al", crystalstructure="fcc")
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     elasticity = Elasticity(
         struct,
@@ -86,15 +92,19 @@ def test_calc_elasticity(tmp_path):
         assert struct.info["strain"] == approx(strain.voigt)
 
 
-def test_no_optimize_no_write_voigt(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_optimize_no_write_voigt(tmp_path, device):
     """Test calculating elasticity for Aluminium without optimization."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     elasticity_path = tmp_path / "Al-elastic_tensor.dat"
     log_file = tmp_path / "Al-elasticity.log"
     generated_path = tmp_path / "Al-elasticity-generated.extxyz"
     minimized_path = tmp_path / "Al-elasticity-opt.extxyz"
 
     struct = bulk("Al", crystalstructure="fcc")
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     elasticity = Elasticity(
         struct,
