@@ -7,6 +7,7 @@ from pathlib import Path
 from ase import Atoms
 from ase.io import read
 import pytest
+import torch
 
 from janus_core.calculations.descriptors import Descriptors
 from janus_core.calculations.single_point import SinglePoint
@@ -17,11 +18,15 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 
-def test_calc_descriptors(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_descriptors(tmp_path, device):
     """Test calculating equation of state from ASE atoms object."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     struct = read(DATA_PATH / "NaCl.cif")
     log_file = tmp_path / "descriptors.log"
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     descriptors = Descriptors(
         struct,
@@ -41,13 +46,18 @@ def test_calc_descriptors(tmp_path):
     )
 
 
-def test_calc_per_element(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_per_element(tmp_path, device):
     """Test calculating descriptors for each element from SinglePoint object."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "descriptors.log"
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
 
     descriptors = Descriptors(
@@ -68,14 +78,19 @@ def test_calc_per_element(tmp_path):
     assert atoms.info["mace_Na_descriptor"] == pytest.approx(-0.0020374985791535563)
 
 
-def test_logging(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_logging(tmp_path, device):
     """Test attaching logger to Descriptors and emissions are saved to info."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "descriptors.log"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     descriptors = Descriptors(
@@ -92,12 +107,17 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_dispersion():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_dispersion(device):
     """Test using mace_mp with dispersion."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"dispersion": False},
+        device=device,
     )
 
     descriptors = Descriptors(
@@ -110,6 +130,7 @@ def test_dispersion():
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         calc_kwargs={"dispersion": True},
+        device=device,
     )
 
     descriptors_disp = Descriptors(
@@ -118,17 +139,24 @@ def test_dispersion():
     )
     descriptors_disp.run()
 
-    assert (
-        descriptors_disp.struct.info["mace_mp_d3_descriptor"]
-        == descriptors.struct.info["mace_mp_descriptor"]
+    assert descriptors_disp.struct.info["mace_mp_d3_descriptor"] == pytest.approx(
+        descriptors.struct.info["mace_mp_descriptor"]
     )
 
 
-def test_not_implemented_error():
-    """Test correct error raised if descriptors not implemented."""
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_not_implemented_error(device):
+    """Test correct implemented error raised if descriptors not installed."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
+    from tests.utils import skip_extras
+
+    skip_extras("chgnet")
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="chgnet",
+        device=device,
     )
     with pytest.raises(NotImplementedError):
         Descriptors(

@@ -6,6 +6,8 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read
+import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -32,8 +34,12 @@ def test_singlepoint_help():
     assert "Usage: janus singlepoint [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_singlepoint(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_singlepoint(tmp_path, device):
     """Test singlepoint calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         results_path = results_dir / "NaCl-results.extxyz"
@@ -48,6 +54,8 @@ def test_singlepoint(tmp_path):
                 DATA_PATH / "NaCl.cif",
                 "--arch",
                 "mace_mp",
+                "--device",
+                device,
             ],
         )
         assert result.exit_code == 0
@@ -77,8 +85,12 @@ def test_singlepoint(tmp_path):
         clear_log_handlers()
 
 
-def test_properties(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_properties(tmp_path, device):
     """Test properties for singlepoint calculation in a new directory."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path_1 = tmp_path / "test" / "H2O-energy-results.extxyz"
     results_path_2 = tmp_path / "test" / "H2O-stress-results.extxyz"
     log_path = tmp_path / "test.log"
@@ -101,6 +113,8 @@ def test_properties(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -125,6 +139,8 @@ def test_properties(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -134,8 +150,12 @@ def test_properties(tmp_path):
     assert "mace_mp_energy" not in atoms.info
 
 
-def test_read_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_read_kwargs(tmp_path, device):
     """Test setting read_kwargs for singlepoint calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -158,6 +178,8 @@ def test_read_kwargs(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -166,8 +188,12 @@ def test_read_kwargs(tmp_path):
     assert isinstance(atoms, list)
 
 
-def test_calc_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_kwargs(tmp_path, device):
     """Test setting calc_kwargs for singlepoint calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -190,14 +216,20 @@ def test_calc_kwargs(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
     assert "Using float32 for MACECalculator" in result.stdout
 
 
-def test_log(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_log(tmp_path, device):
     """Test log correctly written for singlepoint."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -218,6 +250,8 @@ def test_log(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -225,8 +259,12 @@ def test_log(tmp_path):
     assert_log_contains(log_path, includes=["Starting single point calculation"])
 
 
-def test_summary(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_summary(tmp_path, device):
     """Test summary file can be read correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -247,6 +285,8 @@ def test_summary(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
 
@@ -281,8 +321,12 @@ def test_summary(tmp_path):
     check_output_files(summary=sp_summary, output_files=output_files)
 
 
-def test_config(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_config(tmp_path, device):
     """Test passing a config file with read kwargs, and values to be overwritten."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "benzene-traj-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -303,6 +347,8 @@ def test_config(tmp_path):
             summary_path,
             "--config",
             DATA_PATH / "singlepoint_config.yml",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -335,8 +381,12 @@ def test_invalid_config():
     assert isinstance(result.exception, ValueError)
 
 
-def test_write_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_write_kwargs(tmp_path, device):
     """Test setting invalidate_calc and write_results via write_kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -357,6 +407,8 @@ def test_write_kwargs(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -367,8 +419,12 @@ def test_write_kwargs(tmp_path):
     assert "forces" in atoms.calc.results
 
 
-def test_write_cif(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_write_cif(tmp_path, device):
     """Test writing out a cif file."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.cif"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -389,6 +445,8 @@ def test_write_cif(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -396,8 +454,12 @@ def test_write_cif(tmp_path):
     assert isinstance(atoms, Atoms)
 
 
-def test_hessian(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_hessian(tmp_path, device):
     """Test Hessian calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -423,6 +485,8 @@ def test_hessian(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -435,8 +499,12 @@ def test_hessian(tmp_path):
     assert atoms.info["units"]["hessian"] == "ev/Ang^2"
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -458,6 +526,8 @@ def test_no_carbon(tmp_path):
             "--no-tracker",
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -468,8 +538,12 @@ def test_no_carbon(tmp_path):
     assert "emissions" not in sp_summary
 
 
-def test_file_prefix(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_file_prefix(tmp_path, device):
     """Test file prefix creates directories and affects all files."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test/test"
     result = runner.invoke(
         app,
@@ -481,6 +555,8 @@ def test_file_prefix(tmp_path):
             "mace_mp",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -493,8 +569,12 @@ def test_file_prefix(tmp_path):
     }
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-results.extxyz"
     log_path = tmp_path / "test.log"
@@ -514,6 +594,8 @@ def test_model(tmp_path):
             "--file-prefix",
             file_prefix,
             "--no-tracker",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0

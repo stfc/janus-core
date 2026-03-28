@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ase.io import read, write
 import pytest
-from pytest import skip
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -30,7 +30,9 @@ SEVENNET_EXTRA_MODEL_PATH = EXTRA_MODEL_PATH / "SevenNet_l3i5.pth"
 runner = CliRunner()
 
 
-def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
+def write_tmp_config_mace(
+    config_path: Path, tmp_path: Path, device: str = "cpu"
+) -> Path:
     """
     Fix paths in config files and write corrected config to tmp_path for mace.
 
@@ -60,6 +62,8 @@ def write_tmp_config_mace(config_path: Path, tmp_path: Path) -> Path:
         if file in config and (MODEL_PATH / Path(config[file]).name).exists():
             config[file] = str(MODEL_PATH / Path(config[file]).name)
 
+    config["device"] = device
+
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yml"
     with open(tmp_config, "w", encoding="utf8") as file:
@@ -73,6 +77,7 @@ def write_tmp_config_nequip(
     tmp_path: Path,
     fine_tune: bool = False,
     model_type: str = "package",
+    device: str = "cpu",
 ) -> Path:
     """
     Fix paths in config files and write corrected config to tmp_path for nequip.
@@ -119,6 +124,10 @@ def write_tmp_config_nequip(
         for pth in (model, "extra" / model):
             if (MODEL_PATH / pth).is_file():
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
+
+    if "trainer" not in config:
+        config["trainer"] = {}
+    config["trainer"]["accelerator"] = "gpu" if device == "cuda" else "cpu"
 
     # Write out temporary config with corrected paths
     tmp_config = tmp_path / "config.yaml"
@@ -188,8 +197,11 @@ def test_help():
     assert "Usage: janus train [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_train(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_train(tmp_path, device):
     """Test MLIP training."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("mace")
 
     with chdir(tmp_path):
@@ -202,7 +214,9 @@ def test_train(tmp_path):
         log_path = results_dir / "train-log.yml"
         summary_path = results_dir / "train-summary.yml"
 
-        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path.cwd())
+        config = write_tmp_config_mace(
+            DATA_PATH / "mlip_train.yml", Path.cwd(), device=device
+        )
 
         result = runner.invoke(
             app,
@@ -249,15 +263,20 @@ def test_train(tmp_path):
         clear_log_handlers()
 
 
-def test_train_with_foundation(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_train_with_foundation(tmp_path, device):
     """Test MLIP training raises error with foundation_model in config."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("mace")
 
     results_dir = tmp_path / "janus_results"
 
     log_path = results_dir / "test.log"
     summary_path = results_dir / "summary.yml"
-    config = write_tmp_config_mace(DATA_PATH / "mlip_train_invalid.yml", tmp_path)
+    config = write_tmp_config_mace(
+        DATA_PATH / "mlip_train_invalid.yml", tmp_path, device=device
+    )
 
     result = runner.invoke(
         app,
@@ -276,8 +295,11 @@ def test_train_with_foundation(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_fine_tune(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_fine_tune(tmp_path, device):
     """Test MLIP fine-tuning."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("mace")
 
     with chdir(tmp_path):
@@ -291,7 +313,13 @@ def test_fine_tune(tmp_path):
         summary_path = tmp_path / "summary.yml"
         logs_path = results_dir / "logs"
 
+<<<<<<< HEAD
         config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path.cwd())
+=======
+        config = write_tmp_config_mace(
+            DATA_PATH / "mlip_fine_tune.yml", Path(), device=device
+        )
+>>>>>>> d7be6e9 (add gpu workflow and tests)
 
         result = runner.invoke(
             app,
@@ -318,8 +346,11 @@ def test_fine_tune(tmp_path):
         clear_log_handlers()
 
 
-def test_fine_tune_no_foundation(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_fine_tune_no_foundation(tmp_path, device):
     """Test MLIP fine-tuning raises errors without foundation_model."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("mace")
 
     log_path = tmp_path / "test.log"
@@ -345,8 +376,11 @@ def test_fine_tune_no_foundation(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_fine_tune_invalid_foundation(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_fine_tune_invalid_foundation(tmp_path, device):
     """Test MLIP fine-tuning raises errors with invalid foundation_model."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("mace")
 
     log_path = tmp_path / "test.log"
@@ -371,8 +405,11 @@ def test_fine_tune_invalid_foundation(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("mace")
 
     with chdir(tmp_path):
@@ -386,7 +423,9 @@ def test_no_carbon(tmp_path):
         log_path = tmp_path / "test.log"
         summary_path = tmp_path / "summary.yml"
 
-        config = write_tmp_config_mace(DATA_PATH / "mlip_train.yml", Path.cwd())
+        config = write_tmp_config_mace(
+            DATA_PATH / "mlip_train.yml", Path.cwd(), device=device
+        )
 
         result = runner.invoke(
             app,
@@ -419,8 +458,11 @@ def test_no_carbon(tmp_path):
         clear_log_handlers()
 
 
-def test_nequip_train(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nequip_train(tmp_path, device):
     """Test training with nequip."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("nequip")
 
     with chdir(tmp_path):
@@ -436,7 +478,7 @@ def test_nequip_train(tmp_path):
         train_log_path = results_dir / "train_log"
         metrics_path = results_dir / "train_log/version_0/metrics.csv"
 
-        config_path = write_tmp_config_nequip(config_path, tmp_path)
+        config_path = write_tmp_config_nequip(config_path, tmp_path, device=device)
 
         result = runner.invoke(
             app,
@@ -467,14 +509,17 @@ def test_nequip_train(tmp_path):
         assert header[:3] == ["epoch", "lr-Adam", "step"]
 
 
-def test_nequip_train_invalid_config_suffix(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nequip_train_invalid_config_suffix(tmp_path, device):
     """Test training with nequip."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("nequip")
 
     with chdir(tmp_path):
         config_path = DATA_PATH / "mlip_train.yml"
 
-        config_path = write_tmp_config_mace(config_path, tmp_path)
+        config_path = write_tmp_config_mace(config_path, tmp_path, device=device)
 
         result = runner.invoke(
             app,
@@ -488,8 +533,11 @@ def test_nequip_train_invalid_config_suffix(tmp_path):
     not NEQUIP_EXTRA_MODEL_PATH.exists(),
     reason=f"Extra model: {NEQUIP_EXTRA_MODEL_PATH} not downloaded.",
 )
-def test_nequip_fine_tune_foundation(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nequip_fine_tune_foundation(tmp_path, device):
     """Test fine-tuning with a nequip foundation model."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras("nequip")
 
     with chdir(tmp_path):
@@ -503,7 +551,7 @@ def test_nequip_fine_tune_foundation(tmp_path):
         metrics_path = results_dir / "train_log/version_0/metrics.csv"
 
         config_path = write_tmp_config_nequip(
-            DATA_PATH / "nequip_fine_tune.yaml", tmp_path, True
+            DATA_PATH / "nequip_fine_tune.yaml", tmp_path, True, device=device
         )
 
         result = runner.invoke(
@@ -591,7 +639,7 @@ def test_sevennet_fine_tune_foundation(tmp_path):
     skip_extras("sevennet")
 
     if not SEVENNET_EXTRA_MODEL_PATH.exists():
-        skip(f"Extra model: {SEVENNET_EXTRA_MODEL_PATH} not downloaded.")
+        pytest.skip(f"Extra model: {SEVENNET_EXTRA_MODEL_PATH} not downloaded.")
 
     with chdir(tmp_path):
         log_path = tmp_path / "test.log"

@@ -7,6 +7,7 @@ from pathlib import Path
 from ase.io import read
 from h5py import File as HDF5Open
 import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -32,8 +33,12 @@ def test_help():
     assert "Usage: janus phonons [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_phonons(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_phonons(tmp_path, device):
     """Test calculating force constants and band structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         phonopy_path = results_dir / "NaCl-phonopy.yml"
@@ -51,6 +56,8 @@ def test_phonons(tmp_path):
                 "mace_mp",
                 "--no-hdf5",
                 "--bands",
+                "--device",
+                device,
             ],
         )
         assert result.exit_code == 0
@@ -104,8 +111,12 @@ def test_phonons(tmp_path):
         clear_log_handlers()
 
 
-def test_bands_simple(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_bands_simple(tmp_path, device):
     """Test calculating force constants and reduced bands information."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     autoband_results = tmp_path / "NaCl-auto_bands.yml"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
@@ -125,6 +136,8 @@ def test_bands_simple(tmp_path):
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -146,8 +159,12 @@ def test_bands_simple(tmp_path):
     assert phonon_summary["config"]["bands"]
 
 
-def test_qpoints_simple(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_qpoints_simple(tmp_path, device):
     """Test qpoints mode."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         qpoints_results = results_dir / "NaCl-qpoints.hdf5"
@@ -167,6 +184,8 @@ def test_qpoints_simple(tmp_path):
                 "--qpoints",
                 "--write-full",
                 "--hdf5",
+                "--device",
+                device,
             ],
         )
         assert result.exit_code == 0
@@ -191,9 +210,13 @@ def test_qpoints_simple(tmp_path):
         assert phonon_summary["config"]["qpoints"]
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("compression", [None, "gzip", "lzf"])
-def test_hdf5(tmp_path, compression):
+def test_hdf5(tmp_path, compression, device):
     """Test saving force constants and bands to HDF5 in new directory."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test" / "NaCl"
     phonon_results = tmp_path / "test" / "NaCl-phonopy.yml"
     hdf5_results = tmp_path / "test" / "NaCl-force_constants.hdf5"
@@ -218,6 +241,8 @@ def test_hdf5(tmp_path, compression):
             file_prefix,
             "--hdf5",
             *compression_kwargs,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -263,8 +288,12 @@ def test_hdf5(tmp_path, compression):
         assert h5f["force_constants"].compression == compression
 
 
-def test_thermal_props(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_thermal_props(tmp_path, device):
     """Test calculating thermal properties."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test" / "NaCl"
     thermal_results = tmp_path / "test" / "NaCl-thermal.yml"
     summary_path = tmp_path / "test" / "NaCl-phonons-summary.yml"
@@ -281,6 +310,8 @@ def test_thermal_props(tmp_path):
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -296,8 +327,12 @@ def test_thermal_props(tmp_path):
     check_output_files(summary=phonon_summary, output_files=output_files)
 
 
-def test_dos(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_dos(tmp_path, device):
     """Test calculating the DOS."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test" / "NaCl"
     dos_results = tmp_path / "test" / "NaCl-dos.dat"
 
@@ -315,6 +350,8 @@ def test_dos(tmp_path):
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -324,8 +361,12 @@ def test_dos(tmp_path):
     assert lines[-1].split()[0] == "0.0000000000"
 
 
-def test_pdos(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_pdos(tmp_path, device):
     """Test calculating the PDOS."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test" / "NaCl"
     pdos_results = tmp_path / "test" / "NaCl-pdos.dat"
 
@@ -343,6 +384,8 @@ def test_pdos(tmp_path):
             "--no-hdf5",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -353,8 +396,12 @@ def test_pdos(tmp_path):
     assert lines[-1].split()[0] == "0.0000000000"
 
 
-def test_plot(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_plot(tmp_path, device):
     """Test for plotting routines."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     phonon_results = tmp_path / "NaCl-phonopy.yml"
     bands_path = tmp_path / "NaCl-auto_bands.yml"
@@ -388,6 +435,8 @@ def test_plot(tmp_path):
             "--no-write-full",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -435,9 +484,13 @@ test_data = [
 ]
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("supercell,supercell_matrix", test_data)
-def test_supercell(supercell, supercell_matrix, tmp_path):
+def test_supercell(supercell, supercell_matrix, tmp_path, device):
     """Test setting the supercell."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     param_file = tmp_path / "NaCl-phonopy.yml"
 
@@ -492,8 +545,12 @@ def test_invalid_supercell(supercell, tmp_path):
     assert result.exit_code == 1 or result.exit_code == 2
 
 
-def test_minimize_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize_kwargs(tmp_path, device):
     """Test setting optimizer function and writing optimized structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test"
     opt_path = tmp_path / "test-opt.extxyz"
     log_path = tmp_path / "test-phonons-log.yml"
@@ -525,8 +582,12 @@ def test_minimize_kwargs(tmp_path):
     assert opt_path.exists()
 
 
-def test_minimize_filename(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize_filename(tmp_path, device):
     """Test minimize filename overwrites default."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test" / "test"
     opt_path = tmp_path / "test" / "geomopt-opt.extxyz"
     summary_path = tmp_path / "test" / "test-phonons-summary.yml"
@@ -563,9 +624,13 @@ def test_minimize_filename(tmp_path):
     check_output_files(summary=phonon_summary, output_files=output_files)
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("read_kwargs", ["{'index': 0}", "{}"])
-def test_valid_traj_input(read_kwargs, tmp_path):
+def test_valid_traj_input(read_kwargs, tmp_path, device):
     """Test valid trajectory input structure handled."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "traj"
     phonon_results = tmp_path / "traj-phonopy.yml"
 
@@ -612,8 +677,12 @@ def test_invalid_traj_input(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     summary_path = tmp_path / "NaCl-phonons-summary.yml"
 
@@ -629,6 +698,8 @@ def test_no_carbon(tmp_path):
             "--no-tracker",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -639,8 +710,12 @@ def test_no_carbon(tmp_path):
         assert "emissions" not in phonon_summary
 
 
-def test_displacement_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_displacement_kwargs(tmp_path, device):
     """Test displacement_kwargs can be set."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix_1 = tmp_path / "NaCl_1"
     file_prefix_2 = tmp_path / "NaCl_2"
     displacement_file_1 = tmp_path / "NaCl_1-phonopy.yml"
@@ -659,6 +734,8 @@ def test_displacement_kwargs(tmp_path):
             "{'is_plusminus': True}",
             "--file-prefix",
             file_prefix_1,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -676,6 +753,8 @@ def test_displacement_kwargs(tmp_path):
             "{'is_plusminus': False}",
             "--file-prefix",
             file_prefix_2,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -694,8 +773,12 @@ def test_displacement_kwargs(tmp_path):
     assert n_displacements_2 == 2
 
 
-def test_paths(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_paths(tmp_path, device):
     """Test passing qpoint file."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     qpoint_file = DATA_PATH / "paths.yml"
     band_results = tmp_path / "NaCl-bands.yml"
@@ -714,6 +797,8 @@ def test_paths(tmp_path):
             qpoint_file,
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -725,8 +810,12 @@ def test_paths(tmp_path):
     assert bands["npath"] == 1
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-opt.extxyz"
     log_path = tmp_path / "test.log"
@@ -748,6 +837,8 @@ def test_model(tmp_path):
             "--no-tracker",
             "--no-hdf5",
             "--minimize",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0

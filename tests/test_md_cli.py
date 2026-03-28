@@ -9,6 +9,7 @@ from ase.io import read
 import ase.md.nose_hoover_chain
 import numpy as np
 import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -62,9 +63,12 @@ test_data = [
 ]
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble", test_data)
-def test_md(ensemble, tmp_path):
+def test_md(ensemble, tmp_path, device):
     """Test all MD simulations are able to run."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     # Expected default file prefix for each ensemble
     file_prefix = {
         "nvt": "NaCl-nvt-T300.0-",
@@ -120,6 +124,8 @@ def test_md(ensemble, tmp_path):
                     " 'vaf_x': {'a': 'Velocity', 'points': 10,"
                     "'a_kwargs': {'components': ['x']}, 'b_kwargs': '.'}}"
                 ),
+                "--device",
+                device,
             ],
         )
 
@@ -170,8 +176,11 @@ def test_md(ensemble, tmp_path):
         clear_log_handlers()
 
 
-def test_log(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_log(tmp_path, device):
     """Test log correctly written for MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "NaCl"
     stats_path = tmp_path / "NaCl-stats.dat"
     log_path = tmp_path / "NaCl-md-log.yml"
@@ -192,6 +201,8 @@ def test_log(tmp_path):
             1,
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -219,8 +230,11 @@ def test_log(tmp_path):
         assert final_temp == pytest.approx(final_temp)
 
 
-def test_seed(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_seed(tmp_path, device):
     """Test seed enables reproducable results for NVT."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "nvt-T300"
     stats_path = tmp_path / "nvt-T300-stats.dat"
 
@@ -291,8 +305,11 @@ def test_seed(tmp_path):
             assert stats_1 == stats_2
 
 
-def test_summary(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_summary(tmp_path, device):
     """Test summary file can be read correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "nve"
     stats_path = tmp_path / "nve-stats.dat"
     traj_path = tmp_path / "nve-traj.extxyz"
@@ -354,8 +371,11 @@ def test_summary(tmp_path):
     check_output_files(summary=summary, output_files=output_files)
 
 
-def test_config(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_config(tmp_path, device):
     """Test passing a config file."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "nvt"
     log_path = tmp_path / "nvt-md-log.yml"
     summary_path = tmp_path / "nvt-md-summary.yml"
@@ -377,6 +397,8 @@ def test_config(tmp_path):
             "--minimize",
             "--config",
             DATA_PATH / "md_config.yml",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -399,9 +421,12 @@ def test_config(tmp_path):
     assert_log_contains(log_path, includes=["hydrostatic_strain: True"])
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble", test_data)
-def test_heating(tmp_path, ensemble):
+def test_heating(tmp_path, ensemble, device):
     """Test heating before MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "nvt-T300"
 
     result = runner.invoke(
@@ -428,6 +453,8 @@ def test_heating(tmp_path, ensemble):
             10,
             "--temp-time",
             2,
+            "--device",
+            device,
         ],
     )
     if ensemble in ("nve", "nph"):
@@ -456,8 +483,11 @@ def test_invalid_config():
     assert isinstance(result.exception, ValueError)
 
 
-def test_ensemble_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_ensemble_kwargs(tmp_path, device):
     """Test passing ensemble-kwargs to NPT."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     struct_path = DATA_PATH / "NaCl.cif"
     file_prefix = tmp_path / "test" / "md"
     final_path = tmp_path / "test" / "md-final.extxyz"
@@ -483,6 +513,8 @@ def test_ensemble_kwargs(tmp_path):
             ensemble_kwargs,
             "--stats-every",
             1,
+            "--device",
+            device,
         ],
     )
 
@@ -535,8 +567,11 @@ def test_invalid_ensemble_kwargs(tmp_path):
     assert isinstance(result.exception, TypeError)
 
 
-def test_final_name(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_final_name(tmp_path, device):
     """Test specifying the final file name."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "npt"
     stats_path = tmp_path / "npt-stats.dat"
     traj_path = tmp_path / "npt-traj.extxyz"
@@ -562,6 +597,8 @@ def test_final_name(tmp_path):
             file_prefix,
             "--final-file",
             final_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -570,8 +607,11 @@ def test_final_name(tmp_path):
     assert final_path.exists()
 
 
-def test_write_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_write_kwargs(tmp_path, device):
     """Test passing write-kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     struct_path = DATA_PATH / "NaCl.cif"
     file_prefix = tmp_path / "md"
     final_path = tmp_path / "md-final.extxyz"
@@ -599,6 +639,8 @@ def test_write_kwargs(tmp_path):
             write_kwargs,
             "--traj-every",
             1,
+            "--device",
+            device,
         ],
     )
 
@@ -619,9 +661,12 @@ def test_write_kwargs(tmp_path):
     assert "mace_mp_energy" in final_atoms.info
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
-def test_valid_traj_input(read_kwargs, tmp_path):
+def test_valid_traj_input(read_kwargs, tmp_path, device):
     """Test valid trajectory input structure handled."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "traj"
     final_path = tmp_path / "traj-final.extxyz"
 
@@ -641,6 +686,8 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             2,
             "--read-kwargs",
             read_kwargs,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -674,8 +721,11 @@ def test_invalid_traj_input(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_minimize_kwargs_filename(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize_kwargs_filename(tmp_path, device):
     """Test passing filename via minimize kwargs to MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "test" / "md"
     opt_path = tmp_path / "test" / "test.extxyz"
     traj_path = tmp_path / "test" / "md-traj.extxyz"
@@ -705,6 +755,8 @@ def test_minimize_kwargs_filename(tmp_path):
             "--minimize",
             "--minimize-kwargs",
             f"{{'write_kwargs': {{'filename': '{opt_path.as_posix()}'}}}}",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -736,8 +788,11 @@ def test_minimize_kwargs_filename(tmp_path):
     check_output_files(summary=summary, output_files=output_files)
 
 
-def test_minimize_kwargs_write_results(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize_kwargs_write_results(tmp_path, device):
     """Test passing write_results via minimize kwargs to MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "test" / "md"
     opt_path = tmp_path / "test" / "md-opt.extxyz"
     traj_path = tmp_path / "test" / "md-traj.extxyz"
@@ -765,6 +820,8 @@ def test_minimize_kwargs_write_results(tmp_path):
             "--minimize",
             "--minimize-kwargs",
             "{'write_results': True}",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -778,8 +835,11 @@ def test_minimize_kwargs_write_results(tmp_path):
     assert isinstance(atoms, Atoms)
 
 
-def test_auto_restart(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_auto_restart(tmp_path, device):
     """Test auto restart with file_prefix."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "md"
     traj_path = tmp_path / "md-traj.extxyz"
     stats_path = tmp_path / "md-stats.dat"
@@ -813,6 +873,8 @@ def test_auto_restart(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -855,6 +917,8 @@ def test_auto_restart(tmp_path):
             log_path,
             "--summary",
             summary_path,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -876,8 +940,11 @@ def test_auto_restart(tmp_path):
     assert "7/7" in result.stdout
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "nvt"
     summary_path = tmp_path / "nvt-md-summary.yml"
 
@@ -896,6 +963,8 @@ def test_no_carbon(tmp_path):
             file_prefix,
             "--steps",
             1,
+            "--device",
+            device,
         ],
     )
 
@@ -910,8 +979,11 @@ def test_no_carbon(tmp_path):
 @pytest.mark.parametrize("ensemble", ("nvt", "npt", "nvt-csvr"))
 @pytest.mark.parametrize("output_every", (1, 2))
 @pytest.mark.parametrize("heating", (True, False))
-def test_consistent_stats_traj(tmp_path, ensemble, output_every, heating):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_consistent_stats_traj(tmp_path, ensemble, output_every, heating, device):
     """Test data saved to statistics is consistent with trajectory info."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / ensemble
     stats_path = tmp_path / f"{ensemble}-stats.dat"
     traj_path = tmp_path / f"{ensemble}-traj.extxyz"
@@ -933,6 +1005,8 @@ def test_consistent_stats_traj(tmp_path, ensemble, output_every, heating):
         output_every,
         "--traj-every",
         output_every,
+        "--device",
+        device,
     ]
 
     if heating:
@@ -970,8 +1044,11 @@ def test_consistent_stats_traj(tmp_path, ensemble, output_every, heating):
         assert target_temps == pytest.approx(stats_target_temps, rel=1e5)
 
 
-def test_no_progress(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_progress(tmp_path, device):
     """Test disabling progress bar."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "nvt"
 
     result = runner.invoke(
@@ -990,6 +1067,8 @@ def test_no_progress(tmp_path):
             "--steps",
             2,
             "--no-progress-bar",
+            "--device",
+            device,
         ],
     )
 
@@ -998,8 +1077,11 @@ def test_no_progress(tmp_path):
     assert "2/2" not in result.output
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-final.extxyz"
     log_path = tmp_path / "test.log"
@@ -1023,6 +1105,8 @@ def test_model(tmp_path):
             "--file-prefix",
             file_prefix,
             "--no-tracker",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -1052,8 +1136,11 @@ def test_missing_arch(tmp_path):
     assert "Missing option" in result.stderr
 
 
-def test_info(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_info(tmp_path, device):
     """Test info written to output structures."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     file_prefix = tmp_path / "NaCl"
     traj_path = tmp_path / "NaCl-traj.extxyz"
     final_path = tmp_path / "NaCl-final.extxyz"
@@ -1078,6 +1165,8 @@ def test_info(tmp_path):
             "--file-prefix",
             file_prefix,
             "--no-tracker",
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0

@@ -7,6 +7,7 @@ from pathlib import Path
 from ase import Atoms
 from ase.io import read
 import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -32,8 +33,12 @@ def test_help():
     assert "Usage: janus neb [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_neb(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_neb(tmp_path, device):
     """Test calculating force constants and band structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("./janus_results")
         results_path = results_dir / "LiFePO4_start-neb-results.dat"
@@ -60,6 +65,8 @@ def test_neb(tmp_path):
                 5,
                 "--plot-band",
                 "--write-band",
+                "--device",
+                device,
             ],
         )
         assert result.exit_code == 0
@@ -113,8 +120,12 @@ def test_neb(tmp_path):
         clear_log_handlers()
 
 
-def test_minimize(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize(tmp_path, device):
     """Test minimizing structures before interpolation and optimization."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "LFPO"
     results_path = tmp_path / "LFPO-neb-results.dat"
     min_init_path = tmp_path / "LFPO-init-opt.extxyz"
@@ -144,6 +155,8 @@ def test_minimize(tmp_path):
             "--no-tracker",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -185,8 +198,12 @@ def test_minimize(tmp_path):
     )
 
 
-def test_bands(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_bands(tmp_path, device):
     """Test using band that has already been generated."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "LFPO"
     log_path = tmp_path / "LFPO-neb-log.yml"
 
@@ -202,6 +219,8 @@ def test_bands(tmp_path):
             2,
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -285,8 +304,12 @@ def test_invalid_n_images(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_neb_class(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_neb_class(tmp_path, device):
     """Test passing neb_class and invalid neb_kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "LFPO"
     log_path = tmp_path / "LFPO-neb-log.yml"
 
@@ -313,6 +336,8 @@ def test_neb_class(tmp_path):
             "--no-tracker",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 1
@@ -320,8 +345,12 @@ def test_neb_class(tmp_path):
     assert_log_contains(log_path, includes="Using NEB class: DyNEB")
 
 
-def test_interpolator(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_interpolator(tmp_path, device):
     """Test passing interpolator_kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "LFPO"
     results_path = tmp_path / "LFPO-neb-results.dat"
 
@@ -346,6 +375,8 @@ def test_interpolator(tmp_path):
             "--no-tracker",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -359,8 +390,12 @@ def test_interpolator(tmp_path):
     )
 
 
-def test_optimzer(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_optimzer(tmp_path, device):
     """Test passing optimizer and optimizer_kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "LFPO"
     results_path = tmp_path / "LFPO-neb-results.dat"
     log_path = tmp_path / "LFPO-neb-log.yml"
@@ -386,6 +421,8 @@ def test_optimzer(tmp_path):
             "--no-tracker",
             "--file-prefix",
             file_prefix,
+            "--device",
+            device,
         ],
     )
     assert result.exit_code == 0
@@ -462,8 +499,12 @@ def test_invalid_opt(tmp_path):
     assert isinstance(result.exception, AttributeError)
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-neb-band.extxyz"
     log_path = tmp_path / "test.log"
@@ -523,8 +564,12 @@ def test_missing_arch(tmp_path):
     assert "Missing option" in result.stderr
 
 
-def test_info(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_info(tmp_path, device):
     """Test info written to output structures."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "LiFePO4"
     neb_path = tmp_path / "LiFePO4-neb-band.extxyz"
 

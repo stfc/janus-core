@@ -7,6 +7,7 @@ from urllib.error import HTTPError, URLError
 from zipfile import BadZipFile
 
 import pytest
+import torch
 
 from janus_core.helpers.mlip_calculators import add_dispersion, choose_calculator
 from tests.utils import skip_extras
@@ -65,8 +66,9 @@ PET_MAD_CHECKPOINT = (
 MACE_POLAR_MODEL = "polar-1-s"
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize(
-    "arch, device, kwargs",
+    "arch, kwargs",
     [
         ("chgnet", "cpu", {}),
         ("chgnet", "cpu", {"model": "0.2.0"}),
@@ -74,7 +76,7 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
         ("grace", "cpu", {}),
-        ("grace", "cpu", {"model": "GRACE-1L-OMAT"}),
+        ("grace", "cpu", {"model": "GRACE-1L-MP-r6"}),
         ("mace", "cpu", {"model": MACE_MP_PATH}),
         ("mace", "cpu", {"model_paths": MACE_MP_PATH}),
         ("mace_mp", "cpu", {}),
@@ -108,6 +110,9 @@ MACE_POLAR_MODEL = "polar-1-s"
 def test_mlips(arch, device, kwargs):
     """Test calculators can be configured."""
     skip_extras(arch)
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     try:
         calculator = choose_calculator(arch=arch, device=device, **kwargs)

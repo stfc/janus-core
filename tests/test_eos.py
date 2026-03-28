@@ -8,6 +8,7 @@ from zipfile import BadZipFile
 from ase.eos import EquationOfState
 from ase.io import read
 import pytest
+import torch
 
 from janus_core.calculations.eos import EoS
 from janus_core.calculations.single_point import SinglePoint
@@ -18,14 +19,19 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 
-def test_calc_eos(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_eos(tmp_path, device):
     """Test calculating equation of state from ASE atoms object."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     struct = read(DATA_PATH / "NaCl.cif")
     log_file = tmp_path / "eos.log"
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     eos = EoS(
         struct,
+        device=device,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
     )
@@ -39,16 +45,22 @@ def test_calc_eos(tmp_path):
     )
 
 
-def test_no_optimize(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_optimize(tmp_path, device):
     """Test not optimizing structure before calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "eos.log"
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
     eos = EoS(
         single_point.struct,
+        device=device,
         minimize=False,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
@@ -64,10 +76,17 @@ def test_no_optimize(tmp_path):
 
 @pytest.mark.parametrize(
     "arch, device",
-    [("chgnet", "cpu"), ("sevennet", "cpu")],
+    [
+        ("chgnet", "cpu"),
+        ("chgnet", "cuda"),
+        ("sevennet", "cpu"),
+        ("sevennet", "cuda"),
+    ],
 )
 def test_extras(arch, device, tmp_path):
     """Test extra potentials."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     skip_extras(arch)
 
     eos_fit_path = tmp_path / "NaCl-eos-fit.dat"
@@ -97,12 +116,16 @@ def test_extras(arch, device, tmp_path):
         pytest.skip()
 
 
-def test_invalid_struct():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_invalid_struct(device):
     """Test setting invalid structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
     single_point = SinglePoint(
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     with pytest.raises(NotImplementedError):
@@ -115,18 +138,24 @@ def test_invalid_struct():
         )
 
 
-def test_logging(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_logging(tmp_path, device):
     """Test attaching logger to EoS and emissions are saved to info."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "eos.log"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     eos = EoS(
         single_point.struct,
+        device=device,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
     )
@@ -139,14 +168,19 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_plot(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_plot(tmp_path, device):
     """Test plotting equation of state."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     plot_file = tmp_path / "plot.svg"
 
     eos = EoS(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         plot_to_file=True,
         plot_kwargs={"filename": plot_file},
         file_prefix=tmp_path / "NaCl",

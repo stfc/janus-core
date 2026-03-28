@@ -7,6 +7,7 @@ from pathlib import Path
 from ase.filters import FrechetCellFilter, UnitCellFilter
 from ase.io import read
 import pytest
+import torch
 
 from janus_core.calculations.geom_opt import GeomOpt
 from janus_core.calculations.single_point import SinglePoint
@@ -35,31 +36,41 @@ test_data = [
 ]
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("arch, struct, expected, kwargs", test_data)
-def test_optimize(arch, struct, expected, kwargs):
+def test_optimize(arch, struct, expected, kwargs, device):
     """Test optimizing geometry using MACE."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / struct,
         arch=arch,
         model=MODEL_PATH,
+        device=device,
     )
 
     optimizer = GeomOpt(single_point.struct, **kwargs)
     optimizer.run()
 
     assert single_point.struct.get_potential_energy() == pytest.approx(
-        expected, rel=1e-8
+        expected, rel=1e-6
     )
 
 
-def test_saving_struct(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_saving_struct(tmp_path, device):
     """Test saving optimized structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     results_path = tmp_path / "NaCl.extxyz"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
         properties="energy",
     )
 
@@ -76,12 +87,17 @@ def test_saving_struct(tmp_path):
     assert opt_struct.info["mace_energy"] < init_energy
 
 
-def test_saving_traj(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_saving_traj(tmp_path, device):
     """Test saving optimization trajectory output."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     optimizer = GeomOpt(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
         write_traj=True,
         traj_kwargs={"filename": tmp_path / "NaCl.traj"},
     )
@@ -125,18 +141,24 @@ def test_traj_without_write(tmp_path):
         )
 
 
-def test_hydrostatic_strain():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_hydrostatic_strain(device):
     """Test setting hydrostatic strain for filter."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point_1 = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
 
     single_point_2 = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
 
     optimizer_1 = GeomOpt(
@@ -169,10 +191,14 @@ def test_hydrostatic_strain():
     assert single_point_2.struct.cell.cellpar() == pytest.approx(expected_2)
 
 
-def test_set_calc():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_set_calc(device):
     """Test setting the calculator without SinglePoint."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     init_energy = struct.get_potential_energy()
     optimizer = GeomOpt(struct)
@@ -180,12 +206,17 @@ def test_set_calc():
     assert struct.get_potential_energy() < init_energy
 
 
-def test_converge_warning():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_converge_warning(device):
     """Test warning raised if not converged."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
     optimizer = GeomOpt(single_point.struct, steps=1)
 
@@ -193,12 +224,17 @@ def test_converge_warning():
         optimizer.run()
 
 
-def test_restart(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_restart(tmp_path, device):
     """Test restarting geometry optimization."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         properties="energy",
     )
 
@@ -227,12 +263,17 @@ def test_restart(tmp_path):
     assert final_energy < intermediate_energy
 
 
-def test_space_group():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_space_group(device):
     """Test spacegroup of the structure."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-sg.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     optimizer = GeomOpt(single_point.struct, fmax=0.001)
@@ -242,14 +283,19 @@ def test_space_group():
     assert single_point.struct.info["final_spacegroup"] == "Fm-3m (225)"
 
 
-def test_str_optimizer(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_str_optimizer(tmp_path, device):
     """Test setting optimizer function with string."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "opt.log"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-sg.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     optimizer = GeomOpt(
@@ -281,14 +327,19 @@ def test_invalid_str_optimizer():
         )
 
 
-def test_str_filter(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_str_filter(tmp_path, device):
     """Test setting filter with string."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "opt.log"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl-sg.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     optimizer = GeomOpt(
@@ -339,13 +390,18 @@ def test_invalid_struct():
         )
 
 
-def test_logging(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_logging(tmp_path, device):
     """Test attaching logger to GeomOpt and emissions are saved to info."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "geomopt.log"
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     assert "emissions" not in single_point.struct.info
@@ -361,12 +417,17 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_write_xyz(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_write_xyz(tmp_path, device):
     """Test writing a non-extended xyz file."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     optimizer = GeomOpt(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         fmax=0.1,
     )
     optimizer.run()
@@ -381,8 +442,12 @@ def test_missing_arch(struct):
         GeomOpt(struct=struct)
 
 
-def test_traj_new_dir(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_traj_new_dir(tmp_path, device):
     """Test writing trajectory extxyz in new directory via file_prefix."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     new_dir = tmp_path / "test" / "test"
     traj_path = new_dir / "NaCl-traj.extxyz"
 
@@ -390,6 +455,7 @@ def test_traj_new_dir(tmp_path):
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         write_traj=True,
         file_prefix=new_dir / "NaCl",
     )
@@ -399,8 +465,12 @@ def test_traj_new_dir(tmp_path):
     assert len(traj) == 3
 
 
-def test_traj_kwargs_new_dir(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_traj_kwargs_new_dir(tmp_path, device):
     """Test writing trajectory in new directory via traj_kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     new_dir = tmp_path / "test" / "test"
     traj_path = new_dir / "NaCl-traj.traj"
 
@@ -408,6 +478,7 @@ def test_traj_kwargs_new_dir(tmp_path):
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         write_traj=True,
         file_prefix=tmp_path / "NaCl",
         traj_kwargs={"filename": traj_path},
