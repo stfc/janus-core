@@ -32,3 +32,4 @@ keep_checkpoints: False
 save_cpu: True
 weight_decay: 1e-8
 eval_interval: 2
+plot: False

@@ -44,3 +44,4 @@ clip_grad: 100
 keep_checkpoints: False
 keep_isolated_atoms: True
 save_cpu: True
+plot: False

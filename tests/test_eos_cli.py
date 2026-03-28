@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase.io import read
 import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -31,8 +32,12 @@ def test_help():
     assert "Usage: janus eos [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_eos(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_eos(tmp_path, device):
     """Test calculating the equation of state."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("./janus_results")
         eos_raw_path = results_dir / "NaCl-eos-raw.dat"
@@ -48,6 +53,8 @@ def test_eos(tmp_path):
                 DATA_PATH / "NaCl.cif",
                 "--arch",
                 "mace_mp",
+                "--device",
+                device,
             ],
         )
         assert result.exit_code == 0
@@ -111,8 +118,12 @@ def test_eos(tmp_path):
         clear_log_handlers()
 
 
-def test_setting_lattice(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_setting_lattice(tmp_path, device):
     """Test setting the lattice constants."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "example"
     eos_raw_path = tmp_path / "example-eos-raw.dat"
 
@@ -124,6 +135,8 @@ def test_setting_lattice(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--min-volume",
             0.8,
             "--max-volume",
@@ -171,8 +184,12 @@ def test_invalid_lattice(option, value, tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_minimising_all(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimising_all(tmp_path, device):
     """Test minimising structures with different lattice constants."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     log_path = tmp_path / "NaCl-eos-log.yml"
 
@@ -184,6 +201,8 @@ def test_minimising_all(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--n-volumes",
             4,
             "--minimize-all",
@@ -204,8 +223,12 @@ def test_minimising_all(tmp_path):
     )
 
 
-def test_writing_structs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_writing_structs(tmp_path, device):
     """Test writing out generated structures."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test" / "example"
     raw_path = tmp_path / "test" / "example-eos-raw.dat"
     fit_path = tmp_path / "test" / "example-eos-fit.dat"
@@ -221,6 +244,8 @@ def test_writing_structs(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--n-volumes",
             4,
             "--file-prefix",
@@ -275,9 +300,13 @@ def test_error_write_geomopt(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
-def test_valid_traj_input(read_kwargs, tmp_path):
+def test_valid_traj_input(read_kwargs, tmp_path, device):
     """Test valid trajectory input structure handled."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "traj"
     eos_raw_path = tmp_path / "traj-eos-raw.dat"
     eos_fit_path = tmp_path / "traj-eos-fit.dat"
@@ -290,6 +319,8 @@ def test_valid_traj_input(read_kwargs, tmp_path):
             DATA_PATH / "NaCl-traj.xyz",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--read-kwargs",
             read_kwargs,
             "--file-prefix",
@@ -323,8 +354,12 @@ def test_invalid_traj_input(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
-def test_plot(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_plot(tmp_path, device):
     """Test plotting equation of state."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     raw_path = tmp_path / "NaCl-eos-raw.dat"
     fit_path = tmp_path / "NaCl-eos-fit.dat"
@@ -340,6 +375,8 @@ def test_plot(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--n-volumes",
             4,
             "--plot-to-file",
@@ -364,8 +401,12 @@ def test_plot(tmp_path):
     check_output_files(eos_summary, output_files)
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     summary_path = tmp_path / "NaCl-eos-summary.yml"
 
@@ -377,6 +418,8 @@ def test_no_carbon(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--n-volumes",
             4,
             "--no-tracker",
@@ -392,8 +435,12 @@ def test_no_carbon(tmp_path):
     assert "emissions" not in eos_summary
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     generated_path = tmp_path / "NaCl-generated.extxyz"
     log_path = tmp_path / "test.log"
@@ -406,6 +453,8 @@ def test_model(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--model",
             MACE_PATH,
             "--n-volumes",
@@ -446,8 +495,12 @@ def test_missing_arch(tmp_path):
     assert "Missing option" in result.stderr
 
 
-def test_info(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_info(tmp_path, device):
     """Test info written to generated structures."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     generated_path = tmp_path / "NaCl-generated.extxyz"
 
@@ -459,6 +512,8 @@ def test_info(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--n-volumes",
             4,
             "--file-prefix",
@@ -480,8 +535,12 @@ def test_info(tmp_path):
         assert struct.info["config_type"] == "eos"
 
 
-def test_info_min(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_info_min(tmp_path, device):
     """Test info written to generated structures after minimisation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     generated_path = tmp_path / "NaCl-generated.extxyz"
 
@@ -493,6 +552,8 @@ def test_info_min(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--n-volumes",
             4,
             "--file-prefix",

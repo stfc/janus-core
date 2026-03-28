@@ -11,6 +11,7 @@ from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
 from numpy import isfinite
 import pytest
+import torch
 
 from janus_core.calculations.single_point import SinglePoint
 from tests.utils import chdir, read_atoms, skip_extras
@@ -42,12 +43,18 @@ test_data = [
 ]
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize(
     "struct, expected, properties, prop_key, calc_kwargs, idx", test_data
 )
-def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, idx):
+def test_potential_energy(
+    struct, expected, properties, prop_key, calc_kwargs, idx, device
+):
     """Test single point energy using MACE calculators."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     single_point = SinglePoint(
         struct=DATA_PATH / struct,
@@ -55,6 +62,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         model=MACE_PATH,
         calc_kwargs=calc_kwargs,
         properties=properties,
+        device=device,
     )
     results = single_point.run()[prop_key]
 
@@ -72,50 +80,46 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         assert results_2 == pytest.approx(expected)
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize(
-    "arch, device, expected_energy, struct, kwargs",
+    "arch, expected_energy, struct, kwargs",
     [
-        ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
-        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
+        ("chgnet", -29.331436157226562, "NaCl.cif", {}),
+        ("dpa3", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
         (
             "fairchem",
-            "cpu",
             -27.10070295,
             "NaCl.cif",
             {"model": UMA_LABEL},
         ),
-        ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
-        ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),
-        ("mace_omol", "cpu", -2079.8650795528843, "H2O.cif", {}),
-        ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
+        ("grace", -27.081155042373453, "NaCl.cif", {}),
+        ("mace_off", -2081.1209264240006, "H2O.cif", {}),
+        ("mace_omol", -2079.8650795528843, "H2O.cif", {}),
+        ("mattersim", -27.06208038330078, "NaCl.cif", {}),
         (
             "nequip",
-            "cpu",
             -169815.1282456301,
             "toluene.xyz",
             {"model": NEQUIP_PATH},
         ),
-        ("orb", "cpu", -27.08186149597168, "NaCl.cif", {}),
-        ("orb", "cpu", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
-        ("upet", "cpu", -30.168052673339844, "NaCl.cif", {}),
+        ("orb", -27.08186149597168, "NaCl.cif", {}),
+        ("orb", -27.089094161987305, "NaCl.cif", {"model": "orb-v2"}),
+        ("upet", -30.168052673339844, "NaCl.cif", {}),
         (
             "upet",
-            "cpu",
             -27.47624969482422,
             "NaCl.cif",
             {"model": PET_MAD_CHECKPOINT},
         ),
         (
             "sevennet",
-            "cpu",
             -27.061979293823242,
             "NaCl.cif",
             {"model": SEVENNET_PATH},
         ),
-        ("sevennet", "cpu", -27.061979293823242, "NaCl.cif", {}),
+        ("sevennet", -27.061979293823242, "NaCl.cif", {}),
         (
             "sevennet",
-            "cpu",
             -27.061979293823242,
             "NaCl.cif",
             {"model": "SevenNet-0_11July2024"},
@@ -125,6 +129,9 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
 def test_extras(arch, device, expected_energy, struct, kwargs):
     """Test single point energy using extra MLIP calculators."""
     skip_extras(arch)
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     try:
         single_point = SinglePoint(
@@ -150,14 +157,19 @@ def test_extras(arch, device, expected_energy, struct, kwargs):
         raise err
 
 
-def test_single_point_none():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_single_point_none(device):
     """Test single point stress using MACE calculator."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MACE_PATH,
+        device=device,
     )
 
     results = single_point.run()
@@ -165,14 +177,19 @@ def test_single_point_none():
         assert prop in results
 
 
-def test_single_point_clean():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_single_point_clean(device):
     """Test single point stress using MACE calculator."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     single_point = SinglePoint(
         struct=DATA_PATH / "H2O.cif",
         arch="mace",
         model=MACE_PATH,
+        device=device,
     )
 
     results = single_point.run()
@@ -181,15 +198,20 @@ def test_single_point_clean():
     assert "mace_stress" not in results
 
 
-def test_single_point_traj():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_single_point_traj(device):
     """Test single point stress using MACE calculator."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     single_point = SinglePoint(
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace",
         model=MACE_PATH,
         properties="energy",
+        device=device,
     )
 
     assert len(single_point.struct) == 2
@@ -204,9 +226,13 @@ def test_single_point_traj():
     )
 
 
-def test_single_point_write(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_single_point_write(tmp_path, device):
     """Test writing singlepoint results."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     with chdir(tmp_path):
         data_path = DATA_PATH / "NaCl.cif"
@@ -218,6 +244,7 @@ def test_single_point_write(tmp_path):
             arch="mace",
             model=MACE_PATH,
             write_results=True,
+            device=device,
         )
         assert "mace_forces" not in single_point.struct.arrays
 
@@ -241,9 +268,13 @@ def test_single_point_write(tmp_path):
         )
 
 
-def test_single_point_write_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_single_point_write_kwargs(tmp_path, device):
     """Test passing write_kwargs to singlepoint results."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     data_path = DATA_PATH / "NaCl.cif"
     results_path = tmp_path / "NaCl.extxyz"
@@ -254,6 +285,7 @@ def test_single_point_write_kwargs(tmp_path):
         model=MACE_PATH,
         write_results=True,
         write_kwargs={"filename": results_path},
+        device=device,
     )
     assert "mace_forces" not in single_point.struct.arrays
 
@@ -263,9 +295,13 @@ def test_single_point_write_kwargs(tmp_path):
     assert "mace_forces" in atoms.arrays
 
 
-def test_single_point_molecule(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_single_point_molecule(tmp_path, device):
     """Test singlepoint results for isolated molecule."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     data_path = DATA_PATH / "H2O.cif"
     results_path = tmp_path / "H2O.extxyz"
@@ -274,6 +310,7 @@ def test_single_point_molecule(tmp_path):
         arch="mace",
         model=MACE_PATH,
         properties="energy",
+        device=device,
     )
 
     assert isfinite(single_point.run()["energy"]).all()
@@ -305,9 +342,13 @@ def test_invalid_prop():
         )
 
 
-def test_atoms():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_atoms(device):
     """Test passing ASE Atoms structure."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     struct = read(DATA_PATH / "NaCl.cif")
     single_point = SinglePoint(
@@ -315,6 +356,7 @@ def test_atoms():
         arch="mace",
         model=MACE_PATH,
         properties="energy",
+        device=device,
     )
     assert single_point.run()["energy"] < 0
 
@@ -328,9 +370,13 @@ def test_no_atoms_or_path():
         )
 
 
-def test_invalidate_calc():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_invalidate_calc(device):
     """Test setting invalidate_calc via write_kwargs."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     struct = DATA_PATH / "NaCl.cif"
 
@@ -339,6 +385,7 @@ def test_invalidate_calc():
         arch="mace",
         model=MACE_PATH,
         write_kwargs={"invalidate_calc": False},
+        device=device,
     )
 
     single_point.run()
@@ -349,9 +396,13 @@ def test_invalidate_calc():
     assert "energy" not in single_point.struct.calc.results
 
 
-def test_logging(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_logging(tmp_path, device):
     """Test attaching logger to SinglePoint and emissions are saved to info."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     log_file = tmp_path / "sp.log"
 
@@ -361,6 +412,7 @@ def test_logging(tmp_path):
         model=MACE_PATH,
         properties="energy",
         log_kwargs={"filename": log_file},
+        device=device,
     )
 
     assert "emissions" not in single_point.struct.info
@@ -372,15 +424,20 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_hessian():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_hessian(device):
     """Test Hessian."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     sp = SinglePoint(
         model=MACE_PATH,
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         properties="hessian",
+        device=device,
     )
     results = sp.run()
     assert "hessian" in results
@@ -388,15 +445,20 @@ def test_hessian():
     assert "mace_mp_hessian" in sp.struct.info
 
 
-def test_hessian_traj():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_hessian_traj(device):
     """Test calculating Hessian for trajectory."""
     skip_extras("mace")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     sp = SinglePoint(
         model=MACE_PATH,
         struct=DATA_PATH / "benzene-traj.xyz",
         arch="mace_mp",
         properties="hessian",
+        device=device,
     )
     results = sp.run()
     assert "hessian" in results
@@ -452,6 +514,7 @@ def test_missing_arch(struct):
         SinglePoint(struct=struct)
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize(
     "arch, kwargs, pred",
     [
@@ -466,10 +529,13 @@ def test_missing_arch(struct):
         ("sevennet", {}, -0.08281749),
     ],
 )
-def test_dispersion(arch, kwargs, pred):
+def test_dispersion(arch, kwargs, pred, device):
     """Test dispersion correction."""
     skip_extras(arch)
     pytest.importorskip("torch_dftd")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     try:
         data_path = DATA_PATH / "benzene.xyz"
@@ -478,6 +544,7 @@ def test_dispersion(arch, kwargs, pred):
             arch=arch,
             properties="energy",
             calc_kwargs={"dispersion": False},
+            device=device,
         )
         assert not isinstance(sp_no_d3.struct.calc, SumCalculator)
         no_d3_results = sp_no_d3.run()
@@ -487,6 +554,7 @@ def test_dispersion(arch, kwargs, pred):
             arch=arch,
             properties="energy",
             calc_kwargs={"dispersion": True, "dispersion_kwargs": {**kwargs}},
+            device=device,
         )
         assert isinstance(sp_d3.struct.calc, SumCalculator)
         d3_results = sp_d3.run()
@@ -500,10 +568,14 @@ def test_dispersion(arch, kwargs, pred):
         raise err
 
 
-def test_mace_mp_dispersion():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_mace_mp_dispersion(device):
     """Test mace_mp dispersion correction matches default."""
     skip_extras("mace_mp")
     pytest.importorskip("torch_dftd")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     from mace.calculators import mace_mp
 
@@ -514,6 +586,7 @@ def test_mace_mp_dispersion():
         arch="mace_mp",
         properties="energy",
         calc_kwargs={"dispersion": False},
+        device=device,
     ).run()["energy"]
 
     d3_energy = SinglePoint(
@@ -521,10 +594,11 @@ def test_mace_mp_dispersion():
         arch="mace_mp",
         properties="energy",
         calc_kwargs={"dispersion": True},
+        device=device,
     ).run()["energy"]
 
     struct = read(data_path)
-    struct.calc = mace_mp(model="small", dispersion=True)
+    struct.calc = mace_mp(model="small", dispersion=True, device=device)
 
     mace_d3_energy = SinglePoint(
         struct=struct,

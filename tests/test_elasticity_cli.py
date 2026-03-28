@@ -6,7 +6,9 @@ from pathlib import Path
 
 from ase.io import read
 import numpy as np
+import pytest
 from pytest import approx
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -26,8 +28,12 @@ def test_help():
     assert "Usage: janus elasticity [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_elasticity_opt_none(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_elasticity_opt_none(tmp_path, device):
     """Test calculating the ElasticTensor from the CLI without optimisation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("./janus_results")
         elasticity_path = results_dir / "NaCl-elastic_tensor.dat"
@@ -44,6 +50,8 @@ def test_elasticity_opt_none(tmp_path):
                 DATA_PATH / "NaCl.cif",
                 "--arch",
                 "mace_mp",
+                "--device",
+                device,
                 "--n-strains",
                 "2",
                 "--no-minimize",
@@ -95,8 +103,12 @@ def test_elasticity_opt_none(tmp_path):
         assert elasticity_summary["config"]["n_strains"] == 2
 
 
-def test_elasticity_opt_all(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_elasticity_opt_all(tmp_path, device):
     """Test calculating the ElasticTensor from the command line."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("./janus_results")
         elasticity_path = results_dir / "NaCl-elastic_tensor.dat"
@@ -113,6 +125,8 @@ def test_elasticity_opt_all(tmp_path):
                 DATA_PATH / "NaCl.cif",
                 "--arch",
                 "mace_mp",
+                "--device",
+                device,
                 "--n-strains",
                 "2",
                 "--minimize-all",

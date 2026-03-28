@@ -7,6 +7,7 @@ from urllib.error import HTTPError, URLError
 from zipfile import BadZipFile
 
 import pytest
+import torch
 
 from janus_core.helpers.mlip_calculators import add_dispersion, choose_calculator
 from tests.utils import skip_extras
@@ -63,47 +64,51 @@ PET_MAD_CHECKPOINT = (
 )
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize(
-    "arch, device, kwargs",
+    "arch, kwargs",
     [
-        ("chgnet", "cpu", {}),
-        ("chgnet", "cpu", {"model": "0.2.0"}),
-        ("chgnet", "cpu", {"model": CHGNET_PATH}),
-        ("chgnet", "cpu", {"model": CHGNET_MODEL}),
-        ("dpa3", "cpu", {"model": DPA3_PATH}),
-        ("grace", "cpu", {}),
-        ("grace", "cpu", {"model": "GRACE-1L-MP-r6"}),
-        ("mace", "cpu", {"model": MACE_MP_PATH}),
-        ("mace", "cpu", {"model_paths": MACE_MP_PATH}),
-        ("mace_mp", "cpu", {}),
-        ("mace_mp", "cpu", {"model": "small"}),
-        ("mace_mp", "cpu", {"model": MACE_MP_PATH}),
-        ("mace_off", "cpu", {}),
-        ("mace_off", "cpu", {"model": "medium"}),
-        ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
-        ("mace_omol", "cpu", {}),
-        ("mace_omol", "cpu", {"model": "extra_large"}),
-        ("mattersim", "cpu", {}),
-        ("mattersim", "cpu", {"model": "mattersim-v1.0.0-1m"}),
-        ("nequip", "cpu", {"model": NEQUIP_PATH}),
-        ("orb", "cpu", {}),
-        ("orb", "cpu", {"model": ORB_MODEL}),
-        ("upet", "cpu", {}),
-        ("upet", "cpu", {"model": PET_MAD_CHECKPOINT}),
-        ("upet", "cpu", {"checkpoint_path": PET_MAD_CHECKPOINT}),
-        ("sevennet", "cpu", {"model": SEVENNET_PATH}),
-        ("sevennet", "cpu", {"path": SEVENNET_PATH}),
-        ("sevennet", "cpu", {}),
-        ("sevennet", "cpu", {"model": "sevennet-0"}),
-        ("fairchem", "cpu", {"model": UMA_LABEL}),
-        ("fairchem", "cpu", {"model_name": UMA_LABEL}),
-        ("fairchem", "cpu", {"model": UMA_PREDICT_UNIT}),
-        ("fairchem", "cpu", {"predict_unit": UMA_PREDICT_UNIT}),
+        ("chgnet", {}),
+        ("chgnet", {"model": "0.2.0"}),
+        ("chgnet", {"model": CHGNET_PATH}),
+        ("chgnet", {"model": CHGNET_MODEL}),
+        ("dpa3", {"model": DPA3_PATH}),
+        ("grace", {}),
+        ("grace", {"model": "GRACE-1L-MP-r6"}),
+        ("mace", {"model": MACE_MP_PATH}),
+        ("mace", {"model_paths": MACE_MP_PATH}),
+        ("mace_mp", {}),
+        ("mace_mp", {"model": "small"}),
+        ("mace_mp", {"model": MACE_MP_PATH}),
+        ("mace_off", {}),
+        ("mace_off", {"model": "medium"}),
+        ("mace_off", {"model": MACE_OFF_PATH}),
+        ("mace_omol", {}),
+        ("mace_omol", {"model": "extra_large"}),
+        ("mattersim", {}),
+        ("mattersim", {"model": "mattersim-v1.0.0-1m"}),
+        ("nequip", {"model": NEQUIP_PATH}),
+        ("orb", {}),
+        ("orb", {"model": ORB_MODEL}),
+        ("upet", {}),
+        ("upet", {"model": PET_MAD_CHECKPOINT}),
+        ("upet", {"checkpoint_path": PET_MAD_CHECKPOINT}),
+        ("sevennet", {"model": SEVENNET_PATH}),
+        ("sevennet", {"path": SEVENNET_PATH}),
+        ("sevennet", {}),
+        ("sevennet", {"model": "sevennet-0"}),
+        ("fairchem", {"model": UMA_LABEL}),
+        ("fairchem", {"model_name": UMA_LABEL}),
+        ("fairchem", {"model": UMA_PREDICT_UNIT}),
+        ("fairchem", {"predict_unit": UMA_PREDICT_UNIT}),
     ],
 )
 def test_mlips(arch, device, kwargs):
     """Test calculators can be configured."""
     skip_extras(arch)
+
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
     try:
         calculator = choose_calculator(arch=arch, device=device, **kwargs)

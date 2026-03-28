@@ -1,0 +1,58 @@
+name: gpu-ci
+
+on: [push, pull_request]
+
+jobs:
+
+  tests:
+    runs-on: [self-hosted, gpu]
+    if: github.repository == 'stfc/janus-core'
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        python-version: ["3.10","3.11","3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install "all" dependencies
+        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra upet --extra plumed
+
+      - name: Install PLUMED
+        uses: Iximiel/install-plumed@v1
+        id: plumed
+        continue-on-error: true
+
+      - name: Set environment variable based on plumed success
+        run: |
+          if [ "${{ steps.plumed.outcome }}" = "success" ]; then
+            echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
+          fi
+
+      - name: Download extra models
+        run: |
+          python3 tests/models/extra_models.py tests/models/extra
+
+      - name: Run test suite
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+        run: uv run --no-sync pytest -k cuda
+
+      - name: Install updated e3nn dependencies
+        run: |
+          uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
+          uv pip install --reinstall pynvml
+          uv pip install "fairchem-core[torch-extras]" --no-build-isolation
+
+      - name: Run test suite for updated e3nn dependencies
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py -k cuda
