@@ -7,6 +7,7 @@ from pathlib import Path
 from ase.io import read
 from h5py import File
 import pytest
+import torch
 
 from janus_core.calculations.phonons import Phonons
 from janus_core.calculations.single_point import SinglePoint
@@ -17,40 +18,55 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models" / "mace_mp_small.model"
 
 
-def test_init():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_init(device):
     """Test initialising Phonons."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
     phonons = Phonons(struct=single_point.struct)
     assert str(phonons.file_prefix) == str(Path("janus_results") / "Cl4Na4")
 
 
-def test_calc_phonons():
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_phonons(device):
     """Test calculating phonons from ASE atoms object."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     phonons = Phonons(
         struct=struct,
+        device=device,
     )
 
     phonons.calc_force_constants(write_force_consts=False)
     assert "phonon" in phonons.results
 
 
-def test_force_consts_compression(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_force_consts_compression(tmp_path, device):
     """Test compression of force constants."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "phonons.log"
     force_constants = tmp_path / "NaCl-force_constants.hdf5"
 
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     phonons = Phonons(
         struct=struct,
+        device=device,
         file_prefix=tmp_path / "NaCl",
         log_kwargs={"filename": log_file},
         hdf5=True,
@@ -64,8 +80,12 @@ def test_force_consts_compression(tmp_path):
         assert h5f["force_constants"].compression == "gzip"
 
 
-def test_optimize(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_optimize(tmp_path, device):
     """Test optimizing structure before calculation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "phonons.log"
     opt_file = tmp_path / "NaCl-opt.extxyz"
 
@@ -73,9 +93,11 @@ def test_optimize(tmp_path):
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
     phonons = Phonons(
         struct=single_point.struct,
+        device=device,
         log_kwargs={"filename": log_file},
         minimize=True,
         minimize_kwargs={"write_kwargs": {"filename": opt_file}},
@@ -107,18 +129,24 @@ def test_invalid_struct():
         )
 
 
-def test_logging(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_logging(tmp_path, device):
     """Test attaching logger to Phonons and emissions are saved to info."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "phonons.log"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     phonons = Phonons(
         struct=single_point.struct,
+        device=device,
         log_kwargs={"filename": log_file},
         write_results=False,
     )
@@ -131,14 +159,19 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_symmetrize(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_symmetrize(tmp_path, device):
     """Test symmetrize."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
 
     phonons_1 = Phonons(
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},
@@ -151,6 +184,7 @@ def test_symmetrize(tmp_path):
         struct=DATA_PATH / "NaCl-deformed.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
         write_results=False,
         minimize=True,
         minimize_kwargs={"fmax": 0.001},

@@ -9,6 +9,7 @@ from ase.io import read
 import ase.md.nose_hoover_chain
 import numpy as np
 import pytest
+import torch
 
 from janus_core.calculations.md import NPH, NPT, NVE, NVT, NVT_CSVR, NVT_NH
 from janus_core.calculations.single_point import SinglePoint
@@ -58,13 +59,18 @@ ensembles_with_thermostat = (
 )
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble, expected", test_data)
-def test_init(ensemble, expected):
+def test_init(ensemble, expected, device):
     """Test initialising ensembles."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
     dyn = ensemble(
         struct=single_point.struct,
@@ -72,8 +78,12 @@ def test_init(ensemble, expected):
     assert dyn.ensemble == expected
 
 
-def test_npt(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_npt(tmp_path, device):
     """Test NPT molecular dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         restart_path_1 = results_dir / "Cl4Na4-npt-T300.0-p1.0-res-2.extxyz"
@@ -116,8 +126,12 @@ def test_npt(tmp_path):
             assert len(lines) == 6
 
 
-def test_nvt_nh(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nvt_nh(tmp_path, device):
     """Test NVT-Nosé–Hoover  molecular dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         restart_path = results_dir / "Cl4Na4-nvt-nh-T300.0-res-3.extxyz"
@@ -159,8 +173,12 @@ def test_nvt_nh(tmp_path):
             assert len(lines) == 5
 
 
-def test_nve(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nve(tmp_path, device):
     """Test NVE molecular dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nve-T300.0"
     traj_path = tmp_path / "Cl4Na4-nve-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nve-T300.0-stats.dat"
@@ -191,8 +209,12 @@ def test_nve(tmp_path):
         assert len(lines) == 6
 
 
-def test_nph(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nph(tmp_path, device):
     """Test NPH molecular dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         restart_path = results_dir / "Cl4Na4-nph-T300.0-p0.0-res-2.extxyz"
@@ -234,8 +256,12 @@ def test_nph(tmp_path):
             assert len(lines) == 3
 
 
-def test_nvt_csvr(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_nvt_csvr(tmp_path, device):
     """Test NVT CSVR molecular dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         restart_path_1 = results_dir / "NaCl-nvt-csvr-T300.0-res-2.extxyz"
@@ -248,6 +274,7 @@ def test_nvt_csvr(tmp_path):
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
             model=MODEL_PATH,
+            device=device,
             temp=300.0,
             steps=4,
             traj_every=1,
@@ -273,9 +300,13 @@ def test_nvt_csvr(tmp_path):
             assert len(lines) == 6
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
-def test_npt_mtk(tmp_path):
+def test_npt_mtk(tmp_path, device):
     """Test NPT MTK molecular dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
@@ -288,6 +319,7 @@ def test_npt_mtk(tmp_path):
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
             model=MODEL_PATH,
+            device=device,
             temp=300.0,
             pressure=0.0001,
             steps=4,
@@ -319,8 +351,12 @@ def test_npt_mtk(tmp_path):
             assert len(lines) == 6
 
 
-def test_restart(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_restart(tmp_path, device):
     """Test restarting molecular dynamics simulation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
@@ -353,6 +389,7 @@ def test_restart(tmp_path):
         restart=True,
         restart_auto=False,
         file_prefix=file_prefix,
+        device=device,
     )
     nvt_restart.run()
     assert nvt_restart.offset == 4
@@ -369,8 +406,12 @@ def test_restart(tmp_path):
     assert len(traj) == 9
 
 
-def test_restart_with_d3(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_restart_with_d3(tmp_path, device):
     """Test restarting molecular dynamics simulation (with D3)."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
@@ -379,6 +420,7 @@ def test_restart_with_d3(tmp_path):
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
         calc_kwargs={"dispersion": True},
     )
     nvt = NVT(
@@ -405,6 +447,7 @@ def test_restart_with_d3(tmp_path):
         restart=True,
         restart_auto=False,
         file_prefix=file_prefix,
+        device=device,
         calc_kwargs={"dispersion": True},
     )
     nvt_restart.run()
@@ -422,8 +465,12 @@ def test_restart_with_d3(tmp_path):
     assert len(traj) == 9
 
 
-def test_minimize(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize(tmp_path, device):
     """Test geometry optimzation before dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
 
     single_point = SinglePoint(
@@ -441,6 +488,7 @@ def test_minimize(tmp_path):
         stats_every=1,
         minimize=True,
         file_prefix=file_prefix,
+        device=device,
     )
     nvt.run()
 
@@ -448,8 +496,12 @@ def test_minimize(tmp_path):
     assert final_energy < init_energy
 
 
-def test_reset_velocities(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_reset_velocities(tmp_path, device):
     """Test rescaling velocities before dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
 
     single_point = SinglePoint(
@@ -481,8 +533,12 @@ def test_reset_velocities(tmp_path):
     assert final_momentum == pytest.approx(0, abs=1e-10)
 
 
-def test_no_reset_velocities(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_reset_velocities(tmp_path, device):
     """Test not resetting velocities before dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     struct_file = DATA_PATH / "lj-traj.xyz"
     file_prefix = tmp_path / "md"
 
@@ -502,6 +558,7 @@ def test_no_reset_velocities(tmp_path):
         stats_every=1,
         rescale_velocities=False,
         file_prefix=file_prefix,
+        device=device,
     )
     nvt.run()
 
@@ -512,8 +569,12 @@ def test_no_reset_velocities(tmp_path):
     assert final_velocities == pytest.approx(init_velocities)
 
 
-def test_reset_velocities_zero_kinetic_energy(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_reset_velocities_zero_kinetic_energy(tmp_path, device):
     """Test velocities are set for zero kinetic energy."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     log_file = tmp_path / "nvt.log"
 
@@ -536,6 +597,7 @@ def test_reset_velocities_zero_kinetic_energy(tmp_path):
         stats_every=1,
         rescale_velocities=False,
         file_prefix=file_prefix,
+        device=device,
         log_kwargs={"filename": log_file},
     )
     nvt.run()
@@ -557,8 +619,12 @@ def test_reset_velocities_zero_kinetic_energy(tmp_path):
     assert final_velocities != pytest.approx(init_velocities)
 
 
-def test_remove_rot(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_remove_rot(tmp_path, device):
     """Test removing rotation before dynamics."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
 
     single_point = SinglePoint(
@@ -585,6 +651,7 @@ def test_remove_rot(tmp_path):
             remove_rot=True,
             equil_steps=1,
             file_prefix=file_prefix,
+            device=device,
         )
 
     nvt.run()
@@ -599,8 +666,12 @@ def test_remove_rot(tmp_path):
     assert final_ang_mom == pytest.approx(0)
 
 
-def test_traj_start(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_traj_start(tmp_path, device):
     """Test starting trajectory after n steps."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
 
@@ -641,8 +712,12 @@ def test_traj_start(tmp_path):
     assert len(traj) == 2
 
 
-def test_minimize_every(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_minimize_every(tmp_path, device):
     """Test setting minimize_every."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     log_file = tmp_path / "nvt.log"
 
@@ -672,8 +747,12 @@ def test_minimize_every(tmp_path):
     )
 
 
-def test_rescale_every(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_rescale_every(tmp_path, device):
     """Test setting minimize_every."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     log_file = tmp_path / "nvt.log"
 
@@ -714,8 +793,12 @@ def test_rescale_every(tmp_path):
     )
 
 
-def test_rotate_restart(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_rotate_restart(tmp_path, device):
     """Test setting rotate_restart."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-nvt"
     restart_path_1 = tmp_path / "NaCl-nvt-res-1.extxyz"
     restart_path_2 = tmp_path / "NaCl-nvt-res-2.extxyz"
@@ -735,6 +818,7 @@ def test_rotate_restart(tmp_path):
         restart_every=1,
         restarts_to_keep=2,
         file_prefix=file_prefix,
+        device=device,
     )
     nvt.run()
 
@@ -743,14 +827,18 @@ def test_rotate_restart(tmp_path):
     assert restart_path_3.exists()
 
 
-def test_atoms_struct(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_atoms_struct(tmp_path, device):
     """Test passing a structure with an attached calculator."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
     traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
     stats_path = tmp_path / "Cl4Na4-nvt-T300.0-stats.dat"
 
     struct = read(DATA_PATH / "NaCl.cif")
-    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH)
+    struct.calc = choose_calculator(arch="mace_mp", model=MODEL_PATH, device=device)
 
     nvt = NVT(
         struct=struct,
@@ -759,6 +847,7 @@ def test_atoms_struct(tmp_path):
         stats_every=1,
         traj_every=1,
         file_prefix=file_prefix,
+        device=device,
     )
     nvt.run()
 
@@ -772,9 +861,13 @@ def test_atoms_struct(tmp_path):
         assert len(lines) == 6
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble, tag", test_data)
-def test_stats(tmp_path, ensemble, tag):
+def test_stats(tmp_path, ensemble, tag, device):
     """Test stats file has correct structure and entries for all ensembles."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / tag / "NaCl"
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
@@ -786,6 +879,7 @@ def test_stats(tmp_path, ensemble, tag):
         steps=2,
         stats_every=1,
         file_prefix=file_prefix,
+        device=device,
     )
     md.run()
 
@@ -799,9 +893,13 @@ def test_stats(tmp_path, ensemble, tag):
     assert stat_data.units[etot_index] == "eV"
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_heating(tmp_path, capsys, ensemble):
+def test_heating(tmp_path, capsys, ensemble, device):
     """Test heating with no MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
     log_file = tmp_path / "NaCl.log"
@@ -842,9 +940,13 @@ def test_heating(tmp_path, capsys, ensemble):
     assert "2/2" in capsys.readouterr().out
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble", ensembles_without_thermostat)
-def test_no_thermostat_heating(tmp_path, ensemble):
+def test_no_thermostat_heating(tmp_path, ensemble, device):
     """Test that temperature ramp with no thermostat throws an error."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-heating"
     final_file = tmp_path / "NaCl-heating-final.extxyz"
     log_file = tmp_path / "NaCl.log"
@@ -867,14 +969,19 @@ def test_no_thermostat_heating(tmp_path, ensemble):
             temp_step=20,
             temp_time=0.5,
             log_kwargs={"filename": log_file},
+            device=device,
         )
         md.run()
     assert not final_file.exists()
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_noramp_heating(tmp_path, ensemble):
+def test_noramp_heating(tmp_path, ensemble, device):
     """Test ValueError is thrown for invalid temperature ramp."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-heating"
 
     single_point = SinglePoint(
@@ -890,12 +997,17 @@ def test_noramp_heating(tmp_path, ensemble):
             temp_start=10,
             temp_end=10,
             temp_step=20,
+            device=device,
         )
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble", ensembles_with_thermostat)
-def test_heating_md(tmp_path, capsys, ensemble):
+def test_heating_md(tmp_path, capsys, ensemble, device):
     """Test heating followed by MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-heating"
     stats_path = tmp_path / "NaCl-heating-stats.dat"
     log_file = tmp_path / "NaCl.log"
@@ -946,13 +1058,18 @@ def test_heating_md(tmp_path, capsys, ensemble):
     assert "9/9" in capsys.readouterr().out
 
 
-def test_heating_restart(tmp_path, capsys):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_heating_restart(tmp_path, capsys, device):
     """Test restarting during temperature ramp."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-heating"
 
     md = NVT(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
+        device=device,
         temp=10.0,
         steps=3,
         traj_every=100,
@@ -967,6 +1084,7 @@ def test_heating_restart(tmp_path, capsys):
     md_restart = NVT(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
+        device=device,
         temp=30.0,
         steps=2,
         traj_every=100,
@@ -992,8 +1110,12 @@ def test_heating_restart(tmp_path, capsys):
     assert "8/8" in capsys.readouterr().out
 
 
-def test_heating_files(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_heating_files(tmp_path, device):
     """Test default heating file names."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("./janus_results")
         traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-traj.extxyz"
@@ -1004,6 +1126,7 @@ def test_heating_files(tmp_path):
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
             model=MODEL_PATH,
+            device=device,
         )
         nvt = NVT(
             struct=single_point.struct,
@@ -1015,6 +1138,7 @@ def test_heating_files(tmp_path):
             temp_end=20,
             temp_step=10,
             temp_time=2,
+            device=device,
         )
 
         nvt.run()
@@ -1033,8 +1157,12 @@ def test_heating_files(tmp_path):
         assert stats.data[2, 16] == 20.0
 
 
-def test_heating_md_files(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_heating_md_files(tmp_path, device):
     """Test default heating files when also running md."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         traj_heating_path = results_dir / "Cl4Na4-nvt-T10-T20-T25.0-traj.extxyz"
@@ -1045,6 +1173,7 @@ def test_heating_md_files(tmp_path):
             struct=DATA_PATH / "NaCl.cif",
             arch="mace",
             model=MODEL_PATH,
+            device=device,
         )
         nvt = NVT(
             struct=single_point.struct,
@@ -1056,6 +1185,7 @@ def test_heating_md_files(tmp_path):
             temp_end=20,
             temp_step=10,
             temp_time=2,
+            device=device,
         )
 
         nvt.run()
@@ -1074,14 +1204,19 @@ def test_heating_md_files(tmp_path):
         assert stats.data[3, 16] == 25
 
 
-def test_ramp_negative(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_ramp_negative(tmp_path, device):
     """Test ValueError is thrown for negative values in temperature ramp."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-heating"
 
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
 
     with pytest.raises(ValueError):
@@ -1092,6 +1227,7 @@ def test_ramp_negative(tmp_path):
             temp_end=10,
             temp_step=20,
             temp_time=10,
+            device=device,
         )
     with pytest.raises(ValueError):
         NVT(
@@ -1101,11 +1237,16 @@ def test_ramp_negative(tmp_path):
             temp_end=-5,
             temp_step=20,
             temp_time=10,
+            device=device,
         )
 
 
-def test_cooling(tmp_path, capsys):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_cooling(tmp_path, capsys, device):
     """Test cooling with no MD."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl-cooling"
     final_path = tmp_path / "NaCl-cooling-final.extxyz"
     stats_cooling_path = tmp_path / "NaCl-cooling-stats.dat"
@@ -1130,6 +1271,7 @@ def test_cooling(tmp_path, capsys):
         temp_time=1,
         log_kwargs={"filename": log_file},
         enable_progress_bar=True,
+        device=device,
     )
     nvt.run()
     assert_log_contains(
@@ -1154,14 +1296,18 @@ def test_cooling(tmp_path, capsys):
     assert "2/2" in capsys.readouterr().out
 
 
-def test_heating_too_short(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_heating_too_short(tmp_path, device):
     """Test that heating with steps shorter than 1 timestep fails."""
-    file_prefix = tmp_path / "NaCl-heating"
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
 
+    file_prefix = tmp_path / "NaCl-heating"
     single_point = SinglePoint(
         struct=DATA_PATH / "NaCl.cif",
         arch="mace",
         model=MODEL_PATH,
+        device=device,
     )
 
     with pytest.raises(ValueError, match="Temperature ramp step time"):
@@ -1176,12 +1322,17 @@ def test_heating_too_short(tmp_path):
             temp_end=20.0,
             temp_step=20,
             temp_time=0.5,
+            device=device,
         )
         nvt.run()
 
 
-def test_ensemble_kwargs(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_ensemble_kwargs(tmp_path, device):
     """Test setting integrator kwargs."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "nvt.log"
 
     single_point = SinglePoint(
@@ -1194,6 +1345,7 @@ def test_ensemble_kwargs(tmp_path):
         struct=single_point.struct,
         ensemble_kwargs={"mask": (0, 1, 0)},
         log_kwargs={"filename": log_file},
+        device=device,
     )
 
     expected_mask = [[False, False, False], [False, True, False], [False, False, False]]
@@ -1218,8 +1370,12 @@ def test_invalid_struct():
         )
 
 
-def test_logging(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_logging(tmp_path, device):
     """Test attaching logger to NVT and emissions are saved to info."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     log_file = tmp_path / "md.log"
     file_prefix = tmp_path / "md"
 
@@ -1227,6 +1383,7 @@ def test_logging(tmp_path):
         struct=DATA_PATH / "NaCl.cif",
         arch="mace_mp",
         model=MODEL_PATH,
+        device=device,
     )
 
     assert "emissions" not in single_point.struct.info
@@ -1245,8 +1402,12 @@ def test_logging(tmp_path):
     assert single_point.struct.info["emissions"] > 0
 
 
-def test_auto_restart(tmp_path, capsys):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_auto_restart(tmp_path, capsys, device):
     """Test auto restarting simulation."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         # Include T300.0 to test Path.stem vs Path.name
         final_path = "md-T300.0-final.extxyz"
@@ -1271,6 +1432,7 @@ def test_auto_restart(tmp_path, capsys):
             final_file=final_path,
             restart_every=4,
             timestep=100,
+            device=device,
         )
         nvt.run()
 
@@ -1304,6 +1466,7 @@ def test_auto_restart(tmp_path, capsys):
             final_file=final_path,
             log_kwargs={"filename": log_file},
             enable_progress_bar=True,
+            device=device,
         )
 
         assert_log_contains(log_file, includes="Auto restart successful")
@@ -1336,8 +1499,12 @@ def test_auto_restart(tmp_path, capsys):
         assert "7/7" in capsys.readouterr().out
 
 
-def test_auto_restart_restart_stem(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_auto_restart_restart_stem(tmp_path, device):
     """Test auto restarting simulation with restart stem defined."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "npt"
     traj_path = tmp_path / "npt-traj.extxyz"
     stats_path = tmp_path / "npt-stats.dat"
@@ -1359,6 +1526,7 @@ def test_auto_restart_restart_stem(tmp_path):
         restart_stem=str(restart_stem),
         restart_every=4,
         timestep=10,
+        device=device,
     )
     npt.run()
 
@@ -1391,6 +1559,7 @@ def test_auto_restart_restart_stem(tmp_path):
         file_prefix=file_prefix,
         traj_every=1,
         log_kwargs={"filename": log_file},
+        device=device,
     )
 
     assert_log_contains(log_file, includes="Auto restart successful")
@@ -1418,8 +1587,12 @@ def test_auto_restart_restart_stem(tmp_path):
     assert len(final_traj) == 10
 
 
-def test_set_info(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_set_info(tmp_path, device):
     """Test info is set at correct frequency."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "npt"
     traj_path = tmp_path / "npt-traj.extxyz"
 
@@ -1437,6 +1610,7 @@ def test_set_info(tmp_path):
         file_prefix=file_prefix,
         seed=2024,
         traj_every=10,
+        device=device,
     )
 
     npt.run()
@@ -1445,9 +1619,13 @@ def test_set_info(tmp_path):
     assert final_struct.info["density"] == pytest.approx(2.120952627887493)
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("ensemble, tag", test_data)
-def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
+def test_progress_bar_complete(tmp_path, capsys, ensemble, tag, device):
     """Test progress bar completes in all ensembles."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / f"Cl4Na4-{tag}-T300.0"
 
     md = ensemble(
@@ -1457,6 +1635,7 @@ def test_progress_bar_complete(tmp_path, capsys, ensemble, tag):
         steps=2,
         file_prefix=file_prefix,
         enable_progress_bar=True,
+        device=device,
     )
 
     md.run()
