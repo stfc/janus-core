@@ -700,7 +700,7 @@ Configuration of Nequip training is outlined in the `Nequip user guide <https://
 The results directory contents depends on the options selected in the configuration file, but may typically contain model checkpoint, ``.ckpt``, files and a metrics directory.
 
 
-Training SevenNet MLIPS
+Training SevenNet MLIPs
 +++++++++++++++++++++++
 
 The `SevenNet documentation <https://sevennet.readthedocs.io/en/latest/>`_ contains information on training SevenNet MLIPs. The SevenNet `tutorial repository <https://github.com/MDIL-SNU/sevennet_tutorial/tree/main>`_ also contains some example ```.yaml``` configuration files for training and fine-tuning.
