@@ -692,7 +692,7 @@ For MACE, training will create ``logs``, ``checkpoints`` and ``results`` sub-dir
 Instructions for writing a MACE ``config.yml`` file can be found in the `MACE Readme <https://github.com/ACEsuit/mace?tab=readme-ov-file#training>`_ and the `MACE run_train CLI <https://github.com/ACEsuit/mace/blob/main/mace/cli/run_train.py>`_.
 
 
-Training Nequip MLIPS
+Training Nequip MLIPs
 +++++++++++++++++++++
 
 Configuration of Nequip training is outlined in the `Nequip user guide <https://nequip.readthedocs.io/en/latest/guide/guide.html>`_. In particular note that the configuration file must have a ``.yaml`` extension.

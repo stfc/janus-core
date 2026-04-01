@@ -109,14 +109,14 @@ def write_tmp_config_nequip(
     if fine_tune:
         model_dict = config["training_module"]["model"]
         model = Path(model_dict[f"{model_type}_path"]).name
-        for pth in (model, f"extra/{model}"):
+        for pth in (model, "extra" / model):
             if (MODEL_PATH / pth).is_file():
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
     if fine_tune:
         model_dict = config["training_module"]["model"]
         model = Path(model_dict[f"{model_type}_path"]).name
-        for pth in (model, f"extra/{model}"):
+        for pth in (model, "extra" / model):
             if (MODEL_PATH / pth).is_file():
                 model_dict[f"{model_type}_path"] = str(MODEL_PATH / pth)
 
@@ -158,7 +158,7 @@ def write_tmp_data_sevennet(
             path = DATA_PATH / name
             if path.exists():
                 frames = read(path, index=":")
-                # There is currenlty no option to rename these.
+                # There is currently no option to rename these.
                 rename_info = {"dft_energy": "energy", "dft_stress": "stress"}
                 rename_arrays = {"dft_forces": "forces"}
                 for frame in frames:
