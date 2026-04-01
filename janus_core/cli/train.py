@@ -132,9 +132,7 @@ def train(
                 model = continue_section.get("checkpoint")
                 if model is None:
                     raise ValueError(
-                        """No model specified as a checkpoint for
-                        fine-tuning.
-                        """
+                        "No model specified as a checkpoint for fine-tuning."
                     )
             if not fine_tune and continue_section is not None:
                 raise ValueError(
