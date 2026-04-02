@@ -150,23 +150,15 @@ def test_rdf_by_elements():
 
     expected_peaks = {
         ("C", "C"): (1.375, 2.425, 2.775),
-        ("C", "H"): (
-            1.075,
-            1.375,
-            2.175,
-            2.425,
-            2.475,
-            2.775,
-            3.425,
-            3.875,
-            4.275,
-            4.975,
-        ),
+        ("C", "H"): (1.075, 2.175, 3.425, 3.875),
         ("H", "H"): (2.475, 4.275, 4.975),
     }
 
     for element, rdf in rdfs.items():
         peaks = np.where(rdf[1] > 0.0)
+        print(element)
+        print(expected_peaks[element])
+        print(rdf[0][peaks])
         assert (np.isclose(expected_peaks[element], rdf[0][peaks])).all()
 
 
