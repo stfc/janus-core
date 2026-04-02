@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from itertools import combinations_with_replacement
 
 from ase import Atoms
-from ase.geometry.analysis import Analysis
+from ase.geometry.rdf import get_rdf
 import numpy as np
 from numpy import float64
 from numpy.typing import NDArray
@@ -21,7 +21,6 @@ from janus_core.helpers.utils import build_file_dir, slicelike_to_startstopstep
 
 def compute_rdf(
     data: MaybeSequence[Atoms],
-    ana: Analysis | None = None,
     /,
     *,
     filenames: MaybeSequence[PathLike] | None = None,
@@ -39,8 +38,6 @@ def compute_rdf(
     ----------
     data
         Dataset to compute RDF of.
-    ana
-        ASE Analysis object for data reuse.
     filenames
         Filenames to output data to. Must match number of RDFs computed.
     by_elements
@@ -82,9 +79,6 @@ def compute_rdf(
     ):
         volume = (2 * rmax) ** 3
 
-    if ana is None:
-        ana = Analysis(data)
-
     if by_elements:
         elements = (
             tuple(sorted(set(data[0].get_chemical_symbols())))
@@ -92,22 +86,27 @@ def compute_rdf(
             else elements
         )
 
-        rdf = {
-            element: ana.get_rdf(
-                rmax=rmax,
-                nbins=nbins,
-                elements=element,
-                imageIdx=slice(*index),
-                return_dists=True,
-                volume=volume,
-            )
+        rdfs = {
+            element: [
+                get_rdf(
+                    atoms,
+                    rmax,
+                    nbins,
+                    elements=element,
+                    volume=volume,
+                )
+                for atoms in data
+            ]
             for element in combinations_with_replacement(elements, 2)
         }
 
         # Compute RDF average
         rdf = {
-            element: (rdf[0][1], np.average([rdf_i[0] for rdf_i in rdf], axis=0))
-            for element, rdf in rdf.items()
+            element: (
+                element_rdfs[0][1],
+                np.average([rdf_i[0] for rdf_i in element_rdfs], axis=0),
+            )
+            for element, element_rdfs in rdfs.items()
         }
 
         if filenames is not None:
@@ -129,14 +128,15 @@ def compute_rdf(
                         print(dist, rdf_i, file=out_file)
 
     else:
-        rdf = ana.get_rdf(
-            rmax=rmax,
-            nbins=nbins,
-            elements=elements,
-            imageIdx=slice(*index),
-            return_dists=True,
-            volume=volume,
-        )
+        rdf = [
+            get_rdf(
+                atoms,
+                rmax,
+                nbins,
+                volume=volume,
+            )
+            for atoms in data
+        ]
 
         assert isinstance(rdf, list)
 
