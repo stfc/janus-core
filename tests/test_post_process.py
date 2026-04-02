@@ -156,9 +156,6 @@ def test_rdf_by_elements():
 
     for element, rdf in rdfs.items():
         peaks = np.where(rdf[1] > 0.0)
-        print(element)
-        print(expected_peaks[element])
-        print(rdf[0][peaks])
         assert (np.isclose(expected_peaks[element], rdf[0][peaks])).all()
 
 
