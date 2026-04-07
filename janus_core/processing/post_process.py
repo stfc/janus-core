@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from itertools import combinations_with_replacement
 
 from ase import Atoms
+from ase.geometry.analysis import Analysis
 from ase.geometry.rdf import get_rdf
 import numpy as np
 from numpy import float64
@@ -21,6 +22,7 @@ from janus_core.helpers.utils import build_file_dir, slicelike_to_startstopstep
 
 def compute_rdf(
     data: MaybeSequence[Atoms],
+    ana: Analysis | None = None,
     /,
     *,
     filenames: MaybeSequence[PathLike] | None = None,
@@ -38,6 +40,8 @@ def compute_rdf(
     ----------
     data
         Dataset to compute RDF of.
+    ana
+        ASE Analysis object for data reuse.
     filenames
         Filenames to output data to. Must match number of RDFs computed.
     by_elements
@@ -66,6 +70,9 @@ def compute_rdf(
         If `by_elements` is true returns a `dict` of RDF by element pairs.
         Otherwise returns RDF of total system filtered by elements.
     """
+    if ana is not None and by_elements:
+        raise ValueError("Using Analysis.get_rdf split by elements has known bugs.")
+
     index = slicelike_to_startstopstep(index)
 
     if not isinstance(data, Sequence):
@@ -128,16 +135,17 @@ def compute_rdf(
                         print(dist, rdf_i, file=out_file)
 
     else:
-        rdf = [
-            get_rdf(
-                atoms,
-                rmax,
-                nbins,
-                volume=volume,
-            )
-            for atoms in data
-        ]
+        if ana is None:
+            ana = Analysis(data)
 
+        rdf = ana.get_rdf(
+            rmax=rmax,
+            nbins=nbins,
+            elements=elements,
+            imageIdx=slice(*index),
+            return_dists=True,
+            volume=volume,
+        )
         assert isinstance(rdf, list)
 
         # Compute RDF average

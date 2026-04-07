@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from ase.geometry.analysis import Analysis
 from ase.io import read
 import numpy as np
 import pytest
@@ -130,6 +131,49 @@ def test_rdf():
     )
     peaks = np.where(rdf[1] > 0.0)
     assert (np.isclose(expected_peaks, rdf[0][peaks])).all()
+
+
+def test_rdf_with_analysis():
+    """Test computation of RDF."""
+    data = read(DATA_PATH / "benzene.xyz")
+    ana = Analysis(data)
+    rdf = post_process.compute_rdf(data, ana, index=0, rmax=5.0, nbins=100)
+
+    assert isinstance(rdf, tuple)
+    assert isinstance(rdf[0], np.ndarray)
+
+    expected_peaks = np.asarray(
+        (
+            1.075,
+            1.375,
+            2.175,
+            2.425,
+            2.475,
+            2.775,
+            3.425,
+            3.875,
+            4.275,
+            4.975,
+        )
+    )
+    peaks = np.where(rdf[1] > 0.0)
+    assert (np.isclose(expected_peaks, rdf[0][peaks])).all()
+
+
+def test_rdf_by_element_analysis_error():
+    """Test the by_elements method with Analysis raises ValueError."""
+    data = read(DATA_PATH / "benzene.xyz")
+    ana = Analysis(data)
+
+    with pytest.raises(ValueError):
+        post_process.compute_rdf(
+            data,
+            ana,
+            index=0,
+            rmax=5.0,
+            nbins=100,
+            by_elements=True,
+        )
 
 
 def test_rdf_by_elements():
