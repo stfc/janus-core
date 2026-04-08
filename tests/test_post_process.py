@@ -133,11 +133,13 @@ def test_rdf():
     assert (np.isclose(expected_peaks, rdf[0][peaks])).all()
 
 
-def test_rdf_with_analysis():
-    """Test computation of RDF."""
+def test_rdf_with_analysis_deprecation():
+    """Test computation of RDF and ana deprecation."""
     data = read(DATA_PATH / "benzene.xyz")
     ana = Analysis(data)
-    rdf = post_process.compute_rdf(data, ana, index=0, rmax=5.0, nbins=100)
+
+    with pytest.warns(FutureWarning, match="ana has been deprecated."):
+        rdf = post_process.compute_rdf(data, ana, index=0, rmax=5.0, nbins=100)
 
     assert isinstance(rdf, tuple)
     assert isinstance(rdf[0], np.ndarray)
@@ -160,12 +162,12 @@ def test_rdf_with_analysis():
     assert (np.isclose(expected_peaks, rdf[0][peaks])).all()
 
 
-def test_rdf_by_element_analysis_error():
+def test_rdf_by_elementw_analysis_error():
     """Test the by_elements method with Analysis raises ValueError."""
     data = read(DATA_PATH / "benzene.xyz")
     ana = Analysis(data)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Analysis.get_rdf has known bugs"):
         post_process.compute_rdf(
             data,
             ana,

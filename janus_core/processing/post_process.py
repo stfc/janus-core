@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from itertools import combinations_with_replacement
+from warnings import warn
 
 from ase import Atoms
 from ase.geometry.analysis import Analysis
@@ -41,7 +42,7 @@ def compute_rdf(
     data
         Dataset to compute RDF of.
     ana
-        ASE Analysis object for data reuse.
+        Deprecated. Please do not use. ASE Analysis object for data reuse.
     filenames
         Filenames to output data to. Must match number of RDFs computed.
     by_elements
@@ -70,8 +71,17 @@ def compute_rdf(
         If `by_elements` is true returns a `dict` of RDF by element pairs.
         Otherwise returns RDF of total system filtered by elements.
     """
-    if ana is not None and by_elements:
-        raise ValueError("Using Analysis.get_rdf split by elements has known bugs.")
+    if ana is not None:
+        warn(
+            "ana has been deprecated.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        if by_elements:
+            raise ValueError(
+                "Analysis.get_rdf has known bugs with by_elements."
+                "Call without ana to use ase.geometry.rdf.get_rdf directly."
+            )
 
     index = slicelike_to_startstopstep(index)
 
@@ -135,17 +145,25 @@ def compute_rdf(
                         print(dist, rdf_i, file=out_file)
 
     else:
-        if ana is None:
-            ana = Analysis(data)
+        if ana is not None:
+            rdf = ana.get_rdf(
+                rmax=rmax,
+                nbins=nbins,
+                imageIdx=slice(*index),
+                return_dists=True,
+                volume=volume,
+            )
+        else:
+            rdf = [
+                get_rdf(
+                    atoms,
+                    rmax,
+                    nbins,
+                    volume=volume,
+                )
+                for atoms in data
+            ]
 
-        rdf = ana.get_rdf(
-            rmax=rmax,
-            nbins=nbins,
-            elements=elements,
-            imageIdx=slice(*index),
-            return_dists=True,
-            volume=volume,
-        )
         assert isinstance(rdf, list)
 
         # Compute RDF average
