@@ -14,7 +14,6 @@ from typing import Any
 from warnings import warn
 
 from ase import Atoms
-from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
@@ -1293,8 +1292,6 @@ class MolecularDynamics(BaseCalculation):
 
         data = read(self.traj_file, index=":")
 
-        ana = Analysis(data)
-
         if self.post_process_kwargs.get("rdf_compute", False):
             rdf_args = {
                 name: self.post_process_kwargs.get(key, default)
@@ -1312,7 +1309,7 @@ class MolecularDynamics(BaseCalculation):
             )
             rdf_args["index"] = slice_
 
-            compute_rdf(data, ana, filenames=self._rdf_files, **rdf_args)
+            compute_rdf(data, filenames=self._rdf_files, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
