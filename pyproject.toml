@@ -84,8 +84,7 @@ sevennet = [
     "sevenn == 0.11.2.post1",
 ]
 fairchem = [
-    "fairchem-core == 2.12.0",
-    "setuptools < 82",
+    "fairchem-core == 2.19.0; python_version > '3.11'",
 ]
 
 [project.scripts]
