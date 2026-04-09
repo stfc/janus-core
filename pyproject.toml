@@ -50,7 +50,7 @@ dpa3 = [
     "MPICH; sys_platform != 'win32'",
 ]
 d3 = [
-    "torch-dftd==0.5.1",
+    "torch-dftd==0.5.3",
 ]
 grace = [
     "tensorpotential == 0.6.0",
