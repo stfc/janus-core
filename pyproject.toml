@@ -61,7 +61,7 @@ mace = [
     "graph-longrange",
 ]
 orb = [
-    "orb-models == 0.5.5; sys_platform != 'win32' and python_version < '3.13'",
+    "orb-models == 0.6.2; sys_platform != 'win32' and python_version > '3.11' and python_version < '3.13'",
 ]
 upet = [
     "upet == 0.3.0; python_version > '3.11'"
@@ -242,5 +242,9 @@ conflicts = [
     [
       { extra = "upet" },
       { extra = "grace" },
+    ],
+    [
+      { extra = "orb" },
+      { extra = "upet" },
     ],
 ]
