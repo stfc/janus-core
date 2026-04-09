@@ -233,4 +233,13 @@ conflicts = [
       { extra = "nequip" },
       { extra = "mace" },
     ],
+
+    [
+      { extra = "orb" },
+      { extra = "grace" },
+    ],
+    [
+      { extra = "upet" },
+      { extra = "grace" },
+    ],
 ]
