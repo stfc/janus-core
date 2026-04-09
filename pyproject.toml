@@ -26,7 +26,7 @@ classifiers = [
 readme = "README.md"
 
 dependencies = [
-    "ase<4.0,==3.27",
+    "ase<4.0,>=3.28",
     "click<9,>=8.2.1",
     "codecarbon<4.0.0,>=3.0.7",
     "numpy<3.0.0,>=1.26.4",
@@ -73,7 +73,7 @@ visualise = [
 
 # MLIPs with updated e3nn
 mattersim = [
-    "mattersim == 1.2.0; sys_platform != 'win32'",
+    "mattersim == 1.2.2; sys_platform != 'win32'",
 ]
 nequip = [
     "nequip == 0.14.0",
