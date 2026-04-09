@@ -70,7 +70,7 @@ plumed = [
     "plumed<3.0.0,>=2.10.0; sys_platform != 'win32'",
 ]
 visualise = [
-    "weas-widget<0.2,>=0.1.26"
+    "weas-widget<0.3,>=0.2.6"
 ]
 
 # MLIPs with updated e3nn
