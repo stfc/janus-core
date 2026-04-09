@@ -147,7 +147,6 @@ def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
     assert neb.results["barrier"] == pytest.approx(8117.328587986063)
     assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
-    # assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
 def test_neb_plot(tmp_path):
