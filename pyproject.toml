@@ -73,7 +73,7 @@ visualise = [
 
 # MLIPs with updated e3nn
 mattersim = [
-    "mattersim == 1.2.0; sys_platform != 'win32'",
+    "mattersim == 1.2.2; sys_platform != 'win32'",
 ]
 nequip = [
     "nequip == 0.14.0",
