@@ -162,7 +162,7 @@ def test_rdf_with_analysis_deprecation():
     assert (np.isclose(expected_peaks, rdf[0][peaks])).all()
 
 
-def test_rdf_by_elementw_analysis_error():
+def test_rdf_by_elements_analysis_error():
     """Test the by_elements method with Analysis raises ValueError."""
     data = read(DATA_PATH / "benzene.xyz")
     ana = Analysis(data)
