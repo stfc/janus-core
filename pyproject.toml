@@ -54,7 +54,7 @@ d3 = [
     "torch-dftd==0.5.1",
 ]
 grace = [
-    "tensorpotential == 0.5.1; sys_platform != 'win32' and python_version < '3.13'",
+    "tensorpotential == 0.5.1; python_version < '3.13'",
 ]
 mace = [
     "mace-torch==0.3.14",
