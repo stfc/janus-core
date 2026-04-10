@@ -21,7 +21,7 @@ def try_retrieve(url: str, filename: Path):
     try:
         urlretrieve(url, filename)
     except Exception as e:
-        warn(f"Unable to retrieve from {url} becuase of:\n  {e}", stacklevel=2)
+        warn(f"Unable to retrieve from {url} because of:\n  {e}", stacklevel=2)
 
 
 if __name__ == "__main__":
