@@ -187,6 +187,7 @@ def config_tracker(
     OfflineEmissionsTracker | None
         Configured offline codecarbon tracker, if logger is specified.
     """
+    tracker = None
     if janus_logger and track_carbon:
         carbon_logger = LoggerOutput(janus_logger)
         tracker = OfflineEmissionsTracker(
@@ -210,8 +211,5 @@ def config_tracker(
                 "Carbon tracker has not been configured correctly. Please try "
                 "reconfiguring, or disable the tracker."
             )
-
-    else:
-        tracker = None
 
     return tracker
