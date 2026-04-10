@@ -55,6 +55,7 @@ def _set_model(
         "model_name",
         "checkpoint_path",
         "predict_unit",
+        "ckpt_path",
     }
     present = kwargs.keys() & model_kwargs
 
@@ -254,6 +255,44 @@ def choose_calculator(
 
             calculator = CHGNetCalculator(
                 model=loaded_model, use_device=device, **kwargs
+            )
+
+
+
+        case "alphanet":
+            from alphanet import __version__
+            from alphanet.config import All_Config
+            from alphanet.infer.calc import AlphaNetCalculator
+            import torch
+
+            # Set before loading model to avoid type mismatches
+            torch.set_default_dtype(torch.float32)
+
+            # No default model
+            if model is None:
+                raise ValueError(
+                    f"Please specify `model`, as there is no default model for {arch}. "
+                    "Provide path to AlphaNet checkpoint file (.ckpt). "
+                    "Download from: https://github.com/zmyybc/AlphaNet/tree/main/pretrained"
+                )
+
+            # Get config path from kwargs
+            config_path = kwargs.pop("config", None)
+            if config_path is None:
+                raise ValueError(
+                    "Config file must be specified with config='/path/to/config.json'. "
+                    "Download from: https://github.com/zmyybc/AlphaNet/tree/main/pretrained"
+                )
+
+            config = All_Config().from_json(config_path)
+            precision = kwargs.pop("precision", "32")
+
+            calculator = AlphaNetCalculator(
+                ckpt_path=str(model),
+                config=config,
+                device=device,
+                precision=precision,
+                **kwargs,
             )
 
         case "sevennet":
