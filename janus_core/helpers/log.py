@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from typing import Literal
+from warnings import warn
 
 from codecarbon import OfflineEmissionsTracker
 from codecarbon.output import LoggerOutput
@@ -207,9 +208,10 @@ def config_tracker(
             carbon_logger.removeHandler(carbon_logger.handlers[0])
 
         if not hasattr(tracker, "_emissions"):
-            raise Warning(
+            raise warn(
                 "Carbon tracker has not been configured correctly. Please try "
-                "reconfiguring, or disable the tracker."
+                "reconfiguring, or disable the tracker.",
+                stacklevel=2,
             )
 
     return tracker
