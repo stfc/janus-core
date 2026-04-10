@@ -18,6 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
@@ -29,7 +30,8 @@ dependencies = [
     "ase<4.0,>=3.28",
     "click<9,>=8.2.1",
     "codecarbon<4.0.0,>=3.0.7",
-    "numpy<3.0.0,>=1.26.4",
+    "numpy<3,>=1.26.4; python_version < '3.13'",
+    "numpy<3,>=2.1.0; python_version >= '3.13'",
     "phonopy<2.48,>=2.39.0",
     "pymatgen>=2025.1.24",
     "pyyaml<7.0.0,>=6.0.1",
@@ -52,20 +54,20 @@ d3 = [
     "torch-dftd==0.5.1",
 ]
 grace = [
-    "tensorpotential == 0.5.1",
+    "tensorpotential == 0.5.1; python_version < '3.13'",
 ]
 mace = [
     "mace-torch==0.3.14",
     "janus-core[d3]",
 ]
 orb = [
-    "orb-models == 0.5.5; sys_platform != 'win32'",
+    "orb-models == 0.5.5; sys_platform != 'win32' and python_version < '3.13'",
 ]
 upet = [
     "upet == 0.2.1; python_version > '3.11'"
 ]
 plumed = [
-    "plumed<3.0.0,>=2.9.0; sys_platform != 'win32'",
+    "plumed<3.0.0,>=2.10.0; sys_platform != 'win32'",
 ]
 visualise = [
     "weas-widget<0.2,>=0.1.26"
