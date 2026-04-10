@@ -48,5 +48,5 @@ def test_tracker_error(tmp_path):
     log_path = tmp_path / "test.log"
 
     logger = config_logger(name=__name__, filename=log_path)
-    with pytest.raises(Warning):
+    with pytest.warns(UserWarning):
         config_tracker(janus_logger=logger, country_2letter_iso_code=123)
