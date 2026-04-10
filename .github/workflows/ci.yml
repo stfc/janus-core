@@ -24,8 +24,8 @@ jobs:
           rm -rf ~/.cache/*
           uv cache clean
 
-      - name: Install "all" dependencies
-        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra upet --extra plumed
+      - name: Install dependencies compatible with MACE
+        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra plumed
 
       - name: Install PLUMED
         uses: Iximiel/install-plumed@v1
@@ -47,6 +47,18 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest --cov janus_core --cov-append .
+
+      - name: Install updated UPET (incompatible with Orb/GRACE)
+        run: |
+          uv cache clean
+          uv sync --extra upet --extra d3
+
+      - name: Run test suite for updated UPET
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install updated e3nn dependencies
         run: |

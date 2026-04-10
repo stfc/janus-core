@@ -21,7 +21,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install "all" dependencies
-        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra upet --extra plumed
+        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra plumed
 
       - name: Install PLUMED
         uses: Iximiel/install-plumed@v1
@@ -33,6 +33,19 @@ jobs:
           if [ "${{ steps.plumed.outcome }}" = "success" ]; then
             echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
           fi
+
+      - name: Install updated UPET (incompatible with Orb/GRACE)
+        run: |
+          uv cache clean
+          uv sync --extra upet --extra d3
+
+      - name: Run test suite for updated UPET
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
+
 
       - name: Download extra models
         run: |
