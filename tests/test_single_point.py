@@ -592,6 +592,7 @@ def test_mace_mp_dispersion(device):
     no_d3_energy = SinglePoint(
         struct=data_path,
         arch="mace_mp",
+        model="small",
         properties="energy",
         calc_kwargs={"dispersion": False},
         device=device,
@@ -600,6 +601,7 @@ def test_mace_mp_dispersion(device):
     d3_energy = SinglePoint(
         struct=data_path,
         arch="mace_mp",
+        model="small",
         properties="energy",
         calc_kwargs={"dispersion": True},
         device=device,
