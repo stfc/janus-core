@@ -175,7 +175,7 @@ select = [
 'containers/*.py' = ['D100', 'E501']
 
 [tool.ruff.lint.mccabe]
-max-complexity = 10
+max-complexity = 5
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
