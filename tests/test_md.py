@@ -299,7 +299,7 @@ def test_nvt_csvr(tmp_path, device):
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
 @pytest.mark.parametrize("mtk_flavour", ["iso", "aniso"])
-def test_npt_mtk(tmp_path, device,mtk_flavour):
+def test_npt_mtk(tmp_path, device, mtk_flavour):
     """Test NPT MTK molecular dynamics."""
     if device == "cuda" and not torch.cuda.is_available():
         pytest.skip("CUDA not available")
