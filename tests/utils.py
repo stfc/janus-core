@@ -199,3 +199,15 @@ def chdir(path):
         yield
     finally:
         os.chdir(prev_cwd)
+
+
+def rename_atoms_attributes(
+    atoms: Atoms, rename_info: dict[str, str], rename_arrays: dict[str, str]
+) -> None:
+    """Rename an Atoms objects info and arrays entries in place."""
+    for name_map, store in zip(
+        (rename_info, rename_arrays), (atoms.info, atoms.arrays), strict=True
+    ):
+        for old_name, new_name in name_map.items():
+            if old_name in store:
+                store[new_name] = store.pop(old_name)
