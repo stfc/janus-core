@@ -313,13 +313,9 @@ def test_fine_tune(tmp_path, device):
         summary_path = tmp_path / "summary.yml"
         logs_path = results_dir / "logs"
 
-<<<<<<< HEAD
-        config = write_tmp_config_mace(DATA_PATH / "mlip_fine_tune.yml", Path.cwd())
-=======
         config = write_tmp_config_mace(
             DATA_PATH / "mlip_fine_tune.yml", Path(), device=device
         )
->>>>>>> d7be6e9 (add gpu workflow and tests)
 
         result = runner.invoke(
             app,
