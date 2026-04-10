@@ -213,5 +213,6 @@ def config_tracker(
                 "reconfiguring, or disable the tracker.",
                 stacklevel=2,
             )
+            tracker = None
 
     return tracker
