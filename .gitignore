@@ -39,3 +39,4 @@ results/
 logs/
 *.model
 tests/models/extra
+!docs/source/tutorials/python/anharmonic_phonons.ipynb

@@ -53,6 +53,7 @@ from janus_core.helpers.utils import (
 )
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
+from janus_core.processing.tdep import build_tdep_inputs_from_nvt
 
 units = create_units("2014")
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
@@ -1282,11 +1283,11 @@ class MolecularDynamics(BaseCalculation):
         # Nothing to do
         if not any(
             self.post_process_kwargs.get(kwarg, None)
-            for kwarg in ("rdf_compute", "vaf_compute")
+            for kwarg in ("rdf_compute", "vaf_compute", "tdep_compute")
         ):
             warn(
                 "Post-processing arguments present, but no computation requested. "
-                "Please set either 'rdf_compute' or 'vaf_compute' "
+                "Please set 'rdf_compute' or 'vaf_compute' or 'tdep_compute' "
                 "to do post-processing.",
                 stacklevel=2,
             )
@@ -1329,6 +1330,21 @@ class MolecularDynamics(BaseCalculation):
                 fft=fft,
                 index=slice_,
                 atoms_filter=self.post_process_kwargs.get("vaf_atoms", None),
+            )
+
+        if self.post_process_kwargs.get("tdep_compute", False):
+            tdep_output_dir = self.post_process_kwargs.get("tdep_output_dir", None)
+            if tdep_output_dir is None:
+                tdep_output_dir = self._build_filename("tdep-inputs", filename=None)
+
+            build_tdep_inputs_from_nvt(
+                unit_cell_file=self.post_process_kwargs["tdep_unit_cell_file"],
+                supercell=self.post_process_kwargs["tdep_supercell_file"],
+                traj_file=self.traj_file,
+                stats_file=self.stats_file,
+                temperature=self.temp,
+                output_dir=tdep_output_dir,
+                timestep=0.0,
             )
 
     def _write_restart(self) -> None:
