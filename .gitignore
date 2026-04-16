@@ -40,3 +40,4 @@ logs/
 *.model
 tests/models/extra
 !docs/source/tutorials/python/anharmonic_phonons.ipynb
+!docs/source/tutorials/data/outfile.dispersion_relations.png
