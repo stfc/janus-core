@@ -69,41 +69,44 @@ def build_tdep_inputs_from_nvt(
     trajectory = read(traj_file, index=":")
     n_atoms = len(trajectory[0])
     n_steps = len(trajectory)
-
-    with open(meta_path, "w", encoding="utf-8") as file:
-        file.write(f"{n_atoms}    # N atoms\n")
-        file.write(f"{n_steps}    # N timesteps\n")
-        file.write(f"{timestep}    # timestep in fs\n")
-        file.write(f"{temperature}    # temperature in K\n")
-
     unit_cell = read(unit_cell_file)
+    stats_data = np.atleast_2d(np.loadtxt(stats_file, comments="#"))
+
     if len(supercell_atoms) != n_atoms:
         raise ValueError(
             "The number of atoms in supercell must match the number of atoms "
             "in traj_file."
         )
 
-    write(ucposcar_path, unit_cell, format="vasp")
-    write(ssposcar_path, supercell_atoms, format="vasp")
-
-    with open(positions_path, "w", encoding="utf-8") as file:
-        for atoms in trajectory:
-            for position in atoms.get_scaled_positions():
-                file.write(
-                    f"{position[0]:.12f} {position[1]:.12f} {position[2]:.12f}\n"
-                )
-
-    with open(forces_path, "w", encoding="utf-8") as file:
-        for atoms in trajectory:
-            for force in atoms.get_forces():
-                file.write(f"{force[0]:25.12f}{force[1]:25.12f}{force[2]:25.12f}\n")
-
-    stats_data = np.atleast_2d(np.loadtxt(stats_file, comments="#"))
-
     if len(stats_data) != n_steps:
         raise ValueError(
             "The number of rows in stats_file must match the number of frames "
             "in traj_file."
+        )
+
+    meta_path.write_text(
+        f"{n_atoms}    # N atoms\n"
+        f"{n_steps}    # N timesteps\n"
+        f"{timestep}    # timestep in fs\n"
+        f"{temperature}    # temperature in K\n",
+        encoding="utf-8",
+    )
+
+    write(ucposcar_path, unit_cell, format="vasp")
+    write(ssposcar_path, supercell_atoms, format="vasp")
+
+    with open(positions_path, "w", encoding="utf-8") as file:
+        file.writelines(
+            f"{position[0]:.12f} {position[1]:.12f} {position[2]:.12f}\n"
+            for atoms in trajectory
+            for position in atoms.get_scaled_positions()
+        )
+
+    with open(forces_path, "w", encoding="utf-8") as file:
+        file.writelines(
+            f"{force[0]:25.12f} {force[1]:25.12f} {force[2]:25.12f}\n"
+            for atoms in trajectory
+            for force in atoms.get_forces()
         )
 
     time_fs = stats_data[:, 2]
@@ -120,22 +123,22 @@ def build_tdep_inputs_from_nvt(
     stress_xy = stats_data[:, 15]
 
     with open(stat_path, "w", encoding="utf-8") as file:
-        for i in range(len(time_fs)):
-            file.write(
-                f"{i:d} "
-                f"{time_fs[i]:.12f} "
-                f"{e_tot[i]:.12f} "
-                f"{e_pot[i]:.12f} "
-                f"{e_kin[i]:.12f} "
-                f"{temperature_data[i]:.12f} "
-                f"{pressure[i]:.12f} "
-                f"{stress_xx[i]:.12f} "
-                f"{stress_yy[i]:.12f} "
-                f"{stress_zz[i]:.12f} "
-                f"{stress_xz[i]:.12f} "
-                f"{stress_yz[i]:.12f} "
-                f"{stress_xy[i]:.12f}\n"
-            )
+        file.writelines(
+            f"{i:d} "
+            f"{time_fs[i]:.12f} "
+            f"{e_tot[i]:.12f} "
+            f"{e_pot[i]:.12f} "
+            f"{e_kin[i]:.12f} "
+            f"{temperature_data[i]:.12f} "
+            f"{pressure[i]:.12f} "
+            f"{stress_xx[i]:.12f} "
+            f"{stress_yy[i]:.12f} "
+            f"{stress_zz[i]:.12f} "
+            f"{stress_xz[i]:.12f} "
+            f"{stress_yz[i]:.12f} "
+            f"{stress_xy[i]:.12f}\n"
+            for i in range(len(time_fs))
+        )
 
     return {
         "infile.ucposcar": ucposcar_path,
