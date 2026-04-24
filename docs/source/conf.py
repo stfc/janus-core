@@ -53,7 +53,6 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "ase": ("https://ase-lib.org/", None),
     "phonopy": ("https://phonopy.github.io/phonopy/", None),
-    "codecarbon": ("https://mlco2.github.io/codecarbon/", None),
     "torch": ("https://pytorch.org/docs/stable", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "rich": ("https://rich.readthedocs.io/en/stable/", None),

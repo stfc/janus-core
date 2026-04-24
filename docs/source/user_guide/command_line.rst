@@ -566,7 +566,8 @@ The ``--paths`` file must include:
 
 - ``npoints``, which gives the number of sampling points, including path ends, in each path segment
 
-These correspond to ``BAND_LABELS``, ``BAND``, and ``BAND_POINTS`` in `phonopy <https://phonopy.github.io/phonopy/setting-tags.html#band-structure-tags>`_.
+These correspond to ``BAND_LABELS``, ``BAND``, and ``BAND_POINTS`` in
+`phonopy's band structure tags <https://phonopy.github.io/phonopy/setting-tags.html#band-structure-tags>`_.
 
 For example:
 
