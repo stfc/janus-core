@@ -46,7 +46,7 @@ jobs:
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
-        run: uv run --no-sync pytest --cov janus_core --cov-append .
+        run: uv run --no-sync pytest --cov janus_core --cov-append . -k "not cuda"
 
       - name: Install updated e3nn dependencies
         run: |
@@ -60,7 +60,7 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py -k "not cuda"
 
       - name: Report coverage to Coveralls
         uses: coverallsapp/github-action@v2

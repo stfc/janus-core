@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from typing import Literal
+from warnings import warn
 
 from codecarbon import OfflineEmissionsTracker
 from codecarbon.output import LoggerOutput
@@ -187,6 +188,7 @@ def config_tracker(
     OfflineEmissionsTracker | None
         Configured offline codecarbon tracker, if logger is specified.
     """
+    tracker = None
     if janus_logger and track_carbon:
         carbon_logger = LoggerOutput(janus_logger)
         tracker = OfflineEmissionsTracker(
@@ -206,12 +208,11 @@ def config_tracker(
             carbon_logger.removeHandler(carbon_logger.handlers[0])
 
         if not hasattr(tracker, "_emissions"):
-            raise ValueError(
+            warn(
                 "Carbon tracker has not been configured correctly. Please try "
-                "reconfiguring, or disable the tracker."
+                "reconfiguring, or disable the tracker.",
+                stacklevel=2,
             )
-
-    else:
-        tracker = None
+            tracker = None
 
     return tracker

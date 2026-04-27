@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase.io import read
 import pytest
+import torch
 from typer.testing import CliRunner
 import yaml
 
@@ -31,8 +32,12 @@ def test_help():
     assert "Usage: janus descriptors [OPTIONS]" in strip_ansi_codes(result.stdout)
 
 
-def test_descriptors(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_descriptors(tmp_path, device):
     """Test calculating MLIP descriptors."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     with chdir(tmp_path):
         results_dir = Path("janus_results")
         out_path = results_dir / "NaCl-descriptors.extxyz"
@@ -47,6 +52,8 @@ def test_descriptors(tmp_path):
                 DATA_PATH / "NaCl.cif",
                 "--arch",
                 "mace_mp",
+                "--device",
+                device,
             ],
         )
         assert result.exit_code == 0
@@ -100,8 +107,12 @@ def test_descriptors(tmp_path):
         clear_log_handlers()
 
 
-def test_calc_per_element(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_calc_per_element(tmp_path, device):
     """Test calculating MLIP descriptors for each element."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     out_path = tmp_path / "test" / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -114,6 +125,8 @@ def test_calc_per_element(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             out_path,
             "--calc-per-element",
@@ -142,8 +155,12 @@ def test_calc_per_element(tmp_path):
     )
 
 
-def test_invariant(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_invariant(tmp_path, device):
     """Test setting invariant_only to false."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     out_path = tmp_path / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -156,6 +173,8 @@ def test_invariant(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             out_path,
             "--no-invariants-only",
@@ -184,8 +203,12 @@ def test_invariant(tmp_path):
     )
 
 
-def test_traj(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_traj(tmp_path, device):
     """Test calculating descriptors for a trajectory."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     out_path = tmp_path / "benzene-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -198,6 +221,8 @@ def test_traj(tmp_path):
             DATA_PATH / "benzene-traj.xyz",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             out_path,
             "--read-kwargs",
@@ -217,8 +242,12 @@ def test_traj(tmp_path):
     assert "mace_mp_descriptor" in atoms[1].info
 
 
-def test_per_atom(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_per_atom(tmp_path, device):
     """Test calculating descriptors for each atom."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     out_path = tmp_path / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -231,6 +260,8 @@ def test_per_atom(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             out_path,
             "--calc-per-atom",
@@ -261,8 +292,12 @@ def test_per_atom(tmp_path):
     )
 
 
-def test_no_carbon(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_no_carbon(tmp_path, device):
     """Test disabling carbon tracking."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     out_path = tmp_path / "test" / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
     summary_path = tmp_path / "summary.yml"
@@ -275,6 +310,8 @@ def test_no_carbon(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--out",
             out_path,
             "--log",
@@ -292,8 +329,12 @@ def test_no_carbon(tmp_path):
     assert "emissions" not in descriptors_summary
 
 
-def test_file_prefix(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_file_prefix(tmp_path, device):
     """Test file prefix creates directories and affects all files."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "test/test"
     result = runner.invoke(
         app,
@@ -303,6 +344,8 @@ def test_file_prefix(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--file-prefix",
             file_prefix,
         ],
@@ -317,8 +360,12 @@ def test_file_prefix(tmp_path):
     }
 
 
-def test_model(tmp_path):
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_model(tmp_path, device):
     """Test model passed correctly."""
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
     file_prefix = tmp_path / "NaCl"
     results_path = tmp_path / "NaCl-descriptors.extxyz"
     log_path = tmp_path / "test.log"
@@ -331,6 +378,8 @@ def test_model(tmp_path):
             DATA_PATH / "NaCl.cif",
             "--arch",
             "mace_mp",
+            "--device",
+            device,
             "--model",
             MACE_PATH,
             "--log",
