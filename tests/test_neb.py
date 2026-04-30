@@ -6,6 +6,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from ase.io import read, write
+from ase.mep.neb import DyNEB
+from ase.optimize import BFGS
+import numpy as np
 import pytest
 
 from janus_core.calculations.neb import NEB
@@ -52,6 +55,7 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
         arch="mace_mp",
         model=MODEL_PATH,
         n_images=5,
+        neb_kwargs={"method": "aseneb"},
         file_prefix=tmp_path / "LFPO",
     )
     neb.run()
@@ -60,7 +64,6 @@ def test_neb(tmp_path, LFPO_start_b, LFPO_end_b):
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
     assert neb.results["barrier"] == pytest.approx(8117.328587956959)
     assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
-    assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
 def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
@@ -85,6 +88,7 @@ def test_neb_pymatgen(tmp_path, LFPO_start_b, LFPO_end_b):
         n_images=5,
         interpolator="pymatgen",
         fmax=4,
+        neb_kwargs={"method": "aseneb"},
         file_prefix=file_prefix,
     )
     neb.run()
@@ -111,6 +115,7 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
         n_images=5,
         interpolator="ase",
         fmax=4,
+        neb_kwargs={"method": "aseneb"},
         file_prefix=file_prefix,
     )
     neb.run()
@@ -120,7 +125,6 @@ def test_set_calc(tmp_path, LFPO_start_b, LFPO_end_b):
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
     assert neb.results["barrier"] == pytest.approx(8117.328587986063)
     assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
-    assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
 def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
@@ -134,6 +138,7 @@ def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
         model=MODEL_PATH,
         n_images=5,
         interpolator="ase",
+        neb_kwargs={"method": "aseneb"},
         file_prefix=file_prefix,
     )
     neb.interpolate()
@@ -144,7 +149,6 @@ def test_neb_functions(tmp_path, LFPO_start_b, LFPO_end_b):
     assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
     assert neb.results["barrier"] == pytest.approx(8117.328587986063)
     assert neb.results["delta_E"] == pytest.approx(-3.0149328722473e-07)
-    assert neb.results["max_force"] == pytest.approx(148695.846153840771)
 
 
 def test_neb_plot(tmp_path):
@@ -156,6 +160,7 @@ def test_neb_plot(tmp_path):
         arch="mace",
         model=MODEL_PATH,
         steps=2,
+        neb_kwargs={"method": "aseneb"},
         file_prefix=file_prefix,
     )
     neb.optimize()
@@ -178,6 +183,7 @@ def test_converge_warning(tmp_path, LFPO_start_b, LFPO_end_b):
         n_images=5,
         steps=1,
         fmax=0.1,
+        neb_kwargs={"method": "aseneb"},
         file_prefix=tmp_path / "LFPO",
     )
     with pytest.warns(UserWarning, match="NEB optimization has not converged"):
@@ -193,6 +199,7 @@ def test_restart(tmp_path):
         model=MODEL_PATH,
         interpolator=None,
         file_prefix=tmp_path / "LFPO",
+        neb_kwargs={"method": "aseneb"},
         fmax=1.3,
     )
     neb.optimize()
@@ -218,6 +225,7 @@ def test_restart_update_climb(tmp_path):
             model=MODEL_PATH,
             interpolator=None,
             fmax=1.3,
+            neb_kwargs={"method": "aseneb"},
             file_prefix=tmp_path / "LFPO",
         )
         neb.run()
@@ -293,3 +301,28 @@ def test_missing_arch(struct):
     """Test missing arch."""
     with pytest.raises(ValueError, match="A calculator must be attached"):
         NEB(neb_structs=struct)
+
+
+def test_max_force(tmp_path, LFPO_start_b, LFPO_end_b):
+    """Test saved max force corresponds to correct NEB."""
+    neb = NEB(
+        init_struct=LFPO_start_b,
+        final_struct=LFPO_end_b,
+        arch="mace_mp",
+        model=MODEL_PATH,
+        n_images=5,
+        neb_class=DyNEB,
+        neb_kwargs={"climb": True, "method": "eb", "scale_fmax": 1.0},
+        optimizer=BFGS,
+        interpolator="ase",
+        steps=1,
+        file_prefix=tmp_path / "LFPO",
+    )
+    neb.run()
+
+    assert all(key in neb.results for key in ("barrier", "delta_E", "max_force"))
+
+    stored_max_force = neb.results["max_force"]
+    forces = neb.neb.get_forces()
+    max_force = np.sqrt((forces**2).sum(axis=1).max())
+    assert stored_max_force == pytest.approx(max_force)

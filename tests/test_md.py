@@ -36,7 +36,7 @@ test_data = [
     (NVT_CSVR, "nvt-csvr"),
     pytest.param(
         NPT_MTK,
-        "npt-mtk",
+        "npt-mtk-iso",
         marks=pytest.mark.skipif(
             MTK_IMPORT_FAILED, reason="Requires updated version of ASE"
         ),
@@ -70,6 +70,49 @@ def test_init(ensemble, expected):
         struct=single_point.struct,
     )
     assert dyn.ensemble == expected
+
+
+def test_deprecation_npt_mtk(tmp_path):
+    """Test FutureWarning raise for ensemble ntp-mtk."""
+    with chdir(tmp_path):
+        with pytest.warns(
+            FutureWarning,
+            match="`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
+        ):
+            results_dir = tmp_path / Path("janus_results")
+            restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p1.0-res-2.extxyz"
+            restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p1.0-res-4.extxyz"
+            restart_final = results_dir / "NaCl-npt-mtk-T300.0-p1.0-final.extxyz"
+            traj_path = results_dir / "NaCl-npt-mtk-T300.0-p1.0-traj.extxyz"
+            stats_path = results_dir / "NaCl-npt-mtk-T300.0-p1.0-stats.dat"
+
+            npt = NPT_MTK(
+                struct=DATA_PATH / "NaCl.cif",
+                arch="mace",
+                model=MODEL_PATH,
+                ensemble="npt-mtk",
+                pressure=1.0,
+                temp=300.0,
+                steps=4,
+                traj_every=1,
+                restart_every=2,
+                stats_every=1,
+            )
+            npt.run()
+            for restart in (restart_path_1, restart_path_2, restart_final):
+                atoms = read(restart)
+                assert isinstance(atoms, Atoms)
+
+            traj = read(traj_path, index=":")
+            assert all(isinstance(image, Atoms) for image in traj)
+            # Includes step 0
+            assert len(traj) == 5
+
+            with open(stats_path, encoding="utf8") as stats_file:
+                lines = stats_file.readlines()
+                assert "Target_P [GPa]" in lines[0] and "Target_T [K]" in lines[0]
+                # Includes step 0
+                assert len(lines) == 6
 
 
 def test_npt(tmp_path):
@@ -274,15 +317,17 @@ def test_nvt_csvr(tmp_path):
 
 
 @pytest.mark.skipif(MTK_IMPORT_FAILED, reason="Requires updated version of ASE")
-def test_npt_mtk(tmp_path):
+@pytest.mark.parametrize("mtk_flavour", ["iso", "aniso"])
+def test_npt_mtk(tmp_path, mtk_flavour):
     """Test NPT MTK molecular dynamics."""
     with chdir(tmp_path):
         results_dir = Path("janus_results")
-        restart_path_1 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-2.extxyz"
-        restart_path_2 = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-res-4.extxyz"
-        restart_final = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-final.extxyz"
-        traj_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-traj.extxyz"
-        stats_path = results_dir / "NaCl-npt-mtk-T300.0-p0.0001-stats.dat"
+        stem = f"NaCl-npt-mtk-{mtk_flavour}-T300.0-p0.0001"
+        restart_path_1 = results_dir / f"{stem}-res-2.extxyz"
+        restart_path_2 = results_dir / f"{stem}-res-4.extxyz"
+        restart_final = results_dir / f"{stem}-final.extxyz"
+        traj_path = results_dir / f"{stem}-traj.extxyz"
+        stats_path = results_dir / f"{stem}-stats.dat"
 
         npt_mtk = NPT_MTK(
             struct=DATA_PATH / "NaCl.cif",
@@ -300,6 +345,7 @@ def test_npt_mtk(tmp_path):
             barostat_chain=2,
             thermostat_substeps=2,
             barostat_substeps=2,
+            ensemble=f"npt-mtk-{mtk_flavour}",
         )
 
         npt_mtk.run()
@@ -476,8 +522,85 @@ def test_reset_velocities(tmp_path):
 
     final_momentum = np.sum(single_point.struct.get_momenta())
     assert abs(final_momentum) < abs(init_momentum)
-    assert init_momentum != pytest.approx(0)
-    assert final_momentum == pytest.approx(0)
+    assert init_momentum != pytest.approx(0, abs=1e-10)
+    # Rescaling sets `Stationary`
+    assert final_momentum == pytest.approx(0, abs=1e-10)
+
+
+def test_no_reset_velocities(tmp_path):
+    """Test not resetting velocities before dynamics."""
+    struct_file = DATA_PATH / "lj-traj.xyz"
+    file_prefix = tmp_path / "md"
+
+    # Check initial velocities are non-zero.
+    struct = read(struct_file)
+    init_momentum = np.sum(struct.get_momenta())
+    init_velocities = struct.get_velocities()
+    assert init_momentum != pytest.approx(0, abs=1e-10)
+
+    nvt = NVT(
+        arch="mace",
+        model=MODEL_PATH,
+        struct=struct_file,
+        temp=300.0,
+        steps=0,
+        traj_every=1,
+        stats_every=1,
+        rescale_velocities=False,
+        file_prefix=file_prefix,
+    )
+    nvt.run()
+
+    # Check final velocities are non-zero and unchanged
+    final_momentum = np.sum(nvt.struct.get_momenta())
+    final_velocities = nvt.struct.get_velocities()
+    assert final_momentum == pytest.approx(init_momentum)
+    assert final_velocities == pytest.approx(init_velocities)
+
+
+def test_reset_velocities_zero_kinetic_energy(tmp_path):
+    """Test velocities are set for zero kinetic energy."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    log_file = tmp_path / "nvt.log"
+
+    single_point = SinglePoint(
+        struct=DATA_PATH / "H2O.cif",
+        arch="mace",
+        model=MODEL_PATH,
+    )
+    # Give structure arbitrary velocities
+    single_point.struct.set_velocities(np.zeros((3, 3)))
+    init_momentum = np.sum(single_point.struct.get_momenta())
+    init_velocities = single_point.struct.get_velocities()
+    init_kinetic_energy = single_point.struct.get_kinetic_energy()
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=0,
+        traj_every=1,
+        stats_every=1,
+        rescale_velocities=False,
+        file_prefix=file_prefix,
+        log_kwargs={"filename": log_file},
+    )
+    nvt.run()
+
+    assert_log_contains(
+        log_file,
+        includes=["Setting velocity due to zero kinetic energy"],
+    )
+
+    final_momentum = np.sum(single_point.struct.get_momenta())
+    final_velocities = single_point.struct.get_velocities()
+    final_kinetic_energy = single_point.struct.get_kinetic_energy()
+
+    # Final state should have zero net momentum, but non-zero velocities
+    assert init_momentum == pytest.approx(0, abs=1e-10)
+    assert init_kinetic_energy == pytest.approx(0)
+    assert final_momentum == pytest.approx(0, abs=1e-10)
+    assert final_kinetic_energy != pytest.approx(0, abs=1e-10)
+    assert final_velocities != pytest.approx(init_velocities)
 
 
 def test_remove_rot(tmp_path):

@@ -14,11 +14,11 @@ from typing import Any
 from warnings import warn
 
 from ase import Atoms
-from ase.geometry.analysis import Analysis
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
 from ase.md.melchionna import MelchionnaNPT
+from ase.md.nose_hoover_chain import MTKNPT, IsotropicMTKNPT
 from ase.md.velocitydistribution import (
     MaxwellBoltzmannDistribution,
     Stationary,
@@ -108,11 +108,13 @@ class MolecularDynamics(BaseCalculation):
     minimize_kwargs
         Keyword arguments to pass to geometry optimizer. Default is {}.
     rescale_velocities
-        Whether to rescale velocities. Default is False.
+        Whether to rescale velocities before dynamics and during equilibration.
+        Frequency during equilibration depends on `rescale_every`. Default is False.
     remove_rot
-        Whether to remove rotation. Default is False.
+        Whether to remove rotation when rescaling velocities. Default is False.
     rescale_every
-        Frequency to rescale velocities. Default is 10.
+        Frequency to rescale velocities and remove roation during equilibration.
+        Default is 10.
     file_prefix
         Prefix for output filenames. Default is inferred from structure, ensemble,
         and temperature.
@@ -285,11 +287,13 @@ class MolecularDynamics(BaseCalculation):
         minimize_kwargs
             Keyword arguments to pass to geometry optimizer. Default is {}.
         rescale_velocities
-            Whether to rescale velocities. Default is False.
+            Whether to rescale velocities before dynamics and during equilibration.
+            Frequency during equilibration depends on `rescale_every`. Default is False.
         remove_rot
-            Whether to remove rotation. Default is False.
+            Whether to remove rotation when rescaling velocities. Default is False.
         rescale_every
-            Frequency to rescale velocities. Default is 10.
+            Frequency to rescale velocities and remove roation during equilibration.
+            Default is 10.
         file_prefix
             Prefix for output filenames. Default is inferred from structure, ensemble,
             and temperature.
@@ -1289,8 +1293,6 @@ class MolecularDynamics(BaseCalculation):
 
         data = read(self.traj_file, index=":")
 
-        ana = Analysis(data)
-
         if self.post_process_kwargs.get("rdf_compute", False):
             rdf_args = {
                 name: self.post_process_kwargs.get(key, default)
@@ -1308,7 +1310,7 @@ class MolecularDynamics(BaseCalculation):
             )
             rdf_args["index"] = slice_
 
-            compute_rdf(data, ana, filenames=self._rdf_files, **rdf_args)
+            compute_rdf(data, filenames=self._rdf_files, **rdf_args)
 
         if self.post_process_kwargs.get("vaf_compute", False):
             use_vel = self.post_process_kwargs.get("vaf_velocities", False)
@@ -1371,14 +1373,8 @@ class MolecularDynamics(BaseCalculation):
             raise ValueError("Temperature set for ensemble with no thermostat.")
 
     def run(self) -> None:
-        """Run molecular dynamics simulation and/or temperature ramp."""
+        """Prepare and run molecular dynamics simulation and/or temperature ramp."""
         self._set_info_units(self.info_unit_keys)
-
-        if not self.restart:
-            if self.minimize:
-                self._optimize_structure()
-            if self.rescale_velocities:
-                self._reset_velocities()
 
         if self.offset == 0:
             self._write_header()
@@ -1412,9 +1408,16 @@ class MolecularDynamics(BaseCalculation):
         if self.ramp_temp:
             self.temp = self.temp_start
 
-        # Set velocities to match current temperature
+        # Relax and set velocities to match current temperature
         if not self.restart:
-            self._set_velocity_distribution()
+            if self.minimize:
+                self._optimize_structure()
+            if self.rescale_velocities:
+                self._set_velocity_distribution()
+            if np.isclose(self.struct.get_kinetic_energy(), 0.0, rtol=0, atol=1e-12):
+                if self.logger:
+                    self.logger.warning("Setting velocity due to zero kinetic energy")
+                self._set_velocity_distribution()
 
         # Run temperature ramp
         if self.ramp_temp:
@@ -2145,7 +2148,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
     barostat_substeps
         The number of sub-steps in barostat integration. Default is 1.
     ensemble
-        Name for thermodynamic ensemble. Default is "npt-mtk".
+        Name for thermodynamic ensemble. Default is "npt-mtk-iso".
     ensemble_kwargs
         Keyword arguments to pass to ensemble initialization. Default is {}.
     **kwargs
@@ -2162,7 +2165,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         barostat_chain: int = 3,
         thermostat_substeps: int = 1,
         barostat_substeps: int = 1,
-        ensemble: Ensembles = "npt-mtk",
+        ensemble: Ensembles = "npt-mtk-iso",
         ensemble_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
@@ -2190,20 +2193,28 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         barostat_substeps
             The number of sub-steps in barostat integration. Default is 1.
         ensemble
-            Name for thermodynamic ensemble. Default is "npt-mtk".
+            Name for thermodynamic ensemble. Default is "npt-mtk-iso".
         ensemble_kwargs
             Keyword arguments to pass to ensemble initialization. Default is {}.
         **kwargs
             Additional keyword arguments.
         """
-        try:
-            from ase.md.nose_hoover_chain import (
-                IsotropicMTKNPT as ASE_NPT_MTK,  # noqa: N814 (camelcase-imported-as-constant)
+        if ensemble == "npt-mtk":
+            warn(
+                "`npt-mtk` has been deprecated. Please use `npt-mtk-iso`.",
+                FutureWarning,
+                stacklevel=2,
             )
-        except ImportError as e:
-            raise NotImplementedError(
-                "Please download the latest ASE commits to use this module"
-            ) from e
+            ase_npt_mtk = IsotropicMTKNPT
+        elif ensemble == "npt-mtk-iso":
+            ase_npt_mtk = IsotropicMTKNPT
+        elif ensemble == "npt-mtk-aniso":
+            ase_npt_mtk = MTKNPT
+        else:
+            raise ValueError(
+                "Ensemble NPT_MTK can only be 'npt-mtk-iso' or 'npt-mtk-aniso."
+                f"Not {ensemble}"
+            )
 
         self.pressure = pressure
 
@@ -2211,7 +2222,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
 
         (ensemble_kwargs,) = none_to_dict(ensemble_kwargs)
 
-        self.dyn = ASE_NPT_MTK(
+        self.dyn = ase_npt_mtk(
             self.struct,
             timestep=self.timestep,
             temperature_K=self.temp,
@@ -2242,8 +2253,7 @@ class NPT_MTK(MolecularDynamics):  # noqa: N801 (invalid-class-name)
         if file_prefix is not None:
             return ""
 
-        pressure = f"-p{self.pressure}"
-        return f"{super()._set_param_prefix(file_prefix)}{pressure}"
+        return f"{super()._set_param_prefix(file_prefix)}-p{self.pressure}"
 
     @property
     def info_unit_keys(self) -> tuple[str]:
