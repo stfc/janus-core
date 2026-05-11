@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase.filters import FrechetCellFilter, UnitCellFilter
 from ase.io import read
+from numpy.testing import assert_allclose
 import pytest
 
 from janus_core.calculations.geom_opt import GeomOpt
@@ -50,6 +51,28 @@ def test_optimize(arch, struct, expected, kwargs):
     assert single_point.struct.get_potential_energy() == pytest.approx(
         expected, rel=1e-8
     )
+
+
+def test_constrained_optimize():
+    """Test optimizing geometry using MACE with ASE constraint."""
+    single_point = SinglePoint(
+        struct=DATA_PATH / "H2O.cif",
+        arch="mace",
+        model=MODEL_PATH,
+    )
+
+    initial_positions = single_point.struct.positions.copy()
+
+    optimizer = GeomOpt(
+        single_point.struct,
+        filter_class=None,  # No volume opt
+        constraint_class="FixAtoms",
+        constraint_kwargs={"indices": [2]},
+    )
+    optimizer.run()
+
+    assert_allclose(initial_positions[2], optimizer.struct.positions[2])
+    assert (initial_positions[:2] - optimizer.struct.positions[:2]).any()
 
 
 def test_saving_struct(tmp_path):

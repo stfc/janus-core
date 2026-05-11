@@ -603,6 +603,39 @@ def test_filter_str_error(tmp_path):
     assert isinstance(result.exception, ValueError)
 
 
+def test_constraint(tmp_path):
+    """Test setting constraint."""
+    results_path = tmp_path / "H2O-opt.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "H2O.cif",
+            "--arch",
+            "mace_mp",
+            "--out",
+            results_path,
+            "--constraint",
+            "FixAtoms",
+            "--minimize-kwargs",
+            "{'constraint_kwargs': {'indices': [2]}}",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert_log_contains(
+        log_path,
+        includes=["Starting geometry optimization", "Using constraint: FixAtoms"],
+    )
+
+
 @pytest.mark.parametrize("read_kwargs", ["{'index': 1}", "{}"])
 def test_valid_traj_input(read_kwargs, tmp_path):
     """Test valid trajectory input structure handled."""
