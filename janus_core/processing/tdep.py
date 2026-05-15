@@ -97,7 +97,7 @@ def build_tdep_inputs_from_nvt(
 
     with open(positions_path, "w", encoding="utf-8") as file:
         file.writelines(
-            f"{position[0]:.12f} {position[1]:.12f} {position[2]:.12f}\n"
+            " ".join(map(out_fmt, position) + "\n"
             for atoms in trajectory
             for position in atoms.get_scaled_positions()
         )
