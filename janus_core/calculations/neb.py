@@ -13,6 +13,7 @@ from ase.mep import NEB as ASE_NEB
 from ase.mep import NEBTools
 from ase.mep.neb import NEBOptimizer
 from matplotlib.figure import Figure
+import numpy as np
 from numpy.linalg import LinAlgError
 from pymatgen.io.ase import AseAtomsAdaptor
 
@@ -526,7 +527,9 @@ class NEB(BaseCalculation):
         """Run NEBTools analysis."""
         self.nebtools = NEBTools(self.images)
         barrier, delta_E = self.nebtools.get_barrier()  # noqa: N806
-        max_force = self.nebtools.get_fmax()
+        # Avoid reinitialising NEB with NEBTools.get_fmax
+        forces = self.neb.get_forces()
+        max_force = np.sqrt((forces**2).sum(axis=1).max())
         self.results = {
             "barrier": barrier,
             "delta_E": delta_E,

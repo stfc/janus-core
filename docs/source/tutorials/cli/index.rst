@@ -8,6 +8,7 @@ Command-line Tutorials
     singlepoint
     geomopt
     md
+    eos
     phonons
     neb
     elasticity
