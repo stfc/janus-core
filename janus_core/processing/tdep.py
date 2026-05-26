@@ -65,7 +65,7 @@ def build_tdep_inputs_from_nvt(
     forces_path = output_dir / "infile.forces"
     stat_path = output_dir / "infile.stat"
     meta_path = output_dir / "infile.meta"
-
+    out_fmt = "{:.12f}".format
     trajectory = read(traj_file, index=":")
     n_atoms = len(trajectory[0])
     n_steps = len(trajectory)
@@ -85,10 +85,12 @@ def build_tdep_inputs_from_nvt(
         )
 
     meta_path.write_text(
-        f"{n_atoms}    # N atoms\n"
-        f"{n_steps}    # N timesteps\n"
-        f"{timestep}    # timestep in fs\n"
-        f"{temperature}    # temperature in K\n",
+        f"""\
+{n_atoms}    # N atoms
+{n_steps}    # N timesteps
+{timestep}    # timestep in fs
+{temperature}    # temperature in K
+""",
         encoding="utf-8",
     )
 
@@ -97,7 +99,7 @@ def build_tdep_inputs_from_nvt(
 
     with open(positions_path, "w", encoding="utf-8") as file:
         file.writelines(
-            " ".join(map(out_fmt, position) + "\n"
+            " ".join(map(out_fmt, position)) + "\n"
             for atoms in trajectory
             for position in atoms.get_scaled_positions()
         )
@@ -125,18 +127,24 @@ def build_tdep_inputs_from_nvt(
     with open(stat_path, "w", encoding="utf-8") as file:
         file.writelines(
             f"{i:d} "
-            f"{time_fs[i]:.12f} "
-            f"{e_tot[i]:.12f} "
-            f"{e_pot[i]:.12f} "
-            f"{e_kin[i]:.12f} "
-            f"{temperature_data[i]:.12f} "
-            f"{pressure[i]:.12f} "
-            f"{stress_xx[i]:.12f} "
-            f"{stress_yy[i]:.12f} "
-            f"{stress_zz[i]:.12f} "
-            f"{stress_xz[i]:.12f} "
-            f"{stress_yz[i]:.12f} "
-            f"{stress_xy[i]:.12f}\n"
+            + " ".join(
+                out_fmt(dat[i])
+                for dat in (
+                    time_fs,
+                    e_tot,
+                    e_pot,
+                    e_kin,
+                    temperature_data,
+                    pressure,
+                    stress_xx,
+                    stress_yy,
+                    stress_zz,
+                    stress_xz,
+                    stress_yz,
+                    stress_xy,
+                )
+            )
+            + "\n"
             for i in range(len(time_fs))
         )
 
