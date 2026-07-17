@@ -135,7 +135,7 @@ def skip_extras(arch: str):
             pytest.importorskip("deepmd")
         case "grace":
             pytest.importorskip("tensorpotential")
-        case "mace" | "mace_mp" | "mace_off" | "mace_omol":
+        case "mace" | "mace_mp" | "mace_off" | "mace_omol" | "mace_polar":
             pytest.importorskip("mace")
         case "mattersim":
             pytest.importorskip("mattersim")
