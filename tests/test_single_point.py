@@ -88,7 +88,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),
         ("mace_omol", "cpu", -2079.8650795528843, "H2O.cif", {}),
-        ("mace_polar", "cpu", -2079.863982582351, "H2O.cif", {}),
+        (
+            "mace_polar",
+            "cpu",
+            -2079.863982582351,
+            "H2O.cif",
+            {"model": MACE_POLAR_MODEL},
+        ),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
         (
             "nequip",

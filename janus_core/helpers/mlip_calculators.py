@@ -233,8 +233,8 @@ def choose_calculator(
             from mace import __version__
             from mace.calculators import mace_polar
 
-            # Default to "polar-1-s" model and float64 precision
-            model = model if model else "polar-1-s"
+            # Default to "polar-1-m" model and float64 precision
+            model = model if model else "polar-1-m"
             kwargs.setdefault("default_dtype", "float64")
 
             calculator = mace_polar(model=model, device=device, **kwargs)
