@@ -62,7 +62,7 @@ PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/upet/resolve/main/models/pet-mad-s-v1.1.0.ckpt"
 )
 
-MACE_POLAR_MODEL = "mace-polar-1-s"
+MACE_POLAR_MODEL = "polar-1-s"
 
 
 @pytest.mark.parametrize(
