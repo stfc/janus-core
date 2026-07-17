@@ -62,6 +62,8 @@ PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/upet/resolve/main/models/pet-mad-s-v1.1.0.ckpt"
 )
 
+MACE_POLAR_MODEL = "mace-polar-1-s"
+
 
 @pytest.mark.parametrize(
     "arch, device, kwargs",
@@ -83,6 +85,7 @@ PET_MAD_CHECKPOINT = (
         ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
         ("mace_omol", "cpu", {}),
         ("mace_omol", "cpu", {"model": "extra_large"}),
+        ("mace_polar", "cpu", {"model": MACE_POLAR_MODEL}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
@@ -139,6 +142,7 @@ def test_invalid_arch():
         ("mace", "/invalid/path"),
         ("mace_mp", "/invalid/path"),
         ("mace_off", "/invalid/path"),
+        ("mace_polar", "/invalid/path"),
         ("mattersim", "/invalid/path"),
         ("nequip", "/invalid/path"),
         ("orb", "/invalid/path"),
