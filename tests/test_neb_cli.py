@@ -231,8 +231,8 @@ def test_invalid_interpolator(tmp_path):
             file_prefix,
         ],
     )
-    assert result.exit_code == 2
-    assert "'test' is not one of" in result.stderr
+    assert result.exit_code == 1
+    assert "'test' is not one of" in result.exception.message
 
 
 def test_interpolate_and_band(tmp_path):
