@@ -137,7 +137,7 @@ module-name = "janus_core"
 module-root = ""
 
 [tool.uv.sources]
-graph-longrange = { git = "https://github.com/WillBaldwin0/graph_electrostatics", tag = "v0.4.3" }
+graph-longrange = { git = "https://github.com/WillBaldwin0/graph_electrostatics", tag = "v0.4.0" }
 
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)
