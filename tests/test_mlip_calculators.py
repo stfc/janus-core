@@ -85,6 +85,7 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("mace_off", "cpu", {"model": MACE_OFF_PATH}),
         ("mace_omol", "cpu", {}),
         ("mace_omol", "cpu", {"model": "extra_large"}),
+        ("mace_polar", "cpu", {}),
         ("mace_polar", "cpu", {"model": MACE_POLAR_MODEL}),
         ("mattersim", "cpu", {}),
         ("mattersim", "cpu", {"model": "mattersim-v1.0.0-1m"}),
