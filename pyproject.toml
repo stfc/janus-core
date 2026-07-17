@@ -65,7 +65,7 @@ orb = [
     "orb-models == 0.5.5; sys_platform != 'win32' and python_version < '3.13'",
 ]
 upet = [
-    "upet == 0.2.1; python_version > '3.11'"
+    "upet == 0.2.6; python_version > '3.11'"
 ]
 plumed = [
     "plumed<3.0.0,>=2.10.0; sys_platform != 'win32'",
