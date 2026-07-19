@@ -83,11 +83,15 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v4
 
       - name: Check all sources documented
+        shell: bash
         run: |
           diff -y --suppress-common-lines \
                <(git ls-files janus_core/** | sed '/.py$/!d; s/\/__init__.py//; s#/#.#g; s/.py$//' | sort) \
@@ -101,7 +105,43 @@ jobs:
       - name: Install pandoc
         uses: pandoc/actions/setup@v1
 
-      - name: Install dependencies
+      - name: Install poppler-utils and gnuplot
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils gnuplot-nox
+
+      - name: Set up Miniconda for TDEP
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          auto-update-conda: true
+          activate-environment: tdep
+          python-version: "3.10"
+
+      - name: Install TDEP build deps via conda-forge
+        run: |
+          conda install -c conda-forge -y \
+            gfortran openmpi-mpifort scalapack fftw hdf5
+
+      - name: Cache TDEP build
+        id: cache-tdep
+        uses: actions/cache@v4
+        with:
+          path: ~/tdep
+          key: tdep-${{ runner.os }}-conda-v1
+
+      - name: Clone & build TDEP
+        if: steps.cache-tdep.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 https://github.com/tdep-developers/tdep.git ~/tdep
+          cd ~/tdep
+          cp examples/build/important_settings.conda important_settings
+          sed -i "s|^PREFIX=.*|PREFIX=$CONDA_PREFIX|" important_settings
+          ./build_things.sh --nthreads_make 2
+
+      - name: Add TDEP to PATH
+        run: echo "$HOME/tdep/bin" >> $GITHUB_PATH
+
+      - name: Install Python dependencies
         run: |
           uv sync --extra mace
           uv pip install --reinstall pynvml

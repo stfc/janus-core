@@ -21,6 +21,11 @@ rescale_every: 50
 
 post_process_kwargs:
   rdf_compute: True
+  tdep_compute: True
+  tdep_unit_cell_file: "tests/data/NaCl.cif"
+  tdep_supercell_file: "tests/data/NaCl.cif"
+  tdep_output_dir: "tdep-inputs"
+
 correlation_kwargs:
   vaf:
     a: Velocity

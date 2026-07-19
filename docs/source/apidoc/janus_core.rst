@@ -332,6 +332,16 @@ janus\_core.processing.post\_process module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.processing.tdep module
+----------------------------------
+
+.. automodule:: janus_core.processing.tdep
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.processing.symmetry module
 --------------------------------------
 
