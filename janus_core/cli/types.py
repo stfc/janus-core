@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, get_args
+from typing import TYPE_CHECKING, Annotated
 
-from click import Choice
 from typer import Option
 
 from janus_core.helpers.janus_types import Architectures, Devices
@@ -77,18 +76,16 @@ StructPath = Annotated[
 ]
 
 Architecture = Annotated[
-    str | None,
+    Architectures | None,
     Option(
-        click_type=Choice(get_args(Architectures)),
         help="MLIP architecture to use for calculations.",
         rich_help_panel="MLIP calculator",
         show_default=False,
     ),
 ]
 Device = Annotated[
-    str | None,
+    Devices | None,
     Option(
-        click_type=Choice(get_args(Devices)),
         help="Device to run calculations on.",
         rich_help_panel="MLIP calculator",
     ),

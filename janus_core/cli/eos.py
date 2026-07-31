@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Annotated, get_args
+from typing import Annotated
 
-from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -49,9 +48,8 @@ def eos(
         int, Option(help="Number of volumes.", rich_help_panel="Calculation")
     ] = 7,
     eos_type: Annotated[
-        str,
+        EoSNames,
         Option(
-            click_type=Choice(get_args(EoSNames)),
             help="Type of fit for equation of state.",
             rich_help_panel="Calculation",
         ),
@@ -111,7 +109,7 @@ def eos(
     Parameters
     ----------
     ctx
-        Typer (Click) Context. Automatically set.
+        Typer Context. Automatically set.
     arch
         MLIP architecture to use for calculations.
     struct

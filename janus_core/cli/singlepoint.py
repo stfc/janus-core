@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from pathlib import Path
 from typing import Annotated, get_args
 
-from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -26,6 +26,10 @@ from janus_core.cli.types import (
 from janus_core.cli.utils import yaml_converter_callback
 from janus_core.helpers.janus_types import Properties
 
+PropertiesEnum = Enum(
+    "Properties", {value.upper(): value for value in get_args(Properties)}
+)
+
 app = Typer()
 
 
@@ -39,9 +43,8 @@ def singlepoint(
     struct: StructPath,
     # Calculation
     properties: Annotated[
-        list[str] | None,
+        list[PropertiesEnum],
         Option(
-            click_type=Choice(get_args(Properties)),
             help=(
                 "Properties to calculate. If not specified, 'energy', 'forces' "
                 "and 'stress' will be returned."
@@ -79,7 +82,7 @@ def singlepoint(
     Parameters
     ----------
     ctx
-        Typer (Click) Context. Automatically set.
+        Typer Context. Automatically set.
     arch
         MLIP architecture to use for single point calculations.
     struct
