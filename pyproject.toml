@@ -54,7 +54,7 @@ d3 = [
     "torch-dftd==0.5.1",
 ]
 grace = [
-    "tensorpotential == 0.5.2",
+    "tensorpotential == 0.6.0",
 ]
 mace = [
     "mace-torch == 0.3.16",
