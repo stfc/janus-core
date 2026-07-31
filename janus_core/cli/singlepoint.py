@@ -134,6 +134,9 @@ def singlepoint(
     # Check options from configuration file are all valid
     check_config(ctx)
 
+    if properties:
+        properties = [prop.value for prop in properties]
+
     [read_kwargs, calc_kwargs, write_kwargs] = parse_typer_dicts(
         [read_kwargs, calc_kwargs, write_kwargs]
     )
