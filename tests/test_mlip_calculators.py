@@ -74,7 +74,7 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
         ("grace", "cpu", {}),
-        ("grace", "cpu", {"model": "GRACE-1L-MP-r6"}),
+        ("grace", "cpu", {"model": "GRACE-1L-OMAT"}),
         ("mace", "cpu", {"model": MACE_MP_PATH}),
         ("mace", "cpu", {"model_paths": MACE_MP_PATH}),
         ("mace_mp", "cpu", {}),
