@@ -214,10 +214,8 @@ default-groups = [
 ]
 
 constraint-dependencies = [
-    "dgl==2.1",
     "tensorflow>=2.16.1",
     "tensorflow-io-gcs-filesystem<=0.31.0; sys_platform == 'win32'",
-    "snowballstemmer<3",
 ]
 
 conflicts = [
