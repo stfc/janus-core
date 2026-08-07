@@ -98,9 +98,11 @@ Current and planned features include:
 - [x] Training ML potentials
   - MACE
   - Nequip
+  - SevenNet
 - [x] Fine-tuning MLIPs
   - MACE
   - Nequip
+  - SevenNet
 - [x] MLIP descriptors
   - MACE
 - [x] Data preprocessing
