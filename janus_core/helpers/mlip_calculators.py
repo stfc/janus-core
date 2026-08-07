@@ -361,9 +361,8 @@ def choose_calculator(
             )
 
         case "grace":
+            from tensorpotential import __version__
             from tensorpotential.calculator import grace_fm
-
-            __version__ = "0.5.1"
 
             # Default model
             model = model if model else "GRACE-2L-OMAT"
