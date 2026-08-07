@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
-from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 
@@ -69,9 +68,8 @@ def neb(
     ] = False,
     neb_kwargs: NebKwargs = None,
     interpolator: Annotated[
-        str | None,
+        Literal["ase", "pymatgen"] | None,
         Option(
-            click_type=Choice(["ase", "pymatgen"]),
             help="Choice of interpolation strategy.",
             rich_help_panel="Calculation",
         ),
@@ -126,7 +124,7 @@ def neb(
     Parameters
     ----------
     ctx
-        Typer (Click) Context. Automatically set.
+        Typer Context. Automatically set.
     arch
         MLIP architecture to use for Nudged Elastic Band method.
     init_struct

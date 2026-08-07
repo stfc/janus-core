@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Annotated, get_args
+from typing import Annotated
 
-from click import Choice
 from typer import Context, Option, Typer
 from typer_config import use_config
 import yaml
@@ -65,9 +64,8 @@ def md(
     # Required
     arch: Architecture,
     ensemble: Annotated[
-        str,
+        Ensembles,
         Option(
-            click_type=Choice(get_args(Ensembles)),
             help="Name of thermodynamic ensemble.",
             rich_help_panel="Calculation",
             show_default=False,
@@ -383,7 +381,7 @@ def md(
     Parameters
     ----------
     ctx
-        Typer (Click) Context. Automatically set.
+        Typer Context. Automatically set.
     arch
         MLIP architecture to use for molecular dynamics.
     ensemble

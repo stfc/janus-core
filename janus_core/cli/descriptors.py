@@ -85,7 +85,7 @@ def descriptors(
     Parameters
     ----------
     ctx
-        Typer (Click) Context. Automatically set.
+        Typer Context. Automatically set.
     arch
         MLIP architecture to use for calculations.
     struct
