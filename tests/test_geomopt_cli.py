@@ -808,6 +808,9 @@ def test_fix_symmetry(tmp_path):
     with open(summary_path, encoding="utf-8") as file:
         summary = yaml.safe_load(file)
     assert summary["config"]["fix_symmetry"] is True
+    assert_log_contains(
+        log_path, includes=["Constrain the symmetry of the system with"]
+    )
 
 
 def test_no_carbon(tmp_path):

@@ -305,7 +305,8 @@ class GeomOpt(BaseCalculation):
                 )
             if self.logger:
                 self.logger.info(
-                    "FixSymmetry constraint applied with symprec=%s, adjust_cell=%s",
+                    "Constrain the symmetry of the system with"
+                    "symprec=%s, adjust_cell=%s",
                     self.symmetry_tolerance,
                     self.filter_class is not None,
                 )
