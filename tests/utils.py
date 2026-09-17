@@ -133,6 +133,8 @@ def skip_extras(arch: str):
             pytest.importorskip("chgnet")
         case "dpa3":
             pytest.importorskip("deepmd")
+        case "fennix":
+            pytest.importorskip("fennol")
         case "grace":
             pytest.importorskip("tensorpotential")
         case "mace" | "mace_mp" | "mace_off" | "mace_omol" | "mace_polar":

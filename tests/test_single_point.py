@@ -19,6 +19,7 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
 DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+FENNIX_PATH = MODEL_PATH / "ani2x.fnx"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
@@ -84,6 +85,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
             -27.10070295,
             "NaCl.cif",
             {"model": UMA_LABEL},
+        ),
+        (
+            "fennix",
+            "cpu",
+            -0.03934891415044156,
+            "H2O.cif",
+            {"model": FENNIX_PATH},
         ),
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),

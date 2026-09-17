@@ -131,6 +131,7 @@ Architectures = Literal[
     "fairchem",
     "mace_omol",
     "mace_polar",
+    "fennix",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal[
