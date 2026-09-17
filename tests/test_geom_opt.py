@@ -416,3 +416,53 @@ def test_traj_kwargs_new_dir(tmp_path):
     assert traj_path.exists()
     traj = read(traj_path, index=":")
     assert len(traj) == 3
+
+
+def test_fix_symmetry():
+    """Test fix_symmetry constraint attachment and symmetry preservation."""
+    from ase.constraints import FixAtoms, FixSymmetry
+
+    from janus_core.processing.symmetry import spacegroup
+
+    # Test FixSymmetry is attached to struct
+    opt = GeomOpt(
+        struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        fix_symmetry=True,
+    )
+    assert any(isinstance(c, FixSymmetry) for c in opt.struct.constraints)
+
+    # Test existing constraints are preserved
+    struct = read(DATA_PATH / "NaCl-deformed.cif")
+    struct.set_constraint(FixAtoms(indices=[0]))
+    opt = GeomOpt(
+        struct=struct,
+        arch="mace_mp",
+        model=MODEL_PATH,
+        fix_symmetry=True,
+    )
+    assert any(isinstance(c, FixAtoms) for c in opt.struct.constraints)
+    assert any(isinstance(c, FixSymmetry) for c in opt.struct.constraints)
+
+    # Test optimization preserves symmetry
+    initial_spacegroup = spacegroup(opt.struct)
+    opt.run()
+    assert spacegroup(opt.struct) == initial_spacegroup
+
+
+def test_fix_symmetry_cell():
+    """Test fix_symmetry with cell optimization."""
+    from janus_core.processing.symmetry import spacegroup
+
+    opt = GeomOpt(
+        struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        filter_class=FrechetCellFilter,
+        fix_symmetry=True,
+        fmax=0.01,
+    )
+    initial_spacegroup = spacegroup(opt.struct)
+    opt.run()
+    assert spacegroup(opt.struct) == initial_spacegroup

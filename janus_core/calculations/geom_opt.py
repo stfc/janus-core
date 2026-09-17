@@ -8,6 +8,7 @@ from typing import Any
 import warnings
 
 from ase import Atoms, filters, units
+from ase.constraints import FixSymmetry
 from ase.filters import FrechetCellFilter
 from ase.io import read
 import ase.optimize
@@ -63,6 +64,8 @@ class GeomOpt(BaseCalculation):
         Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
     steps
         Set maximum number of optimization steps to run. Default is 1000.
+    fix_symmetry
+        Whether to preserve symmetry during geometry optimization. Default is False.
     symmetrize
         Whether to refine symmetry after geometry optimization. Default is False.
     symmetry_tolerance
@@ -108,6 +111,7 @@ class GeomOpt(BaseCalculation):
         file_prefix: PathLike | None = None,
         fmax: float = 0.1,
         steps: int = 1000,
+        fix_symmetry: bool = False,
         symmetrize: bool = False,
         symmetry_tolerance: float = 0.001,
         angle_tolerance: float = -1.0,
@@ -154,6 +158,8 @@ class GeomOpt(BaseCalculation):
             Set force convergence criteria for optimizer in units eV/Å. Default is 0.1.
         steps
             Set maximum number of optimization steps to run. Default is 1000.
+        fix_symmetry
+            Whether to preserve symmetry during geometry optimization. Default is False.
         symmetrize
             Whether to refine symmetry after geometry optimization. Default is False.
         symmetry_tolerance
@@ -192,6 +198,7 @@ class GeomOpt(BaseCalculation):
 
         self.fmax = fmax
         self.steps = steps
+        self.fix_symmetry = fix_symmetry
         self.symmetrize = symmetrize
         self.symmetry_tolerance = symmetry_tolerance
         self.angle_tolerance = angle_tolerance
@@ -282,6 +289,27 @@ class GeomOpt(BaseCalculation):
         self._set_functions()
         if self.logger:
             self.logger.info("Using optimizer: %s", self.optimizer.__name__)
+
+        if self.fix_symmetry:
+            has_fix_symmetry = any(
+                isinstance(c, FixSymmetry) for c in self.struct.constraints
+            )
+            if not has_fix_symmetry:
+                sym_constraint = FixSymmetry(
+                    self.struct,
+                    symprec=self.symmetry_tolerance,
+                    adjust_cell=self.filter_class is not None,
+                )
+                self.struct.set_constraint(
+                    list(self.struct.constraints) + [sym_constraint]
+                )
+            if self.logger:
+                self.logger.info(
+                    "Constrain the symmetry of the system with"
+                    "symprec=%s, adjust_cell=%s",
+                    self.symmetry_tolerance,
+                    self.filter_class is not None,
+                )
 
         if self.filter_class is not None:
             if "scalar_pressure" in self.filter_kwargs:
