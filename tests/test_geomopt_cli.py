@@ -778,6 +778,38 @@ def test_symmetrize(tmp_path):
     assert results_2.cell.cellpar() == pytest.approx(expected)
 
 
+def test_fix_symmetry(tmp_path):
+    """Test fix_symmetry option."""
+    results_path = tmp_path / "test" / "NaCl-opt.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl-deformed.cif",
+            "--arch",
+            "mace_mp",
+            "--fmax",
+            0.01,
+            "--fix-symmetry",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+    assert results_path.exists()
+    with open(summary_path, encoding="utf-8") as file:
+        summary = yaml.safe_load(file)
+    assert summary["config"]["fix_symmetry"] is True
+
+
 def test_no_carbon(tmp_path):
     """Test disabling carbon tracking."""
     results_path = tmp_path / "NaCl-results.extxyz"

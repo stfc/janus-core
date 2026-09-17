@@ -5,11 +5,12 @@ from __future__ import annotations
 from ase import Atoms
 from ase.spacegroup.symmetrize import refine_symmetry
 from spglib import get_spacegroup
+from spglib.error import SpglibError
 
 
 def spacegroup(
     struct: Atoms, sym_tolerance: float = 0.001, angle_tolerance: float = -1.0
-) -> str:
+) -> str | None:
     """
     Determine the spacegroup for a structure.
 
@@ -26,18 +27,21 @@ def spacegroup(
 
     Returns
     -------
-    str
-        Spacegroup name.
+    str | None
+        Spacegroup name, or None if symmetry cannot be determined.
     """
-    return get_spacegroup(
-        cell=(
-            struct.get_cell(),
-            struct.get_scaled_positions(),
-            struct.get_atomic_numbers(),
-        ),
-        symprec=sym_tolerance,
-        angle_tolerance=angle_tolerance,
-    )
+    try:
+        return get_spacegroup(
+            cell=(
+                struct.get_cell(),
+                struct.get_scaled_positions(),
+                struct.get_atomic_numbers(),
+            ),
+            symprec=sym_tolerance,
+            angle_tolerance=angle_tolerance,
+        )
+    except SpglibError:
+        return None
 
 
 def snap_symmetry(struct: Atoms, sym_tolerance: float = 0.001) -> None:

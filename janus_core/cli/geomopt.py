@@ -131,6 +131,13 @@ def geomopt(
             rich_help_panel="Calculation",
         ),
     ] = 0.0,
+    fix_symmetry: Annotated[
+        bool,
+        Option(
+            help="Whether to preserve symmetry during geometry optimization.",
+            rich_help_panel="Calculation",
+        ),
+    ] = False,
     symmetrize: Annotated[
         bool,
         Option(
@@ -209,6 +216,8 @@ def geomopt(
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
         0.0.
+    fix_symmetry
+        Whether to preserve symmetry during geometry optimization. Default is False.
     symmetrize
         Whether to refine symmetry after geometry optimization. Default is False.
     symmetry_tolerance
@@ -320,6 +329,7 @@ def geomopt(
         "optimizer": optimizer,
         "fmax": fmax,
         "steps": steps,
+        "fix_symmetry": fix_symmetry,
         "symmetrize": symmetrize,
         "symmetry_tolerance": symmetry_tolerance,
         "file_prefix": file_prefix,
