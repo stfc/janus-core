@@ -414,6 +414,55 @@ def choose_calculator(
                 **kwargs,
             )
 
+        case "fennix":
+            import importlib.metadata
+
+            import fennol
+            from fennol.ase import FENNIXCalculator
+            from fennol.models import FENNIX
+            import jax
+
+            __version__ = getattr(fennol, "__version__", None) or (
+                importlib.metadata.version("fennol")
+            )
+
+            if device not in ("cpu", "cuda"):
+                raise ValueError(f"Device {device} is not supported for {arch}")
+
+            if device == "cpu":
+                jax.config.update("jax_default_device", jax.devices("cpu")[0])
+                kwargs.setdefault("gpu_preprocessing", False)
+            elif device == "cuda":
+                try:
+                    cuda_device = jax.devices("cuda")[0]
+                except (RuntimeError, IndexError):
+                    cuda_device = jax.devices("gpu")[0]
+                jax.config.update("jax_default_device", cuda_device)
+
+            match model:
+                case FENNIX():
+                    loaded_model = model
+                    model = "loaded_FENNIX"
+                case Path() | str():
+                    model_path = Path(model)
+                    if not model_path.exists() and Path(f"{model}.fnx").exists():
+                        model_path = Path(f"{model}.fnx")
+                    if not model_path.exists():
+                        raise ValueError(f"Model path '{model}' does not exist")
+                    loaded_model = str(model_path)
+                case None:
+                    raise ValueError(
+                        f"Please specify `model`, as there is no default model "
+                        f"for {arch}"
+                    )
+                case _:
+                    raise ValueError(
+                        "`model` must be a `FENNIX` object, path to a model file "
+                        "(.fnx), or model filename string"
+                    )
+
+            calculator = FENNIXCalculator(model=loaded_model, **kwargs)
+
         case _:
             raise ValueError(
                 f"Unrecognized {arch=}. Suported architectures "

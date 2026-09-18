@@ -62,6 +62,15 @@ PET_MAD_CHECKPOINT = (
     "https://huggingface.co/lab-cosmo/upet/resolve/main/models/pet-mad-s-v1.1.0.ckpt"
 )
 
+FENNIX_PATH = MODEL_PATH / "ani2x.fnx"
+
+try:
+    from fennol.models import FENNIX
+
+    FENNIX_MODEL = FENNIX.load(FENNIX_PATH)
+except (ImportError, FileNotFoundError):
+    FENNIX_MODEL = None
+
 MACE_POLAR_MODEL = "polar-1-s"
 
 
@@ -73,6 +82,8 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("chgnet", "cpu", {"model": CHGNET_PATH}),
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
         ("dpa3", "cpu", {"model": DPA3_PATH}),
+        ("fennix", "cpu", {"model": FENNIX_PATH}),
+        ("fennix", "cpu", {"model": FENNIX_MODEL}),
         ("grace", "cpu", {}),
         ("grace", "cpu", {"model": "GRACE-1L-OMAT"}),
         ("mace", "cpu", {"model": MACE_MP_PATH}),
@@ -139,6 +150,7 @@ def test_invalid_arch():
     [
         ("chgnet", "/invalid/path"),
         ("dpa3", "/invalid/path"),
+        ("fennix", "/invalid/path"),
         ("grace", "/invalid/path"),
         ("mace", "/invalid/path"),
         ("mace_mp", "/invalid/path"),
