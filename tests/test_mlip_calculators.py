@@ -37,9 +37,9 @@ ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 try:
     from orb_models.forcefield.pretrained import orb_d3_xs_v2
 
-    ORB_MODEL = orb_d3_xs_v2(weights_path=ORB_WEIGHTS_PATH)
+    ORB_MODEL, ORB_ADAPTER = orb_d3_xs_v2(weights_path=ORB_WEIGHTS_PATH)
 except ImportError:
-    ORB_MODEL = None
+    ORB_MODEL = ORB_ADAPTER = None
 
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
@@ -102,7 +102,7 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("mattersim", "cpu", {"model": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),
-        ("orb", "cpu", {"model": ORB_MODEL}),
+        ("orb", "cpu", {"model": ORB_MODEL, "atoms_adapter": ORB_ADAPTER}),
         ("upet", "cpu", {}),
         ("upet", "cpu", {"model": PET_MAD_CHECKPOINT}),
         ("upet", "cpu", {"checkpoint_path": PET_MAD_CHECKPOINT}),
