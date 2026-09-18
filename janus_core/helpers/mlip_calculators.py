@@ -306,11 +306,12 @@ def choose_calculator(
 
             # No default `model`
             if model is None:
-                # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
+                # Pretrained models registered in deepmd-kit. See
+                # https://docs.deepmodeling.com/projects/deepmd/en/latest/model/pretrained.html
                 raise ValueError(
                     "Please specify `model`, as there is no "
                     f"default model for {arch} "
-                    "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
+                    "e.g. a model downloaded with `dp pretrained download DPA-3.3-1M`"
                 )
 
             model = str(model)
