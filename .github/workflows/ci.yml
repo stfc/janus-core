@@ -48,7 +48,7 @@ jobs:
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest --cov janus_core --cov-append .
 
-      - name: Install updated UPET (incompatible with Orb/GRACE)
+      - name: Install updated UPET (incompatible with Orb)
         run: |
           uv cache clean
           uv sync --extra upet --extra d3
