@@ -123,7 +123,7 @@ Architectures = Literal[
     "chgnet",
     "sevennet",
     "nequip",
-    "dpa3",
+    "deepmd",
     "orb",
     "mattersim",
     "grace",
@@ -131,6 +131,8 @@ Architectures = Literal[
     "fairchem",
     "mace_omol",
     "mace_polar",
+    # Deprecated alias for "deepmd"
+    "dpa3",
 ]
 Devices = Literal["cpu", "cuda", "mps", "xpu"]
 Ensembles = Literal[

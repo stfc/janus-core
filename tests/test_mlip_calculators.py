@@ -26,7 +26,9 @@ try:
 except ImportError:
     CHGNET_MODEL = None
 
-DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+DPA3_PATH = MODEL_PATH / "extra" / "DPA-3.3-1M.pt"
+
+DPA4_MODEL = "DPA4-Nano-OMat24-v20260805"
 
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
@@ -35,9 +37,9 @@ ORB_WEIGHTS_PATH = MODEL_PATH / "orb-d3-xs-v2-20241011.ckpt"
 try:
     from orb_models.forcefield.pretrained import orb_d3_xs_v2
 
-    ORB_MODEL = orb_d3_xs_v2(weights_path=ORB_WEIGHTS_PATH)
+    ORB_MODEL, ORB_ADAPTER = orb_d3_xs_v2(weights_path=ORB_WEIGHTS_PATH)
 except ImportError:
-    ORB_MODEL = None
+    ORB_MODEL = ORB_ADAPTER = None
 
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 
@@ -72,7 +74,16 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model": CHGNET_PATH}),
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
-        ("dpa3", "cpu", {"model": DPA3_PATH}),
+        pytest.param(
+            "deepmd",
+            "cpu",
+            {"model": DPA3_PATH, "head": "MPTrj"},
+            marks=pytest.mark.skipif(
+                not DPA3_PATH.exists(),
+                reason=f"Extra model: {DPA3_PATH} not downloaded.",
+            ),
+        ),
+        ("deepmd", "cpu", {"model": DPA4_MODEL}),
         ("grace", "cpu", {}),
         ("grace", "cpu", {"model": "GRACE-1L-OMAT"}),
         ("mace", "cpu", {"model": MACE_MP_PATH}),
@@ -91,7 +102,7 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("mattersim", "cpu", {"model": "mattersim-v1.0.0-1m"}),
         ("nequip", "cpu", {"model": NEQUIP_PATH}),
         ("orb", "cpu", {}),
-        ("orb", "cpu", {"model": ORB_MODEL}),
+        ("orb", "cpu", {"model": ORB_MODEL, "atoms_adapter": ORB_ADAPTER}),
         ("upet", "cpu", {}),
         ("upet", "cpu", {"model": PET_MAD_CHECKPOINT}),
         ("upet", "cpu", {"checkpoint_path": PET_MAD_CHECKPOINT}),
@@ -134,11 +145,21 @@ def test_invalid_arch():
         choose_calculator(arch="invalid")
 
 
+def test_dpa3_deprecated():
+    """Test deprecated dpa3 architecture still configures a deepmd calculator."""
+    skip_extras("deepmd")
+
+    with pytest.warns(FutureWarning, match="`dpa3` has been deprecated"):
+        calculator = choose_calculator(arch="dpa3", model=DPA4_MODEL)
+
+    assert calculator.parameters["arch"] == "dpa3"
+
+
 @pytest.mark.parametrize(
     "arch, model",
     [
         ("chgnet", "/invalid/path"),
-        ("dpa3", "/invalid/path"),
+        ("deepmd", "/invalid/path"),
         ("grace", "/invalid/path"),
         ("mace", "/invalid/path"),
         ("mace_mp", "/invalid/path"),
@@ -191,7 +212,7 @@ def test_d3_manual():
     "kwargs",
     [
         {"arch": "chgnet", "model": CHGNET_PATH, "path": CHGNET_PATH},
-        {"arch": "dpa3", "model": DPA3_PATH, "path": DPA3_PATH},
+        {"arch": "deepmd", "model": DPA3_PATH, "path": DPA3_PATH},
         {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
         {"arch": "mace", "model": MACE_MP_PATH, "model_paths": MACE_MP_PATH},
         {"arch": "mace", "model": MACE_MP_PATH, "potential": MACE_MP_PATH},

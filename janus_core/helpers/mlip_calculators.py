@@ -11,10 +11,10 @@ from __future__ import annotations
 from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, get_args
+from warnings import warn
 
 from ase import units
 from ase.calculators.mixing import SumCalculator
-from torch import get_default_dtype
 
 from janus_core.helpers.janus_types import Architectures, Devices, PathLike
 from janus_core.helpers.utils import none_to_dict
@@ -107,6 +107,7 @@ def add_dispersion(
         Configured calculator with D3 dispersion correction added.
     """
     try:
+        from torch import get_default_dtype
         from torch_dftd.torch_dftd3_calculator import TorchDFTD3Calculator
     except ImportError as err:
         raise ImportError("Please install the d3 extra.") from err
@@ -300,17 +301,25 @@ def choose_calculator(
                 compile_path=model, device=device, **kwargs
             )
 
-        case "dpa3":
+        case "deepmd" | "dpa3":
             from deepmd import __version__
             from deepmd.calculator import DP
 
+            if arch == "dpa3":
+                warn(
+                    "`dpa3` has been deprecated. Please use `deepmd`.",
+                    FutureWarning,
+                    stacklevel=2,
+                )
+
             # No default `model`
             if model is None:
-                # From https://matbench-discovery.materialsproject.org/models/dpa3-v1-mptrj
+                # Pretrained models registered in deepmd-kit. See
+                # https://docs.deepmodeling.com/projects/deepmd/en/latest/model/pretrained.html
                 raise ValueError(
                     "Please specify `model`, as there is no "
                     f"default model for {arch} "
-                    "e.g. https://bohrium-api.dp.tech/ds-dl/dpa3openlam-74ng-v3.zip"
+                    "e.g. a model downloaded with `dp pretrained download DPA-3.3-1M`"
                 )
 
             model = str(model)
@@ -319,27 +328,66 @@ def choose_calculator(
 
         case "orb":
             from orb_models import __version__
-            from orb_models.forcefield.calculator import ORBCalculator
-            from orb_models.forcefield.direct_regressor import DirectForcefieldRegressor
-            import orb_models.forcefield.pretrained as orb_ff
+            from orb_models.forcefield import pretrained
+            from orb_models.forcefield.inference.calculator import ORBCalculator
+            from orb_models.forcefield.inference.d3_model import D3SumModel
+            from orb_models.forcefield.models.conservative_regressor import (
+                ConservativeForcefieldRegressor,
+            )
+            from orb_models.forcefield.models.direct_regressor import (
+                DirectForcefieldRegressor,
+            )
+
+            model_func = None
+
+            # Set by `model_func`, if a pre-trained model label is used
+            atoms_adapter = kwargs.pop("atoms_adapter", None)
+
+            # Options for the calculator, rather than loading the model
+            calc_kwargs = {
+                key: kwargs.pop(key)
+                for key in (
+                    "edge_method",
+                    "max_num_neighbors",
+                    "half_supercell",
+                    "directory",
+                )
+                if key in kwargs
+            }
 
             match model:
                 case DirectForcefieldRegressor():
                     loaded_model = model
                     model = "loaded_DirectForcefieldRegressor"
-                case str() if hasattr(orb_ff, model.replace("-", "_")):
-                    loaded_model = getattr(orb_ff, model.replace("-", "_"))()
+                case ConservativeForcefieldRegressor():
+                    loaded_model = model
+                    model = "loaded_ConservativeForcefieldRegressor"
+                case D3SumModel():
+                    loaded_model = model
+                    model = "loaded_D3SumModel"
+                case str() if hasattr(pretrained, model.replace("-", "_")):
+                    model_func = getattr(pretrained, model.replace("-", "_"))
                 case None:
                     # Default model
                     model = "orb_v3_conservative_20_omat"
-                    loaded_model = getattr(orb_ff, model)()
+                    model_func = getattr(pretrained, model)
                 case _:
                     raise ValueError(
-                        "`model` must be a `DirectForcefieldRegressor`, pre-trained "
-                        "model label (e.g. 'orb-v2'), or `None` (uses default, orb-v2)"
+                        "`model` must be a `DirectForcefieldRegressor`, "
+                        "`ConservativeForcefieldRegressor`, `D3SumModel`, or "
+                        "pre-trained model label (e.g. 'orb-v2'), or `None` (uses "
+                        "default, orb_v3_conservative_20_omat)"
                     )
 
-            calculator = ORBCalculator(model=loaded_model, device=device, **kwargs)
+            if model_func:
+                loaded_model, atoms_adapter = model_func(device=device, **kwargs)
+
+            calculator = ORBCalculator(
+                model=loaded_model,
+                atoms_adapter=atoms_adapter,
+                device=device,
+                **calc_kwargs,
+            )
 
         case "mattersim":
             from mattersim import __version__
