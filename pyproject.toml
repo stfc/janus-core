@@ -44,7 +44,7 @@ dependencies = [
 chgnet = [
     "chgnet == 0.4.2",
 ]
-dpa3 = [
+deepmd = [
     "deepmd-kit == 3.2.0",
     # Torch versons before CXX11_ABI_FLAG change
     "torch<2.12",
@@ -239,7 +239,7 @@ conflicts = [
       { extra = "upet" },
     ],
     [
-      { extra = "dpa3" },
+      { extra = "deepmd" },
       { extra = "fairchem" },
     ],
 ]

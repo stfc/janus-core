@@ -11,6 +11,7 @@ from __future__ import annotations
 from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, get_args
+from warnings import warn
 
 from ase import units
 from ase.calculators.mixing import SumCalculator
@@ -300,9 +301,16 @@ def choose_calculator(
                 compile_path=model, device=device, **kwargs
             )
 
-        case "dpa3":
+        case "deepmd" | "dpa3":
             from deepmd import __version__
             from deepmd.calculator import DP
+
+            if arch == "dpa3":
+                warn(
+                    "`dpa3` has been deprecated. Please use `deepmd`.",
+                    FutureWarning,
+                    stacklevel=2,
+                )
 
             # No default `model`
             if model is None:
