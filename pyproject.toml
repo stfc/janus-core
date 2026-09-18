@@ -46,14 +46,14 @@ chgnet = [
     "chgnet == 0.4.2",
 ]
 dpa3 = [
-    "deepmd-kit == 3.1.2",
+    "deepmd-kit == 3.2.0",
     "MPICH; sys_platform != 'win32'",
 ]
 d3 = [
     "torch-dftd==0.5.3",
 ]
 grace = [
-    "tensorpotential == 0.6.0",
+    "tensorpotential == 0.6.1",
 ]
 mace = [
     "mace-torch == 0.3.16",
@@ -61,10 +61,10 @@ mace = [
     "graph-longrange",
 ]
 orb = [
-    "orb-models == 0.6.2; sys_platform != 'win32' and python_version > '3.11' and python_version < '3.13'",
+    "orb-models == 0.7.0; sys_platform != 'win32' and python_version >= '3.12'",
 ]
 upet = [
-    "upet == 0.3.0; python_version > '3.11'"
+    "upet == 0.3.0; python_version >= '3.12'"
 ]
 plumed = [
     "plumed<3.0.0,>=2.10.0; sys_platform != 'win32'",
@@ -75,16 +75,16 @@ visualise = [
 
 # MLIPs with updated e3nn
 mattersim = [
-    "mattersim == 1.2.2; sys_platform != 'win32'",
+    "mattersim == 1.2.5; sys_platform != 'win32' and python_version >= '3.12'",
 ]
 nequip = [
-    "nequip == 0.17.1",
+    "nequip == 0.19.1",
 ]
 sevennet = [
-    "sevenn == 0.12.1",
+    "sevenn == 0.13.0",
 ]
 fairchem = [
-    "fairchem-core == 2.19.0; python_version > '3.11'",
+    "fairchem-core == 2.22.0; python_version >= '3.12'",
 ]
 
 [project.scripts]
@@ -232,10 +232,6 @@ conflicts = [
     [
       { extra = "nequip" },
       { extra = "mace" },
-    ],
-    [
-      { extra = "upet" },
-      { extra = "grace" },
     ],
     [
       { extra = "orb" },
