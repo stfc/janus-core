@@ -26,13 +26,14 @@ jobs:
 
     # Full reinstall in case the version number is the same as the last release
     - name: Uninstall release versions
-      run: uv pip uninstall ase mace-torch
+      run: uv pip uninstall ase mace-torch graph_longrange
 
     - name: Install dev versions
       run: |
         uv pip install \
-            https://gitlab.com/ase/ase.git \
-            https://github.com/ACEsuit/mace.git
+            git+https://gitlab.com/ase/ase.git \
+            git+https://github.com/ACEsuit/mace.git@develop \
+            git+https://github.com/WillBaldwin0/graph_electrostatics.git
 
     - name: Run test suite
       env:
