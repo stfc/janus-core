@@ -46,6 +46,8 @@ chgnet = [
 ]
 dpa3 = [
     "deepmd-kit == 3.2.0",
+    # Torch versons before CXX11_ABI_FLAG change
+    "torch<2.12",
     "MPICH; sys_platform != 'win32'",
 ]
 d3 = [
@@ -235,5 +237,9 @@ conflicts = [
     [
       { extra = "orb" },
       { extra = "upet" },
+    ],
+    [
+      { extra = "dpa3" },
+      { extra = "fairchem" },
     ],
 ]

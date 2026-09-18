@@ -18,7 +18,7 @@ from tests.utils import chdir, read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
-DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+DPA3_PATH = MODEL_PATH / "extra" / "DPA-3.3-1M.pt"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
@@ -77,7 +77,17 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     "arch, device, expected_energy, struct, kwargs",
     [
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
-        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
+        pytest.param(
+            "dpa3",
+            "cpu",
+            -27.019183695316315,
+            "NaCl.cif",
+            {"model": DPA3_PATH, "calc_kwargs": {"head": "MPTrj"}},
+            marks=pytest.mark.skipif(
+                not DPA3_PATH.exists(),
+                reason=f"Extra model: {DPA3_PATH} not downloaded.",
+            ),
+        ),
         (
             "fairchem",
             "cpu",

@@ -26,7 +26,7 @@ try:
 except ImportError:
     CHGNET_MODEL = None
 
-DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+DPA3_PATH = MODEL_PATH / "extra" / "DPA-3.3-1M.pt"
 
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 
@@ -72,7 +72,15 @@ MACE_POLAR_MODEL = "polar-1-s"
         ("chgnet", "cpu", {"model": "0.2.0"}),
         ("chgnet", "cpu", {"model": CHGNET_PATH}),
         ("chgnet", "cpu", {"model": CHGNET_MODEL}),
-        ("dpa3", "cpu", {"model": DPA3_PATH}),
+        pytest.param(
+            "dpa3",
+            "cpu",
+            {"model": DPA3_PATH, "head": "MPTrj"},
+            marks=pytest.mark.skipif(
+                not DPA3_PATH.exists(),
+                reason=f"Extra model: {DPA3_PATH} not downloaded.",
+            ),
+        ),
         ("grace", "cpu", {}),
         ("grace", "cpu", {"model": "GRACE-1L-OMAT"}),
         ("mace", "cpu", {"model": MACE_MP_PATH}),
