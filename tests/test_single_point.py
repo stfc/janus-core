@@ -19,6 +19,8 @@ DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
 DPA3_PATH = MODEL_PATH / "extra" / "DPA-3.3-1M.pt"
+
+DPA4_MODEL = "DPA4-Nano-OMat24-v20260805"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
@@ -78,7 +80,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     [
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
         pytest.param(
-            "dpa3",
+            "deepmd",
             "cpu",
             -27.019183695316315,
             "NaCl.cif",
@@ -88,6 +90,7 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
                 reason=f"Extra model: {DPA3_PATH} not downloaded.",
             ),
         ),
+        ("deepmd", "cpu", -27.080653878011105, "NaCl.cif", {"model": DPA4_MODEL}),
         (
             "fairchem",
             "cpu",

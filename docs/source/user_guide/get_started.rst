@@ -46,7 +46,7 @@ Currently supported MLIP ``extras`` are:
 - ``mace``: `MACE (mace, mace_mp, mace_off, mace_omol) <https://github.com/ACEsuit/mace>`_
 - ``sevenn``: `SevenNet (sevennet) <https://github.com/MDIL-SNU/SevenNet/>`_
 - ``nequip``: `NequIP (nequip) <https://github.com/mir-group/nequip>`_
-- ``dpa3``: `DPA3 (dpa3) <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
+- ``deepmd``: `DeePMD-kit (deepmd) <https://github.com/deepmodeling/deepmd-kit>`_
 - ``orb``: `Orb (orb) <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim (mattersim) <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
