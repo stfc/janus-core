@@ -31,7 +31,7 @@ dependencies = [
     "codecarbon<4.0.0,>=3.0.7",
     "numpy<3,>=1.26.4; python_version < '3.13'",
     "numpy<3,>=2.1.0; python_version >= '3.13'",
-    "phonopy<3,>=2.48.0",
+    "phonopy<5,>=4.5.0",
     "pymatgen>=2025.1.24",
     "pyyaml<7.0.0,>=6.0.1",
     "rich<14.0.0,>=13.9.1",
