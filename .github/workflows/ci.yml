@@ -25,7 +25,7 @@ jobs:
           uv cache clean
 
       - name: Install dependencies compatible with MACE
-        run: uv sync --extra chgnet --extra deepmd --extra d3 --extra grace --extra mace --extra orb --extra plumed
+        run: uv sync --extra chgnet --extra d3 --extra grace --extra mace --extra orb --extra plumed
 
       - name: Install PLUMED
         uses: Iximiel/install-plumed@v1
@@ -72,6 +72,17 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
+
+      - name: Install DeePMD-kit (incompatible with MACE and fairchem)
+        run: |
+          uv cache clean
+          uv sync --extra deepmd
+
+      - name: Run test suite for DeePMD-kit
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Report coverage to Coveralls

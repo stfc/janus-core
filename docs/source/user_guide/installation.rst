@@ -133,9 +133,17 @@ Due to the different requirements of the MLIPs we support, it is not always poss
 MLIPs with different versions of e3nn
 -------------------------------------
 
-Several MLIP packages, including ``mattersim``, ``fairchem``, and newer versions of ``sevennet``,
+Several MLIP packages, including ``mattersim``, ``fairchem``, ``deepmd``, and newer versions of ``sevennet``,
 depend on versions of ``e3nn`` that are incompatible the version required by ``mace``. So these cannot
 be installed together.
+
+
+MLIPs with different versions of PyTorch
+----------------------------------------
+
+``deepmd`` is distributed with pre-built PyTorch operations, so it requires a matching version of
+``torch``. This is incompatible with the version required by ``fairchem``, so these cannot be
+installed together.
 
 
 MLIPs with limited OS support

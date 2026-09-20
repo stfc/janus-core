@@ -45,10 +45,7 @@ chgnet = [
     "chgnet == 0.4.2",
 ]
 deepmd = [
-    "deepmd-kit == 3.2.0",
-    # Torch versons before CXX11_ABI_FLAG change
-    "torch<2.12",
-    "MPICH; sys_platform != 'win32'",
+    "deepmd-kit[torch] == 3.2.0",
 ]
 d3 = [
     "torch-dftd==0.5.3",
@@ -212,6 +209,12 @@ default-groups = [
     "pre-commit",
 ]
 
+override-dependencies = [
+    # MPICH, required by deepmd-kit's torch extra, has no Windows wheels, and is only
+    # loaded by deepmd-kit on Linux and macOS
+    "mpich; sys_platform != 'win32'",
+]
+
 constraint-dependencies = [
     "tensorflow>=2.16.1",
     "tensorflow-io-gcs-filesystem<=0.31.0; sys_platform == 'win32'",
@@ -241,5 +244,9 @@ conflicts = [
     [
       { extra = "deepmd" },
       { extra = "fairchem" },
+    ],
+    [
+      { extra = "deepmd" },
+      { extra = "mace" },
     ],
 ]
