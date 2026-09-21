@@ -9,7 +9,7 @@ dependencies:
       - pymatgen
       - tqdm
       - pack-mm
-      - 'janus-core[all]@git+https://github.com/stfc/janus-core.git@main'
+      - 'janus-core[chgnet,d3,grace,mace,orb,plumed,visualise]@git+https://github.com/stfc/janus-core.git@main'
       - git+https://github.com/ChengUCB/les.git
 #      - git+https://github.com/ACEsuit/mace.git@develop
       - torch-dftd
