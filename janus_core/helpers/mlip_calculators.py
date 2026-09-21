@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from os import environ
 from pathlib import Path
+from sys import platform
 from typing import TYPE_CHECKING, Any, get_args
 from warnings import warn
 
@@ -441,18 +442,28 @@ def choose_calculator(
             from fairchem.core import FAIRChemCalculator, __version__, pretrained_mlip
             from fairchem.core.units.mlip_unit import MLIPPredictUnit
 
+            # fairchem's "default" inference settings compile the model, which
+            # requires a C++ compiler, typically unavailable on Windows
+            inference_settings = kwargs.pop(
+                "inference_settings", "batch" if platform == "win32" else "default"
+            )
+
             match model:
                 case MLIPPredictUnit():
                     predict_unit = model
                     model = "loaded_Module"
                 case Path() | str():
                     predict_unit = pretrained_mlip.get_predict_unit(
-                        model_name=model, device=device
+                        model_name=model,
+                        device=device,
+                        inference_settings=inference_settings,
                     )
                 case None:
                     model = "uma-m-1p1"
                     predict_unit = pretrained_mlip.get_predict_unit(
-                        model_name=model, device=device
+                        model_name=model,
+                        device=device,
+                        inference_settings=inference_settings,
                     )
 
             kwargs.setdefault("task_name", "omat")
