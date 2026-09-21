@@ -25,7 +25,7 @@ jobs:
           prune-cache: false
 
       - name: Install "all" dependencies
-        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace
+        run: uv sync --extra chgnet --extra d3 --extra grace --extra mace
 
       - name: Download extra models
         shell: bash
@@ -49,4 +49,13 @@ jobs:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_mlip_calculators.py tests/test_single_point.py
+
+      - name: Install DeePMD-kit (incompatible with MACE and fairchem)
+        run: uv sync --extra deepmd
+
+      - name: Run test suite for DeePMD-kit
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest tests/test_mlip_calculators.py tests/test_single_point.py

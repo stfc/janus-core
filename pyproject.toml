@@ -44,15 +44,14 @@ dependencies = [
 chgnet = [
     "chgnet == 0.4.2",
 ]
-dpa3 = [
-    "deepmd-kit == 3.1.2",
-    "MPICH; sys_platform != 'win32'",
+deepmd = [
+    "deepmd-kit[torch] == 3.2.0",
 ]
 d3 = [
-    "torch-dftd==0.5.1",
+    "torch-dftd==0.5.3",
 ]
 grace = [
-    "tensorpotential == 0.6.0",
+    "tensorpotential == 0.6.1",
 ]
 mace = [
     "mace-torch == 0.3.16",
@@ -60,31 +59,30 @@ mace = [
     "graph-longrange",
 ]
 orb = [
-    "orb-models == 0.5.5; sys_platform != 'win32' and python_version < '3.13'",
+    "orb-models == 0.7.0; sys_platform != 'win32' and python_version >= '3.12' and python_version < '3.13'",
 ]
 upet = [
-    "upet == 0.3.0; python_version > '3.11'"
+    "upet == 0.3.0; python_version >= '3.12'"
 ]
 plumed = [
     "plumed<3.0.0,>=2.10.0; sys_platform != 'win32'",
 ]
 visualise = [
-    "weas-widget<0.2,>=0.1.26"
+    "weas-widget<0.3,>=0.2.6"
 ]
 
 # MLIPs with updated e3nn
 mattersim = [
-    "mattersim == 1.2.2; sys_platform != 'win32'",
+    "mattersim == 1.2.5; sys_platform != 'win32' and python_version >= '3.12'",
 ]
 nequip = [
-    "nequip == 0.14.0",
+    "nequip == 0.19.1",
 ]
 sevennet = [
-    "sevenn == 0.11.2.post1",
+    "sevenn == 0.13.0",
 ]
 fairchem = [
-    "fairchem-core == 2.12.0",
-    "setuptools < 82",
+    "fairchem-core == 2.22.0; python_version >= '3.12'",
 ]
 
 [project.scripts]
@@ -211,6 +209,12 @@ default-groups = [
     "pre-commit",
 ]
 
+override-dependencies = [
+    # MPICH, required by deepmd-kit's torch extra, has no Windows wheels, and is only
+    # loaded by deepmd-kit on Linux and macOS
+    "mpich; sys_platform != 'win32'",
+]
+
 constraint-dependencies = [
     "tensorflow>=2.16.1",
     "tensorflow-io-gcs-filesystem<=0.31.0; sys_platform == 'win32'",
@@ -231,6 +235,18 @@ conflicts = [
     ],
     [
       { extra = "nequip" },
+      { extra = "mace" },
+    ],
+    [
+      { extra = "orb" },
+      { extra = "upet" },
+    ],
+    [
+      { extra = "deepmd" },
+      { extra = "fairchem" },
+    ],
+    [
+      { extra = "deepmd" },
       { extra = "mace" },
     ],
 ]
