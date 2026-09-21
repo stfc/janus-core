@@ -27,7 +27,6 @@ readme = "README.md"
 
 dependencies = [
     "ase<4.0,>=3.28",
-    "click<9,>=8.2.1",
     "codecarbon<4.0.0,>=3.0.7",
     "numpy<3,>=1.26.4; python_version < '3.13'",
     "numpy<3,>=2.1.0; python_version >= '3.13'",
@@ -37,7 +36,7 @@ dependencies = [
     "rich<14.0.0,>=13.9.1",
     "seekpath<3.0.0,>=1.9.7",
     "spglib<3.0.0,>=2.3.0",
-    "typer<1.0.0,>=0.19.1",
+    "typer<0.28,>=0.27.2",
     "typer-config<2.0.0,>=1.4.2",
 ]
 
