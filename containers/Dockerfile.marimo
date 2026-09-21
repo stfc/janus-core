@@ -50,9 +50,8 @@ RUN uv pip install --no-cache-dir marimo[recommended,lsp,sql] altair pandas pyth
   nbformat \
   pytest
 
-RUN uv pip install --no-cache-dir 'janus-core[chgnet,d3,grace,mace,upet,plumed]@git+https://github.com/stfc/janus-core.git@main' &&
-\
-uv pip install --no-cache-dir 'git+https://github.com/WillBaldwin0/graph_electrostatics.git@v0.4.0'
+RUN uv pip install --no-cache-dir 'janus-core[chgnet,d3,grace,mace,upet,plumed]@git+https://github.com/stfc/janus-core.git@main' && \
+    uv pip install --no-cache-dir 'git+https://github.com/WillBaldwin0/graph_electrostatics.git@v0.4.0'
 
 RUN uv pip install  --no-cache-dir cuequivariance==0.11.1 \
   cuequivariance-torch==0.11.1 \
