@@ -229,6 +229,7 @@ nitpick_ignore = [
     ("py:class", "Architectures"),
     ("py:class", "Devices"),
     ("py:class", "Properties"),
+    ("py:class", "janus_core.cli.singlepoint.Properties"),
     ("py:class", "PhononCalcs"),
     ("py:class", "MaybeList"),
     ("py:class", "MaybeSequence"),

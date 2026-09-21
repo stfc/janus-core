@@ -27,11 +27,11 @@ To get all the latest changes, ``janus-core`` can also be installed from GitHub:
 
 By default, no machine learnt interatomic potentials (MLIPs) will be installed. These can be installed manually, or as ``extras`` with ``janus-core``.
 
-For example, to install MACE, CHGNet, and SevenNet, run:
+For example, to install MACE, CHGNet, and GRACE, run:
 
 .. code-block:: python
 
-    python3 -m pip install janus-core[chgnet,sevennet]
+    python3 -m pip install janus-core[mace,chgnet,grace]
 
 
 .. warning::
