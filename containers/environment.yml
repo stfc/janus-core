@@ -9,14 +9,15 @@ dependencies:
       - pymatgen
       - tqdm
       - pack-mm
-      - 'janus-core[all]@git+https://github.com/stfc/janus-core.git@main'
+      - 'janus-core[chgnet,d3,grace,mace,upet,plumed]@git+https://github.com/stfc/janus-core.git@main'
       - git+https://github.com/ChengUCB/les.git
+      - git+https://github.com/WillBaldwin0/graph_electrostatics.git@v0.4.0
 #      - git+https://github.com/ACEsuit/mace.git@develop
       - torch-dftd
 #      - git+https://github.com/CheukHinHoJerry/torch-dftd.git
-      - cuequivariance==0.6.1
-      - cuequivariance-torch==0.6.1
-      - cuequivariance-ops-torch-cu12==0.6.1
+      - cuequivariance==0.11.1
+      - cuequivariance-torch==0.11.1
+      - cuequivariance-ops-torch-cu13==0.11.1
       - torchvision
       - weas-widget
       - seaborn
