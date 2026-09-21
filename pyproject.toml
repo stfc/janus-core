@@ -54,6 +54,9 @@ d3 = [
 grace = [
     "tensorpotential == 0.6.0",
 ]
+fennix = [
+    "fennol == 2026.6.29",
+]
 mace = [
     "mace-torch == 0.3.16",
     "janus-core[d3]",

@@ -52,6 +52,7 @@ Currently supported MLIP ``extras`` are:
 - ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_
 - ``fairchem``: `UMA (fairchem) <https://github.com/FAIR-Chem/fairchem/tree/main/src/fairchem/core>`_
 - ``upet``: `UPET (upet) <https://github.com/lab-cosmo/upet>`_
+- ``fennix``: `FeNNol (fennix) <https://github.com/FeNNol-tools/FeNNol>`_
 
 The labels in brackets are the corresponding architecture parameters (``arch``) that
 should be set to use these models.

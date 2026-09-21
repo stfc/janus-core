@@ -42,3 +42,8 @@ if __name__ == "__main__":
         "https://github.com/MDIL-SNU/SevenNet/raw/dff008ac9c53d368b5bee30a27fa4bdfd73f19b2/sevenn/pretrained_potentials/SevenNet_l3i5/checkpoint_l3i5.pth",
         args.path / "SevenNet_l3i5.pth",
     )
+
+    try_retrieve(
+        "https://raw.githubusercontent.com/FeNNol-tools/FeNNol/main/examples/md/ani2x.fnx",
+        args.path / "ani2x.fnx",
+    )
