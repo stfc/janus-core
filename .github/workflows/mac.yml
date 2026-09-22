@@ -28,11 +28,12 @@ jobs:
         id: plumed
         continue-on-error: true
 
-      - name: Set environment variable based on plumed success
+      - name: Set environment variables
         run: |
           if [ "${{ steps.plumed.outcome }}" = "success" ]; then
             echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
           fi
+          echo "TORCHINDUCTOR_FORCE_DISABLE_CACHES=1" >> $GITHUB_ENV
 
       - name: Download extra models
         run: |
