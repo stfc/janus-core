@@ -8,6 +8,7 @@ from ase.io import read
 import pytest
 
 from janus_core.helpers.utils import FileNameMixin
+from tests.utils import chdir
 
 DATA_PATH = Path(__file__).parent / "data"
 STRUCT = read(DATA_PATH / "benzene.xyz")
@@ -125,3 +126,35 @@ def test_file_name_mixin_build(mixin_params, file_args, file_kwargs, file_name):
     assert (
         file_mix.build_filename(*file_args, **file_kwargs) == Path(file_name).absolute()
     )
+
+
+@pytest.mark.parametrize(
+    "existing_dirs, expected_new_dir",
+    (
+        ((), "janus_results"),
+        (("janus_results",), "janus_results_1"),
+        (("janus_results", "janus_results_1"), "janus_results_2"),
+        (("janus_results", "janus_results_1", "janus_results_2"), "janus_results_3"),
+        # Check non-sequential output directories
+        (("janus_results_1",), "janus_results_2"),
+        (("janus_results_2",), "janus_results_3"),
+        (("janus_results_1", "janus_results_2"), "janus_results_3"),
+        (("janus_results", "janus_results_2"), "janus_results_3"),
+        # Check non-default output directories
+        (("janus_results1"), "janus_results"),
+        (("janus_results", "janus_results1"), "janus_results_1"),
+        (("janus_result"), "janus_results"),
+        (("janus_results_abc"), "janus_results"),
+    ),
+)
+def test_new_results_dir(tmp_path, existing_dirs, expected_new_dir):
+    """Test the creation of new results directories."""
+    with chdir(tmp_path):
+        for dir in existing_dirs:
+            Path(dir).mkdir(parents=True, exist_ok=True)
+
+        file_mix = DummyFileHandler(STRUCT, None, None)
+        assert (
+            file_mix.file_prefix.as_posix()
+            == (Path(expected_new_dir) / "C6H6").as_posix()
+        )
