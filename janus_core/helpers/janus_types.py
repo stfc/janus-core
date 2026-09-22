@@ -78,6 +78,11 @@ class PostProcessKwargs(TypedDict, total=False):
     vaf_stop: int | None
     vaf_step: int
     vaf_output_files: Sequence[PathLike] | None
+    # TDEP
+    tdep_compute: bool
+    tdep_output_dir: PathLike | None
+    tdep_unit_cell_file: PathLike
+    tdep_supercell_file: PathLike
 
 
 class Correlation(TypedDict, total=True):

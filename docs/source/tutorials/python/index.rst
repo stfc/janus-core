@@ -12,3 +12,4 @@ Python Tutorials
     phonons
     neb
     elasticity
+    anharmonic_phonons
