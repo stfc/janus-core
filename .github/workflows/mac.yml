@@ -33,6 +33,8 @@ jobs:
           if [ "${{ steps.plumed.outcome }}" = "success" ]; then
             echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
           fi
+          rm -rf "${TMPDIR:-/tmp}"/torchinductor_*
+          echo "TMPDIR=${{ runner.temp }}" >> $GITHUB_ENV
           echo "TORCHINDUCTOR_FORCE_DISABLE_CACHES=1" >> $GITHUB_ENV
 
       - name: Download extra models
@@ -59,6 +61,7 @@ jobs:
 
       - name: Install updated e3nn dependencies
         run: |
+          uv cache clean
           uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
           uv pip install --reinstall pynvml
           uv pip install "fairchem-core[torch-extras]" --no-build-isolation
@@ -71,7 +74,9 @@ jobs:
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
 
       - name: Install DeePMD-kit (incompatible with MACE and fairchem)
-        run: uv sync --extra deepmd
+        run: |
+          uv cache clean
+          uv sync --extra deepmd
 
       - name: Run test suite for DeePMD-kit
         env:
