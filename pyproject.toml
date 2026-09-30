@@ -56,7 +56,7 @@ grace = [
 mace = [
     "mace-torch == 0.3.16",
     "janus-core[d3]",
-    "graph-longrange",
+    "graph-longrange==0.4.0",
 ]
 orb = [
     "orb-models == 0.7.0; sys_platform != 'win32' and python_version >= '3.12' and python_version < '3.13'",
@@ -131,9 +131,6 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "janus_core"
 module-root = ""
-
-[tool.uv.sources]
-graph-longrange = { git = "https://github.com/WillBaldwin0/graph_electrostatics", tag = "v0.4.0" }
 
 [tool.pytest.ini_options]
 # Configuration for [pytest](https://docs.pytest.org)
