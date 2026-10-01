@@ -9,6 +9,8 @@
 [![Docs status][docs-badge]][docs-link]
 [![License][license-badge]][license-link]
 [![DOI][doi-badge]][doi-link]
+[![Ask DeepWiki][deepwiki-badge]][deepwiki-link]
+
 
 Tools for machine learnt interatomic potentials
 
@@ -430,3 +432,5 @@ Contributors to this project were funded by
 [doi-link]: https://zenodo.org/badge/latestdoi/754081470
 [doi-badge]: https://zenodo.org/badge/754081470.svg
 [logo]: https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/janus-core-100.png
+[deepwiki-link]: https://deepwiki.com/stfc/janus-core
+[deepwiki-badge]: https://deepwiki.com/badge.svg
