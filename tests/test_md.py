@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from ase import Atoms
@@ -1462,6 +1463,111 @@ def test_auto_restart_restart_stem(tmp_path):
 
     final_traj = read(traj_path, index=":")
     assert len(final_traj) == 10
+
+
+def test_auto_restart_mtime(tmp_path):
+    """Test auto restart uses steps in file names, not modification times."""
+    file_prefix = tmp_path / "npt"
+    stats_path = tmp_path / "npt-stats.dat"
+    log_file = tmp_path / "md.log"
+
+    restart_stem = tmp_path / "npt-test"
+
+    npt = NPT(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        temp=300.0,
+        steps=6,
+        stats_every=3,
+        traj_every=1,
+        file_prefix=file_prefix,
+        restart_stem=str(restart_stem),
+        restart_every=2,
+        timestep=10,
+    )
+    npt.run()
+
+    restart_paths = [tmp_path / f"npt-test-{step}.extxyz" for step in (2, 4, 6)]
+    assert all(restart_path.exists() for restart_path in restart_paths)
+
+    # Make the earliest restart file the most recently modified, as copying files
+    # may not preserve their relative modification times
+    for step, restart_path in enumerate(reversed(restart_paths)):
+        os.utime(restart_path, (0, 100 - step))
+
+    npt_restart = NPT(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        temp=300.0,
+        steps=7,
+        stats_every=1,
+        restart_stem=restart_stem,
+        restart=True,
+        restart_auto=True,
+        file_prefix=file_prefix,
+        traj_every=1,
+        log_kwargs={"filename": log_file},
+    )
+
+    assert_log_contains(log_file, includes="Auto restart successful")
+
+    # Restart from highest step, despite modification times
+    assert npt_restart.offset == 6
+    assert read(restart_paths[-1]).positions == pytest.approx(
+        npt_restart.struct.positions
+    )
+
+    # Offset is not taken from stats file
+    with open(stats_path, encoding="utf8") as stats_file:
+        assert int(stats_file.readlines()[-1].split()[0]) == 6
+
+
+def test_auto_restart_invalid_steps(tmp_path):
+    """Test auto restart falls back to `struct` if no steps can be inferred."""
+    file_prefix = tmp_path / "npt"
+    log_file = tmp_path / "md.log"
+
+    restart_stem = tmp_path / "npt-test"
+
+    npt = NPT(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        temp=300.0,
+        steps=4,
+        stats_every=3,
+        traj_every=1,
+        file_prefix=file_prefix,
+        restart_stem=str(restart_stem),
+        restart_every=4,
+        timestep=10,
+    )
+    npt.run()
+
+    # Step can no longer be inferred from the file name
+    (tmp_path / "npt-test-4.extxyz").rename(tmp_path / "npt-test-final.extxyz")
+
+    npt_restart = NPT(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+        temp=300.0,
+        steps=7,
+        stats_every=1,
+        restart_stem=restart_stem,
+        restart=True,
+        restart_auto=True,
+        file_prefix=file_prefix,
+        traj_every=1,
+        log_kwargs={"filename": log_file},
+    )
+
+    assert_log_contains(log_file, includes="Auto restart failed")
+
+    # Offset from stats file
+    assert npt_restart.offset == 3
 
 
 def test_set_info(tmp_path):
