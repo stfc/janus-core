@@ -193,6 +193,39 @@ def test_converge_warning():
         optimizer.run()
 
 
+def test_filter_kwargs_no_filter_warning():
+    """Test warning raised if filter_kwargs set without a filter."""
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+    )
+
+    with pytest.warns(UserWarning, match="`filter_kwargs` are ignored"):
+        GeomOpt(
+            single_point.struct,
+            filter_class=None,
+            filter_kwargs={"scalar_pressure": 5.0},
+        )
+
+
+def test_filter_kwargs_with_filter_no_warning(recwarn):
+    """Test no warning raised if filter_kwargs set with a filter."""
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+    )
+
+    GeomOpt(
+        single_point.struct,
+        filter_class=FrechetCellFilter,
+        filter_kwargs={"scalar_pressure": 5.0},
+    )
+
+    assert not any("`filter_kwargs` are ignored" in str(w.message) for w in recwarn)
+
+
 def test_restart(tmp_path):
     """Test restarting geometry optimization."""
     single_point = SinglePoint(

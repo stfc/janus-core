@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from ase import Atoms
@@ -287,6 +288,74 @@ def test_scalar_pressure(option, tmp_path):
     )
     assert result.exit_code == 0
     assert_log_contains(log_path, includes=["scalar_pressure: 0.01 GPa"])
+
+
+def test_scalar_pressure_no_filter(tmp_path):
+    """Test warning raised passing --pressure without optimizing the cell."""
+    results_path = tmp_path / "NaCl-opt.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    # Reset global state so warnings are captured in the log
+    logging.captureWarnings(False)
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
+            "--out",
+            results_path,
+            "--pressure",
+            "0.01",
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(
+        log_path,
+        includes=[
+            "UserWarning: `filter_kwargs` are ignored when `filter_class` is None: "
+            "scalar_pressure"
+        ],
+        excludes=["Using filter"],
+    )
+
+
+def test_no_scalar_pressure_no_filter(tmp_path):
+    """Test no warning raised without --pressure or optimizing the cell."""
+    results_path = tmp_path / "NaCl-opt.extxyz"
+    log_path = tmp_path / "test.log"
+    summary_path = tmp_path / "summary.yml"
+
+    logging.captureWarnings(False)
+
+    result = runner.invoke(
+        app,
+        [
+            "geomopt",
+            "--struct",
+            DATA_PATH / "NaCl.cif",
+            "--arch",
+            "mace_mp",
+            "--out",
+            results_path,
+            "--log",
+            log_path,
+            "--summary",
+            summary_path,
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert_log_contains(log_path, excludes=["`filter_kwargs` are ignored"])
 
 
 def test_opt_kwargs_traj(tmp_path):
