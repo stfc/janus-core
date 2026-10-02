@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any, get_args
+from warnings import warn
 
 from ase import Atoms
-from numpy import ndarray
+from ase.calculators.calculator import PropertyNotImplementedError
+from numpy import ndarray, zeros
 
 from janus_core.calculations.base import BaseCalculation
 from janus_core.helpers.janus_types import (
@@ -271,6 +273,34 @@ class SinglePoint(BaseCalculation):
 
         return self.struct.get_forces()
 
+    @staticmethod
+    def _calc_stress(struct: Atoms) -> ndarray:
+        """
+        Calculate stress for a given structure.
+
+        If not implemented for a calculator, stress is set to zero. For example,
+        non-periodic structures with the D3 dispersion correction.
+
+        Parameters
+        ----------
+        struct
+            Structure to calculate stress for.
+
+        Returns
+        -------
+        ndarray
+            Stress of structure.
+        """
+        try:
+            return struct.get_stress()
+        except PropertyNotImplementedError:
+            warn(
+                "Stress cannot be calculated for this structure, so has been set to "
+                "zero.",
+                stacklevel=2,
+            )
+            return zeros(6)
+
     def _get_stress(self) -> MaybeList[ndarray]:
         """
         Calculate stress using MLIP.
@@ -286,9 +316,9 @@ class SinglePoint(BaseCalculation):
                 struct_sequence = track_progress(
                     struct_sequence, description="Computing stresses..."
                 )
-            return [struct.get_stress() for struct in struct_sequence]
+            return [self._calc_stress(struct) for struct in struct_sequence]
 
-        return self.struct.get_stress()
+        return self._calc_stress(self.struct)
 
     def _calc_hessian(self, struct: Atoms) -> ndarray:
         """
