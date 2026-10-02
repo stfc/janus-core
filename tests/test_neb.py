@@ -186,9 +186,13 @@ def test_converge_warning(tmp_path, LFPO_start_b, LFPO_end_b):
         neb_kwargs={"method": "aseneb"},
         file_prefix=tmp_path / "LFPO",
     )
+    assert not neb.converged
+
     with pytest.warns(UserWarning, match="NEB optimization has not converged"):
         neb.run()
-    assert not neb.converged
+
+    assert neb.converged is False
+    assert all(image.info["converged"] is False for image in neb.images)
 
 
 def test_restart(tmp_path):
