@@ -31,6 +31,7 @@ def _set_minimize_kwargs(
     minimize_kwargs: dict[str, Any],
     opt_cell_lengths: bool,
     pressure: float,
+    use_filter: bool,
 ) -> None:
     """
     Set minimize_kwargs dictionary values.
@@ -45,6 +46,8 @@ def _set_minimize_kwargs(
     pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
         function if either `opt_cell_lengths` or `opt_cell_fully` is True.
+    use_filter
+        Whether a filter will be applied to the structure.
     """
     minimize_kwargs.setdefault("opt_kwargs", {})
     minimize_kwargs.setdefault("traj_kwargs", {})
@@ -63,9 +66,12 @@ def _set_minimize_kwargs(
     else:
         minimize_kwargs["filter_kwargs"] = {}
 
-    # Set hydrostatic_strain and scalar pressure
-    minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = opt_cell_lengths
-    minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure
+    # Set hydrostatic_strain and scalar pressure, only passing pressure without a
+    # filter if explicitly set, so GeomOpt warns it is ignored
+    if use_filter:
+        minimize_kwargs["filter_kwargs"]["hydrostatic_strain"] = opt_cell_lengths
+    if use_filter or pressure:
+        minimize_kwargs["filter_kwargs"]["scalar_pressure"] = pressure
 
 
 @app.command()
@@ -127,7 +133,10 @@ def geomopt(
     pressure: Annotated[
         float,
         Option(
-            help="Scalar pressure when optimizing cell geometry, in GPa.",
+            help=(
+                "Scalar pressure when optimizing cell geometry, in GPa. Ignored "
+                "unless --opt-cell-lengths or --opt-cell-fully is set."
+            ),
             rich_help_panel="Calculation",
         ),
     ] = 0.0,
@@ -214,8 +223,8 @@ def geomopt(
         --opt-cell-lengths or --opt-cell-fully, defaults to `FrechetCellFilter`.
     pressure
         Scalar pressure when optimizing cell geometry, in GPa. Passed to the filter
-        function if either `opt_cell_lengths` or `opt_cell_fully` is True. Default is
-        0.0.
+        function if either `opt_cell_lengths` or `opt_cell_fully` is True, and ignored
+        otherwise. Default is 0.0.
     fix_symmetry
         Whether to preserve symmetry during geometry optimization. Default is False.
     symmetrize
@@ -295,8 +304,6 @@ def geomopt(
     if out:
         write_kwargs["filename"] = out
 
-    _set_minimize_kwargs(minimize_kwargs, opt_cell_lengths, pressure)
-
     if opt_cell_fully or opt_cell_lengths:
         # Use default filter unless filter explicitly passed
         if filter_class:
@@ -310,6 +317,13 @@ def geomopt(
             )
         # Override default filter class with None
         opt_cell_fully_dict = {"filter_class": None}
+
+    _set_minimize_kwargs(
+        minimize_kwargs,
+        opt_cell_lengths,
+        pressure,
+        use_filter=opt_cell_fully or opt_cell_lengths,
+    )
 
     log_kwargs = {"filemode": "w"}
     if log:
