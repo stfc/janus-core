@@ -105,6 +105,12 @@ class NEB(BaseCalculation):
     file_prefix
         Prefix for output filenames. Default is inferred from the intial structure
         name, or chemical formula of the intial structure.
+
+    Attributes
+    ----------
+    converged : bool
+        Whether the NEB optimization has converged. False before `run` or `optimize`
+        is called.
     """
 
     def __init__(
@@ -243,6 +249,7 @@ class NEB(BaseCalculation):
         self.plot_band = plot_band
         self.minimize = minimize
         self.minimize_kwargs = minimize_kwargs
+        self.converged = False
 
         # Validate parameters
         if self.n_images <= 0 or not isinstance(self.n_images, int):
@@ -477,7 +484,7 @@ class NEB(BaseCalculation):
             case _:
                 raise ValueError("Invalid interpolator selected")
 
-    def optimize(self, fmax: float | None = None, steps: int | None = None) -> None:
+    def optimize(self, fmax: float | None = None, steps: int | None = None) -> bool:
         """
         Run NEB optimisation.
 
@@ -487,6 +494,11 @@ class NEB(BaseCalculation):
             Maximum force for NEB optimiser. Default is `self.fmax`.
         steps
             Maximum steps for NEB optimiser. Default is `self.steps`.
+
+        Returns
+        -------
+        bool
+            Whether the NEB optimization converged.
         """
         fmax = fmax if fmax is not None else self.fmax
         steps = steps if steps is not None else self.steps
@@ -497,7 +509,8 @@ class NEB(BaseCalculation):
         if not hasattr(self, "opt"):
             self.opt = self.optimizer(self.neb, **self.optimizer_kwargs)
 
-        self.converged = self.opt.run(fmax=fmax, steps=steps)
+        # Cast to built-in bool, as ASE optimizers may return numpy bools
+        self.converged = bool(self.opt.run(fmax=fmax, steps=steps))
 
         if not self.converged:
             message = f"NEB optimization has not converged after {steps} steps."
@@ -514,6 +527,9 @@ class NEB(BaseCalculation):
         if self.logger:
             self.logger.info("Optimization steps: %s", self.opt.nsteps)
 
+        for image in self.images:
+            image.info["converged"] = self.converged
+
         # Optionally write band images to file
         output_structs(
             images=self.images,
@@ -522,6 +538,8 @@ class NEB(BaseCalculation):
             write_kwargs=self.write_kwargs,
             config_type="neb",
         )
+
+        return self.converged
 
     def run_nebtools(self):
         """Run NEBTools analysis."""

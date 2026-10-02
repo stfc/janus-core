@@ -903,6 +903,8 @@ class MolecularDynamics(BaseCalculation):
                 self.logger.info("Minimizing at step %s", self.dyn.nsteps)
             optimizer = GeomOpt(self.struct, **self.minimize_kwargs)
             optimizer.run()
+            # Convergence of the minimization does not apply to MD output
+            self.struct.info.pop("converged", None)
 
     def _set_param_prefix(self, file_prefix: PathLike | None = None) -> str:
         """
