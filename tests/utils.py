@@ -131,11 +131,11 @@ def skip_extras(arch: str):
     match arch:
         case "chgnet":
             pytest.importorskip("chgnet")
-        case "dpa3":
+        case "deepmd" | "dpa3":
             pytest.importorskip("deepmd")
         case "grace":
             pytest.importorskip("tensorpotential")
-        case "mace" | "mace_mp" | "mace_off" | "mace_omol":
+        case "mace" | "mace_mp" | "mace_off" | "mace_omol" | "mace_polar":
             pytest.importorskip("mace")
         case "mattersim":
             pytest.importorskip("mattersim")

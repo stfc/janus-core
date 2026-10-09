@@ -27,11 +27,11 @@ To get all the latest changes, ``janus-core`` can also be installed from GitHub:
 
 By default, no machine learnt interatomic potentials (MLIPs) will be installed. These can be installed manually, or as ``extras`` with ``janus-core``.
 
-For example, to install MACE, CHGNet, and SevenNet, run:
+For example, to install MACE, CHGNet, and GRACE, run:
 
 .. code-block:: python
 
-    python3 -m pip install janus-core[chgnet,sevennet]
+    python3 -m pip install janus-core[mace,chgnet,grace]
 
 
 .. warning::
@@ -46,7 +46,7 @@ Currently supported MLIP ``extras`` are:
 - ``mace``: `MACE (mace, mace_mp, mace_off, mace_omol) <https://github.com/ACEsuit/mace>`_
 - ``sevenn``: `SevenNet (sevennet) <https://github.com/MDIL-SNU/SevenNet/>`_
 - ``nequip``: `NequIP (nequip) <https://github.com/mir-group/nequip>`_
-- ``dpa3``: `DPA3 (dpa3) <https://github.com/deepmodeling/deepmd-kit/tree/dpa3-alpha>`_
+- ``deepmd``: `DeePMD-kit (deepmd) <https://github.com/deepmodeling/deepmd-kit>`_
 - ``orb``: `Orb (orb) <https://github.com/orbital-materials/orb-models>`_
 - ``mattersim``: `MatterSim (mattersim) <https://github.com/microsoft/mattersim>`_
 - ``grace``: `GRACE (grace) <https://github.com/ICAMS/grace-tensorpotential>`_

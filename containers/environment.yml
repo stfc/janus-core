@@ -9,7 +9,9 @@ dependencies:
       - pymatgen
       - tqdm
       - pack-mm
-      - 'janus-core[all]@git+https://github.com/stfc/janus-core.git@main'
+      # pip ignores janus-core's `tool.uv.sources`, and PyPI has no Python 3.12+ release
+      - 'graph-longrange@git+https://github.com/WillBaldwin0/graph_electrostatics@v0.4.0'
+      - 'janus-core[chgnet,d3,grace,mace,orb,plumed,visualise]@git+https://github.com/stfc/janus-core.git@main'
       - git+https://github.com/ChengUCB/les.git
 #      - git+https://github.com/ACEsuit/mace.git@develop
       - torch-dftd

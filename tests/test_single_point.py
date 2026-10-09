@@ -18,7 +18,9 @@ from tests.utils import chdir, read_atoms, skip_extras
 DATA_PATH = Path(__file__).parent / "data"
 MODEL_PATH = Path(__file__).parent / "models"
 
-DPA3_PATH = MODEL_PATH / "2025-01-10-dpa3-mptrj.pth"
+DPA3_PATH = MODEL_PATH / "extra" / "DPA-3.3-1M.pt"
+
+DPA4_MODEL = "DPA4-Nano-OMat24-v20260805"
 MACE_PATH = MODEL_PATH / "mace_mp_small.model"
 NEQUIP_PATH = MODEL_PATH / "toluene.nequip.pth"
 PET_MAD_CHECKPOINT = (
@@ -26,6 +28,7 @@ PET_MAD_CHECKPOINT = (
 )
 SEVENNET_PATH = MODEL_PATH / "sevennet_0.pth"
 UMA_LABEL = "uma-s-1p1"
+MACE_POLAR_MODEL = "polar-1-s"
 
 test_data = [
     ("benzene.xyz", -76.0605725422795, "energy", "energy", {}, None),
@@ -76,7 +79,18 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
     "arch, device, expected_energy, struct, kwargs",
     [
         ("chgnet", "cpu", -29.331436157226562, "NaCl.cif", {}),
-        ("dpa3", "cpu", -27.053507387638092, "NaCl.cif", {"model": DPA3_PATH}),
+        pytest.param(
+            "deepmd",
+            "cpu",
+            -27.019183695316315,
+            "NaCl.cif",
+            {"model": DPA3_PATH, "calc_kwargs": {"head": "MPTrj"}},
+            marks=pytest.mark.skipif(
+                not DPA3_PATH.exists(),
+                reason=f"Extra model: {DPA3_PATH} not downloaded.",
+            ),
+        ),
+        ("deepmd", "cpu", -27.080653878011105, "NaCl.cif", {"model": DPA4_MODEL}),
         (
             "fairchem",
             "cpu",
@@ -87,6 +101,13 @@ def test_potential_energy(struct, expected, properties, prop_key, calc_kwargs, i
         ("grace", "cpu", -27.081155042373453, "NaCl.cif", {}),
         ("mace_off", "cpu", -2081.1209264240006, "H2O.cif", {}),
         ("mace_omol", "cpu", -2079.8650795528843, "H2O.cif", {}),
+        (
+            "mace_polar",
+            "cpu",
+            -2079.863982582351,
+            "H2O.cif",
+            {"model": MACE_POLAR_MODEL},
+        ),
         ("mattersim", "cpu", -27.06208038330078, "NaCl.cif", {}),
         (
             "nequip",

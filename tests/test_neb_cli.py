@@ -309,7 +309,8 @@ def test_neb_class(tmp_path):
             "--neb-class",
             "DyNEB",
             "--neb-kwargs",
-            "{'dynamic_relaxation': False, 'scale_fmax': 1.0}",  # Invalid combination
+            # scale_fmax is DyNEB-specific, and DyNEB rejects parallel images
+            "{'scale_fmax': 1.0, 'parallel': True}",
             "--no-tracker",
             "--file-prefix",
             file_prefix,
@@ -317,6 +318,7 @@ def test_neb_class(tmp_path):
     )
     assert result.exit_code == 1
     assert isinstance(result.exception, ValueError)
+    assert "Dynamic relaxation" in str(result.exception)
     assert_log_contains(log_path, includes="Using NEB class: DyNEB")
 
 

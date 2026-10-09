@@ -65,7 +65,7 @@ def train(
         config = yaml.safe_load(config_file)
 
     match arch:
-        case "mace" | "mace_mp" | "mace_off" | "mace_omol":
+        case "mace" | "mace_mp" | "mace_off" | "mace_omol" | "mace_polar":
             if fine_tune:
                 if "foundation_model" not in config:
                     raise ValueError(

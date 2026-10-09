@@ -323,7 +323,7 @@ def check_config(ctx: Context) -> None:
     Parameters
     ----------
     ctx
-        Typer (Click) Context within command.
+        Typer Context within command.
     """
     # Compare options from config file (default_map) to function definition (params)
     for option in ctx.default_map:

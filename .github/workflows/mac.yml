@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        python-version: ["3.10","3.11","3.12", "3.13"]
+        python-version: ["3.11","3.12","3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -21,18 +21,21 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install "all" dependencies
-        run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra upet --extra plumed
+        run: uv sync --extra chgnet --extra d3 --extra grace --extra mace --extra orb --extra plumed
 
       - name: Install PLUMED
         uses: Iximiel/install-plumed@v1
         id: plumed
         continue-on-error: true
 
-      - name: Set environment variable based on plumed success
+      - name: Set environment variables
         run: |
           if [ "${{ steps.plumed.outcome }}" = "success" ]; then
             echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.dylib" >> $GITHUB_ENV
           fi
+          rm -rf "${TMPDIR:-/tmp}"/torchinductor_*
+          echo "TMPDIR=${{ runner.temp }}" >> $GITHUB_ENV
+          echo "TORCHINDUCTOR_FORCE_DISABLE_CACHES=1" >> $GITHUB_ENV
 
       - name: Download extra models
         run: |
@@ -44,15 +47,43 @@ jobs:
           PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest
 
+      - name: Install updated UPET (incompatible with Orb)
+        run: |
+          uv cache clean
+          rm -rf "${TMPDIR:-/tmp}"/torchinductor_*
+          uv sync --extra upet --extra d3
+
+      - name: Run test suite for updated UPET
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
+
       - name: Install updated e3nn dependencies
         run: |
+          uv cache clean
+          rm -rf "${TMPDIR:-/tmp}"/torchinductor_*
           uv sync --extra mattersim --extra fairchem --extra sevennet --extra nequip --extra d3
           uv pip install --reinstall pynvml
           uv pip install "fairchem-core[torch-extras]" --no-build-isolation
+          rm -rf "${TMPDIR:-/tmp}"/torchinductor_*
 
       - name: Run test suite for updated e3nn dependencies
         env:
           # show timings of tests
           PYTEST_ADDOPTS: "--durations=0"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py
+
+      - name: Install DeePMD-kit (incompatible with MACE and fairchem)
+        run: |
+          uv cache clean
+          rm -rf "${TMPDIR:-/tmp}"/torchinductor_*
+          uv sync --extra deepmd
+
+      - name: Run test suite for DeePMD-kit
+        env:
+          # show timings of tests
+          PYTEST_ADDOPTS: "--durations=0"
         run: uv run --no-sync pytest tests/test_{mlip_calculators,single_point}.py

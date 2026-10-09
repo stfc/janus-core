@@ -9,6 +9,8 @@
 [![Docs status][docs-badge]][docs-link]
 [![License][license-badge]][license-link]
 [![DOI][doi-badge]][doi-link]
+[![Ask DeepWiki][deepwiki-badge]][deepwiki-link]
+
 
 Tools for machine learnt interatomic potentials
 
@@ -45,10 +47,10 @@ python3 -m pip install git+https://github.com/stfc/janus-core.git
 
 By default, no machine learnt interatomic potentials (MLIPs) will be installed with `janus-core`. These can be installed separately, or as `extras`.
 
-For example, to install MACE, CHGNet, and SevenNet, run:
+For example, to install MACE, CHGNet, and GRACE, run:
 
 ```python
-python3 -m pip install janus-core[mace,chgnet,sevennet]
+python3 -m pip install janus-core[mace,chgnet,grace]
 ```
 
 > [!WARNING]
@@ -79,7 +81,7 @@ Current and planned features include:
   - CHGNet
   - SevenNet
   - NequIP
-  - DPA3
+  - DPA3/DPA4
   - Orb
   - MatterSim
   - GRACE
@@ -98,9 +100,11 @@ Current and planned features include:
 - [x] Training ML potentials
   - MACE
   - Nequip
+  - SevenNet
 - [x] Fine-tuning MLIPs
   - MACE
   - Nequip
+  - SevenNet
 - [x] MLIP descriptors
   - MACE
 - [x] Data preprocessing
@@ -237,65 +241,64 @@ Usage: janus singlepoint [OPTIONS]
 
  Perform single point calculations and save to file.
 
-╭─ Options ────────────────────────────────────────────────────────────────────────╮
-│ --config        TEXT  Path to configuration file.                                │
-│ --help                Show this message and exit.                                │
-╰──────────────────────────────────────────────────────────────────────────────────╯
-╭─ MLIP calculator ────────────────────────────────────────────────────────────────╮
-│ *  --arch               [mace|mace_mp|mace_off|chg  MLIP architecture to use for │
-│                         net|sevennet|nequip|dpa3|o  calculations.                │
-│                         rb|mattersim|grace|upet|fa  [required]                   │
-│                         airchem|mace_omol]                                       │
-│    --device             [cpu|cuda|mps|xpu]          Device to run calculations   │
-│                                                     on.                          │
-│                                                     [default: cpu]               │
-│    --model              TEXT                        MLIP model name, or path to  │
-│                                                     model.                       │
-│    --calc-kwargs        DICT                        Keyword arguments to pass to │
-│                                                     selected calculator. Must be │
-│                                                     passed as a dictionary       │
-│                                                     wrapped in quotes, e.g.      │
-│                                                     "{'key': value}".            │
-╰──────────────────────────────────────────────────────────────────────────────────╯
-╭─ Calculation ────────────────────────────────────────────────────────────────────╮
-│ *  --struct            PATH                         Path of structure to         │
-│                                                     simulate.                    │
-│                                                     [required]                   │
-│    --properties        [energy|stress|forces|hessi  Properties to calculate. If  │
-│                        an]                          not specified, 'energy',     │
-│                                                     'forces' and 'stress' will   │
-│                                                     be returned.                 │
-│    --out               PATH                         Path to save structure with  │
-│                                                     calculated results. Default  │
-│                                                     is inferred from             │
-│                                                     `file_prefix`.               │
-╰──────────────────────────────────────────────────────────────────────────────────╯
-╭─ Structure I/O ──────────────────────────────────────────────────────────────────╮
-│ --file-prefix         PATH  Prefix for output files, including directories.      │
-│                             Default directory is ./janus_results, and default    │
-│                             filename prefix is inferred from the input stucture  │
-│                             filename.                                            │
-│ --read-kwargs         DICT  Keyword arguments to pass to ase.io.read. Must be    │
-│                             passed as a dictionary wrapped in quotes, e.g.       │
-│                             "{'key': value}". By default, read_kwargs['index'] = │
-│                             ':', so all structures are read.                     │
-│ --write-kwargs        DICT  Keyword arguments to pass to ase.io.write when       │
-│                             saving any structures. Must be passed as a           │
-│                             dictionary wrapped in quotes, e.g. "{'key': value}". │
-╰──────────────────────────────────────────────────────────────────────────────────╯
-╭─ Logging/summary ────────────────────────────────────────────────────────────────╮
-│ --log                                  PATH  Path to save logs to. Default is    │
-│                                              inferred from `file_prefix`         │
-│ --tracker         --no-tracker               Whether to save carbon emissions of │
-│                                              calculation                         │
-│                                              [default: tracker]                  │
-│ --summary                              PATH  Path to save summary of inputs,     │
-│                                              start/end time, and carbon          │
-│                                              emissions. Default is inferred from │
-│                                              `file_prefix`.                      │
-│ --progress-bar    --no-progress-bar          Whether to show progress bar.       │
-│                                              [default: progress-bar]             │
-╰──────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ───────────────────────────────────────────────────────────────────────────╮
+│ --config        <str>  Path to configuration file.                                  │
+│ --help                 Show this message and exit.                                  │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ MLIP calculator ───────────────────────────────────────────────────────────────────╮
+│ *  --arch               <mace|mace_mp|mace_off|chgne  MLIP architecture to use for  │
+│                         t|sevennet|nequip|deepmd|orb  calculations.                 │
+│                         |mattersim|grace|upet|fairch  [required]                    │
+│                         em|mace_omol|mace_polar|dpa3                                │
+│                         >                                                           │
+│    --device             <cpu|cuda|mps|xpu>            Device to run calculations    │
+│                                                       on.                           │
+│                                                       [default: cpu]                │
+│    --model              <str>                         MLIP model name, or path to   │
+│                                                       model.                        │
+│    --calc-kwargs        DICT                          Keyword arguments to pass to  │
+│                                                       selected calculator. Must be  │
+│                                                       passed as a dictionary        │
+│                                                       wrapped in quotes, e.g.       │
+│                                                       "{'key': value}".             │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Calculation ───────────────────────────────────────────────────────────────────────╮
+│ *  --struct            <path>                        Path of structure to simulate. │
+│                                                      [required]                     │
+│    --properties        <energy|stress|forces|hessia  Properties to calculate. If    │
+│                        n>                            not specified, 'energy',       │
+│                                                      'forces' and 'stress' will be  │
+│                                                      returned.                      │
+│    --out               <path>                        Path to save structure with    │
+│                                                      calculated results. Default is │
+│                                                      inferred from `file_prefix`.   │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Structure I/O ─────────────────────────────────────────────────────────────────────╮
+│ --file-prefix         <path>  Prefix for output files, including directories.       │
+│                               Default directory is ./janus_results, and default     │
+│                               filename prefix is inferred from the input stucture   │
+│                               filename.                                             │
+│ --read-kwargs         DICT    Keyword arguments to pass to ase.io.read. Must be     │
+│                               passed as a dictionary wrapped in quotes, e.g.        │
+│                               "{'key': value}". By default, read_kwargs['index'] =  │
+│                               ':', so all structures are read.                      │
+│ --write-kwargs        DICT    Keyword arguments to pass to ase.io.write when saving │
+│                               any structures. Must be passed as a dictionary        │
+│                               wrapped in quotes, e.g. "{'key': value}".             │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Logging/summary ───────────────────────────────────────────────────────────────────╮
+│ --log                                  <path>  Path to save logs to. Default is     │
+│                                                inferred from `file_prefix`          │
+│ --tracker         --no-tracker                 Whether to save carbon emissions of  │
+│                                                calculation                          │
+│                                                [default: tracker]                   │
+│ --summary                              <path>  Path to save summary of inputs,      │
+│                                                start/end time, and carbon           │
+│                                                emissions. Default is inferred from  │
+│                                                `file_prefix`.                       │
+│ --progress-bar    --no-progress-bar            Whether to show progress bar.        │
+│                                                [default: progress-bar]              │
+╰─────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 
@@ -429,3 +432,5 @@ Contributors to this project were funded by
 [doi-link]: https://zenodo.org/badge/latestdoi/754081470
 [doi-badge]: https://zenodo.org/badge/754081470.svg
 [logo]: https://raw.githubusercontent.com/stfc/janus-core/main/docs/source/images/janus-core-100.png
+[deepwiki-link]: https://deepwiki.com/stfc/janus-core
+[deepwiki-badge]: https://deepwiki.com/badge.svg

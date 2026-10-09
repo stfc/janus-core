@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
 
     steps:
     - uses: actions/checkout@v6
@@ -22,17 +22,18 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: uv sync --extra chgnet --extra dpa3 --extra d3 --extra grace --extra mace --extra orb --extra upet --extra plumed
+      run: uv sync --extra chgnet --extra d3 --extra grace --extra mace --extra orb --extra plumed
 
     # Full reinstall in case the version number is the same as the last release
     - name: Uninstall release versions
-      run: uv pip uninstall ase mace-torch
+      run: uv pip uninstall ase mace-torch graph_longrange
 
     - name: Install dev versions
       run: |
         uv pip install \
-            https://gitlab.com/ase/ase.git \
-            https://github.com/ACEsuit/mace.git
+            git+https://gitlab.com/ase/ase.git \
+            git+https://github.com/ACEsuit/mace.git@develop \
+            git+https://github.com/WillBaldwin0/graph_electrostatics.git
 
     - name: Run test suite
       env:

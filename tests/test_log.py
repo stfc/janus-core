@@ -34,6 +34,16 @@ def test_multiline_log(tmp_path):
     assert_log_contains(log_path, includes=["Line 1", "Line 4"])
 
 
+def test_log_args(tmp_path):
+    """Test messages with format args are written correctly."""
+    log_path = tmp_path / "test.log"
+
+    logger = config_logger(name=__name__, filename=log_path)
+    logger.info("Found %d files in %s", 5, "dir\\subdir")
+
+    assert_log_contains(log_path, includes=["Found 5 files in dir/subdir"])
+
+
 def test_tracker(tmp_path):
     """Test tracker can be correctly set up."""
     log_path = tmp_path / "test.log"

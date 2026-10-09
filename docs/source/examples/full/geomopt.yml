@@ -12,6 +12,7 @@ opt_cell_lengths: False
 opt_cell_fully: True
 filter_class: UnitCellFilter
 pressure: 0.0001
+fix_symmetry: False
 symmetrize: True
 symmetry_tolerance: 0.001
 out: NaCl-opt.extxyz
