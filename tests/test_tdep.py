@@ -58,7 +58,7 @@ def test_nvt_tdep(tmp_path) -> None:
     assert len(meta_lines) == 4
     assert meta_lines[0].endswith("# N atoms")
     assert meta_lines[1].endswith("# N timesteps")
-    assert meta_lines[2] == "0.0    # timestep in fs"
+    assert meta_lines[2] == "1.0    # timestep in fs"
     assert meta_lines[3] == "300.0    # temperature in K"
 
     positions_lines = (

@@ -1344,7 +1344,8 @@ class MolecularDynamics(BaseCalculation):
                 stats_file=self.stats_file,
                 temperature=self.temp,
                 output_dir=tdep_output_dir,
-                timestep=0.0,
+                # Time between saved frames in fs (rounded to drop float noise)
+                timestep=round(self.timestep / units.fs * self.traj_every, 6),
             )
 
     def _write_restart(self) -> None:
