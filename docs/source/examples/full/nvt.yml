@@ -13,6 +13,7 @@ equil_steps: 100
 minimize: True
 minimize_every: 50
 minimize_kwargs:
+  filter_class: null  # changed for TDEP: keep the cell fixed when minimizing
   opt_kwargs:
     maxstep: 0.1
 rescale_velocities: True
@@ -21,6 +22,11 @@ rescale_every: 50
 
 post_process_kwargs:
   rdf_compute: True
+  tdep_compute: True
+  tdep_unit_cell_file: "tests/data/NaCl-primitive.extxyz"
+  tdep_supercell_file: "tests/data/NaCl.cif"
+  tdep_output_dir: "nvt-tdep-inputs"
+
 correlation_kwargs:
   vaf:
     a: Velocity
@@ -53,7 +59,7 @@ stats_file: nvt-stats.dat
 stats_every: 100
 traj_file: nvt-traj.extxyz
 traj_append: False
-traj_start: 10
+traj_start: 100  # changed for TDEP: save frames only after the 90-step heating ramp
 traj_every: 100
 
 file_prefix: NaCl

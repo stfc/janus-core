@@ -96,6 +96,7 @@ Current and planned features include:
 - [x] Nudged Elastic Band
 - [x] Phonons
   - Phonopy
+  - TDEP (input generation)
 - [x] Equation of State
 - [x] Training ML potentials
   - MACE
