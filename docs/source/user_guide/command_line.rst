@@ -378,6 +378,8 @@ The RDF is also computed from the trajectory file and the options ``rdf_start``,
 
 will save frames from step 1000, after equilibration, and write ``infile.ucposcar``, ``infile.ssposcar``, ``infile.positions``, ``infile.forces``, ``infile.stat``, and ``infile.meta`` to ``janus_results/NaCl-nvt-T300.0-tdep-inputs``, or to ``'tdep_output_dir'`` if it is set. TDEP must be installed separately to use these files, as described in the :doc:`installation documentation </user_guide/installation>`.
 
+These files can be used for any TDEP calculation based on the sampled structures, such as higher-order force constants, free energies, and the lattice thermal conductivity, as described in the `TDEP tutorials <https://github.com/tdep-developers/tdep-tutorials>`_. Data that MLIPs do not usually provide, such as the Born effective charges required by TDEP's ``--polar`` option, must be obtained separately.
+
 ``'tdep_supercell_file'`` must match the MD structure, with the same atoms in the same order and the same cell, and must be a supercell of ``'tdep_unit_cell_file'``, which may be a primitive cell.
 
 The following are also checked before the MD starts:
