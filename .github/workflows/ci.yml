@@ -38,6 +38,50 @@ jobs:
             echo "PLUMED_KERNEL=${{ steps.plumed.outputs.plumed_prefix }}/lib/libplumedKernel.so" >> $GITHUB_ENV
           fi
 
+      - name: Install TDEP build dependencies
+        id: tdep-deps
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gfortran \
+            libblas-dev \
+            liblapack-dev \
+            libhdf5-dev \
+            libhdf5-serial-dev \
+            libhdf5-openmpi-dev \
+            openmpi-bin \
+            libopenmpi-dev \
+            libfftw3-dev \
+            libscalapack-openmpi-dev
+
+      - name: Build TDEP
+        id: tdep
+        if: steps.tdep-deps.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          # Pinned, as tests/test_tdep.py checks reference values from this commit
+          TDEP_COMMIT: 6ccdf13ced49aa067a92f9c9b03a2a202bc361b5
+        run: |
+          # Clone outside the workspace, so pytest does not collect TDEP's own tests
+          git clone https://github.com/tdep-developers/tdep.git "$RUNNER_TEMP/tdep"
+          cd "$RUNNER_TEMP/tdep"
+          git checkout "$TDEP_COMMIT"
+          # Production (-O3) settings from TDEP's own CI
+          cp .github/important_settings.x86_64 important_settings
+          bash build_things.sh --nthreads_make 4
+          test -x bin/extract_forceconstants && test -x bin/phonon_dispersion_relations
+
+      - name: Add TDEP to PATH based on build success
+        run: |
+          if [ "${{ steps.tdep.outcome }}" = "success" ]; then
+            echo "$RUNNER_TEMP/tdep/bin" >> $GITHUB_PATH
+          else
+            echo "::warning title=TDEP not installed::TDEP tests will be skipped"
+          fi
+
       - name: Download extra models
         run: |
           python3 tests/models/extra_models.py tests/models/extra
@@ -106,15 +150,11 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    defaults:
-      run:
-        shell: bash -el {0}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - name: Check all sources documented
-        shell: bash
         run: |
           diff -y --suppress-common-lines \
                <(git ls-files janus_core/** | sed '/.py$/!d; s/\/__init__.py//; s#/#.#g; s/.py$//' | sort) \
@@ -128,43 +168,7 @@ jobs:
       - name: Install pandoc
         uses: pandoc/actions/setup@v1
 
-      - name: Install poppler-utils and gnuplot
-        shell: bash
-        run: sudo apt-get update && sudo apt-get install -y poppler-utils gnuplot-nox
-
-      - name: Set up Miniconda for TDEP
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          miniconda-version: latest
-          auto-update-conda: true
-          activate-environment: tdep
-          python-version: "3.10"
-
-      - name: Install TDEP build deps via conda-forge
-        run: |
-          conda install -c conda-forge -y \
-            gfortran openmpi-mpifort scalapack fftw hdf5
-
-      - name: Cache TDEP build
-        id: cache-tdep
-        uses: actions/cache@v4
-        with:
-          path: ~/tdep
-          key: tdep-${{ runner.os }}-conda-v1
-
-      - name: Clone & build TDEP
-        if: steps.cache-tdep.outputs.cache-hit != 'true'
-        run: |
-          git clone --depth 1 https://github.com/tdep-developers/tdep.git ~/tdep
-          cd ~/tdep
-          cp examples/build/important_settings.conda important_settings
-          sed -i "s|^PREFIX=.*|PREFIX=$CONDA_PREFIX|" important_settings
-          ./build_things.sh --nthreads_make 2
-
-      - name: Add TDEP to PATH
-        run: echo "$HOME/tdep/bin" >> $GITHUB_PATH
-
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           uv sync --extra mace
           uv pip install --reinstall pynvml
