@@ -1500,7 +1500,7 @@ class MolecularDynamics(BaseCalculation):
             )
             if self.logger:
                 self.logger.info(
-                    "TDEP input files written to %s", self._tdep_output_dir
+                    "TDEP input files written to %s", self._tdep_output_dir.as_posix()
                 )
 
     def _write_restart(self) -> None:
