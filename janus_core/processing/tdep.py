@@ -7,11 +7,13 @@ from pathlib import Path
 from ase import Atoms
 from ase.io import read, write
 import numpy as np
+from numpy import float64
+from numpy.typing import NDArray
 
 from janus_core.helpers.janus_types import PathLike
 
 
-def _frame_forces(atoms: Atoms) -> np.ndarray:
+def _frame_forces(atoms: Atoms) -> NDArray[float64]:
     """
     Get the forces stored in a trajectory frame.
 
@@ -22,7 +24,7 @@ def _frame_forces(atoms: Atoms) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    NDArray[float64]
         Forces on each atom. Taken from the frame's calculator if present,
         otherwise from the ``<arch>_forces`` array written by janus-core.
     """

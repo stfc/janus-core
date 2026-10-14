@@ -69,6 +69,15 @@ Further installation options are described in the `documentation <https://www.pl
     For example, there are resolved issues on MacOS that require building from source.
 
 
+TDEP
+====
+
+``janus-core`` can write input files for `TDEP <https://tdep-developers.github.io/tdep/>`_ after MD without any additional packages.
+
+To run TDEP on these files, it must be built separately, following its `installation instructions <https://github.com/tdep-developers/tdep/blob/main/INSTALL.md>`_, with its ``bin`` directory added to ``PATH``.
+Tests and tutorials that run TDEP skip these steps if it is not found on ``PATH``.
+
+
 Updating Dependencies
 =====================
 
