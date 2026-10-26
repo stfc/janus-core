@@ -930,7 +930,7 @@ class MolecularDynamics(BaseCalculation):
         return temperature_prefix.lstrip("-")
 
     @property
-    def _restart_stem(self) -> str:
+    def _restart_stem(self) -> Path:
         """
         Stem for restart files.
 
@@ -939,7 +939,7 @@ class MolecularDynamics(BaseCalculation):
 
         Returns
         -------
-        str
+        Path
            Stem for restart files.
         """
         if self.restart_stem is not None:

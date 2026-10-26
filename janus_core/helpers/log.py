@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import PurePath
 from typing import Literal
 
 from codecarbon import OfflineEmissionsTracker
@@ -77,10 +78,12 @@ class YamlFormatter(logging.Formatter):  # numpydoc ignore=PR02
         """
         # Parse JSON dump from codecarbon
         record.msg = str(record.msg)
-        # Only sanitise string args, so numeric format specifiers (e.g. %d) still work
+        # Only sanitise string and path args, so numeric format specifiers (e.g. %d)
+        # still work. Paths must be sanitised too, as backslashes in Windows paths are
+        # otherwise interpreted as escape sequences when the log is parsed as yaml
         if isinstance(record.args, tuple):
             record.args = tuple(
-                arg.replace("\\", "/") if isinstance(arg, str) else arg
+                str(arg).replace("\\", "/") if isinstance(arg, str | PurePath) else arg
                 for arg in record.args
             )
         if len(record.msg) > 1 and (record.msg[0] == "{" and record.msg[-1] == "}"):
