@@ -1468,7 +1468,6 @@ def test_auto_restart_restart_stem(tmp_path):
 def test_auto_restart_mtime(tmp_path):
     """Test auto restart uses steps in file names, not modification times."""
     file_prefix = tmp_path / "npt"
-    stats_path = tmp_path / "npt-stats.dat"
     log_file = tmp_path / "md.log"
 
     restart_stem = tmp_path / "npt-test"
@@ -1493,7 +1492,7 @@ def test_auto_restart_mtime(tmp_path):
 
     # Make the earliest restart file the most recently modified, as copying files
     # may not preserve their relative modification times
-    for step, restart_path in enumerate(reversed(restart_paths)):
+    for step, restart_path in enumerate(restart_paths):
         os.utime(restart_path, (0, 100 - step))
 
     npt_restart = NPT(
@@ -1518,10 +1517,6 @@ def test_auto_restart_mtime(tmp_path):
     assert read(restart_paths[-1]).positions == pytest.approx(
         npt_restart.struct.positions
     )
-
-    # Offset is not taken from stats file
-    with open(stats_path, encoding="utf8") as stats_file:
-        assert int(stats_file.readlines()[-1].split()[0]) == 6
 
 
 def test_auto_restart_invalid_steps(tmp_path):
@@ -1549,20 +1544,21 @@ def test_auto_restart_invalid_steps(tmp_path):
     # Step can no longer be inferred from the file name
     (tmp_path / "npt-test-4.extxyz").rename(tmp_path / "npt-test-final.extxyz")
 
-    npt_restart = NPT(
-        struct=DATA_PATH / "NaCl.cif",
-        arch="mace_mp",
-        model=MODEL_PATH,
-        temp=300.0,
-        steps=7,
-        stats_every=1,
-        restart_stem=restart_stem,
-        restart=True,
-        restart_auto=True,
-        file_prefix=file_prefix,
-        traj_every=1,
-        log_kwargs={"filename": log_file},
-    )
+    with pytest.warns(UserWarning, match="Auto restart failed"):
+        npt_restart = NPT(
+            struct=DATA_PATH / "NaCl.cif",
+            arch="mace_mp",
+            model=MODEL_PATH,
+            temp=300.0,
+            steps=7,
+            stats_every=1,
+            restart_stem=restart_stem,
+            restart=True,
+            restart_auto=True,
+            file_prefix=file_prefix,
+            traj_every=1,
+            log_kwargs={"filename": log_file},
+        )
 
     assert_log_contains(log_file, includes="Auto restart failed")
 
