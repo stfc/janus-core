@@ -188,7 +188,7 @@ def test_converge_warning():
         model=MODEL_PATH,
     )
     optimizer = GeomOpt(single_point.struct, steps=1)
-    assert not optimizer.converged
+    assert optimizer.converged is False
 
     with pytest.warns(UserWarning):
         converged = optimizer.run()
@@ -212,7 +212,7 @@ def test_converged(tmp_path):
         write_results=True,
         write_kwargs={"filename": results_path},
     )
-    assert not optimizer.converged
+    assert optimizer.converged is False
 
     converged = optimizer.run()
 
