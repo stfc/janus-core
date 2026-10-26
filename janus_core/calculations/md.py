@@ -846,11 +846,15 @@ class MolecularDynamics(BaseCalculation):
                 if self.logger:
                     self.logger.info("Auto restart successful")
 
-            elif self.logger:
-                self.logger.info(
-                    "Auto restart failed with stem: %s. Using `struct`",
-                    restart_stem,
+            else:
+                # Dynamics restart from `struct`, but files are still appended to
+                message = (
+                    f"Auto restart failed with stem: {restart_stem}. Using `struct`"
                 )
+                warn(message, stacklevel=2)
+
+                if self.logger:
+                    self.logger.info(message)
 
         # Check files exist to append
         if not self.stats_file.exists() or not self.traj_file.exists():
