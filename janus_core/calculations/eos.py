@@ -378,6 +378,9 @@ class EoS(BaseCalculation):
             c_struct.calc = copy(self.struct.calc)
             c_struct.set_cell(cell * lattice_scalar, scale_atoms=True)
 
+            # Convergence does not apply to scaled structure, unless minimized below
+            c_struct.info.pop("converged", None)
+
             # Minimize new structure
             if self.minimize_all:
                 if self.logger:

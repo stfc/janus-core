@@ -362,6 +362,10 @@ class Elasticity(BaseCalculation):
         ]
         for i, deformed_structure in enumerate(self.deformed_structures):
             deformed_structure.calc = copy(self.struct.calc)
+
+            # Convergence does not apply to deformed structure, unless minimized below
+            deformed_structure.info.pop("converged", None)
+
             progress = f"{i} / {len(self.deformed_structures)}"
             if self.minimize_all:
                 if self.logger:

@@ -85,6 +85,11 @@ def test_calc_elasticity(tmp_path):
         assert "strain" in struct.info
         assert struct.info["strain"] == approx(strain.voigt)
 
+        # Convergence does not apply to deformed structures
+        assert "converged" not in struct.info
+
+    assert read(minimized_path).info["converged"] is True
+
 
 def test_no_optimize_no_write_voigt(tmp_path):
     """Test calculating elasticity for Aluminium without optimization."""
