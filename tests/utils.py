@@ -150,11 +150,11 @@ def skip_extras(arch: str):
         case "fairchem":
             pytest.importorskip("fairchem.core.calculate")
             from huggingface_hub.utils._auth import get_token
-        case "d3":
-            pytest.importorskip("torch_dftd")
 
             if not get_token():
                 pytest.skip("Unable to download model")
+        case "d3":
+            pytest.importorskip("torch_dftd")
 
 
 def check_output_files(summary: dict[str, Any], output_files: dict[str, Path]) -> None:
