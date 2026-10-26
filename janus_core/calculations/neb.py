@@ -512,15 +512,18 @@ class NEB(BaseCalculation):
         # Cast to built-in bool, as ASE optimizers may return numpy bools
         self.converged = bool(self.opt.run(fmax=fmax, steps=steps))
 
+        # NEBOptimizer also reports success when `steps` is reached, so check forces
+        try:
+            max_force = self.neb.get_residual()
+        except RuntimeError:
+            max_force = None
+        else:
+            self.converged = bool(self.converged and max_force <= fmax)
+
         if not self.converged:
             message = f"NEB optimization has not converged after {steps} steps."
-            try:
-                message += (
-                    f" Current max force {self.neb.get_residual()} > target force "
-                    f"{fmax}"
-                )
-            except RuntimeError:
-                pass
+            if max_force is not None and max_force > fmax:
+                message += f" Current max force {max_force} > target force {fmax}"
 
             warnings.warn(message, stacklevel=2)
 
