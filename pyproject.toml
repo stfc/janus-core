@@ -82,7 +82,7 @@ sevennet = [
     "sevenn == 0.13.0",
 ]
 fairchem = [
-    "fairchem-core == 2.22.0; python_version >= '3.12'",
+    "fairchem-core == 2.24.0; python_version >= '3.12'",
 ]
 
 [project.scripts]
@@ -245,5 +245,9 @@ conflicts = [
     [
       { extra = "deepmd" },
       { extra = "mace" },
+    ],
+    [
+      { extra = "fairchem" },
+      { extra = "orb" },
     ],
 ]
