@@ -78,7 +78,8 @@ class GeomOpt(BaseCalculation):
         Filter class, or name of class from ase.filters to wrap around atoms.
         Default is `FrechetCellFilter`.
     filter_kwargs
-        Keyword arguments to pass to filter_class. Default is {}.
+        Keyword arguments to pass to filter_class. Ignored if filter_class is
+        None. Default is {}.
     optimizer
         Optimization function, or name of function from ase.optimize. Default is
         `LBFGS`.
@@ -172,7 +173,8 @@ class GeomOpt(BaseCalculation):
             Filter class, or name of class from ase.filters to wrap around atoms.
             Default is `FrechetCellFilter`.
         filter_kwargs
-            Keyword arguments to pass to filter_class. Default is {}.
+            Keyword arguments to pass to filter_class. Ignored if filter_class is
+            None. Default is {}.
         optimizer
             Optimization function, or name of function from ase.optimize. Default is
             `LBFGS`.
@@ -333,6 +335,12 @@ class GeomOpt(BaseCalculation):
                         self.filter_kwargs["scalar_pressure"] / units.GPa,
                     )
         else:
+            if self.filter_kwargs:
+                warnings.warn(
+                    "`filter_kwargs` are ignored when `filter_class` is None: "
+                    f"{', '.join(self.filter_kwargs)}",
+                    stacklevel=2,
+                )
             self.dyn = self.optimizer(self.struct, **self.opt_kwargs)
 
     def _set_functions(self) -> None:
