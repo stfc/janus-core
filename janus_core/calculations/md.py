@@ -1376,6 +1376,9 @@ class MolecularDynamics(BaseCalculation):
 
     def run(self) -> None:
         """Prepare and run molecular dynamics simulation and/or temperature ramp."""
+        # Convergence of a previous calculation does not apply to MD output
+        self.struct.info.pop("converged", None)
+
         self._set_info_units(self.info_unit_keys)
 
         if self.offset == 0:

@@ -494,6 +494,37 @@ def test_minimize(tmp_path):
     assert final_energy < init_energy
 
 
+def test_converged_not_kept(tmp_path):
+    """Test convergence of a previous optimization is not written to MD output."""
+    file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
+    traj_path = tmp_path / "Cl4Na4-nvt-T300.0-traj.extxyz"
+    final_path = tmp_path / "Cl4Na4-nvt-T300.0-final.extxyz"
+
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model=MODEL_PATH,
+    )
+
+    # Set as if read from the output of a previous geometry optimization
+    single_point.struct.info["converged"] = True
+
+    nvt = NVT(
+        struct=single_point.struct,
+        temp=300.0,
+        steps=2,
+        traj_every=1,
+        stats_every=1,
+        minimize=False,
+        file_prefix=file_prefix,
+    )
+    nvt.run()
+
+    assert "converged" not in single_point.struct.info
+    assert all("converged" not in image.info for image in read(traj_path, index=":"))
+    assert "converged" not in read(final_path).info
+
+
 def test_reset_velocities(tmp_path):
     """Test rescaling velocities before dynamics."""
     file_prefix = tmp_path / "Cl4Na4-nvt-T300.0"
