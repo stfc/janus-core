@@ -28,6 +28,7 @@ app = Typer()
 
 
 def _set_minimize_kwargs(
+    *,
     minimize_kwargs: dict[str, Any],
     opt_cell_lengths: bool,
     pressure: float,
@@ -319,9 +320,9 @@ def geomopt(
         opt_cell_fully_dict = {"filter_class": None}
 
     _set_minimize_kwargs(
-        minimize_kwargs,
-        opt_cell_lengths,
-        pressure,
+        minimize_kwargs=minimize_kwargs,
+        opt_cell_lengths=opt_cell_lengths,
+        pressure=pressure,
         use_filter=opt_cell_fully or opt_cell_lengths,
     )
 
