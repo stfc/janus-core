@@ -9,6 +9,7 @@ from itertools import combinations_with_replacement
 from math import isclose
 from pathlib import Path
 import random
+import re
 from typing import Any
 from warnings import warn
 
@@ -813,23 +814,20 @@ class MolecularDynamics(BaseCalculation):
             # Use restart_stem.name otherwise T300.0 etc. counts as extension
             poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
 
-            # Infer dynamics steps from file names, rather than relying on file
-            # modification times, which may not be preserved when files are copied
-            restarts = {}
+            # Infer steps from file names, as modification times may not be preserved
+            # when copied. The glob is a prefix match, so check the full stem matches
+            step_regex = re.compile(rf"{re.escape(restart_stem.name)}-(\d+)")
+
+            last_restart = None
+            last_step = 0
             for poss_restart in poss_restarts:
-                try:
-                    # Remove restart_stem from filename
-                    step = int(poss_restart.stem.split("-")[-1])
-                except ValueError:
-                    continue
+                match = step_regex.fullmatch(poss_restart.stem)
+                if match and (step := int(match[1])) > last_step:
+                    last_restart = poss_restart
+                    last_step = step
 
-                # Check "-" not included in step
-                if step > 0:
-                    restarts[step] = poss_restart
-
-            if restarts:
-                self.offset = max(restarts)
-                last_restart = restarts[self.offset]
+            if last_restart:
+                self.offset = last_step
 
                 # Read in last structure
                 self.struct, self.struct_path = input_structs(
