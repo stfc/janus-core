@@ -7,9 +7,9 @@ import datetime
 from functools import partial
 from itertools import combinations_with_replacement
 from math import isclose
-from os.path import getmtime
 from pathlib import Path
 import random
+import re
 from typing import Any
 from warnings import warn
 
@@ -813,8 +813,21 @@ class MolecularDynamics(BaseCalculation):
 
             # Use restart_stem.name otherwise T300.0 etc. counts as extension
             poss_restarts = restart_stem.parent.glob(f"{restart_stem.name}*.extxyz")
-            try:
-                last_restart = max(poss_restarts, key=getmtime)
+
+            # Infer steps from file names, as modification times may not be preserved
+            # when copied. The glob is a prefix match, so check the full stem matches
+            step_regex = re.compile(rf"{re.escape(restart_stem.name)}-(\d+)")
+
+            last_restart = None
+            last_step = 0
+            for poss_restart in poss_restarts:
+                match = step_regex.fullmatch(poss_restart.stem)
+                if match and (step := int(match[1])) > last_step:
+                    last_restart = poss_restart
+                    last_step = step
+
+            if last_restart:
+                self.offset = last_step
 
                 # Read in last structure
                 self.struct, self.struct_path = input_structs(
@@ -830,30 +843,18 @@ class MolecularDynamics(BaseCalculation):
 
                 self._config_plumed()
 
-                # Infer last dynamics step
-                last_stem = last_restart.stem
-                try:
-                    # Remove restart_stem from filename
-                    # Use restart_stem.name otherwise T300.0 etc. counts as extension
-                    self.offset = int(last_stem.split("-")[-1])
-
-                    # Check "-" not inlcuded in offset
-                    assert self.offset > 0
-
-                except (ValueError, AssertionError) as e:
-                    raise ValueError(
-                        f"Unable to infer final dynamics step from {last_restart}"
-                    ) from e
-
                 if self.logger:
                     self.logger.info("Auto restart successful")
 
-            except IndexError:
+            else:
+                # Dynamics restart from `struct`, but files are still appended to
+                message = (
+                    f"Auto restart failed with stem: {restart_stem}. Using `struct`"
+                )
+                warn(message, stacklevel=2)
+
                 if self.logger:
-                    self.logger.info(
-                        "Auto restart failed with stem: %s. Using `struct`",
-                        restart_stem,
-                    )
+                    self.logger.info(message)
 
         # Check files exist to append
         if not self.stats_file.exists() or not self.traj_file.exists():
@@ -933,7 +934,7 @@ class MolecularDynamics(BaseCalculation):
         return temperature_prefix.lstrip("-")
 
     @property
-    def _restart_stem(self) -> str:
+    def _restart_stem(self) -> Path:
         """
         Stem for restart files.
 
@@ -942,7 +943,7 @@ class MolecularDynamics(BaseCalculation):
 
         Returns
         -------
-        str
+        Path
            Stem for restart files.
         """
         if self.restart_stem is not None:

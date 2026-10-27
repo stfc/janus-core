@@ -317,7 +317,7 @@ This performs an NVE molecular dynamics simulation at 300K for 200 steps (0.2 ps
 as well as changing the output file names for both.
 
 To restart a simulation, the restart file can be entered explicitly (e.g. ``--struct NaCl-npt-T300.0-p1.0-res-1000.extxyz``) in combination with the ``--restart`` option,
-but by default the ``--restart-auto`` option allows the same original structure to be used to infer the most recent restart file created.
+but by default the ``--restart-auto`` option allows the same original structure to be used to infer the latest restart file, based on the number of steps in its file name.
 For example:
 
 .. code-block:: bash
