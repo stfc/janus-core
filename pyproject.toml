@@ -54,9 +54,9 @@ grace = [
     "tensorpotential == 0.6.1",
 ]
 mace = [
-    "mace-torch == 0.3.16",
+    "mace-torch == 0.3.17",
     "janus-core[d3]",
-    "graph-longrange==0.4.0",
+    "graph-longrange==0.4.4",
 ]
 orb = [
     "orb-models == 0.7.0; sys_platform != 'win32' and python_version >= '3.12' and python_version < '3.13'",
