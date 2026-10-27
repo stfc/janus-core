@@ -186,9 +186,41 @@ def test_converge_warning(tmp_path, LFPO_start_b, LFPO_end_b):
         neb_kwargs={"method": "aseneb"},
         file_prefix=tmp_path / "LFPO",
     )
+    assert neb.converged is False
+
     with pytest.warns(UserWarning, match="NEB optimization has not converged"):
         neb.run()
-    assert not neb.converged
+
+    assert neb.converged is False
+    assert all(image.info["converged"] is False for image in neb.images)
+
+
+def test_converge_max_steps(tmp_path):
+    """Test convergence is not reported when the maximum steps are reached."""
+    # Small displacement, so the band improves steadily rather than failing
+    init_struct = read(DATA_PATH / "NaCl.cif")
+    final_struct = init_struct.copy()
+    final_struct[0].x += 0.5
+
+    # NEBOptimizer returns True when `steps` is reached while still improving
+    neb = NEB(
+        init_struct=init_struct,
+        final_struct=final_struct,
+        arch="mace_mp",
+        model=MODEL_PATH,
+        n_images=5,
+        steps=3,
+        fmax=0.01,
+        neb_kwargs={"method": "improvedtangent"},
+        file_prefix=tmp_path / "NaCl",
+    )
+
+    with pytest.warns(UserWarning, match="NEB optimization has not converged"):
+        neb.run()
+
+    assert neb.converged is False
+    assert all(image.info["converged"] is False for image in neb.images)
+    assert neb.results["max_force"] > 0.01
 
 
 def test_restart(tmp_path):

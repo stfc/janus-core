@@ -188,9 +188,38 @@ def test_converge_warning():
         model=MODEL_PATH,
     )
     optimizer = GeomOpt(single_point.struct, steps=1)
+    assert optimizer.converged is False
 
     with pytest.warns(UserWarning):
-        optimizer.run()
+        converged = optimizer.run()
+
+    assert converged is False
+    assert optimizer.converged is False
+    assert single_point.struct.info["converged"] is False
+
+
+def test_converged(tmp_path):
+    """Test convergence saved as attribute, return value, and structure info."""
+    results_path = tmp_path / "NaCl-opt.extxyz"
+
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl-deformed.cif",
+        arch="mace_mp",
+        model=MODEL_PATH,
+    )
+    optimizer = GeomOpt(
+        single_point.struct,
+        write_results=True,
+        write_kwargs={"filename": results_path},
+    )
+    assert optimizer.converged is False
+
+    converged = optimizer.run()
+
+    assert converged is True
+    assert optimizer.converged is True
+    assert single_point.struct.info["converged"] is True
+    assert read(results_path).info["converged"] is True
 
 
 def test_filter_kwargs_no_filter_warning():

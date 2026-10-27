@@ -62,6 +62,37 @@ def test_no_optimize(tmp_path):
     )
 
 
+@pytest.mark.parametrize("minimize_all", [False, True])
+def test_converged_not_copied(tmp_path, minimize_all):
+    """Test minimization convergence is not copied to the generated structures."""
+    generated_path = tmp_path / "NaCl-generated.extxyz"
+    single_point = SinglePoint(
+        struct=DATA_PATH / "NaCl.cif",
+        arch="mace",
+        model=MODEL_PATH,
+    )
+    eos = EoS(
+        single_point.struct,
+        minimize_all=minimize_all,
+        n_volumes=5,
+        write_structures=True,
+        file_prefix=tmp_path / "NaCl",
+    )
+    eos.run()
+
+    generated = read(generated_path, index=":")
+
+    # First structure written is the minimized structure
+    assert generated[0].info["converged"] is True
+
+    # Scaled structures only converged if minimized themselves
+    for struct in generated[1:]:
+        if minimize_all:
+            assert struct.info["converged"] is True
+        else:
+            assert "converged" not in struct.info
+
+
 @pytest.mark.parametrize(
     "arch, device",
     [("chgnet", "cpu"), ("sevennet", "cpu")],

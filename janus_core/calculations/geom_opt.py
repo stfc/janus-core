@@ -95,6 +95,13 @@ class GeomOpt(BaseCalculation):
     traj_kwargs
         Keyword arguments to pass to ase.io.write to save optimization trajectory.
         "filename" keyword is inferred from `file_prefix` if not given. Default is {}.
+
+    Attributes
+    ----------
+    dyn : Optimizer
+        Optimizer object to run geometry optimization.
+    converged : bool
+        Whether the optimization has converged. False before `run` is called.
     """
 
     def __init__(
@@ -212,6 +219,7 @@ class GeomOpt(BaseCalculation):
         self.write_kwargs = write_kwargs
         self.write_traj = write_traj
         self.traj_kwargs = traj_kwargs
+        self.converged = False
 
         # Read last image by default
         read_kwargs.setdefault("index", -1)
@@ -357,8 +365,15 @@ class GeomOpt(BaseCalculation):
             except AttributeError as e:
                 raise AttributeError(f"No such filter: {self.filter_class}") from e
 
-    def run(self) -> None:
-        """Run geometry optimization."""
+    def run(self) -> bool:
+        """
+        Run geometry optimization.
+
+        Returns
+        -------
+        bool
+            Whether the optimization converged.
+        """
         s_grp = spacegroup(self.struct, self.symmetry_tolerance, self.angle_tolerance)
         self.struct.info["initial_spacegroup"] = s_grp
         if self.logger:
@@ -371,7 +386,8 @@ class GeomOpt(BaseCalculation):
 
         self._set_info_units()
 
-        converged = self.dyn.run(fmax=self.fmax, steps=self.steps)
+        # Cast to built-in bool, as ASE optimizers may return numpy bools
+        self.converged = bool(self.dyn.run(fmax=self.fmax, steps=self.steps))
 
         # Calculate current maximum force
         if self.filter_class is not None:
@@ -396,13 +412,14 @@ class GeomOpt(BaseCalculation):
 
         s_grp = spacegroup(self.struct, self.symmetry_tolerance, self.angle_tolerance)
         self.struct.info["final_spacegroup"] = s_grp
+        self.struct.info["converged"] = self.converged
 
         if self.logger:
             self.logger.info("After optimization spacegroup: %s", s_grp)
             self.logger.info("Max force: %s", max_force)
             self.logger.info("Final energy: %s", self.struct.get_potential_energy())
 
-        if not converged:
+        if not self.converged:
             warnings.warn(
                 f"Optimization has not converged after {self.steps} steps. "
                 f"Current max force {max_force} > target force {self.fmax}",
@@ -435,3 +452,5 @@ class GeomOpt(BaseCalculation):
             emissions = self.tracker.stop_task().emissions
             self.struct.info["emissions"] = emissions
             self.tracker.stop()
+
+        return self.converged
