@@ -9,7 +9,7 @@ from ase import units
 from ase.calculators.mixing import SumCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
-from numpy import isfinite
+from numpy import isfinite, zeros
 import pytest
 
 from janus_core.calculations.single_point import SinglePoint
@@ -490,7 +490,7 @@ def test_missing_arch(struct):
 def test_dispersion(arch, kwargs, pred):
     """Test dispersion correction."""
     skip_extras(arch)
-    pytest.importorskip("torch_dftd")
+    skip_extras("d3")
 
     try:
         data_path = DATA_PATH / "benzene.xyz"
@@ -524,7 +524,7 @@ def test_dispersion(arch, kwargs, pred):
 def test_mace_mp_dispersion():
     """Test mace_mp dispersion correction matches default."""
     skip_extras("mace_mp")
-    pytest.importorskip("torch_dftd")
+    skip_extras("d3")
 
     from mace.calculators import mace_mp
 
@@ -556,3 +556,25 @@ def test_mace_mp_dispersion():
     # Different default to other architectures
     assert d3_energy - no_d3_energy == pytest.approx(-0.29815768)
     assert d3_energy == pytest.approx(mace_d3_energy)
+
+
+def test_dispersion_no_pbc():
+    """Test dispersion stress is zero for non-periodic structures."""
+    skip_extras("mace_mp")
+    skip_extras("d3")
+
+    data_path = DATA_PATH / "benzene.xyz"
+
+    sp_d3 = SinglePoint(
+        struct=data_path,
+        arch="mace_mp",
+        model=MACE_PATH,
+        properties="stress",
+        calc_kwargs={"dispersion": True},
+    )
+
+    with pytest.warns(UserWarning, match="Stress cannot be calculated"):
+        d3_stress = sp_d3.run()["stress"]
+
+    # Stress is undefined without a cell
+    assert d3_stress == pytest.approx(zeros(6))

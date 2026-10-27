@@ -153,6 +153,8 @@ def skip_extras(arch: str):
 
             if not get_token():
                 pytest.skip("Unable to download model")
+        case "d3":
+            pytest.importorskip("torch_dftd")
 
 
 def check_output_files(summary: dict[str, Any], output_files: dict[str, Path]) -> None:
