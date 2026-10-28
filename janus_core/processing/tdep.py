@@ -6,11 +6,11 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read, write
-import numpy as np
 from numpy import float64
 from numpy.typing import NDArray
 
 from janus_core.helpers.janus_types import PathLike
+from janus_core.helpers.stats import Stats
 
 
 def _frame_forces(atoms: Atoms) -> NDArray[float64]:
@@ -25,15 +25,60 @@ def _frame_forces(atoms: Atoms) -> NDArray[float64]:
     Returns
     -------
     NDArray[float64]
-        Forces on each atom. Taken from the frame's calculator if present,
-        otherwise from the ``<arch>_forces`` array written by janus-core.
+        Forces on each atom. Taken from the ``<arch>_forces`` array written by
+        janus-core if present, otherwise from the results stored in the frame's
+        calculator, so they are never recalculated.
     """
-    if atoms.calc is not None and "forces" in atoms.calc.results:
-        return atoms.get_forces()
     arch = atoms.info.get("arch")
     if arch is not None and f"{arch}_forces" in atoms.arrays:
         return atoms.arrays[f"{arch}_forces"]
+    if atoms.calc is not None and "forces" in atoms.calc.results:
+        return atoms.calc.results["forces"]
     raise ValueError("Frames in traj_file must contain 'forces' or '<arch>_forces'.")
+
+
+def _validate_inputs(
+    trajectory: list[Atoms],
+    supercell: Atoms,
+    stats_steps: list[int],
+) -> None:
+    """
+    Check that MD outputs can be converted to TDEP input files.
+
+    Parameters
+    ----------
+    trajectory
+        Frames read from the MD trajectory file.
+    supercell
+        Supercell written to ``infile.ssposcar``.
+    stats_steps
+        MD step of each row in the MD statistics file.
+
+    Raises
+    ------
+    ValueError
+        If the frames cannot be paired with the supercell and with the rows of the
+        MD statistics file.
+    """
+    if any("step" not in atoms.info for atoms in trajectory):
+        raise ValueError("Frames in traj_file must contain 'step' in their info.")
+    frame_steps = [atoms.info["step"] for atoms in trajectory]
+    if len(set(frame_steps)) != len(frame_steps):
+        raise ValueError("Frames in traj_file must have unique steps.")
+
+    if len(supercell) != len(trajectory[0]):
+        raise ValueError(
+            "The number of atoms in supercell must match the number of atoms "
+            "in traj_file."
+        )
+
+    if len(set(stats_steps)) != len(stats_steps):
+        raise ValueError("Rows in stats_file must have unique steps.")
+    if missing := sorted(set(frame_steps).difference(stats_steps)):
+        raise ValueError(
+            f"stats_file has no row for {len(missing)} trajectory step(s), "
+            f"e.g. step {missing[0]}. traj_every must be a multiple of stats_every."
+        )
 
 
 def build_tdep_inputs_from_nvt(
@@ -91,36 +136,17 @@ def build_tdep_inputs_from_nvt(
     meta_path = output_dir / "infile.meta"
     out_fmt = "{:.12f}".format
     trajectory = read(traj_file, index=":")
-    n_atoms = len(trajectory[0])
-    n_steps = len(trajectory)
     unit_cell = read(unit_cell_file)
-    stats_data = np.atleast_2d(np.loadtxt(stats_file, comments="#"))
-    forces = [_frame_forces(atoms) for atoms in trajectory]
-
-    if len(supercell_atoms) != n_atoms:
-        raise ValueError(
-            "The number of atoms in supercell must match the number of atoms "
-            "in traj_file."
-        )
+    stats = Stats(stats_file)
+    stats_steps = [int(step) for step in stats["Step"]]
+    _validate_inputs(trajectory, supercell_atoms, stats_steps)
 
     # Pair each frame with the stats row written at the same MD step
-    if any("step" not in atoms.info for atoms in trajectory):
-        raise ValueError("Frames in traj_file must contain 'step' in their info.")
-    frame_steps = [int(atoms.info["step"]) for atoms in trajectory]
-    if len(set(frame_steps)) != n_steps:
-        raise ValueError("Frames in traj_file must have unique steps.")
-
-    stats_rows = {int(step): row for row, step in enumerate(stats_data[:, 0])}
-    if len(stats_rows) != len(stats_data):
-        raise ValueError("Rows in stats_file must have unique steps.")
-
-    missing = [step for step in frame_steps if step not in stats_rows]
-    if missing:
-        raise ValueError(
-            f"stats_file has no row for {len(missing)} trajectory step(s), "
-            f"e.g. step {missing[0]}. traj_every must be a multiple of stats_every."
-        )
-    stats_data = stats_data[[stats_rows[step] for step in frame_steps]]
+    stats_rows = {step: row for row, step in enumerate(stats_steps)}
+    rows = [stats_rows[atoms.info["step"]] for atoms in trajectory]
+    forces = [_frame_forces(atoms) for atoms in trajectory]
+    n_atoms = len(trajectory[0])
+    n_steps = len(trajectory)
 
     # Only create the output directory once all checks have passed
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -152,18 +178,18 @@ def build_tdep_inputs_from_nvt(
             for force in frame_forces
         )
 
-    time_fs = stats_data[:, 2]
-    e_pot = stats_data[:, 3] * n_atoms
-    e_kin = stats_data[:, 4] * n_atoms
-    temperature_data = stats_data[:, 5]
-    e_tot = stats_data[:, 6] * n_atoms
-    pressure = stats_data[:, 9]
-    stress_xx = stats_data[:, 10]
-    stress_yy = stats_data[:, 11]
-    stress_zz = stats_data[:, 12]
-    stress_yz = stats_data[:, 13]
-    stress_xz = stats_data[:, 14]
-    stress_xy = stats_data[:, 15]
+    time_fs = stats["Time"][rows]
+    e_pot = stats["Epot/N"][rows] * n_atoms
+    e_kin = stats["EKin/N"][rows] * n_atoms
+    temperature_data = stats["T"][rows]
+    e_tot = stats["ETot/N"][rows] * n_atoms
+    pressure = stats["P"][rows]
+    stress_xx = stats["Pxx"][rows]
+    stress_yy = stats["Pyy"][rows]
+    stress_zz = stats["Pzz"][rows]
+    stress_yz = stats["Pyz"][rows]
+    stress_xz = stats["Pxz"][rows]
+    stress_xy = stats["Pxy"][rows]
 
     with open(stat_path, "w", encoding="utf-8") as file:
         file.writelines(

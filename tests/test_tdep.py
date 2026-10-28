@@ -8,6 +8,7 @@ import subprocess
 
 from ase import Atoms
 from ase.build import bulk
+from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read, write
 import numpy as np
 import pytest
@@ -157,6 +158,27 @@ def test_build_inputs(tmp_path):
     assert stat[:, 10:13] == pytest.approx(stats[:, [15, 13, 14]])
 
 
+def test_build_inputs_calc_forces(tmp_path):
+    """Test forces are taken from the calculator without an <arch>_forces array."""
+    frames = read(TRAJ, index=":2")
+    for atoms in frames:
+        forces = atoms.arrays.pop("mace_forces")
+        atoms.calc = SinglePointCalculator(atoms, forces=forces)
+    write(tmp_path / "traj.extxyz", frames)
+
+    output_dir = tmp_path / "tdep-inputs"
+    build_tdep_inputs_from_nvt(
+        unit_cell_file=UNIT_CELL,
+        supercell=SUPERCELL,
+        traj_file=tmp_path / "traj.extxyz",
+        stats_file=STATS,
+        temperature=300.0,
+        output_dir=output_dir,
+    )
+    forces = np.concatenate([atoms.calc.results["forces"] for atoms in frames])
+    assert np.loadtxt(output_dir / "infile.forces") == pytest.approx(forces, abs=1e-11)
+
+
 @pytest.mark.parametrize(
     "case, match",
     [
@@ -187,7 +209,8 @@ def test_build_inputs_errors(tmp_path, case, match):
     elif case == "small_supercell":
         supercell = UNIT_CELL
     write(tmp_path / "traj.extxyz", frames)
-    np.savetxt(tmp_path / "stats.dat", stats)
+    header = STATS.read_text(encoding="utf-8").splitlines()[0]
+    np.savetxt(tmp_path / "stats.dat", stats, header=header, comments="")
 
     output_dir = tmp_path / "tdep-inputs"
     with pytest.raises(ValueError, match=match):
