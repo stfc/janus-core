@@ -14,6 +14,7 @@ from typing import Any
 from warnings import warn
 
 from ase import Atoms
+from ase.geometry import find_mic
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
@@ -826,6 +827,16 @@ class MolecularDynamics(BaseCalculation):
             raise ValueError(
                 "`tdep_supercell_file` must have the same cell as the MD structure, "
                 "within 1e-3 Å. Note that CIF files do not keep the cell orientation."
+            )
+        # TDEP pairs each atom with the supercell atom of the same index, so they must
+        # be at the same positions, allowing for atoms wrapped into the cell
+        displacements, _ = find_mic(
+            self.struct.positions - supercell.positions, supercell.cell
+        )
+        if not np.allclose(displacements, 0, atol=1e-3):
+            raise ValueError(
+                "`tdep_supercell_file` must have the same positions as the MD "
+                "structure, within 1e-3 Å. The atoms may be in a different order."
             )
 
         # TDEP checks, with a tolerance of 1e-5, that the volume ratio is an integer

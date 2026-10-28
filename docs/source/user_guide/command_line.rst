@@ -380,7 +380,7 @@ will save frames from step 1000, after equilibration, and write ``infile.ucposca
 
 These files can be used for any TDEP calculation based on the sampled structures, such as higher-order force constants, free energies, and the lattice thermal conductivity, as described in the `TDEP tutorials <https://github.com/tdep-developers/tdep-tutorials>`_. Data that MLIPs do not usually provide, such as the Born effective charges required by TDEP's ``--polar`` option, must be obtained separately.
 
-``'tdep_supercell_file'`` must match the MD structure, with the same atoms in the same order and the same cell, and must be a supercell of ``'tdep_unit_cell_file'``, which may be a primitive cell.
+``'tdep_supercell_file'`` must match the MD structure, with the same atoms in the same order, at the same positions, and with the same cell, and must be a supercell of ``'tdep_unit_cell_file'``, which may be a primitive cell. The simplest way to ensure this is to use the same file for both, as in the tutorials.
 
 The following are also checked before the MD starts:
 

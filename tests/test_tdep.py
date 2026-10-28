@@ -69,6 +69,10 @@ RAMP = {
 NACL = read(DATA_PATH / "NaCl.cif")
 PRIMITIVE = bulk("NaCl", "rocksalt", a=5.64)
 
+# NaCl.cif with two Na atoms swapped, so only their positions differ
+NACL_SWAPPED = NACL.copy()
+NACL_SWAPPED.positions[[0, 2]] = NACL.positions[[2, 0]]
+
 # TDEP's programs are found on PATH, where its INSTALL.md puts them
 TDEP_INSTALLED = all(
     shutil.which(program)
@@ -289,6 +293,7 @@ def test_valid_settings(tmp_path, md_kwargs):
     [
         (NACL, NACL * (2, 1, 1), "has 16 atoms, but the MD structure has 8"),
         (NACL, NACL[NACL.numbers.argsort()], "same chemical symbols"),
+        (NACL, NACL_SWAPPED, "same positions"),
         (Atoms("NaCl", positions=[[0, 0, 0], [2.82, 0, 0]]), NACL, "three cell"),
         (bulk("NaCl", "rocksalt", a=5.5, cubic=True), NACL, "volume ratio"),
         (NACL[:-1], NACL, r"must equal their volume ratio \(1\)"),
@@ -308,6 +313,21 @@ def test_invalid_cells(tmp_path, unit_cell, supercell, match):
             file_prefix=tmp_path / "NaCl",
             post_process_kwargs=TDEP_KWARGS | tdep_kwargs,
         )
+
+
+def test_wrapped_supercell(tmp_path):
+    """Test a supercell with an atom outside the cell is accepted."""
+    supercell = NACL.copy()
+    supercell.positions[0] += supercell.cell[0]
+    write(tmp_path / "supercell.extxyz", supercell)
+
+    nvt = NVT(
+        **MD_KWARGS,
+        file_prefix=tmp_path / "NaCl",
+        post_process_kwargs=TDEP_KWARGS
+        | {"tdep_supercell_file": tmp_path / "supercell.extxyz"},
+    )
+    assert nvt.output_files["tdep_inputs"] == tmp_path / "NaCl-tdep-inputs"
 
 
 def test_primitive_unit_cell(tmp_path):
