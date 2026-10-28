@@ -773,9 +773,9 @@ class MolecularDynamics(BaseCalculation):
                 "generate TDEP inputs"
             )
 
-        # No frame may be saved during a temperature ramp, including at its last step.
-        # This also holds on restart: traj_start counts from the restart, and fewer
-        # ramp steps remain
+        # Frames saved during a temperature ramp, including at its last step, are not
+        # used. Frame steps count from the start of the first run, so this also holds
+        # on restart
         ramp_steps = 0
         if self.ramp_temp:
             ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
@@ -787,21 +787,16 @@ class MolecularDynamics(BaseCalculation):
             ramp_steps = self.heating_steps_per_temp * sum(
                 not isclose(temp, 0.0) for temp in temps
             )
-        # _write_traj saves frames at multiples of traj_every, from traj_start
-        first_frame = self.traj_start + (-self.traj_start) % self.traj_every
-        if self.ramp_temp and first_frame <= ramp_steps:
-            raise ValueError(
-                f"The first trajectory frame would be saved at step {first_frame}, "
-                f"but the temperature ramp ends at step {ramp_steps}. Set "
-                f"`traj_start` greater than {ramp_steps} (e.g. "
-                f"{(ramp_steps // self.traj_every + 1) * self.traj_every}) to "
-                "generate TDEP inputs"
-            )
+        self._tdep_start_step = ramp_steps + 1 if ramp_steps else 0
 
         # At least one frame must be saved during the MD at `temp`. The last step is
         # not checked on restart, as the frames of the previous run are kept
         if self.steps <= 0:
             raise ValueError("`steps` must be greater than 0 to generate TDEP inputs")
+        # _write_traj saves frames at multiples of traj_every, from traj_start, and
+        # only those from _tdep_start_step are used
+        first_step = max(self.traj_start, self._tdep_start_step)
+        first_frame = first_step + (-first_step) % self.traj_every
         last_step = ramp_steps + self.steps
         if not self.restart and first_frame > last_step:
             raise ValueError(
@@ -1508,6 +1503,7 @@ class MolecularDynamics(BaseCalculation):
                 output_dir=self._tdep_output_dir,
                 # Time between saved frames in fs (rounded to drop float noise)
                 timestep=round(self.timestep / units.fs * self.traj_every, 6),
+                start_step=self._tdep_start_step,
             )
             if self.logger:
                 self.logger.info(

@@ -41,6 +41,7 @@ def _validate_inputs(
     trajectory: list[Atoms],
     supercell: Atoms,
     stats_steps: list[int],
+    start_step: int,
 ) -> None:
     """
     Check that MD outputs can be converted to TDEP input files.
@@ -53,16 +54,22 @@ def _validate_inputs(
         Supercell written to ``infile.ssposcar``.
     stats_steps
         MD step of each row in the MD statistics file.
+    start_step
+        First MD step whose frame is used.
 
     Raises
     ------
     ValueError
-        If the frames cannot be paired with the supercell and with the rows of the
-        MD statistics file.
+        If the frames to use cannot be paired with the supercell and with the rows
+        of the MD statistics file.
     """
     if any("step" not in atoms.info for atoms in trajectory):
         raise ValueError("Frames in traj_file must contain 'step' in their info.")
-    frame_steps = [atoms.info["step"] for atoms in trajectory]
+    frame_steps = [
+        atoms.info["step"] for atoms in trajectory if atoms.info["step"] >= start_step
+    ]
+    if not frame_steps:
+        raise ValueError(f"traj_file has no frames from step {start_step}.")
     if len(set(frame_steps)) != len(frame_steps):
         raise ValueError("Frames in traj_file must have unique steps.")
 
@@ -90,6 +97,7 @@ def build_tdep_inputs_from_nvt(
     temperature: float,
     output_dir: PathLike,
     timestep: float = 0.0,
+    start_step: int = 0,
 ) -> dict[str, Path]:
     """
     Build TDEP input files from NVT molecular dynamics outputs.
@@ -111,6 +119,9 @@ def build_tdep_inputs_from_nvt(
         Directory where the TDEP input files will be written.
     timestep
         Time interval between exported configurations in fs. Default is ``0.0``.
+    start_step
+        First MD step whose frame is used, so that earlier frames, such as those
+        saved during a temperature ramp, are skipped. Default is ``0``.
 
     Returns
     -------
@@ -139,9 +150,10 @@ def build_tdep_inputs_from_nvt(
     unit_cell = read(unit_cell_file)
     stats = Stats(stats_file)
     stats_steps = [int(step) for step in stats["Step"]]
-    _validate_inputs(trajectory, supercell_atoms, stats_steps)
+    _validate_inputs(trajectory, supercell_atoms, stats_steps, start_step)
 
-    # Pair each frame with the stats row written at the same MD step
+    # Pair each frame from start_step with the stats row written at the same MD step
+    trajectory = [atoms for atoms in trajectory if atoms.info["step"] >= start_step]
     stats_rows = {step: row for row, step in enumerate(stats_steps)}
     rows = [stats_rows[atoms.info["step"]] for atoms in trajectory]
     forces = [_frame_forces(atoms) for atoms in trajectory]

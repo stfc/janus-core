@@ -386,7 +386,7 @@ The following are also checked before the MD starts:
 
 - TDEP requires canonical sampling of a fixed cell, so only the ``nvt``, ``nvt-nh``, and ``nvt-csvr`` ensembles are supported, without PLUMED. If ``--minimize`` is used, ``'filter_class': None`` must be set in ``--minimize-kwargs``, so that the cell is not relaxed.
 - ``--traj-every`` must be a multiple of ``--stats-every``, so that each saved frame has statistics from the same step.
-- With a temperature ramp, frames must only be saved after it ends, so ``--traj-start`` must be greater than the number of steps in the ramp. This also applies when restarting, even if the ramp has already finished.
+- At least one frame must be saved after any temperature ramp, as frames saved during the ramp, including at its last step, are not used.
 
 .. note::
     The structure files must keep the cell orientation, which CIF files do not for cells such as primitive cells, and ASE must recognise their format from the file name. For example, TDEP's ``outfile.ssposcar`` could be renamed ``supercell.vasp``.

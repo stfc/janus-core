@@ -117,6 +117,21 @@ def test_nvt_tdep(tmp_path):
     assert_log_contains(log_file, includes="TDEP input files written to")
 
 
+def test_nvt_tdep_ramp(tmp_path):
+    """Test frames saved during a temperature ramp are not used."""
+    output_dir = tmp_path / "tdep-inputs"
+    NVT(
+        **(MD_KWARGS | RAMP | {"steps": 20}),
+        file_prefix=tmp_path / "NaCl",
+        post_process_kwargs=TDEP_KWARGS | {"tdep_output_dir": output_dir},
+    ).run()
+
+    # Frames are saved at steps 0, 10, ..., 110, but the ramp ends at step 90
+    assert len(read(tmp_path / "NaCl-traj.extxyz", index=":")) == 12
+    stat = np.loadtxt(output_dir / "infile.stat")
+    assert stat[:, 1] == pytest.approx([10.0, 11.0])
+
+
 def test_build_inputs(tmp_path):
     """Test TDEP input files written from committed NVT output."""
     output_dir = tmp_path / "tdep-inputs"
@@ -158,6 +173,26 @@ def test_build_inputs(tmp_path):
     assert stat[:, 10:13] == pytest.approx(stats[:, [15, 13, 14]])
 
 
+def test_build_inputs_start_step(tmp_path):
+    """Test frames saved before start_step are not used."""
+    build_tdep_inputs_from_nvt(
+        unit_cell_file=UNIT_CELL,
+        supercell=SUPERCELL,
+        traj_file=TRAJ,
+        stats_file=STATS,
+        temperature=300.0,
+        output_dir=tmp_path,
+        timestep=100.0,
+        start_step=1300,
+    )
+
+    # Frames at steps 1100, 1200, ..., 2000, with a timestep of 1 fs
+    meta = (tmp_path / "infile.meta").read_text(encoding="utf-8").splitlines()
+    assert meta[1] == "8    # N timesteps"
+    stat = np.loadtxt(tmp_path / "infile.stat")
+    assert stat[:, 1] == pytest.approx(np.arange(1300, 2001, 100))
+
+
 def test_build_inputs_calc_forces(tmp_path):
     """Test forces are taken from the calculator without an <arch>_forces array."""
     frames = read(TRAJ, index=":2")
@@ -188,6 +223,7 @@ def test_build_inputs_calc_forces(tmp_path):
         ("repeated_stats_row", "Rows in stats_file must have unique steps"),
         ("missing_stats_row", "stats_file has no row for 1 trajectory step"),
         ("small_supercell", "number of atoms in supercell must match"),
+        ("no_frames", "traj_file has no frames from step 1301"),
     ],
 )
 def test_build_inputs_errors(tmp_path, case, match):
@@ -195,6 +231,7 @@ def test_build_inputs_errors(tmp_path, case, match):
     frames = read(TRAJ, index=":3")
     stats = np.loadtxt(STATS)
     supercell = SUPERCELL
+    start_step = 0
     if case == "no_forces":
         for atoms in frames:
             del atoms.arrays["mace_forces"]
@@ -208,6 +245,8 @@ def test_build_inputs_errors(tmp_path, case, match):
         stats = stats[stats[:, 0] != frames[1].info["step"]]
     elif case == "small_supercell":
         supercell = UNIT_CELL
+    elif case == "no_frames":
+        start_step = frames[-1].info["step"] + 1
     write(tmp_path / "traj.extxyz", frames)
     header = STATS.read_text(encoding="utf-8").splitlines()[0]
     np.savetxt(tmp_path / "stats.dat", stats, header=header, comments="")
@@ -221,6 +260,7 @@ def test_build_inputs_errors(tmp_path, case, match):
             stats_file=tmp_path / "stats.dat",
             temperature=300.0,
             output_dir=output_dir,
+            start_step=start_step,
         )
     assert not output_dir.exists()
 
@@ -267,7 +307,7 @@ def test_invalid_ensembles(tmp_path, ensemble):
         ({"minimize": True}, {}, ValueError, "filter_class"),
         ({"traj_every": 5, "stats_every": 10}, {}, ValueError, "positive multiple"),
         ({"traj_every": 0}, {}, ValueError, "positive multiple"),
-        (RAMP | {"traj_start": 90}, {}, ValueError, "ramp ends at step 90"),
+        (RAMP | {"steps": 5}, {}, ValueError, "No trajectory frames"),
         ({"steps": 0}, {}, ValueError, "must be greater than 0"),
         (
             {"steps": 10, "traj_start": 20, "traj_every": 10, "stats_every": 10},
@@ -297,7 +337,7 @@ def test_invalid_settings(tmp_path, md_kwargs, tdep_kwargs, error, match):
     "md_kwargs",
     [
         {"minimize": True, "minimize_kwargs": {"filter_class": None}},
-        RAMP | {"traj_start": 91},
+        RAMP | {"steps": 10},
         {"steps": 20, "traj_start": 20, "traj_every": 10, "stats_every": 10},
     ],
 )
