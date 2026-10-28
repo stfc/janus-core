@@ -836,9 +836,9 @@ class MolecularDynamics(BaseCalculation):
                 "`tdep_unit_cell_file` and `tdep_supercell_file` must both have three "
                 "cell vectors"
             )
-        matrix = supercell.cell[:] @ np.linalg.inv(unit_cell.cell[:])
+        matrix = supercell.cell @ np.linalg.inv(unit_cell.cell)
         n_cells = abs(np.linalg.det(matrix))
-        if abs(n_cells - round(n_cells)) > 1e-5:
+        if not isclose(n_cells, round(n_cells), rel_tol=0, abs_tol=1e-5):
             raise ValueError(
                 "The volume ratio of `tdep_supercell_file` to `tdep_unit_cell_file` "
                 f"({n_cells:.7f}) must be an integer to generate TDEP inputs"
@@ -851,8 +851,8 @@ class MolecularDynamics(BaseCalculation):
             )
 
         # The supercell matrix must be an integer matrix
-        deviation = np.abs(matrix - np.rint(matrix)).max()
-        if deviation > 1e-5:
+        if not np.allclose(matrix, np.rint(matrix), rtol=0, atol=1e-5):
+            deviation = np.abs(matrix - np.rint(matrix)).max()
             raise ValueError(
                 "`tdep_supercell_file` must be a supercell of `tdep_unit_cell_file`, "
                 "but supercell.cell @ inv(unit_cell.cell) is not an integer matrix "
