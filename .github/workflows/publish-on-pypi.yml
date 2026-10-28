@@ -61,10 +61,10 @@ jobs:
         env:
           # The same commit as in ci.yml
           TDEP_COMMIT: 6ccdf13ced49aa067a92f9c9b03a2a202bc361b5
+        working-directory: ${{ runner.temp }}
         run: |
-          git clone https://github.com/tdep-developers/tdep.git "$RUNNER_TEMP/tdep"
-          cd "$RUNNER_TEMP/tdep"
-          git checkout "$TDEP_COMMIT"
+          git clone --revision="$TDEP_COMMIT" --depth=1 https://github.com/tdep-developers/tdep.git
+          cd tdep
           # Production (-O3) settings from TDEP's own CI
           cp .github/important_settings.x86_64 important_settings
           bash build_things.sh --nthreads_make 4
