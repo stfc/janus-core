@@ -164,6 +164,13 @@ These are tested before ``janus-core`` is published to PyPI, but can be tested l
         cd docs
         make clean; make tutorials
 
+The anharmonic phonons tutorials also run `TDEP <https://tdep-developers.github.io/tdep/>`_,
+which is not a Python package and must be built separately, as described in
+:doc:`Installation </user_guide/installation>`.
+If TDEP's programs are not found on ``PATH``, the TDEP steps in these notebooks are skipped,
+so the other cells still run but TDEP's results are not shown.
+The PyPI release workflow builds TDEP before running the tutorials.
+
 
 Continuous integration
 ++++++++++++++++++++++
