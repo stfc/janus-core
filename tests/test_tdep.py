@@ -74,6 +74,14 @@ PRIMITIVE = bulk("NaCl", "rocksalt", a=5.64)
 NACL_SWAPPED = NACL.copy()
 NACL_SWAPPED.positions[[0, 2]] = NACL.positions[[2, 0]]
 
+# Primitive cell that NaCl.cif does not repeat, as its origin is shifted
+PRIMITIVE_SHIFTED = PRIMITIVE.copy()
+PRIMITIVE_SHIFTED.positions += [0.1, 0, 0]
+
+# Lattice parameter of NaCl relaxed with MACE-MP small. Unlike with 5.64 Å, the
+# positions are not exact when written with the 8 decimals of extxyz files
+A_RELAXED = 5.690028396379315
+
 # TDEP's programs are found on PATH, where its INSTALL.md puts them
 TDEP_INSTALLED = all(
     shutil.which(program)
@@ -224,12 +232,14 @@ def test_build_inputs_calc_forces(tmp_path):
         ("missing_stats_row", "stats_file has no row for 1 trajectory step"),
         ("small_supercell", "number of atoms in supercell must match"),
         ("no_frames", "traj_file has no frames from step 1301"),
+        ("shifted_unit_cell", "image of a unit-cell atom"),
     ],
 )
 def test_build_inputs_errors(tmp_path, case, match):
     """Test invalid MD output is rejected before any file is written."""
     frames = read(TRAJ, index=":3")
     stats = np.loadtxt(STATS)
+    unit_cell = UNIT_CELL
     supercell = SUPERCELL
     start_step = 0
     if case == "no_forces":
@@ -247,6 +257,9 @@ def test_build_inputs_errors(tmp_path, case, match):
         supercell = UNIT_CELL
     elif case == "no_frames":
         start_step = frames[-1].info["step"] + 1
+    elif case == "shifted_unit_cell":
+        unit_cell = tmp_path / "unit_cell.extxyz"
+        write(unit_cell, PRIMITIVE_SHIFTED)
     write(tmp_path / "traj.extxyz", frames)
     header = STATS.read_text(encoding="utf-8").splitlines()[0]
     np.savetxt(tmp_path / "stats.dat", stats, header=header, comments="")
@@ -254,7 +267,7 @@ def test_build_inputs_errors(tmp_path, case, match):
     output_dir = tmp_path / "tdep-inputs"
     with pytest.raises(ValueError, match=match):
         build_tdep_inputs_from_nvt(
-            unit_cell_file=UNIT_CELL,
+            unit_cell_file=unit_cell,
             supercell=supercell,
             traj_file=tmp_path / "traj.extxyz",
             stats_file=tmp_path / "stats.dat",
@@ -538,3 +551,35 @@ def test_tdep_nvt(tmp_path):
     assert frequencies.shape[1] == 6
     assert frequencies.min() > -0.1
     assert 4.0 < frequencies.max() < 8.0
+
+
+@requires_tdep
+def test_tdep_phonons_relaxed_lattice(tmp_path):
+    """Test TDEP runs on inputs written from extxyz files with inexact positions."""
+    # Committed NVT output scaled to A_RELAXED, with the same forces, so that the force
+    # constants are divided by the scale factor
+    scale = A_RELAXED / 5.64
+    frames = read(TRAJ, index=":")
+    supercell = read(SUPERCELL)
+    for atoms in (*frames, supercell):
+        atoms.set_cell(atoms.cell * scale, scale_atoms=True)
+    write(tmp_path / "traj.extxyz", frames)
+    write(tmp_path / "supercell.extxyz", supercell)
+    write(tmp_path / "unit_cell.extxyz", bulk("NaCl", "rocksalt", a=A_RELAXED))
+
+    output_dir = tmp_path / "tdep-inputs"
+    build_tdep_inputs_from_nvt(
+        unit_cell_file=tmp_path / "unit_cell.extxyz",
+        supercell=tmp_path / "supercell.extxyz",
+        traj_file=tmp_path / "traj.extxyz",
+        stats_file=STATS,
+        temperature=300.0,
+        output_dir=output_dir,
+        timestep=100.0,
+    )
+    frequencies = run_tdep(output_dir)
+
+    # Reference values of test_tdep_phonons, divided by the square root of the scale
+    gamma = frequencies[0]
+    assert gamma[3:] == pytest.approx([5.7205173069 / scale**0.5] * 3, rel=1e-4)
+    assert frequencies.max() == pytest.approx(6.2202119257 / scale**0.5, rel=1e-4)

@@ -382,6 +382,8 @@ These files can be used for any TDEP calculation based on the sampled structures
 
 ``'tdep_supercell_file'`` must match the MD structure, with the same atoms in the same order, at the same positions, and with the same cell, and must be a supercell of ``'tdep_unit_cell_file'``, which may be a primitive cell. The simplest way to ensure this is to use the same file for both, as in the tutorials.
 
+TDEP requires the two cells to agree to machine precision, but formats such as extxyz store positions with only 8 decimals. When the files are written, each supercell atom is therefore moved onto the nearest image of a unit-cell atom of the same element, which must be within 1e-3 Å, and unit-cell fractional coordinates within 1e-8 of a cell boundary are moved onto it.
+
 The following are also checked before the MD starts:
 
 - TDEP requires canonical sampling of a fixed cell, so only the ``nvt``, ``nvt-nh``, and ``nvt-csvr`` ensembles are supported, without PLUMED. If ``--minimize`` is used, ``'filter_class': None`` must be set in ``--minimize-kwargs``, so that the cell is not relaxed.

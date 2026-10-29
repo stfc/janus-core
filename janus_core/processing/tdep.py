@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ase import Atoms
 from ase.io import read, write
+import numpy as np
 from numpy import float64
 from numpy.typing import NDArray
 
@@ -88,6 +89,55 @@ def _validate_inputs(
         )
 
 
+def _snap_to_unit_cell(unit_cell: Atoms, supercell: Atoms) -> tuple[Atoms, Atoms]:
+    """
+    Place the supercell atoms exactly on images of the unit-cell atoms.
+
+    TDEP requires the two cells to agree to machine precision, but positions read from
+    extxyz files, for example, are rounded to 8 decimals.
+
+    Parameters
+    ----------
+    unit_cell
+        Unit cell written to ``infile.ucposcar``.
+    supercell
+        Supercell of ``unit_cell`` written to ``infile.ssposcar``.
+
+    Returns
+    -------
+    tuple[Atoms, Atoms]
+        Copy of ``unit_cell``, with fractional coordinates within 1e-8 of a cell
+        boundary moved onto it, and copy of ``supercell``, with each atom moved onto
+        the nearest image of a unit-cell atom of the same element.
+    """
+    unit_cell = unit_cell.copy()
+    supercell = supercell.copy()
+
+    # Coordinates this close to a cell boundary are meant to be on it
+    sites = unit_cell.get_scaled_positions(wrap=False)
+    on_boundary = np.abs(sites - np.rint(sites)) < 1e-8
+    sites[on_boundary] = np.rint(sites[on_boundary])
+    unit_cell.set_scaled_positions(sites)
+
+    # Offsets of each supercell atom from each unit-cell atom, in fractional
+    # coordinates of the unit cell, using the integer supercell matrix as TDEP does
+    matrix = np.rint(supercell.cell @ np.linalg.inv(unit_cell.cell))
+    offsets = (supercell.get_scaled_positions(wrap=False) @ matrix)[:, None] - sites
+    translations = np.rint(offsets)
+    distances = np.linalg.norm((offsets - translations) @ unit_cell.cell, axis=2)
+    distances[supercell.numbers[:, None] != unit_cell.numbers] = np.inf
+    if distances.min(axis=1).max() > 1e-3:
+        raise ValueError(
+            "Each supercell atom must be within 1e-3 Å of an image of a unit-cell atom "
+            "of the same element"
+        )
+
+    nearest = distances.argmin(axis=1)
+    images = sites[nearest] + translations[np.arange(len(supercell)), nearest]
+    supercell.set_scaled_positions(images @ np.linalg.inv(matrix))
+    return unit_cell, supercell
+
+
 def build_tdep_inputs_from_nvt(
     *,
     unit_cell_file: PathLike,
@@ -106,8 +156,11 @@ def build_tdep_inputs_from_nvt(
     ----------
     unit_cell_file
         Path to the unit-cell structure file used to generate ``infile.ucposcar``.
+        Fractional coordinates within 1e-8 of a cell boundary are moved onto it.
     supercell
-        Supercell structure or path used to generate ``infile.ssposcar``.
+        Supercell structure or path used to generate ``infile.ssposcar``. Each atom
+        is moved onto the nearest image of a unit-cell atom of the same element,
+        which must be within 1e-3 Å.
     traj_file
         Path to the MD trajectory file.
     stats_file
@@ -151,6 +204,7 @@ def build_tdep_inputs_from_nvt(
     stats = Stats(stats_file)
     stats_steps = [int(step) for step in stats["Step"]]
     _validate_inputs(trajectory, supercell_atoms, stats_steps, start_step)
+    unit_cell, supercell_atoms = _snap_to_unit_cell(unit_cell, supercell_atoms)
 
     # Pair each frame from start_step with the stats row written at the same MD step
     trajectory = [atoms for atoms in trajectory if atoms.info["step"] >= start_step]
