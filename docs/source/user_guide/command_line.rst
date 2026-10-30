@@ -370,6 +370,31 @@ will compute the RDFs for ``Na`` and ``Cl`` atoms. Seperately for each paring, u
 
 The RDF is also computed from the trajectory file and the options ``rdf_start``, ``rdf_stop``, and ``rdf_step`` may be used to control which trajectory frames are utilised.
 
+`TDEP <https://tdep-developers.github.io/tdep/>`_ input files may also be written after NVT MD, so that TDEP can fit (anharmonic) force constants to the sampled structures. For example:
+
+.. code-block:: bash
+
+   janus md --ensemble nvt --struct tests/data/NaCl.cif --arch mace_mp --steps 2000 --traj-start 1000 --traj-every 100 --stats-every 100 --post-process-kwargs "{'tdep_compute': True, 'tdep_unit_cell_file': 'tests/data/NaCl-primitive.extxyz', 'tdep_supercell_file': 'tests/data/NaCl.cif'}"
+
+will save frames from step 1000, after equilibration, and write ``infile.ucposcar``, ``infile.ssposcar``, ``infile.positions``, ``infile.forces``, ``infile.stat``, and ``infile.meta`` to ``janus_results/NaCl-nvt-T300.0-tdep-inputs``, or to ``'tdep_output_dir'`` if it is set. TDEP must be installed separately to use these files, as described in the :doc:`installation documentation </user_guide/installation>`.
+
+These files can be used for any TDEP calculation based on the sampled structures, such as higher-order force constants, free energies, and the lattice thermal conductivity, as described in the `TDEP tutorials <https://github.com/tdep-developers/tdep-tutorials>`_. Data that MLIPs do not usually provide, such as the Born effective charges required by TDEP's ``--polar`` option, must be obtained separately.
+
+``'tdep_supercell_file'`` must match the MD structure, with the same atoms in the same order, at the same positions, and with the same cell, and must be a supercell of ``'tdep_unit_cell_file'``, which may be a primitive cell. The simplest way to ensure this is to use the same file for both, as in the tutorials.
+
+TDEP requires the two cells to agree to machine precision, but formats such as extxyz store positions with only 8 decimals. When the files are written, each supercell atom is therefore moved onto the nearest image of a unit-cell atom of the same element, which must be within 1e-3 Å, and unit-cell fractional coordinates within 1e-8 of a cell boundary are moved onto it.
+
+The following are also checked before the MD starts:
+
+- TDEP requires canonical sampling of a fixed cell, so only the ``nvt``, ``nvt-nh``, and ``nvt-csvr`` ensembles are supported, without PLUMED. If ``--minimize`` is used, ``'filter_class': None`` must be set in ``--minimize-kwargs``, so that the cell is not relaxed.
+- ``--traj-every`` must be a multiple of ``--stats-every``, so that each saved frame has statistics from the same step.
+- At least one frame must be saved after any temperature ramp, as frames saved during the ramp, including at its last step, are not used.
+
+.. note::
+    The structure files must keep the cell orientation, which CIF files do not for cells such as primitive cells, and ASE must recognise their format from the file name. For example, TDEP's ``outfile.ssposcar`` could be renamed ``supercell.vasp``.
+
+    The saved frames must also contain forces, so these should not be removed from the columns saved using ``--write-kwargs``.
+
 On-the-fly Processing
 +++++++++++++++++++++
 

@@ -12,3 +12,4 @@ Command-line Tutorials
     phonons
     neb
     elasticity
+    anharmonic_phonons

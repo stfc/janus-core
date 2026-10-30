@@ -347,6 +347,7 @@ def test_summary(tmp_path):
         "minimized_initial_structure": None,
         "rdfs": None,
         "vafs": None,
+        "tdep_inputs": None,
         "correlations": None,
         "log": log_path,
         "summary": summary_path,

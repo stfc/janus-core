@@ -14,6 +14,7 @@ from typing import Any
 from warnings import warn
 
 from ase import Atoms
+from ase.geometry import find_mic
 from ase.io import read
 from ase.md.bussi import Bussi
 from ase.md.langevin import Langevin
@@ -53,6 +54,7 @@ from janus_core.helpers.utils import (
 )
 from janus_core.processing.correlator import Correlation
 from janus_core.processing.post_process import compute_rdf, compute_vaf
+from janus_core.processing.tdep import build_tdep_inputs_from_nvt
 
 units = create_units("2014")
 DENS_FACT = (units.m / 1.0e2) ** 3 / units.mol
@@ -493,6 +495,10 @@ class MolecularDynamics(BaseCalculation):
         if not self.struct.calc:
             raise ValueError("Please attach a calculator to `struct`.")
 
+        # Check TDEP settings first, as _config_plumed creates the PLUMED log directory
+        if self.post_process_kwargs.get("tdep_compute"):
+            self._config_tdep()
+
         self._config_plumed()
 
         # Set output file names
@@ -586,6 +592,11 @@ class MolecularDynamics(BaseCalculation):
             "vafs": (
                 self._vaf_files
                 if self.post_process_kwargs.get("vaf_compute", False)
+                else None
+            ),
+            "tdep_inputs": (
+                self._tdep_output_dir
+                if self.post_process_kwargs.get("tdep_compute", False)
                 else None
             ),
             "plumed_log": self.plumed_log if self.plumed_input else None,
@@ -716,6 +727,157 @@ class MolecularDynamics(BaseCalculation):
 
             if self.logger:
                 self.logger.info("Plumed calculator configured")
+
+    def _config_tdep(self) -> None:
+        """Check TDEP post-processing settings and resolve the output directory."""
+        # Unit cell and supercell files, written to infile.ucposcar and infile.ssposcar
+        for key in ("tdep_unit_cell_file", "tdep_supercell_file"):
+            filename = self.post_process_kwargs.get(key)
+            if not filename:
+                raise ValueError(f"`{key}` is required when `tdep_compute` is True")
+            if not isinstance(filename, PathLike):
+                raise TypeError(
+                    f"`{key}` must be a path to a structure file, not "
+                    f"{type(filename).__name__}"
+                )
+            if not Path(filename).is_file():
+                raise FileNotFoundError(
+                    f"`{key}` not found or is not a file: {filename}"
+                )
+
+        # TDEP needs unbiased canonical sampling of a fixed cell
+        if not isinstance(self, NVT | NVT_NH):
+            raise ValueError(
+                "TDEP inputs can only be generated from NVT simulations (nvt, nvt-nh "
+                f"or nvt-csvr), not {self.ensemble}"
+            )
+        if self.plumed_input:
+            raise ValueError("TDEP inputs cannot be generated from biased (PLUMED) MD")
+
+        # Minimization must not relax the cell, as GeomOpt does by default
+        filter_class = self.minimize_kwargs.get("filter_class", "FrechetCellFilter")
+        if self.minimize and filter_class is not None:
+            raise ValueError(
+                "`minimize_kwargs['filter_class']` must be None (null in YAML) to "
+                "generate TDEP inputs with `minimize`, so that the cell is not relaxed"
+            )
+
+        # Every saved frame needs the stats row written at the same step
+        if (
+            self.traj_every <= 0
+            or self.stats_every <= 0
+            or self.traj_every % self.stats_every
+        ):
+            raise ValueError(
+                "`traj_every` must be a positive multiple of `stats_every` to "
+                "generate TDEP inputs"
+            )
+
+        # Frames saved during a temperature ramp, including at its last step, are not
+        # used. Frame steps count from the start of the first run, so this also holds
+        # on restart
+        ramp_steps = 0
+        if self.ramp_temp:
+            ramp_sign = 1 if (self.temp_end - self.temp_start) > 0 else -1
+            temps = (
+                self.temp_start + ramp_sign * i * self.temp_step
+                for i in range(self.heating_n_temps)
+            )
+            # No MD is run at 0 K (see _run_dynamics)
+            ramp_steps = self.heating_steps_per_temp * sum(
+                not isclose(temp, 0.0) for temp in temps
+            )
+        self._tdep_start_step = ramp_steps + 1 if ramp_steps else 0
+
+        # At least one frame must be saved during the MD at `temp`. The last step is
+        # not checked on restart, as the frames of the previous run are kept
+        if self.steps <= 0:
+            raise ValueError("`steps` must be greater than 0 to generate TDEP inputs")
+        # _write_traj saves frames at multiples of traj_every, from traj_start, and
+        # only those from _tdep_start_step are used
+        first_step = max(self.traj_start, self._tdep_start_step)
+        first_frame = first_step + (-first_step) % self.traj_every
+        last_step = ramp_steps + self.steps
+        if not self.restart and first_frame > last_step:
+            raise ValueError(
+                "No trajectory frames would be saved to generate TDEP inputs: the "
+                f"first would be at step {first_frame}, after the last step "
+                f"({last_step})"
+            )
+
+        # Positions and forces are written in the atom order and Cartesian frame of
+        # the MD structure, so the supercell must match it
+        supercell = read(self.post_process_kwargs["tdep_supercell_file"])
+        if len(supercell) != len(self.struct):
+            raise ValueError(
+                f"`tdep_supercell_file` has {len(supercell)} atoms, but the MD "
+                f"structure has {len(self.struct)}"
+            )
+        if supercell.get_chemical_symbols() != self.struct.get_chemical_symbols():
+            raise ValueError(
+                "`tdep_supercell_file` must have the same chemical symbols as the MD "
+                "structure, in the same order"
+            )
+        if not np.allclose(supercell.cell, self.struct.cell, rtol=0, atol=1e-3):
+            raise ValueError(
+                "`tdep_supercell_file` must have the same cell as the MD structure, "
+                "within 1e-3 Å. Note that CIF files do not keep the cell orientation."
+            )
+        # TDEP pairs each atom with the supercell atom of the same index, so they must
+        # be at the same positions, allowing for atoms wrapped into the cell
+        displacements, _ = find_mic(
+            self.struct.positions - supercell.positions, supercell.cell
+        )
+        if not np.allclose(displacements, 0, atol=1e-3):
+            raise ValueError(
+                "`tdep_supercell_file` must have the same positions as the MD "
+                "structure, within 1e-3 Å. The atoms may be in a different order."
+            )
+
+        # TDEP checks, with a tolerance of 1e-5, that the volume ratio is an integer
+        # that matches the numbers of atoms, and then the supercell matrix
+        unit_cell = read(self.post_process_kwargs["tdep_unit_cell_file"])
+        if unit_cell.cell.rank < 3 or supercell.cell.rank < 3:
+            raise ValueError(
+                "`tdep_unit_cell_file` and `tdep_supercell_file` must both have three "
+                "cell vectors"
+            )
+        matrix = supercell.cell @ np.linalg.inv(unit_cell.cell)
+        n_cells = abs(np.linalg.det(matrix))
+        if not isclose(n_cells, round(n_cells), rel_tol=0, abs_tol=1e-5):
+            raise ValueError(
+                "The volume ratio of `tdep_supercell_file` to `tdep_unit_cell_file` "
+                f"({n_cells:.7f}) must be an integer to generate TDEP inputs"
+            )
+        if len(supercell) != round(n_cells) * len(unit_cell):
+            raise ValueError(
+                "The ratio of the numbers of atoms in `tdep_supercell_file` "
+                f"({len(supercell)}) and `tdep_unit_cell_file` ({len(unit_cell)}) "
+                f"must equal their volume ratio ({round(n_cells)})"
+            )
+
+        # The supercell matrix must be an integer matrix
+        if not np.allclose(matrix, np.rint(matrix), rtol=0, atol=1e-5):
+            deviation = np.abs(matrix - np.rint(matrix)).max()
+            raise ValueError(
+                "`tdep_supercell_file` must be a supercell of `tdep_unit_cell_file`, "
+                "but supercell.cell @ inv(unit_cell.cell) is not an integer matrix "
+                f"(largest deviation {deviation:.2g}). CIF files only store cell "
+                "lengths and angles, so non-conventional cells, such as primitive "
+                "cells, may be rotated when read. Please use a format that keeps the "
+                "cell orientation, such as extxyz or POSCAR."
+            )
+
+        # Only resolved here, as the directory is created when the inputs are written
+        self._tdep_output_dir = self._build_filename(
+            "tdep-inputs",
+            self.param_prefix,
+            filename=self.post_process_kwargs.get("tdep_output_dir"),
+        )
+        if self._tdep_output_dir.exists() and not self._tdep_output_dir.is_dir():
+            raise FileExistsError(
+                f"TDEP output directory is an existing file: {self._tdep_output_dir}"
+            )
 
     def _init_progress_bar(self) -> Progress:
         """
@@ -1285,11 +1447,11 @@ class MolecularDynamics(BaseCalculation):
         # Nothing to do
         if not any(
             self.post_process_kwargs.get(kwarg, None)
-            for kwarg in ("rdf_compute", "vaf_compute")
+            for kwarg in ("rdf_compute", "vaf_compute", "tdep_compute")
         ):
             warn(
                 "Post-processing arguments present, but no computation requested. "
-                "Please set either 'rdf_compute' or 'vaf_compute' "
+                "Please set 'rdf_compute' or 'vaf_compute' or 'tdep_compute' "
                 "to do post-processing.",
                 stacklevel=2,
             )
@@ -1333,6 +1495,23 @@ class MolecularDynamics(BaseCalculation):
                 index=slice_,
                 atoms_filter=self.post_process_kwargs.get("vaf_atoms", None),
             )
+
+        if self.post_process_kwargs.get("tdep_compute", False):
+            build_tdep_inputs_from_nvt(
+                unit_cell_file=self.post_process_kwargs["tdep_unit_cell_file"],
+                supercell=self.post_process_kwargs["tdep_supercell_file"],
+                traj_file=self.traj_file,
+                stats_file=self.stats_file,
+                temperature=self.temp,
+                output_dir=self._tdep_output_dir,
+                # Time between saved frames in fs (rounded to drop float noise)
+                timestep=round(self.timestep / units.fs * self.traj_every, 6),
+                start_step=self._tdep_start_step,
+            )
+            if self.logger:
+                self.logger.info(
+                    "TDEP input files written to %s", self._tdep_output_dir.as_posix()
+                )
 
     def _write_restart(self) -> None:
         """Write restart file and (optionally) rotate files saved."""
