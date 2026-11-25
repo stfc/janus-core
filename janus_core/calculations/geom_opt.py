@@ -426,6 +426,14 @@ class GeomOpt(BaseCalculation):
                 stacklevel=2,
             )
 
+        # Log before writing trajectory, so the final structure can store the emissions
+        if self.logger:
+            self.logger.info("Geometry optimization complete")
+        if self.tracker:
+            emissions = self.tracker.stop_task().emissions
+            self.struct.info["emissions"] = emissions
+            self.tracker.stop()
+
         # Write out optimized structure
         output_structs(
             self.struct,
@@ -438,6 +446,8 @@ class GeomOpt(BaseCalculation):
         # Reformat trajectory file from binary
         if self.write_traj:
             traj = read(self.opt_kwargs["trajectory"], index=":")
+            # Info set after the optimization is not in the binary trajectory
+            traj[-1].info.update(self.struct.info)
             output_structs(
                 traj,
                 struct_path=self.struct_path,
@@ -445,12 +455,5 @@ class GeomOpt(BaseCalculation):
                 write_kwargs=self.traj_kwargs,
                 config_type="geom_opt",
             )
-
-        if self.logger:
-            self.logger.info("Geometry optimization complete")
-        if self.tracker:
-            emissions = self.tracker.stop_task().emissions
-            self.struct.info["emissions"] = emissions
-            self.tracker.stop()
 
         return self.converged

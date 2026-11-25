@@ -89,6 +89,11 @@ def test_saving_traj(tmp_path):
     traj = read(tmp_path / "NaCl.traj", index=":")
     assert len(traj) == 3
 
+    # Info set after the optimization is only added to the final frame
+    assert traj[-1].info["converged"] is True
+    assert "final_spacegroup" in traj[-1].info
+    assert "final_spacegroup" not in traj[0].info
+
 
 def test_traj_opt_kwargs(tmp_path):
     """Test trajectory file cannot be defined through opt_kwargs."""
