@@ -36,6 +36,7 @@ from janus_core.mcp.tools import (
     run_singlepoint,
     run_train,
 )
+from tests.utils import strip_ansi_codes
 
 runner = CliRunner()
 
@@ -89,15 +90,16 @@ def test_inspect_structure(tmp_path: Path):
 def test_to_jsonable():
     """Test recursive JSON serialization of NumPy, Path, and ASE objects."""
     atoms = Atoms("H2", positions=[[0, 0, 0], [0, 0, 0.74]])
+    sample_path = Path("tmp") / "test.xyz"
     payload = {
-        "path": Path("/tmp/test.xyz"),
+        "path": sample_path,
         "arr": np.array([1.0, 2.0]),
         "scalar": np.float64(3.5),
         "atoms": atoms,
         "tuple": (1, 2),
     }
     converted = _to_jsonable(payload)
-    assert converted["path"] == "/tmp/test.xyz"
+    assert converted["path"] == str(sample_path)
     assert converted["arr"] == [1.0, 2.0]
     assert converted["scalar"] == 3.5
     assert converted["atoms"]["formula"] == "H2"
@@ -363,8 +365,10 @@ def test_cli_mcp_help_and_invocation():
     """Test `janus mcp --help` and option forwarding to run_mcp_server."""
     help_res = runner.invoke(janus_app, ["mcp", "--help"])
     assert help_res.exit_code == 0
-    assert "--transport" in help_res.stdout
-    assert "--mode" in help_res.stdout
+    clean_stdout = strip_ansi_codes(help_res.stdout)
+    assert "Usage: janus mcp [OPTIONS]" in clean_stdout
+    assert "--transport" in clean_stdout
+    assert "--mode" in clean_stdout
 
     with patch("janus_core.mcp.server.run_mcp_server") as mock_run:
         res = runner.invoke(

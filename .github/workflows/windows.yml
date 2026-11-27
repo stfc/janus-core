@@ -25,7 +25,7 @@ jobs:
           prune-cache: false
 
       - name: Install "all" dependencies
-        run: uv sync --extra chgnet --extra d3 --extra grace --extra mace
+        run: uv sync --extra chgnet --extra d3 --extra grace --extra mace --extra mcp
 
       - name: Download extra models
         shell: bash
