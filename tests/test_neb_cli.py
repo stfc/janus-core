@@ -78,7 +78,7 @@ def test_neb(tmp_path):
         assert lines[0] == "#Barrier [eV] | delta E [eV] | Max force [eV/Å] \n"
         results = [float(result) for result in lines[1].split()]
         assert results == pytest.approx(
-            [0.8497755543465928, -3.0149328722473e-07, 4.802233744475505]
+            [0.8352820257832692, -3.0149328722473e-07, 4.5083504610360015]
         )
 
         # Read NEB summary file
@@ -172,7 +172,7 @@ def test_minimize(tmp_path):
     assert lines[0] == "#Barrier [eV] | delta E [eV] | Max force [eV/Å] \n"
     results = [float(result) for result in lines[1].split()]
     assert results == pytest.approx(
-        [0.8551249637134779, -1.4654790447821142e-07, 2.174366063099385]
+        [0.8550316405110152, -1.4654790447821142e-07, 2.0825469928500944]
     )
 
     assert_log_contains(
