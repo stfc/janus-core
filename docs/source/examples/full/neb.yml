@@ -11,7 +11,7 @@ neb-class: NEB
 n-images: 10
 write-band: True
 neb-kwargs:
-  dynamic_relaxation: False
+  method: improvedtangent
 interpolator: pymatgen
 interpolator-kwargs:
   autosort_tol: 0.0
