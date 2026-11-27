@@ -78,6 +78,18 @@ To run TDEP on these files, it must be built separately, following its `installa
 Tests and tutorials that run TDEP skip these steps if it is not found on ``PATH``.
 
 
+MCP Server
+==========
+
+To run ``janus-core`` as a `Model Context Protocol (MCP) <https://modelcontextprotocol.io/>`_ server, install the optional ``mcp`` extra:
+
+.. code-block:: bash
+
+    uv pip install "janus-core[mcp]"
+
+See :doc:`/user_guide/mcp` and :doc:`/tutorials/mcp` for usage and deployment instructions.
+
+
 Updating Dependencies
 =====================
 

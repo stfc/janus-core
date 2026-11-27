@@ -158,6 +158,16 @@ janus\_core.cli.janus module
    :undoc-members:
    :show-inheritance:
 
+janus\_core.cli.mcp module
+--------------------------
+
+.. automodule:: janus_core.cli.mcp
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
 janus\_core.cli.md module
 -------------------------
 
@@ -366,6 +376,36 @@ janus\_core.training.train module
 ---------------------------------
 
 .. automodule:: janus_core.training.train
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.mcp module
+----------------------
+
+.. automodule:: janus_core.mcp
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.mcp.server module
+-----------------------------
+
+.. automodule:: janus_core.mcp.server
+   :members:
+   :special-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+janus\_core.mcp.tools module
+----------------------------
+
+.. automodule:: janus_core.mcp.tools
    :members:
    :special-members:
    :private-members:

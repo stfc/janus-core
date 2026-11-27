@@ -246,4 +246,9 @@ nitpick_ignore = [
     ("py:class", "typer.models.CallbackParam"),
     ("py:class", "SumCalculator"),
     ("py:class", "ElasticTensor"),
+    ("py:class", "Ensembles"),
+    ("py:class", "EoSNames"),
+    ("py:class", "JanusMode"),
+    ("py:class", "MCPTransport"),
+    ("py:class", "janus_core.cli.mcp.ModeEnum"),
 ]

@@ -9,4 +9,5 @@ User guide
     installation
     python
     command_line
+    mcp
     troubleshooting

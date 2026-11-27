@@ -7,3 +7,4 @@ Tutorials
 
     python/index
     cli/index
+    mcp

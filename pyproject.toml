@@ -64,6 +64,9 @@ orb = [
 upet = [
     "upet == 0.3.0; python_version >= '3.12'"
 ]
+mcp = [
+    "mcp>=1.0.0",
+]
 plumed = [
     "plumed<3.0.0,>=2.10.0; sys_platform != 'win32'",
 ]
@@ -87,6 +90,7 @@ fairchem = [
 
 [project.scripts]
 janus = "janus_core.cli.janus:app"
+janus-mcp = "janus_core.cli.mcp:main"
 
 [project.urls]
 Repository = "https://github.com/stfc/janus-core/"
