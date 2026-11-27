@@ -11,6 +11,7 @@ from janus_core.cli.descriptors import descriptors
 from janus_core.cli.elasticity import elasticity
 from janus_core.cli.eos import eos
 from janus_core.cli.geomopt import geomopt
+from janus_core.cli.mcp import mcp
 from janus_core.cli.md import md
 from janus_core.cli.neb import neb
 from janus_core.cli.phonons import phonons
@@ -63,6 +64,10 @@ app.command(
     help="Preprocess data before training.",
     rich_help_panel="Training",
 )(preprocess)
+app.command(
+    help="Start the Model Context Protocol (MCP) server for janus-core.",
+    rich_help_panel="Server",
+)(mcp)
 
 
 @app.callback(invoke_without_command=True, help="")
