@@ -71,7 +71,8 @@ class NEB(BaseCalculation):
     neb_class
         Nudged Elastic Band class to use. Default is ase.mep.NEB.
     neb_kwargs
-        Keyword arguments to pass to neb_class. Default is {}.
+        Keyword arguments to pass to neb_class. Default is
+        {"method": "improvedtangent"}.
     n_images
         Number of images to use in NEB. Default is 15.
     write_results
@@ -183,7 +184,8 @@ class NEB(BaseCalculation):
         neb_class
             Nudged Elastic Band class to use. Default is ase.mep.NEB.
         neb_kwargs
-            Keyword arguments to pass to neb_class. Default is {}.
+            Keyword arguments to pass to neb_class. Default is
+            {"method": "improvedtangent"}.
         n_images
             Number of images to use in NEB. Default is 15.
         write_results
@@ -323,6 +325,9 @@ class NEB(BaseCalculation):
             self.images = self.struct
             self.final_struct = self.struct[-1]
             self.final_struct_path = None
+
+        # Set NEB method explicitly, rather than relying on the ASE default
+        self.neb_kwargs.setdefault("method", "improvedtangent")
 
         # Set default interpolation kwargs
         if self.interpolator == "ase":

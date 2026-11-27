@@ -143,7 +143,8 @@ def neb(
     write_band
         Whether to write out all band images after optimization. Default is False.
     neb_kwargs
-        Keyword arguments to pass to neb_class. Default is {}.
+        Keyword arguments to pass to neb_class. Default is
+        {"method": "improvedtangent"}.
     interpolator
         Choice of interpolation strategy. Default is "ase" if using `init_struct` and
         `final_struct`, or None if using `neb_structs`.
